@@ -393,7 +393,7 @@ class ProjectUpdate(CommonTask):
         self.save()
         self.start_args = encrypt_field(self, 'start_args')
         self.save()
-        notify_task_runner.delay(dict(task_type="project_update", id=self.id, metadata=kwargs))
+        # notify_task_runner.delay(dict(task_type="project_update", id=self.id, metadata=kwargs))
         return True
 
     def _update_parent_instance(self):

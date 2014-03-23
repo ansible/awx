@@ -132,7 +132,8 @@ class BaseTask(Task):
                          self.model._meta.object_name, retry_count)
 
     def signal_finished(self, pk):
-        notify_task_runner(dict(complete=pk))
+        pass
+        # notify_task_runner(dict(complete=pk))
 
     def get_model(self, pk):
         return self.model.objects.get(pk=pk)

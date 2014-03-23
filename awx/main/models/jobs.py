@@ -400,7 +400,7 @@ class Job(CommonTask):
         self.save()
         self.start_args = encrypt_field(self, 'start_args')
         self.save()
-        notify_task_runner.delay(dict(task_type="ansible_playbook", id=self.id))
+        # notify_task_runner.delay(dict(task_type="ansible_playbook", id=self.id))
         return True
 
     def start(self, error_callback, **kwargs):
