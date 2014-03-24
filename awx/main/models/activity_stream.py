@@ -50,6 +50,7 @@ class ActivityStreamBase(models.Model):
     permission = models.ManyToManyField("Permission", blank=True)
     #job_template = models.ManyToManyField("JobTemplate", blank=True)
     #job = models.ManyToManyField("Job", blank=True)
+    schedule = models.ManyToManyField("Schedule", blank=True)
 
     def get_absolute_url(self):
         return reverse('api:activity_stream_detail', args=(self.pk,))

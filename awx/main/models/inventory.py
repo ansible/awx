@@ -51,6 +51,7 @@ class Inventory(CommonModel):
         'Organization',
         related_name='inventories',
         help_text=_('Organization containing this inventory.'),
+        on_delete=models.CASCADE,
     )
     variables = models.TextField(
         blank=True,
@@ -172,6 +173,7 @@ class HostBase(CommonModelNameNotUnique):
     inventory = models.ForeignKey(
         'Inventory',
         related_name='hosts',
+        on_delete=models.CASCADE,
     )
     enabled = models.BooleanField(
         default=True,
@@ -294,7 +296,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
         last_job = models.ForeignKey(
             'Job',
             related_name='hosts_as_last_job+',
-            blank=True,
             null=True,
             default=None,
             editable=False,
@@ -303,7 +304,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
         new_last_job = models.ForeignKey(
             'JobNew',
             related_name='hosts_as_last_job+',
-            blank=True,
             null=True,
             default=None,
             editable=False,
@@ -312,14 +312,12 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
         inventory_sources = models.ManyToManyField(
             'InventorySource',
             related_name='hosts',
-            blank=True,
             editable=False,
             help_text=_('Inventory source(s) that created or modified this host.'),
         )
         new_inventory_sources = models.ManyToManyField(
             'InventorySourceNew',
             related_name='hosts',
-            blank=True,
             editable=False,
             help_text=_('Inventory source(s) that created or modified this host.'),
         )
@@ -335,7 +333,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
         new_last_job = models.ForeignKey(
             'JobNew',
             related_name='hosts_as_last_job+',
-            blank=True,
             null=True,
             default=None,
             editable=False,
@@ -344,7 +341,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
         new_inventory_sources = models.ManyToManyField(
             'InventorySourceNew',
             related_name='hosts',
-            blank=True,
             editable=False,
             help_text=_('Inventory source(s) that created or modified this host.'),
         )
@@ -360,7 +356,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
         last_job = models.ForeignKey(
             'Job',
             related_name='hosts_as_last_job+',
-            blank=True,
             null=True,
             default=None,
             editable=False,
@@ -369,7 +364,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
         inventory_sources = models.ManyToManyField(
             'InventorySource',
             related_name='hosts',
-            blank=True,
             editable=False,
             help_text=_('Inventory source(s) that created or modified this host.'),
         )
@@ -389,6 +383,7 @@ class GroupBase(CommonModelNameNotUnique):
     inventory = models.ForeignKey(
         'Inventory',
         related_name='groups',
+        on_delete=models.CASCADE,
     )
     # Can also be thought of as: parents == member_of, children == members
     parents = models.ManyToManyField(
@@ -576,7 +571,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
         inventory_sources = models.ManyToManyField(
             'InventorySource',
             related_name='groups',
-            blank=True,
             editable=False,
             help_text=_('Inventory source(s) that created or modified this group.'),
         )
@@ -584,7 +578,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
         new_inventory_sources = models.ManyToManyField(
             'InventorySourceNew',
             related_name='groups',
-            blank=True,
             editable=False,
             help_text=_('Inventory source(s) that created or modified this group.'),
         )
@@ -600,7 +593,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
         new_inventory_sources = models.ManyToManyField(
             'InventorySourceNew',
             related_name='groups',
-            blank=True,
             editable=False,
             help_text=_('Inventory source(s) that created or modified this group.'),
         )
@@ -616,7 +608,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
         inventory_sources = models.ManyToManyField(
             'InventorySource',
             related_name='groups',
-            blank=True,
             editable=False,
             help_text=_('Inventory source(s) that created or modified this group.'),
         )
@@ -659,7 +650,7 @@ class InventorySourceOptions(BaseModel):
         null=True,
         default=None,
         blank=True,
-        #on_delete=models.SET_NULL, # FIXME
+        on_delete=models.SET_NULL,
     )
     source_regions = models.CharField(
         max_length=1024,
@@ -837,14 +828,15 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
             null=True,
             default=None,
             editable=False,
+            on_delete=models.CASCADE,
         )
         group = AutoOneToOneField(
             'Group',
             related_name='inventory_source',
-            blank=True,
             null=True,
             default=None,
             editable=False,
+            on_delete=models.CASCADE,
         )
         current_update = models.ForeignKey(
             'InventoryUpdate',
@@ -852,6 +844,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
             default=None,
             editable=False,
             related_name='inventory_source_as_current_update+',
+            on_delete=models.SET_NULL,
         )
         last_update = models.ForeignKey(
             'InventoryUpdate',
@@ -859,6 +852,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
             default=None,
             editable=False,
             related_name='inventory_source_as_last_update+',
+            on_delete=models.SET_NULL,
         )
         last_update_failed = models.BooleanField(
             default=False,
@@ -889,14 +883,15 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
             null=True,
             default=None,
             editable=False,
+            on_delete=models.CASCADE,
         )
         group = AutoOneToOneField(
             'Group',
             related_name='new_inventory_source',
-            blank=True,
             null=True,
             default=None,
             editable=False,
+            on_delete=models.CASCADE,
         )
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
@@ -919,14 +914,15 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
             null=True,
             default=None,
             editable=False,
+            on_delete=models.CASCADE,
         )
         group = AutoOneToOneField(
             'Group',
             related_name='inventory_source',
-            blank=True,
             null=True,
             default=None,
             editable=False,
+            on_delete=models.CASCADE,
         )
 
 
@@ -1006,8 +1002,8 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
         inventory_source = models.ForeignKey(
             'InventorySource',
             related_name='inventory_updates',
-            on_delete=models.CASCADE,
             editable=False,
+            on_delete=models.CASCADE,
         )
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
@@ -1020,8 +1016,8 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
         inventory_source = models.ForeignKey(
             'InventorySourceNew',
             related_name='inventory_updates',
-            on_delete=models.CASCADE,
             editable=False,
+            on_delete=models.CASCADE,
         )
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
@@ -1041,6 +1037,6 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
         inventory_source = models.ForeignKey(
             'InventorySource',
             related_name='inventory_updates',
-            on_delete=models.CASCADE,
             editable=False,
+            on_delete=models.CASCADE,
         )

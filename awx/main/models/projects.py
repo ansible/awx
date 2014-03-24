@@ -106,6 +106,7 @@ class ProjectOptions(models.Model):
         blank=True,
         null=True,
         default=None,
+        on_delete=models.SET_NULL,
     )
 
     def clean_scm_type(self):
@@ -338,6 +339,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
             default=None,
             editable=False,
             related_name='project_as_current_update+',
+            on_delete=models.SET_NULL,
         )
         last_update = models.ForeignKey(
             'ProjectUpdate',
@@ -345,6 +347,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
             default=None,
             editable=False,
             related_name='project_as_last_update+',
+            on_delete=models.SET_NULL,
         )
         last_update_failed = models.BooleanField(
             default=False,

@@ -72,6 +72,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         default=None,
         editable=False,
         related_name='%(class)s_as_current_job+',
+        on_delete=models.SET_NULL,
     )
     last_job = models.ForeignKey( # alias for last_update
         'UnifiedJob',
@@ -79,6 +80,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         default=None,
         editable=False,
         related_name='%(class)s_as_last_job+',
+        on_delete=models.SET_NULL,
     )
     last_job_failed = models.BooleanField( # alias for last_update_failed
         default=False,
@@ -97,10 +99,18 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     #    max_length=32,
     #    choices=[],
     #)
-    next_job_run = models.DateTimeField( # FIXME: Calculate from schedule.
+    next_job_run = models.DateTimeField( # FIXME: Calculate from schedules.
         null=True,
         default=None,
         editable=False,
+    )
+    next_schedule = models.ForeignKey( # Schedule entry responsible for next_job_run.
+        'Schedule',
+        null=True,
+        default=None,
+        editable=False,
+        related_name='%(class)s_as_next_schedule+',
+        on_delete=models.SET_NULL,
     )
     status = models.CharField(
         max_length=32,
@@ -156,17 +166,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     def _set_status_and_last_job_run(self, save=True):
         status = self._get_current_status()
         last_job_run = self._get_last_job_run()
-        # Update values if changed.
-        update_fields = []
-        if self.status != status:
-            self.status = status
-            update_fields.append('status')
-        if self.last_job_run != last_job_run:
-            self.last_job_run = last_job_run
-            update_fields.append('last_job_run')
-        if save and update_fields:
-            self.save(update_fields=update_fields)
-        return update_fields
+        return self.update_fields(status=status, last_job_run=last_job_run,
+                                  save=save)
 
     def _can_update(self):
         # Override in subclasses as needed.
@@ -212,7 +213,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         return unified_job
 
 
-class UnifiedJob(PolymorphicModel, PrimordialModel):
+class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
     '''
     Concrete base class for unified job run by the task engine.
     '''
@@ -238,6 +239,7 @@ class UnifiedJob(PolymorphicModel, PrimordialModel):
         default=None,
         editable=False,
         related_name='%(class)s_unified_jobs',
+        on_delete=models.SET_NULL,
     )
     launch_type = models.CharField(
         max_length=20,
@@ -245,16 +247,17 @@ class UnifiedJob(PolymorphicModel, PrimordialModel):
         default='manual',
         editable=False,
     )
-    schedule = models.ForeignKey(
+    schedule = models.ForeignKey( # Which schedule entry was responsible for starting this job.
         'Schedule',
         null=True,
         default=None,
         editable=False,
+        on_delete=models.SET_NULL,
     )
-    depends_on = models.ManyToManyField(
+    dependent_jobs = models.ManyToManyField(
         'self',
         editable=False,
-        related_name='%(class)s_blocked_by+',
+        related_name='%(class)s_blocked_jobs+',
     )
     cancel_flag = models.BooleanField(
         blank=True,
