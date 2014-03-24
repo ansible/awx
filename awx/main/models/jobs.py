@@ -407,6 +407,8 @@ class Job(CommonTask):
         from awx.main.tasks import handle_work_error
         task_class = self._get_task_class()
         if not self.can_start:
+            self.result_traceback = "Job is not in a startable status: %s, expecting one of %s" % (self.status, str(('new', 'waiting')))
+            self.save()
             return False
         needed = self._get_passwords_needed_to_start()
         try:
@@ -418,6 +420,8 @@ class Job(CommonTask):
         else:
             opts = dict([(field, stored_args.get(field, '')) for field in needed])
         if not all(opts.values()):
+            self.result_traceback = "Missing needed fields: %s" % str(opts.values())
+            self.save()
             return False
         task_class().apply_async((self.pk,), opts, link_error=error_callback)
         return True
