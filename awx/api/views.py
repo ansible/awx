@@ -293,7 +293,7 @@ class SchedulesList(APIView):
     def post(self, request):
         return Response({})
 
-class UnifiedJobTemplateList(APIView):
+class UnifiedJobsList(APIView):
 
     view_name = "Unified Job Templates"
 
