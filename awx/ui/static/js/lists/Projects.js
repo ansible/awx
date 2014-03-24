@@ -93,36 +93,31 @@ angular.module('ProjectsListDefinition', [])
 
         fieldActions: {
             edit: {
-                label: 'Edit',
                 ngClick: "editProject(project.id)",
-                awToolTip: 'Edit project properties',
+                awToolTip: 'Edit the project',
                 dataPlacement: 'top'
             },
             scm_update: {
-                label: 'Update',
                 ngClick: 'SCMUpdate(project.id)',
                 awToolTip: "{{ project.scm_update_tooltip }}",
                 ngClass: "project.scm_type_class",
                 dataPlacement: 'top'
             },
             cancel: {
-                label: 'Stop',
                 ngClick: "cancelUpdate(project.id, project.name)",
-                awToolTip: 'Cancel a running SCM update process',
+                awToolTip: 'Cancel the SCM update',
                 ngShow: "project.status == 'updating'",
                 dataPlacement: 'top'
             },
             schedule: {
-                label: 'Schedule',
                 mode: 'all',
                 ngHref: '#/projects/{{ project.id }}/schedules',
-                awToolTip: 'Schedule future project sync runs',
+                awToolTip: 'Schedule future SCM updates',
                 dataPlacement: 'top'
             },
             "delete": {
-                label: 'Delete',
                 ngClick: "deleteProject(project.id, project.name)",
-                awToolTip: 'Permanently remove project from the database',
+                awToolTip: 'Delete the project',
                 ngShow: "project.status !== 'updating'",
                 dataPlacement: 'top'
             }

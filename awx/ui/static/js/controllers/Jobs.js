@@ -10,13 +10,16 @@
  
 'use strict';
 
-function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
-    GetChoices, GetBasePath, Wait) {
+function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
+    ScheduledJobsList, GetChoices, GetBasePath, Wait, DeleteJob) {
     
     ClearScope();
 
-    var e, completed_scope, running_scope, queued_scope, choicesCount = 0, listsCount = 0;
-    // schedule_scope;
+    var e,
+        completed_scope, running_scope, queued_scope, scheduled_scope,
+        choicesCount = 0, listsCount = 0;
+
+    LoadBreadCrumbs();
 
     // Add breadcrumbs
     e = angular.element(document.getElementById('breadcrumbs'));
@@ -45,7 +48,7 @@ function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJ
             scope: completed_scope,
             list: CompletedJobsList,
             id: 'completed-jobs',
-            url: '/static/sample/data/jobs/completed/data.json'
+            url: GetBasePath('unified_jobs') + '?status__in=(succesful,failed,error,canceled)'     ///static/sample/data/jobs/completed/data.json'
         });
         running_scope = $scope.$new();
         LoadScope({
@@ -53,7 +56,7 @@ function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJ
             scope: running_scope,
             list: RunningJobsList,
             id: 'active-jobs',
-            url: '/static/sample/data/jobs/running/data.json'
+            url: GetBasePath('unified_jobs') + '?status=running'
         });
         queued_scope = $scope.$new();
         LoadScope({
@@ -61,8 +64,29 @@ function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJ
             scope: queued_scope,
             list: QueuedJobsList,
             id: 'queued-jobs',
-            url: '/static/sample/data/jobs/queued/data.json'
+            url: GetBasePath('unified_jobs') + '?status__in(pending,waiting,new)'              //'/static/sample/data/jobs/queued/data.json'
         });
+        scheduled_scope = $scope.$new();
+        LoadScope({
+            parent_scope: $scope,
+            scope: scheduled_scope,
+            list: ScheduledJobsList,
+            id: 'scheduled-jobs',
+            url: GetBasePath('schedules')
+        });
+
+        completed_scope.deleteJob = function(id) {
+            DeleteJob({ scope: completed_scope, id: id });
+        };
+
+        queued_scope.deleteJob = function(id) {
+            DeleteJob({ scope: queued_scope, id: id });
+        };
+
+        running_scope.deleteJob = function(id) {
+            DeleteJob({ scope: running_scope, id: id });
+        };
+        
     });
 
     if ($scope.removeChoicesReady) {
@@ -95,8 +119,8 @@ function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJ
 
 }
 
-JobsList.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadScope', 'RunningJobsList', 'CompletedJobsList',
-    'QueuedJobsList', 'GetChoices', 'GetBasePath', 'Wait'];
+JobsListController.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadScope', 'RunningJobsList', 'CompletedJobsList',
+    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'DeleteJob'];
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,

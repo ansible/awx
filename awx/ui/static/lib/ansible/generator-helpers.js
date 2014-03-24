@@ -9,7 +9,7 @@
 
 'use strict';
 
-angular.module('GeneratorHelpers', ['GeneratorHelpers'])
+angular.module('GeneratorHelpers', [])
 
 .factory('Attr', function () {
     return function (obj, key, fld) {
@@ -630,7 +630,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         //
         var iterator = params.iterator,
             form = params.template,
-            useMini = params.mini,
+            size = params.size,
+            includeSize = (params.includeSize === undefined) ? true : params.includeSize,
             fld,
             i, html = '',
             modifier,
@@ -638,12 +639,14 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
         for (i = 1; i <= searchWidgets; i++) {
             modifier = (i === 1) ? '' : i;
-            html += "<div class=\"";
-            html += (params.size) ? params.size : "col-lg-4 col-md-6 col-sm-12 col-xs-12";
-            html += "\" id=\"search-widget-container" + modifier + "\">\n";
+    
+            if (includeSize) {
+                html += "<div class=\"";
+                html += (size) ? size : "col-lg-4 col-md-6 col-sm-12 col-xs-12";
+                html += "\" id=\"search-widget-container" + modifier + "\">\n";
+            }
 
-            html += "<div class=\"input-group";
-            html += (useMini) ? " input-group-sm" : " input-group-sm";
+            html += "<div class=\"input-group input-group-sm";
             html += "\">\n";
             html += "<div class=\"input-group-btn dropdown\">\n";
             html += "<button type=\"button\" ";
@@ -707,8 +710,10 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                 iterator + "HoldInput" + modifier + " || " +
                 iterator + "HideAllStartBtn" + modifier + "\"" +
                 "><i class=\"fa fa-search\"></i></a>\n";
-
-            html += "</div>\n";
+            
+            if (includeSize) {
+                html += "</div>\n";
+            }
         }
 
         return html;

@@ -89,10 +89,12 @@ angular.module('ansible', [
     'ActivityDetailDefinition',
     'VariablesHelper',
     'SchedulesListDefinition',
+    'ScheduledJobsDefinition',
     'AngularScheduler',
     'Timezones',
     'SchedulesHelper',
-    'QueuedJobsDefinition'
+    'QueuedJobsDefinition',
+    'JobsListDefinition'
 ])
     
     .constant('AngularScheduler.partials', $basePath + 'lib/angular-scheduler/lib/')
@@ -105,7 +107,7 @@ angular.module('ansible', [
             $routeProvider.
             when('/jobs', {
                 templateUrl: urlPrefix + 'partials/jobs.html',
-                controller: 'JobsList'
+                controller: 'JobsListController'
             }).
 
             when('/jobs/:id', {
