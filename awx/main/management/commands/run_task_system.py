@@ -237,6 +237,7 @@ def process_graph(graph, task_capacity):
             if not start_status:
                 node_obj.status = 'failed'
                 node_obj.result_traceback += "Task failed pre-start check"
+                node_obj.save()
                 # TODO: Run error handler
                 continue
             remaining_volume -= impact

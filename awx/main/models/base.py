@@ -370,7 +370,7 @@ class CommonTask(PrimordialModel):
 
     @property
     def can_start(self):
-        return bool(self.status == 'new')
+        return bool(self.status in ('new', 'waiting'))
 
     @property
     def task_impact(self):
@@ -397,7 +397,7 @@ class CommonTask(PrimordialModel):
 
     def start(self, error_callback, **kwargs):
         task_class = self._get_task_class()
-        if not self.can_start:
+        if not self.status == 'waiting':
             return False
         needed = self._get_passwords_needed_to_start()
         try:
