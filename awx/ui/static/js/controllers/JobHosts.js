@@ -56,15 +56,20 @@ function JobHostSummaryList($scope, $rootScope, $location, $log, $routeParams, R
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
 
-        // Set status, tooltips, badget icons, etc.
-        for (var i = 0; i < $scope.jobhosts.length; i++) {
-            $scope.jobhosts[i].host_name = $scope.jobhosts[i].summary_fields.host.name;
+        // Set status, tooltips, badges icons, etc.
+        $scope.jobhosts.forEach(function(element, i) {
+            $scope.jobhosts[i].host_name = ($scope.jobhosts[i].summary_fields.host) ? $scope.jobhosts[i].summary_fields.host.name : '';
             $scope.jobhosts[i].status = ($scope.jobhosts[i].failed) ? 'failed' : 'success';
             $scope.jobhosts[i].statusBadgeToolTip = JobStatusToolTip($scope.jobhosts[i].status) +
                 " Click to view details.";
-            $scope.jobhosts[i].statusLinkTo = '/#/jobs/' + $scope.jobhosts[i].job + '/job_events/?host=' +
-                encodeURI($scope.jobhosts[i].summary_fields.host.name);
-        }
+            if ($scope.jobhosts[i].summary_fields.host) {
+                $scope.jobhosts[i].statusLinkTo = '/#/jobs/' + $scope.jobhosts[i].job + '/job_events/?host=' +
+                    encodeURI($scope.jobhosts[i].summary_fields.host.name);
+            }
+            else {
+                $scope.jobhosts[i].statusLinkTo = '/#/jobs/' + $scope.jobhosts[i].job + '/job_events';
+            }
+        });
 
         if ($scope.job_id !== null && $scope.job_id !== undefined && $scope.job_id !== '') {
             // need job_status so we can show/hide refresh button

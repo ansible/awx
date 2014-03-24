@@ -10,7 +10,7 @@
 'use strict';
 
 angular.module('JobsListDefinition', [])
-    .value( 'JobList', {
+    .value( 'JobsList', {
         
         name: 'jobs',
         iterator: 'job',
@@ -39,13 +39,9 @@ angular.module('JobsListDefinition', [])
                 searchable: false,
                 filter: "date:'MM/dd HH:mm:ss'"
             },
-            job_template: {
-                label: 'Job Template',
-                ngBind: 'job.summary_fields.job_template.name',
-                //ngHref: "{{ '/#/job_templates/?name=' + job.summary_fields.job_template.name }}",
-                ngHref:"{{ '/#/job_templates/' + job.job_template }}",
-                sourceModel: 'job_template',
-                sourceField: 'name'
+            name: {
+                label: 'Name',
+                link: false
             },
             failed: {
                 label: 'Job failed?',

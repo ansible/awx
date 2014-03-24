@@ -44,7 +44,7 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities', 'PaginationHelpers
                             scope[iterator + 'HoldInput' + modifier] = false;
                         }
                         scope[set] = data.results;
-                        window.scrollTo(0, 0);
+                        //window.scrollTo(0, 0);
                         Wait('stop');
                         scope.$emit('PostRefresh');
                     })

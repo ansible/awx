@@ -234,16 +234,19 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             if (scope.removeDoSearch) {
                 scope.removeDoSearch();
             }
-            scope.removeDoSearch = scope.$on('doSearch', function (e, iterator, page, load) {
+            scope.removeDoSearch = scope.$on('doSearch', function (e, iterator, page, load, calcOnly) {
                 //
                 // Execute the search
                 //
-                scope[iterator + 'Loading'] = (load === undefined || load === true) ? true : false;
-                var url = defaultUrl,
+                var url = (calcOnly) ? '' : defaultUrl,
                     connect;
+                
+                if (!calcOnly) {
+                    scope[iterator + 'Loading'] = (load === undefined || load === true) ? true : false;
+                    scope[iterator + 'Page'] = (page) ? parseInt(page) - 1 : 0;
+                }
 
-                //finalize and execute the query
-                scope[iterator + 'Page'] = (page) ? parseInt(page) - 1 : 0;
+                //finalize and execute the query  
                 if (scope[iterator + 'SearchParams']) {
                     if (/\/$/.test(url)) {
                         url += '?' + scope[iterator + 'SearchParams'];
@@ -261,20 +264,26 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     connect = (/\/$/.test(url)) ? '?' : '&';
                     url += connect + scope[iterator + 'ExtraParms'];
                 }
-                url = url.replace(/\&\&/, '&');
-                Refresh({
-                    scope: scope,
-                    set: set,
-                    iterator: iterator,
-                    url: url
-                });
+                url = url.replace(/\&\&/g, '&');
+
+                if (calcOnly) {
+                    scope.$emit('searchParamsReady', url);
+                }
+                else {
+                    Refresh({
+                        scope: scope,
+                        set: set,
+                        iterator: iterator,
+                        url: url
+                    });
+                }
             });
 
 
             if (scope.removePrepareSearch) {
                 scope.removePrepareSearch();
             }
-            scope.removePrepareSearch = scope.$on('prepareSearch', function (e, iterator, page, load, spin) {
+            scope.removePrepareSearch = scope.$on('prepareSearch', function (e, iterator, page, load, calcOnly) {
                 //
                 // Start building the search key/value pairs. This will process each search widget, if the
                 // selected field is an object type (used on activity stream).
@@ -320,13 +329,13 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         }
                     }
                 }
-                scope.$emit('prepareSearch2', iterator, page, load, spin);
+                scope.$emit('prepareSearch2', iterator, page, load, calcOnly);
             });
 
             if (scope.removePrepareSearch2) {
                 scope.removePrepareSearch2();
             }
-            scope.removePrepareSearch2 = scope.$on('prepareSearch2', function (e, iterator, page, load, spin) {
+            scope.removePrepareSearch2 = scope.$on('prepareSearch2', function (e, iterator, page, load, calcOnly) {
                 // Continue building the search by examining the remaining search widgets. If we're looking at activity_stream,
                 // there's more than one.
                 var i, modifier,
@@ -408,7 +417,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     scope[iterator + 'SearchParams'] += 'order_by=' + encodeURI(sort_order);
                 }
 
-                scope.$emit('doSearch', iterator, page, load, spin);
+                scope.$emit('doSearch', iterator, page, load, calcOnly);
             });
 
             scope.startSearch = function (e, iterator) {
@@ -418,22 +427,28 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 }
             };
 
-            scope.search = function (iterator, page, load) {
-                // Called to initiate a searh. 
-                // Page is optional. Added to accomodate back function on Job Events detail. 
-                // Spin optional -set to false if spin not desired.
-                // Load optional -set to false if loading message not desired
-                load = (load === undefined) ? true : false;
+            /** 
+             * Initiate a searh.
+             *
+             *   @iterator: required, list.iterator value  
+             *   @Page:     optional. Added to accomodate back function on Job Events detail. 
+             *   @Load:     optional, set to false if 'Loading' message not desired
+             *   @calcOnly: optiona, set to true when you want to calc or figure out search params without executing the search
+             */
+            scope.search = function (iterator, page, load, calcOnly) {
+                page = page || null;
+                load = (load) ? true : false;
+                calcOnly = (calcOnly) ? true : false;
                 if (load) {
-                    scope[set] = [];
+                    scope[set] = [];  //clear the list array to make sure 'Loading' is the only thing visible on the list
                 }
-                scope.$emit('prepareSearch', iterator, page, load);
+                scope.$emit('prepareSearch', iterator, page, load, calcOnly);
             };
 
 
             scope.sort = function (fld) {
-                // reset sort icons back to 'icon-sort' on all columns
-                // except the one clicked
+                // Reset sort icons back to 'icon-sort' on all columns
+                // except the one clicked.
                 $('.list-header').each(function () {
                     if ($(this).attr('id') !== fld + '-header') {
                         var icon = $(this).find('i');

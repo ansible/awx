@@ -291,31 +291,26 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             $(element).popover({ placement: placement, delay: 0, title: title,
                 content: attrs.awPopOver, trigger: trigger, html: true, container: container });
             $(element).click(function() {
-                var self = $(this).attr('id');
+                var self = $(this);
                 $('.help-link, .help-link-white').each( function() {
-                    if (self !== $(this).attr('id')) {
+                    if (self.attr('id') !== $(this).attr('id')) {
                         $(this).popover('hide');
                     }
                 });
-            
                 $('.popover').each(function() {
                     // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                     $(this).remove();
                 });
-                
                 $('.tooltip').each( function() {
                     // close any lingering tool tipss
                     $(this).hide();
                 });
-
                 $(this).popover('toggle');
-
                 $('.popover').each(function() {
                     $compile($(this))(scope);  //make nested directives work!
                 });
-
                 $('.popover-content, .popover-title').click(function() {
-                    $('#' + self).popover('hide');
+                    $(self).popover('hide');
                 });
             });
             

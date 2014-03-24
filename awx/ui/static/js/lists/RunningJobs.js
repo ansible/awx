@@ -14,6 +14,7 @@ angular.module('RunningJobsDefinition', [])
         name: 'running_jobs',
         iterator: 'running_job',
         editTitle: 'Completed Jobs',
+        'class': 'table-condensed',
         index: false,
         hover: true,
         well: false,
@@ -24,7 +25,7 @@ angular.module('RunningJobsDefinition', [])
                 key: true,
                 desc: true,
                 searchType: 'int',
-                columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2'
+                columnClass: 'col-md-1 col-sm-2 col-xs-2'
             },
             inventory: {
                 label: 'Inventory ID',
@@ -38,6 +39,12 @@ angular.module('RunningJobsDefinition', [])
                 filter: "date:'MM/dd/yy HH:mm:ss'",
                 columnClass: "col-md-2 hidden-xs"
             },
+            next_job_run: {
+                label: 'Next Run',
+                searchable: false,
+                filter: "date:'MM/dd/yy HH:mm:ss'",
+                columnClass: "col-md-2 hidden-sm hidden-xs"
+            },
             type: {
                 label: 'Type',
                 link: false,
@@ -45,33 +52,31 @@ angular.module('RunningJobsDefinition', [])
             },
             name: {
                 label: 'Name',
-                columnClass: 'col-sm-4 col-xs-5',
-                ngHref: 'nameHref'
-            },
-            failed: {
-                label: 'Job failed?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true,
-                nosort: true
+                columnClass: 'col-md-3 col-xs-5',
+                ngHref: 'nameHref',
+                sourceModel: 'template',
+                sourceField: 'name'
             }
         },
-        
+
         actions: {
+            columnClass: 'col-md-2 col-sm-3 col-xs-3',
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()"
             }
         },
-
+       
         fieldActions: {
             status: {
                 mode: 'all',
+                awToolTip: "{{ running_job.status_tip }}",
+                awTipPlacement: "top",
+                dataTitle: "{{ running_job.status_popover_title }}",
                 iconClass: 'fa icon-job-{{ running_job.status }}',
-                awToolTip: "{{ running_job.statusToolTip }}",
-                dataPlacement: 'top'
+                awPopOver: "{{ running_job.status_popover }}",
+                dataPlacement: 'left'
             },
             submit: {
                 icon: 'icon-rocket',
@@ -84,14 +89,6 @@ angular.module('RunningJobsDefinition', [])
                 mode: 'all',
                 ngClick: 'deleteJob(running_job.id)',
                 awToolTip: 'Cancel the job',
-                ngShow: "running_job.status == 'pending' || running_job.status == 'running' || running_job.status == 'waiting'",
-                dataPlacement: 'top'
-            },
-            "delete": {
-                mode: 'all',
-                ngClick: 'deleteJob(running_job.id)',
-                awToolTip: 'Delete the job',
-                ngShow: "running_job.status != 'pending' && running_job.status != 'running' && running_job.status != 'waiting'",
                 dataPlacement: 'top'
             },
             dropdown: {
@@ -100,11 +97,9 @@ angular.module('RunningJobsDefinition', [])
                 icon: 'fa-search-plus',
                 'class': 'btn-default btn-xs',
                 options: [
-                    { ngClick: 'editJob(running_job.id, running_job.summary_fields.job_template.name)', label: 'Status' },
-                    { ngClick: 'viewEvents(running_job.id, running_job.summary_fields.job_template.name)', label: 'Events',
-                        ngHide: "running_job.status == 'new'" },
-                    { ngClick: 'viewSummary(running_job.id, running_job.summary_fields.job_template.name)', label: 'Host Summary',
-                        ngHide: "running_job.status == 'new'" }
+                    { ngHref: '/#/jobs/{{ running_job.id }}', label: 'Status' },
+                    { ngHref: '/#/jobs/{{ running_job.id }}/job_events', label: 'Events' },
+                    { ngHref: '/#/jobs/{{ running_job.id }}/job_host_summaries', label: 'Host Summary' }
                 ]
             }
         }

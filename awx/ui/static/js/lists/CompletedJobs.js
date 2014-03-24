@@ -14,6 +14,7 @@ angular.module('CompletedJobsDefinition', [])
         name: 'completed_jobs',
         iterator: 'completed_job',
         editTitle: 'Completed Jobs',
+        'class': 'table-condensed',
         index: false,
         hover: true,
         well: false,
@@ -25,7 +26,12 @@ angular.module('CompletedJobsDefinition', [])
                 key: true,
                 desc: true,
                 searchType: 'int',
-                columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2'
+                columnClass: 'col-md-1 col-sm-2 col-xs-2'
+            },
+            inventory: {
+                label: 'Inventory ID',
+                searchType: 'int',
+                searchOnly: true
             },
             modified: {
                 label: 'Completed On',
@@ -34,6 +40,12 @@ angular.module('CompletedJobsDefinition', [])
                 filter: "date:'MM/dd/yy HH:mm:ss'",
                 columnClass: "col-md-2 hidden-xs"
             },
+            next_job_run: {
+                label: 'Next Run',
+                searchable: false,
+                filter: "date:'MM/dd/yy HH:mm:ss'",
+                columnClass: "col-md-2 hidden-sm hidden-xs"
+            },
             type: {
                 label: 'Type',
                 link: false,
@@ -41,8 +53,10 @@ angular.module('CompletedJobsDefinition', [])
             },
             name: {
                 label: 'Name',
-                columnClass: 'col-sm-4 col-xs-5',
-                ngHref: 'nameHref'
+                columnClass: 'col-md-3 col-xs-5',
+                ngHref: 'nameHref',
+                sourceModel: 'template',
+                sourceField: 'name'
             },
             failed: {
                 label: 'Job failed?',
@@ -51,17 +65,29 @@ angular.module('CompletedJobsDefinition', [])
                 searchValue: 'true',
                 searchOnly: true,
                 nosort: true
+            },
+            status: {
+                label: 'Status',
+                searchType: 'select',
+                searchOnly: true,
+                searchOptions: [
+                    { name: "Success", value: "successful" },
+                    { name: "Error", value: "error" },
+                    { name: "Failed", value: "failed" },
+                    { name: "Canceled", value: "canceled" }
+                ]
             }
         },
-        
+
         actions: {
+            columnClass: 'col-md-2 col-sm-3 col-xs-3',
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()"
             }
         },
-
+        
         fieldActions: {
             status: {
                 mode: 'all',
@@ -79,18 +105,10 @@ angular.module('CompletedJobsDefinition', [])
                 awToolTip: 'Relaunch the job',
                 dataPlacement: 'top'
             },
-            cancel: {
-                mode: 'all',
-                ngClick: 'deleteJob(completed_job.id)',
-                awToolTip: 'Cancel a running or pending job',
-                ngShow: "completed_job.status == 'pending' || completed_job.status == 'running' || completed_job.status == 'waiting'",
-                dataPlacement: 'top'
-            },
             "delete": {
                 mode: 'all',
                 ngClick: 'deleteJob(completed_job.id)',
                 awToolTip: 'Delete the job',
-                ngShow: "completed_job.status != 'pending' && completed_job.status != 'running' && completed_job.status != 'waiting'",
                 dataPlacement: 'top'
             },
             dropdown: {
@@ -99,11 +117,9 @@ angular.module('CompletedJobsDefinition', [])
                 icon: 'fa-search-plus',
                 'class': 'btn-default btn-xs',
                 options: [
-                    { ngClick: 'editJob(completed_job.id, completed_job.summary_fields.job_template.name)', label: 'Status' },
-                    { ngClick: 'viewEvents(completed_job.id, completed_job.summary_fields.job_template.name)', label: 'Events',
-                        ngHide: "completed_job.status == 'new'" },
-                    { ngClick: 'viewSummary(completed_job.id, completed_job.summary_fields.job_template.name)', label: 'Host Summary',
-                        ngHide: "completed_job.status == 'new'" }
+                    { ngHref: '/#/jobs/{{ completed_job.id }}', label: 'Status' },
+                    { ngHref: '/#/jobs/{{ completed_job.id }}/job_events', label: 'Events', ngHide: "completed_job.status == 'new'" },
+                    { ngHref: '/#/jobs/{{ completed_job.id }}/job_host_summaries', label: 'Host Summary' }
                 ]
             }
         }

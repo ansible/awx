@@ -164,9 +164,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                         html += "</div>\n";
                     }
                     
-                    html += "<div class=\"row\">\n";
-
+                    
                     if (options.showSearch=== undefined || options.showSearch === true) {
+                        html += "<div class=\"row\">\n";
                         if (list.name !== 'groups') {
                             if (options.searchSize) {
                                 html += SearchWidget({
@@ -260,7 +260,6 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                             //lookup
                             html += "<div class=\"col-lg-7\"></div>\n";
                         }
-
                         html += "</div><!-- row -->\n";
                     }
 
@@ -400,8 +399,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                                             action: field_action
                                         });
                                     }
-                                    html += (fAction.label) ? "<span class=\"list-action-label\"> " + list.fieldActions[field_action].label +
-                                        "</span>" : "";
+                                    //html += (fAction.label) ? "<span class=\"list-action-label\"> " + list.fieldActions[field_action].label +
+                                    //    "</span>" : "";
                                     html += "</a>";
                                 }
                             }

@@ -14,6 +14,7 @@ angular.module('QueuedJobsDefinition', [])
         name: 'queued_jobs',
         iterator: 'queued_job',
         editTitle: 'Queued Jobs',
+        'class': 'table-condensed',
         index: false,
         hover: true,
         well: false,
@@ -24,7 +25,7 @@ angular.module('QueuedJobsDefinition', [])
                 key: true,
                 desc: true,
                 searchType: 'int',
-                columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2'
+                columnClass: 'col-md-1 col-sm-2 col-xs-2'
             },
             inventory: {
                 label: 'Inventory ID',
@@ -38,6 +39,12 @@ angular.module('QueuedJobsDefinition', [])
                 filter: "date:'MM/dd/yy HH:mm:ss'",
                 columnClass: 'col-md-2 hidden-xs'
             },
+            next_job_run: {
+                label: 'Next Run',
+                searchable: false,
+                filter: "date:'MM/dd/yy HH:mm:ss'",
+                columnClass: "col-md-2 hidden-sm hidden-xs"
+            },
             type: {
                 label: 'Type',
                 link: false,
@@ -45,20 +52,15 @@ angular.module('QueuedJobsDefinition', [])
             },
             name: {
                 label: 'Name',
-                columnClass: 'col-sm-4 col-xs-5',
-                ngHref: 'nameHref'
-            },
-            failed: {
-                label: 'Job failed?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true,
-                nosort: true
+                columnClass: 'col-sm-3 col-xs-5',
+                ngHref: 'nameHref',
+                sourceModel: 'template',
+                sourceField: 'name'
             }
         },
-        
+
         actions: {
+            columnClass: 'col-md-2 col-sm-3 col-xs-3',
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",

@@ -9,7 +9,7 @@
 
 'use strict';
 
-angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper'])
+angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers'])
 
 .factory('JobStatusToolTip', [
     function () {
@@ -166,7 +166,7 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
  *
  */
 .factory('LoadScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'PageRangeSetup', 'ProcessErrors', 'Rest',
-    function(SearchInit, PaginateInit, GenerateList, PageRangeSetup, ProcessErrors, Rest) {
+    function(SearchInit, PaginateInit, GenerateList) {
     return function(params) {
         var parent_scope = params.parent_scope,
             scope = params.scope,
@@ -180,7 +180,7 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
             breadCrumbs: false,
             scope: scope,
             searchSize: 'col-lg-4 col-md-6 col-sm-12 col-xs-12',
-            showSearch: false
+            showSearch: true
         });
 
         SearchInit({
@@ -197,35 +197,25 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
             pageSize: 10
         });
 
+        scope.iterator = list.iterator;
+
         
         // The following bits probably don't belong here once the API is available.
 
         if (scope.removePostRefresh) {
             scope.removePostRefresh();
         }
-        scope.$on('PostRefresh', function(e, data){
-            var i, modifier;
-            PageRangeSetup({
-                scope: scope,
-                count: data.count,
-                next: data.next,
-                previous: data.previous,
-                iterator: list.iterator
-            });
-            scope[list.iterator + 'Loading'] = false;
-            for (i = 1; i <= 3; i++) {
-                modifier = (i === 1) ? '' : i;
-                scope[list.iterator + 'HoldInput' + modifier] = false;
-            }
-            scope[list.name] = data.results;
-            window.scrollTo(0, 0);
+        scope.$on('PostRefresh', function(){
 
             scope[list.name].forEach(function(item, item_idx) {
+                var fld, field,
+                    itm = scope[list.name][item_idx];
+
                 // Set the item type label
                 if (list.fields.type) {
                     parent_scope.type_choices.every(function(choice) {
                         if (choice.value === item.type) {
-                            scope[list.name][item_idx].type = choice.label;
+                            itm.type = choice.label;
                             return false;
                         }
                         return true;
@@ -234,33 +224,107 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
                 // Set the job status label
                 parent_scope.status_choices.every(function(status) {
                     if (status.value === item.status) {
-                        scope[list.name][item_idx].status_label = status.label;
+                        itm.status_label = status.label;
                         return false;
                     }
                     return true;
                 });
+                
                 if (list.name === 'completed_jobs' || list.name === 'running_jobs') {
-                    scope[list.name][item_idx].status_tip = scope[list.name][item_idx].status_label + '. Click for details.';
+                    itm.status_tip = itm.status_label + '. Click for details.';
                 }
-                else {
-                    scope[list.name][item_idx].status_tip = 'Pending';
+                else if (list.name === 'queued_jobs') {
+                    itm.status_tip = 'Pending';
                 }
-                scope[list.name][item_idx].status_popover_title = scope[list.name][item_idx].status_label;
-                scope[list.name][item_idx].status_popover = "<p>" + scope[list.name][item_idx].job_explanation + "</p>\n";
-                scope[list.name][item_idx].status_popover += "<p><a href=\"/#/jobs/" + scope[list.name][item_idx].id + "\">More...</a></p>\n";
-            });
+                else if (list.name === 'scheduled_jobs') {
+                    itm.enabled = (itm.enabled) ? true : false;
+                    itm.play_tip = (itm.enabled) ? 'Schedule is Active. Click to temporarily stop.' : 'Schedule is temporarily stopped. Click to activate.';
+                }
 
+                // Copy summary_field values
+                for (field in list.fields) {
+                    fld = list.fields[field];
+                    if (fld.sourceModel) {
+                        if (itm.summary_fields[fld.sourceModel]) {
+                            itm[field] = itm.summary_fields[fld.sourceModel][fld.sourceField];
+                        }
+                    }
+                }
+
+                itm.status_popover_title = itm.status_label;
+                itm.status_popover = "<p>" + itm.job_explanation + "</p>\n" +
+                    "<p><a href=\"/#/jobs/" + itm.id + "\">More...</a></p>\n" +
+                    "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+            });
             parent_scope.$emit('listLoaded');
         });
+        scope.search(list.iterator);
+    };
+}])
 
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                scope.$emit('PostRefresh', data);
-            })
-            .error(function(data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-            });
+.factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Prompt',
+function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt){
+    return function(params) {
+        
+        var scope = params.scope,
+            id = params.id,
+            action, jobs, job, url, action_label, hdr;
+
+        if (scope.completed_jobs) {
+            jobs = scope.completed_jobs;
+        }
+        else if (scope.running_jobs) {
+            jobs = scope.running_jobs;
+        }
+        else if (scope.queued_jobs) {
+            jobs = scope.queued_jobs;
+        }
+        job = Find({list: jobs, key: 'id', val: id });
+
+        if (job.status === 'pending' || job.status === 'running' || job.status === 'waiting') {
+            url = job.related.cancel;
+            action_label = 'cancel';
+            hdr = 'Cancel Job';
+        } else {
+            url = GetBasePath('jobs') + id + '/';
+            action_label = 'delete';
+            hdr = 'Delete Job';
+        }
+
+        action = function () {
+            Wait('start');
+            Rest.setUrl(url);
+            if (action_label === 'cancel') {
+                Rest.post()
+                    .success(function () {
+                        $('#prompt-modal').modal('hide');
+                        scope.search(scope.iterator);
+                    })
+                    .error(function (data, status) {
+                        $('#prompt-modal').modal('hide');
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
+                            ' failed. POST returned status: ' + status });
+                    });
+            } else {
+                Rest.destroy()
+                    .success(function () {
+                        $('#prompt-modal').modal('hide');
+                        scope.search(scope.iterator);
+                    })
+                    .error(function (data, status) {
+                        $('#prompt-modal').modal('hide');
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
+                            ' failed. DELETE returned status: ' + status });
+                    });
+            }
+        };
+
+        Prompt({
+            hdr: hdr,
+            body: "<div class=\"alert alert-info\">Are you sure you want to " + action_label + " job " + id + " <em>" + job.name  + "</em>?</div>",
+            action: action
+        });
+
     };
 }]);
+

@@ -226,6 +226,7 @@ textarea.allowresize {
   }
   .popover {
       z-index: 2000;
+      min-width: 200px;
       max-width: 325px;
   }
   .popover-footer {
@@ -889,7 +890,28 @@ input[type="checkbox"].checkbox-no-label {
 
 .table-hover-inverse tbody tr:hover > td,
 .table-hover-inverse tbody tr:hover > th {
-  background-color: #dff0d8;
+  background-color: #c6e5e5;
+}
+
+.table > thead > tr > td.success,
+.table > tbody > tr > td.success,
+.table > tfoot > tr > td.success,
+.table > thead > tr > th.success,
+.table > tbody > tr > th.success,
+.table > tfoot > tr > th.success,
+.table > thead > tr.success > td,
+.table > tbody > tr.success > td,
+.table > tfoot > tr.success > td,
+.table > thead > tr.success > th,
+.table > tbody > tr.success > th,
+.table > tfoot > tr.success > th {
+  background-color: #c6e5e5;
+}
+.table-hover > tbody > tr > td.success:hover,
+.table-hover > tbody > tr > th.success:hover,
+.table-hover > tbody > tr.success:hover > td,
+.table-hover > tbody > tr.success:hover > th {
+  background-color: #c6e5e5;
 }
 
 .table-summary thead > tr > th,
@@ -1017,6 +1039,14 @@ input[type="checkbox"].checkbox-no-label {
     content: "\f111";
   }
 
+  .icon-schedule-enabled-true:before {
+      content: "\f04c";
+  }
+
+  .icon-schedule-enabled-false:before {
+      content: "\f04b";
+  }
+
   .badge {
     padding: 2px 3px 3px 4px;
     font-size: 10px;
@@ -1025,20 +1055,12 @@ input[type="checkbox"].checkbox-no-label {
   }
 
   .job-list {
-      margin-top: 30px;
-      .row {
-          margin-left: 0;
-          margin-right: 0;
-      }
-      .page-row div:first-child {
-          padding-left: 8px;
-      }
+      margin-top: 20px;
       .title {
-          font-size: 14px;
-          padding-left: 8px;
+          margin-left: 3px;
           font-weight: bold;
           margin-bottom: 6px;
-          color: @black;
+          color: #666;
       }
       thead >tr >th, .page-row {
           font-size: 12px;
