@@ -53,3 +53,4 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 2):
     # activity_stream_registrar.connect(JobHostSummary)
     # activity_stream_registrar.connect(JobEvent)
     #activity_stream_registrar.connect(Profile)
+    activity_stream_registrar.connect(Schedule)

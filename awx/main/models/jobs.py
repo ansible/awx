@@ -251,6 +251,7 @@ class JobBase(JobOptions):
         through='JobHostSummary',
     )
 
+
 class JobBaseMethods(object):
 
     @classmethod

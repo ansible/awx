@@ -38,6 +38,7 @@ from awx.main.utils import encrypt_field
 
 __all__ = ['Project', 'ProjectUpdate']
 
+
 class ProjectOptions(models.Model):
 
     SCM_TYPE_CHOICES = [

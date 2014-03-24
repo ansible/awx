@@ -432,38 +432,44 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
 
     @property
     def can_start(self):
-        return bool(self.status == 'new')
+        return bool(self.status in ('new', 'waiting'))
+
+    @property
+    def task_impact(self):
+        raise NotImplementedError
 
     def _get_passwords_needed_to_start(self):
         return []
 
-    def start_signature(self, **kwargs):
-        from awx.main.tasks import handle_work_error
+    def is_blocked_by(self, task_object):
+        ''' Given another task object determine if this task would be blocked by it '''
+        raise NotImplementedError
 
+    def generate_dependencies(self, active_tasks):
+        ''' Generate any tasks that the current task might be dependent on given a list of active
+            tasks that might preclude creating one'''
+        return []
+
+    def signal_start(self):
+        ''' Notify the task runner system to begin work on this task '''
+        raise NotImplementedError
+
+    def start(self, error_callback, **kwargs):
         task_class = self._get_task_class()
-        if not self.can_start:
+        if not self.can_start: # self.status == 'waiting':   # FIXME: Why did this not include "new"?
             return False
         needed = self._get_passwords_needed_to_start()
-        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        try:
+            stored_args = json.loads(decrypt_field(self, 'start_args'))
+        except Exception, e:
+            stored_args = None
+        if stored_args is None or stored_args == '':
+            opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        else:
+            opts = dict([(field, stored_args.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
-        self.status = 'pending'
-        self.save(update_fields=['status'])
-        transaction.commit()
-        task_actual = task_class().si(self.pk, **opts)
-        return task_actual
-
-    def start(self, **kwargs):
-        task_actual = self.start_signature(**kwargs)
-        # TODO: Callback for status
-        task_result = task_actual.delay()
-        # Reload instance from database so we don't clobber results from task
-        # (mainly from tests when using Django 1.4.x).
-        instance = self.__class__.objects.get(pk=self.pk)
-        # The TaskMeta instance in the database isn't created until the worker
-        # starts processing the task, so we can only store the task ID here.
-        instance.celery_task_id = task_result.task_id
-        instance.save(update_fields=['celery_task_id'])
+        task_class().apply_async((self.pk,), opts, link_error=error_callback)
         return True
 
     @property
