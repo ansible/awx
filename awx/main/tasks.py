@@ -97,6 +97,7 @@ class BaseTask(Task):
     model = None
     abstract = True
 
+    @transaction.commit_on_success
     def update_model(self, pk, **updates):
         '''
         Reload model from database and update the given fields.
@@ -291,7 +292,7 @@ class BaseTask(Task):
         '''
         Hook for checking job/task before running.
         '''
-        if instance.status != 'pending':
+        if instance.status != 'running':
             return False
         # TODO: Check that we can write to the stdout data directory
         return True
@@ -299,12 +300,11 @@ class BaseTask(Task):
     def post_run_hook(self, instance, **kwargs):
         pass
 
-    @transaction.commit_on_success
     def run(self, pk, **kwargs):
         '''
         Run the job/task and capture its output.
         '''
-        instance = self.update_model(pk, status='pending', celery_task_id=self.request.id)
+        instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
         status, stdout, tb = 'error', '', ''
         output_replacements = []
         try:
@@ -317,7 +317,6 @@ class BaseTask(Task):
                     instance = self.update_model(pk)
                     status = instance.status
                     raise RuntimeError('not starting %s task' % instance.status)
-            instance = self.update_model(pk, status='running')
             kwargs['private_data_file'] = self.build_private_data_file(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
             args = self.build_args(instance, **kwargs)
@@ -507,8 +506,7 @@ class RunJob(BaseTask):
         if job.cancel_flag:
             job = self.update_model(job.pk, status='canceled')
             return False
-        elif job.status in ('pending', 'waiting'):
-            job = self.update_model(job.pk, status='pending')
+        elif job.status == 'running':
             return True
         else:
             return False
@@ -705,25 +703,11 @@ class RunProjectUpdate(BaseTask):
         Hook for checking project update before running.
         '''
         while True:
-            pk = project_update.pk
-            if project_update.status in ('pending', 'waiting'):
-                # Check if project update is blocked by any jobs or other 
-                # updates that are active.  Exclude job that is waiting for
-                # this project update.
-                project = project_update.project
-                jobs_qs = project.jobs.filter(status__in=('pending', 'running'))
-                pu_qs = project.project_updates.filter(status__in=('pending', 'running'))
-                pu_qs = pu_qs.exclude(pk=project_update.pk)
-                if jobs_qs.count() or pu_qs.count():
-                    #print 'project update %d waiting on' % pk, jobs_qs, pu_qs
-                    project_update = self.update_model(pk, status='waiting')
-                    time.sleep(4.0)
-                else:
-                    project_update = self.update_model(pk, status='pending')
-                    return True
-            elif project_update.cancel_flag:
-                project_update = self.update_model(pk, status='canceled')
+            if project_update.cancel_flag:
+                project_update = self.update_model(project_update.pk, status='canceled')
                 return False
+            elif project_update.status == 'running':
+                return True
             else:
                 return False
 
@@ -852,23 +836,10 @@ class RunInventoryUpdate(BaseTask):
         Hook for checking inventory update before running.
         '''
         while True:
-            pk = inventory_update.pk
-            if inventory_update.status in ('pending', 'waiting'):
-                # Check if inventory update is blocked by any jobs using the
-                # inventory or other active inventory updates.
-                inventory = inventory_update.inventory_source.inventory
-                jobs_qs = inventory.jobs.filter(status__in=('pending', 'running'))
-                iu_qs = InventoryUpdate.objects.filter(inventory_source__inventory=inventory, status__in=('pending', 'running'))
-                iu_qs = iu_qs.exclude(pk=inventory_update.pk)
-                if jobs_qs.count() or iu_qs.count():
-                    print 'inventory update %d waiting on' % pk, jobs_qs, iu_qs
-                    inventory_update = self.update_model(pk, status='waiting')
-                    time.sleep(4.0)
-                else:
-                    inventory_update = self.update_model(pk, status='pending')
-                    return True
-            elif inventory_update.cancel_flag:
-                inventory_update = self.update_model(pk, status='canceled')
+            if inventory_update.cancel_flag:
+                inventory_update = self.update_model(inventory_update.pk, status='canceled')
                 return False
+            elif inventory_update.status == 'running':
+                return True
             else:
                 return False
