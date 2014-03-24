@@ -142,6 +142,17 @@ class BaseModel(models.Model):
         if errors:
              raise ValidationError(errors)        
 
+    def update_fields(self, **kwargs):
+        save = kwargs.pop('save', True)
+        update_fields = []
+        for field, value in kwargs.items():
+            if getattr(self, field) != value:
+                setattr(self, field, value)
+                update_fields.append(field)
+        if save and update_fields:
+            self.save(update_fields=update_fields)
+        return update_fields
+
     def save(self, *args, **kwargs):
         # For compatibility with Django 1.4.x, attempt to handle any calls to
         # save that pass update_fields.
@@ -306,6 +317,11 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
         job_env = JSONField(
             blank=True,
             default={},
+            editable=False,
+        )
+        start_args = models.TextField(
+            blank=True,
+            default='',
             editable=False,
         )
         _result_stdout = models.TextField(

@@ -6,376 +6,81 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
+    '''
+    Rename tables/columns to be consistent with model/field names.
+    '''
 
     def forwards(self, orm):
-        # Removing unique constraint on 'JobHostSummary', fields ['job', 'host']
-        db.delete_unique(u'main_jobhostsummary', ['job_id', 'host_id'])
+        db.rename_table(u'main_projectnew', 'main_project')
+        db.rename_table(u'main_projectupdatenew', 'main_projectupdate')
+        db.rename_table(u'main_inventorysourcenew', 'main_inventorysource')
+        db.rename_table(u'main_inventoryupdatenew', 'main_inventoryupdate')
+        db.rename_table(u'main_jobtemplatenew', 'main_jobtemplate')
+        db.rename_table(u'main_jobnew', 'main_job')
 
-        # Deleting model 'JobTemplate'
-        db.delete_table(u'main_jobtemplate')
+        db.rename_table(db.shorten_name(u'main_team_new_projects'), db.shorten_name(u'main_team_projects'))
+        db.rename_column(db.shorten_name(u'main_team_projects'), 'projectnew_id', 'project_id')
+        db.rename_table(db.shorten_name(u'main_organization_new_projects'), db.shorten_name(u'main_organization_projects'))
+        db.rename_column(db.shorten_name(u'main_organization_projects'), 'projectnew_id', 'project_id')
+        db.rename_column(u'main_permission', 'new_project_id', 'project_id')
 
-        # Deleting model 'InventorySource'
-        db.delete_table(u'main_inventorysource')
+        db.rename_column(u'main_host', 'new_last_job_id', 'last_job_id')
+        db.rename_table(db.shorten_name(u'main_host_new_inventory_sources'), db.shorten_name(u'main_host_inventory_sources'))
+        db.rename_column(db.shorten_name(u'main_host_inventory_sources'), 'inventorysourcenew_id', 'inventorysource_id')
+        db.rename_table(db.shorten_name(u'main_group_new_inventory_sources'), db.shorten_name(u'main_group_inventory_sources'))
+        db.rename_column(db.shorten_name(u'main_group_inventory_sources'), 'inventorysourcenew_id', 'inventorysource_id')
+        
+        db.rename_column(u'main_jobhostsummary', 'new_job_id', 'job_id')
+        db.rename_column(u'main_jobevent', 'new_job_id', 'job_id')
 
-        # Deleting model 'Project'
-        db.delete_table(u'main_project')
-
-        # Deleting model 'ProjectUpdate'
-        db.delete_table(u'main_projectupdate')
-
-        # Deleting model 'InventoryUpdate'
-        db.delete_table(u'main_inventoryupdate')
-
-        # Deleting model 'Job'
-        db.delete_table(u'main_job')
-
-        # Deleting field 'Host.last_job'
-        db.delete_column(u'main_host', 'last_job_id')
-
-        # Removing M2M table for field inventory_sources on 'Host'
-        db.delete_table(db.shorten_name(u'main_host_inventory_sources'))
-
-        # Removing M2M table for field projects on 'Organization'
-        db.delete_table(db.shorten_name(u'main_organization_projects'))
-
-        # Removing M2M table for field projects on 'Team'
-        db.delete_table(db.shorten_name(u'main_team_projects'))
-
-        # Deleting field 'Permission.project'
-        db.delete_column(u'main_permission', 'project_id')
-
-        # Deleting field 'JobHostSummary.job'
-        db.delete_column(u'main_jobhostsummary', 'job_id')
-
-        # Changing field 'JobHostSummary.new_job'
-        db.alter_column(u'main_jobhostsummary', 'new_job_id', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['main.JobNew']))
-
-        # Removing M2M table for field inventory_sources on 'Group'
-        db.delete_table(db.shorten_name(u'main_group_inventory_sources'))
-
-        # Deleting field 'JobEvent.job'
-        db.delete_column(u'main_jobevent', 'job_id')
-
-        # Changing field 'JobEvent.new_job'
-        db.alter_column(u'main_jobevent', 'new_job_id', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['main.JobNew']))
-        # Removing M2M table for field inventory_update on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_inventory_update'))
-
-        # Removing M2M table for field project_update on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_project_update'))
-
-        # Removing M2M table for field inventory_source on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_inventory_source'))
-
-        # Removing M2M table for field job_template on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_job_template'))
-
-        # Removing M2M table for field job on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_job'))
-
-        # Removing M2M table for field project on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_project'))
-
+        db.rename_table(db.shorten_name(u'main_activitystream_new_project'), db.shorten_name(u'main_activitystream_project'))
+        db.rename_column(db.shorten_name(u'main_activitystream_project'), 'projectnew_id', 'project_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_new_project_update'), db.shorten_name(u'main_activitystream_project_update'))
+        db.rename_column(db.shorten_name(u'main_activitystream_project_update'), 'projectupdatenew_id', 'projectupdate_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_new_inventory_source'), db.shorten_name(u'main_activitystream_inventory_source'))
+        db.rename_column(db.shorten_name(u'main_activitystream_inventory_source'), 'inventorysourcenew_id', 'inventorysource_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_new_inventory_update'), db.shorten_name(u'main_activitystream_inventory_update'))
+        db.rename_column(db.shorten_name(u'main_activitystream_inventory_update'), 'inventoryupdatenew_id', 'inventoryupdate_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_new_job_template'), db.shorten_name(u'main_activitystream_job_template'))
+        db.rename_column(db.shorten_name(u'main_activitystream_job_template'), 'jobtemplatenew_id', 'jobtemplate_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_new_job'), db.shorten_name(u'main_activitystream_job'))
+        db.rename_column(db.shorten_name(u'main_activitystream_job'), 'jobnew_id', 'job_id')
 
     def backwards(self, orm):
-        # Adding model 'JobTemplate'
-        db.create_table(u'main_jobtemplate', (
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobtemplates', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'jobtemplate', 'app_label': 'main'}(class)s_modified+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('extra_vars', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('verbosity', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
-            ('job_tags', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('job_type', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'jobtemplate', 'app_label': 'main'}(class)s_created+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_templates', null=True, on_delete=models.SET_NULL, to=orm['main.Project'])),
-            ('host_config_key', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('limit', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobtemplates', null=True, on_delete=models.SET_NULL, to=orm['main.Inventory'])),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('forks', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
-            ('playbook', self.gf('django.db.models.fields.CharField')(default='', max_length=1024)),
-            ('cloud_credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobtemplates_as_cloud_credential+', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=512, unique=True)),
-        ))
-        db.send_create_signal('main', ['JobTemplate'])
+        db.rename_column(db.shorten_name(u'main_activitystream_job'), 'job_id', 'jobnew_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_job'), db.shorten_name(u'main_activitystream_new_job'))
+        db.rename_column(db.shorten_name(u'main_activitystream_job_template'), 'jobtemplate_id', 'jobtemplatenew_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_job_template'), db.shorten_name(u'main_activitystream_new_job_template'))
+        db.rename_column(db.shorten_name(u'main_activitystream_inventory_update'), 'inventoryupdate_id', 'inventoryupdatenew_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_inventory_update'), db.shorten_name(u'main_activitystream_new_inventory_update'))
+        db.rename_column(db.shorten_name(u'main_activitystream_inventory_source'), 'inventorysource_id', 'inventorysourcenew_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_inventory_source'), db.shorten_name(u'main_activitystream_new_inventory_source'))
+        db.rename_column(db.shorten_name(u'main_activitystream_project_update'), 'projectupdate_id', 'projectupdatenew_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_project_update'), db.shorten_name(u'main_activitystream_new_project_update'))
+        db.rename_column(db.shorten_name(u'main_activitystream_project'), 'project_id', 'projectnew_id')
+        db.rename_table(db.shorten_name(u'main_activitystream_project'), db.shorten_name(u'main_activitystream_new_project'))
 
-        # Adding model 'InventorySource'
-        db.create_table(u'main_inventorysource', (
-            ('last_updated', self.gf('django.db.models.fields.DateTimeField')(default=None, null=True)),
-            ('source_regions', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('current_update', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='inventory_source_as_current_update+', null=True, on_delete=models.SET_NULL, to=orm['main.InventoryUpdate'])),
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('overwrite', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('source_vars', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('group', self.gf('awx.main.fields.AutoOneToOneField')(default=None, related_name='inventory_source', unique=True, null=True, to=orm['main.Group'])),
-            ('last_update_failed', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'inventorysource', 'app_label': 'main'}(class)s_created+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('last_update', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='inventory_source_as_last_update+', null=True, on_delete=models.SET_NULL, to=orm['main.InventoryUpdate'])),
-            ('source', self.gf('django.db.models.fields.CharField')(default='', max_length=32, blank=True)),
-            ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='inventory_sources', null=True, to=orm['main.Inventory'])),
-            ('update_cache_timeout', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
-            ('status', self.gf('django.db.models.fields.CharField')(default='none', max_length=32)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='inventorysources', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('overwrite_vars', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'inventorysource', 'app_label': 'main'}(class)s_modified+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('update_on_launch', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('source_path', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-        ))
-        db.send_create_signal('main', ['InventorySource'])
+        db.rename_column(u'main_jobevent', 'job_id', 'new_job_id')
+        db.rename_column(u'main_jobhostsummary', 'job_id', 'new_job_id')
 
-        # Adding model 'Project'
-        db.create_table(u'main_project', (
-            ('scm_branch', self.gf('django.db.models.fields.CharField')(default='', max_length=256, blank=True)),
-            ('scm_update_cache_timeout', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
-            ('scm_clean', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('scm_delete_on_update', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('current_update', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='project_as_current_update+', null=True, on_delete=models.SET_NULL, to=orm['main.ProjectUpdate'])),
-            ('last_updated', self.gf('django.db.models.fields.DateTimeField')(default=None, null=True)),
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'project', 'app_label': 'main'}(class)s_modified+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('last_update_failed', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'project', 'app_label': 'main'}(class)s_created+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('last_update', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='project_as_last_update+', null=True, on_delete=models.SET_NULL, to=orm['main.ProjectUpdate'])),
-            ('local_path', self.gf('django.db.models.fields.CharField')(max_length=1024, blank=True)),
-            ('scm_delete_on_next_update', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('status', self.gf('django.db.models.fields.CharField')(default='ok', max_length=32, null=True)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='projects', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('scm_type', self.gf('django.db.models.fields.CharField')(default='', max_length=8, blank=True)),
-            ('scm_update_on_launch', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=512, unique=True)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('scm_url', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-        ))
-        db.send_create_signal('main', ['Project'])
+        db.rename_column(db.shorten_name(u'main_group_inventory_sources'), 'inventorysource_id', 'inventorysourcenew_id')
+        db.rename_table(db.shorten_name(u'main_group_inventory_sources'), db.shorten_name(u'main_group_new_inventory_sources'))
+        db.rename_column(db.shorten_name(u'main_host_inventory_sources'), 'inventorysource_id', 'inventorysourcenew_id')
+        db.rename_table(db.shorten_name(u'main_host_inventory_sources'), db.shorten_name(u'main_host_new_inventory_sources'))
+        db.rename_column(u'main_host', 'last_job_id', 'new_last_job_id')
 
-        # Adding model 'ProjectUpdate'
-        db.create_table(u'main_projectupdate', (
-            ('cancel_flag', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('scm_branch', self.gf('django.db.models.fields.CharField')(default='', max_length=256, blank=True)),
-            ('scm_clean', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('scm_delete_on_update', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('start_args', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('celery_task_id', self.gf('django.db.models.fields.CharField')(default='', max_length=100, blank=True)),
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'projectupdate', 'app_label': 'main'}(class)s_modified+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('job_cwd', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'projectupdate', 'app_label': 'main'}(class)s_created+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('failed', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('local_path', self.gf('django.db.models.fields.CharField')(max_length=1024, blank=True)),
-            ('status', self.gf('django.db.models.fields.CharField')(default='new', max_length=20)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='projectupdates', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('result_traceback', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('scm_type', self.gf('django.db.models.fields.CharField')(default='', max_length=8, blank=True)),
-            ('job_env', self.gf('jsonfield.fields.JSONField')(default={}, blank=True)),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('result_stdout_file', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('job_args', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('scm_url', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='project_updates', to=orm['main.Project'])),
-            ('_result_stdout', self.gf('django.db.models.fields.TextField')(default='', db_column='result_stdout', blank=True)),
-        ))
-        db.send_create_signal('main', ['ProjectUpdate'])
-
-        # Adding model 'InventoryUpdate'
-        db.create_table(u'main_inventoryupdate', (
-            ('cancel_flag', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('source_regions', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('license_error', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('start_args', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('celery_task_id', self.gf('django.db.models.fields.CharField')(default='', max_length=100, blank=True)),
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('overwrite', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('source_vars', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'inventoryupdate', 'app_label': 'main'}(class)s_modified+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('job_cwd', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('source', self.gf('django.db.models.fields.CharField')(default='', max_length=32, blank=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'inventoryupdate', 'app_label': 'main'}(class)s_created+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('failed', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('status', self.gf('django.db.models.fields.CharField')(default='new', max_length=20)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='inventoryupdates', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('overwrite_vars', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('result_traceback', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('job_env', self.gf('jsonfield.fields.JSONField')(default={}, blank=True)),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('result_stdout_file', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('inventory_source', self.gf('django.db.models.fields.related.ForeignKey')(related_name='inventory_updates', to=orm['main.InventorySource'])),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('job_args', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('source_path', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('_result_stdout', self.gf('django.db.models.fields.TextField')(default='', db_column='result_stdout', blank=True)),
-        ))
-        db.send_create_signal('main', ['InventoryUpdate'])
-
-        # Adding model 'Job'
-        db.create_table(u'main_job', (
-            ('cancel_flag', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('result_traceback', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('job_type', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('start_args', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('job_tags', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('celery_task_id', self.gf('django.db.models.fields.CharField')(default='', max_length=100, blank=True)),
-            ('playbook', self.gf('django.db.models.fields.CharField')(default='', max_length=1024)),
-            ('job_env', self.gf('jsonfield.fields.JSONField')(default={}, blank=True)),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('result_stdout_file', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('status', self.gf('django.db.models.fields.CharField')(default='new', max_length=20)),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'job', 'app_label': 'main'}(class)s_modified+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('job_cwd', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('job_template', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', on_delete=models.SET_NULL, default=None, to=orm['main.JobTemplate'], blank=True, null=True)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('extra_vars', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('verbosity', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
-            ('job_args', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'job', 'app_label': 'main'}(class)s_created+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', null=True, on_delete=models.SET_NULL, to=orm['main.Project'])),
-            ('failed', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', null=True, on_delete=models.SET_NULL, to=orm['main.Inventory'])),
-            ('_result_stdout', self.gf('django.db.models.fields.TextField')(default='', db_column='result_stdout', blank=True)),
-            ('limit', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('forks', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
-            ('cloud_credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs_as_cloud_credential+', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('launch_type', self.gf('django.db.models.fields.CharField')(default='manual', max_length=20)),
-        ))
-        db.send_create_signal('main', ['Job'])
-
-        # Adding field 'Host.last_job'
-        db.add_column(u'main_host', 'last_job',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='hosts_as_last_job+', null=True, on_delete=models.SET_NULL, to=orm['main.Job']),
-                      keep_default=False)
-
-        # Adding M2M table for field inventory_sources on 'Host'
-        m2m_table_name = db.shorten_name(u'main_host_inventory_sources')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('host', models.ForeignKey(orm['main.host'], null=False)),
-            ('inventorysource', models.ForeignKey(orm['main.inventorysource'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['host_id', 'inventorysource_id'])
-
-        # Adding M2M table for field projects on 'Organization'
-        m2m_table_name = db.shorten_name(u'main_organization_projects')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('organization', models.ForeignKey(orm['main.organization'], null=False)),
-            ('project', models.ForeignKey(orm['main.project'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['organization_id', 'project_id'])
-
-        # Adding M2M table for field projects on 'Team'
-        m2m_table_name = db.shorten_name(u'main_team_projects')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('team', models.ForeignKey(orm['main.team'], null=False)),
-            ('project', models.ForeignKey(orm['main.project'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['team_id', 'project_id'])
-
-        # Adding field 'Permission.project'
-        db.add_column(u'main_permission', 'project',
-                      self.gf('django.db.models.fields.related.ForeignKey')(related_name='permissions', null=True, to=orm['main.Project'], on_delete=models.SET_NULL, blank=True),
-                      keep_default=False)
-
-        # Adding field 'JobHostSummary.job'
-        db.add_column(u'main_jobhostsummary', 'job',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='job_host_summaries', null=True, to=orm['main.Job']),
-                      keep_default=False)
-
-        # Changing field 'JobHostSummary.new_job'
-        db.alter_column(u'main_jobhostsummary', 'new_job_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, to=orm['main.JobNew']))
-
-        # Adding unique constraint on 'JobHostSummary', fields ['job', 'host']
-        db.create_unique(u'main_jobhostsummary', ['job_id', 'host_id'])
-
-        # Adding M2M table for field inventory_sources on 'Group'
-        m2m_table_name = db.shorten_name(u'main_group_inventory_sources')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('group', models.ForeignKey(orm['main.group'], null=False)),
-            ('inventorysource', models.ForeignKey(orm['main.inventorysource'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['group_id', 'inventorysource_id'])
-
-        # Adding field 'JobEvent.job'
-        db.add_column(u'main_jobevent', 'job',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='job_events', null=True, to=orm['main.Job']),
-                      keep_default=False)
-
-        # Changing field 'JobEvent.new_job'
-        db.alter_column(u'main_jobevent', 'new_job_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, to=orm['main.JobNew']))
-        # Adding M2M table for field inventory_update on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_inventory_update')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('inventoryupdate', models.ForeignKey(orm['main.inventoryupdate'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'inventoryupdate_id'])
-
-        # Adding M2M table for field project_update on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_project_update')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('projectupdate', models.ForeignKey(orm['main.projectupdate'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'projectupdate_id'])
-
-        # Adding M2M table for field inventory_source on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_inventory_source')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('inventorysource', models.ForeignKey(orm['main.inventorysource'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'inventorysource_id'])
-
-        # Adding M2M table for field job_template on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_job_template')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('jobtemplate', models.ForeignKey(orm['main.jobtemplate'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'jobtemplate_id'])
-
-        # Adding M2M table for field job on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_job')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('job', models.ForeignKey(orm['main.job'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'job_id'])
-
-        # Adding M2M table for field project on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_project')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('project', models.ForeignKey(orm['main.project'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'project_id'])
-
+        db.rename_column(u'main_permission', 'project_id', 'new_project_id')
+        db.rename_column(db.shorten_name(u'main_organization_projects'), 'project_id', 'projectnew_id')
+        db.rename_table(db.shorten_name(u'main_organization_projects'), db.shorten_name(u'main_organization_new_projects'))
+        db.rename_column(db.shorten_name(u'main_team_projects'), 'project_id', 'projectnew_id')
+        db.rename_table(db.shorten_name(u'main_team_projects'), db.shorten_name(u'main_team_new_projects'))
+        
+        db.rename_table(u'main_job', 'main_jobnew')
+        db.rename_table(u'main_jobtemplate', 'main_jobtemplatenew')
+        db.rename_table(u'main_inventoryupdate', 'main_inventoryupdatenew')
+        db.rename_table(u'main_inventorysource', 'main_inventorysourcenew')
+        db.rename_table(u'main_projectupdate', 'main_projectupdatenew')
+        db.rename_table(u'main_project', 'main_projectnew')
 
     models = {
         u'auth.group': {
@@ -423,18 +128,18 @@ class Migration(SchemaMigration):
             'host': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Host']", 'symmetrical': 'False', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'inventory': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Inventory']", 'symmetrical': 'False', 'blank': 'True'}),
-            'new_inventory_source': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.InventorySourceNew']", 'symmetrical': 'False', 'blank': 'True'}),
-            'new_inventory_update': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.InventoryUpdateNew']", 'symmetrical': 'False', 'blank': 'True'}),
-            'new_job': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.JobNew']", 'symmetrical': 'False', 'blank': 'True'}),
-            'new_job_template': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.JobTemplateNew']", 'symmetrical': 'False', 'blank': 'True'}),
-            'new_project': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.ProjectNew']", 'symmetrical': 'False', 'blank': 'True'}),
-            'new_project_update': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.ProjectUpdateNew']", 'symmetrical': 'False', 'blank': 'True'}),
+            'inventory_source': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.InventorySource']", 'symmetrical': 'False', 'blank': 'True'}),
+            'inventory_update': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.InventoryUpdate']", 'symmetrical': 'False', 'blank': 'True'}),
+            'job': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Job']", 'symmetrical': 'False', 'blank': 'True'}),
+            'job_template': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.JobTemplate']", 'symmetrical': 'False', 'blank': 'True'}),
             'object1': ('django.db.models.fields.TextField', [], {}),
             'object2': ('django.db.models.fields.TextField', [], {}),
             'object_relationship_type': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'operation': ('django.db.models.fields.CharField', [], {'max_length': '13'}),
             'organization': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Organization']", 'symmetrical': 'False', 'blank': 'True'}),
             'permission': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
+            'project': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Project']", 'symmetrical': 'False', 'blank': 'True'}),
+            'project_update': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.ProjectUpdate']", 'symmetrical': 'False', 'blank': 'True'}),
             'schedule': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Schedule']", 'symmetrical': 'False', 'blank': 'True'}),
             'team': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Team']", 'symmetrical': 'False', 'blank': 'True'}),
             'timestamp': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
@@ -487,10 +192,10 @@ class Migration(SchemaMigration):
             'hosts_with_active_failures': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'groups'", 'to': "orm['main.Inventory']"}),
+            'inventory_sources': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'groups'", 'symmetrical': 'False', 'to': "orm['main.InventorySource']"}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': '"{\'class\': \'group\', \'app_label\': \'main\'}(class)s_modified+"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
-            'new_inventory_sources': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'groups'", 'symmetrical': 'False', 'to': "orm['main.InventorySourceNew']"}),
             'parents': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'children'", 'blank': 'True', 'to': "orm['main.Group']"}),
             'total_groups': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'total_hosts': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
@@ -508,12 +213,12 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'instance_id': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
             'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'hosts'", 'to': "orm['main.Inventory']"}),
+            'inventory_sources': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'hosts'", 'symmetrical': 'False', 'to': "orm['main.InventorySource']"}),
+            'last_job': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'hosts_as_last_job+'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Job']"}),
             'last_job_host_summary': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'hosts_as_last_job_summary+'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.JobHostSummary']", 'blank': 'True', 'null': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': '"{\'class\': \'host\', \'app_label\': \'main\'}(class)s_modified+"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
-            'new_inventory_sources': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'hosts'", 'symmetrical': 'False', 'to': "orm['main.InventorySourceNew']"}),
-            'new_last_job': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'hosts_as_last_job+'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.JobNew']"}),
             'variables': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'})
         },
         'main.inventory': {
@@ -537,11 +242,11 @@ class Migration(SchemaMigration):
             'total_inventory_sources': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'variables': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'})
         },
-        'main.inventorysourcenew': {
-            'Meta': {'object_name': 'InventorySourceNew', '_ormbases': ['main.UnifiedJobTemplate']},
-            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'inventorysourcenews'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
-            'group': ('awx.main.fields.AutoOneToOneField', [], {'default': 'None', 'related_name': "'new_inventory_source'", 'unique': 'True', 'null': 'True', 'to': "orm['main.Group']"}),
-            'inventory': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'new_inventory_sources'", 'null': 'True', 'to': "orm['main.Inventory']"}),
+        'main.inventorysource': {
+            'Meta': {'object_name': 'InventorySource', '_ormbases': ['main.UnifiedJobTemplate']},
+            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'inventorysources'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
+            'group': ('awx.main.fields.AutoOneToOneField', [], {'default': 'None', 'related_name': "'inventory_source'", 'unique': 'True', 'null': 'True', 'to': "orm['main.Group']"}),
+            'inventory': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'inventory_sources'", 'null': 'True', 'to': "orm['main.Inventory']"}),
             'overwrite': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'overwrite_vars': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'source': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '32', 'blank': 'True'}),
@@ -552,10 +257,10 @@ class Migration(SchemaMigration):
             'update_cache_timeout': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'update_on_launch': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
         },
-        'main.inventoryupdatenew': {
-            'Meta': {'object_name': 'InventoryUpdateNew', '_ormbases': ['main.UnifiedJob']},
-            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'inventoryupdatenews'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
-            'inventory_source': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'inventory_updates'", 'to': "orm['main.InventorySourceNew']"}),
+        'main.inventoryupdate': {
+            'Meta': {'object_name': 'InventoryUpdate', '_ormbases': ['main.UnifiedJob']},
+            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'inventoryupdates'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
+            'inventory_source': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'inventory_updates'", 'to': "orm['main.InventorySource']"}),
             'license_error': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'overwrite': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'overwrite_vars': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -564,6 +269,23 @@ class Migration(SchemaMigration):
             'source_regions': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'source_vars': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             u'unifiedjob_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['main.UnifiedJob']", 'unique': 'True', 'primary_key': 'True'})
+        },
+        'main.job': {
+            'Meta': {'object_name': 'Job', '_ormbases': ['main.UnifiedJob']},
+            'cloud_credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs_as_cloud_credential+'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
+            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
+            'extra_vars': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'forks': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
+            'hosts': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'jobs'", 'symmetrical': 'False', 'through': "orm['main.JobHostSummary']", 'to': "orm['main.Host']"}),
+            'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Inventory']"}),
+            'job_tags': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
+            'job_template': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.JobTemplate']", 'blank': 'True', 'null': 'True'}),
+            'job_type': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
+            'limit': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
+            'playbook': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024'}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Project']"}),
+            u'unifiedjob_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['main.UnifiedJob']", 'unique': 'True', 'primary_key': 'True'}),
+            'verbosity': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'})
         },
         'main.jobevent': {
             'Meta': {'ordering': "('pk',)", 'object_name': 'JobEvent'},
@@ -575,15 +297,15 @@ class Migration(SchemaMigration):
             'host': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'job_events_as_primary_host'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Host']"}),
             'hosts': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'job_events'", 'symmetrical': 'False', 'to': "orm['main.Host']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_events'", 'to': "orm['main.Job']"}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
-            'new_job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'new_job_events'", 'to': "orm['main.JobNew']"}),
             'parent': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'children'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.JobEvent']"}),
             'play': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024'}),
             'role': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024'}),
             'task': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024'})
         },
         'main.jobhostsummary': {
-            'Meta': {'ordering': "('-pk',)", 'unique_together': "[('new_job', 'host')]", 'object_name': 'JobHostSummary'},
+            'Meta': {'ordering': "('-pk',)", 'unique_together': "[('job', 'host')]", 'object_name': 'JobHostSummary'},
             'changed': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'dark': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
@@ -591,42 +313,25 @@ class Migration(SchemaMigration):
             'failures': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'host': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_host_summaries'", 'to': "orm['main.Host']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_host_summaries'", 'to': "orm['main.Job']"}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
-            'new_job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'new_job_host_summaries'", 'to': "orm['main.JobNew']"}),
             'ok': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'processed': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'skipped': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'})
         },
-        'main.jobnew': {
-            'Meta': {'object_name': 'JobNew', '_ormbases': ['main.UnifiedJob']},
-            'cloud_credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobnews_as_cloud_credential+'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
-            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobnews'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
-            'extra_vars': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
-            'forks': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
-            'hosts': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'jobnews'", 'symmetrical': 'False', 'through': "orm['main.JobHostSummary']", 'to': "orm['main.Host']"}),
-            'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobnews'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Inventory']"}),
-            'job_tags': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
-            'job_template': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.JobTemplateNew']", 'blank': 'True', 'null': 'True'}),
-            'job_type': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
-            'limit': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
-            'playbook': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024'}),
-            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.ProjectNew']"}),
-            u'unifiedjob_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['main.UnifiedJob']", 'unique': 'True', 'primary_key': 'True'}),
-            'verbosity': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'})
-        },
-        'main.jobtemplatenew': {
-            'Meta': {'object_name': 'JobTemplateNew', '_ormbases': ['main.UnifiedJobTemplate']},
-            'cloud_credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobtemplatenews_as_cloud_credential+'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
-            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobtemplatenews'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
+        'main.jobtemplate': {
+            'Meta': {'object_name': 'JobTemplate', '_ormbases': ['main.UnifiedJobTemplate']},
+            'cloud_credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobtemplates_as_cloud_credential+'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
+            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobtemplates'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
             'extra_vars': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'forks': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'host_config_key': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
-            'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobtemplatenews'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Inventory']"}),
+            'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobtemplates'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Inventory']"}),
             'job_tags': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'job_type': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
             'limit': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'playbook': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024'}),
-            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_templates'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.ProjectNew']"}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_templates'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Project']"}),
             u'unifiedjobtemplate_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['main.UnifiedJobTemplate']", 'unique': 'True', 'primary_key': 'True'}),
             'verbosity': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'})
         },
@@ -641,7 +346,7 @@ class Migration(SchemaMigration):
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': '"{\'class\': \'organization\', \'app_label\': \'main\'}(class)s_modified+"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
-            'new_projects': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'organizations'", 'blank': 'True', 'to': "orm['main.ProjectNew']"}),
+            'projects': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'organizations'", 'blank': 'True', 'to': "orm['main.Project']"}),
             'users': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'organizations'", 'blank': 'True', 'to': u"orm['auth.User']"})
         },
         'main.permission': {
@@ -655,8 +360,8 @@ class Migration(SchemaMigration):
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': '"{\'class\': \'permission\', \'app_label\': \'main\'}(class)s_modified+"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
-            'new_project': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'permissions'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.ProjectNew']"}),
             'permission_type': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'permissions'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Project']"}),
             'team': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'permissions'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Team']"}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'permissions'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"})
         },
@@ -668,9 +373,9 @@ class Migration(SchemaMigration):
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'user': ('awx.main.fields.AutoOneToOneField', [], {'related_name': "'profile'", 'unique': 'True', 'to': u"orm['auth.User']"})
         },
-        'main.projectnew': {
-            'Meta': {'object_name': 'ProjectNew', '_ormbases': ['main.UnifiedJobTemplate']},
-            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'projectnews'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
+        'main.project': {
+            'Meta': {'object_name': 'Project', '_ormbases': ['main.UnifiedJobTemplate']},
+            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'projects'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
             'local_path': ('django.db.models.fields.CharField', [], {'max_length': '1024', 'blank': 'True'}),
             'scm_branch': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '256', 'blank': 'True'}),
             'scm_clean': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -682,11 +387,11 @@ class Migration(SchemaMigration):
             'scm_url': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             u'unifiedjobtemplate_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['main.UnifiedJobTemplate']", 'unique': 'True', 'primary_key': 'True'})
         },
-        'main.projectupdatenew': {
-            'Meta': {'object_name': 'ProjectUpdateNew', '_ormbases': ['main.UnifiedJob']},
-            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'projectupdatenews'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
+        'main.projectupdate': {
+            'Meta': {'object_name': 'ProjectUpdate', '_ormbases': ['main.UnifiedJob']},
+            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'projectupdates'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
             'local_path': ('django.db.models.fields.CharField', [], {'max_length': '1024', 'blank': 'True'}),
-            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'project_updates'", 'to': "orm['main.ProjectNew']"}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'project_updates'", 'to': "orm['main.Project']"}),
             'scm_branch': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '256', 'blank': 'True'}),
             'scm_clean': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'scm_delete_on_update': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -721,8 +426,8 @@ class Migration(SchemaMigration):
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': '"{\'class\': \'team\', \'app_label\': \'main\'}(class)s_modified+"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
-            'new_projects': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'teams'", 'blank': 'True', 'to': "orm['main.ProjectNew']"}),
             'organization': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'teams'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Organization']"}),
+            'projects': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'teams'", 'blank': 'True', 'to': "orm['main.Project']"}),
             'users': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'teams'", 'blank': 'True', 'to': u"orm['auth.User']"})
         },
         'main.unifiedjob': {

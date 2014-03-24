@@ -349,6 +349,13 @@ class Credential(CommonModelNameNotUnique):
         verbose_name=_('SSH private key'),
         help_text=_('RSA or DSA private key to be used instead of password.'),
     )
+    ssh_key_path = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        verbose_name=_('SSH key path'),
+        help_text=_('Path to SSH private key file.'),
+    )
     ssh_key_unlock = models.CharField(
         max_length=1024,
         blank=True,
@@ -369,6 +376,12 @@ class Credential(CommonModelNameNotUnique):
         default='',
         help_text=_('Sudo password (or "ASK" to prompt the user).'),
     )
+    vault_password = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Vault password (or "ASK" to prompt the user).'),
+    )
 
     @property
     def needs_password(self):
@@ -377,7 +390,7 @@ class Credential(CommonModelNameNotUnique):
     @property
     def needs_ssh_key_unlock(self):
         return self.kind == 'ssh' and self.ssh_key_unlock == 'ASK' and \
-            'ENCRYPTED' in decrypt_field(self, 'ssh_key_data')
+            'ENCRYPTED' in decrypt_field(self, 'ssh_key_data') # FIXME: Support ssh_key_path
 
     @property
     def needs_sudo_password(self):

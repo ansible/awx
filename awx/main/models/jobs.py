@@ -243,7 +243,6 @@ class JobBase(JobOptions):
     hosts = models.ManyToManyField(
         'Host',
         related_name='%(class)ss',
-        blank=True,
         editable=False,
         through='JobHostSummary',
     )
@@ -541,6 +540,8 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
             'Job',
             related_name='job_host_summaries',
             on_delete=models.CASCADE,
+            null=True,
+            default=None,
             editable=False,
         )
         new_job = models.ForeignKey(
@@ -679,7 +680,6 @@ class JobEventBase(CreatedModifiedModel):
     host = models.ForeignKey(
         'Host',
         related_name='job_events_as_primary_host',
-        blank=True,
         null=True,
         default=None,
         on_delete=models.SET_NULL,
@@ -688,31 +688,26 @@ class JobEventBase(CreatedModifiedModel):
     hosts = models.ManyToManyField(
         'Host',
         related_name='job_events',
-        blank=True,
         editable=False,
     )
     play = models.CharField(
         max_length=1024,
-        blank=True,
         default='',
         editable=False,
     )
     role = models.CharField( # FIXME: Determine from callback or task name.
         max_length=1024,
-        blank=True,
         default='',
         editable=False,
     )
     task = models.CharField(
         max_length=1024,
-        blank=True,
         default='',
         editable=False,
     )
     parent = models.ForeignKey(
         'self',
         related_name='children',
-        blank=True,
         null=True,
         default=None,
         on_delete=models.SET_NULL,
@@ -953,6 +948,8 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
             'Job',
             related_name='job_events',
             on_delete=models.CASCADE,
+            null=True,
+            default=None,
             editable=False,
         )
         new_job = models.ForeignKey(

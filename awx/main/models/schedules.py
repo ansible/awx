@@ -24,10 +24,13 @@ class Schedule(CommonModel):
 
     objects = ScheduleManager()
 
-    job_template = models.ForeignKey(
+    unified_job_template = models.ForeignKey(
         'UnifiedJobTemplate',
         related_name='schedules',
         on_delete=models.CASCADE,
+    )
+    enabled = models.BooleanField(
+        default=True,
     )
     dtstart = models.DateTimeField(
         
@@ -35,10 +38,15 @@ class Schedule(CommonModel):
     dtend = models.DateTimeField(
         null=True,
         default=None,
-        editable=False
+        editable=False,
     )
     rrule = models.CharField(
         max_length=255,
+    )
+    next_run = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
     )
 
     def save(self, *args, **kwargs):
