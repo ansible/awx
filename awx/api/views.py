@@ -93,7 +93,7 @@ class ApiV1RootView(APIView):
         data['job_templates'] = reverse('api:job_template_list')
         data['jobs'] = reverse('api:job_list')
         data['schedules'] = reverse('api:schedules_list')
-        data['unified_job_templates'] = reverse('api:unified_jobs_list')
+        data['unified_jobs'] = reverse('api:unified_jobs_list')
         data['activity_stream'] = reverse('api:activity_stream_list')
         return Response(data)
 
