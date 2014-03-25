@@ -304,9 +304,6 @@ AWX_TASK_ENV = {}
 # Flag to enable/disable updating hosts M2M when saving job events.
 CAPTURE_JOB_EVENT_HOSTS = False
 
-# Flag to indicate which version of unified jobs model to use.
-UNIFIED_JOBS_STEP = 2
-
 # Not possible to get list of regions without authenticating, so use this list
 # instead (based on docs from:
 # http://docs.rackspace.com/loadbalancers/api/v1.0/clb-devguide/content/Service_Access_Endpoints-d1e517.html)

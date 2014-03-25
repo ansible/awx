@@ -194,17 +194,13 @@ class ProjectOptions(models.Model):
         return results
 
 
-class ProjectBase(ProjectOptions):
+class Project(UnifiedJobTemplate, ProjectOptions):
     '''
     A project represents a playbook git repo that can access a set of inventories
     '''
 
     class Meta:
         app_label = 'main'
-        abstract = True
-
-    # this is not part of the project, but managed with perms
-    # inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
 
     scm_delete_on_next_update = models.BooleanField(
         default=False,
@@ -216,9 +212,6 @@ class ProjectBase(ProjectOptions):
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
     )
-
-
-class ProjectBaseMethods(object):
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -248,7 +241,7 @@ class ProjectBaseMethods(object):
             if 'local_path' not in update_fields:
                 update_fields.append('local_path')
         # Do the actual save.
-        super(ProjectBaseMethods, self).save(*args, **kwargs)
+        super(Project, self).save(*args, **kwargs)
         if new_instance:
             update_fields=[]
             # Generate local_path for SCM after initial save (so we have a PK).
@@ -318,88 +311,20 @@ class ProjectBaseMethods(object):
         return reverse('api:project_detail', args=(self.pk,))
 
 
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-
-    class Project(ProjectBaseMethods, CommonModel, ProjectBase):
-
-        PROJECT_STATUS_CHOICES = [
-            ('ok', 'OK'),
-            ('missing', 'Missing'),
-            ('never updated', 'Never Updated'),
-            ('updating', 'Updating'),
-            ('failed', 'Failed'),
-            ('successful', 'Successful'),
-        ]
-
-        class Meta:
-            app_label = 'main'
-
-        current_update = models.ForeignKey(
-            'ProjectUpdate',
-            null=True,
-            default=None,
-            editable=False,
-            related_name='project_as_current_update+',
-            on_delete=models.SET_NULL,
-        )
-        last_update = models.ForeignKey(
-            'ProjectUpdate',
-            null=True,
-            default=None,
-            editable=False,
-            related_name='project_as_last_update+',
-            on_delete=models.SET_NULL,
-        )
-        last_update_failed = models.BooleanField(
-            default=False,
-            editable=False,
-        )
-        last_updated = models.DateTimeField(
-            null=True,
-            default=None,
-            editable=False,
-        )
-        status = models.CharField(
-            max_length=32,
-            choices=PROJECT_STATUS_CHOICES,
-            default='ok',
-            editable=False,
-            null=True, # FIXME: Remove
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
-
-    class ProjectNew(ProjectBaseMethods, UnifiedJobTemplate, ProjectBase):
-
-        class Meta:
-            app_label = 'main'
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class Project(ProjectNew):
-
-        class Meta:
-            proxy = True
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    class Project(ProjectBaseMethods, UnifiedJobTemplate, ProjectBase):
-
-        class Meta:
-            app_label = 'main'
-
-
-class ProjectUpdateBase(ProjectOptions):
+class ProjectUpdate(UnifiedJob, ProjectOptions):
     '''
     Internal job for tracking project updates from SCM.
     '''
 
     class Meta:
         app_label = 'main'
-        abstract = True
 
-
-class ProjectUpdateBaseMethods(object):
+    project = models.ForeignKey(
+        'Project',
+        related_name='project_updates',
+        on_delete=models.CASCADE,
+        editable=False,
+    )
 
     @classmethod
     def _get_parent_field_name(cls):
@@ -458,53 +383,3 @@ class ProjectUpdateBaseMethods(object):
                                                     'last_job',
                                                     'last_job_failed',
                                                     'scm_delete_on_next_update'])
-
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-
-    class ProjectUpdate(ProjectUpdateBaseMethods, CommonTask, ProjectUpdateBase):
-
-        class Meta:
-            app_label = 'main'
-
-        project = models.ForeignKey(
-            'Project',
-            related_name='project_updates',
-            on_delete=models.CASCADE,
-            editable=False,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
-
-    class ProjectUpdateNew(ProjectUpdateBaseMethods, UnifiedJob, ProjectUpdateBase):
-
-        class Meta:
-            app_label = 'main'
-
-        project = models.ForeignKey(
-            'ProjectNew',
-            related_name='project_updates',
-            on_delete=models.CASCADE,
-            editable=False,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-    
-    class ProjectUpdate(ProjectUpdateNew):
-
-        class Meta:
-            proxy = True
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    class ProjectUpdate(ProjectUpdateBaseMethods, UnifiedJob, ProjectUpdateBase):
-
-        class Meta:
-            app_label = 'main'
-
-        project = models.ForeignKey(
-            'Project',
-            related_name='project_updates',
-            on_delete=models.CASCADE,
-            editable=False,
-        )

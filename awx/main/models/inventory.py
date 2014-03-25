@@ -160,13 +160,12 @@ class Inventory(CommonModel):
         return self.groups.exclude(parents__pk__in=group_pks).distinct()
 
 
-class HostBase(CommonModelNameNotUnique):
+class Host(CommonModelNameNotUnique):
     '''
     A managed node
     '''
 
     class Meta:
-        abstract = True
         app_label = 'main'
         unique_together = (("name", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
 
@@ -189,15 +188,14 @@ class HostBase(CommonModelNameNotUnique):
         default='',
         help_text=_('Host variables in JSON or YAML format.'),
     )
-    #last_job = models.ForeignKey(
-    #    'Job',
-    #    related_name='hosts_as_last_job+',
-    #    blank=True,
-    #    null=True,
-    #    default=None,
-    #    editable=False,
-    #    on_delete=models.SET_NULL,
-    #)
+    last_job = models.ForeignKey(
+        'Job',
+        related_name='hosts_as_last_job+',
+        null=True,
+        default=None,
+        editable=False,
+        on_delete=models.SET_NULL,
+    )
     last_job_host_summary = models.ForeignKey(
         'JobHostSummary',
         related_name='hosts_as_last_job_summary+',
@@ -217,13 +215,12 @@ class HostBase(CommonModelNameNotUnique):
         editable=False,
         help_text=_('Flag indicating whether this host was created/updated from any external inventory sources.'),
     )
-    #inventory_sources = models.ManyToManyField(
-    #    'InventorySource',
-    #    related_name='hosts',
-    #    blank=True,
-    #    editable=False,
-    #    help_text=_('Inventory source(s) that created or modified this host.'),
-    #)
+    inventory_sources = models.ManyToManyField(
+        'InventorySource',
+        related_name='hosts',
+        editable=False,
+        help_text=_('Inventory source(s) that created or modified this host.'),
+    )
 
     def __unicode__(self):
         return self.name
@@ -236,7 +233,7 @@ class HostBase(CommonModelNameNotUnique):
         When marking hosts inactive, remove all associations to related
         inventory sources.
         '''
-        super(HostBase, self).mark_inactive(save=save)
+        super(Host, self).mark_inactive(save=save)
         self.inventory_sources.clear()
 
     def update_computed_fields(self, update_inventory=True, update_groups=True):
@@ -285,98 +282,13 @@ class HostBase(CommonModelNameNotUnique):
     # Use .job_events.all() to get events affecting this host.
 
 
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-
-    class Host(HostBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = (("name", "inventory"),)
-
-        last_job = models.ForeignKey(
-            'Job',
-            related_name='hosts_as_last_job+',
-            null=True,
-            default=None,
-            editable=False,
-            on_delete=models.SET_NULL,
-        )
-        new_last_job = models.ForeignKey(
-            'JobNew',
-            related_name='hosts_as_last_job+',
-            null=True,
-            default=None,
-            editable=False,
-            on_delete=models.SET_NULL,
-        )
-        inventory_sources = models.ManyToManyField(
-            'InventorySource',
-            related_name='hosts',
-            editable=False,
-            help_text=_('Inventory source(s) that created or modified this host.'),
-        )
-        new_inventory_sources = models.ManyToManyField(
-            'InventorySourceNew',
-            related_name='hosts',
-            editable=False,
-            help_text=_('Inventory source(s) that created or modified this host.'),
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class Host(HostBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = (("name", "inventory"),)
-
-        new_last_job = models.ForeignKey(
-            'JobNew',
-            related_name='hosts_as_last_job+',
-            null=True,
-            default=None,
-            editable=False,
-            on_delete=models.SET_NULL,
-        )
-        new_inventory_sources = models.ManyToManyField(
-            'InventorySourceNew',
-            related_name='hosts',
-            editable=False,
-            help_text=_('Inventory source(s) that created or modified this host.'),
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    class Host(HostBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = (("name", "inventory"),)
-
-        last_job = models.ForeignKey(
-            'Job',
-            related_name='hosts_as_last_job+',
-            null=True,
-            default=None,
-            editable=False,
-            on_delete=models.SET_NULL,
-        )
-        inventory_sources = models.ManyToManyField(
-            'InventorySource',
-            related_name='hosts',
-            editable=False,
-            help_text=_('Inventory source(s) that created or modified this host.'),
-        )
-
-
-class GroupBase(CommonModelNameNotUnique):
+class Group(CommonModelNameNotUnique):
     '''
     A group containing managed hosts.  A group or host may belong to multiple
     groups.
     '''
 
     class Meta:
-        abstract = True
         app_label = 'main'
         unique_together = (("name", "inventory"),)
 
@@ -433,13 +345,12 @@ class GroupBase(CommonModelNameNotUnique):
         editable=False,
         help_text=_('Flag indicating whether this group was created/updated from any external inventory sources.'),
     )
-    #inventory_sources = models.ManyToManyField(
-    #    'InventorySource',
-    #    related_name='groups',
-    #    blank=True,
-    #    editable=False,
-    #    help_text=_('Inventory source(s) that created or modified this group.'),
-    #)
+    inventory_sources = models.ManyToManyField(
+        'InventorySource',
+        related_name='groups',
+        editable=False,
+        help_text=_('Inventory source(s) that created or modified this group.'),
+    )
 
     def __unicode__(self):
         return self.name
@@ -453,7 +364,7 @@ class GroupBase(CommonModelNameNotUnique):
         groups/hosts/inventory_sources.
         '''
         def mark_actual():
-            super(GroupBase, self).mark_inactive(save=save)
+            super(Group, self).mark_inactive(save=save)
             self.inventory_source.mark_inactive(save=save)
             self.inventory_sources.clear()
             self.parents.clear()
@@ -558,59 +469,6 @@ class GroupBase(CommonModelNameNotUnique):
     def job_events(self):
         from awx.main.models.jobs import JobEvent
         return JobEvent.objects.filter(host__in=self.all_hosts)
-
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-    
-    class Group(GroupBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = (("name", "inventory"),)
-            
-        inventory_sources = models.ManyToManyField(
-            'InventorySource',
-            related_name='groups',
-            editable=False,
-            help_text=_('Inventory source(s) that created or modified this group.'),
-        )
-
-        new_inventory_sources = models.ManyToManyField(
-            'InventorySourceNew',
-            related_name='groups',
-            editable=False,
-            help_text=_('Inventory source(s) that created or modified this group.'),
-        )
-        
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class Group(GroupBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = (("name", "inventory"),)
-            
-        new_inventory_sources = models.ManyToManyField(
-            'InventorySourceNew',
-            related_name='groups',
-            editable=False,
-            help_text=_('Inventory source(s) that created or modified this group.'),
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    class Group(GroupBase):
-        
-        class Meta:
-            app_label = 'main'
-            unique_together = (("name", "inventory"),)
-
-        inventory_sources = models.ManyToManyField(
-            'InventorySource',
-            related_name='groups',
-            editable=False,
-            help_text=_('Inventory source(s) that created or modified this group.'),
-        )
 
 
 class InventorySourceOptions(BaseModel):
@@ -739,21 +597,33 @@ class InventorySourceOptions(BaseModel):
     source_vars_dict = VarsDictProperty('source_vars')
 
 
-class InventorySourceBase(InventorySourceOptions):
+class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
     class Meta:
-        abstract = True
         app_label = 'main'
 
+    inventory = models.ForeignKey(
+        'Inventory',
+        related_name='inventory_sources',
+        null=True,
+        default=None,
+        editable=False,
+        on_delete=models.CASCADE,
+    )
+    group = AutoOneToOneField(
+        'Group',
+        related_name='inventory_source',
+        null=True,
+        default=None,
+        editable=False,
+        on_delete=models.CASCADE,
+    )
     update_on_launch = models.BooleanField(
         default=False,
     )
     update_cache_timeout = models.PositiveIntegerField(
         default=0,
     )
-
-
-class InventorySourceBaseMethods(object):
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -779,7 +649,7 @@ class InventorySourceBaseMethods(object):
             if 'name' not in update_fields:
                 update_fields.append('name')
         # Do the actual save.
-        super(InventorySourceBaseMethods, self).save(*args, **kwargs)
+        super(InventorySource, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('api:inventory_source_detail', args=(self.pk,))
@@ -807,142 +677,25 @@ class InventorySourceBaseMethods(object):
             return inventory_update
 
 
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-
-    class InventorySource(InventorySourceBaseMethods, PrimordialModel, InventorySourceBase):
-
-        INVENTORY_SOURCE_STATUS_CHOICES = [
-            ('none', _('No External Source')),
-            ('never updated', _('Never Updated')),
-            ('updating', _('Updating')),
-            ('failed', _('Failed')),
-            ('successful', _('Successful')),
-        ]
-
-        class Meta:
-            app_label = 'main'
-
-        inventory = models.ForeignKey(
-            'Inventory',
-            related_name='inventory_sources',
-            null=True,
-            default=None,
-            editable=False,
-            on_delete=models.CASCADE,
-        )
-        group = AutoOneToOneField(
-            'Group',
-            related_name='inventory_source',
-            null=True,
-            default=None,
-            editable=False,
-            on_delete=models.CASCADE,
-        )
-        current_update = models.ForeignKey(
-            'InventoryUpdate',
-            null=True,
-            default=None,
-            editable=False,
-            related_name='inventory_source_as_current_update+',
-            on_delete=models.SET_NULL,
-        )
-        last_update = models.ForeignKey(
-            'InventoryUpdate',
-            null=True,
-            default=None,
-            editable=False,
-            related_name='inventory_source_as_last_update+',
-            on_delete=models.SET_NULL,
-        )
-        last_update_failed = models.BooleanField(
-            default=False,
-            editable=False,
-        )
-        last_updated = models.DateTimeField(
-            null=True,
-            default=None,
-            editable=False,
-        )
-        status = models.CharField(
-            max_length=32,
-            choices=INVENTORY_SOURCE_STATUS_CHOICES,
-            default='none',
-            editable=False,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
-
-    class InventorySourceNew(InventorySourceBaseMethods, UnifiedJobTemplate, InventorySourceBase):
-
-        class Meta:
-            app_label = 'main'
-
-        inventory = models.ForeignKey(
-            'Inventory',
-            related_name='new_inventory_sources',
-            null=True,
-            default=None,
-            editable=False,
-            on_delete=models.CASCADE,
-        )
-        group = AutoOneToOneField(
-            'Group',
-            related_name='new_inventory_source',
-            null=True,
-            default=None,
-            editable=False,
-            on_delete=models.CASCADE,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class InventorySource(InventorySourceNew):
-
-        class Meta:
-            proxy = True
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    class InventorySource(InventorySourceBaseMethods, UnifiedJobTemplate, InventorySourceBase):
-
-        class Meta:
-            app_label = 'main'
-
-        inventory = models.ForeignKey(
-            'Inventory',
-            related_name='inventory_sources',
-            null=True,
-            default=None,
-            editable=False,
-            on_delete=models.CASCADE,
-        )
-        group = AutoOneToOneField(
-            'Group',
-            related_name='inventory_source',
-            null=True,
-            default=None,
-            editable=False,
-            on_delete=models.CASCADE,
-        )
-
-
-class InventoryUpdateBase(InventorySourceOptions):
+class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     '''
     Internal job for tracking inventory updates from external sources.
     '''
 
     class Meta:
         app_label = 'main'
-        abstract = True
 
+    inventory_source = models.ForeignKey(
+        'InventorySource',
+        related_name='inventory_updates',
+        editable=False,
+        on_delete=models.CASCADE,
+    )
     license_error = models.BooleanField(
         default=False,
         editable=False,
     )
-
-
-class InventoryUpdateBaseMethods(object):
-
+    
     @classmethod
     def _get_parent_field_name(cls):
         return 'inventory_source'
@@ -959,7 +712,7 @@ class InventoryUpdateBaseMethods(object):
             self.license_error = True
             if 'license_error' not in update_fields:
                 update_fields.append('license_error')
-        super(InventoryUpdateBaseMethods, self).save(*args, **kwargs)
+        super(InventoryUpdate, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('api:inventory_update_detail', args=(self.pk,))
@@ -990,53 +743,3 @@ class InventoryUpdateBaseMethods(object):
         self.save()
         # notify_task_runner.delay(dict(task_type="inventory_update", id=self.id, metadata=kwargs))
         return True
-
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-
-    class InventoryUpdate(InventoryUpdateBaseMethods, CommonTask, InventoryUpdateBase):
-
-        class Meta:
-            app_label = 'main'
-
-        inventory_source = models.ForeignKey(
-            'InventorySource',
-            related_name='inventory_updates',
-            editable=False,
-            on_delete=models.CASCADE,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
-
-    class InventoryUpdateNew(InventoryUpdateBaseMethods, UnifiedJob, InventoryUpdateBase):
-
-        class Meta:
-            app_label = 'main'
-
-        inventory_source = models.ForeignKey(
-            'InventorySourceNew',
-            related_name='inventory_updates',
-            editable=False,
-            on_delete=models.CASCADE,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class InventoryUpdate(InventoryUpdateNew):
-
-        class Meta:
-            proxy = True
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    class InventoryUpdate(InventoryUpdateBaseMethods, UnifiedJob, InventoryUpdateBase):
-
-        class Meta:
-            app_label = 'main'
-
-        inventory_source = models.ForeignKey(
-            'InventorySource',
-            related_name='inventory_updates',
-            editable=False,
-            on_delete=models.CASCADE,
-        )

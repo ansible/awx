@@ -47,6 +47,7 @@ logger = logging.getLogger('awx.main.models.jobs')
 
 __all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent']
 
+
 class JobOptions(BaseModel):
     '''
     '''
@@ -64,12 +65,12 @@ class JobOptions(BaseModel):
         null=True,
         on_delete=models.SET_NULL,
     )
-    #project = models.ForeignKey(
-    #    'Project',
-    #    related_name='%(class)ss',
-    #    null=True,
-    #    on_delete=models.SET_NULL,
-    #)
+    project = models.ForeignKey(
+        'Project',
+        related_name='%(class)ss',
+        null=True,
+        on_delete=models.SET_NULL,
+    )
     playbook = models.CharField(
         max_length=1024,
         default='',
@@ -129,14 +130,13 @@ class JobOptions(BaseModel):
         return cred
 
 
-class JobTemplateBase(JobOptions):
+class JobTemplate(UnifiedJobTemplate, JobOptions):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
     '''
 
     class Meta:
-        abstract = True
         app_label = 'main'
 
     host_config_key = models.CharField(
@@ -144,8 +144,6 @@ class JobTemplateBase(JobOptions):
         blank=True,
         default='',
     )
-
-class JobTemplateBaseMethods(object):
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -181,59 +179,7 @@ class JobTemplateBaseMethods(object):
         return bool(self.credential and not len(needed))
 
 
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-
-    class JobTemplate(JobTemplateBaseMethods, CommonModel, JobTemplateBase):
-
-        class Meta:
-            app_label = 'main'
-
-        project = models.ForeignKey(
-            'Project',
-            related_name='job_templates',
-            null=True,
-            on_delete=models.SET_NULL,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
-
-    class JobTemplateNew(JobTemplateBaseMethods, UnifiedJobTemplate, JobTemplateBase):
-
-        class Meta:
-            app_label = 'main'
-            db_table = 'main_jobtemplatenew'
-
-        project = models.ForeignKey(
-            'ProjectNew',
-            related_name='job_templates',
-            null=True,
-            on_delete=models.SET_NULL,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class JobTemplate(JobTemplateNew):
-
-        class Meta:
-            proxy = True
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    #class JobTemplate(JobTemplateBase, UnifiedJobTemplate):
-    class JobTemplate(JobTemplateBaseMethods, UnifiedJobTemplate, JobTemplateBase):
-
-        class Meta:
-            app_label = 'main'
-
-        project = models.ForeignKey(
-            'Project',
-            related_name='job_templates',
-            null=True,
-            on_delete=models.SET_NULL,
-        )
-
-
-class JobBase(JobOptions):
+class Job(UnifiedJob, JobOptions):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
@@ -241,18 +187,22 @@ class JobBase(JobOptions):
     '''
 
     class Meta:
-        abstract = True
         app_label = 'main'
 
+    job_template = models.ForeignKey(
+        'JobTemplate',
+        related_name='jobs',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
     hosts = models.ManyToManyField(
         'Host',
-        related_name='%(class)ss',
+        related_name='jobs',
         editable=False,
         through='JobHostSummary',
     )
-
-
-class JobBaseMethods(object):
 
     @classmethod
     def _get_parent_field_name(cls):
@@ -409,111 +359,23 @@ class JobBaseMethods(object):
         return True
 
 
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-    
-    class Job(JobBaseMethods, CommonTask, JobBase):
-
-        LAUNCH_TYPE_CHOICES = [
-            ('manual', _('Manual')),
-            ('callback', _('Callback')),
-            ('scheduled', _('Scheduled')),
-        ]
-
-        class Meta:
-            app_label = 'main'
-
-        job_template = models.ForeignKey(
-            'JobTemplate',
-            related_name='jobs',
-            blank=True,
-            null=True,
-            default=None,
-            on_delete=models.SET_NULL,
-        )
-        project = models.ForeignKey(
-            'Project',
-            related_name='jobs',
-            null=True,
-            on_delete=models.SET_NULL,
-        )
-        launch_type = models.CharField(
-            max_length=20,
-            choices=LAUNCH_TYPE_CHOICES,
-            default='manual',
-            editable=False,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
-
-    class JobNew(JobBaseMethods, UnifiedJob, JobBase):
-
-        class Meta:
-            app_label = 'main'
-
-        job_template = models.ForeignKey(
-            'JobTemplateNew',
-            related_name='jobs',
-            blank=True,
-            null=True,
-            default=None,
-            on_delete=models.SET_NULL,
-        )
-        project = models.ForeignKey(
-            'ProjectNew',
-            related_name='jobs',
-            null=True,
-            on_delete=models.SET_NULL,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class Job(JobNew):
-
-        class Meta:
-            proxy = True
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    #class Job(JobBase, UnifiedJob):
-    class Job(JobBaseMethods, UnifiedJob, JobBase):
-
-        class Meta:
-            app_label = 'main'
-
-        job_template = models.ForeignKey(
-            'JobTemplate',
-            related_name='jobs',
-            blank=True,
-            null=True,
-            default=None,
-            on_delete=models.SET_NULL,
-        )
-        project = models.ForeignKey(
-            'Project',
-            related_name='jobs',
-            null=True,
-            on_delete=models.SET_NULL,
-        )
-
-
-class JobHostSummaryBase(CreatedModifiedModel):
+class JobHostSummary(CreatedModifiedModel):
     '''
     Per-host statistics for each job.
     '''
 
     class Meta:
-        abstract = True
         app_label = 'main'
         unique_together = [('job', 'host')]
         verbose_name_plural = _('job host summaries')
         ordering = ('-pk',)
 
-    #job = models.ForeignKey(
-    #    'Job',
-    #    related_name='job_host_summaries',
-    #    on_delete=models.CASCADE,
-    #    editable=False,
-    #)
+    job = models.ForeignKey(
+        'Job',
+        related_name='job_host_summaries',
+        on_delete=models.CASCADE,
+        editable=False,
+    )
     host = models.ForeignKey('Host',
         related_name='job_host_summaries',
         on_delete=models.CASCADE,
@@ -542,7 +404,7 @@ class JobHostSummaryBase(CreatedModifiedModel):
         update_fields = kwargs.get('update_fields', [])
         self.failed = bool(self.dark or self.failures)
         update_fields.append('failed')
-        super(JobHostSummaryBase, self).save(*args, **kwargs)
+        super(JobHostSummary, self).save(*args, **kwargs)
         self.update_host_last_job_summary()
 
     def update_host_last_job_summary(self):
@@ -558,69 +420,7 @@ class JobHostSummaryBase(CreatedModifiedModel):
         #self.host.update_computed_fields()
 
 
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-    
-    class JobHostSummary(JobHostSummaryBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = [('job', 'host'), ('new_job', 'host')]
-            verbose_name_plural = _('job host summaries')
-            ordering = ('-pk',)
-
-        job = models.ForeignKey(
-            'Job',
-            related_name='job_host_summaries',
-            on_delete=models.CASCADE,
-            null=True,
-            default=None,
-            editable=False,
-        )
-        new_job = models.ForeignKey(
-            'JobNew',
-            related_name='new_job_host_summaries',
-            on_delete=models.CASCADE,
-            null=True,
-            default=None,
-            editable=False,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class JobHostSummary(JobHostSummaryBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = [('new_job', 'host')]
-            verbose_name_plural = _('job host summaries')
-            ordering = ('-pk',)
-
-        new_job = models.ForeignKey(
-            'JobNew',
-            related_name='new_job_host_summaries',
-            on_delete=models.CASCADE,
-            editable=False,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-    
-    class JobHostSummary(JobHostSummaryBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = [('job', 'host')]
-            verbose_name_plural = _('job host summaries')
-            ordering = ('-pk',)
-
-        job = models.ForeignKey(
-            'Job',
-            related_name='job_host_summaries',
-            on_delete=models.CASCADE,
-            editable=False,
-        )
-    
-
-class JobEventBase(CreatedModifiedModel):
+class JobEvent(CreatedModifiedModel):
     '''
     An event/message logged from the callback when running a job.
     '''
@@ -683,16 +483,15 @@ class JobEventBase(CreatedModifiedModel):
     LEVEL_FOR_EVENT = dict([(x[1], x[0]) for x in EVENT_TYPES])
 
     class Meta:
-        abstract = True
         app_label = 'main'
         ordering = ('pk',)
 
-    #job = models.ForeignKey(
-    #    'Job',
-    #    related_name='job_events',
-    #    on_delete=models.CASCADE,
-    #    editable=False,
-    #)
+    job = models.ForeignKey(
+        'Job',
+        related_name='job_events',
+        on_delete=models.CASCADE,
+        editable=False,
+    )
     event = models.CharField(
         max_length=100,
         choices=EVENT_CHOICES,
@@ -890,7 +689,7 @@ class JobEventBase(CreatedModifiedModel):
             self.parent = self._find_parent()
             if 'parent' not in update_fields:
                 update_fields.append('parent')
-        super(JobEventBase, self).save(*args, **kwargs)
+        super(JobEvent, self).save(*args, **kwargs)
         if post_process and not from_parent_update:
             self.update_parent_failed_and_changed()
             # FIXME: The update_hosts() call (and its queries) are the current
@@ -967,58 +766,3 @@ class JobEventBase(CreatedModifiedModel):
                         host_summary.save(update_fields=update_fields)
             job.inventory.update_computed_fields()
 
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-
-    class JobEvent(JobEventBase):
-
-        class Meta:
-            app_label = 'main'
-            ordering = ('pk',)
-
-        job = models.ForeignKey(
-            'Job',
-            related_name='job_events',
-            on_delete=models.CASCADE,
-            null=True,
-            default=None,
-            editable=False,
-        )
-        new_job = models.ForeignKey(
-            'JobNew',
-            related_name='new_job_events',
-            on_delete=models.CASCADE,
-            null=True,
-            default=None,
-            editable=False,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class JobEvent(JobEventBase):
-
-        class Meta:
-            app_label = 'main'
-            ordering = ('pk',)
-
-        new_job = models.ForeignKey(
-            'JobNew',
-            related_name='new_job_events',
-            on_delete=models.CASCADE,
-            editable=False,
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    class JobEvent(JobEventBase):
-
-        class Meta:
-            app_label = 'main'
-            ordering = ('pk',)
-
-        job = models.ForeignKey(
-            'Job',
-            related_name='job_events',
-            on_delete=models.CASCADE,
-            editable=False,
-        )

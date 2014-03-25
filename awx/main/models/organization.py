@@ -37,13 +37,12 @@ __all__ = ['Organization', 'Team', 'Permission', 'Credential', 'Profile',
            'AuthToken']
 
 
-class OrganizationBase(CommonModel):
+class Organization(CommonModel):
     '''
     An organization is the basic unit of multi-tenancy divisions
     '''
 
     class Meta:
-        abstract = True
         app_label = 'main'
 
     users = models.ManyToManyField(
@@ -56,6 +55,11 @@ class OrganizationBase(CommonModel):
         blank=True,
         related_name='admin_of_organizations',
     )
+    projects = models.ManyToManyField(
+        'Project',
+        blank=True,
+        related_name='organizations',
+    )
 
     def get_absolute_url(self):
         return reverse('api:organization_detail', args=(self.pk,))
@@ -64,58 +68,12 @@ class OrganizationBase(CommonModel):
         return self.name
 
 
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-
-    class Organization(OrganizationBase):
-
-        class Meta:
-            app_label = 'main'
-
-        projects = models.ManyToManyField(
-            'Project',
-            blank=True,
-            related_name='organizations',
-        )
-        new_projects = models.ManyToManyField(
-            'ProjectNew',
-            blank=True,
-            related_name='organizations',
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class Organization(OrganizationBase):
-
-        class Meta:
-            app_label = 'main'
-
-        new_projects = models.ManyToManyField(
-            'ProjectNew',
-            blank=True,
-            related_name='organizations',
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    class Organization(OrganizationBase):
-        
-        class Meta:
-            app_label = 'main'
-    
-        projects = models.ManyToManyField(
-            'Project',
-            blank=True,
-            related_name='organizations',
-        )
-
-
-class TeamBase(CommonModelNameNotUnique):
+class Team(CommonModelNameNotUnique):
     '''
     A team is a group of users that work on common projects.
     '''
 
     class Meta:
-        abstract = True
         app_label = 'main'
         unique_together = [('organization', 'name')]
 
@@ -131,66 +89,22 @@ class TeamBase(CommonModelNameNotUnique):
         on_delete=models.SET_NULL,
         related_name='teams',
     )
+    projects = models.ManyToManyField(
+        'Project',
+        blank=True,
+        related_name='teams',
+    )
 
     def get_absolute_url(self):
         return reverse('api:team_detail', args=(self.pk,))
 
 
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-
-    class Team(TeamBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = [('organization', 'name')]
-
-        projects = models.ManyToManyField(
-            'Project',
-            blank=True,
-            related_name='teams',
-        )
-        new_projects = models.ManyToManyField(
-            'ProjectNew',
-            blank=True,
-            related_name='teams',
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class Team(TeamBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = [('organization', 'name')]
-
-        new_projects = models.ManyToManyField(
-            'ProjectNew',
-            blank=True,
-            related_name='teams',
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    class Team(TeamBase):
-
-        class Meta:
-            app_label = 'main'
-            unique_together = [('organization', 'name')]
-
-        projects = models.ManyToManyField(
-            'Project',
-            blank=True,
-            related_name='teams',
-        )
-
-
-class PermissionBase(CommonModelNameNotUnique):
+class Permission(CommonModelNameNotUnique):
     '''
     A permission allows a user, project, or team to be able to use an inventory source.
     '''
 
     class Meta:
-        abstract = True
         app_label = 'main'
 
     # permissions are granted to either a user or a team:
@@ -198,7 +112,13 @@ class PermissionBase(CommonModelNameNotUnique):
     team            = models.ForeignKey('Team', null=True, on_delete=models.SET_NULL, blank=True, related_name='permissions')
 
     # to be used against a project or inventory (or a project and inventory in conjunction):
-    #project         = models.ForeignKey('Project', null=True, on_delete=models.SET_NULL, blank=True, related_name='permissions')
+    project = models.ForeignKey(
+        'Project',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='permissions',
+    )
     inventory       = models.ForeignKey('Inventory', null=True, on_delete=models.SET_NULL, related_name='permissions')
 
     # permission system explanation:
@@ -227,59 +147,6 @@ class PermissionBase(CommonModelNameNotUnique):
 
     def get_absolute_url(self):
         return reverse('api:permission_detail', args=(self.pk,))
-
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
-
-    class Permission(PermissionBase):
-
-        class Meta:
-            app_label = 'main'
-
-        project = models.ForeignKey(
-            'Project',
-            null=True,
-            on_delete=models.SET_NULL,
-            blank=True,
-            related_name='permissions',
-        )
-        new_project = models.ForeignKey(
-            'ProjectNew',
-            null=True,
-            on_delete=models.SET_NULL,
-            blank=True,
-            related_name='permissions',
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
-
-    class Permission(PermissionBase):
-
-        class Meta:
-            app_label = 'main'
-
-        new_project = models.ForeignKey(
-            'ProjectNew',
-            null=True,
-            on_delete=models.SET_NULL,
-            blank=True,
-            related_name='permissions',
-        )
-
-if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
-
-    class Permission(PermissionBase):
-
-        class Meta:
-            app_label = 'main'
-
-        project = models.ForeignKey(
-            'Project',
-            null=True,
-            on_delete=models.SET_NULL,
-            blank=True,
-            related_name='permissions',
-        )
 
 
 class Credential(CommonModelNameNotUnique):
