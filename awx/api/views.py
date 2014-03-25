@@ -168,7 +168,7 @@ class DashboardView(APIView):
 
         user_groups = get_user_queryset(request.user, Group)
         groups_job_failed = (Group.objects.filter(hosts_with_active_failures__gt=0) | Group.objects.filter(groups_with_active_failures__gt=0)).count()
-        groups_inventory_failed = Group.objects.filter(inventory_sources__last_update_failed=True).count()
+        groups_inventory_failed = Group.objects.filter(inventory_sources__last_job_failed=True).count()
         data['groups'] = {'url': reverse('api:group_list'),
                           'failures_url': reverse('api:group_list') + "?has_active_failures=True",
                           'total': user_groups.count(),
@@ -183,32 +183,32 @@ class DashboardView(APIView):
                          'failed': user_hosts_failed.count()}
 
         user_projects = get_user_queryset(request.user, Project)
-        user_projects_failed = user_projects.filter(last_update_failed=True)
+        user_projects_failed = user_projects.filter(last_job_failed=True)
         data['projects'] = {'url': reverse('api:project_list'),
-                            'failures_url': reverse('api:project_list') + "?last_update_failed=True",
+                            'failures_url': reverse('api:project_list') + "?last_job_failed=True",
                             'total': user_projects.count(),
                             'failed': user_projects_failed.count()}
 
         git_projects = user_projects.filter(scm_type='git')
-        git_failed_projects = git_projects.filter(last_update_failed=True)
+        git_failed_projects = git_projects.filter(last_job_failed=True)
         svn_projects = user_projects.filter(scm_type='svn')
-        svn_failed_projects = svn_projects.filter(last_update_failed=True)
+        svn_failed_projects = svn_projects.filter(last_job_failed=True)
         hg_projects = user_projects.filter(scm_type='hg')
-        hg_failed_projects = hg_projects.filter(last_update_failed=True)
+        hg_failed_projects = hg_projects.filter(last_job_failed=True)
         data['scm_types'] = {}
         data['scm_types']['git'] = {'url': reverse('api:project_list') + "?scm_type=git",
                                     'label': 'Git',
-                                    'failures_url': reverse('api:project_list') + "?scm_type=git&last_update_failed=True",
+                                    'failures_url': reverse('api:project_list') + "?scm_type=git&last_job_failed=True",
                                     'total': git_projects.count(),
                                     'failed': git_failed_projects.count()}
         data['scm_types']['svn'] = {'url': reverse('api:project_list') + "?scm_type=svn",
                                     'label': 'Subversion',
-                                    'failures_url': reverse('api:project_list') + "?scm_type=svn&last_update_failed=True",
+                                    'failures_url': reverse('api:project_list') + "?scm_type=svn&last_job_failed=True",
                                     'total': svn_projects.count(),
                                     'failed': svn_failed_projects.count()}
         data['scm_types']['hg'] = {'url': reverse('api:project_list') + "?scm_type=hg",
                                    'label': 'Mercurial',
-                                   'failures_url': reverse('api:project_list') + "?scm_type=hg&last_update_failed=True",
+                                   'failures_url': reverse('api:project_list') + "?scm_type=hg&last_job_failed=True",
                                    'total': hg_projects.count(),
                                    'failed': hg_failed_projects.count()}
 

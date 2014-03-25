@@ -49,7 +49,18 @@ class FieldLookupBackend(BaseFilterBackend):
         # FIXME: Could build up a list of models used across relationships, use
         # those lookups combined with request.user.get_queryset(Model) to make
         # sure user cannot query using objects he could not view.
+        new_parts = []
         for n, name in enumerate(parts[:-1]):
+
+            # HACK: Make project and inventory source filtering by old field names work for backwards compatibility.
+            if model._meta.object_name in ('Project', 'InventorySource'):
+                name = {
+                    'current_update': 'current_job',
+                    'last_update': 'last_job',
+                    'last_update_failed': 'last_job_failed',
+                    'last_updated': 'last_job_run',
+                }.get(name, name)
+
             if name == 'pk':
                 field = model._meta.pk
             else:
@@ -59,7 +70,11 @@ class FieldLookupBackend(BaseFilterBackend):
                     model = field.rel.to
                 else:
                     model = field.model
-        return field
+            new_parts.append(name)
+        if parts:
+            new_parts.append(parts[-1])
+        new_lookup = '__'.join(new_parts)
+        return field, new_lookup
 
     def to_python_boolean(self, value, allow_none=False):
         value = unicode(value)
@@ -90,7 +105,7 @@ class FieldLookupBackend(BaseFilterBackend):
             return field.to_python(value)
 
     def value_to_python(self, model, lookup, value):
-        field = self.get_field_from_lookup(model, lookup)
+        field, new_lookup = self.get_field_from_lookup(model, lookup)
         if lookup.endswith('__isnull'):
             value = self.to_python_boolean(value)
         elif lookup.endswith('__in'):
@@ -106,7 +121,7 @@ class FieldLookupBackend(BaseFilterBackend):
             return value
         else:
             value = self.value_to_python_for_field(field, value)
-        return value
+        return value, new_lookup
 
     def filter_queryset(self, request, queryset, view):
         try:
@@ -152,13 +167,13 @@ class FieldLookupBackend(BaseFilterBackend):
                 for value in values:
                     if q_int:
                         value = int(value)
-                    value = self.value_to_python(queryset.model, key, value)
+                    value, new_key = self.value_to_python(queryset.model, key, value)
                     if q_chain:
-                        chain_filters.append((q_not, key, value))
+                        chain_filters.append((q_not, new_key, value))
                     elif q_or:
-                        or_filters.append((q_not, key, value))
+                        or_filters.append((q_not, new_key, value))
                     else:
-                        and_filters.append((q_not, key, value))
+                        and_filters.append((q_not, new_key, value))
 
             # Now build Q objects for database query filter.
             if and_filters or or_filters or chain_filters:

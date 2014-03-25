@@ -183,6 +183,19 @@ class ProjectsTest(BaseTest):
         self.get(url, expect=401)
         self.get(url, expect=401, auth=self.get_invalid_credentials())
 
+    def test_dashboard(self):
+        url = reverse('api:dashboard_view')
+        # superuser can read dashboard.
+        response = self.get(url, expect=200, auth=self.get_super_credentials())
+        # org admin can read dashboard.
+        response = self.get(url, expect=200, auth=self.get_normal_credentials())
+        # regular user can read dashboard.
+        response = self.get(url, expect=200, auth=self.get_nobody_credentials())
+        # anonymous/invalid user can't access dashboard.
+        self.get(url, expect=401)
+        self.get(url, expect=401, auth=self.get_invalid_credentials())
+        # FIXME: Test that data on dashboard is filtered based on RBAC.
+
     def test_mainline(self):
 
         # =====================================================================
