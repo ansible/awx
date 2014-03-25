@@ -391,7 +391,7 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
         else:
             elapsed = 0.0
         if self.elapsed != elapsed:
-            self.elapsed = elapsed
+            self.elapsed = str(elapsed)
             if 'elapsed' not in update_fields:
                 update_fields.append('elapsed')
         if self.unified_job_template != self._get_parent_instance():
