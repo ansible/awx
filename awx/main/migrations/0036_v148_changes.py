@@ -41,7 +41,7 @@ class Migration(DataMigration):
             'failed': instance.failed,
             'started': instance.created,
             'finished': instance.modified,
-            'elapsed': elapsed,
+            'elapsed': str(elapsed),
             'job_args': instance.job_args,
             'job_env': instance.job_env,
             'result_stdout_text': instance._result_stdout,
