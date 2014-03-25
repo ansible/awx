@@ -106,19 +106,18 @@ class FieldLookupBackend(BaseFilterBackend):
 
     def value_to_python(self, model, lookup, value):
         field, new_lookup = self.get_field_from_lookup(model, lookup)
-        if lookup.endswith('__isnull'):
+        if new_lookup.endswith('__isnull'):
             value = self.to_python_boolean(value)
-        elif lookup.endswith('__in'):
+        elif new_lookup.endswith('__in'):
             items = []
             for item in value.split(','):
                 items.append(self.value_to_python_for_field(field, item))
             value = items
-        elif lookup.endswith('__regex') or lookup.endswith('__iregex'):
+        elif new_lookup.endswith('__regex') or new_lookup.endswith('__iregex'):
             try:
                 re.compile(value)
             except re.error, e:
                 raise ValueError(e.args[0])
-            return value
         else:
             value = self.value_to_python_for_field(field, value)
         return value, new_lookup
