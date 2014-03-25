@@ -23,7 +23,10 @@ angular.module('ScheduledJobsDefinition', [])
             next_run: {
                 label: 'Next Run',
                 link: false,
-                columnClass: "col-md-2"
+                searchable: false,
+                columnClass: "col-md-2",
+                key: true,
+                desc: true
             },
             dtend: {
                 label: 'Ends On',
@@ -31,16 +34,16 @@ angular.module('ScheduledJobsDefinition', [])
                 filter: "date:'MM/dd/yy HH:mm:ss'",
                 columnClass: "col-md-2 hidden-xs"
             },
-            type: {
-                label: 'Type',
-                link: false,
-                columnClass: "col-md-2 hidden-sm hidden-xs"
-            },
             template_name: {
                 label: 'Name',
                 columnClass: "col-md-4 col-xs-5",
                 sourceModel: "template",
                 sourceField: "name"
+            },
+            type: {
+                label: 'Type',
+                link: false,
+                columnClass: "col-md-2 hidden-sm hidden-xs"
             }
         },
 
