@@ -368,7 +368,7 @@ class ProjectSerializer(BaseSerializer):
         # Backwards compatibility.
         if obj.current_update:
             res['current_update'] = reverse('api:project_update_detail',
-                                            args=(obj.last_update.pk,))
+                                            args=(obj.current_update.pk,))
         if obj.last_update:
             res['last_update'] = reverse('api:project_update_detail',
                                          args=(obj.last_update.pk,))
