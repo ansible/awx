@@ -247,6 +247,9 @@ class Job(UnifiedJob, JobOptions):
         from awx.main.models import InventoryUpdate, ProjectUpdate
         if type(obj) == Job:
             if obj.job_template == self.job_template:
+                if obj.launch_type == 'callback' and self.launch_type == 'callback':
+                    if obj.limit != self.limit:
+                        return False
                 return True
             return False
         if type(obj) == InventoryUpdate:
