@@ -326,8 +326,9 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
  *
  */
 .factory('ScheduleList', ['ScheduleEdit', 'SchedulesList', 'GenerateList', 'SearchInit', 'PaginateInit', 'Rest', 'PageRangeSetup',
-'Wait', 'ProcessErrors', 'Find',
-function(ScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Rest, PageRangeSetup, Wait, ProcessErrors, Find) {
+'Wait', 'ProcessErrors', 'Find', 'ToggleSchedule', 'DeleteSchedule',
+function(ScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Rest, PageRangeSetup, Wait, ProcessErrors, Find,
+ToggleSchedule, DeleteSchedule) {
     return function(params) {
         var parent_scope = params.scope,
             schedule_scope = parent_scope.$new(),
@@ -406,6 +407,30 @@ function(ScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Re
         schedule_scope.addSchedule = function() {
             ScheduleEdit({ scope: parent_scope, schedule: {}, mode: 'add'});
         };
+
+        if (schedule_scope.removeSchedulesRefresh) {
+            schedule_scope.removeSchedulesRefresh();
+        }
+        schedule_scope.removeSchedulesRefresh = schedule_scope.$on('SchedulesRefresh', function() {
+            schedule_scope.search(SchedulesList.iterator);
+        });
+
+        schedule_scope.toggleSchedule = function(id) {
+            ToggleSchedule({
+                scope: schedule_scope,
+                id: id,
+                callback: 'SchedulesRefresh'
+            });
+        };
+
+        schedule_scope.deleteSchedule = function(id) {
+            DeleteSchedule({
+                scope: schedule_scope,
+                id: id,
+                callback: 'SchedulesRefresh'
+            });
+        };
+
     };
 }])
 

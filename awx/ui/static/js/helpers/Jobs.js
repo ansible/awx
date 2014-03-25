@@ -9,7 +9,7 @@
 
 'use strict';
 
-angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers', 'SchedulesHelper'])
+angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers'])
 
 .factory('JobStatusToolTip', [
     function () {
@@ -326,17 +326,4 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt){
         });
 
     };
-}])
-
-.factory('ToggleScheduleEnabled', ['ToggleSchedule', function(ToggleSchedule) {
-    return function(params) {
-        var scope = params.scope,
-            id = params.id;
-        ToggleSchedule({
-            scope: scope,
-            id: id,
-            callback: 'ScheduleToggled'
-        });
-    };
 }]);
-

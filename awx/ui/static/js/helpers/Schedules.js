@@ -262,7 +262,112 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                     msg: 'Failed to retrieve schedule ' + id + ' GET returned: ' + status });
             });
         };
+    }])
+
+    /**
+     * Delete a schedule. Prompts user to confirm delete
+     *
+     * DeleteSchedule({
+     *     scope:       $scope containing list of schedules
+     *     id:          id of schedule to delete
+     *     callback:    $scope.$emit label to call when delete is completed
+     * })
+     *
+     */
+    .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Find',
+    function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find) {
+        return function(params) {
+
+            var scope = params.scope,
+                id = params.id,
+                callback = params.callback,
+                action, schedule, list, url, hdr;
+
+            if (scope.schedules) {
+                list = scope.schedules;
+            }
+            else if (scope.scheduled_jobs) {
+                list = scope.scheduled_jobs;
+            }
+
+            url = GetBasePath('schedules') + id + '/';
+            schedule = Find({list: list, key: 'id', val: id });
+            hdr = 'Delete Schedule';
+
+            action = function () {
+                Wait('start');
+                Rest.setUrl(url);
+                Rest.destroy()
+                    .success(function () {
+                        $('#prompt-modal').modal('hide');
+                        scope.$emit(callback, id);
+                    })
+                    .error(function (data, status) {
+                        $('#prompt-modal').modal('hide');
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
+                            ' failed. DELETE returned: ' + status });
+                    });
+            };
+
+            Prompt({
+                hdr: hdr,
+                body: "<div class=\"alert alert-info\">Are you sure you want to delete the <em>" + schedule.name  + "</em> schedule?</div>",
+                action: action
+            });
+
+        };
     }]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

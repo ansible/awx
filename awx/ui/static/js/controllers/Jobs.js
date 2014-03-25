@@ -11,7 +11,7 @@
 'use strict';
 
 function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
-    ScheduledJobsList, GetChoices, GetBasePath, Wait, DeleteJob, ToggleScheduleEnabled, Find) {
+    ScheduledJobsList, GetChoices, GetBasePath, Wait, DeleteJob, Find, DeleteSchedule, ToggleSchedule) {
     
     ClearScope();
 
@@ -75,14 +75,12 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             url: GetBasePath('schedules')
         });
 
-        if (scheduled_scope.removeScheduleToggled) {
-            scheduled_scope.removeScheduleToggled();
+        if (scheduled_scope.removeSchedulesRefresh) {
+            scheduled_scope.removeSchedulesRefresh();
         }
-        scheduled_scope.removeScheduleToggled = function(e, id) {
-            //scheduled_scope.search(ScheduledJobsList.iterator);
-            var schedule = Find({ list: scheduled_scope[ScheduledJobsList.name], key: 'id', val: id});
-            schedule.enabled = (schedule.enabled) ? false : true;
-        };
+        scheduled_scope.removeSchedulesRefresh = scheduled_scope.$on('SchedulesRefresh', function() {
+            scheduled_scope.search(ScheduledJobsList.iterator);
+        });
 
         completed_scope.deleteJob = function(id) {
             DeleteJob({ scope: completed_scope, id: id });
@@ -97,9 +95,18 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         };
 
         scheduled_scope.toggleSchedule = function(id) {
-            ToggleScheduleEnabled({
+            ToggleSchedule({
                 scope: scheduled_scope,
-                id: id
+                id: id,
+                callback: 'SchedulesRefresh'
+            });
+        };
+
+        scheduled_scope.deleteSchedule = function(id) {
+            DeleteSchedule({
+                scope: scheduled_scope,
+                id: id,
+                callback: 'SchedulesRefresh'
             });
         };
         
@@ -136,7 +143,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
 }
 
 JobsListController.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadScope', 'RunningJobsList', 'CompletedJobsList',
-    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'DeleteJob', 'ToggleScheduleEnabled', 'Find'];
+    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'DeleteJob', 'Find', 'DeleteSchedule', 'ToggleSchedule'];
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,

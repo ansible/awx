@@ -11,7 +11,7 @@
 'use strict';
 
 function ScheduleEdit($scope, $compile, $location, $routeParams, SchedulesList, GenerateList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateInit, PageRangeSetup, EditSchedule, AddSchedule, Find, ToggleSchedule) {
+GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateInit, PageRangeSetup, EditSchedule, AddSchedule, Find, ToggleSchedule, DeleteSchedule) {
     
     ClearScope();
 
@@ -125,18 +125,34 @@ GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateI
         AddSchedule({ scope: $scope, schedule: schedule, url: url });
     };
 
-    if ($scope.removeScheduleToggled) {
-        $scope.removeScheduleToggled();
+    if ($scope.removeScheduleRefresh) {
+        $scope.removeScheduleRefresh();
     }
-    $scope.removeScheduleToggled = function() {
+    $scope.removeScheduleToggled = $scope.$on('ScheduleRefresh', function() {
         $scope.search(SchedulesList.iterator);
-    };
+    });
 
     $scope.toggleSchedule = function(id) {
         ToggleSchedule({
             scope: $scope,
             id: id,
             callback: 'ScheduleToggled'
+        });
+    };
+
+    $scope.toggleSchedule = function(id) {
+        ToggleSchedule({
+            scope: $scope,
+            id: id,
+            callback: 'SchedulesRefresh'
+        });
+    };
+
+    $scope.deleteSchedule = function(id) {
+        DeleteSchedule({
+            scope: $scope,
+            id: id,
+            callback: 'SchedulesRefresh'
         });
     };
 
@@ -156,5 +172,5 @@ GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateI
 
 ScheduleEdit.$inject = ['$scope', '$compile', '$location', '$routeParams', 'SchedulesList', 'GenerateList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
 'ClearScope', 'GetBasePath', 'LookUpInit', 'Wait', 'SchedulerInit', 'Breadcrumbs', 'SearchInit', 'PaginateInit', 'PageRangeSetup', 'EditSchedule', 'AddSchedule',
-'Find', 'ToggleSchedule'
+'Find', 'ToggleSchedule', 'DeleteSchedule'
 ];

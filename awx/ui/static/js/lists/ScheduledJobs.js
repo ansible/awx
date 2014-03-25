@@ -67,13 +67,13 @@ angular.module('ScheduledJobsDefinition', [])
             },
             "edit": {
                 mode: "all",
-                ngClick: "edit(scheduled_job.id)",
+                ngClick: "editSchedule(scheduled_job.id)",
                 awToolTip: "Edit the schedule",
                 dataPlacement: "top"
             },
             "delete": {
                 mode: 'all',
-                ngClick: 'deleteJob(completed_job.id)',
+                ngClick: 'deleteSchedule(scheduled_job.id)',
                 awToolTip: 'Delete the schedule',
                 dataPlacement: 'top'
             }
