@@ -60,7 +60,7 @@ class SimpleDAG(object):
                 type_str = "Project"
             else:
                 type_str = "Unknown"
-            type_str += "-%s" % str(obj.id)
+            type_str += "%s" % str(obj.id)
             return type_str
 
         doc = """
