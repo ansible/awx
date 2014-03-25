@@ -72,7 +72,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
-    #'inventory_source': ('source', 'last_updated', 'status'),
+    'inventory_source': ('source', 'last_updated', 'status'),
 }
 
 class ChoiceField(fields.ChoiceField):
