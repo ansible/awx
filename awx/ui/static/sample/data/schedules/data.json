@@ -10,6 +10,7 @@
             "project": null,
             "job_class": "ansible:playbook",
             "name": "Hourly",
+            "enabled": true,
             "dtstart": "2014-03-10T17:00:00.000Z" ,
             "dtend": null,
             "rrule": "FREQ=HOURLY;DTSTART=20140310T170000Z;INTERVAL=1"
@@ -21,6 +22,7 @@
             "project": null,
             "job_class": "ansible:playbook",
             "name": "Weekly",
+            "enabled": true,
             "dtstart": "2014-03-17T13:00:00.000Z",
             "dtend": null,
             "rrule": "FREQ=WEEKLY;DTSTART=20140317T130000Z;INTERVAL=1;COUNT=10;BYDAY=MO"
@@ -32,6 +34,7 @@
             "project": null,
             "job_class": "ansible:playbook",
             "name": "Monthly",
+            "enabled": false,
             "dtstart": "2014-04-06T01:00:00.000Z",
             "dtend": "2020-03-01T01:00:00.000Z",
             "rrule": "FREQ=MONTHLY;DTSTART=20140406T010000Z;INTERVAL=1;UNTIL=20200301T010000Z;BYMONTHDAY=1"

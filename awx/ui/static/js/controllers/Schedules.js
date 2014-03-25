@@ -11,19 +11,32 @@
 'use strict';
 
 function ScheduleEdit($scope, $compile, $location, $routeParams, SchedulesList, GenerateList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateInit, PageRangeSetup, EditSchedule, AddSchedule, Find) {
+GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateInit, PageRangeSetup, EditSchedule, AddSchedule, Find, ToggleSchedule) {
     
     ClearScope();
 
-    var base, e, id, job_template, url;
+    var base, e, id, parentObject, url;
 
     base = $location.path().replace(/^\//, '').split('/')[0];
-        
-    $scope.$on('job_template_ready', function() {
+
+    if ($scope.removePostRefresh) {
+        $scope.removePostRefresh();
+    }
+    $scope.removePostRefresh = $scope.$on('PostRefresh', function() {
+        var list = $scope.schedules;
+        list.forEach(function(element, idx) {
+            list[idx].play_tip = (element.enabled) ? 'Schedule is Active. Click to temporarily stop.' : 'Schedule is temporarily stopped. Click to activate.';
+        });
+    });
+    
+    if ($scope.removeParentLoaded) {
+        $scope.removeParentLoaded();
+    }
+    $scope.removeScheduledLoaded = $scope.$on('ParentLoaded', function() {
         // Add breadcrumbs
         LoadBreadCrumbs({
             path: $location.path().replace(/\/schedules$/,''),
-            title: job_template.name
+            title: parentObject.name
         });
         e = angular.element(document.getElementById('breadcrumbs'));
         e.html(Breadcrumbs({ list: SchedulesList, mode: 'edit' }));
@@ -112,16 +125,28 @@ GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateI
         AddSchedule({ scope: $scope, schedule: schedule, url: url });
     };
 
+    if ($scope.removeScheduleToggled) {
+        $scope.removeScheduleToggled();
+    }
+    $scope.removeScheduleToggled = function() {
+        $scope.search(SchedulesList.iterator);
+    };
 
-    //scheduler = SchedulerInit({ scope: $scope });
-    //scheduler.inject('scheduler-target', true);
+    $scope.toggleSchedule = function(id) {
+        ToggleSchedule({
+            scope: $scope,
+            id: id,
+            callback: 'ScheduleToggled'
+        });
+    };
 
+    // Load the parent object
     id = $routeParams.id;
     Rest.setUrl(GetBasePath(base) + id);
     Rest.get()
         .success(function(data) {
-            job_template = data;
-            $scope.$emit('job_template_ready');
+            parentObject = data;
+            $scope.$emit('ParentLoaded');
         })
         .error(function(status) {
             ProcessErrors($scope, null, status, null, { hdr: 'Error!',
@@ -131,5 +156,5 @@ GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateI
 
 ScheduleEdit.$inject = ['$scope', '$compile', '$location', '$routeParams', 'SchedulesList', 'GenerateList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
 'ClearScope', 'GetBasePath', 'LookUpInit', 'Wait', 'SchedulerInit', 'Breadcrumbs', 'SearchInit', 'PaginateInit', 'PageRangeSetup', 'EditSchedule', 'AddSchedule',
-'Find'
+'Find', 'ToggleSchedule'
 ];
