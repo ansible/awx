@@ -48,13 +48,6 @@ angular.module('JobTemplatesListDefinition', [])
         },
 
         fieldActions: {
-            edit: {
-                label: 'Edit',
-                ngClick: "editJobTemplate(job_template.id)",
-                awToolTip: 'Edit template',
-                "class": 'btn-default btn-xs',
-                dataPlacement: 'top'
-            },
             submit: {
                 label: 'Launch',
                 mode: 'all',
@@ -67,6 +60,13 @@ angular.module('JobTemplatesListDefinition', [])
                 mode: 'all',
                 ngHref: '#/job_templates/{{ job_template.id }}/schedules',
                 awToolTip: 'Schedule future job template runs',
+                dataPlacement: 'top'
+            },
+            edit: {
+                label: 'Edit',
+                ngClick: "editJobTemplate(job_template.id)",
+                awToolTip: 'Edit template',
+                "class": 'btn-default btn-xs',
                 dataPlacement: 'top'
             },
             "delete": {

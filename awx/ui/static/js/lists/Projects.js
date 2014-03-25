@@ -92,11 +92,6 @@ angular.module('ProjectsListDefinition', [])
         },
 
         fieldActions: {
-            edit: {
-                ngClick: "editProject(project.id)",
-                awToolTip: 'Edit the project',
-                dataPlacement: 'top'
-            },
             scm_update: {
                 ngClick: 'SCMUpdate(project.id)',
                 awToolTip: "{{ project.scm_update_tooltip }}",
@@ -113,6 +108,11 @@ angular.module('ProjectsListDefinition', [])
                 mode: 'all',
                 ngHref: '#/projects/{{ project.id }}/schedules',
                 awToolTip: 'Schedule future SCM updates',
+                dataPlacement: 'top'
+            },
+            edit: {
+                ngClick: "editProject(project.id)",
+                awToolTip: 'Edit the project',
                 dataPlacement: 'top'
             },
             "delete": {

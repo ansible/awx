@@ -107,38 +107,6 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
         };
     }])
 
-    /*.factory('ShowDetails', [ function() {
-        return function(params) {
-            
-            var scope = params.scope,
-                scheduler = params.scheduler,
-                e = params.e,
-                rrule;
-
-            if ($(e.target).text() === 'Details') {
-                if (scheduler.isValid()) {
-                    scope.schedulerIsValid = true;
-                    rrule = scheduler.getRRule();
-                    scope.occurrence_list = [];
-                    scope.dateChoice = 'utc';
-                    rrule.all(function(date, i){
-                        if (i < 10) {
-                            scope.occurrence_list.push({ utc: date.toUTCString(), local: date.toString() });
-                            return true;
-                        }
-                        return false;
-                    });
-                    scope.rrule_nlp_description = rrule.toText().replace(/^RRule error.*$/,'Natural language description not available');
-                    scope.rrule = scheduler.getValue().rrule;
-                }
-                else {
-                    scope.schedulerIsValid = false;
-                    $('#scheduler-tabs a:first').tab('show');
-                }
-            }
-        };
-    }])*/
-
     .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest',
     function(SchedulerInit, ShowSchedulerModal, Wait, Rest) {
         return function(params) {
@@ -246,4 +214,67 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                 }
             });
         };
+    }])
+
+    /**
+     * Flip a schedule's enable flag
+     *
+     * ToggleSchedule({
+     *     scope:       scope,
+     *     id:          schedule.id to update
+     *     callback:    scope.$emit label to call when update completes
+     * });
+     *
+     */
+    .factory('ToggleSchedule', ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', function(Wait, GetBasePath, ProcessErrors, Rest) {
+        return function(params) {
+            var scope = params.scope,
+                id = params.id,
+                callback = params.callback,
+                url = GetBasePath('schedules') + id +'/';
+            
+            // Perform the update
+            if (scope.removeScheduleFound) {
+                scope.removeScheduleFound();
+            }
+            scope.removeScheduleFound = scope.$on('removeScheduleFound', function(e, data) {
+                data.enabled = (data.enabled) ? false : true;
+                Rest.put(data)
+                    .success( function() {
+                        if (callback) {
+                            scope.$emit(callback, id);
+                        }
+                    })
+                    .error( function() {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to update schedule ' + id + ' PUT returned: ' + status });
+                    });
+            });
+
+            // Get the existing record
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(){
+                    
+            })
+            .error(function(data,status){
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Failed to retrieve schedule ' + id + ' GET returned: ' + status });
+            });
+        };
     }]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
