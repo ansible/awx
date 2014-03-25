@@ -135,6 +135,7 @@ class ApiV1ConfigView(APIView):
 class DashboardView(APIView):
 
     view_name = "Dashboard"
+    new_in_14 = True
 
     def get(self, request, format=None):
         ''' Show Dashboard Details '''
@@ -239,6 +240,7 @@ class DashboardView(APIView):
 class SchedulesList(APIView):
 
     view_name = "Schedules"
+    new_in_148 = True
 
     def get(self, request, format=None):
         data = {
@@ -296,6 +298,7 @@ class SchedulesList(APIView):
 class UnifiedJobsList(APIView):
 
     view_name = "Unified Job Templates"
+    new_in_148 = True
 
     def get(self, request, format=None):
         data = {
@@ -564,6 +567,7 @@ class OrganizationActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Organization
     relationship = 'activitystream_set'
+    new_in_145 = True
 
 class TeamList(ListCreateAPIView):
 
@@ -622,6 +626,7 @@ class TeamActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Team
     relationship = 'activitystream_set'
+    new_in_145 = True
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -677,6 +682,7 @@ class ProjectActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Project
     relationship = 'activitystream_set'
+    new_in_145 = True
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -814,6 +820,7 @@ class UserActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = User
     relationship = 'activitystream_set'
+    new_in_145 = True
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -860,6 +867,7 @@ class CredentialActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Credential
     relationship = 'activitystream_set'
+    new_in_145 = True
 
 class PermissionDetail(RetrieveUpdateDestroyAPIView):
 
@@ -887,6 +895,7 @@ class InventoryActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Inventory
     relationship = 'activitystream_set'
+    new_in_145 = True
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -942,6 +951,7 @@ class HostActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Host
     relationship = 'activitystream_set'
+    new_in_145 = True
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1034,6 +1044,7 @@ class GroupActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Group
     relationship = 'activitystream_set'
+    new_in_145 = True
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1198,7 +1209,7 @@ class InventorySourceActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = InventorySource
     relationship = 'activitystream_set'
-
+    new_in_145 = True
 
 class InventorySourceUpdatesList(SubListAPIView):
 
@@ -1276,7 +1287,7 @@ class JobTemplateActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = JobTemplate
     relationship = 'activitystream_set'
-
+    new_in_145 = True
 
 class JobTemplateCallback(GenericAPIView):
 
@@ -1416,6 +1427,7 @@ class JobActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Job
     relationship = 'activitystream_set'
+    new_in_145 = True
 
 class JobStart(GenericAPIView):
 
@@ -1556,11 +1568,13 @@ class ActivityStreamList(SimpleListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
+    new_in_145 = True
 
 class ActivityStreamDetail(RetrieveAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
+    new_in_145 = True
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to

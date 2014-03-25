@@ -106,6 +106,8 @@ class APIView(views.APIView):
             'docstring': type(self).__doc__ or '',
             'new_in_13': getattr(self, 'new_in_13', False),
             'new_in_14': getattr(self, 'new_in_14', False),
+            'new_in_145': getattr(self, 'new_in_145', False),
+            'new_in_148': getattr(self, 'new_in_148', False),
             'new_in_15': getattr(self, 'new_in_15', False),
         }
 
@@ -116,6 +118,20 @@ class APIView(views.APIView):
             template_list.append('api/%s.md' % template_basename)
         context = self.get_description_context()
         return render_to_string(template_list, context)
+
+    def metadata(self, request):
+        '''
+        Add version number where view was added to Tower.
+        '''
+        ret = super(APIView, self).metadata(request)
+        added_in_version = '1.2'
+        for version in ('1.5', '1.4.8', '1.4.5', '1.4', '1.3'):
+            if getattr(self, 'new_in_%s' % version.replace('.', ''), False):
+                added_in_version = version
+                break
+        ret['added_in_version'] = added_in_version
+        return ret
+
 
 class GenericAPIView(generics.GenericAPIView, APIView):
     # Base class for all model-based views.
