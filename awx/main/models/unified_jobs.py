@@ -456,7 +456,7 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
 
     def start(self, error_callback, **kwargs):
         task_class = self._get_task_class()
-        if not self.can_start: # self.status == 'waiting':   # FIXME: Why did this not include "new"?
+        if not self.can_start:
             return False
         needed = self._get_passwords_needed_to_start()
         try:

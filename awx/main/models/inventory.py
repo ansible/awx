@@ -740,6 +740,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
         self.start_args = json_args
         self.save()
         self.start_args = encrypt_field(self, 'start_args')
+        self.status = 'pending'
         self.save()
         # notify_task_runner.delay(dict(task_type="inventory_update", id=self.id, metadata=kwargs))
         return True

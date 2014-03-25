@@ -133,9 +133,9 @@ class SimpleDAG(object):
 def get_tasks():
     ''' Fetch all Tower tasks that are relevant to the task management system '''
     # TODO: Replace this when we can grab all objects in a sane way
-    graph_jobs = [j for j in Job.objects.filter(status__in=('new', 'waiting', 'pending', 'running'))]
-    graph_inventory_updates = [iu for iu in InventoryUpdate.objects.filter(status__in=('new', 'waiting', 'pending', 'running'))]
-    graph_project_updates = [pu for pu in ProjectUpdate.objects.filter(status__in=('new', 'waiting', 'pending', 'running'))]
+    graph_jobs = [j for j in Job.objects.filter(status__in=('pending', 'waiting', 'running'))]
+    graph_inventory_updates = [iu for iu in InventoryUpdate.objects.filter(status__in=('pending', 'waiting', 'running'))]
+    graph_project_updates = [pu for pu in ProjectUpdate.objects.filter(status__in=('pending', 'waiting', 'running'))]
     all_actions = sorted(graph_jobs + graph_inventory_updates + graph_project_updates, key=lambda task: task.created)
     return all_actions
 
@@ -165,7 +165,7 @@ def rebuild_graph(message):
             return None
     running_tasks = filter(lambda t: t.status == 'running', all_sorted_tasks)
     waiting_tasks = filter(lambda t: t.status != 'running', all_sorted_tasks)
-    new_tasks = filter(lambda t: t.status == 'new', all_sorted_tasks)
+    new_tasks = filter(lambda t: t.status == 'pending', all_sorted_tasks)
 
     # Check running tasks and make sure they are active in celery
     print("Active celery tasks: " + str(active_tasks))

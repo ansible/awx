@@ -309,11 +309,11 @@ class Job(UnifiedJob, JobOptions):
                 if obj.inventory_source in inventory_sources:
                     inventory_sources_found.append(obj.inventory_source)
         if not project_found and self.project.scm_update_on_launch:
-            dependencies.append(self.project.project_updates.create())
+            dependencies.append(self.project.create_project_update(launch_type='dependency'))
         if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
             for source in inventory_sources:
                 if not source in inventory_sources_found:
-                    dependencies.append(source.inventory_updates.create())
+                    dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
 
     def signal_start(self, **kwargs):
@@ -331,6 +331,7 @@ class Job(UnifiedJob, JobOptions):
         self.start_args = json_args
         self.save()
         self.start_args = encrypt_field(self, 'start_args')
+        self.status = 'pending'
         self.save()
         # notify_task_runner.delay(dict(task_type="ansible_playbook", id=self.id))
         return True
