@@ -11,7 +11,7 @@
 'use strict';
 
 function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
-    ScheduledJobsList, GetChoices, GetBasePath, Wait, DeleteJob) {
+    ScheduledJobsList, GetChoices, GetBasePath, Wait, DeleteJob, ToggleScheduleEnabled, Find) {
     
     ClearScope();
 
@@ -75,6 +75,15 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             url: GetBasePath('schedules')
         });
 
+        if (scheduled_scope.removeScheduleToggled) {
+            scheduled_scope.removeScheduleToggled();
+        }
+        scheduled_scope.removeScheduleToggled = function(e, id) {
+            //scheduled_scope.search(ScheduledJobsList.iterator);
+            var schedule = Find({ list: scheduled_scope[ScheduledJobsList.name], key: 'id', val: id});
+            schedule.enabled = (schedule.enabled) ? false : true;
+        };
+
         completed_scope.deleteJob = function(id) {
             DeleteJob({ scope: completed_scope, id: id });
         };
@@ -85,6 +94,13 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
 
         running_scope.deleteJob = function(id) {
             DeleteJob({ scope: running_scope, id: id });
+        };
+
+        scheduled_scope.toggleSchedule = function(id) {
+            ToggleScheduleEnabled({
+                scope: scheduled_scope,
+                id: id
+            });
         };
         
     });
@@ -120,7 +136,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
 }
 
 JobsListController.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadScope', 'RunningJobsList', 'CompletedJobsList',
-    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'DeleteJob'];
+    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'DeleteJob', 'ToggleScheduleEnabled', 'Find'];
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,

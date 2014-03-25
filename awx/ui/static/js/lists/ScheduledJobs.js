@@ -60,7 +60,7 @@ angular.module('ScheduledJobsDefinition', [])
                 awToolTip: "{{ scheduled_job.play_tip }}",
                 dataTipWatch: "scheduled_job.play_tip",
                 iconClass: "{{ 'fa icon-schedule-enabled-' + scheduled_job.enabled }}",
-                dataPlacement: 'top',
+                dataPlacement: 'top'
             },
             "edit": {
                 mode: "all",

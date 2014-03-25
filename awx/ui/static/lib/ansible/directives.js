@@ -292,9 +292,20 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 content: attrs.awPopOver, trigger: trigger, html: true, container: container });
             $(element).click(function() {
                 var self = $(this);
+                try {
+                    self.tooltip('hide');
+                }
+                catch(e) {
+                    // ignore
+                }
                 $('.help-link, .help-link-white').each( function() {
                     if (self.attr('id') !== $(this).attr('id')) {
-                        $(this).popover('hide');
+                        try {
+                            $(this).popover('hide');
+                        }
+                        catch(e) {
+                            // ignore
+                        }
                     }
                 });
                 $('.popover').each(function() {
