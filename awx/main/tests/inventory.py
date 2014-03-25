@@ -807,11 +807,15 @@ class InventoryTest(BaseTest):
     def test_get_inventory_tree_view(self):
         # Group A is parent of B, B is parent of C, C is parent of D.
         g_a = self.inventory_a.groups.create(name='A')
+        g_a.inventory_source
         g_b = self.inventory_a.groups.create(name='B')
+        g_b.inventory_source
         g_b.parents.add(g_a)
         g_c = self.inventory_a.groups.create(name='C')
+        g_c.inventory_source
         g_c.parents.add(g_b)
         g_d = self.inventory_a.groups.create(name='D')
+        g_d.inventory_source
         g_d.parents.add(g_c)
         
         url = reverse('api:inventory_tree_view', args=(self.inventory_a.pk,))

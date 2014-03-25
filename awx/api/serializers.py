@@ -72,7 +72,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
-    'inventory_source': ('source', 'last_updated', 'status'),
+    #'inventory_source': ('source', 'last_updated', 'status'),
 }
 
 class ChoiceField(fields.ChoiceField):
@@ -654,7 +654,8 @@ class GroupTreeSerializer(GroupSerializer):
         if obj is None:
             return {}
         children_qs = obj.children.filter(active=True)
-        children_qs = children_qs.select_related('inventory', 'inventory_source')
+        children_qs = children_qs.select_related('inventory')
+        children_qs = children_qs.prefetch_related('inventory_source')
         return GroupTreeSerializer(children_qs, many=True).data
 
 
