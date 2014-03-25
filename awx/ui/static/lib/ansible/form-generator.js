@@ -1427,7 +1427,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                             html += (fAction.ngShow) ? this.attr(fAction, 'ngShow') : "";
                             html += ">";
                             html += SelectIcon({ action: act });
-                            html += (fAction.label) ? "<span class=\"list-action-label\"> " + fAction.label + "</span>": "";
+                            //html += (fAction.label) ? "<span class=\"list-action-label\"> " + fAction.label + "</span>": "";
                             html += "</a>";
                         }
                         html += "</td>";
