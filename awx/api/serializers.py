@@ -332,6 +332,8 @@ class ProjectSerializer(BaseSerializer):
 
     playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
     scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
+    last_update_failed = serializers.Field(source='last_update_failed')
+    last_updated = serializers.Field(source='last_updated')
 
     class Meta:
         model = Project
@@ -339,8 +341,8 @@ class ProjectSerializer(BaseSerializer):
                                 'scm_branch', 'scm_clean',
                                 'scm_delete_on_update', 'scm_delete_on_next_update',
                                 'scm_update_on_launch', 'credential',
-                                #'last_update_failed', 'status', 'last_updated')
-                                'last_job_failed', 'status', 'last_job_run')
+                                'last_job_failed', 'status', 'last_job_run') +\
+                               ('last_update_failed', 'last_updated',)  # Backwards compatibility
 
     def get_related(self, obj):
         if obj is None:
@@ -357,17 +359,19 @@ class ProjectSerializer(BaseSerializer):
         if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
-        #if obj.current_update:
-        #    res['current_update'] = reverse('api:project_update_detail',
-        #if obj.last_update:
-        #    res['last_update'] = reverse('api:project_update_detail',
-        #                                 args=(obj.last_update.pk,))
         if obj.current_job:
             res['current_job'] = reverse('api:project_update_detail',
                                          args=(obj.current_job.pk,))
         if obj.last_job:
             res['last_job'] = reverse('api:project_update_detail',
                                          args=(obj.last_job.pk,))
+        # Backwards compatibility.
+        if obj.current_update:
+            res['current_update'] = reverse('api:project_update_detail',
+                                            args=(obj.last_update.pk,))
+        if obj.last_update:
+            res['last_update'] = reverse('api:project_update_detail',
+                                         args=(obj.last_update.pk,))
         return res
 
     def validate_local_path(self, attrs, source):
@@ -694,15 +698,17 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
 class InventorySourceSerializer(BaseSerializer):
     
     #source_password = serializers.WritableField(required=False, default='')
+    last_update_failed = serializers.Field(source='last_update_failed')
+    last_updated = serializers.Field(source='last_updated')
 
     class Meta:
         model = InventorySource
         fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'inventory', 'group', 'source', 'source_path',
                   'source_vars', 'credential', 'source_regions', 'overwrite',
-                  'overwrite_vars', 'update_on_launch', #'update_interval',
-                  #'last_update_failed', 'status', 'last_updated')
-                  'last_job_failed', 'status', 'last_job_run')
+                  'overwrite_vars', 'update_on_launch', 'last_job_failed',
+                  'status', 'last_job_run') + \
+                 ('last_update_failed', 'last_updated') # Backwards compatibility.
         read_only_fields = ('inventory', 'group')
 
     def get_related(self, obj):
@@ -723,18 +729,19 @@ class InventorySourceSerializer(BaseSerializer):
         if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
-        #if obj.current_update:
-        #    res['current_update'] = reverse('api:inventory_update_detail',
-        #                                    args=(obj.current_update.pk,))
-        #if obj.last_update:
-        #    res['last_update'] = reverse('api:inventory_update_detail',
-        #                                 args=(obj.last_update.pk,))
         if obj.current_job:
             res['current_job'] = reverse('api:inventory_update_detail',
                                             args=(obj.current_job.pk,))
         if obj.last_job:
             res['last_job'] = reverse('api:inventory_update_detail',
                                          args=(obj.last_job.pk,))
+        # Backwards compatibility.
+        if obj.current_update:
+            res['current_update'] = reverse('api:inventory_update_detail',
+                                            args=(obj.current_update.pk,))
+        if obj.last_update:
+            res['last_update'] = reverse('api:inventory_update_detail',
+                                         args=(obj.last_update.pk,))
         return res
 
     def get_summary_fields(self, obj):
