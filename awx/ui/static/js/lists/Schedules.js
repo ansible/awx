@@ -22,13 +22,16 @@ angular.module('SchedulesListDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name'
+                label: 'Name',
+                ngClick: "editSchedule(schedule.id)"
             },
             dtstart: {
-                label: 'Start'
+                label: 'Start',
+                searchable: false
             },
             dtend: {
-                label: 'End'
+                label: 'End',
+                searchable: false
             }
         },
 
@@ -46,6 +49,14 @@ angular.module('SchedulesListDefinition', [])
         },
 
         fieldActions: {
+            "play": {
+                mode: "all",
+                ngClick: "toggleSchedule(schedule.id)",
+                awToolTip: "{{ schedule.play_tip }}",
+                dataTipWatch: "schedule.play_tip",
+                iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",
+                dataPlacement: "top"
+            },
             edit: {
                 label: 'Edit',
                 ngClick: "editSchedule(schedule.id)",
@@ -53,7 +64,6 @@ angular.module('SchedulesListDefinition', [])
                 awToolTip: 'Edit schedule',
                 dataPlacement: 'top'
             },
-
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteSchedule(schedule.id)",
