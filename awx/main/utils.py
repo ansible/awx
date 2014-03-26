@@ -233,7 +233,7 @@ def model_instance_diff(old, new, serializer_mapping=None):
     When provided, read-only fields will not be included in the resulting dictionary
     """
     from django.db.models import Model
-    from awx.main.models.organization import Credential
+    from awx.main.models.credential import Credential
 
     if not(old is None or isinstance(old, Model)):
         raise TypeError('The supplied old instance is not a valid model instance.')
@@ -281,7 +281,7 @@ def model_to_dict(obj, serializer_mapping=None):
     serializer_mapping are used to determine read-only fields.
     When provided, read-only fields will not be included in the resulting dictionary
     """
-    from awx.main.models.organization import Credential
+    from awx.main.models.credential import Credential
     attr_d = {}
     if serializer_mapping is not None and obj.__class__ in serializer_mapping:
         serializer_actual = serializer_mapping[obj.__class__]()

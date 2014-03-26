@@ -24,7 +24,7 @@ from django.utils.timezone import now
 # AWX
 from awx.main.models import *
 from awx.main.tests.base import BaseTest, BaseTransactionTest
-from awx.main.tests.tasks import TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
+from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
 from awx.main.utils import decrypt_field, update_scm_url
 
 TEST_PLAYBOOK = '''- hosts: mygroup
@@ -221,7 +221,7 @@ class ProjectsTest(BaseTest):
 
         # can add projects (super user)
         project_dir = tempfile.mkdtemp(dir=settings.PROJECTS_ROOT)
-        self._temp_project_dirs.append(project_dir)
+        self._temp_paths.append(project_dir)
         project_data = {
             'name': 'My Test Project',
             'description': 'Does amazing things',
@@ -452,8 +452,8 @@ class ProjectsTest(BaseTest):
             name = 'credential',
             project = Project.objects.order_by('pk')[0].pk,
             default_username = 'foo',
-            ssh_key_data = 'bar',
-            ssh_key_unlock = 'baz',
+            ssh_key_data = TEST_SSH_KEY_DATA_LOCKED,
+            ssh_key_unlock = TEST_SSH_KEY_DATA_UNLOCK,
             ssh_password = 'narf',
             sudo_password = 'troz'
         )
@@ -528,6 +528,54 @@ class ProjectsTest(BaseTest):
         with self.current_user(self.super_django_user):
             data = dict(name='wxy', user=self.super_django_user.pk, kind='ssh',
                         ssh_key_data=TEST_SSH_KEY_DATA_LOCKED)
+            self.post(url, data, expect=400)
+            data['ssh_key_unlock'] = TEST_SSH_KEY_DATA_UNLOCK
+            self.post(url, data, expect=201)
+
+        # Test with invalid ssh key data.
+        with self.current_user(self.super_django_user):
+            bad_key_data = TEST_SSH_KEY_DATA.replace('PRIVATE', 'PUBLIC')
+            data = dict(name='wyx', user=self.super_django_user.pk, kind='ssh',
+                        ssh_key_data=bad_key_data)
+            self.post(url, data, expect=400)
+            data['ssh_key_data'] = TEST_SSH_KEY_DATA.replace('-', '=')
+            self.post(url, data, expect=400)
+            data['ssh_key_data'] = '\n'.join(TEST_SSH_KEY_DATA.splitlines()[1:-1])
+            self.post(url, data, expect=400)
+            data['ssh_key_data'] = TEST_SSH_KEY_DATA.replace('--B', '---B')
+            self.post(url, data, expect=400)
+            data['ssh_key_data'] = TEST_SSH_KEY_DATA
+            self.post(url, data, expect=201)
+
+        # Test with ssh_key_path (invalid path, bad data, then valid key).
+        handle, ssh_key_path = tempfile.mkstemp(suffix='.key')
+        self._temp_paths.append(ssh_key_path)
+        ssh_key_file = os.fdopen(handle, 'w')
+        ssh_key_file.write(TEST_SSH_KEY_DATA)
+        ssh_key_file.close()
+        handle, invalid_ssh_key_path = tempfile.mkstemp(suffix='.key')
+        self._temp_paths.append(invalid_ssh_key_path)
+        invalid_ssh_key_file = os.fdopen(handle, 'w')
+        invalid_ssh_key_file.write('not a valid key')
+        invalid_ssh_key_file.close()
+        with self.current_user(self.super_django_user):
+            data = dict(name='yzv', user=self.super_django_user.pk, kind='ssh',
+                        ssh_key_path=ssh_key_path + '.moo')
+            self.post(url, data, expect=400)
+            data['ssh_key_path'] = invalid_ssh_key_path
+            self.post(url, data, expect=400)
+            data['ssh_key_path'] = ssh_key_path
+            self.post(url, data, expect=201)
+
+        # Test with encrypted key on ssh_key_path.
+        handle, enc_ssh_key_path = tempfile.mkstemp(suffix='.key')
+        self._temp_paths.append(enc_ssh_key_path)
+        enc_ssh_key_file = os.fdopen(handle, 'w')
+        enc_ssh_key_file.write(TEST_SSH_KEY_DATA_LOCKED)
+        enc_ssh_key_file.close()
+        with self.current_user(self.super_django_user):
+            data = dict(name='wvz', user=self.super_django_user.pk, kind='ssh',
+                        ssh_key_path=enc_ssh_key_path)
             self.post(url, data, expect=400)
             data['ssh_key_unlock'] = TEST_SSH_KEY_DATA_UNLOCK
             self.post(url, data, expect=201)
@@ -719,7 +767,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             kwargs['credential'] = credential
         project = Project.objects.create(**kwargs)
         project_path = project.get_project_path(check_if_exists=False)
-        self._temp_project_dirs.append(project_path)
+        self._temp_paths.append(project_path)
         return project
 
     def test_update_scm_url(self):
@@ -1313,7 +1361,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
 
     def create_local_git_repo(self):
         repo_dir = tempfile.mkdtemp()
-        self._temp_project_dirs.append(repo_dir)
+        self._temp_paths.append(repo_dir)
         handle, playbook_path = tempfile.mkstemp(suffix='.yml', dir=repo_dir)
         test_playbook_file = os.fdopen(handle, 'w')
         test_playbook_file.write(TEST_PLAYBOOK)
@@ -1408,7 +1456,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
 
     def create_local_hg_repo(self):
         repo_dir = tempfile.mkdtemp()
-        self._temp_project_dirs.append(repo_dir)
+        self._temp_paths.append(repo_dir)
         handle, playbook_path = tempfile.mkstemp(suffix='.yml', dir=repo_dir)
         test_playbook_file = os.fdopen(handle, 'w')
         test_playbook_file.write(TEST_PLAYBOOK)
@@ -1477,7 +1525,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
 
     def create_local_svn_repo(self):
         repo_dir = tempfile.mkdtemp()
-        self._temp_project_dirs.append(repo_dir)
+        self._temp_paths.append(repo_dir)
         subprocess.check_call(['svnadmin', 'create', '.'], cwd=repo_dir,
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         handle, playbook_path = tempfile.mkstemp(suffix='.yml', dir=repo_dir)

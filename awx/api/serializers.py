@@ -985,7 +985,7 @@ class CredentialSerializer(BaseSerializer):
     class Meta:
         model = Credential
         fields = ('*', 'user', 'team', 'kind', 'cloud', 'username',
-                  'password', 'ssh_key_data', 'ssh_key_unlock',
+                  'password', 'ssh_key_data', 'ssh_key_path', 'ssh_key_unlock',
                   'sudo_username', 'sudo_password', 'vault_password')
 
     def to_native(self, obj):

@@ -371,10 +371,11 @@ class RunJob(BaseTask):
 
     def build_private_data(self, job, **kwargs):
         '''
-        Return SSH private key data needed for this job.
+        Return SSH private key data needed for this job (only if stored in DB
+        as ssh_key_data).
         '''
         credential = getattr(job, 'credential', None)
-        if credential:
+        if credential and credential.ssh_key_data:
             return decrypt_field(credential, 'ssh_key_data') or None
 
     def build_passwords(self, job, **kwargs):
@@ -472,6 +473,13 @@ class RunJob(BaseTask):
         except ValueError:
             pass
 
+        # If private key isn't encrypted, pass the path on the command line.
+        ssh_key_path = kwargs.get('private_data_file', '')
+        ssh_key_path = ssh_key_path or (creds and creds.ssh_key_path) or ''
+        use_ssh_agent = 'ssh_key_unlock' in kwargs.get('passwords', {})
+        if ssh_key_path and not use_ssh_agent:
+            args.append('--private-key=%s' % ssh_key_path)
+
         if job.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % job.forks)
         if job.limit:
@@ -483,11 +491,13 @@ class RunJob(BaseTask):
         if job.job_tags:
             args.extend(['-t', job.job_tags])
         args.append(job.playbook) # relative path to project.local_path
-        ssh_key_path = kwargs.get('private_data_file', '')
-        if ssh_key_path:
+
+        # If ssh unlock password is needed, run using ssh-agent.
+        if ssh_key_path and use_ssh_agent:
             cmd = ' '.join([self.args2cmdline('ssh-add', ssh_key_path),
                             '&&', self.args2cmdline(*args)])
             args = ['ssh-agent', 'sh', '-c', cmd]
+            
         return args
 
     def build_cwd(self, job, **kwargs):

@@ -728,7 +728,7 @@ class RunJobTest(BaseCeleryTest):
         self.check_job_result(job, 'failed')
         self.assertTrue('-l' in job.job_args)
 
-    def test_limit_option_with_group_pattern_and_ssh_agent(self):
+    def test_limit_option_with_group_pattern_and_ssh_key(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA)
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template(limit='test-group:&test-group2')
@@ -738,7 +738,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('ssh-agent' in job.job_args)
+        self.assertTrue('--private-key=' in job.job_args)
+        self.assertFalse('ssh-agent' in job.job_args)
 
     def test_ssh_username_and_password(self):
         self.create_test_credential(username='sshuser', password='sshpass')
@@ -810,7 +811,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('ssh-agent' in job.job_args)
+        self.assertTrue('--private-key=' in job.job_args)
+        self.assertFalse('ssh-agent' in job.job_args)
 
     def test_locked_ssh_key_with_password(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
@@ -842,6 +844,68 @@ class RunJobTest(BaseCeleryTest):
 
     def test_locked_ssh_key_ask_password(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
+                                    ssh_key_unlock='ASK')
+        self.create_test_project(TEST_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertTrue(job.passwords_needed_to_start)
+        self.assertTrue('ssh_key_unlock' in job.passwords_needed_to_start)
+        self.assertFalse(job.signal_start())
+        job.status = 'failed'
+        job.save()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertTrue(job.signal_start(ssh_key_unlock=TEST_SSH_KEY_DATA_UNLOCK))
+        job = Job.objects.get(pk=job.pk)
+        self.check_job_result(job, 'successful')
+        self.assertTrue('ssh-agent' in job.job_args)
+        self.assertTrue('Bad passphrase' not in job.result_stdout)
+
+    def test_unlocked_ssh_key_path(self):
+        handle, ssh_key_path = tempfile.mkstemp(suffix='.key')
+        self._temp_paths.append(ssh_key_path)
+        ssh_key_file = os.fdopen(handle, 'w')
+        ssh_key_file.write(TEST_SSH_KEY_DATA)
+        ssh_key_file.close()
+        self.create_test_credential(ssh_key_path=ssh_key_path)
+        self.create_test_project(TEST_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        job = Job.objects.get(pk=job.pk)
+        self.check_job_result(job, 'successful')
+        self.assertTrue('--private-key=' in job.job_args)
+        self.assertFalse('ssh-agent' in job.job_args)
+
+    def test_locked_ssh_key_path_with_password(self):
+        handle, ssh_key_path = tempfile.mkstemp(suffix='.key')
+        self._temp_paths.append(ssh_key_path)
+        ssh_key_file = os.fdopen(handle, 'w')
+        ssh_key_file.write(TEST_SSH_KEY_DATA_LOCKED)
+        ssh_key_file.close()
+        self.create_test_credential(ssh_key_path=ssh_key_path,
+                                    ssh_key_unlock=TEST_SSH_KEY_DATA_UNLOCK)
+        self.create_test_project(TEST_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        job = Job.objects.get(pk=job.pk)
+        self.check_job_result(job, 'successful')
+        self.assertTrue('ssh-agent' in job.job_args)
+        self.assertTrue('Bad passphrase' not in job.result_stdout)
+
+    def test_locked_ssh_key_path_ask_password(self):
+        handle, ssh_key_path = tempfile.mkstemp(suffix='.key')
+        self._temp_paths.append(ssh_key_path)
+        ssh_key_file = os.fdopen(handle, 'w')
+        ssh_key_file.write(TEST_SSH_KEY_DATA_LOCKED)
+        ssh_key_file.close()
+        self.create_test_credential(ssh_key_path=ssh_key_path,
                                     ssh_key_unlock='ASK')
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()

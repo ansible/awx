@@ -38,7 +38,7 @@ class BaseTestMixin(object):
     def setUp(self):
         super(BaseTestMixin, self).setUp()
         self.object_ctr = 0
-        self._temp_project_dirs = []
+        self._temp_paths = []
         self._current_auth = None
         self._user_passwords = {}
         self.ansible_version = get_ansible_version()
@@ -63,18 +63,18 @@ class BaseTestMixin(object):
             callback_port = random.randint(55700, 55799)
             settings.CALLBACK_CONSUMER_PORT = 'tcp://127.0.0.1:%d' % callback_port
             callback_queue_path = '/tmp/callback_receiver_test_%d.ipc' % callback_port
-            self._temp_project_dirs.append(callback_queue_path)
+            self._temp_paths.append(callback_queue_path)
             settings.CALLBACK_QUEUE_PORT = 'ipc://%s' % callback_queue_path
             settings.TASK_COMMAND_PORT = 'ipc:///tmp/task_command_receiver_%d.ipc' % callback_port
         # Make temp job status directory for unit tests.
         job_status_dir = tempfile.mkdtemp()
-        self._temp_project_dirs.append(job_status_dir)
+        self._temp_paths.append(job_status_dir)
         settings.JOBOUTPUT_ROOT = os.path.abspath(job_status_dir)
         self._start_time = time.time()
 
     def tearDown(self):
         super(BaseTestMixin, self).tearDown()
-        for project_dir in self._temp_project_dirs:
+        for project_dir in self._temp_paths:
             if os.path.exists(project_dir):
                 if os.path.isdir(project_dir):
                     shutil.rmtree(project_dir, True)
@@ -131,7 +131,7 @@ class BaseTestMixin(object):
             os.makedirs(settings.PROJECTS_ROOT)
         # Create temp project directory.
         project_dir = tempfile.mkdtemp(dir=settings.PROJECTS_ROOT)
-        self._temp_project_dirs.append(project_dir)
+        self._temp_paths.append(project_dir)
         # Create temp playbook in project (if playbook content is given).
         if playbook_content:
             handle, playbook_path = tempfile.mkstemp(suffix='.yml',

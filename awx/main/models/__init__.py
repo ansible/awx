@@ -8,6 +8,7 @@ from django.conf import settings
 from awx.main.models.base import *
 from awx.main.models.unified_jobs import *
 from awx.main.models.organization import *
+from awx.main.models.credential import *
 from awx.main.models.projects import *
 from awx.main.models.inventory import *
 from awx.main.models.jobs import *

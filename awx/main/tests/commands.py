@@ -463,7 +463,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
     def create_test_dir(self, hostnames=None):
         hostnames = hostnames or []
         self.inv_dir = tempfile.mkdtemp()
-        self._temp_project_dirs.append(self.inv_dir)
+        self._temp_paths.append(self.inv_dir)
         self.create_test_ini(self.inv_dir)
         group_vars = os.path.join(self.inv_dir, 'group_vars')
         os.makedirs(group_vars)
