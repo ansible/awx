@@ -218,13 +218,13 @@ angular.module('ProjectFormDefinition', [])
                 "default": '0',
                 addRequired: false,
                 editRequired: false,
-                awPopOver: '<p>Time in seconds to consider a project update current. During job runs and callbacks the task system will ' +
-                    'evaluate the timestamp of the latest project update. If it is older than Cache Timeout, the project update is not current, ' +
-                    'and a new update will be performed.',
+                awPopOver: '<p>Time in seconds to consider a project to be current. During job runs and callbacks the task system will ' +
+                    'evaluate the timestamp of the latest project update. If it is older than Cache Timeout, it is not considered current, ' +
+                    'and a new project update will be performed.</p>',
                 dataTitle: 'Cache Timeout',
                 dataPlacement: 'right',
                 dataContainer: "body"
-            },
+            }
         },
 
         buttons: {

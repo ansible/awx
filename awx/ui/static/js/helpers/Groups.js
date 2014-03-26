@@ -202,6 +202,7 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                         id: 'all',
                         text: 'All'
                     }]);
+                    $('#source_form').removeClass('squeeze');
                 } else if (scope.source.value === 'ec2') {
                     scope.source_region_choices = scope.ec2_regions;
                     //$('#s2id_group_source_regions').select2('data', []);
@@ -209,6 +210,7 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                         id: 'all',
                         text: 'All'
                     }]);
+                    $('#source_form').addClass('squeeze');
                 }
                 if (scope.source.value === 'rax' || scope.source.value === 'ec2') {
                     kind = (scope.source.value === 'rax') ? 'rax' : 'aws';
@@ -650,15 +652,15 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
             if (ww > 1199) {
                 // desktop
                 x = 675;
-                y = (750 > wh) ? wh - 20 : 750;
+                y = (780 > wh) ? wh - 15 : 780;
                 maxrows = 18;
             } else if (ww <= 1199 && ww >= 768) {
                 x = 550;
-                y = (620 > wh) ? wh - 15 : 620;
+                y = (770 > wh) ? wh - 15 : 770;
                 maxrows = 12;
             } else {
                 x = (ww - 20);
-                y = (500 > wh) ? wh : 500;
+                y = (770 > wh) ? wh - 15 : 770;
                 maxrows = 10;
             }
 
@@ -843,7 +845,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                                     // Parse source_vars, converting to YAML.  
                                     sources_scope.source_vars = ParseVariableString(data.source_vars);
                                     master.source_vars = sources_scope.variables;
-                                } else if (data[fld]) {
+                                } else if (data[fld] !== undefined) {
                                     sources_scope[fld] = data[fld];
                                     master[fld] = sources_scope[fld];
                                 }
@@ -1056,7 +1058,8 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                         credential: sources_scope.credential,
                         overwrite: sources_scope.overwrite,
                         overwrite_vars: sources_scope.overwrite_vars,
-                        update_on_launch: sources_scope.update_on_launch
+                        update_on_launch: sources_scope.update_on_launch,
+                        update_cache_timeout: sources_scope.update_cache_timeout
                     };
 
                 // Create a string out of selected list of regions

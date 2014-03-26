@@ -128,6 +128,24 @@ angular.module('SourceFormDefinition', [])
                     dataPlacement: 'right',
                     labelClass: 'checkbox-options'
                 }]
+            },
+            update_cache_timeout: {
+                label: 'Cache Timeout',
+                id: 'source-cache-timeout',
+                type: 'number',
+                integer: true,
+                min: 0,
+                ngShow: "update_on_launch",
+                spinner: true,
+                "default": '0',
+                addRequired: false,
+                editRequired: false,
+                awPopOver: '<p>Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will ' +
+                    'evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, ' +
+                    'and a new inventory sync will be performed.</p>',
+                dataTitle: 'Cache Timeout',
+                dataPlacement: 'right',
+                dataContainer: "body"
             }
         },
 
