@@ -10,7 +10,7 @@
 'use strict';
 
 angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers',
-    'JobSubmissionHelper'])
+    'JobSubmissionHelper', 'SchedulesHelper'])
 
 .factory('JobStatusToolTip', [
     function () {
@@ -369,6 +369,16 @@ function(Find, Wait, Rest, InventoryUpdate, ProcessErrors, GetBasePath) {
         var scope = params.scope,
             id = params.id;
         ProjectUpdate({ scope: scope, id: id });
+    };
+}])
+
+.factory('ScheduledJobEdit', ['Find', 'EditSchedule', 'GetBasePath', function(Find, EditSchedule, GetBasePath) {
+    return function(params) {
+        var scope = params.scope,
+            id = params.id,
+            url = GetBasePath('schedules'),
+            schedule = Find({ list: scope.scheduled_jobs, key: 'id', val: id });
+        EditSchedule({ scope: scope, schedule: schedule, url: url });
     };
 }]);
 

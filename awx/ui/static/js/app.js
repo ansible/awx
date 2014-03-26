@@ -147,7 +147,7 @@ angular.module('ansible', [
 
             when('/job_templates/:id/schedules', {
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
-                controller: 'ScheduleEdit'
+                controller: 'ScheduleEditController'
             }).
 
             when('/projects', {
@@ -167,7 +167,7 @@ angular.module('ansible', [
             
             when('/projects/:id/schedules', {
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
-                controller: 'ScheduleEdit'
+                controller: 'ScheduleEditController'
             }).
 
             when('/projects/:project_id/organizations', {

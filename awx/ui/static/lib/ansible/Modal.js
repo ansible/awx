@@ -45,6 +45,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 onClose = params.onClose,
                 onOpen = params.onOpen,
                 callback = params.callback,
+                closeOnEscape = (params.closeOnEscape === undefined) ? false : params.closeOnEscape,
                 buttons,
                 id = params.id,
                 x, y, wh, ww;
@@ -82,6 +83,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 autoOpen: false,
                 minWidth: minWidth,
                 title: title,
+                closeOnEscape: closeOnEscape,
                 create: function () {
                     // Fix the close button
                     $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
@@ -108,8 +110,11 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 resizeStop: function () {
                     // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
                     var dialog = $('.ui-dialog[aria-describedby="' + id + '"]'),
+                        titleHeight = dialog.find('.ui-dialog-titlebar').outerHeight(),
+                        buttonHeight = dialog.find('.ui-dialog-buttonpane').outerHeight(),
                         content = dialog.find('#' + id);
                     content.width(dialog.width() - 28);
+                    content.css({ height: (dialog.height() - titleHeight - buttonHeight - 10) });
                     if (onResizeStop) {
                         onResizeStop();
                     }

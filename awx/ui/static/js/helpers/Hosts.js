@@ -470,6 +470,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             minWidth: 400,
             title: 'Host Properties',
             id: 'host-modal-dialog',
+            clonseOnEscape: false,
             onClose: function() {
                 Wait('stop');
                 scope.codeMirror.destroy();
@@ -485,6 +486,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                 });
             },
             onOpen: function() {
+                $('#host_name').focus();
                 setTimeout(function() {
                     TextareaResize({
                         scope: scope,

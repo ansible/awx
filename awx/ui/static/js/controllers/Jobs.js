@@ -11,7 +11,8 @@
 'use strict';
 
 function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
-    ScheduledJobsList, GetChoices, GetBasePath, Wait, DeleteJob, Find, DeleteSchedule, ToggleSchedule, RelaunchInventory, RelaunchPlaybook, RelaunchSCM) {
+    ScheduledJobsList, GetChoices, GetBasePath, Wait, DeleteJob, Find, DeleteSchedule, ToggleSchedule, RelaunchInventory, RelaunchPlaybook, RelaunchSCM,
+    LoadDialogPartial, ScheduledJobEdit) {
     
     ClearScope();
 
@@ -140,6 +141,10 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             });
         };
 
+        scheduled_scope.editSchedule = function(id) {
+            ScheduledJobEdit({ scope: scheduled_scope, id: id });
+        };
+
         completed_scope.relaunch = function(id) {
             var job = Find({ list: completed_scope.completed_jobs, key: 'id', val: id }),
                 type_id = getTypeId(job);
@@ -165,7 +170,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
     }
     $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
         choicesCount++;
-        if (choicesCount === 2) {
+        if (choicesCount === 3) {
             $scope.$emit('buildJobsList');
         }
     });
@@ -188,11 +193,16 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         callback: 'choicesReady'
     });
 
+    LoadDialogPartial({
+        scope: $scope,
+        element_id: 'schedule-dialog-target',
+        callback: 'choicesReady'
+    });
 }
 
 JobsListController.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadScope', 'RunningJobsList', 'CompletedJobsList',
     'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'DeleteJob', 'Find', 'DeleteSchedule', 'ToggleSchedule', 'RelaunchInventory',
-    'RelaunchPlaybook', 'RelaunchSCM'];
+    'RelaunchPlaybook', 'RelaunchSCM', 'LoadDialogPartial', 'ScheduledJobEdit'];
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
@@ -464,6 +474,7 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
 JobsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobForm', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit', 'PromptPasswords',
-    'GetBasePath', 'md5Setup', 'FormatDate', 'JobStatusToolTip', 'Wait', 'Empty', 'ParseVariableString', 'GetChoices'
+    'GetBasePath', 'md5Setup', 'FormatDate', 'JobStatusToolTip', 'Wait', 'Empty', 'ParseVariableString', 'GetChoices',
+    'LoadDialogPartial'
 ];
 

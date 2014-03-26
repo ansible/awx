@@ -1,0 +1,13 @@
+<div id="scheduler-modal-dialog" title="Edit Schedule">
+    <ul id="scheduler-tabs" class="nav nav-tabs">
+        <li class="active"><a href="#schedule" id="schedule-link" data-toggle="tab" ng-click="toggleTab($event, 'schedule-link', 'scheduler-tabs')">Options</a></li>
+        <li><a href="#occurrences" id="occurrence-link" data-toggle="tab" ng-click="toggleTab($event, 'occurrence-link', 'scheduler-tabs')">Details</a></li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="schedule">
+            <div id="form-container"></div>
+        </div>
+        <div class="tab-pane" id="occurrences">
+        </div>
+    </div>
+</div>

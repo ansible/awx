@@ -52,6 +52,7 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                 width: x,
                 height: y,
                 autoOpen: false,
+                closeOnEscape: false,
                 create: function () {
                     $('.ui-dialog[aria-describedby="scheduler-modal-dialog"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
                     $('.ui-dialog[aria-describedby="scheduler-modal-dialog"]').find('.ui-dialog-buttonset button').each(function () {
@@ -79,9 +80,12 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                 },
                 resizeStop: function () {
                     // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
-                    var dialog = $('.ui-dialog[aria-describedby="status-modal-dialog"]'),
-                    content = dialog.find('#scheduler-modal-dialog');
+                    var dialog = $('.ui-dialog[aria-describedby="scheduler-modal-dialog"]'),
+                        titleHeight = dialog.find('.ui-dialog-titlebar').outerHeight(),
+                        buttonHeight = dialog.find('.ui-dialog-buttonpane').outerHeight(),
+                        content = dialog.find('#scheduler-modal-dialog');
                     content.width(dialog.width() - 28);
+                    content.css({ height: (dialog.height() - titleHeight - buttonHeight - 10) });
                 },
                 close: function () {
                     // Destroy on close
@@ -114,7 +118,6 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                 schedule = params.schedule,
                 url = params.url,
                 scheduler;
-
             Wait('start');
             $('#form-container').empty();
             scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
@@ -124,6 +127,10 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
             ShowSchedulerModal({ scope: scope });
             scope.showRRuleDetail = false;
 
+            if (!/DTSTART/.test(schedule.rrule)) {
+                schedule.rrule += ";DTSTART=" + schedule.dtstart;
+            }
+           
             setTimeout(function(){
                 $('#scheduler-modal-dialog').dialog('open');
                 scope.$apply(function() {
@@ -213,6 +220,31 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                     }
                 }
             });
+        };
+    }])
+
+    .factory('LoadDialogPartial', ['Rest', '$compile', 'ProcessErrors', function(Rest, $compile, ProcessErrors) {
+        return function(params) {
+            
+            var scope = params.scope,
+                element_id = params.element_id,
+                callback = params.callback,
+                url;
+
+            // Add the schedule_dialog.html partial 
+            url = '/static/partials/schedule_dialog.html';
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    var e = angular.element(document.getElementById(element_id));
+                    e.append(data);
+                    $compile(e)(scope);
+                    scope.$emit(callback);
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, null, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. GET returned: ' + status });
+                });
         };
     }])
 

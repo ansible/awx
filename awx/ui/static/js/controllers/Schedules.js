@@ -10,8 +10,9 @@
 
 'use strict';
 
-function ScheduleEdit($scope, $compile, $location, $routeParams, SchedulesList, GenerateList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateInit, PageRangeSetup, EditSchedule, AddSchedule, Find, ToggleSchedule, DeleteSchedule) {
+function ScheduleEditController($scope, $compile, $location, $routeParams, SchedulesList, GenerateList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateInit, PageRangeSetup, EditSchedule, AddSchedule, Find, ToggleSchedule, DeleteSchedule,
+LoadDialogPartial) {
     
     ClearScope();
 
@@ -156,21 +157,33 @@ GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateI
         });
     };
 
-    // Load the parent object
-    id = $routeParams.id;
-    Rest.setUrl(GetBasePath(base) + id);
-    Rest.get()
-        .success(function(data) {
-            parentObject = data;
-            $scope.$emit('ParentLoaded');
-        })
-        .error(function(status) {
-            ProcessErrors($scope, null, status, null, { hdr: 'Error!',
-                msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-        });
+    if ($scope.removeLoadParent) {
+        $scope.removeLoadParent();
+    }
+    $scope.removeLoadParent = $scope.$on('LoadParent', function() {
+        // Load the parent object
+        id = $routeParams.id;
+        url = GetBasePath(base) + id;
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                parentObject = data;
+                $scope.$emit('ParentLoaded');
+            })
+            .error(function(status) {
+                ProcessErrors($scope, null, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + ' failed. GET returned: ' + status });
+            });
+    });
+
+    LoadDialogPartial({
+        scope: $scope,
+        element_id: 'schedule-dialog-target',
+        callback: 'LoadParent',
+    });
 }
 
-ScheduleEdit.$inject = ['$scope', '$compile', '$location', '$routeParams', 'SchedulesList', 'GenerateList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
+ScheduleEditController.$inject = ['$scope', '$compile', '$location', '$routeParams', 'SchedulesList', 'GenerateList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
 'ClearScope', 'GetBasePath', 'LookUpInit', 'Wait', 'SchedulerInit', 'Breadcrumbs', 'SearchInit', 'PaginateInit', 'PageRangeSetup', 'EditSchedule', 'AddSchedule',
-'Find', 'ToggleSchedule', 'DeleteSchedule'
+'Find', 'ToggleSchedule', 'DeleteSchedule', 'LoadDialogPartial'
 ];

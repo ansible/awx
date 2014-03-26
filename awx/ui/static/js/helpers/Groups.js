@@ -678,6 +678,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                 autoOpen: false,
                 minWidth: 440,
                 title: 'Edit Group',
+                closeOnEscape: false,
                 create: function () {
                     $('.ui-dialog[aria-describedby="group-modal-dialog"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
                     $('.ui-dialog[aria-describedby="group-modal-dialog"]').find('.ui-dialog-buttonset button').each(function () {
@@ -705,9 +706,13 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                 resizeStop: function () {
                     // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
                     var dialog = $('.ui-dialog[aria-describedby="group-modal-dialog"]'),
+                        titleHeight = dialog.find('.ui-dialog-titlebar').outerHeight(),
+                        buttonHeight = dialog.find('.ui-dialog-buttonpane').outerHeight(),
                         content = dialog.find('#group-modal-dialog'),
                         w;
                     content.width(dialog.width() - 28);
+                    content.css({ height: (dialog.height() - titleHeight - buttonHeight - 10) });
+
                     if ($('#group_tabs .active a').text() === 'Properties') {
                         textareaResize('group_variables', properties_scope);
                     }
