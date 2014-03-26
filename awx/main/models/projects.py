@@ -297,6 +297,15 @@ class Project(UnifiedJobTemplate, ProjectOptions):
             kwargs['scm_delete_on_update'] = True
         return self._create_unified_job_instance(**kwargs)
 
+    @property
+    def needs_update_on_launch(self):
+        if self.active and self.scm_type and self.scm_update_on_launch:
+            if not self.last_job_run:
+                return True
+            if (self.last_job_run + datetime.timedelta(seconds=self.scm_update_cache_timeout)) <= now():
+                return True
+        return False
+
     def update_signature(self, **kwargs):
         if self.can_update:
             project_update = self.create_project_update()

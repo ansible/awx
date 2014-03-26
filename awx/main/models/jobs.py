@@ -311,14 +311,12 @@ class Job(UnifiedJob, JobOptions):
             if type(obj) == InventoryUpdate:
                 if obj.inventory_source in inventory_sources:
                     inventory_sources_found.append(obj.inventory_source)
-        if not project_found and self.project.scm_update_on_launch:
-            if not self.project.last_job_run + datetime.timedelta(seconds=self.project.scm_update_cache_timeout) > now():
-                dependencies.append(self.project.create_project_update(launch_type='dependency'))
+        if not project_found and self.project.needs_update_on_launch:
+            dependencies.append(self.project.create_project_update(launch_type='dependency'))
         if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
             for source in inventory_sources:
-                if not source in inventory_sources_found:
-                    if not source.last_job_run + datetime.timedelta(seconds=source.update_cache_timeout) > now():
-                        dependencies.append(source.create_inventory_update(launch_type='dependency'))
+                if not source in inventory_sources_found and source.needs_update_on_launch:
+                    dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
 
     def signal_start(self, **kwargs):
