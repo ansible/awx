@@ -5,7 +5,7 @@
 import ConfigParser
 import cStringIO
 import datetime
-import distutils.version
+from distutils.version import StrictVersion as Version
 import functools
 import json
 import logging
@@ -317,6 +317,8 @@ class BaseTask(Task):
                     instance = self.update_model(pk)
                     status = instance.status
                     raise RuntimeError('not starting %s task' % instance.status)
+            # Fetch ansible version once here to support version-dependent features.
+            kwargs['ansible_version'] = get_ansible_version()
             kwargs['private_data_file'] = self.build_private_data_file(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
             args = self.build_args(instance, **kwargs)
@@ -377,12 +379,13 @@ class RunJob(BaseTask):
 
     def build_passwords(self, job, **kwargs):
         '''
-        Build a dictionary of passwords for SSH private key, SSH user and sudo.
+        Build a dictionary of passwords for SSH private key, SSH user, sudo
+        and ansible-vault.
         '''
         passwords = super(RunJob, self).build_passwords(job, **kwargs)
         creds = job.credential
         if creds:
-            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password'):
+            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password', 'vault_password'):
                 if field == 'ssh_password':
                     value = kwargs.get(field, decrypt_field(creds, 'password'))
                 else:
@@ -413,8 +416,7 @@ class RunJob(BaseTask):
         # When using Ansible >= 1.3, allow the inventory script to include host
         # variables inline via ['_meta']['hostvars'].
         try:
-            Version = distutils.version.StrictVersion
-            if Version(get_ansible_version()) >= Version('1.3'):
+            if Version(kwargs['ansible_version']) >= Version('1.3'):
                 env['INVENTORY_HOSTVARS'] = str(True)
         except ValueError:
             pass
@@ -461,6 +463,15 @@ class RunJob(BaseTask):
             args.extend(['-U', sudo_username])
         if 'sudo_password' in kwargs.get('passwords', {}):
             args.append('--ask-sudo-pass')
+
+        # When using Ansible >= 1.5, support prompting for a vault password.
+        try:
+            if Version(kwargs['ansible_version']) >= Version('1.5'):
+                if 'vault_password' in kwargs.get('passwords', {}):
+                    args.append('--ask-vault-pass')
+        except ValueError:
+            pass
+
         if job.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % job.forks)
         if job.limit:
@@ -497,6 +508,7 @@ class RunJob(BaseTask):
         d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'sudo_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
         return d
 
     def pre_run_check(self, job, **kwargs):
@@ -591,8 +603,7 @@ class RunProjectUpdate(BaseTask):
         # the git module.
         if scm_type == 'git' and scm_url_parts.scheme == 'ssh':
             try:
-                Version = distutils.version.StrictVersion
-                if Version(get_ansible_version()) >= Version('1.5'):
+                if Version(kwargs['ansible_version']) >= Version('1.5'):
                     extra_vars['scm_accept_hostkey'] = 'true'
             except ValueError:
                 pass

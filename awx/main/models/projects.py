@@ -176,8 +176,12 @@ class ProjectOptions(models.Model):
                     # show up.
                     matched = False
                     try:
-                        for line in file(playbook):
+                        for n, line in enumerate(file(playbook)):
                             if valid_re.match(line):
+                                matched = True
+                            # Any YAML file can also be encrypted with vault;
+                            # allow these to be used as the main playbook.
+                            elif n == 0 and line.startswith('$ANSIBLE_VAULT;'):
                                 matched = True
                     except IOError:
                         continue

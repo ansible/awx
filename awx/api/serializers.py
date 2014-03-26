@@ -980,12 +980,13 @@ class CredentialSerializer(BaseSerializer):
     ssh_key_data = serializers.WritableField(required=False, default='')
     ssh_key_unlock = serializers.WritableField(required=False, default='')
     sudo_password = serializers.WritableField(required=False, default='')
+    vault_password = serializers.WritableField(required=False, default='')
 
     class Meta:
         model = Credential
         fields = ('*', 'user', 'team', 'kind', 'cloud', 'username',
                   'password', 'ssh_key_data', 'ssh_key_unlock',
-                  'sudo_username', 'sudo_password')
+                  'sudo_username', 'sudo_password', 'vault_password')
 
     def to_native(self, obj):
         ret = super(CredentialSerializer, self).to_native(obj)

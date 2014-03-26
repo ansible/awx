@@ -164,7 +164,7 @@ class Credential(CommonModelNameNotUnique):
     ]
 
     PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock',
-                       'sudo_password')
+                       'sudo_password', 'vault_password')
 
     class Meta:
         app_label = 'main'
@@ -264,9 +264,13 @@ class Credential(CommonModelNameNotUnique):
         return self.kind == 'ssh' and self.sudo_password == 'ASK'
 
     @property
+    def needs_vault_password(self):
+        return self.kind == 'ssh' and self.vault_password == 'ASK'
+
+    @property
     def passwords_needed(self):
         needed = []
-        for field in ('password', 'sudo_password', 'ssh_key_unlock'):
+        for field in ('password', 'sudo_password', 'ssh_key_unlock', 'vault_password'):
             if getattr(self, 'needs_%s' % field):
                 needed.append(field)
         return needed

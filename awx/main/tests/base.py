@@ -27,6 +27,7 @@ from awx.main.models import *
 from awx.main.backend import LDAPSettings
 from awx.main.management.commands.run_callback_receiver import run_subscriber
 from awx.main.management.commands.run_task_system import run_taskmanager
+from awx.main.utils import get_ansible_version
 
 
 class BaseTestMixin(object):
@@ -40,6 +41,8 @@ class BaseTestMixin(object):
         self._temp_project_dirs = []
         self._current_auth = None
         self._user_passwords = {}
+        self.ansible_version = get_ansible_version()
+        self.assertNotEqual(self.ansible_version, 'unknown')
         # Wrap settings so we can redefine them within each test.
         self._wrapped = settings._wrapped
         settings._wrapped = UserSettingsHolder(settings._wrapped)

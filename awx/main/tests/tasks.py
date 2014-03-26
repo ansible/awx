@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+from distutils.version import StrictVersion as Version
 import os
 import shutil
 import tempfile
@@ -86,6 +87,19 @@ TEST_ASYNC_NOWAIT_PLAYBOOK = '''
     async: 8
     poll: 0
 '''
+
+TEST_VAULT_PLAYBOOK = '''$ANSIBLE_VAULT;1.1;AES256
+35623233333035633365383330323835353564346534363762366465316263363463396162656432
+6562643539396330616265616532656466353639303338650a313466333663646431646663333739
+32623935316439343636633462373633653039646336376361386439386661366434333830383634
+6266613530626633390a363532373562353262323863343830343865303663306335643430396239
+63393963623537326366663332656132653465646332343234656237316537643135313932623237
+66313863396463343232383131633531363239396636363165646562396261626633326561313837
+32383634326230656230386237333561373630343233353239613463626538356338326633386434
+36396639313030336165366266646431306665336662663732313762663938666239663233393964
+30393733393331383132306463656636396566373961383865643562383564356363'''
+
+TEST_VAULT_PASSWORD = '1234'
 
 TEST_SSH_KEY_DATA = '''-----BEGIN RSA PRIVATE KEY-----
 MIIEpQIBAAKCAQEAyQ8F5bbgjHvk4SZJsKI9OmJKMFxZqRhvx4LaqjLTKbBwRBsY
@@ -198,6 +212,7 @@ class RunJobTest(BaseCeleryTest):
             'password': '',
             'sudo_username': '',
             'sudo_password': '',
+            'vault_password': '',
         }
         opts.update(kwargs)
         self.credential = Credential.objects.create(**opts)
@@ -844,6 +859,56 @@ class RunJobTest(BaseCeleryTest):
         self.check_job_result(job, 'successful')
         self.assertTrue('ssh-agent' in job.job_args)
         self.assertTrue('Bad passphrase' not in job.result_stdout)
+
+    def test_vault_password(self):
+        self.create_test_credential(vault_password=TEST_VAULT_PASSWORD)
+        self.create_test_project(TEST_VAULT_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        job = Job.objects.get(pk=job.pk)
+        if Version(self.ansible_version) >= Version('1.5'):
+            self.check_job_result(job, 'successful')
+            self.assertTrue('--ask-vault-pass' in job.job_args)
+        else:
+            self.check_job_result(job, 'failed')
+            self.assertFalse('--ask-vault-pass' in job.job_args)
+
+    def test_vault_ask_password(self):
+        self.create_test_credential(vault_password='ASK')
+        self.create_test_project(TEST_VAULT_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertTrue(job.passwords_needed_to_start)
+        self.assertTrue('vault_password' in job.passwords_needed_to_start)
+        self.assertFalse(job.signal_start())
+        self.assertEqual(job.status, 'new')
+        self.assertTrue(job.signal_start(vault_password=TEST_VAULT_PASSWORD))
+        job = Job.objects.get(pk=job.pk)
+        if Version(self.ansible_version) >= Version('1.5'):
+            self.check_job_result(job, 'successful')
+            self.assertTrue('--ask-vault-pass' in job.job_args)
+        else:
+            self.check_job_result(job, 'failed')
+            self.assertFalse('--ask-vault-pass' in job.job_args)
+
+    def test_vault_bad_password(self):
+        self.create_test_credential(vault_password='not it')
+        self.create_test_project(TEST_VAULT_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        job = Job.objects.get(pk=job.pk)
+        self.check_job_result(job, 'failed')
+        if Version(self.ansible_version) >= Version('1.5'):
+            self.assertTrue('--ask-vault-pass' in job.job_args)
+        else:
+            self.assertFalse('--ask-vault-pass' in job.job_args)
 
     def _test_cloud_credential_environment_variables(self, kind):
         if kind == 'aws':
