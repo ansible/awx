@@ -632,11 +632,62 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     }])
 
 
-    .directive('awAccordion', function() {
-        return function(scope, element) {
+    .directive('awAccordion', ['Empty', '$location', 'Store', function(Empty, $location, Store) {
+        return function(scope, element, attrs) {
+            var active,
+                list = Store('accordions'),
+                id, base;
+            
+            if (!Empty(attrs.openFirst)) {
+                active = 0;
+            }
+            else {
+                // Look in storage for last active panel
+                if (list) {
+                    id = $(element).attr('id');
+                    base = ($location.path().replace(/^\//, '').split('/')[0]);
+                    list.every(function(elem) {
+                        if (elem.base === base && elem.id === id) {
+                            active = elem.active;
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+                active = (Empty(active)) ? 0 : active;
+            }
+
             $(element).accordion({
                 collapsible: true,
-                heightStyle: "content"
+                heightStyle: "content",
+                active: active,
+                activate: function() {
+                    // When a panel is activated update storage
+                    var active = $(this).accordion('option', 'active'),
+                        id = $(this).attr('id'),
+                        base = ($location.path().replace(/^\//, '').split('/')[0]),
+                        list = Store('accordions'),
+                        found = false;
+                    if (!list) {
+                        list = [];
+                    }
+                    list.every(function(elem) {
+                        if (elem.base === base && elem.id === id) {
+                            elem.active = active;
+                            found = true;
+                            return false;
+                        }
+                        return true;
+                    });
+                    if (found === false) {
+                        list.push({
+                            base: base,
+                            id: id,
+                            active: active
+                        });
+                    }
+                    Store('accordions', list);
+                }
             });
         };
-    });
+    }]);
