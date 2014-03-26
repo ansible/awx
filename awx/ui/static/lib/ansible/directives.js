@@ -629,4 +629,14 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 });
             }
         };
-    }]);
+    }])
+
+
+    .directive('awAccordion', function() {
+        return function(scope, element) {
+            $(element).accordion({
+                collapsible: true,
+                heightStyle: "content"
+            });
+        };
+    });

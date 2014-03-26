@@ -16,156 +16,204 @@
 
 'use strict';
 
-angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ApiLoader'])
-    .factory('LookUpInit', ['Alert', 'Rest', 'GenerateList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'FormatDate', 'Empty',
-        function (Alert, Rest, GenerateList, SearchInit, PaginateInit, GetBasePath, FormatDate, Empty) {
-            return function (params) {
+angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ApiLoader', 'ModalDialog'])
 
-                var scope = params.scope,
-                    form = params.form,
-                    list = params.list,
-                    field = params.field,
-                    postAction = params.postAction,
-                    defaultUrl, name, hdr, watchUrl;
+    .factory('LookUpInit', ['Alert', 'Rest', 'GenerateList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'FormatDate', 'Empty', 'CreateDialog',
+    function (Alert, Rest, GenerateList, SearchInit, PaginateInit, GetBasePath, FormatDate, Empty, CreateDialog) {
+        return function (params) {
 
-                if (params.url) {
-                    // pass in a url value to override the default
-                    defaultUrl = params.url;
-                } else {
-                    defaultUrl = (list.name === 'inventories') ? GetBasePath('inventory') : GetBasePath(list.name);
-                }
+            var parent_scope = params.scope,
+                form = params.form,
+                list = params.list,
+                field = params.field,
+                instructions = params.instructions,
+                postAction = params.postAction,
+                defaultUrl, name, watchUrl;
 
-                // Show pop-up 
+            if (params.url) {
+                // pass in a url value to override the default
+                defaultUrl = params.url;
+            } else {
+                defaultUrl = (list.name === 'inventories') ? GetBasePath('inventory') : GetBasePath(list.name);
+            }
+
+            if ($('#htmlTemplate #lookup-modal-dialog').length > 0) {
+                $('#htmlTemplate #lookup-modal-dialog').empty();
+            }
+            else {
+                $('#htmlTemplate').append("<div id=\"lookup-modal-dialog\"></div>");
+            }
+
+            name = list.iterator.charAt(0).toUpperCase() + list.iterator.substring(1);
+            
+            watchUrl = (/\/$/.test(defaultUrl)) ? defaultUrl + '?' : defaultUrl + '&';
+            watchUrl += form.fields[field].sourceField + '__' + 'iexact=:value';
+
+            $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-url', watchUrl);
+            $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-source', field);
+
+            
+            parent_scope['lookUp' + name] = function () {
+
+                var master = {},
+                    scope = parent_scope.$new(),
+                    name, hdr, buttons;
+
+                // Generating the search list potentially kills the values held in scope for the field.
+                // We'll keep a copy in master{} that we can revert back to on cancel;
+                master[field] = scope[field];
+                master[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] =
+                    scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField];
+
+                GenerateList.inject(list, {
+                    mode: 'lookup',
+                    id: 'lookup-modal-dialog',
+                    scope: scope,
+                    instructions: instructions
+                });
+
                 name = list.iterator.charAt(0).toUpperCase() + list.iterator.substring(1);
                 hdr = (params.hdr) ? params.hdr : 'Select ' + name;
 
-                watchUrl = (/\/$/.test(defaultUrl)) ? defaultUrl + '?' : defaultUrl + '&';
-                watchUrl += form.fields[field].sourceField + '__' + 'iexact=:value';
-
-                $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-url', watchUrl);
-                $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-source', field);
-
-                scope['lookUp' + name] = function () {
-
-                    var master = {}, listGenerator, listScope;
-
-                    // Generating the search list potentially kills the values held in scope for the field.
-                    // We'll keep a copy in master{} that we can revert back to on cancel;
-                    master[field] = scope[field];
-                    master[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] =
-                        scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField];
-
-                    listGenerator = GenerateList;
-                    listScope = listGenerator.inject(list, { mode: 'lookup', hdr: hdr });
-
-                    $('#lookup-modal').on('hidden.bs.modal', function () {
-                        // Restore search settings
-                        if (listScope.searchCleanup) {
-                            listScope.searchCleanup();
-                        }
-                        // If user clicks cancel without making a selection, restore original values 
-                        if (Empty(scope[field])) {
-                            scope[field] = master[field];
-                            scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] =
-                               master[form.fields[field].sourceModel + '_' + form.fields[field].sourceField];
-                        }
-                    });
-
-                    listScope.selectAction = function () {
-
-                        var i, found = false;
-                        for (i = 0; i < listScope[list.name].length; i++) {
-                            if (listScope[list.name][i].checked === '1') {
-                                found = true;
-                                scope[field] = listScope[list.name][i].id;
-                                if (scope[form.name + '_form'] && form.fields[field] && form.fields[field].sourceModel) {
-                                    scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] =
-                                        listScope[list.name][i][form.fields[field].sourceField];
-                                    if (scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField]) {
-                                        scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField]
-                                            .$setValidity('awlookup', true);
-                                    }
-                                }
-                                if (scope[form.name + '_form']) {
-                                    scope[form.name + '_form'].$setDirty();
-                                }
-                                listGenerator.hide();
-                            }
-                        }
-                        if (found === false) {
-                            Alert('Missing Selection', 'Oops, you failed to make a selection. Click on a row to make your selection, ' +
-                                'and then click the Select button.');
-                        } else {
-                            if (postAction) {
-                                postAction();
-                            }
-                        }
-                    };
-
-                    listScope['toggle_' + list.iterator] = function (id) {
-                        var i;
-                        for (i = 0; i < listScope[list.name].length; i++) {
-                            if (listScope[list.name][i].id === id) {
-                                listScope[list.name][i].checked = '1';
-                                listScope[list.name][i].success_class = 'success';
-                            } else {
-                                listScope[list.name][i].checked = '0';
-                                listScope[list.name][i].success_class = '';
-                            }
-                        }
-                    };
-
-                    SearchInit({
-                        scope: listScope,
-                        set: list.name,
-                        list: list,
-                        url: defaultUrl
-                    });
-                    PaginateInit({
-                        scope: listScope,
-                        list: list,
-                        url: defaultUrl,
-                        mode: 'lookup'
-                    });
-
-                    // If user made a selection previously, mark it as selected when modal loads 
-                    if (listScope.lookupPostRefreshRemove) {
-                        listScope.lookupPostRefreshRemove();
+                // Show pop-up 
+                buttons = [{
+                    label: "Cancel",
+                    icon: "fa-times",
+                    "class": "btn btn-default",
+                    "id": "lookup-cancel-button",
+                    onClick: function() {
+                        $('#lookup-modal-dialog').dialog('close');
                     }
-                    listScope.lookupPostRefreshRemove = scope.$on('PostRefresh', function () {
-                        var fld, i;
-                        for (fld in list.fields) {
-                            if (list.fields[fld].type && list.fields[fld].type === 'date') {
-                                //convert dates to our standard format
-                                for (i = 0; i < scope[list.name].length; i++) {
-                                    scope[list.name][i][fld] = FormatDate(new Date(scope[list.name][i][fld]));
+                },{
+                    label: "Select",
+                    onClick: function() {
+                        scope.selectAction();
+                    },
+                    icon: "fa-check",
+                    "class": "btn btn-primary",
+                    "id": "lookup-save-button"
+                }];
+
+                if (scope.removeModalReady) {
+                    scope.removeModalReady();
+                }
+                scope.removeModalReady = scope.$on('ModalReady', function() {
+                    $('#lookup-modal-dialog').dialog('open');
+                });
+
+                CreateDialog({
+                    scope: scope,
+                    buttons: buttons,
+                    width: 600,
+                    height: (instructions) ? 625 : 500,
+                    minWidth: 500,
+                    title: hdr,
+                    id: 'lookup-modal-dialog',
+                    onClose: function() {
+                        setTimeout( function() {
+                            scope.$apply( function() {
+                                if (Empty(scope[field])) {
+                                    scope[field] = master[field];
+                                    scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] =
+                                    master[form.fields[field].sourceModel + '_' + form.fields[field].sourceField];
                                 }
+                            });
+                        }, 300);
+                    },
+                    callback: 'ModalReady'
+                });
+
+                SearchInit({
+                    scope: scope,
+                    set: list.name,
+                    list: list,
+                    url: defaultUrl
+                });
+
+                PaginateInit({
+                    scope: scope,
+                    list: list,
+                    url: defaultUrl,
+                    mode: 'lookup'
+                });
+
+                if (scope.lookupPostRefreshRemove) {
+                    scope.lookupPostRefreshRemove();
+                }
+                scope.lookupPostRefreshRemove = scope.$on('PostRefresh', function () {
+                    var fld, i;
+                    for (fld in list.fields) {
+                        if (list.fields[fld].type && list.fields[fld].type === 'date') {
+                            //convert dates to our standard format
+                            for (i = 0; i < scope[list.name].length; i++) {
+                                scope[list.name][i][fld] = FormatDate(new Date(scope[list.name][i][fld]));
                             }
                         }
+                    }
 
-                        // List generator creates the form, resetting it and losing the previously selected value. 
-                        // If it's in the current set, find it and marke it as selected.
-                        if (scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] !== '' &&
-                            scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] !== null) {
-                            for (i = 0; i < listScope[list.name].length; i++) {
-                                if (listScope[list.name][i][form.fields[field].sourceField] ===
-                                    scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField]) {
-                                    scope[field] = listScope[list.name][i].id;
-                                    break;
+                    // List generator creates the list, resetting it and losing the previously selected value. 
+                    // If the selected value is in the current set, find it and mark selected.
+                    if (!Empty(parent_scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField])) {
+                        scope[list.name].forEach(function(elem) {
+                            if (elem[form.fields[field].sourceField] ===
+                                parent_scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField]) {
+                                scope[field] = elem.id;
+                            }
+                        });
+
+                    }
+
+                    if (!Empty(scope[field])) {
+                        scope['toggle_' + list.iterator](scope[field]);
+                    }
+
+                });
+
+                scope.search(list.iterator);
+
+                scope.selectAction = function () {
+                    var i, found = false;
+                    for (i = 0; i < scope[list.name].length; i++) {
+                        if (scope[list.name][i].checked === '1') {
+                            found = true;
+                            parent_scope[field] = scope[list.name][i].id;
+                            if (parent_scope[form.name + '_form'] && form.fields[field] && form.fields[field].sourceModel) {
+                                parent_scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] =
+                                    scope[list.name][i][form.fields[field].sourceField];
+                                if (parent_scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField]) {
+                                    parent_scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField]
+                                        .$setValidity('awlookup', true);
                                 }
                             }
-
+                            if (parent_scope[form.name + '_form']) {
+                                parent_scope[form.name + '_form'].$setDirty();
+                            }
                         }
-
-                        if (!Empty(scope[field])) {
-                            listScope['toggle_' + list.iterator](scope[field]);
+                    }
+                    if (found === false) {
+                        Alert('Missing Selection', 'Oops, you failed to make a selection. Click on a row to make your selection, ' +
+                            'and then click the Select button.');
+                    } else {
+                        $('#lookup-modal-dialog').dialog('close');
+                        if (postAction) {
+                            postAction();
                         }
+                    }
+                };
 
-                    });
 
-                    listScope.search(list.iterator);
-
+                scope['toggle_' + list.iterator] = function (id) {
+                    var i;
+                    for (i = 0; i < scope[list.name].length; i++) {
+                        if (scope[list.name][i].id === id) {
+                            scope[list.name][i].checked = '1';
+                            scope[list.name][i].success_class = 'success';
+                        } else {
+                            scope[list.name][i].checked = '0';
+                            scope[list.name][i].success_class = '';
+                        }
+                    }
                 };
             };
-        }
-    ]);
+        };
+    }]);

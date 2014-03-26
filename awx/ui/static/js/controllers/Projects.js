@@ -12,7 +12,7 @@
 
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate,
-    ProjectStatus, FormatDate, Refresh, Wait, Stream, GetChoices, Empty) {
+    ProjectStatus, FormatDate, Refresh, Wait, Stream, GetChoices, Empty, Find) {
     
     ClearScope();
 
@@ -77,9 +77,11 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                         $scope.projects[i].scm_type = $scope.project_scm_type_options[j].label;
                         if ($scope.projects[i].scm_type === 'Manual') {
                             $scope.projects[i].scm_update_tooltip = 'Manaul projects do not require an SCM update';
+                            $scope.projects[i].scm_schedule_tooltip = 'Manual projects do not require a schedule';
                             $scope.projects[i].scm_type_class = 'btn-disabled';
                         } else {
                             $scope.projects[i].scm_update_tooltip = "Start an SCM update";
+                            $scope.projects[i].scm_schedule_tooltip = "Schedule future SCM updates";
                             $scope.projects[i].scm_type_class = "";
                         }
                         break;
@@ -339,11 +341,21 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
             }
         }
     };
+
+    $scope.editSchedules = function(id) {
+        var project = Find({ list: $scope.projects, key: 'id', val: id });
+        if (project.scm_type === "Manual" || Empty(project.scm_type)) {
+            // Nothing to do
+        }
+        else {
+            $location.path('/projects/' + id + '/schedules');
+        }
+    };
 }
 
 ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
-    'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate', 'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty'
+    'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate', 'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty', 'Find'
 ];
 
 
@@ -475,7 +487,7 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
         $rootScope.flashMessage = null;
         generator.reset();
         for (fld in master) {
-            $scope.fld = master.fld;
+            $scope[fld] = master[fld];
         }
         $scope.scmChange();
     };

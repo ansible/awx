@@ -49,9 +49,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     //
                     var element;
 
-                    if (options.mode === 'lookup') {
-                        element = angular.element(document.getElementById('lookup-modal-body'));
-                    } else if (options.id) {
+                    if (options.id) {
                         element = angular.element(document.getElementById(options.id));
                     } else {
                         element = angular.element(document.getElementById('htmlTemplate'));
@@ -97,7 +95,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                         //ignore any errors should the dialog not be initialized 
                     }
 
-                    if (options.mode === 'lookup') {
+                    /*if (options.mode === 'lookup') {
                         // options should include {hdr: <dialog header>, action: <function...> }
                         this.scope.formModalActionDisabled = false;
                         this.scope.lookupHeader = options.hdr;
@@ -111,7 +109,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                                 $('#lookup-modal').modal('hide');
                             }
                         });
-                    }
+                    }*/
 
                     return this.scope;
                 },
@@ -151,6 +149,13 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                         html += "</div>\n";
                     }
 
+                    if (options.instructions) {
+                        html += "<div class=\"instructions alert alert-info\">" + options.instructions + "</div>\n";
+                    }
+                    else if (list.instructions) {
+                        html += "<div class=\"instructions alert alert-info\">" + list.instructions + "</div>\n";
+                    }
+
                     if (options.mode !== 'lookup' && (list.well === undefined || list.well)) {
                         html += "<div class=\"well\">\n";
                     }
@@ -163,7 +168,6 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                         html += "</div>\n";
                         html += "</div>\n";
                     }
-                    
                     
                     if (options.showSearch=== undefined || options.showSearch === true) {
                         html += "<div class=\"row\">\n";

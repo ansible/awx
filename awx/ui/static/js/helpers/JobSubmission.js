@@ -185,25 +185,25 @@ angular.module('JobSubmissionHelper', ['RestServices', 'Utilities', 'CredentialF
 ])
 
 .factory('SubmitJob', ['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'CredentialList',
-    'LookUpInit', 'CredentialForm', 'ProcessErrors', 'JobTemplateForm', 'Wait',
+    'LookUpInit', 'CredentialForm', 'ProcessErrors', 'JobTemplateForm', 'Wait', 'Empty', 'PromptForCredential',
     function (PromptPasswords, $compile, Rest, $location, GetBasePath, CredentialList, LookUpInit, CredentialForm,
-        ProcessErrors, JobTemplateForm, Wait) {
+        ProcessErrors, JobTemplateForm, Wait, Empty, PromptForCredential) {
         return function (params) {
+
             var scope = params.scope,
                 id = params.id,
                 template_name = (params.template) ? params.template : null,
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 url = GetBasePath(base) + id + '/';
 
-            function postJob(data) {
-                var dt, url, name;
-                // Create the job record
-                if (scope.credentialWatchRemove) {
-                    scope.credentialWatchRemove();
-                }
-                dt = new Date().toISOString();
-                url = (data.related.jobs) ? data.related.jobs : data.related.job_template + 'jobs/';
-                name = (template_name) ? template_name : data.name;
+            if (scope.removePostTheJob) {
+                scope.removePostTheJob();
+            }
+            scope.removePostTheJob = scope.$on('PostTheJob', function(e, data) {
+                var dt = new Date().toISOString(),
+                    url = (data.related.jobs) ? data.related.jobs : data.related.job_template + 'jobs/',
+                    name = (template_name) ? template_name : data.name;
+
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.post({
@@ -251,43 +251,26 @@ angular.module('JobSubmissionHelper', ['RestServices', 'Utilities', 'CredentialF
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                         msg: 'Failed to create job. POST returned status: ' + status });
                 });
+            });
+
+
+            if (scope.removePromptForCredential) {
+                scope.removePromptForCredential();
             }
+            scope.removePromptForCredential = scope.$on('PromptForCredential', function(e, data) {
+                PromptForCredential({ scope: scope, template: data });
+            });
 
             // Get the job or job_template record
             Wait('start');
             Rest.setUrl(url);
             Rest.get()
                 .success(function (data) {
-                    // Create a job record
-                    scope.credential = '';
-                    if (data.credential === '' || data.credential === null) {
-                        // Template does not have credential, prompt for one
-                        Wait('stop');
-                        if (scope.credentialWatchRemove) {
-                            scope.credentialWatchRemove();
-                        }
-                        scope.credentialWatchRemove = scope.$watch('credential', function (newVal, oldVal) {
-                            if (newVal !== oldVal) {
-                                // After user selects a credential from the modal,
-                                // submit the job
-                                if (scope.credential !== '' && scope.credential !== null && scope.credential !== undefined) {
-                                    data.credential = scope.credential;
-                                    postJob(data);
-                                }
-                            }
-                        });
-                        LookUpInit({
-                            scope: scope,
-                            form: JobTemplateForm,
-                            current_item: null,
-                            list: CredentialList,
-                            field: 'credential',
-                            hdr: 'Credential Required'
-                        });
-                        scope.lookUpCredential();
+                    if (Empty(data.credential)) {
+                        scope.$emit('PromptForCredential', data);
                     } else {
                         // We have what we need, submit the job
-                        postJob(data);
+                        scope.$emit('PostTheJob');
                     }
                 })
                 .error(function (data, status) {
@@ -297,6 +280,38 @@ angular.module('JobSubmissionHelper', ['RestServices', 'Utilities', 'CredentialF
         };
     }
 ])
+
+.factory('PromptForCredential', ['GetBasePath', 'LookUpInit', 'JobTemplateForm', 'CredentialList', 'Empty',
+function(GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Empty) {
+    return function(params) {
+        
+        var scope = params.scope,
+            template = params.template,
+            launchJob;
+        
+        scope.credential = '';
+
+        launchJob = function () {
+            if (!Empty(scope.credential)) {
+                template.credential = scope.credential;
+                scope.$emit('PostTheJob', template);
+            }
+        };
+        
+        LookUpInit({
+            url: GetBasePath('credentials') + '?kind=ssh',
+            scope: scope,
+            form: JobTemplateForm,
+            current_item: null,
+            list: CredentialList,
+            field: 'credential',
+            hdr: 'Credential Required',
+            instructions: "Launching this job requires a machine credential. Please select your machine credential now or Cancel to quit.",
+            postAction: launchJob
+        });
+        scope.lookUpCredential();
+    };
+}])
 
 // Sumbit SCM Update request
 .factory('ProjectUpdate', ['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',

@@ -29,7 +29,7 @@ angular.module('CredentialsListDefinition', [])
             },
             description: {
                 label: 'Description',
-                excludeModal: false
+                excludeModal: true
             },
             kind: {
                 label: 'Type',

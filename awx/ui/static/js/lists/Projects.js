@@ -106,8 +106,9 @@ angular.module('ProjectsListDefinition', [])
             },
             schedule: {
                 mode: 'all',
-                ngHref: '#/projects/{{ project.id }}/schedules',
-                awToolTip: 'Schedule future SCM updates',
+                ngClick: "editSchedules(project.id)",
+                awToolTip: "{{ project.scm_schedule_tooltip }}",
+                ngClass: "project.scm_type_class",
                 dataPlacement: 'top'
             },
             edit: {
