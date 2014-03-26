@@ -11,13 +11,13 @@
 'use strict';
 
 function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
-    ScheduledJobsList, GetChoices, GetBasePath, Wait, DeleteJob, Find, DeleteSchedule, ToggleSchedule) {
+    ScheduledJobsList, GetChoices, GetBasePath, Wait, DeleteJob, Find, DeleteSchedule, ToggleSchedule, RelaunchInventory, RelaunchPlaybook, RelaunchSCM) {
     
     ClearScope();
 
     var e,
         completed_scope, running_scope, queued_scope, scheduled_scope,
-        choicesCount = 0, listsCount = 0;
+        choicesCount = 0, listsCount = 0, relaunch, getTypeId;
 
     LoadBreadCrumbs();
 
@@ -25,6 +25,36 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
     e = angular.element(document.getElementById('breadcrumbs'));
     e.html(Breadcrumbs({ list: { editTitle: 'Jobs' } , mode: 'edit' }));
     $compile(e)($scope);
+
+    relaunch = function(params) {
+        var scope = params.scope,
+            id = params.id,
+            type = params.type,
+            name = params.name;
+        if (type === 'inventory_sync') {
+            RelaunchInventory({ scope: scope, id: id});
+        }
+        else if (type === 'playbook_run') {
+            RelaunchPlaybook({ scope: scope, id: id, name: name });
+        }
+        else if (type === 'scm_sync') {
+            RelaunchSCM({ });
+        }
+    };
+
+    getTypeId = function(job) {
+        var type_id;
+        if (job.type === 'inventory_sync') {
+            type_id = job.inventory_source;
+        }
+        else if (job.type === 'scm_sync') {
+            type_id = job.poject;
+        }
+        else if (job.type === 'playbook_run') {
+            type_id = job.id;
+        }
+        return type_id;
+    };
 
     // After all the lists are loaded
     if ($scope.removeListLoaded) {
@@ -109,6 +139,24 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
                 callback: 'SchedulesRefresh'
             });
         };
+
+        completed_scope.relaunch = function(id) {
+            var job = Find({ list: completed_scope.completed_jobs, key: 'id', val: id }),
+                type_id = getTypeId(job);
+            relaunch({ scope: completed_scope, id: type_id, type: job.type, name: job.name });
+        };
+
+        running_scope.relaunch = function(id) {
+            var job = Find({ list: running_scope.running_jobs, key: 'id', val: id }),
+                type_id = getTypeId(job);
+            relaunch({ scope: running_scope, id: type_id, type: job.type, name: job.name });
+        };
+
+        queued_scope.relaunch = function(id) {
+            var job = Find({ list: queued_scope.queued_jobs, key: 'id', val: id }),
+                type_id = getTypeId(job);
+            relaunch({ scope: queued_scope, id: type_id, type: job.type, name: job.name });
+        };
         
     });
 
@@ -143,7 +191,8 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
 }
 
 JobsListController.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadScope', 'RunningJobsList', 'CompletedJobsList',
-    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'DeleteJob', 'Find', 'DeleteSchedule', 'ToggleSchedule'];
+    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'DeleteJob', 'Find', 'DeleteSchedule', 'ToggleSchedule', 'RelaunchInventory',
+    'RelaunchPlaybook', 'RelaunchSCM'];
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
@@ -363,7 +412,7 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
 
     GetChoices({
         scope: $scope,
-        url: GetBasePath('jobs'),
+        url: GetBasePath('unified_jobs'),
         field: 'job_type',
         variable: 'job_type_options',
         callback: 'choicesReady'
@@ -379,7 +428,7 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
 
     GetChoices({
         scope: $scope,
-        url: '/static/sample/data/types/data.json',     //GetBasePath('jobs')
+        url: GetBasePath('unified_jobs'),   //'/static/sample/data/types/data.json'
         field: 'type',
         variable: 'type_choices',
         callback: 'choicesReady'

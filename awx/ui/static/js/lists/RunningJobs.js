@@ -47,6 +47,7 @@ angular.module('RunningJobsDefinition', [])
             },
             type: {
                 label: 'Type',
+                ngBind: 'running_job.type_label',
                 link: false,
                 columnClass: "col-md-2 hidden-sm hidden-xs"
             },
@@ -81,7 +82,7 @@ angular.module('RunningJobsDefinition', [])
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
-                ngClick: 'submitJob(running_job.id, running_job.summary_fields.job_template.name)',
+                ngClick: 'relaunch(running_job.id)',
                 awToolTip: 'Launch another instance of the job',
                 dataPlacement: 'top'
             },

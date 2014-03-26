@@ -47,6 +47,7 @@ angular.module('QueuedJobsDefinition', [])
             },
             type: {
                 label: 'Type',
+                ngBind: 'queued_job.type_label',
                 link: false,
                 columnClass: "col-md-2 hidden-sm hidden-xs"
             },
@@ -78,7 +79,7 @@ angular.module('QueuedJobsDefinition', [])
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
-                ngClick: 'submitJob(queued_job.id, queued_job.summary_fields.job_template.name)',
+                ngClick: 'relaunch(queued_job.id)',
                 awToolTip: 'Launch another instance of the job',
                 dataPlacement: 'top'
             },

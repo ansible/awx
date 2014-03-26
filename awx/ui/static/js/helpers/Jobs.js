@@ -9,7 +9,8 @@
 
 'use strict';
 
-angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers'])
+angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers',
+    'JobSubmissionHelper'])
 
 .factory('JobStatusToolTip', [
     function () {
@@ -215,7 +216,7 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
                 if (list.fields.type) {
                     parent_scope.type_choices.every(function(choice) {
                         if (choice.value === item.type) {
-                            itm.type = choice.label;
+                            itm.type_label = choice.label;
                             return false;
                         }
                         return true;
@@ -326,4 +327,48 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt){
         });
 
     };
+}])
+
+.factory('RelaunchInventory', ['Find', 'Wait', 'Rest', 'InventoryUpdate', 'ProcessErrors', 'GetBasePath',
+function(Find, Wait, Rest, InventoryUpdate, ProcessErrors, GetBasePath) {
+    return function(params) {
+        var scope = params.scope,
+            id = params.id,
+            url = GetBasePath('inventory_sources') + id + '/';
+        Wait('start');
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function (data) {
+                InventoryUpdate({
+                    scope: scope,
+                    url: data.related.update,
+                    group_name: data.summary_fields.group.name,
+                    group_source: data.source,
+                    tree_id: null,
+                    group_id: data.group
+                });
+            })
+            .error(function (data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' +
+                    url + ' POST returned status: ' + status });
+            });
+    };
+}])
+
+.factory('RelaunchPlaybook', ['SubmitJob', function(SubmitJob) {
+    return function(params) {
+        var scope = params.scope,
+            id = params.id,
+            name = params.name;
+        SubmitJob({ scope: scope, id: id, template: name });
+    };
+}])
+
+.factory('RelaunchSCM', ['ProjectUpdate', function(ProjectUpdate) {
+    return function(params) {
+        var scope = params.scope,
+            id = params.id;
+        ProjectUpdate({ scope: scope, id: id });
+    };
 }]);
+
