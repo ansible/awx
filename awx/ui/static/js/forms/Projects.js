@@ -206,7 +206,25 @@ angular.module('ProjectFormDefinition', [])
                     dataPlacement: 'right',
                     labelClass: 'checkbox-options'
                 }]
-            }
+            },
+            scm_update_cache_timeout: {
+                label: 'Cache Timeout',
+                id: 'scm-cache-timeout',
+                type: 'number',
+                integer: true,
+                min: 0,
+                ngShow: "scm_update_on_launch",
+                spinner: true,
+                "default": '0',
+                addRequired: false,
+                editRequired: false,
+                awPopOver: '<p>Time in seconds to consider a project update current. During job runs and callbacks the task system will ' +
+                    'evaluate the timestamp of the latest project update. If it is older than Cache Timeout, the project update is not current, ' +
+                    'and a new update will be performed.',
+                dataTitle: 'Cache Timeout',
+                dataPlacement: 'right',
+                dataContainer: "body"
+            },
         },
 
         buttons: {

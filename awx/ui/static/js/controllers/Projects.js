@@ -576,7 +576,7 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
                             master[form.fields[fld].fields[i].name] = data[form.fields[fld].fields[i].name];
                         }
                     } else {
-                        if (data[fld]) {
+                        if (data[fld] !== undefined) {
                             $scope[fld] = data[fld];
                             master[fld] = data[fld];
                         }
