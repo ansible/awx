@@ -151,9 +151,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['job_type', 'inventory', 'project', 'playbook', 'credential',
-                'cloud_credential', 'forks', 'limit', 'verbosity',
-                'extra_vars', 'job_tags']
+        return ['name', 'description', 'job_type', 'inventory', 'project',
+                'playbook', 'credential', 'cloud_credential', 'forks',
+                'limit', 'verbosity', 'extra_vars', 'job_tags']
 
     def create_job(self, **kwargs):
         '''

@@ -33,9 +33,6 @@ from awx.main.utils import update_scm_url, camelcase_to_underscore
 
 logger = logging.getLogger('awx.api.serializers')
 
-BASE_FIELDS = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
-               'modified', 'name', 'description')
-
 # Fields that should be summarized regardless of object type.
 DEFAULT_SUMMARY_FIELDS = ('name', 'description',)
 
@@ -65,13 +62,15 @@ SUMMARIZABLE_FK_FIELDS = {
                                        'has_inventory_sources'),
     'project': DEFAULT_SUMMARY_FIELDS + ('status',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
+    'cloud_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'permission': DEFAULT_SUMMARY_FIELDS,
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'job_template': DEFAULT_SUMMARY_FIELDS,
-    'last_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
+    'last_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
+    'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('source', 'last_updated', 'status'),
 }
 
@@ -98,13 +97,87 @@ class ChoiceField(fields.ChoiceField):
 serializers.ChoiceField = ChoiceField
 
 
+class BaseSerializerMetaclass(serializers.SerializerMetaclass):
+    '''
+    Custom metaclass to enable attribute inheritance from Meta objects on
+    serializer base classes.
+    
+    Also allows for inheriting or updating field lists from base class(es):
+
+        class Meta:
+
+            # Inherit all fields from base class.
+            fields = ('*',)
+
+            # Inherit all fields from base class and add 'foo'.
+            fields = ('*', 'foo')
+
+            # Inherit all fields from base class except 'bar'.
+            fields = ('*', '-bar')
+
+            # Define fields as 'foo' and 'bar'; ignore base class fields.
+            fields = ('foo', 'bar')
+
+    '''
+
+    @classmethod
+    def _update_meta(self, base, meta, other=None):
+        for attr in dir(other):
+            if attr.startswith('_'):
+                continue
+            val = getattr(other, attr)
+            # Special handling for lists of strings (field names).
+            if isinstance(val, (list, tuple)) and all([isinstance(x, basestring) for x in val]):
+                new_vals = []
+                except_vals = []
+                if base: # Merge values from all bases.
+                    new_vals.extend([x for x in getattr(meta, attr, [])])
+                for v in val:
+                    if not base and v == '*': # Inherit all values from previous base(es).
+                        new_vals.extend([x for x in getattr(meta, attr, [])])
+                    elif not base and v.startswith('-'): # Except these values.
+                        except_vals.append(v[1:])
+                    else:
+                        new_vals.append(v)
+                val = []
+                for v in new_vals:
+                    if v not in except_vals and v not in val:
+                        val.append(v)
+            setattr(meta, attr, val)
+
+    def __new__(cls, name, bases, attrs):
+        meta = type('Meta', (object,), {})
+        for base in bases:
+            cls._update_meta(base, meta, getattr(base, 'Meta', None))
+        cls._update_meta(None, meta, attrs.get('Meta', None))
+        attrs['Meta'] = meta
+        return super(BaseSerializerMetaclass, cls).__new__(cls, name, bases, attrs)
+
+
+class BaseSerializerOptions(serializers.ModelSerializerOptions):
+
+    def __init__(self, meta):
+        super(BaseSerializerOptions, self).__init__(meta)
+        self.summary_fields = getattr(meta, 'summary_fields', ())
+        self.summarizable_fields = getattr(meta, 'summarizable_fields', ())
+
+
 class BaseSerializer(serializers.ModelSerializer):
+
+    __metaclass__ = BaseSerializerMetaclass
+    _options_class = BaseSerializerOptions
+
+    class Meta:
+        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
+                  'modified', 'name', 'description')
+        summary_fields = () # FIXME: List of field names from this serializer that should be used when included as part of another's summary_fields.
+        summarizable_fields = () # FIXME: List of field names on this serializer that should be included in summary_fields.
 
     # add the URL and related resources
     type           = serializers.SerializerMethodField('get_type')
     url            = serializers.SerializerMethodField('get_url')
-    related        = serializers.SerializerMethodField('get_related')
-    summary_fields = serializers.SerializerMethodField('get_summary_fields')
+    related        = serializers.SerializerMethodField('_get_related')
+    summary_fields = serializers.SerializerMethodField('_get_summary_fields')
 
     # make certain fields read only
     created       = serializers.SerializerMethodField('get_created')
@@ -149,6 +222,9 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.get_absolute_url()
 
+    def _get_related(self, obj):
+        return {} if obj is None else self.get_related(obj)
+
     def get_related(self, obj):
         res = SortedDict()
         if getattr(obj, 'created_by', None) and obj.created_by.is_active:
@@ -156,6 +232,9 @@ class BaseSerializer(serializers.ModelSerializer):
         if getattr(obj, 'modified_by', None) and obj.modified_by.is_active:
             res['modified_by'] = reverse('api:user_detail', args=(obj.modified_by.pk,))
         return res
+
+    def _get_summary_fields(self, obj):
+        return {} if obj is None else self.get_summary_fields(obj)
 
     def get_summary_fields(self, obj):
         # Return values for certain fields on related objects, to simplify
@@ -165,6 +244,8 @@ class BaseSerializer(serializers.ModelSerializer):
             try:
                 fkval = getattr(obj, fk, None)
                 if fkval is None:
+                    continue
+                if fkval == obj:
                     continue
                 if hasattr(fkval, 'active') and not fkval.active:
                     continue
@@ -205,6 +286,43 @@ class BaseSerializer(serializers.ModelSerializer):
             return obj.active
 
 
+class UnifiedJobTemplateSerializer(BaseSerializer):
+
+    class Meta:
+        model = UnifiedJobTemplate
+        fields = ('*', 'last_job_run', 'last_job_failed', 'has_schedules',
+                  'next_job_run', 'status')
+
+    def get_related(self, obj):
+        res = super(UnifiedJobTemplateSerializer, self).get_related(obj)
+        if obj.current_job and obj.current_job.active:
+            res['current_job'] = obj.current_job.get_absolute_url()
+        if obj.last_job and obj.last_job.active:
+            res['last_job'] = obj.last_job.get_absolute_url()
+        if obj.next_schedule and obj.next_schedule.active:
+            res['next_schedule'] = obj.next_schedule.get_absolute_url()
+        return res
+
+
+class UnifiedJobSerializer(BaseSerializer):
+
+    result_stdout = serializers.Field(source='result_stdout')
+
+    class Meta:
+        model = UnifiedJob
+        fields = ('*', 'unified_job_template', 'launch_type', 'status',
+                  'failed', 'started', 'finished', 'elapsed', 'job_args',
+                  'job_cwd', 'job_env', 'result_stdout', 'result_traceback')
+
+    def get_related(self, obj):
+        res = super(UnifiedJobSerializer, self).get_related(obj)
+        if obj.unified_job_template and obj.unified_job_template.active:
+            res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
+        if obj.schedule and obj.schedule.active:
+            res['schedule'] = obj.schedule.get_absolute_url()
+        return res
+
+
 class BaseTaskSerializer(BaseSerializer):
 
     job_env = serializers.SerializerMethodField('get_job_env')
@@ -224,9 +342,9 @@ class UserSerializer(BaseSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'type', 'url', 'related', 'created', 'username',
-                  'first_name', 'last_name', 'email', 'is_superuser',
-                  'password', 'ldap_dn')
+        fields = ('*', '-name', '-description', '-modified',
+                  '-summary_fields', 'username', 'first_name', 'last_name',
+                  'email', 'is_superuser', 'password', 'ldap_dn')
 
     def to_native(self, obj):
         ret = super(UserSerializer, self).to_native(obj)
@@ -261,8 +379,6 @@ class UserSerializer(BaseSerializer):
         return super(UserSerializer, self).save_object(obj, **kwargs)
     
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(UserSerializer, self).get_related(obj)
         res.update(dict(
             teams                  = reverse('api:user_teams_list',               args=(obj.pk,)),
@@ -309,69 +425,32 @@ class OrganizationSerializer(BaseSerializer):
 
     class Meta:
         model = Organization
-        fields = BASE_FIELDS
+        fields = ('*',)
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(OrganizationSerializer, self).get_related(obj)
         res.update(dict(
-            #audit_trail = reverse('api:organization_audit_trail_list',    args=(obj.pk,)),
             projects    = reverse('api:organization_projects_list',       args=(obj.pk,)),
             inventories = reverse('api:organization_inventories_list',    args=(obj.pk,)),
             users       = reverse('api:organization_users_list',          args=(obj.pk,)),
             admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
-            #tags        = reverse('api:organization_tags_list',           args=(obj.pk,)),
             teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
             activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,))
         ))
         return res
 
 
-class ProjectSerializer(BaseSerializer):
-
-    playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
-    scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
-    last_update_failed = serializers.Field(source='last_update_failed')
-    last_updated = serializers.Field(source='last_updated')
-
+class ProjectOptionsSerializer(BaseSerializer):
+    
     class Meta:
-        model = Project
-        fields = BASE_FIELDS + ('local_path', 'scm_type', 'scm_url',
-                                'scm_branch', 'scm_clean',
-                                'scm_delete_on_update', 'scm_delete_on_next_update',
-                                'scm_update_on_launch', 'credential',
-                                'last_job_failed', 'status', 'last_job_run') +\
-                               ('last_update_failed', 'last_updated',)  # Backwards compatibility
+        fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch',
+                  'scm_clean', 'scm_delete_on_update', 'credential')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
-        res = super(ProjectSerializer, self).get_related(obj)
-        res.update(dict(
-            organizations = reverse('api:project_organizations_list', args=(obj.pk,)),
-            teams = reverse('api:project_teams_list', args=(obj.pk,)),
-            playbooks = reverse('api:project_playbooks', args=(obj.pk,)),
-            update = reverse('api:project_update_view', args=(obj.pk,)),
-            project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
-            activity_stream = reverse('api:project_activity_stream_list', args=(obj.pk,)),
-        ))
+        res = super(ProjectOptionsSerializer, self).get_related(obj)
         if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
-        if obj.current_job:
-            res['current_job'] = reverse('api:project_update_detail',
-                                         args=(obj.current_job.pk,))
-        if obj.last_job:
-            res['last_job'] = reverse('api:project_update_detail',
-                                         args=(obj.last_job.pk,))
-        # Backwards compatibility.
-        if obj.current_update:
-            res['current_update'] = reverse('api:project_update_detail',
-                                            args=(obj.current_update.pk,))
-        if obj.last_update:
-            res['last_update'] = reverse('api:project_update_detail',
-                                         args=(obj.last_update.pk,))
         return res
 
     def validate_local_path(self, attrs, source):
@@ -391,10 +470,42 @@ class ProjectSerializer(BaseSerializer):
         return attrs
 
     def to_native(self, obj):
-        ret = super(ProjectSerializer, self).to_native(obj)
+        ret = super(ProjectOptionsSerializer, self).to_native(obj)
         if obj is not None and 'credential' in ret and (not obj.credential or not obj.credential.active):
             ret['credential'] = None
         return ret
+
+
+class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
+
+    playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
+    scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
+    last_update_failed = serializers.Field(source='last_update_failed')
+    last_updated = serializers.Field(source='last_updated')
+
+    class Meta:
+        model = Project
+        fields = ('*', 'scm_delete_on_next_update', 'scm_update_on_launch') + \
+                 ('last_update_failed', 'last_updated')  # Backwards compatibility
+
+    def get_related(self, obj):
+        res = super(ProjectSerializer, self).get_related(obj)
+        res.update(dict(
+            organizations = reverse('api:project_organizations_list', args=(obj.pk,)),
+            teams = reverse('api:project_teams_list', args=(obj.pk,)),
+            playbooks = reverse('api:project_playbooks', args=(obj.pk,)),
+            update = reverse('api:project_update_view', args=(obj.pk,)),
+            project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
+            activity_stream = reverse('api:project_activity_stream_list', args=(obj.pk,)),
+        ))
+        # Backwards compatibility.
+        if obj.current_update:
+            res['current_update'] = reverse('api:project_update_detail',
+                                            args=(obj.current_update.pk,))
+        if obj.last_update:
+            res['last_update'] = reverse('api:project_update_detail',
+                                         args=(obj.last_update.pk,))
+        return res
 
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
@@ -408,19 +519,13 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
         return ret.get('playbooks', [])
 
 
-class ProjectUpdateSerializer(BaseTaskSerializer):
-
-    result_stdout = serializers.Field(source='result_stdout')
+class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = ProjectUpdate
-        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
-                  'modified', 'project', 'status', 'failed', 'result_stdout',
-                  'result_traceback', 'job_args', 'job_cwd', 'job_env')
+        fields = ('*', 'project')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(ProjectUpdateSerializer, self).get_related(obj)
         res.update(dict(
             project = reverse('api:project_detail', args=(obj.project.pk,)),
@@ -446,17 +551,12 @@ class InventorySerializer(BaseSerializerWithVariables):
 
     class Meta:
         model = Inventory
-        fields = BASE_FIELDS + ('organization', 'variables',
-                                'has_active_failures', 'total_hosts',
-                                'hosts_with_active_failures', 'total_groups',
-                                'groups_with_active_failures',
-                                'has_inventory_sources',
-                                'total_inventory_sources',
-                                'inventory_sources_with_failures',)
+        fields = ('*', 'organization', 'variables', 'has_active_failures',
+                  'total_hosts', 'hosts_with_active_failures', 'total_groups',
+                  'groups_with_active_failures', 'has_inventory_sources',
+                  'total_inventory_sources', 'inventory_sources_with_failures')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(InventorySerializer, self).get_related(obj)
         res.update(dict(
             hosts         = reverse('api:inventory_hosts_list',        args=(obj.pk,)),
@@ -481,19 +581,14 @@ class InventorySerializer(BaseSerializerWithVariables):
 
 class HostSerializer(BaseSerializerWithVariables):
 
-    # Allow the serializer to treat these fields as read-only
-    last_job = serializers.PrimaryKeyRelatedField(read_only=True)
-    last_job_host_summary = serializers.PrimaryKeyRelatedField(read_only=True)
-
     class Meta:
         model = Host
-        fields = BASE_FIELDS + ('inventory', 'enabled', 'instance_id', 'variables',
-                                'has_active_failures', 'has_inventory_sources',
-                                'last_job', 'last_job_host_summary')
+        fields = ('*', 'inventory', 'enabled', 'instance_id', 'variables',
+                  'has_active_failures', 'has_inventory_sources', 'last_job',
+                  'last_job_host_summary')
+        readonly_fields = ('last_job', 'last_job_host_summary')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(HostSerializer, self).get_related(obj)
         res.update(dict(
             variable_data = reverse('api:host_variable_data',   args=(obj.pk,)),
@@ -513,8 +608,6 @@ class HostSerializer(BaseSerializerWithVariables):
         return res
 
     def get_summary_fields(self, obj):
-        if obj is None:
-            return {}
         d = super(HostSerializer, self).get_summary_fields(obj)
         try:
             d['last_job']['job_template_id'] = obj.last_job.job_template.id
@@ -600,14 +693,11 @@ class GroupSerializer(BaseSerializerWithVariables):
 
     class Meta:
         model = Group
-        fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
-                                'total_hosts', 'hosts_with_active_failures',
-                                'total_groups', 'groups_with_active_failures',
-                                'has_inventory_sources')
+        fields = ('*', 'inventory', 'variables', 'has_active_failures',
+                  'total_hosts', 'hosts_with_active_failures', 'total_groups',
+                  'groups_with_active_failures', 'has_inventory_sources')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(GroupSerializer, self).get_related(obj)
         res.update(dict(
             variable_data = reverse('api:group_variable_data',   args=(obj.pk,)),
@@ -645,10 +735,7 @@ class GroupTreeSerializer(GroupSerializer):
 
     class Meta:
         model = Group
-        fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
-                                'total_hosts', 'hosts_with_active_failures',
-                                'total_groups', 'groups_with_active_failures',
-                                'has_inventory_sources', 'children')
+        fields = ('*', 'children')
 
     def get_children(self, obj):
         if obj is None:
@@ -660,6 +747,9 @@ class GroupTreeSerializer(GroupSerializer):
 
 
 class BaseVariableDataSerializer(BaseSerializer):
+
+    class Meta:
+        fields = ('variables',)
 
     def to_native(self, obj):
         if obj is None:
@@ -679,77 +769,32 @@ class InventoryVariableDataSerializer(BaseVariableDataSerializer):
 
     class Meta:
         model = Inventory
-        fields = ('variables',)
 
 
 class HostVariableDataSerializer(BaseVariableDataSerializer):
 
     class Meta:
         model = Host
-        fields = ('variables',)
 
 
 class GroupVariableDataSerializer(BaseVariableDataSerializer):
 
     class Meta:
         model = Group
-        fields = ('variables',)
 
 
-class InventorySourceSerializer(BaseSerializer):
+class InventorySourceOptionsSerializer(BaseSerializer):
     
-    #source_password = serializers.WritableField(required=False, default='')
-    last_update_failed = serializers.Field(source='last_update_failed')
-    last_updated = serializers.Field(source='last_updated')
-
     class Meta:
-        model = InventorySource
-        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
-                  'modified', 'inventory', 'group', 'source', 'source_path',
-                  'source_vars', 'credential', 'source_regions', 'overwrite',
-                  'overwrite_vars', 'update_on_launch', 'last_job_failed',
-                  'status', 'last_job_run') + \
-                 ('last_update_failed', 'last_updated') # Backwards compatibility.
-        read_only_fields = ('inventory', 'group')
+        fields = ('*', 'source', 'source_path', 'source_vars', 'credential',
+                  'source_regions', 'overwrite', 'overwrite_vars')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
-        res = super(InventorySourceSerializer, self).get_related(obj)
-        res.update(dict(
-            update = reverse('api:inventory_source_update_view', args=(obj.pk,)),
-            inventory_updates = reverse('api:inventory_source_updates_list', args=(obj.pk,)),
-            activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
-            #hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
-            #groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
-        ))
-        if obj.inventory and obj.inventory.active:
-            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
-        if obj.group and obj.group.active:
-            res['group'] = reverse('api:group_detail', args=(obj.group.pk,))
+        res = super(InventorySourceOptionsSerializer, self).get_related(obj)
         if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
-        if obj.current_job:
-            res['current_job'] = reverse('api:inventory_update_detail',
-                                            args=(obj.current_job.pk,))
-        if obj.last_job:
-            res['last_job'] = reverse('api:inventory_update_detail',
-                                         args=(obj.last_job.pk,))
-        # Backwards compatibility.
-        if obj.current_update:
-            res['current_update'] = reverse('api:inventory_update_detail',
-                                            args=(obj.current_update.pk,))
-        if obj.last_update:
-            res['last_update'] = reverse('api:inventory_update_detail',
-                                         args=(obj.last_update.pk,))
         return res
-
-    def get_summary_fields(self, obj):
-        if obj is None:
-            return {}
-        d = super(InventorySourceSerializer, self).get_summary_fields(obj)
-        return d
 
     def validate_source(self, attrs, source):
         src = attrs.get(source, '')
@@ -777,11 +822,54 @@ class InventorySourceSerializer(BaseSerializer):
         return attrs
 
     def metadata(self):
-        metadata = super(InventorySourceSerializer, self).metadata()
+        metadata = super(InventorySourceOptionsSerializer, self).metadata()
         field_opts = metadata.get('source_regions', {})
         field_opts['ec2_region_choices'] = self.opts.model.get_ec2_region_choices()
         field_opts['rax_region_choices'] = self.opts.model.get_rax_region_choices()
         return metadata
+
+    def to_native(self, obj):
+        ret = super(InventorySourceOptionsSerializer, self).to_native(obj)
+        if obj is None:
+            return ret
+        if 'credential' in ret and (not obj.credential or not obj.credential.active):
+            ret['credential'] = None
+        return ret
+
+
+class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
+    
+    last_update_failed = serializers.Field(source='last_update_failed')
+    last_updated = serializers.Field(source='last_updated')
+
+    class Meta:
+        model = InventorySource
+        fields = ('*', 'inventory', 'group', 'update_on_launch',
+                  'update_cache_timeout') + \
+                 ('last_update_failed', 'last_updated') # Backwards compatibility.
+        read_only_fields = ('*', 'name', 'inventory', 'group')
+
+    def get_related(self, obj):
+        res = super(InventorySourceSerializer, self).get_related(obj)
+        res.update(dict(
+            update = reverse('api:inventory_source_update_view', args=(obj.pk,)),
+            inventory_updates = reverse('api:inventory_source_updates_list', args=(obj.pk,)),
+            activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
+            #hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
+            #groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
+        ))
+        if obj.inventory and obj.inventory.active:
+            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
+        if obj.group and obj.group.active:
+            res['group'] = reverse('api:group_detail', args=(obj.group.pk,))
+        # Backwards compatibility.
+        if obj.current_update:
+            res['current_update'] = reverse('api:inventory_update_detail',
+                                            args=(obj.current_update.pk,))
+        if obj.last_update:
+            res['last_update'] = reverse('api:inventory_update_detail',
+                                         args=(obj.last_update.pk,))
+        return res
 
     def to_native(self, obj):
         ret = super(InventorySourceSerializer, self).to_native(obj)
@@ -791,25 +879,16 @@ class InventorySourceSerializer(BaseSerializer):
             ret['inventory'] = None
         if 'group' in ret and (not obj.group or not obj.group.active):
             ret['group'] = None
-        if 'credential' in ret and (not obj.credential or not obj.credential.active):
-            ret['credential'] = None
         return ret
 
 
-class InventoryUpdateSerializer(BaseTaskSerializer):
-
-    result_stdout = serializers.Field(source='result_stdout')
+class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSerializer):
 
     class Meta:
         model = InventoryUpdate
-        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
-                  'modified', 'inventory_source', 'status', 'failed',
-                  'result_stdout', 'result_traceback', 'job_args', 'job_cwd',
-                  'job_env', 'license_error')
+        fields = ('*', 'inventory_source', 'license_error')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(InventoryUpdateSerializer, self).get_related(obj)
         res.update(dict(
             inventory_source = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,)),
@@ -822,11 +901,9 @@ class TeamSerializer(BaseSerializer):
 
     class Meta:
         model = Team
-        fields = BASE_FIELDS + ('organization',)
+        fields = ('*', 'organization')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(TeamSerializer, self).get_related(obj)
         res.update(dict(
             projects     = reverse('api:team_projects_list',    args=(obj.pk,)),
@@ -835,7 +912,7 @@ class TeamSerializer(BaseSerializer):
             permissions  = reverse('api:team_permissions_list', args=(obj.pk,)),
             activity_stream = reverse('api:team_activity_stream_list', args=(obj.pk,)),
         ))
-        if obj.organization:
+        if obj.organization and obj.organization.active:
             res['organization'] = reverse('api:organization_detail',   args=(obj.organization.pk,))
         return res
 
@@ -850,20 +927,18 @@ class PermissionSerializer(BaseSerializer):
 
     class Meta:
         model = Permission
-        fields = BASE_FIELDS + ('user', 'team', 'project', 'inventory',
-                                'permission_type',)
+        fields = ('*', 'user', 'team', 'project', 'inventory',
+                  'permission_type')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(PermissionSerializer, self).get_related(obj)
-        if obj.user:
+        if obj.user and obj.user.is_active:
             res['user']        = reverse('api:user_detail', args=(obj.user.pk,))
-        if obj.team:
+        if obj.team and obj.team.active:
             res['team']        = reverse('api:team_detail', args=(obj.team.pk,))
-        if obj.project:
+        if obj.project and obj.project.active:
             res['project']     = reverse('api:project_detail', args=(obj.project.pk,)) 
-        if obj.inventory:
+        if obj.inventory and obj.inventory.active:
             res['inventory']   = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         return res
 
@@ -908,9 +983,9 @@ class CredentialSerializer(BaseSerializer):
 
     class Meta:
         model = Credential
-        fields = BASE_FIELDS + ('user', 'team', 'kind', 'cloud', 'username',
-                                'password', 'ssh_key_data', 'ssh_key_unlock',
-                                'sudo_username', 'sudo_password',)
+        fields = ('*', 'user', 'team', 'kind', 'cloud', 'username',
+                  'password', 'ssh_key_data', 'ssh_key_unlock',
+                  'sudo_username', 'sudo_password')
 
     def to_native(self, obj):
         ret = super(CredentialSerializer, self).to_native(obj)
@@ -933,8 +1008,6 @@ class CredentialSerializer(BaseSerializer):
         return instance
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(CredentialSerializer, self).get_related(obj)
         res.update(dict(
             activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,))
@@ -946,25 +1019,15 @@ class CredentialSerializer(BaseSerializer):
         return res
 
 
-class JobTemplateSerializer(BaseSerializer):
+class JobOptionsSerializer(BaseSerializer):
 
     class Meta:
-        model = JobTemplate
-        fields = BASE_FIELDS + ('job_type', 'inventory', 'project', 'playbook',
-                                'credential', 'cloud_credential', 'forks',
-                                'limit', 'verbosity', 'extra_vars', 'job_tags',
-                                'host_config_key')
+        fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
+                  'credential', 'cloud_credential', 'forks', 'limit',
+                  'verbosity', 'extra_vars', 'job_tags')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
-        res = super(JobTemplateSerializer, self).get_related(obj)
-        res.update(dict(
-            jobs = reverse('api:job_template_jobs_list', args=(obj.pk,)),
-            activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
-        ))
-        if obj is None:
-            return ret
+        res = super(JobOptionsSerializer, self).get_related(obj)
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         if obj.project and obj.project.active:
@@ -974,12 +1037,10 @@ class JobTemplateSerializer(BaseSerializer):
         if obj.cloud_credential and obj.cloud_credential.active:
             res['cloud_credential'] = reverse('api:credential_detail',
                                               args=(obj.cloud_credential.pk,))
-        if obj.host_config_key:
-            res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
         return res
 
     def to_native(self, obj):
-        ret = super(JobTemplateSerializer, self).to_native(obj)
+        ret = super(JobOptionsSerializer, self).to_native(obj)
         if obj is None:
             return ret
         if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
@@ -1002,24 +1063,32 @@ class JobTemplateSerializer(BaseSerializer):
         return attrs
 
 
-class JobSerializer(BaseTaskSerializer):
+class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
+
+    class Meta:
+        model = JobTemplate
+        fields = ('*', 'host_config_key')
+
+    def get_related(self, obj):
+        res = super(JobTemplateSerializer, self).get_related(obj)
+        res.update(dict(
+            jobs = reverse('api:job_template_jobs_list', args=(obj.pk,)),
+            activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
+        ))
+        if obj.host_config_key:
+            res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
+        return res
+
+
+class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
-    result_stdout = serializers.Field(source='result_stdout')
 
     class Meta:
         model = Job
-        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
-                  'modified', 'job_template', 'job_type', 'inventory',
-                  'project', 'playbook', 'credential', 'cloud_credential',
-                  'forks', 'limit', 'verbosity', 'extra_vars',
-                  'job_tags', 'launch_type', 'status', 'failed', 'result_stdout',
-                  'result_traceback', 'passwords_needed_to_start', 'job_args',
-                  'job_cwd', 'job_env')
+        fields = ('*', 'job_template', 'passwords_needed_to_start')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(JobSerializer, self).get_related(obj)
         res.update(dict(
             job_events  = reverse('api:job_job_events_list', args=(obj.pk,)),
@@ -1029,18 +1098,6 @@ class JobSerializer(BaseTaskSerializer):
         if obj.job_template and obj.job_template.active:
             res['job_template'] = reverse('api:job_template_detail',
                                           args=(obj.job_template.pk,))
-        if obj.inventory and obj.inventory.active:
-            res['inventory'] = reverse('api:inventory_detail',
-                                       args=(obj.inventory.pk,))
-        if obj.project and obj.project.active:
-            res['project'] = reverse('api:project_detail',
-                                     args=(obj.project.pk,))
-        if obj.credential and obj.credential.active:
-            res['credential'] = reverse('api:credential_detail',
-                                        args=(obj.credential.pk,))
-        if obj.cloud_credential and obj.cloud_credential.active:
-            res['cloud_credential'] = reverse('api:credential_detail',
-                                              args=(obj.cloud_credential.pk,))
         if obj.can_start or True:
             res['start'] = reverse('api:job_start', args=(obj.pk,))
         if obj.can_cancel or True:
@@ -1080,16 +1137,6 @@ class JobSerializer(BaseTaskSerializer):
             return ret
         if 'job_template' in ret and (not obj.job_template or not obj.job_template.active):
             ret['job_template'] = None
-        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
-            ret['inventory'] = None
-        if 'project' in ret and (not obj.project or not obj.project.active):
-            ret['project'] = None
-            if 'playbook' in ret:
-                ret['playbook'] = ''
-        if 'credential' in ret and (not obj.credential or not obj.credential.active):
-            ret['credential'] = None
-        if 'cloud_credential' in ret and (not obj.cloud_credential or not obj.cloud_credential.active):
-            ret['cloud_credential'] = None
         return ret
 
 
@@ -1097,26 +1144,17 @@ class JobListSerializer(JobSerializer):
 
     class Meta:
         model = Job
-        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
-                  'modified', 'job_template', 'job_type', 'inventory',
-                  'project', 'playbook', 'credential', 'cloud_credential',
-                  'forks', 'limit', 'verbosity', 'extra_vars',
-                  'job_tags', 'launch_type', 'status', 'failed',
-                  'result_traceback', 'passwords_needed_to_start', 'job_args',
-                  'job_cwd', 'job_env')
+        fields = ('*', '-result_stdout')
 
 
 class JobHostSummarySerializer(BaseSerializer):
 
     class Meta:
         model = JobHostSummary
-        fields = ('id', 'type', 'url', 'job', 'host', 'created', 'modified',
-                  'summary_fields', 'related', 'changed', 'dark', 'failures',
-                  'ok', 'processed', 'skipped', 'failed')
+        fields = ('*', '-name', '-description', 'job', 'host', 'changed',
+                  'dark', 'failures', 'ok', 'processed', 'skipped', 'failed')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(JobHostSummarySerializer, self).get_related(obj)
         res.update(dict(
             job=reverse('api:job_detail', args=(obj.job.pk,)),
@@ -1125,8 +1163,6 @@ class JobHostSummarySerializer(BaseSerializer):
         return res
 
     def get_summary_fields(self, obj):
-        if obj is None:
-            return {}
         d = super(JobHostSummarySerializer, self).get_summary_fields(obj)
         try:
             d['job']['job_template_id'] = obj.job.job_template.id
@@ -1143,14 +1179,11 @@ class JobEventSerializer(BaseSerializer):
 
     class Meta:
         model = JobEvent
-        fields = ('id', 'type', 'url', 'created', 'modified', 'job', 'event',
+        fields = ('*', '-name', '-description', 'job', 'event',
                   'event_display', 'event_data', 'event_level', 'failed',
-                  'changed', 'host', 'related', 'summary_fields', 'parent',
-                  'play', 'task')
+                  'changed', 'host', 'parent', 'play', 'task')
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         res = super(JobEventSerializer, self).get_related(obj)
         res.update(dict(
             job = reverse('api:job_detail', args=(obj.job.pk,)),
@@ -1167,8 +1200,6 @@ class JobEventSerializer(BaseSerializer):
         return res
 
     def get_summary_fields(self, obj):
-        if obj is None:
-            return {}
         d = super(JobEventSerializer, self).get_summary_fields(obj)
         try:
             d['job']['job_template_id'] = obj.job.job_template.id
@@ -1177,13 +1208,31 @@ class JobEventSerializer(BaseSerializer):
             pass
         return d
 
+
+class ScheduleSerializer(BaseSerializer):
+    
+    class Meta:
+        model = Schedule
+        fields = ('*', 'unified_job_template', 'enabled', 'dtstart', 'dtend',
+                  'rrule', 'next_run')
+
+    def get_related(self, obj):
+        res = super(ScheduleSerializer, self).get_related(obj)
+        res.update(dict(
+            #unified_jobs = reverse('api:schedule_unified_jobs_list', args=(obj.pk,)),
+        ))
+        if obj.unified_job_template and obj.unified_job_template.active:
+            res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
+        return res
+
+
 class ActivityStreamSerializer(BaseSerializer):
 
     changes = serializers.SerializerMethodField('get_changes')
 
     class Meta:
         model = ActivityStream
-        fields = ('id', 'type', 'url', 'related', 'summary_fields',
+        fields = ('*', '-name', '-description', '-created', '-modified',
                   'timestamp', 'operation', 'changes', 'object1', 'object2')
 
     def get_fields(self):
@@ -1197,9 +1246,7 @@ class ActivityStreamSerializer(BaseSerializer):
                 field.help_text = 'Unpopulated for create, update, and delete events.  For associate and disassociate events this is the object type that object1 is being associated with'
             if key == 'operation':
                 field.help_text = 'The action taken with respect to the given object(s).'
-
         return ret
-
 
     def get_changes(self, obj):
         if obj is None:
@@ -1214,8 +1261,6 @@ class ActivityStreamSerializer(BaseSerializer):
         return {}
 
     def get_related(self, obj):
-        if obj is None:
-            return {}
         rel = {}
         if obj.actor is not None:
             rel['actor'] = reverse('api:user_detail', args=(obj.actor.pk,))
@@ -1266,6 +1311,7 @@ class ActivityStreamSerializer(BaseSerializer):
                                            first_name = obj.actor.first_name,
                                            last_name = obj.actor.last_name)
         return summary_fields
+
 
 class AuthTokenSerializer(serializers.Serializer):
 

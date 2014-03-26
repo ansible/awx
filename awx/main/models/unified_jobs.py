@@ -185,10 +185,16 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
 
     @classmethod
     def _get_unified_job_class(cls):
+        '''
+        Return subclass of UnifiedJob that is created from this template.
+        '''
         raise NotImplementedError # Implement in subclass.
 
     @classmethod
     def _get_unified_job_field_names(cls):
+        '''
+        Return field names that should be copied from template to new job.
+        '''
         raise NotImplementedError # Implement in subclass.
 
     def _create_unified_job_instance(self, **kwargs):
