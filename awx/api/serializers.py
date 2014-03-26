@@ -322,6 +322,12 @@ class UnifiedJobSerializer(BaseSerializer):
             res['schedule'] = obj.schedule.get_absolute_url()
         return res
 
+    def to_native(self, obj):
+        ret = super(UnifiedJobSerializer, self).to_native(obj)
+        if 'elapsed' in ret:
+            ret['elapsed'] = float(ret['elapsed'])
+        return ret
+
 
 class BaseTaskSerializer(BaseSerializer):
 
