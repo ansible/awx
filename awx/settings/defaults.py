@@ -338,7 +338,7 @@ EC2_REGIONS_BLACKLIST = [
 
 # Defaults for enabling/disabling activity stream.
 ACTIVITY_STREAM_ENABLED = True
-ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = True
+ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 
 # Internal API URL for use by inventory scripts and callback plugin.
 if 'devserver' in INSTALLED_APPS:
