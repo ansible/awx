@@ -7,149 +7,110 @@
 
 'use strict';
 
-angular.module('JobSubmissionHelper', ['RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-    'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper'
-])
+angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
+    'LookUpHelper', 'JobSubmissionHelper' ])
 
-.factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', '$compile', 'Rest', '$location', 'ProcessErrors',
-    'GetBasePath', 'Alert', 'Empty', 'Wait',
-    function (CredentialForm, JobTemplateForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert, Empty, Wait) {
-        return function (params) {
+.factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors', function(Rest, Wait, ProcessErrors) {
+    return function(params) {
+        var scope = params.scope,
+            passwords = params.passwords || {},
+            callback = params.callback || 'JobLaunched',
+            url = params.url;
+        
+        Wait('start');
+        Rest.setUrl(url);
+        Rest.post(passwords)
+            .success(function () {
+                scope.$emit(callback);
+            })
+            .error(function (data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Attempt to start job at ' + url + ' failed. POST returned: ' + status });
+            });
+    };
+}])
 
-            var scope = params.scope,
+.factory('PromptForCredential', ['Wait', 'GetBasePath', 'LookUpInit', 'JobTemplateForm', 'CredentialList',
+function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
+    return function(params) {
+        
+        var scope = params.scope,
+            callback = params.callback || 'CredentialReady',
+            selectionMade;
+        
+        Wait('stop');
+        scope.credential = '';
+
+        selectionMade = function () {
+            scope.$emit(callback, scope.credential);
+        };
+        
+        LookUpInit({
+            url: GetBasePath('credentials') + '?kind=ssh',
+            scope: scope,
+            form: JobTemplateForm,
+            current_item: null,
+            list: CredentialList,
+            field: 'credential',
+            hdr: 'Credential Required',
+            instructions: "Launching this job requires a machine credential. Please select your machine credential now or Cancel to quit.",
+            postAction: selectionMade
+        });
+        scope.lookUpCredential();
+    };
+}])
+
+.factory('PromptForPasswords', ['$compile', 'Wait', 'Alert', 'CredentialForm',
+    function($compile, Wait, Alert, CredentialForm) {
+        return function(params) {
+            var parent_scope = params.scope,
                 passwords = params.passwords,
-                start_url = params.start_url,
-                form = params.form,
-                html = '',
-                field, element, fld, i, current_form,
-                base = $location.path().replace(/^\//, '').split('/')[0],
-                extra_html = params.extra_html;
+                callback = params.callback || 'PasswordsAccepted',
+                password,
+                form = CredentialForm,
+                html,
+                acceptedPasswords = {},
+                scope = parent_scope.$new();
 
-            function navigate(canceled) {
-                //Decide where to send the user once the modal dialog closes
-                if (!canceled) {
-                    if (base === 'jobs') {
-                        scope.refreshJob();
-                    } else {
-                        $location.path('/jobs');
-                    }
-                } else {
-                    $location.path('/' + base);
-                }
-            }
+            Wait('stop');
+            
+            function promptPassword() {
+                var e, fld, field;
 
-            function cancel() {
-                // Delete a job
-                var url = GetBasePath('jobs') + scope.job_id + '/';
-                Rest.setUrl(url);
-                Rest.destroy()
-                    .success(function () {
-                        if (form.name === 'credential') {
-                            navigate(true);
-                        }
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                    });
-            }
-
-            scope.cancelJob = function () {
-                // User clicked cancel button
-                $('#password-modal').modal('hide');
-                if (form.name === 'credential') {
-                    cancel();
-                } else {
-                    scope.$emit('UpdateSubmitted', 'canceled');
-                }
-            };
-
-            scope.startJob = function () {
-                var pswd = {}, value_supplied = false;
-                $('#password-modal').modal('hide');
-                Wait('start');
-                $('.password-field').each(function () {
-                    pswd[$(this).attr('name')] = $(this).val();
-                    if ($(this).val() !== '' && $(this).val() !== null) {
-                        value_supplied = true;
-                    }
-                });
-                if (Empty(passwords) || passwords.length === 0 || value_supplied) {
-                    Rest.setUrl(start_url);
-                    Rest.post(pswd)
-                        .success(function () {
-                            scope.$emit('UpdateSubmitted', 'started');
-                            if (form.name === 'credential') {
-                                navigate(false);
-                            }
-                        })
-                        .error(function (data, status) {
-                            Wait('stop');
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'POST to ' + start_url + ' failed with status: ' + status });
-                        });
-                } else {
-                    Wait('stop');
-                    Alert('No Passwords', 'Required password(s) not provided. The request was not submitted.', 'alert-info');
-                    if (form.name === 'credential') {
-                        // No passwords provided, so we can't start the job. Rather than leave the job in a 'new'
-                        // state, let's delete it. 
-                        scope.cancelJob();
-                    }
-                }
-            };
-
-            if (passwords && passwords.length > 0) {
-                Wait('stop');
-                // Prompt for passwords
+                password = passwords.pop();
+                
+                // Prompt for password
                 html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";
-                html += (extra_html) ? extra_html : "";
-                for (i = 0; i < passwords.length; i++) {
-                    // Add the password field
-                    if (form.name === 'credential') {
-                        // this is a job. we could be prompting for inventory and/or SCM passwords
-                        if (form.fields[passwords[i]]) {
-                            current_form = form;
-                        }
-                        else {
-                            // No match found. Abandon ship!
-                            Alert('Form Not Found', 'Could not locate form for: ' + passwords[i], 'alert-danger');
-                            $location('/#/jobs');
-                        }
-                    } else {
-                        current_form = form;
-                    }
-                    field = current_form.fields[passwords[i]];
-                    fld = passwords[i];
-                    scope[fld] = '';
-                    html += "<div class=\"form-group\">\n";
-                    html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"" + fld + "\">* ";
-                    html += (field.labelBind) ? scope[field.labelBind] : field.label;
-                    html += "</label>\n";
-                    html += "<div class=\"col-lg-9\">\n";
-                    html += "<input type=\"password\" ";
-                    html += "ng-model=\"" + fld + '" ';
-                    html += 'name="' + fld + '" ';
-                    html += "class=\"password-field form-control\" ";
-                    html += "required ";
-                    html += "/>";
-                    html += "<br />\n";
-                    // Add error messages
-                    html += "<span class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
-                        "password_form." + fld + ".$error.required\">A value is required!</span>\n";
-                    html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-                    html += "</div>\n";
-                    html += "</div>\n";
+                field = form.fields[password];
+                fld = password;
+                scope[fld] = '';
+                html += "<div class=\"form-group\">\n";
+                html += "<label class=\"col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3\" for=\"" + fld + "\">* ";
+                html += "</label>\n";
+                html += "<div class=\"col-md-8 col-sm-8 col-xs-9\">\n";
+                html += "<input type=\"password\" ";
+                html += "ng-model=\"" + fld + '" ';
+                html += 'name="' + fld + '" ';
+                html += "class=\"password-field form-control\" ";
+                html += "required ";
+                html += "/>";
+                html += "<br />\n";
+                // Add error messages
+                html += "<span class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
+                    "password_form." + fld + ".$error.required\">A value is required!</span>\n";
+                html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
+                html += "</div>\n";
+                html += "</div>\n";
 
-                    // Add the related confirm field
+                // Add the related confirm field
+                if (field.associated) {
                     fld = field.associated;
-                    field = current_form.fields[field.associated];
+                    field = form.fields[field.associated];
                     scope[fld] = '';
                     html += "<div class=\"form-group\">\n";
-                    html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"" + fld + "\">* ";
-                    html += (field.labelBind) ? scope[field.labelBind] : field.label;
+                    html += "<label class=\"col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3\" for=\"" + fld + "\">* ";
                     html += "</label>\n";
-                    html += "<div class=\"col-lg-9\">\n";
+                    html += "<div class=\"col-md-8 col-sm-8 col-xs-9\">\n";
                     html += "<input type=\"password\" ";
                     html += "ng-model=\"" + fld + '" ';
                     html += 'name="' + fld + '" ';
@@ -161,98 +122,119 @@ angular.module('JobSubmissionHelper', ['RestServices', 'Utilities', 'CredentialF
                     // Add error messages
                     html += "<span class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
                         "password_form." + fld + ".$error.required\">A value is required!</span>\n";
-                    if (field.awPassMatch) {
-                        html += "<span class=\"error\" ng-show=\"password_form." + fld +
-                            ".$error.awpassmatch\">Must match Password value</span>\n";
-                    }
+                    html += (field.awPassMatch) ? "<span class=\"error\" ng-show=\"password_form." + fld +
+                        ".$error.awpassmatch\">Must match Password value</span>\n" : "";
                     html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
                     html += "</div>\n";
                     html += "</div>\n";
                 }
                 html += "</form>\n";
-                element = angular.element(document.getElementById('password-body'));
-                element.html(html);
-                $compile(element.contents())(scope);
+                $('#password-body').empty().html(html);
+                e = angular.element(document.getElementById('password-modal'));
+                $compile(e)(scope);
                 $('#password-modal').modal();
                 $('#password-modal').on('shown.bs.modal', function () {
                     $('#password-body').find('input[type="password"]:first').focus();
                 });
-            } else {
-                scope.startJob();
             }
+
+            scope.passwordAccept = function() {
+                acceptedPasswords[password] = scope[password];
+                if (password.length > 0) {
+                    promptPassword();
+                }
+                else {
+                    parent_scope.$emit(callback, acceptedPasswords);
+                }
+            };
+
+            scope.passwordCancel = function() {
+                Alert('Missing Password', 'Required password(s) not provided. The request will not be submitted.', 'alert-info');
+                parent_scope.$emit('PasswordsCanceled');
+            };
         };
-    }
-])
+    }])
 
-.factory('SubmitJob', ['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'CredentialList',
-    'LookUpInit', 'CredentialForm', 'ProcessErrors', 'JobTemplateForm', 'Wait', 'Empty', 'PromptForCredential',
-    function (PromptPasswords, $compile, Rest, $location, GetBasePath, CredentialList, LookUpInit, CredentialForm,
-        ProcessErrors, JobTemplateForm, Wait, Empty, PromptForCredential) {
+// Submit request to run a playbook
+.factory('PlaybookRun', ['LaunchJob', 'PromptForPasswords', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Wait', 'Empty', 'PromptForCredential',
+    function (LaunchJob, PromptForPasswords, Rest, $location, GetBasePath, ProcessErrors, Wait, Empty, PromptForCredential) {
         return function (params) {
-
             var scope = params.scope,
                 id = params.id,
-                template_name = (params.template) ? params.template : null,
                 base = $location.path().replace(/^\//, '').split('/')[0],
-                url = GetBasePath(base) + id + '/';
+                url = GetBasePath(base) + id + '/',
+                job_template,
+                new_job_id,
+                launch_url;
 
             if (scope.removePostTheJob) {
                 scope.removePostTheJob();
             }
-            scope.removePostTheJob = scope.$on('PostTheJob', function(e, data) {
-                var dt = new Date().toISOString(),
-                    url = (data.related.jobs) ? data.related.jobs : data.related.job_template + 'jobs/',
-                    name = (template_name) ? template_name : data.name;
-
+            scope.removePostTheJob = scope.$on('PostTheJob', function() {
+                var url = (job_template.related.jobs) ? job_template.related.jobs : job_template.related.job_template + 'jobs/';
                 Wait('start');
                 Rest.setUrl(url);
-                Rest.post({
-                    name: name + ' ' + dt, // job name required and unique
-                    description: data.description,
-                    job_template: data.id,
-                    inventory: data.inventory,
-                    project: data.project,
-                    playbook: data.playbook,
-                    credential: data.credential,
-                    forks: data.forks,
-                    limit: data.limit,
-                    verbosity: data.verbosity,
-                    extra_vars: data.extra_vars
-                }).success(function (data) {
-                    scope.job_id = data.id;
+                Rest.post(job_template).success(function (data) {
+                    new_job_id = data.id;
+                    launch_url = data.related.start;
                     if (data.passwords_needed_to_start.length > 0) {
-                        // Passwords needed. Prompt for passwords, then start job.
-                        PromptPasswords({
-                            scope: scope,
-                            passwords: data.passwords_needed_to_start,
-                            start_url: data.related.start,
-                            form: CredentialForm
-                        });
+                        scope.$emit('PromptForPasswords');
                     } else {
-                        // No passwords needed, start the job!
-                        Rest.setUrl(data.related.start);
-                        Rest.post()
-                            .success(function () {
-                                Wait('stop');
-                                var base = $location.path().replace(/^\//, '').split('/')[0];
-                                if (base === 'jobs') {
-                                    scope.refresh();
-                                } else {
-                                    $location.path('/jobs');
-                                }
-                            })
-                            .error(function (data, status) {
-                                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                    msg: 'Failed to start job. POST returned status: ' + status });
-                            });
+                        scope.$emit('StartPlaybookRun', {});
                     }
                 }).error(function (data, status) {
-                    Wait('stop');
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                         msg: 'Failed to create job. POST returned status: ' + status });
                 });
             });
 
+            if (scope.removePasswordsCanceled) {
+                scope.removePasswordsCanceled();
+            }
+            scope.removePasswordCanceled = scope.$on('PasswordCanceled', function() {
+                // Delete the job
+                Wait('start');
+                Rest.setUrl(GetBasePath('jobs') + new_job_id + '/');
+                Rest.destroy()
+                    .success(function() {
+                        Wait('stop');
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                    });
+            });
+
+            if (scope.removePlaybookLaunchFinished) {
+                scope.removePlaybookLaunchFinished();
+            }
+            scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function() {
+                var base = $location.path().replace(/^\//, '').split('/')[0];
+                if (base === 'jobs') {
+                    scope.refresh();
+                } else {
+                    $location.path('/jobs');
+                }
+            });
+
+            if (scope.removeStartPlaybookRun) {
+                scope.removeStartPlaybookRun();
+            }
+            scope.removeStartJob = scope.$on('StartPlaybookRun', function(e, passwords) {
+                LaunchJob({
+                    scope: scope,
+                    url: launch_url,
+                    callback: 'PlaybookLaunchFinished',
+                    passwords: passwords
+                });
+            });
+
+            if (scope.removePromptForPasswords) {
+                scope.removePromptForPasswords();
+            }
+            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function(e, passwords) {
+                PromptForPasswords({ scope: scope, passwords: passwords, callback: 'StartPlaybookRun' });
+            });
 
             if (scope.removePromptForCredential) {
                 scope.removePromptForCredential();
@@ -261,13 +243,25 @@ angular.module('JobSubmissionHelper', ['RestServices', 'Utilities', 'CredentialF
                 PromptForCredential({ scope: scope, template: data });
             });
 
+            if (scope.removeCredentialReady) {
+                scope.removeCredentialReady();
+            }
+            scope.removeCredentialReady = scope.$on('CredentialReady', function(e, credential) {
+                if (!Empty(credential)) {
+                    job_template.credential = credential;
+                    scope.$emit('PostTheJob');
+                }
+            });
+
             // Get the job or job_template record
             Wait('start');
             Rest.setUrl(url);
             Rest.get()
                 .success(function (data) {
+                    delete data.id;
+                    job_template = data;
                     if (Empty(data.credential)) {
-                        scope.$emit('PromptForCredential', data);
+                        scope.$emit('PromptForCredential');
                     } else {
                         // We have what we need, submit the job
                         scope.$emit('PostTheJob');
@@ -281,51 +275,21 @@ angular.module('JobSubmissionHelper', ['RestServices', 'Utilities', 'CredentialF
     }
 ])
 
-.factory('PromptForCredential', ['GetBasePath', 'LookUpInit', 'JobTemplateForm', 'CredentialList', 'Empty',
-function(GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Empty) {
-    return function(params) {
-        
-        var scope = params.scope,
-            template = params.template,
-            launchJob;
-        
-        scope.credential = '';
-
-        launchJob = function () {
-            if (!Empty(scope.credential)) {
-                template.credential = scope.credential;
-                scope.$emit('PostTheJob', template);
-            }
-        };
-        
-        LookUpInit({
-            url: GetBasePath('credentials') + '?kind=ssh',
-            scope: scope,
-            form: JobTemplateForm,
-            current_item: null,
-            list: CredentialList,
-            field: 'credential',
-            hdr: 'Credential Required',
-            instructions: "Launching this job requires a machine credential. Please select your machine credential now or Cancel to quit.",
-            postAction: launchJob
-        });
-        scope.lookUpCredential();
-    };
-}])
 
 // Sumbit SCM Update request
-.factory('ProjectUpdate', ['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',
+.factory('ProjectUpdate', ['PromptForPasswords', 'LaunchJob', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',
     'ProjectsForm', 'Wait',
-    function (PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, ProjectsForm, Wait) {
+    function (PromptForPasswords, LaunchJob, Rest, $location, GetBasePath, ProcessErrors, Alert, ProjectsForm, Wait) {
         return function (params) {
             var scope = params.scope,
                 project_id = params.project_id,
-                url = GetBasePath('projects') + project_id + '/update/';
+                url = GetBasePath('projects') + project_id + '/update/',
+                project;
 
             if (scope.removeUpdateSubmitted) {
                 scope.removeUpdateSubmitted();
             }
-            scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function () {
+            scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
                 // Refresh the project list after update request submitted
                 Wait('stop');
                 Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
@@ -333,18 +297,18 @@ function(GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Empty) {
                 scope.refresh();
             });
 
-            if (scope.removeSCMSubmit) {
-                scope.removeSCMSubmit();
+            if (scope.removePromptForPasswords) {
+                scope.removePromptForPasswords();
             }
-            scope.removeSCMSubmit = scope.$on('SCMSubmit', function (e, passwords_needed_to_update, extra_html) {
-                // After the call to update, kick off the job.
-                PromptPasswords({
-                    scope: scope,
-                    passwords: passwords_needed_to_update,
-                    start_url: url,
-                    form: ProjectsForm,
-                    extra_html: extra_html
-                });
+            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function() {
+                PromptForPasswords({ scope: scope, passwords: project.passwords_needed_to_update, callback: 'StartTheUpdate' });
+            });
+
+            if (scope.removeStartTheUpdate) {
+                scope.removeStartTheUpdate();
+            }
+            scope.removeStartTheUpdate = scope.$on('StartTheUpdate', function(e, passwords) {
+                LaunchJob({ scope: scope, url: url, passwords: passwords, callback: 'UpdateSubmitted' });
             });
 
             // Check to see if we have permission to perform the update and if any passwords are needed
@@ -352,49 +316,24 @@ function(GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Empty) {
             Rest.setUrl(url);
             Rest.get()
                 .success(function (data) {
-                    var i, extra_html;
+                    project = data;
                     Wait('stop');
-                    if (data.can_update) {
-                        extra_html = '';
-                        for (i = 0; i < scope.projects.length; i++) {
-                            if (scope.projects[i].id === project_id) {
-                                extra_html += "<div class=\"form-group\">\n";
-                                extra_html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"scm_url\">SCM URL</label>\n";
-                                extra_html += "<div class=\"col-lg-9\">\n";
-                                extra_html += "<input type=\"text\" readonly";
-                                extra_html += ' name=\"scm_url\" ';
-                                extra_html += "class=\"form-control\" ";
-                                extra_html += "value=\"" + scope.projects[i].scm_url + "\" ";
-                                extra_html += "/>";
-                                extra_html += "</div>\n";
-                                extra_html += "</div>\n";
-                                if (scope.projects[i].scm_username) {
-                                    extra_html += "<div class=\"form-group\">\n";
-                                    extra_html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"scm_username\">SCM Username</label>\n";
-                                    extra_html += "<div class=\"col-lg-9\">\n";
-                                    extra_html += "<input type=\"text\" readonly";
-                                    extra_html += ' name=\"scm_username\" ';
-                                    extra_html += "class=\"form-control\" ";
-                                    extra_html += "value=\"" + scope.projects[i].scm_username + "\" ";
-                                    extra_html += "/>";
-                                    extra_html += "</div>\n";
-                                    extra_html += "</div>\n";
-                                }
-                                break;
-                            }
+                    if (project.can_update) {
+                        if (project.passwords_needed_to_updated) {
+                            scope.$emit('PromptForPasswords');
                         }
-                        extra_html += "</p>";
-                        scope.$emit('SCMSubmit', data.passwords_needed_to_update, extra_html);
-                    } else {
+                        else {
+                            scope.$emit('StartTheUpdate', {});
+                        }
+                    }
+                    else {
                         Alert('Permission Denied', 'You do not have access to update this project. Please contact your system administrator.',
                             'alert-danger');
                     }
                 })
                 .error(function (data, status) {
-                    ProcessErrors(scope, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get project update details: ' + url + ' GET status: ' + status
-                    });
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Failed to lookup project ' + url + ' GET returned: ' + status });
                 });
         };
     }
@@ -402,15 +341,15 @@ function(GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Empty) {
 
 
 // Submit Inventory Update request
-.factory('InventoryUpdate', ['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',
-    'GroupForm', 'BuildTree', 'Wait',
-    function (PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, GroupForm, BuildTree, Wait) {
+.factory('InventoryUpdate', ['PromptForPasswords', 'LaunchJob', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert', 'Wait',
+    function (PromptForPasswords, LaunchJob, Rest, $location, GetBasePath, ProcessErrors, Alert, Wait) {
         return function (params) {
 
             var scope = params.scope,
                 url = params.url,
                 group_id = params.group_id,
-                tree_id = params.tree_id;
+                tree_id = params.tree_id,
+                inventory_source;
 
             if (scope.removeHostReloadComplete) {
                 scope.removeHostReloadComplete();
@@ -427,33 +366,31 @@ function(GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Empty) {
             if (scope.removeUpdateSubmitted) {
                 scope.removeUpdateSubmitted();
             }
-            scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function (e, action) {
+            scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function () {
                 setTimeout(function() {
-                    if (action === 'started') {
-                        if (scope.refreshGroups) {
-                            scope.selected_tree_id = tree_id;
-                            scope.selected_group_id = group_id;
-                            scope.refreshGroups();
-                        } else if (scope.refresh) {
-                            scope.refresh();
-                        }
-                        scope.$emit('HostReloadComplete');
+                    if (scope.refreshGroups) {
+                        scope.selected_tree_id = tree_id;
+                        scope.selected_group_id = group_id;
+                        scope.refreshGroups();
+                    } else if (scope.refresh) {
+                        scope.refresh();
                     }
+                    scope.$emit('HostReloadComplete');
                 }, 2000);
             });
 
-            if (scope.removeInventorySubmit) {
-                scope.removeInventorySubmit();
+            if (scope.removePromptForPasswords) {
+                scope.removePromptForPasswords();
             }
-            scope.removeInventorySubmit = scope.$on('InventorySubmit', function (e, passwords_needed_to_update, extra_html) {
-                // After the call to update, kick off the job.
-                PromptPasswords({
-                    scope: scope,
-                    passwords: passwords_needed_to_update,
-                    start_url: url,
-                    form: GroupForm,
-                    extra_html: extra_html
-                });
+            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function() {
+                PromptForPasswords({ scope: scope, passwords: inventory_source.passwords_needed_to_update, callback: 'StartTheUpdate' });
+            });
+
+            if (scope.removeStartTheUpdate) {
+                scope.removeStartTheUpdate();
+            }
+            scope.removeStartTheUpdate = scope.$on('StartTheUpdate', function(e, passwords) {
+                LaunchJob({ scope: scope, url: url, passwords: passwords, callback: 'UpdateSubmitted' });
             });
 
             // Check to see if we have permission to perform the update and if any passwords are needed
@@ -461,20 +398,23 @@ function(GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Empty) {
             Rest.setUrl(url);
             Rest.get()
                 .success(function (data) {
+                    inventory_source = data;
                     if (data.can_update) {
-                        //var extra_html = "<div class=\"inventory-passwd-msg\">Starting inventory update for <em>" + group_name + 
-                        //    "</em>. Please provide the " + group_source + " credentials:</div>\n";
-                        scope.$emit('InventorySubmit', data.passwords_needed_to_update);
+                        if (data.passwords_needed_to_update) {
+                            scope.$emit('PromptForPasswords');
+                        }
+                        else {
+                            scope.$emit('StartTheUpdate', {});
+                        }
                     } else {
                         Wait('stop');
-                        Alert('Permission Denied', 'You do not have access to run the update. Please contact your system administrator.',
+                        Alert('Permission Denied', 'You do not have access to run the inventory sync. Please contact your system administrator.',
                             'alert-danger');
                     }
                 })
                 .error(function (data, status) {
-                    Wait('stop');
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to get inventory_source details. ' + url + 'GET status: ' + status });
+                        msg: 'Failed to get inventory source ' + url + ' GET returned: ' + status });
                 });
         };
     }

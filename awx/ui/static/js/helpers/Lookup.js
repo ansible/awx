@@ -5,13 +5,15 @@
  *  Build a lookup dialog
  *
  *  LookUpInit( {
- *      scope: <form scope>,
+ *      scope: <caller's scope>,
  *      form: <form object>,
  *      current_item: <id of item to select on open>,
  *      list: <list object>,
  *      field: <name of the form field with which the lookup is associated>,
  *      hdr: <optional. modal dialog header>
- *      })
+ *      postAction: optional function to run after selection made,
+ *      callback: optional label to $emit() on parent scope
+ *  })
  */
 
 'use strict';
@@ -28,6 +30,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                 field = params.field,
                 instructions = params.instructions,
                 postAction = params.postAction,
+                callback = params.callback,
                 defaultUrl, name, watchUrl;
 
             if (params.url) {
@@ -194,9 +197,13 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                         Alert('Missing Selection', 'Oops, you failed to make a selection. Click on a row to make your selection, ' +
                             'and then click the Select button. Or, click Cancel to quit.');
                     } else {
+                        // Selection made
                         $('#lookup-modal-dialog').dialog('close');
                         if (postAction) {
                             postAction();
+                        }
+                        if (callback) {
+                            parent_scope.$emit(callback);
                         }
                     }
                 };

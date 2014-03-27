@@ -12,7 +12,7 @@
 
 function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobTemplateList,
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
-    GetBasePath, PromptPasswords, JobTemplateForm, CredentialList, LookUpInit, SubmitJob, Wait, Stream) {
+    GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun, Wait, Stream) {
 
     ClearScope();
 
@@ -96,14 +96,14 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
     };
 
     $scope.submitJob = function (id) {
-        SubmitJob({ scope: $scope, id: id });
+        PlaybookRun({ scope: $scope, id: id });
     };
 }
 
 JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobTemplateList',
     'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'PromptPasswords', 'JobTemplateForm', 'CredentialList', 'LookUpInit',
-    'SubmitJob', 'Wait', 'Stream'
+    'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList', 'LookUpInit',
+    'PlaybookRun', 'Wait', 'Stream'
 ];
 
 function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm,

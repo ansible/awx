@@ -92,6 +92,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 width: x,
                 height: y,
                 autoOpen: false,
+                closeOnEscape: false,
                 create: function () {
                     // fix the close button
                     $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-titlebar button')
@@ -107,8 +108,11 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 resizeStop: function () {
                     // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
                     var dialog = $('.ui-dialog[aria-describedby="status-modal-dialog"]'),
-                    content = dialog.find('#status-modal-dialog');
+                        titleHeight = dialog.find('.ui-dialog-titlebar').outerHeight(),
+                        buttonHeight = dialog.find('.ui-dialog-buttonpane').outerHeight(),
+                        content = dialog.find('#status-modal-dialog');
                     content.width(dialog.width() - 28);
+                    content.css({ height: (dialog.height() - titleHeight - buttonHeight - 10) });
                 },
                 close: function () {
                     // Destroy on close
@@ -350,17 +354,16 @@ function(Find, Wait, Rest, InventoryUpdate, ProcessErrors, GetBasePath) {
             })
             .error(function (data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' +
-                    url + ' POST returned status: ' + status });
+                    url + ' GET returned: ' + status });
             });
     };
 }])
 
-.factory('RelaunchPlaybook', ['SubmitJob', function(SubmitJob) {
+.factory('RelaunchPlaybook', ['PlaybookRun', function(PlaybookRun) {
     return function(params) {
         var scope = params.scope,
-            id = params.id,
-            name = params.name;
-        SubmitJob({ scope: scope, id: id, template: name });
+            id = params.id;
+        PlaybookRun({ scope: scope, id: id });
     };
 }])
 
