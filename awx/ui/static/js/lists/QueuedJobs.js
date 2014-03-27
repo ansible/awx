@@ -39,12 +39,6 @@ angular.module('QueuedJobsDefinition', [])
                 filter: "date:'MM/dd/yy HH:mm:ss'",
                 columnClass: 'col-md-2 hidden-xs'
             },
-            next_job_run: {
-                label: 'Next Run',
-                searchable: false,
-                filter: "date:'MM/dd/yy HH:mm:ss'",
-                columnClass: "col-md-2 hidden-sm hidden-xs"
-            },
             type: {
                 label: 'Type',
                 ngBind: 'queued_job.type_label',

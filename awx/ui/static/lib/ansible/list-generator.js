@@ -287,7 +287,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     html += "<thead>\n";
                     html += "<tr>\n";
                     if (list.index) {
-                        html += "<th class=\"col-lg-1 col-md-1 col-sm-1 hidden-xs\">#</th>\n";
+                        html += "<th class=\"col-md-1 col-sm-2 hidden-xs\">#</th>\n";
                     }
                     for (fld in list.fields) {
                         if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&

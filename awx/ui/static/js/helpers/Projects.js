@@ -27,7 +27,6 @@ angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDef
 
             Wait('start');
 
-            // Using jquery dialog for its expandable property
             html = "<div id=\"status-modal-dialog\"><div id=\"form-container\" style=\"width: 100%;\"></div></div>\n";
             $('#projects-modal-container').empty().append(html);
 
@@ -74,10 +73,13 @@ angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDef
                         });
                 },
                 resizeStop: function () {
-                    // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
                     var dialog = $('.ui-dialog[aria-describedby="status-modal-dialog"]'),
+                        titleHeight = dialog.find('.ui-dialog-titlebar').outerHeight(),
+                        buttonHeight = dialog.find('.ui-dialog-buttonpane').outerHeight(),
                         content = dialog.find('#status-modal-dialog');
                     content.width(dialog.width() - 28);
+                    content.css({ height: (dialog.height() - titleHeight - buttonHeight - 10) });
+                    
                 },
                 close: function () {
                     // Destroy on close
@@ -124,10 +126,8 @@ angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDef
 
                 })
                 .error(function (data, status) {
-                    $('#form-modal').modal("hide");
-                    ProcessErrors(scope, data, status, form, {
-                        hdr: 'Error!',
-                        msg: 'Failed to retrieve status of project: ' + project_id + '. GET status: ' + status
+                    ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                        msg: 'Failed to retrieve project: ' + project_id + '. GET returned: ' + status
                     });
                 });
         };

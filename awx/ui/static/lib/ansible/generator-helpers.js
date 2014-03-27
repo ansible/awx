@@ -358,7 +358,7 @@ angular.module('GeneratorHelpers', [])
                 }
                 html += "<i ";
                 html += (field.badgeShow) ? "ng-show=\"" + field.badgeShow + "\" " : "";
-                html += " class=\"field-badge " + field.badgeIcon;
+                html += " class=\"fa " + field.badgeIcon;
                 html += (field.badgeClass) ? " " + field.badgeClass : "";
                 html += "\"></i>";
                 if (field.badgeToolTip) {
@@ -454,6 +454,8 @@ angular.module('GeneratorHelpers', [])
                 html = DropDown(params);
             } else if (field.type === 'badgeCount') {
                 html = BadgeCount(params);
+            } else if (field.type === 'badgeOnly') {
+                html = Badge(field);
             } else {
                 html += "<td class=\"" + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";
@@ -537,7 +539,7 @@ angular.module('GeneratorHelpers', [])
                 }
 
                 // Add data binds 
-                if (!field.ngBindHtml && (field.showValue === undefined || field.showValue === true)) {
+                if (!field.ngBindHtml && !field.iconOnly && (field.showValue === undefined || field.showValue === true)) {
                     if (field.ngBind) {
                         html += "{{ " + field.ngBind;
                     } else {

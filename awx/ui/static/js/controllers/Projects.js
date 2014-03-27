@@ -44,50 +44,55 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         $scope.removePostRefresh();
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
-        // Cleanup after a delete
-        var j, i;
         Wait('stop');
-        $('#prompt-modal').modal('hide');
-
+        
         if ($scope.projects) {
-            for (i = 0; i < $scope.projects.length; i++) {
-                if ($scope.projects[i].status === 'ok') {
+            $scope.projects.forEach(function(project, i) {
+                if (project.status === 'ok') {
                     $scope.projects[i].status = 'n/a';
                 }
-                switch ($scope.projects[i].status) {
-                case 'n/a':
-                    $scope.projects[i].badge = 'none';
-                    break;
-                case 'updating':
-                case 'successful':
-                case 'ok':
-                    $scope.projects[i].badge = 'false';
-                    break;
-                case 'never updated':
-                case 'failed':
-                case 'missing':
-                    $scope.projects[i].badge = 'true';
-                    break;
+                switch (project.status) {
+                    case 'n/a':
+                    case 'never updated':
+                        $scope.projects[i].statusIcon = 'none';
+                        $scope.projects[i].statusTip = 'No SCM updates have run for this project';
+                        break;
+                    case 'updating':
+                        $scope.projects[i].statusIcon = 'running pulsate';
+                        $scope.projects[i].statusTip = 'Running! Click for details';
+                        break;
+                    case 'successful':
+                        $scope.projects[i].statusIcon = 'success';
+                        $scope.projects[i].statusTip = 'Success! Click for details';
+                        break;
+                    case 'failed':
+                    case 'missing':
+                        $scope.projects[i].statusTip = 'Failed. Click for details';
+                        $scope.projects[i].statusIcon = 'error';
+                        break;
                 }
-                $scope.projects[i].last_updated = ($scope.projects[i].last_updated !== null) ?
-                    FormatDate(new Date($scope.projects[i].last_updated)) : null;
 
-                for (j = 0; j < $scope.project_scm_type_options.length; j++) {
-                    if ($scope.project_scm_type_options[j].value === $scope.projects[i].scm_type) {
-                        $scope.projects[i].scm_type = $scope.project_scm_type_options[j].label;
-                        if ($scope.projects[i].scm_type === 'Manual') {
+                if (project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
+                    $scope.projects[i].statusTip = 'Canceled. Click for details';
+                }
+
+                $scope.project_scm_type_options.forEach(function(type) {
+                    if (type.value === project.scm_type) {
+                        $scope.projects[i].scm_type = type.label;
+                        if (type.label === 'Manual') {
                             $scope.projects[i].scm_update_tooltip = 'Manaul projects do not require an SCM update';
                             $scope.projects[i].scm_schedule_tooltip = 'Manual projects do not require a schedule';
                             $scope.projects[i].scm_type_class = 'btn-disabled';
+                            $scope.projects[i].statusTip = 'Not configured for SCM';
+                            $scope.projects[i].statusIcon = 'none';
                         } else {
                             $scope.projects[i].scm_update_tooltip = "Start an SCM update";
                             $scope.projects[i].scm_schedule_tooltip = "Schedule future SCM updates";
                             $scope.projects[i].scm_type_class = "";
                         }
-                        break;
                     }
-                }
-            }
+                });
+            });
         }
     });
 
@@ -98,7 +103,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         var opt;
 
         list.fields.scm_type.searchOptions = $scope.project_scm_type_options;
-        list.fields.status.searchOptions = $scope.project_status_options;
+        //list.fields.status.searchOptions = $scope.project_status_options;
 
         if ($routeParams.scm_type && $routeParams.status) {
             // Request coming from home page. User wants all errors for an scm_type
@@ -188,40 +193,28 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
     $scope.showSCMStatus = function (id) {
         // Refresh the project list
-        var i, statusCheckRemove = $scope.$on('PostRefresh', function () {
-            var project;
-            for (i= 0; i < $scope.projects.length; i++) {
-                if ($scope.projects[i].id === id) {
-                    project = $scope.projects[i];
-                    break;
-                }
-            }
-            if (project.scm_type !== null) {
-                if (project.related.current_update) {
-                    Wait('start');
-                    ProjectStatus({
-                        project_id: id,
-                        last_update: project.related.current_update
-                    });
-                } else if (project.related.last_update) {
-                    Wait('start');
-                    ProjectStatus({
-                        project_id: id,
-                        last_update: project.related.last_update
-                    });
-                } else {
-                    Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
-                        ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
-                }
+        var project = Find({ list: $scope.projects, key: 'id', val: id });
+        if (Empty(project.scm_type) || project.scm_type === 'Manual') {
+            Alert('No SCM Configuration', 'The selected project is not configured for SCM. To configure for SCM, edit the project and provide SCM settings, ' +
+                'and then run an update.', 'alert-info');
+        } else {
+            if (project.related.current_update) {
+                Wait('start');
+                ProjectStatus({
+                    project_id: id,
+                    last_update: project.related.current_update
+                });
+            } else if (project.related.last_update) {
+                Wait('start');
+                ProjectStatus({
+                    project_id: id,
+                    last_update: project.related.last_update
+                });
             } else {
-                Alert('Missing SCM Configuration', 'The selected project is not configured for SCM. You must first edit the project, provide SCM settings, ' +
-                    'and then run an update.', 'alert-info');
+                Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
+                    ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
             }
-            statusCheckRemove();
-        });
-
-        // Refresh the project list so we're looking at the latest data
-        $scope.search(list.iterator, null, false, true);
+        }
     };
 
     $scope.deleteProject = function (id, name) {
@@ -324,22 +317,28 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         });
     };
 
-    $scope.SCMUpdate = function (project_id) {
-        var i;
-        for (i = 0; i < $scope.projects.length; i++) {
-            if ($scope.projects[i].id === project_id) {
-                if ($scope.projects[i].scm_type === "Manual" || Empty($scope.projects[i].scm_type)) {
+    $scope.SCMUpdate = function (project_id, event) {
+        try {
+            $(event.target).tooltip('hide');
+        }
+        catch(e) {
+            // ignore
+        }
+        $scope.projects.every(function(project) {
+            if (project.id === project_id) {
+                if (project.scm_type === "Manual" || Empty(project.scm_type)) {
                     // Do not respond. Button appears greyed out as if it is disabled. Not disabled though, because we need mouse over event
                     // to work. So user can click, but we just won't do anything.
                     //Alert('Missing SCM Setup', 'Before running an SCM update, edit the project and provide the SCM access information.', 'alert-info');
-                    break;
-                } else if ($scope.projects[i].status === 'updating') {
+                } else if (project.status === 'updating') {
                     Alert('Update in Progress', 'The SCM update process is running. Use the Refresh button to monitor the status.', 'alert-info');
                 } else {
-                    ProjectUpdate({ scope: $scope, project_id: project_id });
+                    ProjectUpdate({ scope: $scope, project_id: project.id });
                 }
+                return false;
             }
-        }
+            return true;
+        });
     };
 
     $scope.editSchedules = function(id) {

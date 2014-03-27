@@ -979,15 +979,10 @@ input[type="checkbox"].checkbox-no-label {
 
   
   .job-new,
-  .job-canceled {
-    color: #778899;
-  }
-
-  .icon-failures-false,
   .license-valid,
   .job-success,
   .job-successful {
-    color: @green;
+      color: @green;
   }
 
   .icon-job-pending:before,
@@ -996,14 +991,13 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-successful:before,
   .icon-job-waiting:before,
   .icon-job-new:before,
-  .icon-job-canceled:before,
   .icon-job-changed:before {
-    content: "\f111";
+      content: "\f111";
   }
 
   .icon-job-error:before,
   .icon-job-failed:before {
-    content: "\f06a";
+      content: "\f06a";
   }
 
   .icon-job-pending,
@@ -1012,36 +1006,32 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-successful,
   .icon-job-waiting,
   .icon-job-new {
-    color: @green;
+      color: @green;
   }
   
-  .icon-job-canceled {
-    color: @grey;
+  .icon-job-running {
+    .pulsate();
   }
-
+  
   .icon-job-changed,
   .job-changed {
-    color: @warning;
+      color: @warning;
   }
 
   .icon-job-error,
   .icon-job-failed {
-    color: @red;
+      color: @red;
   }
 
-  .icon-failures-none,
-  .icon-failures-na {
-    color: @grey;
+  .icon-job-none,
+  .icon-job-canceled {
+      color: @grey;
+      opacity: 0.45;
   }
 
-  .icon-failures-true:before {
-    content: "\f06a";
-  }
-
-  .icon-failures-none:before,
-  .icon-failures-na:before,
-  .icon-failures-false:before {
-    content: "\f111";
+  .icon-job-canceled,
+  .icon-job-none:before {
+      content: "\f10c";
   }
 
   .icon-schedule-enabled-true:before {

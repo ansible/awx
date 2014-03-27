@@ -22,39 +22,35 @@ angular.module('ProjectsListDefinition', [])
         hover: true,
 
         fields: {
+            status: {
+                label: 'Status',
+                iconOnly: true,
+                ngClick: 'showSCMStatus(project.id)',
+                awToolTip: '{{ project.statusTip }}',
+                dataPlacement: 'top',
+                icon: "icon-job-{{ project.statusIcon }}",
+                columnClass: "col-md-1 col-sm-2 col-xs-3",
+                nosort: true
+            },
             name: {
                 key: true,
-                label: 'Name'
+                label: 'Name',
+                columnClass: "col-md-4 col-sm-3 col-xs-3"
             },
-            description: {
-                label: 'Description',
+            last_updated: {
+                label: 'Last Updated',
+                filter: "date:'MM/dd/yy HH:mm:ss'",
+                columnClass: "col-md-2 hidden-sm hidden-xs",
                 excludeModal: true,
-                columnClass: 'hidden-sm hidden-xs'
+                searchable: false,
+                nosort: true
             },
             scm_type: {
                 label: 'Type',
                 searchType: 'select',
                 searchOptions: [], // will be set by Options call to projects resource
                 excludeModal: true,
-                columnClass: 'hidden-sm hidden-xs',
-                nosort: true
-            },
-            status: {
-                label: 'Status',
-                ngClick: 'showSCMStatus(project.id)',
-                awToolTip: 'View details of last SCM Update',
-                dataPlacement: 'top',
-                badgeIcon: "{{ 'fa icon-failures-' + project.badge }}",
-                badgePlacement: 'left',
-                searchType: 'select',
-                searchOptions: [], // will be set by Options call to projects resource
-                excludeModal: true
-            },
-            last_updated: {
-                label: 'Last Updated',
-                type: 'date',
-                excludeModal: true,
-                searchable: false
+                columnClass: 'col-md-2 hidden-sm hidden-xs'
             }
         },
 
@@ -93,7 +89,7 @@ angular.module('ProjectsListDefinition', [])
 
         fieldActions: {
             scm_update: {
-                ngClick: 'SCMUpdate(project.id)',
+                ngClick: 'SCMUpdate(project.id, $event)',
                 awToolTip: "{{ project.scm_update_tooltip }}",
                 ngClass: "project.scm_type_class",
                 dataPlacement: 'top'

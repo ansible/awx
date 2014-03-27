@@ -15,7 +15,7 @@ angular.module('ScheduledJobsDefinition', [])
         iterator: 'scheduled_job',
         editTitle: 'Scheduled Jobs',
         'class': 'table-condensed',
-        index: false,
+        index: true,
         hover: true,
         well: false,
         
@@ -24,27 +24,28 @@ angular.module('ScheduledJobsDefinition', [])
                 label: 'Next Run',
                 link: false,
                 searchable: false,
-                columnClass: "col-md-2",
+                columnClass: "col-md-2 hidden-xs",
                 key: true,
                 desc: true
-            },
-            dtend: {
-                label: 'Ends On',
-                searchable: false,
-                filter: "date:'MM/dd/yy HH:mm:ss'",
-                columnClass: "col-md-2 hidden-xs"
-            },
-            template_name: {
-                label: 'Name',
-                columnClass: "col-md-4 col-xs-5",
-                sourceModel: "template",
-                sourceField: "name"
             },
             type: {
                 label: 'Type',
                 link: false,
                 columnClass: "col-md-2 hidden-sm hidden-xs"
+            },
+            template_name: {
+                label: 'Name',
+                columnClass: "col-md-3 col-xs-5",
+                sourceModel: "template",
+                sourceField: "name"
             }
+            /*,
+            dtend: {
+                label: 'Ends On',
+                searchable: false,
+                filter: "date:'MM/dd/yy HH:mm:ss'",
+                columnClass: "col-md-2 hidden-xs"
+            }*/
         },
 
         actions: {
