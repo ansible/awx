@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 import logging
+import dateutil
 
 # Django
 from django.db import models
@@ -33,7 +34,9 @@ class Schedule(CommonModel):
         default=True,
     )
     dtstart = models.DateTimeField(
-
+        null=True,
+        default=None,
+        editable=True,
     )
     dtend = models.DateTimeField(
         null=True,
