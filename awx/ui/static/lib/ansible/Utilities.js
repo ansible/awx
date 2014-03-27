@@ -647,7 +647,6 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             var form = params.form,
                 scope = params.scope,
                 fld;
-            console.log('here');
             for (fld in form.fields) {
                 if (scope[form.name + '_form'][fld]) {
                     console.log(fld + ' valid: ' + scope[form.name + '_form'][fld].$valid);

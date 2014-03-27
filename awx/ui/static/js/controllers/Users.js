@@ -146,35 +146,38 @@ function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, U
 
     // Save
     $scope.formSave = function () {
-        generator.clearApiErrors();
         var fld, data = {};
-        if ($scope.organization !== undefined && $scope.organization !== null && $scope.organization !== '') {
-            Rest.setUrl(defaultUrl + $scope.organization + '/users/');
-            for (fld in form.fields) {
-                if (form.fields[fld].realName) {
-                    data[form.fields[fld].realName] = $scope[fld];
-                } else {
-                    data[fld] = $scope[fld];
+        generator.clearApiErrors();
+        generator.checkAutoFill();
+        if ($scope[form.name + '_form'].$valid) {
+            if ($scope.organization !== undefined && $scope.organization !== null && $scope.organization !== '') {
+                Rest.setUrl(defaultUrl + $scope.organization + '/users/');
+                for (fld in form.fields) {
+                    if (form.fields[fld].realName) {
+                        data[form.fields[fld].realName] = $scope[fld];
+                    } else {
+                        data[fld] = $scope[fld];
+                    }
                 }
+                data.is_superuser = data.is_superuser || false;
+                Wait('start');
+                Rest.post(data)
+                    .success(function (data) {
+                        var base = $location.path().replace(/^\//, '').split('/')[0];
+                        if (base === 'users') {
+                            $rootScope.flashMessage = 'New user successfully created!';
+                            $location.path('/users/' + data.id);
+                        }
+                        else {
+                            ReturnToCaller(1);
+                        }
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to add new user. POST returned status: ' + status });
+                    });
+            } else {
+                $scope.organization_name_api_error = 'A value is required';
             }
-            data.is_superuser = data.is_superuser || false;
-            Wait('start');
-            Rest.post(data)
-                .success(function (data) {
-                    var base = $location.path().replace(/^\//, '').split('/')[0];
-                    if (base === 'users') {
-                        $rootScope.flashMessage = 'New user successfully created!';
-                        $location.path('/users/' + data.id);
-                    }
-                    else {
-                        ReturnToCaller(1);
-                    }
-                })
-                .error(function (data, status) {
-                    ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to add new user. POST returned status: ' + status });
-                });
-        } else {
-            $scope.organization_name_api_error = 'A value is required';
         }
     };
 
@@ -289,34 +292,37 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
         $scope.formSave = function () {
             var data = {}, fld;
             generator.clearApiErrors();
+            generator.checkAutoFill();
             $rootScope.flashMessage = null;
-            Rest.setUrl(defaultUrl + id + '/');
-            for (fld in form.fields) {
-                if (form.fields[fld].realName) {
-                    data[form.fields[fld].realName] = $scope[fld];
-                } else {
-                    data[fld] = $scope[fld];
+            if ($scope[form.name + '_form'].$valid) {
+                Rest.setUrl(defaultUrl + id + '/');
+                for (fld in form.fields) {
+                    if (form.fields[fld].realName) {
+                        data[form.fields[fld].realName] = $scope[fld];
+                    } else {
+                        data[fld] = $scope[fld];
+                    }
                 }
+
+                data.is_superuser = data.is_superuser || false;
+
+                Wait('start');
+                Rest.put(data)
+                    .success(function () {
+                        Wait('stop');
+                        var base = $location.path().replace(/^\//, '').split('/')[0];
+                        if (base === 'users') {
+                            ReturnToCaller();
+                        }
+                        else {
+                            ReturnToCaller(1);
+                        }
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update users: ' + $routeParams.id +
+                            '. PUT status: ' + status });
+                    });
             }
-
-            data.is_superuser = data.is_superuser || false;
-
-            Wait('start');
-            Rest.put(data)
-                .success(function () {
-                    Wait('stop');
-                    var base = $location.path().replace(/^\//, '').split('/')[0];
-                    if (base === 'users') {
-                        ReturnToCaller();
-                    }
-                    else {
-                        ReturnToCaller(1);
-                    }
-                })
-                .error(function (data, status) {
-                    ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update users: ' + $routeParams.id +
-                        '. PUT status: ' + status });
-                });
         };
 
         $scope.showActivity = function () {

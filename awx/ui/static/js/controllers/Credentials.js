@@ -215,7 +215,10 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
     // Save
     $scope.formSave = function () {
         generator.clearApiErrors();
-        FormSave({ scope: $scope, mode: 'add' });
+        generator.checkAutoFill();
+        if ($scope[form.name + '_form'].$valid) {
+            FormSave({ scope: $scope, mode: 'add' });
+        }
     };
 
     // Handle Owner change
@@ -420,7 +423,10 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
     // Save changes to the parent
     $scope.formSave = function () {
         generator.clearApiErrors();
-        FormSave({ scope: $scope, mode: 'edit' });
+        generator.checkAutoFill({ scope: $scope });
+        if ($scope[form.name + '_form'].$valid) {
+            FormSave({ scope: $scope, mode: 'edit' });
+        }
     };
 
     // Handle Owner change

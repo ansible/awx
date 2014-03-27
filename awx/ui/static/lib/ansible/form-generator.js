@@ -275,6 +275,21 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                 }
             },
 
+            checkAutoFill: function(params) {
+                var fld, model, newVal, type,
+                    scope = (params && params.scope) ? params.scope : this.scope;
+                for (fld in this.form.fields) {
+                    if (this.form.fields[fld].type === 'text' || this.form.fields[fld].type === 'textarea') {
+                        type = (this.form.fields[fld].type === 'text') ? 'input' : 'textarea';
+                        model = scope[this.form.name + '_form'][fld];
+                        newVal = $(type + '[name="' + fld + '"]').val();
+                        if (newVal && model && model.$viewValue !== newVal) {
+                            model.$setViewValue(newVal);
+                        }
+                    }
+                }
+            },
+
             addListeners: function () {
 
                 if (this.modal) {
@@ -583,7 +598,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
                             html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
                             html += (field.awMultiselect) ? "aw-multiselect=\"" + field.awMultiselect + "\" " : "";
-                            html += " >\n";
+                            html += ">\n";
                         }
 
                         if (field.clear) {
@@ -705,7 +720,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (options.mode === 'add' && field.addRequired) ? "required " : "";
                         html += (field.readonly || field.showonly) ? "readonly " : "";
-                        html += "></textarea>\n";
+                        html += "aw-watch ></textarea>\n";
 
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
@@ -1270,13 +1285,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                                 }
                                 if (button.ngDisabled) {
                                     if (btn !== 'reset') {
-                                        html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
-                                        html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                        //html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
+                                        html += "ng-disabled=\"" + this.form.name + "_form.$invalid";
+                                        //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
                                         html += "\" ";
                                     } else {
-                                        html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
-                                        html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
-                                        html += "\" ";
+                                        //html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
+                                        //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                        //html += "\" ";
                                     }
                                 }
                                 html += ">";

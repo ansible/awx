@@ -691,3 +691,21 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             });
         };
     }]);
+
+    /*
+    .directive('awWatch', [ function() {
+        return {
+            require: 'ngModel',
+            link: function(scope, element, attrs, ngModel) {
+                $(element).change(function() {
+                    console.log('here');
+                    //var newVal = element.val();
+                    //if (newVal && ngModel.$pristine && ngModel.$viewValue !== newVal) {
+                    //    console.log('setting value');
+                    //    return ngModel.$setViewValue(newVal);
+                    //}
+                });
+            }
+        };
+    }]);
+    */
