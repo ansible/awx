@@ -75,57 +75,60 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  * alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
  * clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
  */
-.factory('Alert', ['$rootScope',
-    function ($rootScope) {
-        return function (hdr, msg, cls, action, secondAlert, disableButtons) {
-            if (secondAlert) {
-                $rootScope.alertHeader2 = hdr;
-                $rootScope.alertBody2 = msg;
-                $rootScope.alertClass2 = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
-                $('#alert-modal2').modal({
-                    show: true,
-                    keyboard: true,
-                    backdrop: 'static'
-                });
-                $rootScope.disableButtons2 = (disableButtons) ? true : false;
-                
-                $('#alert-modal2').on('hidden.bs.modal', function () {
-                    if (action) {
-                        action();
-                    }
-                });
-                $(document).bind('keydown', function (e) {
-                    if (e.keyCode === 27) {
-                        $('#alert-modal2').modal('hide');
-                    }
-                });
-            } else {
-                $rootScope.alertHeader = hdr;
-                $rootScope.alertBody = msg;
-                $rootScope.alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
-                $('#alert-modal').modal({
-                    show: true,
-                    keyboard: true,
-                    backdrop: 'static'
-                });
+.factory('Alert', ['$rootScope', '$compile', function ($rootScope, $compile) {
+    return function (hdr, msg, cls, action, secondAlert, disableButtons) {
+        var scope = $rootScope.$new(), e;
+        if (secondAlert) {
+            scope.alertHeader2 = hdr;
+            scope.alertBody2 = msg;
+            scope.alertClass2 = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
+            e = angular.element(document.getElementById('alert-modal2'));
+            $compile(e)(scope);
+            $('#alert-modal2').modal({
+                show: true,
+                keyboard: true,
+                backdrop: 'static'
+            });
+            scope.disableButtons2 = (disableButtons) ? true : false;
+            
+            $('#alert-modal2').on('hidden.bs.modal', function () {
+                if (action) {
+                    action();
+                }
+            });
+            $(document).bind('keydown', function (e) {
+                if (e.keyCode === 27) {
+                    $('#alert-modal2').modal('hide');
+                }
+            });
+        } else {
+            scope.alertHeader = hdr;
+            scope.alertBody = msg;
+            scope.alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
+            e = angular.element(document.getElementById('alert-modal'));
+            $compile(e)(scope);
+            $('#alert-modal').modal({
+                show: true,
+                keyboard: true,
+                backdrop: 'static'
+            });
 
-                $('#alert-modal').on('hidden.bs.modal', function () {
-                    if (action) {
-                        action();
-                    }
-                });
+            $('#alert-modal').on('hidden.bs.modal', function () {
+                if (action) {
+                    action();
+                }
+            });
 
-                $(document).bind('keydown', function (e) {
-                    if (e.keyCode === 27) {
-                        $('#alert-modal').modal('hide');
-                    }
-                });
+            $(document).bind('keydown', function (e) {
+                if (e.keyCode === 27) {
+                    $('#alert-modal').modal('hide');
+                }
+            });
 
-                $rootScope.disableButtons = (disableButtons) ? true : false;
-            }
-        };
-    }
-])
+            scope.disableButtons = (disableButtons) ? true : false;
+        }
+    };
+}])
 
 
 .factory('ProcessErrors', ['$rootScope', '$cookieStore', '$log', '$location', 'Alert', 'Wait',

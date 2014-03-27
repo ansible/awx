@@ -192,7 +192,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                     }
                     if (found === false) {
                         Alert('Missing Selection', 'Oops, you failed to make a selection. Click on a row to make your selection, ' +
-                            'and then click the Select button.');
+                            'and then click the Select button. Or, click Cancel to quit.');
                     } else {
                         $('#lookup-modal-dialog').dialog('close');
                         if (postAction) {
