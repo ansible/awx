@@ -8,7 +8,7 @@ from django.db import models
 
 # AWX
 from awx.main.models.base import *
-
+from django.core.urlresolvers import reverse
 
 logger = logging.getLogger('awx.main.models.schedule')
 
@@ -33,7 +33,7 @@ class Schedule(CommonModel):
         default=True,
     )
     dtstart = models.DateTimeField(
-        
+
     )
     dtend = models.DateTimeField(
         null=True,
@@ -48,6 +48,10 @@ class Schedule(CommonModel):
         default=None,
         editable=False,
     )
+
+    def get_absolute_url(self):
+        return reverse('api:schedule_list')
+        #return reverse('api:schedule_detail', args=(self.pk,))
 
     def save(self, *args, **kwargs):
         super(Schedule, self).save(*args, **kwargs)

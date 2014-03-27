@@ -3,6 +3,7 @@
 
 import os
 import sys
+from datetime import timedelta
 
 # Update this module's local settings from the global settings module.
 from django.conf import global_settings
@@ -285,6 +286,12 @@ CELERYD_TASK_SOFT_TIME_LIMIT = None
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERYBEAT_SCHEDULE = {
+    'tower_scheduler': {
+        'task': 'awx.main.tasks.tower_periodic_scheduler',
+        'schedule': timedelta(seconds=30)
+    },
+}
 
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
 # celery task.

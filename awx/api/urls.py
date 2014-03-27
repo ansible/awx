@@ -41,7 +41,7 @@ project_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/update/$',                    'project_update_view'),
     url(r'^(?P<pk>[0-9]+)/project_updates/$',           'project_updates_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'project_activity_stream_list'),
-    url(r'^(?P<pk>[0-9]+)/schedules/$',                 'schedules_list'),
+    url(r'^(?P<pk>[0-9]+)/schedules/$',                 'project_schedules_list'),
 )
 
 project_update_urls = patterns('awx.api.views',
@@ -104,7 +104,7 @@ inventory_source_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/update/$',                    'inventory_source_update_view'),
     url(r'^(?P<pk>[0-9]+)/inventory_updates/$',         'inventory_source_updates_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'inventory_source_activity_stream_list'),
-    url(r'^(?P<pk>[0-9]+)/schedules/$',                 'schedules_list'),
+    url(r'^(?P<pk>[0-9]+)/schedules/$',                 'inventory_source_schedules_list'),
     #url(r'^(?P<pk>[0-9]+)/groups/$',                    'inventory_source_groups_list'),
     #url(r'^(?P<pk>[0-9]+)/hosts/$',                     'inventory_source_hosts_list'),
 )
@@ -130,7 +130,7 @@ job_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'job_template_detail'),
     url(r'^(?P<pk>[0-9]+)/jobs/$',                      'job_template_jobs_list'),
     url(r'^(?P<pk>[0-9]+)/callback/$',                  'job_template_callback'),
-    url(r'^(?P<pk>[0-9]+)/schedules/$',                 'schedules_list'),
+    url(r'^(?P<pk>[0-9]+)/schedules/$',                 'job_template_schedules_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'job_template_activity_stream_list'),
 )
 
@@ -155,6 +155,11 @@ job_event_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/hosts/$',                     'job_event_hosts_list'),
 )
 
+schedule_urls = patterns('awx.api.views',
+    url(r'^$',                                          'schedule_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'schedule_detail'),
+)
+
 activity_stream_urls = patterns('awx.api.views',
     url(r'^$',                                          'activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'activity_stream_detail'),
@@ -166,7 +171,7 @@ v1_urls = patterns('awx.api.views',
     url(r'^authtoken/$',            'auth_token_view'),
     url(r'^me/$',                   'user_me_list'),
     url(r'^dashboard/$',            'dashboard_view'),
-    url(r'^schedules/$',            'schedules_list'),
+    url(r'^schedules/$',            include(schedule_urls)),
     url(r'^unified_jobs/$','unified_jobs_list'),
     url(r'^organizations/',         include(organization_urls)),
     url(r'^users/',                 include(user_urls)),

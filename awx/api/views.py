@@ -92,7 +92,7 @@ class ApiV1RootView(APIView):
         data['hosts'] = reverse('api:host_list')
         data['job_templates'] = reverse('api:job_template_list')
         data['jobs'] = reverse('api:job_list')
-        data['schedules'] = reverse('api:schedules_list')
+        data['schedules'] = reverse('api:schedule_list')
         data['unified_jobs'] = reverse('api:unified_jobs_list')
         data['activity_stream'] = reverse('api:activity_stream_list')
         return Response(data)
@@ -237,63 +237,19 @@ class DashboardView(APIView):
                                  'total': job_template_list.count()}
         return Response(data)
 
-class SchedulesList(APIView):
+class ScheduleList(ListCreateAPIView):
 
     view_name = "Schedules"
     new_in_148 = True
 
-    def get(self, request, format=None):
-        data = {
-            'count': 3,
-            'next': None,
-            'previous': None,
-            'results': [{
-                'id': 1,
-                'url': '/api/v1/schedules/1/',
-                'related': {},
-                'summary_fields': {},
-                'created': "2014-02-10T19:13:11.910Z",
-                'modified': "2014-02-10T19:13:11.910Z",
-                'name': 'Test schedule',
-                'description': "We love chris",
-                'dtstart': '2014-03-20T14:30:57.123Z',
-                'dtend': '2015-03-20T14:30:57.123Z',
-                'rrule': 'FREQ=DAILY;COUNT=100;INTERVAL=4',
-                'job_template': 1,
-                'project': None,
-                'inventory_source': None},
-                {'id': 2,
-                'url': '/api/v1/schedules/2/',
-                'related': {},
-                'summary_fields': {},
-                'created': "2014-02-10T19:13:11.910Z",
-                'modified': "2014-02-10T19:13:11.910Z",
-                'name': 'Test schedule',
-                'description': "We love chris",
-                'dtstart': '2014-03-20T14:30:57.123Z',
-                'dtend': '2015-03-20T14:30:57.123Z',
-                'rrule': 'FREQ=DAILY;COUNT=100;INTERVAL=4',
-                'job_template': None,
-                'project': 1,
-                'inventory_source': None},
-                {'id': 3,
-                'url': '/api/v1/schedules/3/',
-                'related': {},
-                'summary_fields': {},
-                'created': "2014-02-10T19:13:11.910Z",
-                'modified': "2014-02-10T19:13:11.910Z",
-                'name': 'Test schedule',
-                'description': "We love chris",
-                'dtstart': '2014-03-20T14:30:57.123Z',
-                'dtend': '2015-03-20T14:30:57.123Z',
-                'rrule': 'FREQ=DAILY;COUNT=100;INTERVAL=4',
-                'job_template': None,
-                'project': None,
-                 'inventory_source': 12}]}
-        return Response(data)
+    model = Schedule
+    serializer_class = ScheduleSerializer
 
-    def post(self, request):
-        return Response({})
+class ScheduleDetail(RetrieveUpdateDestroyAPIView):
+
+    new_in_148 = True
+    model = Schedule
+    serializer_class = ScheduleSerializer
 
 class UnifiedJobsList(APIView):
 
@@ -675,6 +631,17 @@ class ProjectTeamsList(SubListCreateAPIView):
     serializer_class = TeamSerializer
     parent_model = Project
     relationship = 'teams'
+
+class ProjectSchedulesList(SubListCreateAPIView):
+
+    view_name = "Project Schedules"
+
+    model = Schedule
+    serializer_class = ScheduleSerializer
+    parent_model = Project
+    relationship = 'schedules'
+    parent_key = 'unified_job_template'
+    new_in_148 = True
 
 class ProjectActivityStreamList(SubListAPIView):
 
@@ -1203,6 +1170,18 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
     serializer_class = InventorySourceSerializer
     new_in_14 = True
 
+
+class InventorySourceSchedulesList(SubListCreateAPIView):
+
+    view_name = "Inventory Source Schedules"
+
+    model = Schedule
+    serializer_class = ScheduleSerializer
+    parent_model = InventorySource
+    relationship = 'schedules'
+    parent_key = 'unified_job_template'
+    new_in_148 = True
+
 class InventorySourceActivityStreamList(SubListAPIView):
 
     model = ActivityStream
@@ -1280,6 +1259,17 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
+
+class JobTemplateSchedulesList(SubListCreateAPIView):
+
+    view_name = "Job Template Schedules"
+
+    model = Schedule
+    serializer_class = ScheduleSerializer
+    parent_model = JobTemplate
+    relationship = 'schedules'
+    parent_key = 'unified_job_template'
+    new_in_148 = True
 
 class JobTemplateActivityStreamList(SubListAPIView):
 

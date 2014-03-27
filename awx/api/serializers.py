@@ -8,6 +8,7 @@ import socket
 import urlparse
 import logging
 import os.path
+from dateutil import rrule
 
 # PyYAML
 import yaml
@@ -503,6 +504,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             playbooks = reverse('api:project_playbooks', args=(obj.pk,)),
             update = reverse('api:project_update_view', args=(obj.pk,)),
             project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
+            schedules = reverse('api:project_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:project_activity_stream_list', args=(obj.pk,)),
         ))
         # Backwards compatibility.
@@ -861,6 +863,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         res.update(dict(
             update = reverse('api:inventory_source_update_view', args=(obj.pk,)),
             inventory_updates = reverse('api:inventory_source_updates_list', args=(obj.pk,)),
+            schedules = reverse('api:inventory_source_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
             #hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
             #groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
@@ -1081,6 +1084,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         res = super(JobTemplateSerializer, self).get_related(obj)
         res.update(dict(
             jobs = reverse('api:job_template_jobs_list', args=(obj.pk,)),
+            schedules = reverse('api:job_template_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
         ))
         if obj.host_config_key:
@@ -1218,7 +1222,7 @@ class JobEventSerializer(BaseSerializer):
 
 
 class ScheduleSerializer(BaseSerializer):
-    
+
     class Meta:
         model = Schedule
         fields = ('*', 'unified_job_template', 'enabled', 'dtstart', 'dtend',
@@ -1233,6 +1237,12 @@ class ScheduleSerializer(BaseSerializer):
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
         return res
 
+    def validate_rrule(self, attrs, source):
+        try:
+            sched_rule = rrule.rrulestr(attrs[source])
+        except Exception, e:
+            raise serializers.ValidationError("rrule parsing failed validation")
+        return attrs
 
 class ActivityStreamSerializer(BaseSerializer):
 

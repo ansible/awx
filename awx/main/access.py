@@ -1043,6 +1043,62 @@ class JobEventAccess(BaseAccess):
     def can_delete(self, obj):
         return False
 
+class ScheduleAccess(BaseAccess):
+    '''
+    I can see a schedule if I can see it's related unified job, I can create them or update them if I have write access
+    '''
+
+    model = Schedule
+
+    def get_queryset(self):
+        qs = self.model.objects.filter(active=True).distinct()
+        qs = qs.select_related('unified_job_template')
+        if self.user.is_superuser:
+            return qs
+        job_template_qs = self.user.get_queryset(JobTemplate)
+        inventory_source_qs = self.user.get_queryset(InventorySource)
+        project_qs = self.user.get_queryset(Project)
+        return qs | job_template_qs | inventory_source_qs | project_qs
+
+    def can_read(self, obj):
+        if self.user.is_superuser:
+            return True
+        if obj and obj.unified_job_template:
+            job_class = obj.unified_job_template._get_unified_job_class()
+            return self.user.can_access(job_class, 'read', obj.unified_job_template)
+        else:
+            return False
+
+    def can_add(self, data):
+        if self.user.is_superuser:
+            return True
+        pk = get_pk_from_dict(data, 'unified_job_template')
+        obj = get_object_or_400(UnifiedJobTemplate, pk=pk)
+        if obj:
+            job_class = obj._get_unified_job_class()
+            print("JC: " + str(job_class))
+            return self.user.can_access(job_class, 'change', obj, None)
+        else:
+            return False
+
+    def can_change(self, obj, data):
+        if self.user.is_superuser:
+            return True
+        if obj and obj.unified_job_template:
+            job_class = obj.unified_job_template._get_unified_job_class()
+            return self.user.can_access(job_class, 'change', obj.unified_job_template, data)
+        else:
+            return False
+
+    def can_delete(self, obj):
+        if self.user.is_superuser:
+            return True
+        if obj and obj.unified_job_template:
+            job_class = obj.unified_job_template._get_unified_job_class()
+            return self.user.can_access(job_class, 'change', obj.unified_job_template, None)
+        else:
+            return False
+
 class ActivityStreamAccess(BaseAccess):
     '''
     I can see activity stream events only when I have permission on all objects included in the event
@@ -1173,4 +1229,5 @@ register_access(JobTemplate, JobTemplateAccess)
 register_access(Job, JobAccess)
 register_access(JobHostSummary, JobHostSummaryAccess)
 register_access(JobEvent, JobEventAccess)
+register_access(Schedule, ScheduleAccess)
 register_access(ActivityStream, ActivityStreamAccess)

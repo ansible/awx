@@ -32,6 +32,7 @@ from kombu import Connection, Exchange, Queue
 # Celery
 from celery import Celery, Task, task
 from celery.execute import send_task
+from djcelery.models import PeriodicTask, TaskMeta
 
 # Django
 from django.conf import settings
@@ -42,7 +43,7 @@ from django.utils.timezone import now
 from django.utils.tzinfo import FixedOffset
 
 # AWX
-from awx.main.models import Job, JobEvent, ProjectUpdate, InventoryUpdate
+from awx.main.models import Job, JobEvent, ProjectUpdate, InventoryUpdate, Schedule
 from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url
 
 __all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate', 'handle_work_error']
@@ -50,6 +51,15 @@ __all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate', 'handle_work_erro
 logger = logging.getLogger('awx.main.tasks')
 
 # FIXME: Cleanly cancel task when celery worker is stopped.
+
+@task(bind=True)
+def tower_periodic_scheduler(self):
+    run_now = now()
+    
+    periodic_task = PeriodicTask.objects.get(task='awx.main.tasks.tower_periodic_scheduler')
+    print("Last run was: " + str(periodic_task.last_run_at))
+    periodic_task.last_run_at = run_now
+    periodic_task.save()
 
 @task()
 def notify_task_runner(metadata_dict):
