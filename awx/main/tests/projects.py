@@ -547,39 +547,6 @@ class ProjectsTest(BaseTest):
             data['ssh_key_data'] = TEST_SSH_KEY_DATA
             self.post(url, data, expect=201)
 
-        # Test with ssh_key_path (invalid path, bad data, then valid key).
-        handle, ssh_key_path = tempfile.mkstemp(suffix='.key')
-        self._temp_paths.append(ssh_key_path)
-        ssh_key_file = os.fdopen(handle, 'w')
-        ssh_key_file.write(TEST_SSH_KEY_DATA)
-        ssh_key_file.close()
-        handle, invalid_ssh_key_path = tempfile.mkstemp(suffix='.key')
-        self._temp_paths.append(invalid_ssh_key_path)
-        invalid_ssh_key_file = os.fdopen(handle, 'w')
-        invalid_ssh_key_file.write('not a valid key')
-        invalid_ssh_key_file.close()
-        with self.current_user(self.super_django_user):
-            data = dict(name='yzv', user=self.super_django_user.pk, kind='ssh',
-                        ssh_key_path=ssh_key_path + '.moo')
-            self.post(url, data, expect=400)
-            data['ssh_key_path'] = invalid_ssh_key_path
-            self.post(url, data, expect=400)
-            data['ssh_key_path'] = ssh_key_path
-            self.post(url, data, expect=201)
-
-        # Test with encrypted key on ssh_key_path.
-        handle, enc_ssh_key_path = tempfile.mkstemp(suffix='.key')
-        self._temp_paths.append(enc_ssh_key_path)
-        enc_ssh_key_file = os.fdopen(handle, 'w')
-        enc_ssh_key_file.write(TEST_SSH_KEY_DATA_LOCKED)
-        enc_ssh_key_file.close()
-        with self.current_user(self.super_django_user):
-            data = dict(name='wvz', user=self.super_django_user.pk, kind='ssh',
-                        ssh_key_path=enc_ssh_key_path)
-            self.post(url, data, expect=400)
-            data['ssh_key_unlock'] = TEST_SSH_KEY_DATA_UNLOCK
-            self.post(url, data, expect=201)
-
         # Test post as organization admin where team is part of org, but user
         # creating credential is not a member of the team.  UI may pass user
         # as an empty string instead of None.

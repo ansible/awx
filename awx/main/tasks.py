@@ -385,7 +385,7 @@ class RunJob(BaseTask):
         as ssh_key_data).
         '''
         credential = getattr(job, 'credential', None)
-        if credential and credential.ssh_key_data:
+        if credential:
             return decrypt_field(credential, 'ssh_key_data') or None
 
     def build_passwords(self, job, **kwargs):
@@ -485,8 +485,7 @@ class RunJob(BaseTask):
 
         # If private key isn't encrypted, pass the path on the command line.
         ssh_key_path = kwargs.get('private_data_file', '')
-        ssh_key_path = ssh_key_path or (creds and creds.ssh_key_path) or ''
-        use_ssh_agent = 'ssh_key_unlock' in kwargs.get('passwords', {})
+        use_ssh_agent = bool(kwargs.get('passwords', {}).get('ssh_key_unlock', ''))
         if ssh_key_path and not use_ssh_agent:
             args.append('--private-key=%s' % ssh_key_path)
 
@@ -654,6 +653,7 @@ class RunProjectUpdate(BaseTask):
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
 
+        # If using an SSH key, run using ssh-agent.
         ssh_key_path = kwargs.get('private_data_file', '')
         if ssh_key_path:
             subcmds = [('ssh-add', ssh_key_path), args]

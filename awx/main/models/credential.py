@@ -86,7 +86,8 @@ class Credential(CommonModelNameNotUnique):
         verbose_name=_('SSH private key'),
         help_text=_('RSA or DSA private key to be used instead of password.'),
     )
-    ssh_key_path = models.CharField(
+    ssh_key_path = models.CharField( # FIXME: No longer needed.
+        editable=False,
         max_length=1024,
         blank=True,
         default='',
@@ -128,16 +129,10 @@ class Credential(CommonModelNameNotUnique):
     def needs_ssh_key_unlock(self):
         ssh_key_data = ''
         if self.kind == 'ssh' and self.ssh_key_unlock == 'ASK':
-            if self.ssh_key_data:
-                if self.pk:
-                    ssh_key_data = decrypt_field(self, 'ssh_key_data')
-                else:
-                    ssh_key_data = self.ssh_key_data
-            elif self.ssh_key_path:
-                try:
-                    ssh_key_data = file(self.ssh_key_path).read(2**15)
-                except IOError:
-                    pass
+            if self.pk:
+                ssh_key_data = decrypt_field(self, 'ssh_key_data')
+            else:
+                ssh_key_data = self.ssh_key_data
         return 'ENCRYPTED' in ssh_key_data
 
     @property
@@ -223,28 +218,11 @@ class Credential(CommonModelNameNotUnique):
             self._validate_ssh_private_key(ssh_key_data)
         return self.ssh_key_data # No need to return decrypted version here.
 
-    def clean_ssh_key_path(self):
-        ssh_key_path = self.ssh_key_path or ''
-        if ssh_key_path:
-            try:
-                ssh_key_data = file(ssh_key_path).read(2**15)
-            except IOError, e:
-                raise ValidationError(e.strerror or 'Unable to read SSH key path')
-            self._validate_ssh_private_key(ssh_key_data)
-        return ssh_key_path
-
     def clean_ssh_key_unlock(self):
-        ssh_key_data = ''
-        if self.ssh_key_data:
-            if self.pk:
-                ssh_key_data = decrypt_field(self, 'ssh_key_data')
-            else:
-                ssh_key_data = self.ssh_key_data
-        elif self.ssh_key_path:
-            try:
-                ssh_key_data = file(self.ssh_key_path).read(2**15)
-            except IOError:
-                pass
+        if self.pk:
+            ssh_key_data = decrypt_field(self, 'ssh_key_data')
+        else:
+            ssh_key_data = self.ssh_key_data
         if 'ENCRYPTED' in ssh_key_data and not self.ssh_key_unlock:
             raise ValidationError('SSH key unlock must be set when SSH key '
                                   'is encrypted')
@@ -253,8 +231,6 @@ class Credential(CommonModelNameNotUnique):
     def clean(self):
         if self.user and self.team:
             raise ValidationError('Credential cannot be assigned to both a user and team')
-        if self.ssh_key_data and self.ssh_key_path:
-            raise ValidationError('Only one of SSH key data or path should be provided')
 
     def _validate_unique_together_with_null(self, unique_check, exclude=None):
         # Based on existing Django model validation code, except it doesn't
