@@ -1318,9 +1318,27 @@ class ScheduleSerializer(BaseSerializer):
             res['unified_job_template'] = ujt.get_absolute_url() #obj.unified_job_template.get_absolute_url()
         return res
 
+    # We reject rrules if:
+    # - DTSTART is not include
+    # - TZID is used
+    # - multiple BYDAY (except WEEKLY), BYMONTHDAY, BYMONTH
+    # - BYDAY prefixed with a number (MO is good but not 20MO)
+    # - BYYEARDAY
+    # - BYWEEKNO
+    # - INTERVAL required
     def validate_rrule(self, attrs, source):
+        rrule_value = attrs[source]
+        if not 'dtstart' in rrule_value.lower():
+            raise serializers.ValidationError('DTSTART required in rrule')
+        if not 'interval' in rrule_value.lower():
+            raise serializers.ValidationError('INTERVAL required in rrule')
+        if 'tzid' in rrule_value.lower():
+            raise serializers.ValidationError('TZID is not supported')
+        
+        if 'secondly' in rrule_value.lower():
+            raise serializers.ValidationError('SECONDLY is not supported')
         try:
-            sched_rule = rrule.rrulestr(attrs[source])
+            sched_rule = rrule.rrulestr(rrule_value)
         except Exception, e:
             raise serializers.ValidationError("rrule parsing failed validation")
         return attrs
