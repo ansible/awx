@@ -94,12 +94,6 @@ angular.module('ProjectsListDefinition', [])
                 ngClass: "project.scm_type_class",
                 dataPlacement: 'top'
             },
-            cancel: {
-                ngClick: "cancelUpdate(project.id, project.name)",
-                awToolTip: 'Cancel the SCM update',
-                ngShow: "project.status == 'updating'",
-                dataPlacement: 'top'
-            },
             schedule: {
                 mode: 'all',
                 ngClick: "editSchedules(project.id)",
@@ -116,6 +110,12 @@ angular.module('ProjectsListDefinition', [])
                 ngClick: "deleteProject(project.id, project.name)",
                 awToolTip: 'Delete the project',
                 ngShow: "project.status !== 'updating'",
+                dataPlacement: 'top'
+            },
+            cancel: {
+                ngClick: "cancelUpdate(project.id, project.name)",
+                awToolTip: 'Cancel the SCM update',
+                ngShow: "project.status == 'updating'",
                 dataPlacement: 'top'
             }
         }
