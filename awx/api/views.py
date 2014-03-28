@@ -238,7 +238,7 @@ class DashboardView(APIView):
                                  'total': job_template_list.count()}
         return Response(data)
 
-class ScheduleList(ListCreateAPIView):
+class ScheduleList(ListAPIView):
 
     view_name = "Schedules"
     model = Schedule
@@ -250,6 +250,14 @@ class ScheduleDetail(RetrieveUpdateDestroyAPIView):
     model = Schedule
     serializer_class = ScheduleSerializer
     new_in_148 = True
+
+class ScheduleUnifiedJobsList(SubListAPIView):
+
+    model = UnifiedJob
+    serializer_class = UnifiedJobSerializer
+    parent_model = Schedule
+    relationship = ''
+    view_name = 'Schedule Jobs List'
 
 class AuthTokenView(APIView):
 

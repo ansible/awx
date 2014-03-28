@@ -23,6 +23,7 @@ class Schedule(CommonModel):
 
     class Meta:
         app_label = 'main'
+        ordering = ['-next_run']
 
     objects = ScheduleManager()
 
@@ -53,21 +54,24 @@ class Schedule(CommonModel):
         editable=False,
     )
 
-    def get_absolute_url(self):
-        return reverse('api:schedule_list')
-        #return reverse('api:schedule_detail', args=(self.pk,))
+    def __unicode__(self):
+        return u'%s_t%s_%s_%s' % (self.name, self.unified_job_template.id, self.id, self.next_run)
 
-    def update_dt_elements(self):
+    def get_absolute_url(self):
+        return reverse('api:schedule_detail', args=(self.pk,))
+
+    def update_computed_fields(self):
         future_rs = dateutil.rrule.rrulestr(self.rrule, forceset=True)
         next_run_actual = future_rs.after(now())
 
         self.next_run = next_run_actual
         if self.dtstart is None:
             self.dtstart = self.next_run
-        if "until" in self.rrule.lower() or 'count' in self.rrule.lower():
+        if self.dtend is None and "until" in self.rrule.lower() or 'count' in self.rrule.lower():
             self.dtend = future_rs[-1]
+        self.unified_job_template.update_computed_fields()
 
     def save(self, *args, **kwargs):
-        self.update_dt_elements()
+        # Check if new rrule, if so set dtstart and dtend to null
+        self.update_computed_fields()
         super(Schedule, self).save(*args, **kwargs)
-        # update template next run details

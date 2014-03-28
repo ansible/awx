@@ -1310,10 +1310,12 @@ class ScheduleSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(ScheduleSerializer, self).get_related(obj)
         res.update(dict(
-            #unified_jobs = reverse('api:schedule_unified_jobs_list', args=(obj.pk,)),
+            unified_jobs = reverse('api:schedule_unified_jobs_list', args=(obj.pk,)),
         ))
         if obj.unified_job_template and obj.unified_job_template.active:
-            res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
+            #TODO: Figure out why we have to do this
+            ujt = UnifiedJobTemplate.objects.get(id=obj.unified_job_template.id)
+            res['unified_job_template'] = ujt.get_absolute_url() #obj.unified_job_template.get_absolute_url()
         return res
 
     def validate_rrule(self, attrs, source):

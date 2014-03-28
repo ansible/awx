@@ -135,6 +135,13 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     def last_updated(self):
         return self.last_job_run
 
+    def update_computed_fields(self):
+        related_schedules = Schedule.objects.get(enabled=True, unified_job_template=self, next_run__isnull=False).order_by('-next_run')
+        if related_schedules.exists():
+            self.next_schedule = related_schedules[0]
+            self.next_job_run = related_schedules[0].next_run
+            self.save(update_fields=['next_schedule', 'next_job_run'])
+
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
