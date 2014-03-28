@@ -12,7 +12,7 @@
 
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate,
-    ProjectStatus, FormatDate, Refresh, Wait, Stream, GetChoices, Empty, Find) {
+    ProjectStatus, FormatDate, Refresh, Wait, Stream, GetChoices, Empty, Find, LogViewer) {
     
     ClearScope();
 
@@ -72,7 +72,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                         break;
                 }
 
-                if (project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
+                if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
                     $scope.projects[i].statusTip = 'Canceled. Click for details';
                 }
 
@@ -206,10 +206,15 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                 });
             } else if (project.related.last_update) {
                 Wait('start');
+                LogViewer({
+                    scope: $scope,
+                    url: project.related.last_update
+                });
+                /*
                 ProjectStatus({
                     project_id: id,
                     last_update: project.related.last_update
-                });
+                });*/
             } else {
                 Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
                     ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
@@ -354,7 +359,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
-    'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate', 'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty', 'Find'
+    'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate', 'Refresh', 'Wait', 'Stream', 'GetChoices', 'Empty', 'Find',
+    'LogViewer'
 ];
 
 

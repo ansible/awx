@@ -12,7 +12,7 @@
 angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition', 'SearchHelper',
     'PaginationHelpers', 'ListGenerator', 'AuthService', 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
     'JobSubmissionHelper', 'RefreshHelper', 'PromptDialog', 'CredentialsListDefinition', 'InventoryTree',
-    'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition'])
+    'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition', 'LogViewerHelper'])
 
 .factory('GetSourceTypeOptions', ['Rest', 'ProcessErrors', 'GetBasePath',
     function (Rest, ProcessErrors, GetBasePath) {
@@ -48,14 +48,23 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
 ])
 
 
-.factory('ViewUpdateStatus', ['Rest', 'ProcessErrors', 'GetBasePath', 'ShowUpdateStatus', 'Alert', 'Wait', 'Empty', 'Find',
-    function (Rest, ProcessErrors, GetBasePath, ShowUpdateStatus, Alert, Wait, Empty, Find) {
+.factory('ViewUpdateStatus', ['Rest', 'ProcessErrors', 'GetBasePath', 'Alert', 'Wait', 'Empty', 'Find', 'LogViewer',
+    function (Rest, ProcessErrors, GetBasePath, Alert, Wait, Empty, Find, LogViewer) {
         return function (params) {
 
             var scope = params.scope,
                 tree_id = params.tree_id,
-                group_id = params.group_id,
                 group = Find({ list: scope.groups, key: 'id', val: tree_id });
+
+            if (scope.removeSourceReady) {
+                scope.removeSourceReady();
+            }
+            scope.removeSourceReady = scope.$on('SourceReady', function(e, url) {
+                LogViewer({
+                    scope: scope,
+                    url: url
+                });
+            });
 
             if (group) {
                 if (Empty(group.source)) {
@@ -70,22 +79,12 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                     Rest.get()
                         .success(function (data) {
                             var url = (data.related.current_update) ? data.related.current_update : data.related.last_update;
-                            ShowUpdateStatus({
-                                group_name: data.summary_fields.group.name,
-                                last_update: url,
-                                license_error: ((data.summary_fields.last_update && data.summary_fields.last_update.license_error) ? true : false),
-                                tree_id: tree_id,
-                                group_id: group_id,
-                                parent_scope: scope
-                            });
+                            scope.$emit('SourceReady', url);
                         })
                         .error(function (data, status) {
-                            Wait('stop');
-                            ProcessErrors(scope, data, status, null, {
-                                hdr: 'Error!',
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Failed to retrieve inventory source: ' + group.related.inventory_source +
-                                    ' POST returned status: ' + status
-                            });
+                                    ' POST returned status: ' + status });
                         });
                 }
             }

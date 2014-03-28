@@ -163,6 +163,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 textareaId = params.textareaId,
                 modalId = params.modalId,
                 formId = params.formId,
+                parse = (params.parse === undefined) ? true : params.parse,
                 textarea,
                 formHeight, model, windowHeight, offset, rows;
 
@@ -189,6 +190,8 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 rows--;
                 textarea.attr('rows', rows);
             }
-            ParseTypeChange({ scope: scope, field_id: textareaId, onReady: waitStop });
+            if (parse) {
+                ParseTypeChange({ scope: scope, field_id: textareaId, onReady: waitStop });
+            }
         };
     }]);

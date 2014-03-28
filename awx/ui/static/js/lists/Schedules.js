@@ -23,11 +23,18 @@ angular.module('SchedulesListDefinition', [])
             name: {
                 key: true,
                 label: 'Name',
-                ngClick: "editSchedule(schedule.id)"
+                ngClick: "editSchedule(schedule.id)",
+                columnClass: "col-md-5 col-sm-3 col-xs-3"
             },
             dtstart: {
                 label: 'Start',
-                searchable: false
+                searchable: false,
+                columnClass: "col-md-2 col-sm-3 col-xs-3"
+            },
+            next_run: {
+                label: 'Next Run',
+                searchable: false,
+                columnClass: "col-md-2 col-sm-3 col-xs-3"
             },
             dtend: {
                 label: 'End',
