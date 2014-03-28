@@ -676,13 +676,13 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             inventory_update_sig = inventory_update.start_signature()
             return (inventory_update, inventory_update_sig)
 
-    def update(self, **kwargs):
+    def update(self, schedule=None, **kwargs):
         if self.can_update:
             inventory_update = self.create_inventory_update()
             if hasattr(settings, 'CELERY_UNIT_TEST'):
                 inventory_update.start(None, **kwargs)
             else:
-                inventory_update.signal_start(**kwargs)
+                inventory_update.signal_start(schedule=schedule, **kwargs)
             return inventory_update
 
 
@@ -736,8 +736,11 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     def task_impact(self):
         return 50
 
-    def signal_start(self, **kwargs):
+    def signal_start(self, schedule=None, **kwargs):
         from awx.main.tasks import notify_task_runner
+        if schedule:
+            self.schedule=schedule
+            self.save()
         if not self.can_start:
             return False
         needed = self._get_passwords_needed_to_start()

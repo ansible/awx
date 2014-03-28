@@ -319,8 +319,11 @@ class Job(UnifiedJob, JobOptions):
                     dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
 
-    def signal_start(self, **kwargs):
+    def signal_start(self, schedule=None, **kwargs):
         from awx.main.tasks import notify_task_runner
+        if schedule:
+            self.schedule = schedule
+            self.save()
         if hasattr(settings, 'CELERY_UNIT_TEST'):
             return self.start(None, **kwargs)
         if not self.can_start:

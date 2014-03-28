@@ -312,13 +312,13 @@ class Project(UnifiedJobTemplate, ProjectOptions):
             project_update_sig = project_update.start_signature()
             return (project_update, project_update_sig)
 
-    def update(self, **kwargs):
+    def update(self, schedule=None, **kwargs):
         if self.can_update:
             project_update = self.create_project_update()
             if hasattr(settings, 'CELERY_UNIT_TEST'):
                 project_update.start(None, **kwargs)
             else:
-                project_update.signal_start(**kwargs)
+                project_update.signal_start(schedule=schedule, **kwargs)
             return project_update
 
     def get_absolute_url(self):
@@ -359,8 +359,11 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
     def task_impact(self):
         return 20
 
-    def signal_start(self, **kwargs):
+    def signal_start(self, schedule=None, **kwargs):
         from awx.main.tasks import notify_task_runner
+        if schedule:
+            self.schedule = schedule
+            self.save()
         if not self.can_start:
             return False
         needed = self._get_passwords_needed_to_start()
