@@ -26,19 +26,23 @@ angular.module('SchedulesListDefinition', [])
                 ngClick: "editSchedule(schedule.id)",
                 columnClass: "col-md-5 col-sm-3 col-xs-3"
             },
-            dtstart: {
-                label: 'Start',
+            next_run: {
+                label: 'Next Run',
+                filter: "date:'MM/dd/yy HH:mm:ss'",
                 searchable: false,
                 columnClass: "col-md-2 col-sm-3 col-xs-3"
             },
-            next_run: {
-                label: 'Next Run',
+            dtstart: {
+                label: 'Start',
+                filter: "date:'MM/dd/yy HH:mm:ss'",
                 searchable: false,
-                columnClass: "col-md-2 col-sm-3 col-xs-3"
+                columnClass: "col-md-2 col-sm-3 hidden-xs"
             },
             dtend: {
                 label: 'End',
-                searchable: false
+                filter: "date:'MM/dd/yy HH:mm:ss'",
+                searchable: false,
+                columnClass: "col-md-2 col-sm-3 hidden-xs"
             }
         },
 

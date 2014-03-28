@@ -111,8 +111,8 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
         };
     }])
 
-    .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest',
-    function(SchedulerInit, ShowSchedulerModal, Wait, Rest) {
+    .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest', 'ToAPI', 'ProcessErrors',
+    function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ToAPI, ProcessErrors) {
         return function(params) {
             var scope = params.scope,
                 schedule = params.schedule,
@@ -128,7 +128,7 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
             scope.showRRuleDetail = false;
 
             if (!/DTSTART/.test(schedule.rrule)) {
-                schedule.rrule += ";DTSTART=" + schedule.dtstart;
+                schedule.rrule += ";DTSTART=" + schedule.dtstart.replace(/\.\d+Z$/,'Z');
             }
            
             setTimeout(function(){
@@ -141,22 +141,24 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
             }, 500);
 
             scope.saveSchedule = function() {
-                var newSchedule;
+                var newSchedule, rrule;
                 $('#scheduler-tabs a:first').tab('show');
                 if (scheduler.isValid()) {
                     Wait('start');
                     newSchedule = scheduler.getValue();
+                    rrule = scheduler.getRRule();
                     schedule.name = newSchedule.name;
-                    schedule.rrule = newSchedule.rrule;
+                    schedule.rrule = ToAPI(rrule.toString());
+                    schedule.description = (/error/.test(rrule.toText())) ? '' : rrule.toText();
                     Rest.setUrl(url);
                     Rest.post(schedule)
                         .success(function(){
                             Wait('stop');
                             $('#scheduler-modal-dialog').dialog('close');
                         })
-                        .error(function(){
-                            Wait('stop');
-                            $('#scheduler-modal-dialog').dialog('close');
+                        .error(function(data, status){
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                msg: 'POST to ' + url + ' returned: ' + status });
                         });
                 }
             };
@@ -171,8 +173,8 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
         };
     }])
 
-    .factory('AddSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest',
-    function(SchedulerInit, ShowSchedulerModal, Wait, Rest) {
+    .factory('AddSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest', 'ToAPI', 'ProcessErrors',
+    function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ToAPI, ProcessErrors) {
         return function(params) {
             var scope = params.scope,
                 url = params.url,
@@ -193,22 +195,24 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
             }, 300);
 
             scope.saveSchedule = function() {
-                var newSchedule;
+                var newSchedule, rrule;
                 $('#scheduler-tabs a:first').tab('show');
                 if (scheduler.isValid()) {
                     Wait('start');
                     newSchedule = scheduler.getValue();
+                    rrule = scheduler.getRRule();
                     schedule.name = newSchedule.name;
-                    schedule.rrule = newSchedule.rrule;
+                    schedule.rrule = ToAPI(rrule.toString());
+                    schedule.description = (/error/.test(rrule.toText())) ? '' : rrule.toText();
                     Rest.setUrl(url);
                     Rest.post(schedule)
                         .success(function(){
                             Wait('stop');
                             $('#scheduler-modal-dialog').dialog('close');
                         })
-                        .error(function(){
-                            Wait('stop');
-                            $('#scheduler-modal-dialog').dialog('close');
+                        .error(function(data, status){
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                msg: 'POST to ' + url + ' returned: ' + status });
                         });
                 }
             };
@@ -242,7 +246,7 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                     scope.$emit(callback);
                 })
                 .error(function(data, status) {
-                    ProcessErrors(scope, null, status, null, { hdr: 'Error!',
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + ' failed. GET returned: ' + status });
                 });
         };
@@ -347,6 +351,16 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                 action: action
             });
 
+        };
+    }])
+
+    .factory('ToAPI', [ function() {
+        return function(rrule) {
+            var response;
+            response = rrule.replace(/(^.*(?=DTSTART))(DTSTART=.*?;)(.*$)/, function(str, p1, p2, p3) {
+                return p2.replace(/\;/,'').replace(/=/,':') + ' ' + 'RRULE:' + p1 + p3;
+            });
+            return response;
         };
     }]);
 

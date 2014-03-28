@@ -16,7 +16,7 @@ LoadDialogPartial) {
     
     ClearScope();
 
-    var base, e, id, parentObject, url;
+    var base, e, id, url, parentObject;
 
     base = $location.path().replace(/^\//, '').split('/')[0];
 
@@ -52,52 +52,31 @@ LoadDialogPartial) {
         });
 
         // Change later to use GetBasePath(base)
-        switch(base) {
-            case 'job_templates':
-                url = '/static/sample/data/schedules/data.json';
-                break;
-            case 'projects':
-                url = '/static/sample/data/schedules/projects/data.json';
-                break;
-        }
+        //switch(base) {
+        //    case 'job_templates':
+        //        url = '/static/sample/data/schedules/data.json';
+        //        break;
+        //    case 'projects':
+        //        url = '/static/sample/data/schedules/projects/data.json';
+        //        break;
+        //}
+        
+        url += "schedules/";
+
         SearchInit({
             scope: $scope,
             set: 'schedules',
             list: SchedulesList,
             url: url
         });
+
         PaginateInit({
             scope: $scope,
             list: SchedulesList,
             url: url
         });
         
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                var i, modifier;
-                PageRangeSetup({
-                    scope: $scope,
-                    count: data.count,
-                    next: data.next,
-                    previous: data.previous,
-                    iterator: SchedulesList.iterator
-                });
-                $scope[SchedulesList.iterator + 'Loading'] = false;
-                for (i = 1; i <= 3; i++) {
-                    modifier = (i === 1) ? '' : i;
-                    $scope[SchedulesList.iterator + 'HoldInput' + modifier] = false;
-                }
-                $scope.schedules = data.results;
-                window.scrollTo(0, 0);
-                Wait('stop');
-                $scope.$emit('PostRefresh');
-                $scope.schedules = data.results;
-            })
-            .error(function(data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-            });
+        $scope.search(SchedulesList.iterator);
     });
 
     $scope.editSchedule = function(id) {
@@ -107,22 +86,7 @@ LoadDialogPartial) {
 
     $scope.addSchedule = function() {
         var schedule = { };
-        switch(base) {
-            case 'job_templates':
-                schedule.job_template = $routeParams.id;
-                schedule.job_type = 'playbook_run';
-                schedule.job_class = "ansible:playbook";
-                break;
-            case 'inventories':
-                schedule.inventory = $routeParams.id;
-                schedule.job_type = 'inventory_sync';
-                schedule.job_class = "inventory:sync";
-                break;
-            case 'projects':
-                schedule.project = $routeParams.id;
-                schedule.job_type = 'project_sync';
-                schedule.job_class = "project:sync";
-        }
+        schedule.enabled =  true;
         AddSchedule({ scope: $scope, schedule: schedule, url: url });
     };
 
@@ -163,7 +127,7 @@ LoadDialogPartial) {
     $scope.removeLoadParent = $scope.$on('LoadParent', function() {
         // Load the parent object
         id = $routeParams.id;
-        url = GetBasePath(base) + id;
+        url = GetBasePath(base) + id + '/';
         Rest.setUrl(url);
         Rest.get()
             .success(function(data) {
