@@ -43,7 +43,7 @@ from django.utils.timezone import now
 from django.utils.tzinfo import FixedOffset
 
 # AWX
-from awx.main.models import Job, JobEvent, ProjectUpdate, InventoryUpdate, Schedule
+from awx.main.models import * # Job, JobEvent, ProjectUpdate, InventoryUpdate, Schedule, UnifiedJobTemplate
 from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url
 
 __all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate', 'handle_work_error']
@@ -54,16 +54,33 @@ logger = logging.getLogger('awx.main.tasks')
 
 @task(bind=True)
 def tower_periodic_scheduler(self):
-    run_now = now()
-    
+    run_now = now()    
     periodic_task = PeriodicTask.objects.get(task='awx.main.tasks.tower_periodic_scheduler')
-    print("Last run was: " + str(periodic_task.last_run_at))
+    logger.debug("Last run was: " + str(periodic_task.last_run_at))
+    # TODO: Cleanup jobs that we missed
+    jobs_matching_schedules = Schedule.objects.filter(enabled=True,
+                                                      next_run__gt=periodic_task.last_run_at, next_run__lte=run_now)
+    for match in jobs_matching_schedules:
+        template = match.unified_job_template
+        match.save()
+        if type(template) == Project:
+            new_project_update = template.create_project_update(launch_type="scheduled")
+            new_project_update.signal_start(schedule=match)
+        elif type(template) == InventorySource:
+            new_inventory_update = template.create_inventory_update(launch_type="scheduled")
+            new_inventory_update.signal_start(schedule=match)
+        elif type(template) == JobTemplate:
+            new_job = template.create_job()
+            new_job.launch_type = "scheduled"
+            new_job.save()
+            new_job.signal_start(schedule=match)
+        else:
+            logger.error("Unknown task type: " + str(type(template)))
     periodic_task.last_run_at = run_now
     periodic_task.save()
 
 @task()
 def notify_task_runner(metadata_dict):
-    time.sleep(1)
     signal_context = zmq.Context()
     signal_socket = signal_context.socket(zmq.PUSH)
     signal_socket.connect(settings.TASK_COMMAND_PORT)

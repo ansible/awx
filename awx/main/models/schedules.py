@@ -2,10 +2,11 @@
 # All Rights Reserved.
 
 import logging
-import dateutil
+import dateutil.rrule
 
 # Django
 from django.db import models
+from django.utils.timezone import now, make_aware, get_default_timezone
 
 # AWX
 from awx.main.models.base import *
@@ -36,7 +37,7 @@ class Schedule(CommonModel):
     dtstart = models.DateTimeField(
         null=True,
         default=None,
-        editable=True,
+        editable=False,
     )
     dtend = models.DateTimeField(
         null=True,
@@ -56,5 +57,17 @@ class Schedule(CommonModel):
         return reverse('api:schedule_list')
         #return reverse('api:schedule_detail', args=(self.pk,))
 
+    def update_dt_elements(self):
+        future_rs = dateutil.rrule.rrulestr(self.rrule, forceset=True)
+        next_run_actual = future_rs.after(now())
+
+        self.next_run = next_run_actual
+        if self.dtstart is None:
+            self.dtstart = self.next_run
+        if "until" in self.rrule.lower() or 'count' in self.rrule.lower():
+            self.dtend = future_rs[-1]
+
     def save(self, *args, **kwargs):
+        self.update_dt_elements()
         super(Schedule, self).save(*args, **kwargs)
+        # update template next run details
