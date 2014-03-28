@@ -555,6 +555,15 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             response = self.post(url, d, expect=400)
             self.assertTrue('playbook' in response)
 
+        # Test unique constraint on names.
+        with self.current_user(self.user_sue):
+            d = dict(data.items())
+            d['name'] = 'new job template'
+            response = self.post(url, d, expect=400)
+            self.assertTrue('name' in response)
+            self.assertTrue('Job template with this Name already exists.' in response['name'])
+            self.assertTrue('__all__' not in response)
+
         # FIXME: Check other credentials and optional fields.
 
     def test_get_job_template_detail(self):

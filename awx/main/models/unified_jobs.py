@@ -20,6 +20,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
+from django.core.exceptions import NON_FIELD_ERRORS
+
 # Django-JSONField
 from jsonfield import JSONField
 
@@ -118,6 +120,44 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         default='ok',
         editable=False,
     )
+
+    def unique_error_message(self, model_class, unique_check):
+        # If polymorphic_ctype is part of a unique check, return a list of the
+        # remaining fields instead of the error message.
+        if len(unique_check) >= 2 and 'polymorphic_ctype' in unique_check:
+            return [x for x in unique_check if x != 'polymorphic_ctype']
+        else:
+            return super(UnifiedJobTemplate, self).unique_error_message(model_class, unique_check)
+
+    def _perform_unique_checks(self, unique_checks):
+        # Handle the list of unique fields returned above. Replace with an
+        # appropriate error message for the remaining field(s) in the unique
+        # check and cleanup the errors dictionary.
+        errors = super(UnifiedJobTemplate, self)._perform_unique_checks(unique_checks)
+        for key, msgs in errors.items():
+            if key != NON_FIELD_ERRORS:
+                continue
+            for msg in msgs:
+                if isinstance(msg, (list, tuple)):
+                    if len(msg) == 1:
+                        new_key = msg[0]
+                    else:
+                        new_key = NON_FIELD_ERRORS
+                    model_class = self.get_real_concrete_instance_class()
+                    errors.setdefault(new_key, []).append(self.unique_error_message(model_class, msg))
+            errors[key] = [x for x in msgs if not isinstance(x, (list, tuple))]
+        for key, msgs in errors.items():
+            if not msgs:
+                del errors[key]
+        return errors
+
+    def validate_unique(self, exclude=None):
+        # Make sure we set the polymorphic_ctype before validating, and omit
+        # it from the list of excluded fields.
+        self.pre_save_polymorphic()
+        if exclude and 'polymorphic_ctype' in exclude:
+            exclude = [x for x in exclude if x != 'polymorphic_ctype']
+        return super(UnifiedJobTemplate, self).validate_unique(exclude)
 
     @property
     def current_update(self):
