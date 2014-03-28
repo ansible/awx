@@ -1043,6 +1043,46 @@ class JobEventAccess(BaseAccess):
     def can_delete(self, obj):
         return False
 
+class UnifiedJobTemplateAccess(BaseAccess):
+    '''
+    I can see a unified job template whenever I can see the same project,
+    inventory source or job template.  Unified job templates do not include
+    projects without SCM configured or inventory sources without a cloud
+    source.
+    '''
+    
+    model = UnifiedJobTemplate
+    
+    def get_queryset(self):
+        qs = self.model.objects.filter(active=True).distinct()
+        project_qs = self.user.get_queryset(Project).filter(scm_type__in=('',))
+        inventory_source_qs = self.user.get_queryset(InventorySource).filter(source__in=CLOUD_INVENTORY_SOURCES)
+        job_template_qs = self.user.get_queryset(JobTemplate)
+        qs = qs.filter(Q(Project___in=project_qs) |
+                       Q(InventorySource___in=inventory_source_qs) |
+                       Q(JobTemplate___in=job_template_qs))
+        # FIXME: select/prefetch to optimize!
+        return qs
+
+class UnifiedJobAccess(BaseAccess):
+    '''
+    I can see a unified job whenever I can see the same project update,
+    inventory update or job.
+    '''
+
+    model = UnifiedJob
+
+    def get_queryset(self):
+        qs = self.model.objects.filter(active=True).distinct()
+        project_update_qs = self.user.get_queryset(ProjectUpdate)
+        inventory_update_qs = self.user.get_queryset(InventoryUpdate).filter(source__in=CLOUD_INVENTORY_SOURCES)
+        job_qs = self.user.get_queryset(Job)
+        qs = qs.filter(Q(ProjectUpdate___in=project_update_qs) |
+                       Q(InventoryUpdate___in=inventory_update_qs) |
+                       Q(Job___in=job_qs))
+        # FIXME: select/prefetch to optimize!
+        return qs
+
 class ScheduleAccess(BaseAccess):
     '''
     I can see a schedule if I can see it's related unified job, I can create them or update them if I have write access
@@ -1230,4 +1270,6 @@ register_access(Job, JobAccess)
 register_access(JobHostSummary, JobHostSummaryAccess)
 register_access(JobEvent, JobEventAccess)
 register_access(Schedule, ScheduleAccess)
+register_access(UnifiedJobTemplate, UnifiedJobTemplateAccess)
+register_access(UnifiedJob, UnifiedJobAccess)
 register_access(ActivityStream, ActivityStreamAccess)

@@ -10,10 +10,14 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.related import RelatedObject
 from django.db.models.fields import FieldDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError
 from rest_framework.filters import BaseFilterBackend
+
+# Ansible Tower
+from awx.main.utils import camelcase_to_underscore
 
 class ActiveOnlyBackend(BaseFilterBackend):
     '''
@@ -28,13 +32,49 @@ class ActiveOnlyBackend(BaseFilterBackend):
                 queryset = queryset.filter(active=True)
         return queryset
 
+class TypeFilterBackend(BaseFilterBackend):
+    '''
+    Filter on type field now returned with all objects.
+    '''
+
+    def filter_queryset(self, request, queryset, view):
+        try:
+            types = None
+            for key, value in request.QUERY_PARAMS.items():
+                if key == 'type':
+                    if ',' in value:
+                        types = value.split(',')
+                    else:
+                        types = (value,)
+            if types:
+                types_map = {}
+                for ct in ContentType.objects.filter(Q(app_label='main') | Q(app_label='auth', model='user')):
+                    ct_model = ct.model_class()
+                    if not ct_model:
+                        continue
+                    ct_type = camelcase_to_underscore(ct_model._meta.object_name)
+                    types_map[ct_type] = ct.pk
+                model = queryset.model
+                model_type = camelcase_to_underscore(model._meta.object_name)
+                if 'polymorphic_ctype' in model._meta.get_all_field_names():
+                    types_pks = set([v for k,v in types_map.items() if k in types])
+                    queryset = queryset.filter(polymorphic_ctype_id__in=types_pks)
+                elif model_type in types:
+                    queryset = queryset
+                else:                    
+                    queryset = queryset.none()
+            return queryset
+        except FieldError, e:
+            # Return a 400 for invalid field names.
+            raise ParseError(*e.args)
+
 class FieldLookupBackend(BaseFilterBackend):
     '''
     Filter using field lookups provided via query string parameters.
     '''
 
     RESERVED_NAMES = ('page', 'page_size', 'format', 'order', 'order_by',
-                      'search')
+                      'search', 'type')
 
     SUPPORTED_LOOKUPS = ('exact', 'iexact', 'contains', 'icontains',
                          'startswith', 'istartswith', 'endswith', 'iendswith',

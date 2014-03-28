@@ -197,7 +197,7 @@ class GenericAPIView(generics.GenericAPIView, APIView):
                 # appropriate metadata about the fields that should be supplied.
                 serializer = self.get_serializer()
                 actions['GET'] = serializer.metadata()
-                ret['types'] = [serializer.get_type(None)] # FIXME: Support multiple types?
+                ret['types'] = serializer.get_types()
         if actions:
             ret['actions'] = actions
         if getattr(self, 'search_fields', None):

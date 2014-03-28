@@ -93,7 +93,8 @@ class ApiV1RootView(APIView):
         data['job_templates'] = reverse('api:job_template_list')
         data['jobs'] = reverse('api:job_list')
         data['schedules'] = reverse('api:schedule_list')
-        data['unified_jobs'] = reverse('api:unified_jobs_list')
+        data['unified_job_templates'] = reverse('api:unified_job_template_list')
+        data['unified_jobs'] = reverse('api:unified_job_list')
         data['activity_stream'] = reverse('api:activity_stream_list')
         return Response(data)
 
@@ -240,214 +241,15 @@ class DashboardView(APIView):
 class ScheduleList(ListCreateAPIView):
 
     view_name = "Schedules"
-    new_in_148 = True
-
     model = Schedule
     serializer_class = ScheduleSerializer
+    new_in_148 = True
 
 class ScheduleDetail(RetrieveUpdateDestroyAPIView):
 
-    new_in_148 = True
     model = Schedule
     serializer_class = ScheduleSerializer
-
-class UnifiedJobsList(APIView):
-
-    view_name = "Unified Job Templates"
     new_in_148 = True
-
-    def get(self, request, format=None):
-        data = {
-            'count': 3,
-            'next': None,
-            'previous': None,
-            'results': [
-
-                {"id": 39, 
-                 "url": "/api/v1/inventory_updates/39/", 
-                 "related": {
-                     "cancel": "/api/v1/inventory_updates/39/cancel/", 
-                     "inventory_source": "/api/v1/inventory_sources/11/"
-                 }, 
-                 "summary_fields": {
-                     "inventory_source": {
-                         "source": "ec2", 
-                         "last_updated": "2014-03-19T17:44:30.726Z", 
-                         "status": "successful"
-                     }
-                 }, 
-                 "created": "2014-03-19T17:44:13.894Z", 
-                 "modified": "2014-03-19T17:44:30.726Z", 
-                 "inventory_source": 11, 
-                 "status": "successful", 
-                 "failed": False, 
-                 "type": "inventory_sync",
-                 "result_stdout": "there will be stdout here",
-                 "result_traceback": "", 
-                 "job_args": "[\"awx-manage\", \"inventory_import\", \"--inventory-id\", \"6\", \"--source\", \"/home/ubuntu/projects/tower/awx/plugins/inventory/ec2.py\", \"--enabled-var\", \"ec2_state\", \"--enabled-value\", \"running\", \"-v1\", \"--traceback\"]", 
-                 "job_cwd": "/home/ubuntu/projects/tower/awx/plugins/inventory", 
-                 "job_env": {
-                     "CELERY_LOG_REDIRECT_LEVEL": "WARNING", 
-                     "ANSIBLE_PARAMIKO_RECORD_HOST_KEYS": "False", 
-                     "DJANGO_LIVE_TEST_SERVER_ADDRESS": "localhost:9013-9199", 
-                     "LESSOPEN": "| /usr/bin/lesspipe %s", 
-                     "_MP_FORK_LOGFILE_": "", 
-                     "SSH_CLIENT": "65.190.173.93 52056 22", 
-                     "CELERY_LOG_REDIRECT": "1", 
-                     "LOGNAME": "ubuntu", 
-                     "USER": "ubuntu", 
-                     "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games", 
-                     "HOME": "/home/ubuntu", 
-                     "MAKEFLAGS": "w", 
-                     "LANG": "en_US.UTF-8", 
-                     "TERM": "screen", 
-                     "SHELL": "/bin/bash", 
-                     "TZ": "America/New_York", 
-                     "_MP_FORK_LOGFORMAT_": "[%(asctime)s: %(levelname)s/%(processName)s] %(message)s", 
-                     "SHLVL": "1", 
-                     "CELERY_LOG_FILE": "", 
-                     "DJANGO_PROJECT_DIR": "/home/ubuntu/projects/tower", 
-                     "MFLAGS": "-w", 
-                     "ANSIBLE_HOST_KEY_CHECKING": "False", 
-                     "PYTHONPATH": "/home/ubuntu/projects/tower/awx/lib/site-packages:", 
-                     "COMP_WORDBREAKS": " \t\n\"'><;|&(:", 
-                     "TMUX": "/tmp/tmux-1000/default,13862,0", 
-                     "CELERY_LOADER": "djcelery.loaders.DjangoLoader", 
-                     "_MP_FORK_LOGLEVEL_": "10", 
-                     "ANSIBLE_NOCOLOR": "1", 
-                     "AWS_ACCESS_KEY_ID": "AKIAJZFZXKDVUHDDCZSA", 
-                     "_": "/usr/bin/make", 
-                     "SSH_CONNECTION": "65.190.173.93 52056 10.157.37.183 22", 
-                     "LESSCLOSE": "/usr/bin/lesspipe %s %s", 
-                     "EC2_INI_PATH": "/tmp/tmpdDHKKH", 
-                     "SSH_TTY": "/dev/pts/0", 
-                     "OLDPWD": "/home/ubuntu", 
-                     "MAKELEVEL": "2", 
-                     "PWD": "/home/ubuntu/projects/tower", 
-                     "DJANGO_SETTINGS_MODULE": "awx.settings.development", 
-                     "AWS_SECRET_ACCESS_KEY": "****************************************", 
-                     "INVENTORY_SOURCE_ID": "11", 
-                     "MAIL": "/var/mail/ubuntu", 
-                     "LS_COLORS": "rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lz=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:", 
-                     "CELERY_LOG_LEVEL": "10", 
-                     "TMUX_PANE": "%1"
-                 }, 
-                 "license_error": False},
-                 {
-                     "id": 1, 
-                     "url": "/api/v1/jobs/1/", 
-                     "related": {
-                         "job_host_summaries": "/api/v1/jobs/1/job_host_summaries/", 
-                         "activity_stream": "/api/v1/jobs/1/activity_stream/", 
-                         "job_events": "/api/v1/jobs/1/job_events/", 
-                         "job_template": "/api/v1/job_templates/1/", 
-                         "inventory": "/api/v1/inventories/1/", 
-                         "project": "/api/v1/projects/1/", 
-                         "credential": "/api/v1/credentials/1/", 
-                         "start": "/api/v1/jobs/1/start/", 
-                         "cancel": "/api/v1/jobs/1/cancel/"
-                     }, 
-                     "summary_fields": {
-                         "credential": {
-                             "name": "testcred", 
-                             "description": "", 
-                             "kind": "ssh", 
-                             "cloud": False
-                         }, 
-                         "job_template": {
-                             "name": "ping1", 
-                             "description": ""
-                         }, 
-                    "project": {
-                        "name": "Test Projects", 
-                        "description": "", 
-                        "status": "ok"
-                    }, 
-                    "inventory": {
-                        "name": "Test Inventory", 
-                        "description": "", 
-                        "has_active_failures": False, 
-                        "total_hosts": 1000, 
-                        "hosts_with_active_failures": 0, 
-                        "total_groups": 1, 
-                        "groups_with_active_failures": 0, 
-                        "has_inventory_sources": False, 
-                        "total_inventory_sources": 0, 
-                        "inventory_sources_with_failures": 0
-                    }
-                }, 
-                "created": "2014-02-10T19:28:43.886Z", 
-                     "modified": "2014-03-14T16:48:26.222Z", 
-                     "job_template": 1, 
-                     "job_type": "run",
-                     "type": "playbook_run",
-                     "inventory": 1, 
-                     "project": 1,
-                     "playbook": "ping.yml", 
-                     "credential": 1, 
-                     "cloud_credential": None, 
-                     "forks": 0, 
-                     "limit": "host-1", 
-                     "verbosity": 0, 
-                     "extra_vars": "{\n\t\"ansible_connection\": \"local\"\n}", 
-                     "job_tags": "", 
-                     "launch_type": "manual", 
-                     "status": "successful", 
-                     "failed": False, 
-                     "result_traceback": "", 
-                     "passwords_needed_to_start": [], 
-                     "job_args": "[\"ansible-playbook\", \"-i\", \"/home/ubuntu/projects/tower/awx/plugins/inventory/awxrest.py\", \"-u\", \"admin\", \"--ask-pass\", \"-l\", \"host-1\", \"-e\", \"{\\\"ansible_connection\\\": \\\"local\\\"}\", \"ping.yml\"]", 
-                     "job_cwd": "/home/ubuntu/projects/tower/awx/projects/test", 
-                     "job_env": {
-                         "CELERY_LOG_REDIRECT_LEVEL": "WARNING", 
-                         "ANSIBLE_PARAMIKO_RECORD_HOST_KEYS": "False", 
-                         "DJANGO_LIVE_TEST_SERVER_ADDRESS": "localhost:9013-9199", 
-                         "LESSOPEN": "| /usr/bin/lesspipe %s", 
-                         "_MP_FORK_LOGFILE_": "", 
-                         "SSH_CLIENT": "65.190.173.93 38699 22", 
-                         "CELERY_LOG_REDIRECT": "1", 
-                         "LOGNAME": "ubuntu", 
-                         "USER": "ubuntu", 
-                         "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games", 
-                         "HOME": "/home/ubuntu", 
-                         "REST_API_TOKEN": "**********************************", 
-                         "CALLBACK_CONSUMER_PORT": "tcp://127.0.0.1:5557", 
-                         "MAKEFLAGS": "", 
-                         "ANSIBLE_CALLBACK_PLUGINS": "/home/ubuntu/projects/tower/awx/plugins/callback", 
-                         "LANG": "en_US.UTF-8", 
-                         "TERM": "screen", 
-                         "SHELL": "/bin/bash", 
-                         "TZ": "America/New_York", 
-                         "_MP_FORK_LOGFORMAT_": "[%(asctime)s: %(levelname)s/%(processName)s] %(message)s", 
-                         "SHLVL": "2", 
-                         "CELERY_LOG_FILE": "", 
-                         "DJANGO_PROJECT_DIR": "/home/ubuntu/projects/tower", 
-                         "MFLAGS": "", 
-                         "ANSIBLE_HOST_KEY_CHECKING": "False", 
-                         "JOB_ID": "1", 
-                         "PYTHONPATH": "/home/ubuntu/projects/tower/awx/lib/site-packages:", 
-                         "COMP_WORDBREAKS": " \t\n\"'><;|&(:", 
-                         "TMUX": "/tmp/tmux-1000/default,1205,0", 
-                         "CELERY_LOADER": "djcelery.loaders.DjangoLoader", 
-                         "_MP_FORK_LOGLEVEL_": "10", 
-                         "ANSIBLE_NOCOLOR": "1", 
-                         "JOB_CALLBACK_DEBUG": "1", 
-                         "REST_API_URL": "http://127.0.0.1:8013", 
-                         "_": "/usr/bin/make", 
-                         "SSH_CONNECTION": "65.190.173.93 38699 10.157.37.183 22", 
-                         "LESSCLOSE": "/usr/bin/lesspipe %s %s", 
-                         "INVENTORY_HOSTVARS": "True", 
-                         "SSH_TTY": "/dev/pts/0", 
-                         "CELERY_LOG_LEVEL": "10", 
-                         "INVENTORY_ID": "1", 
-                         "MAKELEVEL": "1", 
-                         "PWD": "/home/ubuntu/projects/tower", 
-                         "DJANGO_SETTINGS_MODULE": "awx.settings.development", 
-                         "MAIL": "/var/mail/ubuntu", 
-                         "LS_COLORS": "rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lz=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:", 
-                         "TMUX_PANE": "%1"
-                     }},]}
-        return Response(data)
 
 class AuthTokenView(APIView):
 
@@ -1553,6 +1355,18 @@ class JobJobEventsList(BaseJobEventsList):
             return Response(serializer.data, status=status.HTTP_201_CREATED,
                             headers=headers)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UnifiedJobTemplateList(ListAPIView):
+
+    model = UnifiedJobTemplate
+    serializer_class = UnifiedJobTemplateSerializer
+    new_in_148 = True
+
+class UnifiedJobList(ListAPIView):
+
+    model = UnifiedJob
+    serializer_class = UnifiedJobListSerializer
+    new_in_148 = True
 
 class ActivityStreamList(SimpleListAPIView):
 

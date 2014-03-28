@@ -160,6 +160,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_FILTER_BACKENDS': (
         'awx.api.filters.ActiveOnlyBackend',
+        'awx.api.filters.TypeFilterBackend',
         'awx.api.filters.FieldLookupBackend',
         'rest_framework.filters.SearchFilter',
         'awx.api.filters.OrderByBackend',

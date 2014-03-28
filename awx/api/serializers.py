@@ -148,9 +148,9 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
 
     def __new__(cls, name, bases, attrs):
         meta = type('Meta', (object,), {})
-        for base in bases:
+        for base in bases[::-1]:
             cls._update_meta(base, meta, getattr(base, 'Meta', None))
-        cls._update_meta(None, meta, attrs.get('Meta', None))
+        cls._update_meta(None, meta, attrs.get('Meta', meta))
         attrs['Meta'] = meta
         return super(BaseSerializerMetaclass, cls).__new__(cls, name, bases, attrs)
 
@@ -214,6 +214,9 @@ class BaseSerializer(serializers.ModelSerializer):
     def get_type(self, obj):
         opts = get_concrete_model(self.opts.model)._meta
         return camelcase_to_underscore(opts.object_name)
+
+    def get_types(self):
+        return [self.get_type(None)]
 
     def get_url(self, obj):
         if obj is None:
@@ -304,6 +307,27 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             res['next_schedule'] = obj.next_schedule.get_absolute_url()
         return res
 
+    def get_types(self):
+        if type(self) is UnifiedJobTemplateSerializer:
+            return ['project', 'inventory_source', 'job_template']
+        else:
+            return super(UnifiedJobTemplateSerializer, self).get_types()
+
+    def to_native(self, obj):
+        serializer_class = None
+        if type(self) is UnifiedJobTemplateSerializer:
+            if isinstance(obj, Project):
+                serializer_class = ProjectSerializer
+            elif isinstance(obj, InventorySource):
+                serializer_class = InventorySourceSerializer
+            elif isinstance(obj, JobTemplate):
+                serializer_class = JobTemplateSerializer
+        if serializer_class:
+            serializer = serializer_class(instance=obj)
+            return serializer.to_native(obj)
+        else:
+            return super(UnifiedJobTemplateSerializer, self).to_native(obj)
+
 
 class UnifiedJobSerializer(BaseSerializer):
 
@@ -315,6 +339,12 @@ class UnifiedJobSerializer(BaseSerializer):
                   'failed', 'started', 'finished', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'result_stdout', 'result_traceback')
 
+    def get_types(self):
+        if type(self) is UnifiedJobSerializer:
+            return ['project_update', 'inventory_update', 'job']
+        else:
+            return super(UnifiedJobSerializer, self).get_types()
+
     def get_related(self, obj):
         res = super(UnifiedJobSerializer, self).get_related(obj)
         if obj.unified_job_template and obj.unified_job_template.active:
@@ -324,7 +354,50 @@ class UnifiedJobSerializer(BaseSerializer):
         return res
 
     def to_native(self, obj):
-        ret = super(UnifiedJobSerializer, self).to_native(obj)
+        serializer_class = None
+        if type(self) is UnifiedJobSerializer:
+            if isinstance(obj, ProjectUpdate):
+                serializer_class = ProjectUpdateSerializer
+            elif isinstance(obj, InventoryUpdate):
+                serializer_class = InventoryUpdateSerializer
+            elif isinstance(obj, Job):
+                serializer_class = JobSerializer
+        if serializer_class:
+            serializer = serializer_class(instance=obj)
+            ret = serializer.to_native(obj)
+        else:
+            ret = super(UnifiedJobSerializer, self).to_native(obj)
+        if 'elapsed' in ret:
+            ret['elapsed'] = float(ret['elapsed'])
+        return ret
+
+
+class UnifiedJobListSerializer(UnifiedJobSerializer):
+    
+    class Meta:
+        exclude = ('*', 'job_args', 'job_cwd', 'job_env', 'result_traceback',
+                   'result_stdout')
+
+    def get_types(self):
+       if type(self) is UnifiedJobListSerializer:
+           return ['project_update', 'inventory_update', 'job']
+       else:
+           return super(UnifiedJobListSerializer, self).get_types()
+
+    def to_native(self, obj):
+        serializer_class = None
+        if type(self) is UnifiedJobListSerializer:
+            if isinstance(obj, ProjectUpdate):
+                serializer_class = ProjectUpdateListSerializer
+            elif isinstance(obj, InventoryUpdate):
+                serializer_class = InventoryUpdateListSerializer
+            elif isinstance(obj, Job):
+                serializer_class = JobListSerializer
+        if serializer_class:
+            serializer = serializer_class(instance=obj)
+            ret = serializer.to_native(obj)
+        else:
+            ret = super(UnifiedJobListSerializer, self).to_native(obj)
         if 'elapsed' in ret:
             ret['elapsed'] = float(ret['elapsed'])
         return ret
@@ -541,6 +614,11 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
             cancel = reverse('api:project_update_cancel', args=(obj.pk,)),
         ))
         return res
+
+
+class ProjectUpdateListSerializer(ProjectUpdateSerializer, UnifiedJobListSerializer):
+
+    pass
 
 
 class BaseSerializerWithVariables(BaseSerializer):
@@ -907,6 +985,11 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
         return res
 
 
+class InventoryUpdateListSerializer(InventoryUpdateSerializer, UnifiedJobListSerializer):
+
+    pass
+
+
 class TeamSerializer(BaseSerializer):
 
     class Meta:
@@ -1151,12 +1234,9 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             ret['job_template'] = None
         return ret
 
+class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
 
-class JobListSerializer(JobSerializer):
-
-    class Meta:
-        model = Job
-        fields = ('*', '-result_stdout')
+    pass
 
 
 class JobHostSummarySerializer(BaseSerializer):
@@ -1225,8 +1305,7 @@ class ScheduleSerializer(BaseSerializer):
 
     class Meta:
         model = Schedule
-        fields = ('*', 'unified_job_template', 'enabled', 'dtstart', 'dtend',
-                  'rrule', 'next_run')
+        fields = ('*', 'enabled', 'dtstart', 'dtend', 'rrule', 'next_run')
 
     def get_related(self, obj):
         res = super(ScheduleSerializer, self).get_related(obj)
