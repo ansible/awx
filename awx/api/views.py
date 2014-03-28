@@ -256,7 +256,7 @@ class ScheduleUnifiedJobsList(SubListAPIView):
     model = UnifiedJob
     serializer_class = UnifiedJobSerializer
     parent_model = Schedule
-    relationship = ''
+    relationship = 'unifiedjob_set'
     view_name = 'Schedule Jobs List'
 
 class AuthTokenView(APIView):
