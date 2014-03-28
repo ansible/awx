@@ -208,7 +208,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                 Wait('start');
                 LogViewer({
                     scope: $scope,
-                    url: project.related.last_update
+                    url: project.related.last_update,
+                    status_icon: 'icon-job-' + project.statusIcon
                 });
                 /*
                 ProjectStatus({

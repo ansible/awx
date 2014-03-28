@@ -13,16 +13,6 @@ angular.module('LogViewerOptionsDefinition', [])
         well: false,
         
         fields: {
-            "job_args": {
-                label: "Arguments",
-                type: "text",
-                readonly: true
-            },
-            "job_cwd": {
-                label: "CWD",
-                type: "text",
-                readonly: true
-            },
             "job_type": {
                 label: "Job Type",
                 type: "text",

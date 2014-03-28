@@ -32,7 +32,7 @@ angular.module('HomeGroupListDefinition', [])
                 sourceModel: 'inventory',
                 sourceField: 'name',
                 columnClass: 'col-lg-3 col-md2 col-sm-2 hidden-xs elllipsis',
-                linkTo: "{{ /#/inventories/' + group.inventory + '/' }}"
+                linkTo: "{{ '/#/inventories/' + group.inventory + '/' }}"
             },
             source: {
                 label: 'Source',

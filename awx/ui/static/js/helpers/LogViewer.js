@@ -16,6 +16,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
         return function(params) {
             var parent_scope = params.scope,
                 url = params.url,
+                status_icon = params.status_icon,
                 scope = parent_scope.$new();
             
             if (scope.removeModalReady) {
@@ -36,8 +37,8 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
                     scope[key] = data[key];
                 }
                 
-                AddTable({ scope: scope, form: LogViewerStatusForm, id: 'status-form-container' });
-                AddTable({ scope: scope, form: LogViewerOptionsForm, id: 'options-form-container' });
+                AddTable({ scope: scope, form: LogViewerStatusForm, id: 'status-form-container', status_icon: status_icon });
+                AddTable({ scope: scope, form: LogViewerOptionsForm, id: 'options-form-container', status_icon: status_icon });
                 
                 if (data.result_stdout) {
                     AddTextarea({
@@ -61,12 +62,12 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
                     $('#logview-tabs li:eq(2)').hide();
                 }
 
-                if (data.job_env) {
+                /*if (data.job_env) {
                     EnvTable({
                         id: 'env-form-container',
                         vars: data.job_env
                     });
-                }
+                }*/
 
                 if (!Empty(scope.credential)) {
                     LookUpName({
@@ -124,7 +125,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
                 CreateDialog({
                     scope: scope,
                     width: 600,
-                    height: 675,
+                    height: 550,
                     minWidth: 450,
                     callback: 'ModalReady',
                     id: 'logviewer-modal-dialog',
@@ -172,7 +173,11 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
             Rest.get()
                 .success(function(data) {
                     if (!Empty(data.name)) {
-                        scope[scope_var] = data.name;
+                        scope[scope_var + '_name'] = data.name;
+                    }
+                    if (!Empty(data.group)) {
+                        // Used for inventory_source
+                        scope.group = data.group;
                     }
                 })
                 .error(function(data, status) {
@@ -182,20 +187,37 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
         };
     }])
 
-    .factory('AddTable', ['Empty', function(Empty) {
+    .factory('AddTable', ['Empty', 'Find', function(Empty, Find) {
         return function(params) {
             var form = params.form,
                 id = params.id,
                 scope = params.scope,
-                fld, html;
+                status_icon = params.status_icon,
+                fld, html, url,
+                urls = [
+                    { "variable": "credential", "url": "/#/credentials/" },
+                    { "variable": "project", "url": "/#/projects/" },
+                    { "variable": "inventory", "url": "/#/inventories/" },
+                    { "variable": "cloud_credential", "url": "/#/credentials/" },
+                    { "variable": "inventory_source", "url": "/#/home/groups/?id=" }
+                ];
+
             html = "<table class=\"table logviewer-status\">\n";
             for (fld in form.fields) {
                 if (!Empty(scope[fld])) {
                     html += "<tr><td class=\"fld-label col-md-3 col-sm-3 col-xs-3\">" + form.fields[fld].label + "</td>" +
                         "<td>";
-                    if (fld === "credential" || fld === "project" || fld === "inventory" || fld === "cloud_credential" ||
-                        fld === "inventory_source") {
-                        html += "{{ " + fld + " }}";
+                    url = Find({ list: urls, key: "variable", val: fld });
+                    if (url) {
+                        html += "<a href=\"" + url.url;
+                        html += (fld === "inventory_source") ? "{{ group }}" : scope[fld];
+                        html += "\" ng-click=\"modalOK()\">{{ " + fld + '_name' + " }}</a>";
+                    }
+                    else if (fld === 'elapsed') {
+                        html += scope[fld] + " <span class=\"small-text\">seconds</span>";
+                    }
+                    else if (status_icon && fld === 'status') {
+                        html += "<i class=\"fa " + status_icon + "\"></i> " + scope[fld];
                     }
                     else {
                         html += scope[fld];

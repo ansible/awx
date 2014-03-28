@@ -18,18 +18,18 @@ angular.module('LogViewerStatusDefinition', [])
                 type: "text",
                 readonly: true,
             },
-            "created": {
-                label: "Created",
+            "started": {
+                label: "Started",
                 type: "text",
                 readonly: true
             },
-            "modified": {
-                label: "Modified",
+            "finished": {
+                label: "Finished",
                 type: "text",
                 readonly: true
             },
-            "unified_job_template": {
-                label: "Job Template",
+            "elapsed": {
+                label: "Elapsed",
                 type: "text",
                 readonly: true
             },
@@ -45,21 +45,6 @@ angular.module('LogViewerStatusDefinition', [])
             },
             "license_error": {
                 label: "License Error",
-                type: "text",
-                readonly: true
-            },
-            "started": {
-                label: "Started",
-                type: "text",
-                readonly: true
-            },
-            "finished": {
-                label: "Finished",
-                type: "text",
-                readonly: true
-            },
-            "elapsed": {
-                label: "Elapsed",
                 type: "text",
                 readonly: true
             }
