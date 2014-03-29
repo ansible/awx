@@ -289,13 +289,12 @@ class Project(UnifiedJobTemplate, ProjectOptions):
                     pass
 
     def _can_update(self):
-        # FIXME: Prevent update when another one is active!
-        return bool(self.scm_type)# and not self.current_update)
+        return bool(self.scm_type)
 
     def create_project_update(self, **kwargs):
         if self.scm_delete_on_next_update:
             kwargs['scm_delete_on_update'] = True
-        return self._create_unified_job_instance(**kwargs)
+        return self.create_unified_job(**kwargs)
 
     @property
     def needs_update_on_launch(self):
@@ -305,21 +304,6 @@ class Project(UnifiedJobTemplate, ProjectOptions):
             if (self.last_job_run + datetime.timedelta(seconds=self.scm_update_cache_timeout)) <= now():
                 return True
         return False
-
-    def update_signature(self, **kwargs):
-        if self.can_update:
-            project_update = self.create_project_update()
-            project_update_sig = project_update.start_signature()
-            return (project_update, project_update_sig)
-
-    def update(self, schedule=None, **kwargs):
-        if self.can_update:
-            project_update = self.create_project_update()
-            if hasattr(settings, 'CELERY_UNIT_TEST'):
-                project_update.start(None, **kwargs)
-            else:
-                project_update.signal_start(schedule=schedule, **kwargs)
-            return project_update
 
     def get_absolute_url(self):
         return reverse('api:project_detail', args=(self.pk,))
@@ -350,6 +334,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
         return RunProjectUpdate
 
     def is_blocked_by(self, obj):
+        # FIXME: Block update when any job is running using this project!
         if type(obj) == ProjectUpdate:
             if self.project == obj.project:
                 return True
@@ -358,27 +343,6 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
     @property
     def task_impact(self):
         return 20
-
-    def signal_start(self, schedule=None, **kwargs):
-        from awx.main.tasks import notify_task_runner
-        if schedule:
-            self.schedule = schedule
-            self.save()
-        if not self.can_start:
-            return False
-        needed = self._get_passwords_needed_to_start()
-        opts = dict([(field, kwargs.get(field, '')) for field in needed])
-        if not all(opts.values()):
-            return False
-
-        json_args = json.dumps(kwargs)
-        self.start_args = json_args
-        self.save()
-        self.start_args = encrypt_field(self, 'start_args')
-        self.status = 'pending'
-        self.save()
-        # notify_task_runner.delay(dict(task_type="project_update", id=self.id, metadata=kwargs))
-        return True
 
     def get_absolute_url(self):
         return reverse('api:project_update_detail', args=(self.pk,))

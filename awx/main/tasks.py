@@ -4,15 +4,12 @@
 # Python
 import ConfigParser
 import cStringIO
-import datetime
 from distutils.version import StrictVersion as Version
-import functools
 import json
 import logging
 import os
 import pipes
 import re
-import subprocess
 import stat
 import tempfile
 import time
@@ -26,21 +23,15 @@ import pexpect
 # ZMQ
 import zmq
 
-# Kombu
-from kombu import Connection, Exchange, Queue
-
 # Celery
-from celery import Celery, Task, task
-from celery.execute import send_task
-from djcelery.models import PeriodicTask, TaskMeta
+from celery import Task, task
+from djcelery.models import PeriodicTask
 
 # Django
 from django.conf import settings
 from django.db import transaction, DatabaseError
 from django.utils.datastructures import SortedDict
-from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
-from django.utils.tzinfo import FixedOffset
 
 # AWX
 from awx.main.models import * # Job, JobEvent, ProjectUpdate, InventoryUpdate, Schedule, UnifiedJobTemplate
@@ -48,34 +39,28 @@ from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url
 
 __all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate', 'handle_work_error']
 
+HIDDEN_PASSWORD = '**********'
+
 logger = logging.getLogger('awx.main.tasks')
 
 # FIXME: Cleanly cancel task when celery worker is stopped.
 
 @task(bind=True)
 def tower_periodic_scheduler(self):
-    run_now = now()    
-    periodic_task = PeriodicTask.objects.get(task='awx.main.tasks.tower_periodic_scheduler')
-    logger.debug("Last run was: " + str(periodic_task.last_run_at))
+    run_now = now()
+    try:
+        periodic_task = PeriodicTask.objects.filter(task='awx.main.tasks.tower_periodic_scheduler')[0]
+    except IndexError:
+        logger.warning('No PeriodicTask found for tower_periodic_scheduler')
+        return
+    logger.debug("Last run was: %s", periodic_task.last_run_at)
     # TODO: Cleanup jobs that we missed
-    jobs_matching_schedules = Schedule.objects.filter(enabled=True,
-                                                      next_run__gt=periodic_task.last_run_at, next_run__lte=run_now)
-    for match in jobs_matching_schedules:
-        template = match.unified_job_template
-        match.save()
-        if type(template) == Project:
-            new_project_update = template.create_project_update(launch_type="scheduled")
-            new_project_update.signal_start(schedule=match)
-        elif type(template) == InventorySource:
-            new_inventory_update = template.create_inventory_update(launch_type="scheduled")
-            new_inventory_update.signal_start(schedule=match)
-        elif type(template) == JobTemplate:
-            new_job = template.create_job()
-            new_job.launch_type = "scheduled"
-            new_job.save()
-            new_job.signal_start(schedule=match)
-        else:
-            logger.error("Unknown task type: " + str(type(template)))
+    schedules = Schedule.objects.enabled().between(periodic_task.last_run_at, run_now)
+    for schedule in schedules:
+        template = schedule.unified_job_template
+        schedule.save() # To update next_run timestamp.
+        new_unified_job = template.create_unified_job(launch_type='scheduled', schedule=schedule)
+        new_unified_job.signal_start()
     periodic_task.last_run_at = run_now
     periodic_task.save()
 
@@ -101,7 +86,7 @@ def handle_work_error(self, task_id, subtasks=None):
             elif each_task['type'] == 'inventory_update':
                 instance = InventoryUpdate.objects.get(id=each_task['id'])
                 instance_name = instance.inventory_source.inventory.name
-            elif each_task['type'] == 'ansible_playbook':
+            elif each_task['type'] == 'job':
                 instance = Job.objects.get(id=each_task['id'])
                 instance_name = instance.job_template.name
             else:
@@ -163,9 +148,6 @@ class BaseTask(Task):
         pass
         # notify_task_runner(dict(complete=pk))
 
-    def get_model(self, pk):
-        return self.model.objects.get(pk=pk)
-
     def get_path_to(self, *args):
         '''
         Return absolute path relative to this file.
@@ -201,7 +183,6 @@ class BaseTask(Task):
             'yes': 'yes',
             'no': 'no',
             '': '',
-
         }
 
     def build_env(self, instance, **kwargs):
@@ -228,24 +209,33 @@ class BaseTask(Task):
         return env
 
     def build_safe_env(self, instance, **kwargs):
-        hidden_re = re.compile(r'API|TOKEN|KEY|SECRET|PASS')
+        '''
+        Build environment dictionary, hiding potentially sensitive information
+        such as passwords or keys.
+        '''
+        hidden_re = re.compile(r'API|TOKEN|KEY|SECRET|PASS', re.I)
         urlpass_re = re.compile(r'^.*?://.?:(.*?)@.*?$')
         env = self.build_env(instance, **kwargs)
         for k,v in env.items():
-            if k == 'BROKER_URL':
-                m = urlpass_re.match(v)
-                if m:
-                    env[k] = urlpass_re.sub('*'*len(m.groups()[0]), v)
-            elif k in ('REST_API_URL', 'AWS_ACCESS_KEY', 'AWS_ACCESS_KEY_ID'):
+            if k in ('REST_API_URL', 'AWS_ACCESS_KEY', 'AWS_ACCESS_KEY_ID'):
                 continue
             elif k.startswith('ANSIBLE_'):
                 continue
             elif hidden_re.search(k):
-                env[k] = '*'*len(str(v))
+                env[k] = HIDDEN_PASSWORD
+            elif urlpass_re.match(v):
+                env[k] = urlpass_re.sub(HIDDEN_PASSWORD, v)
         return env
 
     def args2cmdline(self, *args):
         return ' '.join([pipes.quote(a) for a in args])
+
+    def wrap_args_with_ssh_agent(self, args, ssh_key_path):
+        if ssh_key_path:
+            cmd = ' && '.join([self.args2cmdline('ssh-add', ssh_key_path),
+                               self.args2cmdline(*args)])
+            args = ['ssh-agent', 'sh', '-c', cmd]
+        return args
 
     def build_args(self, instance, **kwargs):
         raise NotImplementedError
@@ -264,19 +254,19 @@ class BaseTask(Task):
 
     def get_password_prompts(self):
         '''
-        Return a dictionary of prompt regular expressions and password lookup
-        keys.
+        Return a dictionary where keys are strings or regular expressions for
+        prompts, and values are password lookup keys (keys that are returned
+        from build_passwords).
         '''
         return SortedDict()
 
-    def run_pexpect(self, instance, args, cwd, env, passwords, task_stdout_handle,
+    def run_pexpect(self, instance, args, cwd, env, passwords, stdout_handle,
                     output_replacements=None):
         '''
         Run the given command using pexpect to capture output and provide
         passwords when requested.
         '''
-        status, stdout = 'error', ''
-        logfile = task_stdout_handle
+        logfile = stdout_handle
         logfile_pos = logfile.tell()
         child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
@@ -299,7 +289,7 @@ class BaseTask(Task):
             if logfile_pos != logfile.tell():
                 logfile_pos = logfile.tell()
                 last_stdout_update = time.time()
-            # NOTE: In case revoke doesn't have an affect
+            # Refresh model instance from the database (to check cancel flag).
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
                 child.terminate(canceled)
@@ -308,34 +298,28 @@ class BaseTask(Task):
                 child.close(True)
                 canceled = True
         if canceled:
-            status = 'canceled'
+            return 'canceled'
         elif child.exitstatus == 0:
-            status = 'successful'
+            return 'successful'
         else:
-            status = 'failed'
-        return status, stdout
-
-    def pre_run_check(self, instance, **kwargs):
-        '''
-        Hook for checking job/task before running.
-        '''
-        if instance.status != 'running':
-            return False
-        # TODO: Check that we can write to the stdout data directory
-        return True
+            return 'failed'
 
     def post_run_hook(self, instance, **kwargs):
-        pass
+        '''
+        Hook for any steps to run after job/task is complete.
+        '''
 
     def run(self, pk, **kwargs):
         '''
         Run the job/task and capture its output.
         '''
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
-        status, stdout, tb = 'error', '', ''
+        status, tb = 'error', ''
         output_replacements = []
         try:
-            if not self.pre_run_check(instance, **kwargs):
+            if instance.cancel_flag:
+                instance = self.update_model(instance.pk, status='canceled')
+            if instance.status != 'running':
                 if hasattr(settings, 'CELERY_UNIT_TEST'):
                     return
                 else:
@@ -360,7 +344,7 @@ class BaseTask(Task):
             stdout_handle = open(stdout_filename, 'w')
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
                                          job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
-            status, stdout = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
+            status = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
         except Exception:
             if status != 'canceled':
                 tb = traceback.format_exc()
@@ -374,8 +358,7 @@ class BaseTask(Task):
                     stdout_handle.close()
                 except Exception:
                     pass
-        instance = self.update_model(pk, status=status,
-                                     result_traceback=tb,
+        instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements)
         self.post_run_hook(instance, **kwargs)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
@@ -387,6 +370,7 @@ class BaseTask(Task):
                 raise Exception("Task %s(pk:%s) encountered an error" % (str(self.model.__class__), str(pk)))
         if not hasattr(settings, 'CELERY_UNIT_TEST'):
             self.signal_finished(pk)
+
 
 class RunJob(BaseTask):
     '''
@@ -520,10 +504,8 @@ class RunJob(BaseTask):
 
         # If ssh unlock password is needed, run using ssh-agent.
         if ssh_key_path and use_ssh_agent:
-            cmd = ' '.join([self.args2cmdline('ssh-add', ssh_key_path),
-                            '&&', self.args2cmdline(*args)])
-            args = ['ssh-agent', 'sh', '-c', cmd]
-            
+            args = self.wrap_args_with_ssh_agent(args, ssh_key_path)
+
         return args
 
     def build_cwd(self, job, **kwargs):
@@ -547,18 +529,6 @@ class RunJob(BaseTask):
         d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
         return d
 
-    def pre_run_check(self, job, **kwargs):
-        '''
-        Hook for checking job before running.
-        '''
-        if job.cancel_flag:
-            job = self.update_model(job.pk, status='canceled')
-            return False
-        elif job.status == 'running':
-            return True
-        else:
-            return False
-
     def post_run_hook(self, job, **kwargs):
         '''
         Hook for actions to run after job/task has completed.
@@ -569,6 +539,7 @@ class RunJob(BaseTask):
         if not settings.CALLBACK_CONSUMER_PORT:
             for job_event in job.job_events.order_by('pk'):
                 job_event.save(post_process=True)
+
 
 class RunProjectUpdate(BaseTask):
     
@@ -624,7 +595,6 @@ class RunProjectUpdate(BaseTask):
         scm_password = scm_url_parts.password or scm_password or ''
         if scm_username:
             if scm_type == 'svn':
-                # FIXME: Need to somehow escape single/double quotes in username/password
                 extra_vars['scm_username'] = scm_username
                 extra_vars['scm_password'] = scm_password
                 scm_password = False
@@ -673,9 +643,8 @@ class RunProjectUpdate(BaseTask):
         # If using an SSH key, run using ssh-agent.
         ssh_key_path = kwargs.get('private_data_file', '')
         if ssh_key_path:
-            subcmds = [('ssh-add', ssh_key_path), args]
-            cmd = ' && '.join([self.args2cmdline(*x) for x in subcmds])
-            args = ['ssh-agent', 'sh', '-c', cmd]
+            args = self.wrap_args_with_ssh_agent(args, ssh_key_path)
+
         return args
 
     def build_safe_args(self, project_update, **kwargs):
@@ -683,7 +652,7 @@ class RunProjectUpdate(BaseTask):
         for pw_name, pw_val in pwdict.items():
             if pw_name in ('', 'yes', 'no', 'scm_username'):
                 continue
-            pwdict[pw_name] = '*'*len(pw_val)
+            pwdict[pw_name] = HIDDEN_PASSWORD
         kwargs['passwords'] = pwdict
         return self.build_args(project_update, **kwargs)
 
@@ -704,7 +673,7 @@ class RunProjectUpdate(BaseTask):
         for pw_name, pw_val in pwdict.items():
             if pw_name in ('', 'yes', 'no', 'scm_username'):
                 continue
-            pwdict[pw_name] = '*'*len(pw_val)
+            pwdict[pw_name] = HIDDEN_PASSWORD
         kwargs['passwords'] = pwdict
         after_url = self._build_scm_url_extra_vars(project_update,
                                                    **kwargs)[0]
@@ -717,7 +686,7 @@ class RunProjectUpdate(BaseTask):
             }
             d_after = {
                 'username': scm_username,
-                'password': '*'*len(scm_password),
+                'password': HIDDEN_PASSWORD,
             }
             pattern1 = "username=\"%(username)s\" password=\"%(password)s\""
             pattern2 = "--username '%(username)s' --password '%(password)s'"
@@ -740,18 +709,6 @@ class RunProjectUpdate(BaseTask):
     def get_idle_timeout(self):
         return getattr(settings, 'PROJECT_UPDATE_IDLE_TIMEOUT', None)
 
-    def pre_run_check(self, project_update, **kwargs):
-        '''
-        Hook for checking project update before running.
-        '''
-        while True:
-            if project_update.cancel_flag:
-                project_update = self.update_model(project_update.pk, status='canceled')
-                return False
-            elif project_update.status == 'running':
-                return True
-            else:
-                return False
 
 class RunInventoryUpdate(BaseTask):
 
@@ -828,7 +785,6 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
-        #print env
         return env
 
     def build_args(self, inventory_update, **kwargs):
@@ -869,16 +825,3 @@ class RunInventoryUpdate(BaseTask):
 
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
-
-    def pre_run_check(self, inventory_update, **kwargs):
-        '''
-        Hook for checking inventory update before running.
-        '''
-        while True:
-            if inventory_update.cancel_flag:
-                inventory_update = self.update_model(inventory_update.pk, status='canceled')
-                return False
-            elif inventory_update.status == 'running':
-                return True
-            else:
-                return False

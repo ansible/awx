@@ -491,7 +491,7 @@ class ProjectUpdateView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_update:
-            project_update = obj.update(**request.DATA)
+            project_update = obj.update()
             if not project_update:
                 return Response({}, status=status.HTTP_400_BAD_REQUEST)
             else:

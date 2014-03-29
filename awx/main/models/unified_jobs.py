@@ -33,6 +33,7 @@ from djcelery.models import TaskMeta
 
 # AWX
 from awx.main.models.base import *
+from awx.main.utils import camelcase_to_underscore, encrypt_field, decrypt_field
 
 logger = logging.getLogger('awx.main.models.unified_jobs')
 
@@ -224,11 +225,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     def can_update(self):
         return self._can_update()
 
-    def update_signature(self, **kwargs):
-        raise NotImplementedError # Implement in subclass.
-
     def update(self, **kwargs):
-        raise NotImplementedError # Implement in subclass.
+        if self.can_update:
+            unified_job = self.create_unified_job()
+            unified_job.signal_start(**kwargs)
+            return unified_job
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -244,7 +245,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         '''
         raise NotImplementedError # Implement in subclass.
 
-    def _create_unified_job_instance(self, **kwargs):
+    def create_unified_job(self, **kwargs):
         '''
         Create a new unified job based on this unified job template.
         '''
@@ -277,6 +278,8 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
         ('scheduled', _('Scheduled')),
         ('dependency', _('Dependency')),
     ]
+
+    PASSWORD_FIELDS = ('start_args',)
 
     class Meta:
         app_label = 'main'
@@ -393,6 +396,9 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
     def _get_parent_field_name(cls):
         return 'unified_job_template' # Override in subclasses.
 
+    def _get_type(self):
+        return camelcase_to_underscore(self._meta.object_name)
+
     def __unicode__(self):
         return u'%s-%s-%s' % (self.created, self.id, self.status)
 
@@ -416,9 +422,23 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
                                                     'last_job_failed'])
 
     def save(self, *args, **kwargs):
+        new_instance = not bool(self.pk)
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
+        # When first saving to the database, don't store any password field
+        # values, but instead save them until after the instance is created.
+        # Otherwise, store encrypted values to the database.
+        for field in self.PASSWORD_FIELDS:
+            if new_instance:
+                value = getattr(self, field, '')
+                setattr(self, '_saved_%s' % field, value)
+                setattr(self, field, '')
+            else:
+                encrypted = encrypt_field(self, field)
+                setattr(self, field, encrypted)
+                if field not in update_fields:
+                    update_fields.append(field)
         # Get status before save...
         status_before = self.status or 'new'
         if self.pk:
@@ -452,6 +472,15 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
             if 'unified_job_template' not in update_fields:
                 update_fields.append('unified_job_template')
         super(UnifiedJob, self).save(*args, **kwargs)
+        # After saving a new instance for the first time, set the password
+        # fields and save again.
+        if new_instance:
+            update_fields = []
+            for field in self.PASSWORD_FIELDS:
+                saved_value = getattr(self, '_saved_%s' % field, '')
+                setattr(self, field, saved_value)
+                update_fields.append(field)
+            self.save(update_fields=update_fields)
         # If status changed, update parent instance....
         if self.status != status_before:
             self._update_parent_instance()
@@ -483,46 +512,66 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
         except TaskMeta.DoesNotExist:
             pass
 
+    def get_passwords_needed_to_start(self):
+        return []
+
     @property
     def can_start(self):
         return bool(self.status in ('new', 'waiting'))
 
     @property
     def task_impact(self):
-        raise NotImplementedError
-
-    def _get_passwords_needed_to_start(self):
-        return []
+        raise NotImplementedError # Implement in subclass.
 
     def is_blocked_by(self, task_object):
         ''' Given another task object determine if this task would be blocked by it '''
-        raise NotImplementedError
+        raise NotImplementedError # Implement in subclass.
 
     def generate_dependencies(self, active_tasks):
         ''' Generate any tasks that the current task might be dependent on given a list of active
             tasks that might preclude creating one'''
         return []
 
-    def signal_start(self):
-        ''' Notify the task runner system to begin work on this task '''
-        raise NotImplementedError
-
     def start(self, error_callback, **kwargs):
+        '''
+        Start the task running via Celery.
+        '''
         task_class = self._get_task_class()
         if not self.can_start:
+            self.result_traceback = "Job is not in a startable status: %s, expecting one of %s" % (self.status, str(('new', 'waiting')))
+            self.save()
             return False
-        needed = self._get_passwords_needed_to_start()
+        needed = self.get_passwords_needed_to_start()
         try:
-            stored_args = json.loads(decrypt_field(self, 'start_args'))
+            start_args = json.loads(decrypt_field(self, 'start_args'))
         except Exception, e:
-            stored_args = None
-        if stored_args is None or stored_args == '':
-            opts = dict([(field, kwargs.get(field, '')) for field in needed])
-        else:
-            opts = dict([(field, stored_args.get(field, '')) for field in needed])
+            start_args = None
+        if start_args in (None, ''):
+            start_args = kwargs
+        opts = dict([(field, start_args.get(field, '')) for field in needed])
         if not all(opts.values()):
+            missing_fields = ', '.join([k for k,v in opts.items() if not v])
+            self.result_traceback = "Missing needed fields: %s" % missing_fields
+            self.save()
             return False
         task_class().apply_async((self.pk,), opts, link_error=error_callback)
+        return True
+
+    def signal_start(self, **kwargs):
+        '''
+        Notify the task runner system to begin work on this task.
+        '''
+        from awx.main.tasks import notify_task_runner
+        if hasattr(settings, 'CELERY_UNIT_TEST'):
+            return self.start(None, **kwargs)
+        if not self.can_start:
+            return False
+        needed = self.get_passwords_needed_to_start()
+        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        if not all(opts.values()):
+            return False
+        self.update_fields(start_args=json.dumps(kwargs), status='pending')
+        # notify_task_runner.delay(dict(task_type=self._get_type(), id=self.id, metadata=kwargs))
         return True
 
     @property

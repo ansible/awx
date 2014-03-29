@@ -159,7 +159,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         '''
         Create a new job based on this template.
         '''
-        return self._create_unified_job_instance(**kwargs)
+        return self.create_unified_job(**kwargs)
 
     def get_absolute_url(self):
         return reverse('api:job_template_detail', args=(self.pk,))
@@ -177,6 +177,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                 else:
                     needed.append(pw)
         return bool(self.credential and not len(needed))
+
+    def _can_update(self):
+        return self.can_start_without_user_input()
 
 
 class Job(UnifiedJob, JobOptions):
@@ -235,7 +238,7 @@ class Job(UnifiedJob, JobOptions):
                     needed.append(pw)
         return needed
 
-    def _get_passwords_needed_to_start(self):
+    def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
 
     def _get_hosts(self, **kwargs):
@@ -318,52 +321,6 @@ class Job(UnifiedJob, JobOptions):
                 if not source in inventory_sources_found and source.needs_update_on_launch:
                     dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
-
-    def signal_start(self, schedule=None, **kwargs):
-        from awx.main.tasks import notify_task_runner
-        if schedule:
-            self.schedule = schedule
-            self.save()
-        if hasattr(settings, 'CELERY_UNIT_TEST'):
-            return self.start(None, **kwargs)
-        if not self.can_start:
-            return False
-        needed = self._get_passwords_needed_to_start()
-        opts = dict([(field, kwargs.get(field, '')) for field in needed])
-        if not all(opts.values()):
-            return False
-
-        json_args = json.dumps(kwargs)
-        self.start_args = json_args
-        self.save()
-        self.start_args = encrypt_field(self, 'start_args')
-        self.status = 'pending'
-        self.save()
-        # notify_task_runner.delay(dict(task_type="ansible_playbook", id=self.id))
-        return True
-
-    def start(self, error_callback, **kwargs):
-        from awx.main.tasks import handle_work_error
-        task_class = self._get_task_class()
-        if not self.can_start:
-            self.result_traceback = "Job is not in a startable status: %s, expecting one of %s" % (self.status, str(('new', 'waiting')))
-            self.save()
-            return False
-        needed = self._get_passwords_needed_to_start()
-        try:
-            stored_args = json.loads(decrypt_field(self, 'start_args'))
-        except Exception, e:
-            stored_args = None
-        if stored_args is None or stored_args == '':
-            opts = dict([(field, kwargs.get(field, '')) for field in needed])
-        else:
-            opts = dict([(field, stored_args.get(field, '')) for field in needed])
-        if not all(opts.values()):
-            self.result_traceback = "Missing needed fields: %s" % str(opts.values())
-            self.save()
-            return False
-        task_class().apply_async((self.pk,), opts, link_error=error_callback)
-        return True
 
 
 class JobHostSummary(CreatedModifiedModel):

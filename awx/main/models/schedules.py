@@ -6,6 +6,7 @@ import dateutil.rrule
 
 # Django
 from django.db import models
+from django.db.models.query import QuerySet
 from django.utils.timezone import now, make_aware, get_default_timezone
 
 # AWX
@@ -16,8 +17,33 @@ logger = logging.getLogger('awx.main.models.schedule')
 
 __all__ = ['Schedule']
 
-class ScheduleManager(models.Manager):
+
+class ScheduleFilterMethods(object):
+
+    def enabled(self, enabled=True):
+        return self.filter(enabled=enabled)
+
+    def before(self, dt):
+        return self.filter(next_run__lt=dt)
+
+    def after(self, dt):
+        return self.filter(next_run__gt=dt)
+
+    def between(self, begin, end):
+        return self.after(begin).before(end)
+
+
+class ScheduleQuerySet(ScheduleFilterMethods, QuerySet):
     pass
+
+
+class ScheduleManager(ScheduleFilterMethods, models.Manager):
+
+    use_for_related_objects = True
+
+    def get_query_set(self):
+        return ScheduleQuerySet(self.model, using=self._db)
+
 
 class Schedule(CommonModel):
 

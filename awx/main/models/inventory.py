@@ -655,11 +655,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         return reverse('api:inventory_source_detail', args=(self.pk,))
 
     def _can_update(self):
-        # FIXME: Prevent update when another one is active!
-        return bool(self.source)
+        return bool(self.source in CLOUD_INVENTORY_SOURCES)
 
     def create_inventory_update(self, **kwargs):
-        return self._create_unified_job_instance(**kwargs)
+        return self.create_unified_job(**kwargs)
 
     @property
     def needs_update_on_launch(self):
@@ -669,21 +668,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             if (self.last_job_run + datetime.timedelta(seconds=self.update_cache_timeout)) <= now():
                 return True
         return False
-
-    def update_signature(self, **kwargs):
-        if self.can_update:
-            inventory_update = self.create_inventory_update()
-            inventory_update_sig = inventory_update.start_signature()
-            return (inventory_update, inventory_update_sig)
-
-    def update(self, schedule=None, **kwargs):
-        if self.can_update:
-            inventory_update = self.create_inventory_update()
-            if hasattr(settings, 'CELERY_UNIT_TEST'):
-                inventory_update.start(None, **kwargs)
-            else:
-                inventory_update.signal_start(schedule=schedule, **kwargs)
-            return inventory_update
 
 
 class InventoryUpdate(UnifiedJob, InventorySourceOptions):
@@ -727,6 +711,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
         return reverse('api:inventory_update_detail', args=(self.pk,))
 
     def is_blocked_by(self, obj):
+        # FIXME: Block update when any other update is touching the same inventory!
+        # FIXME: Block update when any job is running using this inventory!
         if type(obj) == InventoryUpdate:
             if self.inventory_source == obj.inventory_source:
                 return True
@@ -735,24 +721,3 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     @property
     def task_impact(self):
         return 50
-
-    def signal_start(self, schedule=None, **kwargs):
-        from awx.main.tasks import notify_task_runner
-        if schedule:
-            self.schedule=schedule
-            self.save()
-        if not self.can_start:
-            return False
-        needed = self._get_passwords_needed_to_start()
-        opts = dict([(field, kwargs.get(field, '')) for field in needed])
-        if not all(opts.values()):
-            return False
-
-        json_args = json.dumps(kwargs)
-        self.start_args = json_args
-        self.save()
-        self.start_args = encrypt_field(self, 'start_args')
-        self.status = 'pending'
-        self.save()
-        # notify_task_runner.delay(dict(task_type="inventory_update", id=self.id, metadata=kwargs))
-        return True

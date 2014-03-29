@@ -100,7 +100,7 @@ class SimpleDAG(object):
 
     def get_node_type(self, obj):
         if type(obj) == Job:
-            return "ansible_playbook"
+            return "job"
         elif type(obj) == InventoryUpdate:
             return "inventory_update"
         elif type(obj) == ProjectUpdate:
