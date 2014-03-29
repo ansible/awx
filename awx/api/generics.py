@@ -197,6 +197,14 @@ class GenericAPIView(generics.GenericAPIView, APIView):
                 # appropriate metadata about the fields that should be supplied.
                 serializer = self.get_serializer()
                 actions['GET'] = serializer.metadata()
+                # Inject the type field choices into GET options as well as on
+                # the metadata itself.
+                if 'type' in actions['GET']:
+                    actions['GET']['type']['type'] = 'multiple choice'
+                    actions['GET']['type']['choices'] = [
+                        (x, unicode(get_model_for_type(x)._meta.verbose_name))
+                        for x in serializer.get_types()
+                    ]
                 ret['types'] = serializer.get_types()
         if actions:
             ret['actions'] = actions

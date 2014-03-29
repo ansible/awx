@@ -30,7 +30,7 @@ from rest_framework import serializers
 
 # AWX
 from awx.main.models import *
-from awx.main.utils import update_scm_url, camelcase_to_underscore
+from awx.main.utils import update_scm_url, get_type_for_model
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -214,8 +214,7 @@ class BaseSerializer(serializers.ModelSerializer):
         return ret
 
     def get_type(self, obj):
-        opts = get_concrete_model(self.opts.model)._meta
-        return camelcase_to_underscore(opts.object_name)
+        return get_type_for_model(self.opts.model)
 
     def get_types(self):
         return [self.get_type(None)]

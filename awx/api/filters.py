@@ -17,7 +17,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework.filters import BaseFilterBackend
 
 # Ansible Tower
-from awx.main.utils import camelcase_to_underscore
+from awx.main.utils import get_type_for_model
 
 class ActiveOnlyBackend(BaseFilterBackend):
     '''
@@ -52,10 +52,10 @@ class TypeFilterBackend(BaseFilterBackend):
                     ct_model = ct.model_class()
                     if not ct_model:
                         continue
-                    ct_type = camelcase_to_underscore(ct_model._meta.object_name)
+                    ct_type = get_type_for_model(ct_model)
                     types_map[ct_type] = ct.pk
                 model = queryset.model
-                model_type = camelcase_to_underscore(model._meta.object_name)
+                model_type = get_type_for_model(model)
                 if 'polymorphic_ctype' in model._meta.get_all_field_names():
                     types_pks = set([v for k,v in types_map.items() if k in types])
                     queryset = queryset.filter(polymorphic_ctype_id__in=types_pks)

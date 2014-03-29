@@ -17,7 +17,8 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 from Crypto.Cipher import AES
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
-           'get_ansible_version', 'get_awx_version', 'update_scm_url']
+           'get_ansible_version', 'get_awx_version', 'update_scm_url',
+           'get_type_for_model', 'get_model_for_type']
 
 def get_object_or_400(klass, *args, **kwargs):
     '''
@@ -300,6 +301,28 @@ def model_to_dict(obj, serializer_mapping=None):
         else:
             attr_d[field.name] = "hidden"
     return attr_d
+
+def get_type_for_model(model):
+    '''
+    Return type name for a given model class.
+    '''
+    from rest_framework.compat import get_concrete_model
+    opts = get_concrete_model(model)._meta
+    return camelcase_to_underscore(opts.object_name)
+
+def get_model_for_type(type):
+    '''
+    Return model class for a given type name.
+    '''
+    from django.db.models import Q
+    from django.contrib.contenttypes.models import ContentType
+    for ct in ContentType.objects.filter(Q(app_label='main') | Q(app_label='auth', model='user')):
+        ct_model = ct.model_class()
+        if not ct_model:
+            continue
+        ct_type = get_type_for_model(ct_model)
+        if type == ct_type:
+            return ct_model
 
 def get_system_task_capacity():
     from django.conf import settings
