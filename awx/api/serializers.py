@@ -67,6 +67,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'permission': DEFAULT_SUMMARY_FIELDS,
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'job_template': DEFAULT_SUMMARY_FIELDS,
+    'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
+    'unified_job_template': DEFAULT_SUMMARY_FIELDS,
     'last_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
@@ -1305,7 +1307,7 @@ class ScheduleSerializer(BaseSerializer):
 
     class Meta:
         model = Schedule
-        fields = ('*', 'enabled', 'dtstart', 'dtend', 'rrule', 'next_run')
+        fields = ('*', 'unified_job_template', 'enabled', 'dtstart', 'dtend', 'rrule', 'next_run')
 
     def get_related(self, obj):
         res = super(ScheduleSerializer, self).get_related(obj)
@@ -1320,12 +1322,12 @@ class ScheduleSerializer(BaseSerializer):
 
     # We reject rrules if:
     # - DTSTART is not include
+    # - INTERVAL is not included
     # - TZID is used
     # - multiple BYDAY (except WEEKLY), BYMONTHDAY, BYMONTH
     # - BYDAY prefixed with a number (MO is good but not 20MO)
     # - BYYEARDAY
     # - BYWEEKNO
-    # - INTERVAL required
     def validate_rrule(self, attrs, source):
         rrule_value = attrs[source]
         if not 'dtstart' in rrule_value.lower():
