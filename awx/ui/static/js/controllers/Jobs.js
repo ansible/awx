@@ -79,7 +79,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             scope: completed_scope,
             list: CompletedJobsList,
             id: 'completed-jobs',
-            url: GetBasePath('unified_jobs') + '?status__in=(succesful,failed,error,canceled)'     ///static/sample/data/jobs/completed/data.json'
+            url: GetBasePath('unified_jobs') + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled'
         });
         running_scope = $scope.$new();
         LoadScope({
@@ -95,7 +95,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             scope: queued_scope,
             list: QueuedJobsList,
             id: 'queued-jobs',
-            url: GetBasePath('unified_jobs') + '?status__in(pending,waiting,new)'              //'/static/sample/data/jobs/queued/data.json'
+            url: GetBasePath('unified_jobs') + '?or__status=pending&or__status=waiting$or__status=new'
         });
         scheduled_scope = $scope.$new();
         LoadScope({

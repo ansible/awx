@@ -28,6 +28,23 @@ angular.module('CompletedJobsDefinition', [])
                 searchType: 'int',
                 columnClass: 'col-md-1 col-sm-2 col-xs-2'
             },
+            status: {
+                label: 'Status',
+                awToolTip: "{{ completed_job.status_tip }}",
+                awTipPlacement: "top",
+                dataTitle: "{{ completed_job.status_popover_title }}",
+                icon: 'icon-job-{{ completed_job.status }}',
+                iconOnly: true,
+                awPopOver: "{{ completed_job.status_popover }}",
+                dataPlacement: 'right',
+                searchType: 'select',
+                searchOptions: [
+                    { name: "Success", value: "successful" },
+                    { name: "Error", value: "error" },
+                    { name: "Failed", value: "failed" },
+                    { name: "Canceled", value: "canceled" }
+                ]
+            },
             inventory: {
                 label: 'Inventory ID',
                 searchType: 'int',
@@ -60,17 +77,6 @@ angular.module('CompletedJobsDefinition', [])
                 searchValue: 'true',
                 searchOnly: true,
                 nosort: true
-            },
-            status: {
-                label: 'Status',
-                searchType: 'select',
-                searchOnly: true,
-                searchOptions: [
-                    { name: "Success", value: "successful" },
-                    { name: "Error", value: "error" },
-                    { name: "Failed", value: "failed" },
-                    { name: "Canceled", value: "canceled" }
-                ]
             }
         },
 
@@ -84,15 +90,6 @@ angular.module('CompletedJobsDefinition', [])
         },
         
         fieldActions: {
-            status: {
-                mode: 'all',
-                awToolTip: "{{ completed_job.status_tip }}",
-                awTipPlacement: "top",
-                dataTitle: "{{ completed_job.status_popover_title }}",
-                iconClass: 'fa icon-job-{{ completed_job.status }}',
-                awPopOver: "{{ completed_job.status_popover }}",
-                dataPlacement: 'left'
-            },
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',

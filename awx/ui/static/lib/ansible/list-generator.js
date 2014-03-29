@@ -275,6 +275,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     }
                     
                     // table header row
+                    html += "<div class=\"list-table-container\">\n";
                     html += "<table id=\"" + list.name + "_table\" ";
                     html += "class=\"table";
                     html += (list['class']) ? " " + list['class'] : "";
@@ -426,6 +427,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     // End List
                     html += "</tbody>\n";
                     html += "</table>\n";
+                    html += "</div><!-- table container -->\n";
 
                     if (options.mode === 'select' && (options.selectButton === undefined || options.selectButton)) {
                         html += "<div class=\"navigation-buttons\">\n";

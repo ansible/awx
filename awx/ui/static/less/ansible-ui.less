@@ -984,7 +984,8 @@ input[type="checkbox"].checkbox-no-label {
   }
 
   .icon-job-error:before,
-  .icon-job-failed:before {
+  .icon-job-failed:before,
+  .icon-job-canceled:before {
       content: "\f06a";
   }
 
@@ -1007,17 +1008,16 @@ input[type="checkbox"].checkbox-no-label {
   }
 
   .icon-job-error,
-  .icon-job-failed {
+  .icon-job-failed,
+  .icon-job-canceled {
       color: @red;
   }
 
-  .icon-job-none,
-  .icon-job-canceled {
+  .icon-job-none {
       color: @grey;
       opacity: 0.45;
   }
 
-  .icon-job-canceled,
   .icon-job-none:before {
       content: "\f10c";
   }
@@ -1048,10 +1048,12 @@ input[type="checkbox"].checkbox-no-label {
       .pagination li a {
           font-size: 12px;
       }
+      .list-table-container {
+          min-height: 338px;
+      }
   }
-
-  #completed-jobs-container {
-      margin-top: 0;
+  .job-list-target {
+      min-height: 445px;
   }
 
 /* Inventory job status badge */
