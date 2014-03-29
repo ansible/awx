@@ -140,8 +140,6 @@ INSTALLED_APPS = (
     'awx.main',
     'awx.api',
     'awx.ui',
-    # Django admin is disabled and not supported by default.
-    #'django.contrib.admin',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
