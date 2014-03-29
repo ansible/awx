@@ -204,9 +204,6 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
 
         scope.iterator = list.iterator;
 
-        
-        // The following bits probably don't belong here once the API is available.
-
         if (scope.removePostRefresh) {
             scope.removePostRefresh();
         }

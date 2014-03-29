@@ -114,7 +114,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('job_templates'),
-        form = JobTemplateForm,
+        form = JobTemplateForm(),
         generator = GenerateForm,
         master = {},
         CloudCredentialList = {},
@@ -336,14 +336,14 @@ JobTemplatesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$lo
 
 function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
-    CredentialList, ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
+    CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON) {
     
     ClearScope();
 
     var defaultUrl = GetBasePath('job_templates'),
         generator = GenerateForm,
-        form = JobTemplateForm,
+        form = JobTemplateForm(),
         loadingFinishedCount = 0,
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
@@ -553,7 +553,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     Rest.setUrl(defaultUrl + ':id/');
     Rest.get({ params: { id: id } })
         .success(function (data) {
-            var fld, i, related, set;
+            var fld, i;
             LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
             for (fld in form.fields) {
                 if (fld !== 'variables' && data[fld] !== null && data[fld] !== undefined) {
@@ -586,16 +586,9 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             }
 
             $scope.url = data.url;
-            related = data.related;
-            for (set in form.related) {
-                if (related[set]) {
-                    relatedSets[set] = {
-                        url: related[set],
-                        iterator: form.related[set].iterator
-                    };
-                }
-            }
-
+            
+            relatedSets = form.relatedSets(data.related);
+            
             $scope.callback_url = data.related.callback;
             master.callback_url = $scope.callback_url;
 
@@ -625,16 +618,17 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 field: 'project'
             });
 
-            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
             RelatedSearchInit({
                 scope: $scope,
                 form: form,
                 relatedSets: relatedSets
             });
+            
             RelatedPaginateInit({
                 scope: $scope,
                 relatedSets: relatedSets
             });
+
             $scope.$emit('jobTemplateLoaded', data.related.cloud_credential);
         })
         .error(function (data, status) {
@@ -757,7 +751,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
 JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit', 'PromptPasswords',
+    'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
     'ParseVariableString', 'ToJSON'
 ];

@@ -95,7 +95,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             scope: queued_scope,
             list: QueuedJobsList,
             id: 'queued-jobs',
-            url: GetBasePath('unified_jobs') + '?or__status=pending&or__status=waiting$or__status=new'
+            url: GetBasePath('unified_jobs') + '?or__status=pending&or__status=waiting&or__status=new'
         });
         scheduled_scope = $scope.$new();
         LoadScope({
@@ -179,7 +179,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
 
     GetChoices({
         scope: $scope,
-        url: GetBasePath('jobs'),
+        url: GetBasePath('unified_jobs'),
         field: 'status',
         variable: 'status_choices',
         callback: 'choicesReady'
@@ -187,7 +187,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
     
     GetChoices({
         scope: $scope,
-        url: '/static/sample/data/types/data.json',     //GetBasePath('jobs')
+        url: GetBasePath('unified_jobs'),
         field: 'type',
         variable: 'type_choices',
         callback: 'choicesReady'

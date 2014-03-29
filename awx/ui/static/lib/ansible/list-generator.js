@@ -34,6 +34,11 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
 
                 button: Button,
 
+                buildHTML: function(list, options) {
+                    this.setList(list);
+                    return this.build(options);
+                },
+
                 inject: function (list, options) {
                     // options.mode = one of edit, select or lookup
                     //
@@ -44,7 +49,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     //
                     //     hdr: <lookup dialog header>
                     //
-                    // Inject into a custom element using options.id: <'.selector'>
+                    // Inject into a custom element using options.id: <element id attribute value>
                     // Control breadcrumb creation with options.breadCrumbs: <true | false>
                     //
                     var element;

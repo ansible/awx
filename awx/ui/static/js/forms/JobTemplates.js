@@ -4,11 +4,16 @@
  *  JobTemplates.js
  *  Form definition for Job Template model
  *
+ *  To get the JobTemplateForm object: JobTemplateForm();
  *  
  */
-angular.module('JobTemplateFormDefinition', [])
-    .value('JobTemplateForm', {
-        
+
+'use strict';
+
+angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'CompletedJobsDefinition'])
+    
+    .value ('JobTemplateFormObject', {
+
         addTitle: 'Create Job Templates',
         editTitle: '{{ name }}',
         name: 'job_templates',
@@ -283,119 +288,44 @@ angular.module('JobTemplateFormDefinition', [])
 
         related: {
             
-            jobs:  {
-                type: 'collection',
-                title: 'Jobs',
-                iterator: 'job',
-                index: false,
-                open: false,
-                
-                actions: {
-                    reset: {
-                        dataPlacement: 'top',
-                        icon: "icon-undo",
-                        mode: 'all',
-                        'class': 'btn-xs btn-primary',
-                        awToolTip: "Reset the search filter",
-                        ngClick: "resetSearch('job')",
-                        iconSize: 'large'
-                    }
-                },
-                
-                fields: {
-                    id: {
-                        label: 'Job ID',
-                        key: true,
-                        desc: true,
-                        searchType: 'int'
-                    },
-                    created: {
-                        label: 'Date',
-                        link: false,
-                        searchable: false
-                    },
-                    status: {
-                        label: 'Status',
-                        "class": 'job-{{ job.status }}',
-                        searchType: 'select',
-                        linkTo: "{{}} job.statusLinkTo }}",
-                        searchOptions: [
-                            { name: "new", value: "new" },
-                            { name: "waiting", value: "waiting" },
-                            { name: "pending", value: "pending" },
-                            { name: "running", value: "running" },
-                            { name: "successful", value: "successful" },
-                            { name: "error", value: "error" },
-                            { name: "failed", value: "failed" },
-                            { name: "canceled", value: "canceled" }
-                        ],
-                        badgeIcon: 'fa icon-job-{{ job.status }}',
-                        badgePlacement: 'left',
-                        badgeToolTip: "{{ job.statusBadgeToolTip }}",
-                        badgeTipPlacement: 'top',
-                        badgeNgHref: "{{ job.statusLinkTo }}",
-                        awToolTip: "{{ job.statusBadgeToolTip }}",
-                        dataPlacement: 'top'
-                    }
-                },
-                
-                fieldActions: {
-                    edit: {
-                        label: 'View',
-                        ngClick: "edit('jobs', job.id, job.name)",
-                        icon: 'icon-zoom-in'
-                    }
-                }
+            schedules: {
+                include: "SchedulesList"
             },
-
-            schedules:  {
-                type: 'collection',
-                title: 'Schedules',
-                iterator: 'schedule',
-                index: true,
-                open: false,
-                
-                fields: {
-                    name: {
-                        key: true,
-                        label: 'Name'
-                    },
-                    dtstart: {
-                        label: 'Start'
-                    },
-                    dtend: {
-                        label: 'End'
-                    }
-                },
-
-                actions: {
-                    add: {
-                        mode: 'all',
-                        ngClick: 'addSchedule()',
-                        awToolTip: 'Add a new schedule'
-                    }
-                },
-
-                fieldActions: {
-                    edit: {
-                        label: 'Edit',
-                        ngClick: "editSchedule(schedule.id)",
-                        icon: 'icon-edit',
-                        awToolTip: 'Edit schedule',
-                        dataPlacement: 'top'
-                    },
-
-                    "delete": {
-                        label: 'Delete',
-                        ngClick: "deleteSchedule(schedule.id)",
-                        icon: 'icon-trash',
-                        awToolTip: 'Delete schedule',
-                        dataPlacement: 'top'
-                    }
-                }
-                
+            completed_jobs: {
+                include: "CompletedJobsList"
             }
-        }
-            
-    }); //InventoryForm
+        },
 
+        relatedSets: function(urls) {
+            return {
+                completed_jobs: {
+                    iterator: 'completed_job',
+                    url: urls.jobs
+                },
+                schedules: {
+                    iterator: 'schedule',
+                    url: urls.schedules
+                }
+            };
+        }
+    })
+
+    .factory('JobTemplateForm', ['JobTemplateFormObject', 'SchedulesList', 'CompletedJobsList',
+    function(JobTemplateFormObject, SchedulesList, CompletedJobsList) {
+        return function() {
+            var itm;
+
+            for (itm in JobTemplateFormObject.related) {
+                if (JobTemplateFormObject.related[itm].include === "SchedulesList") {
+                    JobTemplateFormObject.related[itm] = SchedulesList;
+                    JobTemplateFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
+                }
+                if (JobTemplateFormObject.related[itm].include === "CompletedJobsList") {
+                    JobTemplateFormObject.related[itm] = CompletedJobsList;
+                    JobTemplateFormObject.related[itm].generateList = true;
+                }
+            }
+
+            return JobTemplateFormObject;
+        };
+    }]);
