@@ -259,7 +259,24 @@ class OrderByBackend(BaseFilterBackend):
                     else:
                         order_by = (value,)
             if order_by:
-                queryset = queryset.order_by(*order_by)
+                # Special handling of the type field for ordering. In this
+                # case, we're not sorting exactly on the type field, but
+                # given the limited number of views with multiple types,
+                # sorting on polymorphic_ctype.model is effectively the same.
+                new_order_by = []
+                if 'polymorphic_ctype' in queryset.model._meta.get_all_field_names():
+                    for field in order_by:
+                        if field == 'type':
+                            new_order_by.append('polymorphic_ctype__model')
+                        elif field == '-type':
+                            new_order_by.append('-polymorphic_ctype__model')
+                        else:
+                            new_order_by.append(field)
+                else:
+                    for field in order_by:
+                        if field not in ('type', '-type'):
+                            new_order_by.append(field)
+                queryset = queryset.order_by(*new_order_by)
                 # Fetch the first result to run the query, otherwise we don't
                 # always catch the FieldError for invalid field names.
                 try:
