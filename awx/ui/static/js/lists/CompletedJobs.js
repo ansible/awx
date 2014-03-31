@@ -63,7 +63,8 @@ angular.module('CompletedJobsDefinition', [])
                 label: 'Type',
                 ngBind: 'completed_job.type_label',
                 link: false,
-                columnClass: "col-md-2 hidden-sm hidden-xs"
+                columnClass: "col-md-2 hidden-sm hidden-xs",
+                searchable: false
             },
             name: {
                 label: 'Name',
@@ -93,7 +94,7 @@ angular.module('CompletedJobsDefinition', [])
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
-                ngClick: 'relaunchJob(completed_job.id)',
+                ngClick: 'relaunchJob($event, completed_job.id)',
                 awToolTip: 'Relaunch using the same parameters',
                 dataPlacement: 'top'
             },

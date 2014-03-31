@@ -23,11 +23,11 @@ angular.module('ScheduledJobsDefinition', [])
             status: {
                 label: 'Status',
                 columnClass: 'col-md-2 col-sm-2 col-xs-2',
-                awToolTip: "{{ scheduled_job.status_tip }}",
+                awToolTip: "{{ schedule.status_tip }}",
                 awTipPlacement: "top",
-                icon: 'icon-job-{{ scheduled_job.status }}',
+                icon: 'icon-job-{{ schedule.status }}',
                 iconOnly: true,
-                ngClick: "toggleSchedule(scheduled_job.id)"
+                ngClick: "toggleSchedule($event, schedule.id)"
             },
             next_run: {
                 label: 'Next Run',
@@ -41,9 +41,9 @@ angular.module('ScheduledJobsDefinition', [])
             type: {
                 label: 'Type',
                 link: false,
-                sourceModel: '',
-                sourceField: '',
-                columnClass: "col-md-2 hidden-sm hidden-xs"
+                columnClass: "col-md-2 hidden-sm hidden-xs",
+                ngBind: 'schedule.type_label',
+                searchable: false
             },
             name: {
                 label: 'Name',
@@ -64,20 +64,20 @@ angular.module('ScheduledJobsDefinition', [])
             "play": {
                 mode: "all",
                 ngClick: "toggleSchedule($event, schedule.id)",
-                awToolTip: "{{ scheduled_job.play_tip }}",
-                dataTipWatch: "scheduled_job.play_tip",
-                iconClass: "{{ 'fa icon-schedule-enabled-' + scheduled_job.enabled }}",
+                awToolTip: "{{ schedule.play_tip }}",
+                dataTipWatch: "schedule.play_tip",
+                iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",
                 dataPlacement: 'top'
             },
             "edit": {
                 mode: "all",
-                ngClick: "editSchedule(scheduled_job.id)",
+                ngClick: "editSchedule(schedule.id)",
                 awToolTip: "Edit the schedule",
                 dataPlacement: "top"
             },
             "delete": {
                 mode: 'all',
-                ngClick: 'deleteSchedule(scheduled_job.id)',
+                ngClick: 'deleteSchedule(schedule.id)',
                 awToolTip: 'Delete the schedule',
                 dataPlacement: 'top'
             }

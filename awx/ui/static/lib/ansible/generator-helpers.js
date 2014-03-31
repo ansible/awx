@@ -449,7 +449,7 @@ angular.module('GeneratorHelpers', [])
                 options = params.options,
                 base = params.base,
                 field = list.fields[fld],
-                html = '';
+                cap, html = '';
 
             if (field.type !== undefined && field.type === 'DropDown') {
                 html = DropDown(params);
@@ -496,15 +496,19 @@ angular.module('GeneratorHelpers', [])
                 // Start the Link
                 if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref || field.awToolTip || field.awPopOver) &&
                     options.mode !== 'lookup' && options.mode !== 'select' && !field.noLink && !field.ngBindHtml) {
-                    html += "<a ";
+                    cap = false;
                     if (field.linkTo) {
-                        html += "href=\"" + field.linkTo + "\" ";
+                        html += "<a href=\"" + field.linkTo + "\" ";
+                        cap = true;
                     } else if (field.ngClick) {
-                        html += "href=\"\"" + Attr(field, 'ngClick') + " ";
+                        html += "<a href=\"\"" + Attr(field, 'ngClick') + " ";
+                        cap = true;
                     } else if (field.ngHref) {
-                        html += "ng-href=\"" + field.ngHref + "\" ";
+                        html += "<a ng-href=\"" + field.ngHref + "\" ";
+                        cap = true;
                     } else if (field.link || (field.key && (field.link === undefined || field.link))) {
-                        html += "href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
+                        html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
+                        cap = true;
                     }
                     if (field.awDroppable) {
                         html += Attr(field, 'awDroppable');
@@ -528,7 +532,9 @@ angular.module('GeneratorHelpers', [])
                         html += "aw-pop-over=\"" + field.awPopOver + "\" ";
                         html += (field.dataPlacement) ? "data-placement=\"" + field.dataPlacement + "\" " : "";
                     }
-                    html += ">";
+                    if (cap) {
+                        html += ">";
+                    }
                 }
 
                 // Add icon:

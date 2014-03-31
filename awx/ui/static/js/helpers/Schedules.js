@@ -521,6 +521,18 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
                         itm.status = 'stopped';
                         itm.status_tip = 'Schedule is temporarily stopped. Click to activate.';
                     }
+                    
+                    // Set the item type label
+                    if (list.fields.type) {
+                        parent_scope.type_choices.every(function(choice) {
+                            if (choice.value === item.type) {
+                                itm.type_label = choice.label;
+                                return false;
+                            }
+                            return true;
+                        });
+                    }
+
                     // Copy summary_field values
                     for (field in list.fields) {
                         fld = list.fields[field];

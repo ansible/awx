@@ -28,8 +28,14 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 DeleteJob({ scope: scope, id: id });
             };
 
-            scope.relaunchJob = function(id) {
+            scope.relaunchJob = function(event, id) {
                 var list, job, typeId;
+                try {
+                    $(event.target).tooltip('hide');
+                }
+                catch(e) {
+                    //ignore
+                }
                 if (scope.completed_jobs) {
                     list = scope.completed_jobs;
                 }
@@ -355,11 +361,6 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                         }
                     }
                 }
-
-                itm.status_popover_title = itm.status_label;
-                itm.status_popover = "<p>" + itm.job_explanation + "</p>\n" +
-                    "<p><a href=\"/#/jobs/" + itm.id + "\">More...</a></p>\n" +
-                    "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
             });
             parent_scope.$emit('listLoaded');
         });
@@ -473,15 +474,4 @@ function(Find, Wait, Rest, InventoryUpdate, ProcessErrors, GetBasePath) {
             id = params.id;
         ProjectUpdate({ scope: scope, project_id: id });
     };
-}])
-
-.factory('ScheduledJobEdit', ['Find', 'EditSchedule', 'GetBasePath', function(Find, EditSchedule, GetBasePath) {
-    return function(params) {
-        var scope = params.scope,
-            id = params.id,
-            url = GetBasePath('schedules'),
-            schedule = Find({ list: scope.scheduled_jobs, key: 'id', val: id });
-        EditSchedule({ scope: scope, schedule: schedule, url: url });
-    };
 }]);
-

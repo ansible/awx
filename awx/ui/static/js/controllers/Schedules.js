@@ -11,7 +11,7 @@
 'use strict';
 
 function ScheduleEditController($scope, $compile, $location, $routeParams, SchedulesList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope) {
+GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices) {
     
     ClearScope();
 
@@ -54,21 +54,36 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope) {
         });
     });
 
-    // Load the parent object
+    
+    if ($scope.removeChoicesReady) {
+        $scope.removeChocesReady();
+    }
+    $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
+        // Load the parent object
+        id = $routeParams.id;
+        url = GetBasePath(base) + id + '/';
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                parentObject = data;
+                $scope.$emit('ParentLoaded');
+            })
+            .error(function(data, status) {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + ' failed. GET returned: ' + status });
+            });
+    });
+
     Wait('start');
-    id = $routeParams.id;
-    url = GetBasePath(base) + id + '/';
-    Rest.setUrl(url);
-    Rest.get()
-        .success(function(data) {
-            parentObject = data;
-            $scope.$emit('ParentLoaded');
-        })
-        .error(function(data, status) {
-            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-        });
+    
+    GetChoices({
+        scope: $scope,
+        url: GetBasePath('unified_jobs'),   //'/static/sample/data/types/data.json'
+        field: 'type',
+        variable: 'type_choices',
+        callback: 'choicesReady'
+    });
 }
 
 ScheduleEditController.$inject = [ '$scope', '$compile', '$location', '$routeParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
-    'GetBasePath', 'Wait', 'Breadcrumbs', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope' ];
+    'GetBasePath', 'Wait', 'Breadcrumbs', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices' ];

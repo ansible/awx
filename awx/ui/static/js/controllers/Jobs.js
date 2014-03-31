@@ -71,7 +71,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
     }
     $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
         choicesCount++;
-        if (choicesCount === 3) {
+        if (choicesCount === 2) {
             $scope.$emit('buildJobsList');
         }
     });
