@@ -31,6 +31,7 @@ from djcelery.models import TaskMeta
 
 # AWX
 from awx.main.models.base import *
+from awx.main.models.schedules import Schedule
 from awx.main.utils import decrypt_field, get_type_for_model
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
@@ -175,7 +176,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         return self.last_job_run
 
     def update_computed_fields(self):
-        related_schedules = Schedule.objects.get(enabled=True, unified_job_template=self, next_run__isnull=False).order_by('-next_run')
+        related_schedules = Schedule.objects.filter(enabled=True, unified_job_template=self, next_run__isnull=False).order_by('-next_run')
         if related_schedules.exists():
             self.next_schedule = related_schedules[0]
             self.next_job_run = related_schedules[0].next_run
