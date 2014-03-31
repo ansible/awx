@@ -68,7 +68,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
-    'unified_job_template': DEFAULT_SUMMARY_FIELDS,
+    'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('type',),
     'last_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
@@ -271,6 +271,8 @@ class BaseSerializer(serializers.ModelSerializer):
                 summary_fields[fk] = SortedDict()
                 for field in related_fields:
                     fval = getattr(fkval, field, None)
+                    if fval is None and field == 'type':
+                        summary_fields[fk][field] = get_type_for_model(fkval)
                     if fval is not None:
                         summary_fields[fk][field] = fval
             # Can be raised by the reverse accessor for a OneToOneField.
