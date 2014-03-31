@@ -80,10 +80,10 @@ angular.module('QueuedJobsDefinition', [])
                 awToolTip: 'Relaunch using the same parameters',
                 dataPlacement: 'top'
             },
-            cancel: {
+            "delete": {
                 mode: 'all',
                 ngClick: 'deleteJob(queued_job.id)',
-                awToolTip: 'Cancel the job',
+                awToolTip: 'Delete the job',
                 dataPlacement: 'top'
             }
         }
