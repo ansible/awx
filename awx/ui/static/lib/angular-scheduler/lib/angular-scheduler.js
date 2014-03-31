@@ -582,6 +582,7 @@ angular.module('AngularScheduler', ['underscore'])
                 if (key === 'FREQ') {
                     l = value.toLowerCase();
                     scope.schedulerFrequency = _.find(scope.frequencyOptions, function(opt) {
+                        scope.schedulerIntervalLabel = opt.intervalLabel;
                         return opt.value === l;
                     });
                     if (!scope.schedulerFrequency || !scope.schedulerFrequency.name) {
