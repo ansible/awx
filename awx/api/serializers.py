@@ -221,13 +221,13 @@ class BaseSerializer(serializers.ModelSerializer):
 
     def get_type_choices(self):
         type_name_map = {
-            'job': 'playbook run',
-            'project_update': 'project sync',
-            'inventory_update': 'inventory sync',
+            'job': 'Playbook Run',
+            'project_update': 'SCM Update',
+            'inventory_update': 'Inventory Sync',
         }
         choices = []
         for t in self.get_types():
-            name = type_name_map.get(t, unicode(get_model_for_type(t)._meta.verbose_name))
+            name = type_name_map.get(t, unicode(get_model_for_type(t)._meta.verbose_name).title())
             choices.append((t, name))
         return choices
 
