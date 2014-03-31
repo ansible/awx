@@ -261,7 +261,7 @@ class Project(UnifiedJobTemplate, ProjectOptions):
     def _get_current_status(self):
         if self.scm_type:
             if self.current_update:
-                return 'updating'
+                return 'running'
             elif not self.last_job:
                 return 'never updated'
             elif self.last_job_failed:

@@ -173,7 +173,7 @@ def rebuild_graph(message):
         if task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
             # NOTE: Pull status again and make sure it didn't finish in the meantime?
             task.status = 'failed'
-            task.result_traceback += "Task was marked as running in Tower but was not present in Celery so it has been marked as failed"
+            task.job_explanation += "Task was marked as running in Tower but was not present in Celery so it has been marked as failed"
             task.save()
             running_tasks.pop(running_tasks.index(task))
             print("Task %s appears orphaned... marking as failed" % task)
@@ -237,7 +237,7 @@ def process_graph(graph, task_capacity):
             start_status = node_obj.start(error_callback=error_handler)
             if not start_status:
                 node_obj.status = 'failed'
-                node_obj.result_traceback += "Task failed pre-start check"
+                node_obj.job_explanation += "Task failed pre-start check"
                 node_obj.save()
                 # TODO: Run error handler
                 continue

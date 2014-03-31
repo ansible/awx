@@ -15,12 +15,10 @@ import yaml
 from django.conf import settings
 from django.db import models
 from django.db import transaction
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
-
-from django.core.exceptions import NON_FIELD_ERRORS
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -33,7 +31,9 @@ from djcelery.models import TaskMeta
 
 # AWX
 from awx.main.models.base import *
-from awx.main.utils import camelcase_to_underscore, encrypt_field, decrypt_field
+from awx.main.utils import decrypt_field, get_type_for_model
+
+__all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 
 logger = logging.getLogger('awx.main.models.unified_jobs')
 
@@ -44,21 +44,19 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     '''
 
     STATUS_CHOICES = [
-        # from Project
-        ('ok', 'OK'),
-        ('missing', 'Missing'),
-        ('never updated', 'Never Updated'),
-        ('running', 'Running'),
-        ('failed', 'Failed'),
-        ('successful', 'Successful'),
-        # from InventorySource
-        ('none', _('No External Source')),
-        ('never updated', _('Never Updated')),
-        ('updating', _('Updating')),
-        #('failed', _('Failed')),
-        #('successful', _('Successful')),
+        # Common to all:
+        ('never updated', 'Never Updated'),     # A job has never been run using this template.
+        ('running', 'Running'),                 # A job is currently running (or pending/waiting) using this template.
+        ('failed', 'Failed'),                   # The last completed job using this template failed (failed, error, canceled).
+        ('successful', 'Successful'),           # The last completed job using this template succeeded.
+        # For Project only:
+        ('ok', 'OK'),                           # Project is not configured for SCM and path exists.
+        ('missing', 'Missing'),                 # Project path does not exist.
+        # For Inventory Source only:
+        ('none', _('No External Source')),      # Inventory source is not configured to update from an external source.
+        # No longer used for Project / Inventory Source:
+        ('updating', _('Updating')),            # Same as running.
     ]
-
 
     class Meta:
         app_label = 'main'
@@ -69,7 +67,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         default=None,
         editable=False,
     )
-    current_job = models.ForeignKey( # alias for current_update
+    current_job = models.ForeignKey(
         'UnifiedJob',
         null=True,
         default=None,
@@ -77,7 +75,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         related_name='%(class)s_as_current_job+',
         on_delete=models.SET_NULL,
     )
-    last_job = models.ForeignKey( # alias for last_update
+    last_job = models.ForeignKey(
         'UnifiedJob',
         null=True,
         default=None,
@@ -85,11 +83,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         related_name='%(class)s_as_last_job+',
         on_delete=models.SET_NULL,
     )
-    last_job_failed = models.BooleanField( # alias for last_update_failed
+    last_job_failed = models.BooleanField(
         default=False,
         editable=False,
     )
-    last_job_run = models.DateTimeField( # alias for last_updated
+    last_job_run = models.DateTimeField(
         null=True,
         default=None,
         editable=False,
@@ -160,19 +158,19 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
             exclude = [x for x in exclude if x != 'polymorphic_ctype']
         return super(UnifiedJobTemplate, self).validate_unique(exclude)
 
-    @property
+    @property   # Alias for backwards compatibility.
     def current_update(self):
         return self.current_job
 
-    @property
+    @property   # Alias for backwards compatibility.
     def last_update(self):
         return self.last_job
 
-    @property
+    @property   # Alias for backwards compatibility.
     def last_update_failed(self):
         return self.last_job_failed
 
-    @property
+    @property   # Alias for backwards compatibility.
     def last_updated(self):
         return self.last_job_run
 
@@ -198,7 +196,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     def _get_current_status(self):
         # Override in subclasses as needed.
         if self.current_job:
-            return 'updating'
+            return 'running'
         elif not self.last_job:
             return 'never updated'
         elif self.last_job_failed:
@@ -267,16 +265,27 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         return unified_job
 
 
-class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
+class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique):
     '''
     Concrete base class for unified job run by the task engine.
     '''
 
+    STATUS_CHOICES = [
+        ('new', _('New')),                  # Job has been created, but not started.
+        ('pending', _('Pending')),          # Job has been queued, but is not yet running.
+        ('waiting', _('Waiting')),          # Job is waiting on an update/dependency.
+        ('running', _('Running')),          # Job is currently running.
+        ('successful', _('Successful')),    # Job completed successfully.
+        ('failed', _('Failed')),            # Job completed, but with failures.
+        ('error', _('Error')),              # The job was unable to run.
+        ('canceled', _('Canceled')),        # The job was canceled before completion.
+    ]
+
     LAUNCH_TYPE_CHOICES = [
-        ('manual', _('Manual')),
-        ('callback', _('Callback')),
-        ('scheduled', _('Scheduled')),
-        ('dependency', _('Dependency')),
+        ('manual', _('Manual')),            # Job was started manually by a user.
+        ('callback', _('Callback')),        # Job was started via host callback.
+        ('scheduled', _('Scheduled')),      # Job was started from a schedule.
+        ('dependency', _('Dependency')),    # Job was started as a dependency of another job.
     ]
 
     PASSWORD_FIELDS = ('start_args',)
@@ -322,7 +331,7 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
     )
     status = models.CharField(
         max_length=20,
-        choices=TASK_STATUS_CHOICES,
+        choices=STATUS_CHOICES,
         default='new',
         editable=False,
     )
@@ -361,6 +370,11 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
         default={},
         editable=False,
     )
+    job_explanation = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
     start_args = models.TextField(
         blank=True,
         default='',
@@ -396,9 +410,6 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
     def _get_parent_field_name(cls):
         return 'unified_job_template' # Override in subclasses.
 
-    def _get_type(self):
-        return camelcase_to_underscore(self._meta.object_name)
-
     def __unicode__(self):
         return u'%s-%s-%s' % (self.created, self.id, self.status)
 
@@ -422,23 +433,9 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
                                                     'last_job_failed'])
 
     def save(self, *args, **kwargs):
-        new_instance = not bool(self.pk)
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        # When first saving to the database, don't store any password field
-        # values, but instead save them until after the instance is created.
-        # Otherwise, store encrypted values to the database.
-        for field in self.PASSWORD_FIELDS:
-            if new_instance:
-                value = getattr(self, field, '')
-                setattr(self, '_saved_%s' % field, value)
-                setattr(self, field, '')
-            else:
-                encrypted = encrypt_field(self, field)
-                setattr(self, field, encrypted)
-                if field not in update_fields:
-                    update_fields.append(field)
         # Get status before save...
         status_before = self.status or 'new'
         if self.pk:
@@ -472,15 +469,6 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
             if 'unified_job_template' not in update_fields:
                 update_fields.append('unified_job_template')
         super(UnifiedJob, self).save(*args, **kwargs)
-        # After saving a new instance for the first time, set the password
-        # fields and save again.
-        if new_instance:
-            update_fields = []
-            for field in self.PASSWORD_FIELDS:
-                saved_value = getattr(self, '_saved_%s' % field, '')
-                setattr(self, field, saved_value)
-                update_fields.append(field)
-            self.save(update_fields=update_fields)
         # If status changed, update parent instance....
         if self.status != status_before:
             self._update_parent_instance()
@@ -538,8 +526,8 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
         '''
         task_class = self._get_task_class()
         if not self.can_start:
-            self.result_traceback = "Job is not in a startable status: %s, expecting one of %s" % (self.status, str(('new', 'waiting')))
-            self.save()
+            self.job_explanation = u'%s is not in a startable status: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
+            self.save(update_fields=['job_explanation'])
             return False
         needed = self.get_passwords_needed_to_start()
         try:
@@ -551,8 +539,8 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
         opts = dict([(field, start_args.get(field, '')) for field in needed])
         if not all(opts.values()):
             missing_fields = ', '.join([k for k,v in opts.items() if not v])
-            self.result_traceback = "Missing needed fields: %s" % missing_fields
-            self.save()
+            self.job_explanation = u'Missing needed fields: %s' % missing_fields
+            self.save(update_fields=['job_explanation'])
             return False
         task_class().apply_async((self.pk,), opts, link_error=error_callback)
         return True
@@ -571,7 +559,8 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
         if not all(opts.values()):
             return False
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
-        # notify_task_runner.delay(dict(task_type=self._get_type(), id=self.id, metadata=kwargs))
+        task_type = get_type_for_model(self)
+        # notify_task_runner.delay(dict(task_type=task_type, id=self.id, metadata=kwargs))
         return True
 
     @property
@@ -605,9 +594,9 @@ class UnifiedJob(PolymorphicModel, CommonModelNameNotUnique):
             if instance.can_cancel:
                 instance.status = 'canceled'
                 update_fields = ['status']
-                if not instance.result_traceback:
-                    instance.result_traceback = 'Forced cancel'
-                    update_fields.append('result_traceback')
+                if not instance.job_explanation:
+                    instance.job_explanation = 'Forced cancel'
+                    update_fields.append('job_explanation')
                 instance.save(update_fields=update_fields)
         except: # FIXME: Log this exception!
             if settings.DEBUG:

@@ -338,7 +338,8 @@ class UnifiedJobSerializer(BaseSerializer):
         model = UnifiedJob
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
                   'failed', 'started', 'finished', 'elapsed', 'job_args',
-                  'job_cwd', 'job_env', 'result_stdout', 'result_traceback')
+                  'job_cwd', 'job_env', 'job_explanation', 'result_stdout',
+                  'result_traceback')
 
     def get_types(self):
         if type(self) is UnifiedJobSerializer:

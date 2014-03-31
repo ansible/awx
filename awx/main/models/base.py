@@ -4,8 +4,6 @@
 # Python
 import json
 import shlex
-import os
-import os.path
 
 # PyYAML
 import yaml
@@ -13,9 +11,7 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import models
-from django.db import transaction
 from django.core.exceptions import ValidationError
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
@@ -31,12 +27,16 @@ from taggit.managers import TaggableManager
 # Django-Celery
 from djcelery.models import TaskMeta
 
-__all__ = ['VarsDictProperty', 'BaseModel', 'CreatedModifiedModel', 'PrimordialModel', 'CommonModel',
-           'CommonModelNameNotUnique', 'CommonTask', 'PERM_INVENTORY_ADMIN',
-           'PERM_INVENTORY_READ', 'PERM_INVENTORY_WRITE',
-           'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_CHECK', 'JOB_TYPE_CHOICES',
-           'PERMISSION_TYPE_CHOICES', 'TASK_STATUS_CHOICES',
-           'CLOUD_INVENTORY_SOURCES']
+# Ansible Tower
+from awx.main.utils import encrypt_field
+
+__all__ = ['VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
+           'PasswordFieldsModel', 'PrimordialModel', 'CommonModel',
+           'CommonModelNameNotUnique',
+           'PERM_INVENTORY_ADMIN', 'PERM_INVENTORY_READ',
+           'PERM_INVENTORY_WRITE', 'PERM_INVENTORY_DEPLOY',
+           'PERM_INVENTORY_CHECK', 'JOB_TYPE_CHOICES',
+           'PERMISSION_TYPE_CHOICES', 'CLOUD_INVENTORY_SOURCES']
 
 PERM_INVENTORY_ADMIN  = 'admin'
 PERM_INVENTORY_READ   = 'read'
@@ -55,17 +55,6 @@ PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_ADMIN, _('Administrate Inventory')),
     (PERM_INVENTORY_DEPLOY, _('Deploy To Inventory')),
     (PERM_INVENTORY_CHECK, _('Deploy To Inventory (Dry Run)')),
-]
-
-TASK_STATUS_CHOICES = [
-    ('new', _('New')),                  # Job has been created, but not started.
-    ('pending', _('Pending')),          # Job has been queued, but is not yet running.
-    ('waiting', _('Waiting')),          # Job is waiting on an update/dependency.
-    ('running', _('Running')),          # Job is currently running.
-    ('successful', _('Successful')),    # Job completed successfully.
-    ('failed', _('Failed')),            # Job completed, but with failures.
-    ('error', _('Error')),              # The job was unable to run.
-    ('canceled', _('Canceled')),        # The job was canceled before completion.
 ]
 
 CLOUD_INVENTORY_SOURCES = ['ec2', 'rax']
@@ -140,7 +129,7 @@ class BaseModel(models.Model):
                 except ValidationError, e:
                     errors[f.name] = e.messages
         if errors:
-             raise ValidationError(errors)        
+             raise ValidationError(errors)
 
     def update_fields(self, **kwargs):
         save = kwargs.pop('save', True)
@@ -166,38 +155,85 @@ class BaseModel(models.Model):
 
 
 class CreatedModifiedModel(BaseModel):
-    
+    '''
+    Common model with created/modified timestamp fields.  Allows explicitly
+    specifying created/modified timestamps in certain cases (migrations, job
+    events), calculates automatically if not specified.
+    '''
+
     class Meta:
         abstract = True
 
     created = models.DateTimeField(
-        #auto_now_add=True, # FIXME: Disabled temporarily for data migration.
         default=None,
         editable=False,
     )
     modified = models.DateTimeField(
-        #auto_now=True, # FIXME: Disabled temporarily for data migration.
-        #default=now,
         default=None,
         editable=False,
     )
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
-        # Manually perform auto_now_add and auto_now logic (for unified jobs migration).
+        # Manually perform auto_now_add and auto_now logic.
         if not self.pk and not self.created:
             self.created = now()
             if 'created' not in update_fields:
                 update_fields.append('created')
         if 'modified' not in update_fields or not self.modified:
-            self.modified = now() # FIXME: Moved temporarily for unified jobs migration.
+            self.modified = now()
             update_fields.append('modified')
         super(CreatedModifiedModel, self).save(*args, **kwargs)
 
 
+class PasswordFieldsModel(BaseModel):
+    '''
+    Abstract base class for a model with password fields that should be stored
+    as encrypted values.
+    '''
+
+    PASSWORD_FIELDS = ()
+
+    class Meta:
+        abstract = True
+
+    def _password_field_allows_ask(self, field):
+        return False # Override in subclasses if needed.
+
+    def save(self, *args, **kwargs):
+        new_instance = not bool(self.pk)
+        # If update_fields has been specified, add our field names to it,
+        # if it hasn't been specified, then we're just doing a normal save.
+        update_fields = kwargs.get('update_fields', [])
+        # When first saving to the database, don't store any password field
+        # values, but instead save them until after the instance is created.
+        # Otherwise, store encrypted values to the database.
+        for field in self.PASSWORD_FIELDS:
+            if new_instance:
+                value = getattr(self, field, '')
+                setattr(self, '_saved_%s' % field, value)
+                setattr(self, field, '')
+            else:
+                ask = self._password_field_allows_ask(field)
+                encrypted = encrypt_field(self, field, ask)
+                setattr(self, field, encrypted)
+                if field not in update_fields:
+                    update_fields.append(field)
+        super(PasswordFieldsModel, self).save(*args, **kwargs)
+        # After saving a new instance for the first time, set the password
+        # fields and save again.
+        if new_instance:
+            update_fields = []
+            for field in self.PASSWORD_FIELDS:
+                saved_value = getattr(self, '_saved_%s' % field, '')
+                setattr(self, field, saved_value)
+                update_fields.append(field)
+            self.save(update_fields=update_fields)
+
+
 class PrimordialModel(CreatedModifiedModel):
     '''
-    common model for all object types that have these standard fields
+    Common model for all object types that have these standard fields
     must use a subclass CommonModel or CommonModelNameNotUnique though
     as this lacks a name field.
     '''
@@ -275,9 +311,3 @@ class CommonModelNameNotUnique(PrimordialModel):
         max_length=512,
         unique=False,
     )
-
-
-class CommonTask(PrimordialModel):
-
-    class Meta:
-        abstract = True

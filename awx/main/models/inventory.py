@@ -651,6 +651,19 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
 
+    def _get_current_status(self):
+        if self.source:
+            if self.current_job:
+                return 'running'
+            elif not self.last_job:
+                return 'never updated'
+            elif self.last_job_failed:
+                return 'failed'
+            else:
+                return 'successful'
+        else:
+            return 'none'
+
     def get_absolute_url(self):
         return reverse('api:inventory_source_detail', args=(self.pk,))
 

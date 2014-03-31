@@ -99,7 +99,7 @@ def handle_work_error(self, task_id, subtasks=None):
             if instance.celery_task_id != task_id:
                 instance.status = 'failed'
                 instance.failed = True
-                instance.result_traceback = "Previous Task Failed: %s for %s with celery task id: %s" % \
+                instance.job_explanation = "Previous Task Failed: %s for %s with celery task id: %s" % \
                     (first_task_type, first_task_name, task_id)
                 instance.save()
 

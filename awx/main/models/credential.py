@@ -13,13 +13,13 @@ from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
 
 # AWX
-from awx.main.utils import encrypt_field, decrypt_field
+from awx.main.utils import decrypt_field
 from awx.main.models.base import *
 
 __all__ = ['Credential']
 
 
-class Credential(CommonModelNameNotUnique):
+class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     '''
     A credential contains information about how to talk to a remote resource
     Usually this is a SSH key location, and possibly an unlock password.
@@ -85,14 +85,6 @@ class Credential(CommonModelNameNotUnique):
         default='',
         verbose_name=_('SSH private key'),
         help_text=_('RSA or DSA private key to be used instead of password.'),
-    )
-    ssh_key_path = models.CharField( # FIXME: No longer needed.
-        editable=False,
-        max_length=1024,
-        blank=True,
-        default='',
-        verbose_name=_('SSH key path'),
-        help_text=_('Path to SSH private key file.'),
     )
     ssh_key_unlock = models.CharField(
         max_length=1024,
@@ -281,38 +273,16 @@ class Credential(CommonModelNameNotUnique):
         if errors:
             raise ValidationError(errors)
 
+    def _password_field_allows_ask(self, field):
+        return bool(self.kind == 'ssh' and field != 'ssh_key_data')
+
     def save(self, *args, **kwargs):
-        new_instance = not bool(self.pk)
+        # If update_fields has been specified, add our field names to it,
+        # if hit hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        # When first saving to the database, don't store any password field
-        # values, but instead save them until after the instance is created.
-        if new_instance:
-            for field in self.PASSWORD_FIELDS:
-                value = getattr(self, field, '')
-                setattr(self, '_saved_%s' % field, value)
-                setattr(self, field, '')
-        # Otherwise, store encrypted values to the database.
-        else:
-            # If update_fields has been specified, add our field names to it,
-            # if hit hasn't been specified, then we're just doing a normal save.
-            for field in self.PASSWORD_FIELDS:
-                ask = bool(self.kind == 'ssh' and field != 'ssh_key_data')
-                encrypted = encrypt_field(self, field, ask)
-                setattr(self, field, encrypted)
-                if field not in update_fields:
-                    update_fields.append(field)
         cloud = self.kind in ('aws', 'rax')
         if self.cloud != cloud:
             self.cloud = cloud
             if 'cloud' not in update_fields:
                 update_fields.append('cloud')
         super(Credential, self).save(*args, **kwargs)
-        # After saving a new instance for the first time, set the password
-        # fields and save again.
-        if new_instance:
-            update_fields=[]
-            for field in self.PASSWORD_FIELDS:
-                saved_value = getattr(self, '_saved_%s' % field, '')
-                setattr(self, field, saved_value)
-                update_fields.append(field)
-            self.save(update_fields=update_fields)

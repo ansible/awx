@@ -823,7 +823,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
         # Sue can start a job (when passwords are already saved) as long as the
         # status is new.  Reverse list so "new" will be last.
-        for status in reversed([x[0] for x in TASK_STATUS_CHOICES]):
+        for status in reversed([x[0] for x in Job.STATUS_CHOICES]):
             if status == 'waiting':
                 continue
             job.status = status
@@ -920,7 +920,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         self.check_invalid_auth(url, methods=('post',))
 
         # sue can cancel the job, but only when it is pending or running.
-        for status in [x[0] for x in TASK_STATUS_CHOICES]:
+        for status in [x[0] for x in Job.STATUS_CHOICES]:
             if status == 'waiting':
                 continue
             job.status = status
