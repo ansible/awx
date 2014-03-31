@@ -1330,8 +1330,8 @@ class ScheduleSerializer(BaseSerializer):
     # - BYWEEKNO
     def validate_rrule(self, attrs, source):
         rrule_value = attrs[source]
-        if not 'dtstart' in rrule_value.lower():
-            raise serializers.ValidationError('DTSTART required in rrule')
+        if not re.match("DTSTART[\:\=][0-9]+T[0-9]+Z", rrule_value):
+            raise serializers.ValidationError('DTSTART required in rrule, value should match: DTSTART:YYYYMMDDTHHMMSSZ')
         if not 'interval' in rrule_value.lower():
             raise serializers.ValidationError('INTERVAL required in rrule')
         if 'tzid' in rrule_value.lower():

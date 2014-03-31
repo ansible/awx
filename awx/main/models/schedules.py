@@ -98,6 +98,6 @@ class Schedule(CommonModel):
         self.unified_job_template.update_computed_fields()
 
     def save(self, *args, **kwargs):
-        # Check if new rrule, if so set dtstart and dtend to null
+        # TODO: Check if new rrule, if so set dtstart and dtend to null
         self.update_computed_fields()
         super(Schedule, self).save(*args, **kwargs)
