@@ -1,15 +1,14 @@
-{% load i18n %}
+{% load i18n staticfiles %}
 <input type="text" id="lookup_{{ name }}" value="{{ label }}" style="display:none;" />
 <a href="{{ related_url }}{{ url }}" class="related-lookup" id="lookup_id_{{ name }}" onclick="return showRelatedObjectLookupPopup(this);">
-  <img src="{{ admin_media_prefix }}img/{% if pre_django_14 %}admin/{% endif %}selector-search.gif" width="16" height="16" alt="{% trans "Lookup" %}" />
+    <img src="{% static "admin/img/selector-search.gif" %}" width="16" height="16" alt="{% trans "Lookup" %}" />
 </a>
 <script type="text/javascript">
-(function($){
+(function($) {
     // Show lookup input
-    $("#lookup_{{ name }}").show();
+    $('#lookup_{{ name }}').show();
     function reset() {
-        $('#id_{{ name }}').val('');
-        $('#lookup_{{ name }}').val('');
+        $('#id_{{ name }}, #lookup_{{ name }}').val('');
     };
     function lookup(query) {
         $.get('{{ search_path }}', {
@@ -17,7 +16,7 @@
             'app_label': '{{ app_label }}',
             'model_name': '{{ model_name }}',
             'object_pk': query
-        }, function(data){
+        }, function(data) {
             $('#lookup_{{ name }}').val(data);
             {{ name }}_value = query;
         });
@@ -31,20 +30,22 @@
             };
         };
     });
+    $('#lookup_{{ name }}').bind('keyup', function(event) {
+        if ($(this).val()) {
+            if (event.keyCode == 27) {
+                reset();
+            }
+        }
+    });
     $('#lookup_{{ name }}').autocomplete('{{ search_path }}', {
         extraParams: {
             'search_fields': '{{ search_fields }}',
             'app_label': '{{ app_label }}',
             'model_name': '{{ model_name }}'
+        },
+        onItemSelect: function(item) {
+            $('#id_{{ name }}').val(item.data[0]);
         }
-    }).result(function(event, data, formatted) {
-        if (data) {
-            $('#id_{{ name }}').val(data[1]);
-        }
-    }).keyup(function(event){
-        if (event.keyCode == 27) {
-            reset();
-        };
     });
     var {{ name }}_value = $('#id_{{ name }}').val();
     function check() {
@@ -54,7 +55,7 @@
                 lookup({{ name }}_check);
             }
         }
-    }
+    };
     timeout = window.setInterval(check, 300);
 })((typeof window.jQuery == 'undefined' && typeof window.django != 'undefined')? django.jQuery : jQuery);
 </script>

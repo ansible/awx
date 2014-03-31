@@ -192,6 +192,7 @@ class ConsumerMixin(object):
                 try:
                     conn.drain_events(timeout=safety_interval)
                 except socket.timeout:
+                    conn.heartbeat_check()
                     elapsed += safety_interval
                     if timeout and elapsed >= timeout:
                         raise

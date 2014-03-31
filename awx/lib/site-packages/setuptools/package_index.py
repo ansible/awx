@@ -582,8 +582,9 @@ class PackageIndex(Environment):
         if local_index is not None:
             dist = dist or find(requirement, local_index)
 
-        if dist is None and self.to_scan is not None:
-            self.prescan()
+        if dist is None:
+            if self.to_scan is not None:
+                self.prescan()
             dist = find(requirement)
 
         if dist is None and not force_scan:

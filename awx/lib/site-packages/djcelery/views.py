@@ -100,8 +100,12 @@ def task_webhook(fun):
             y = int(request.GET['y'])
             return x + y
 
-        >>> response = add(request)
-        >>> response.content
+        def view(request):
+            response = add(request)
+            print(response.content)
+
+    Gives::
+
         "{'status': 'success', 'retval': 100}"
 
     """

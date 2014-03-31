@@ -8,6 +8,8 @@
 """
 from __future__ import absolute_import
 
+import numbers
+
 from datetime import timedelta
 from weakref import WeakValueDictionary
 
@@ -221,6 +223,7 @@ class TaskProducer(Producer):
                      **kwargs):
         """Send task message."""
         retry = self.retry if retry is None else retry
+        headers = {} if headers is None else headers
 
         qname = queue
         if queue is None and exchange is None:
@@ -251,7 +254,7 @@ class TaskProducer(Producer):
             eta = now + timedelta(seconds=countdown)
             if self.utc:
                 eta = to_utc(eta).astimezone(self.app.timezone)
-        if isinstance(expires, (int, float)):
+        if isinstance(expires, numbers.Real):
             now = now or self.app.now()
             expires = now + timedelta(seconds=expires)
             if self.utc:
@@ -379,6 +382,7 @@ class AMQP(object):
 
     producer_cls = TaskProducer
     consumer_cls = TaskConsumer
+    queues_cls = Queues
 
     #: Cached and prepared routing table.
     _rtable = None
@@ -414,7 +418,7 @@ class AMQP(object):
                             routing_key=conf.CELERY_DEFAULT_ROUTING_KEY), )
         autoexchange = (self.autoexchange if autoexchange is None
                         else autoexchange)
-        return Queues(
+        return self.queues_cls(
             queues, self.default_exchange, create_missing,
             ha_policy, autoexchange,
         )

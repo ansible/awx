@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -31,31 +31,10 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     import boto.beanstalk.layer1
-    return [RegionInfo(name='us-east-1',
-                       endpoint='elasticbeanstalk.us-east-1.amazonaws.com',
-                       connection_cls=boto.beanstalk.layer1.Layer1),
-            RegionInfo(name='us-west-1',
-                       endpoint='elasticbeanstalk.us-west-1.amazonaws.com',
-                       connection_cls=boto.beanstalk.layer1.Layer1),
-            RegionInfo(name='us-west-2',
-                       endpoint='elasticbeanstalk.us-west-2.amazonaws.com',
-                       connection_cls=boto.beanstalk.layer1.Layer1),
-            RegionInfo(name='ap-northeast-1',
-                       endpoint='elasticbeanstalk.ap-northeast-1.amazonaws.com',
-                       connection_cls=boto.beanstalk.layer1.Layer1),
-            RegionInfo(name='ap-southeast-1',
-                       endpoint='elasticbeanstalk.ap-southeast-1.amazonaws.com',
-                       connection_cls=boto.beanstalk.layer1.Layer1),
-            RegionInfo(name='ap-southeast-2',
-                       endpoint='elasticbeanstalk.ap-southeast-2.amazonaws.com',
-                       connection_cls=boto.beanstalk.layer1.Layer1),
-            RegionInfo(name='eu-west-1',
-                       endpoint='elasticbeanstalk.eu-west-1.amazonaws.com',
-                       connection_cls=boto.beanstalk.layer1.Layer1),
-            RegionInfo(name='sa-east-1',
-                       endpoint='elasticbeanstalk.sa-east-1.amazonaws.com',
-                       connection_cls=boto.beanstalk.layer1.Layer1),
-            ]
+    return get_regions(
+        'elasticbeanstalk',
+        connection_cls=boto.beanstalk.layer1.Layer1
+    )
 
 
 def connect_to_region(region_name, **kw_params):

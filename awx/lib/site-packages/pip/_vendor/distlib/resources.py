@@ -37,7 +37,8 @@ class Cache(object):
                      directory under whatever :func:`get_cache_base` returns.
         """
         if base is None:
-            base = os.path.join(get_cache_base(), 'resource-cache')
+            # Use native string to avoid issues on 2.x: see Python #20140.
+            base = os.path.join(get_cache_base(), str('resource-cache'))
             # we use 'isdir' instead of 'exists', because we want to
             # fail if there's a file with that name
             if not os.path.isdir(base):
@@ -158,10 +159,14 @@ class ResourceFinder(object):
         self.loader = getattr(module, '__loader__', None)
         self.base = os.path.dirname(getattr(module, '__file__', ''))
 
+    def _adjust_path(self, path):
+        return os.path.realpath(path)
+
     def _make_path(self, resource_name):
         parts = resource_name.split('/')
         parts.insert(0, self.base)
-        return os.path.realpath(os.path.join(*parts))
+        result = os.path.join(*parts)
+        return self._adjust_path(result)
 
     def _find(self, path):
         return os.path.exists(path)
@@ -216,6 +221,9 @@ class ZipResourceFinder(ResourceFinder):
         else:
             self._files = zipimport._zip_directory_cache[archive]
         self.index = sorted(self._files)
+
+    def _adjust_path(self, path):
+        return path
 
     def _find(self, path):
         path = path[self.prefix_len:]

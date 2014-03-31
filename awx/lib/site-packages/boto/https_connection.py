@@ -109,8 +109,12 @@ class CertValidatingHTTPSConnection(httplib.HTTPConnection):
     if hasattr(self, "timeout") and self.timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:
         sock.settimeout(self.timeout)
     sock.connect((self.host, self.port))
-    boto.log.debug("wrapping ssl socket; CA certificate file=%s",
-                   self.ca_certs)
+    msg = "wrapping ssl socket; "
+    if self.ca_certs:
+        msg += "CA certificate file=%s" %self.ca_certs
+    else:
+        msg += "using system provided SSL certs"
+    boto.log.debug(msg)
     self.sock = ssl.wrap_socket(sock, keyfile=self.key_file,
                                 certfile=self.cert_file,
                                 cert_reqs=ssl.CERT_REQUIRED,

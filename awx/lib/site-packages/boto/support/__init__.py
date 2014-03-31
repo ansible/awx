@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 #
 
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -31,13 +31,7 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     from boto.support.layer1 import SupportConnection
-    return [
-        RegionInfo(
-            name='us-east-1',
-            endpoint='support.us-east-1.amazonaws.com',
-            connection_cls=SupportConnection
-        ),
-    ]
+    return get_regions('support', connection_cls=SupportConnection)
 
 
 def connect_to_region(region_name, **kw_params):

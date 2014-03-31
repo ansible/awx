@@ -69,7 +69,7 @@ class DefListProcessor(BlockProcessor):
         if sibling and sibling.tag == 'dl':
             # This is another item on an existing list
             dl = sibling
-            if len(dl) and dl[-1].tag == 'dd' and len(dl[-1]):
+            if not terms and len(dl) and dl[-1].tag == 'dd' and len(dl[-1]):
                 state = 'looselist'
         else:
             # This is a new list

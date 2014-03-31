@@ -210,27 +210,45 @@ class test_retry_over_time(Case):
 
     @insomnia
     def test_retry_once(self):
-        self.assertRaises(
-            self.Predicate, utils.retry_over_time,
-            self.myfun, self.Predicate,
-            max_retries=1, errback=self.errback, interval_max=14,
-        )
+        with self.assertRaises(self.Predicate):
+            utils.retry_over_time(
+                self.myfun, self.Predicate,
+                max_retries=1, errback=self.errback, interval_max=14,
+            )
         self.assertEqual(self.index, 1)
         # no errback
-        self.assertRaises(
-            self.Predicate, utils.retry_over_time,
-            self.myfun, self.Predicate,
-            max_retries=1, errback=None, interval_max=14,
-        )
+        with self.assertRaises(self.Predicate):
+            utils.retry_over_time(
+                self.myfun, self.Predicate,
+                max_retries=1, errback=None, interval_max=14,
+            )
 
     @insomnia
-    def test_retry_never(self):
-        self.assertRaises(
-            self.Predicate, utils.retry_over_time,
-            self.myfun, self.Predicate,
-            max_retries=0, errback=self.errback, interval_max=14,
+    def test_retry_always(self):
+        Predicate = self.Predicate
+
+        class Fun(object):
+
+            def __init__(self):
+                self.calls = 0
+
+            def __call__(self, *args, **kwargs):
+                try:
+                    if self.calls >= 10:
+                        return 42
+                    raise Predicate()
+                finally:
+                    self.calls += 1
+        fun = Fun()
+
+        self.assertEqual(
+            utils.retry_over_time(
+                fun, self.Predicate,
+                max_retries=0, errback=None, interval_max=14,
+            ),
+            42,
         )
-        self.assertEqual(self.index, 0)
+        self.assertEqual(fun.calls, 11)
 
 
 class test_cached_property(Case):
@@ -318,10 +336,12 @@ class test_symbol_by_name(Case):
 class test_ChannelPromise(Case):
 
     def test_repr(self):
+        obj = Mock(name='cb')
         self.assertIn(
-            'foo',
-            repr(utils.ChannelPromise(lambda: 'foo')),
+            'promise',
+            repr(utils.ChannelPromise(obj)),
         )
+        self.assertFalse(obj.called)
 
 
 class test_entrypoints(Case):

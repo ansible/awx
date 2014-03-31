@@ -123,7 +123,7 @@ class Item(dict):
         if replace:
             del_attrs = []
             for name in self:
-                if self[name] == None:
+                if self[name] is None:
                     del_attrs.append(name)
             if len(del_attrs) > 0:
                 self.domain.delete_attributes(self.name, del_attrs)

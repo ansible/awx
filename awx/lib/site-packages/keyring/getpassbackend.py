@@ -1,7 +1,7 @@
 """Specific support for getpass."""
 import getpass
 
-import keyring.core
+from . import core
 
 
 def get_password(prompt='Password: ', stream=None,
@@ -9,4 +9,4 @@ def get_password(prompt='Password: ', stream=None,
                  username=None):
     if username is None:
         username = getpass.getuser()
-    return keyring.core.get_password(service_name, username)
+    return core.get_password(service_name, username)

@@ -1,10 +1,16 @@
-from django.conf import settings
-from django.template import get_library
 import os
+import six
 import inspect
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.management import color
+from django.template import get_library
 from django.utils import termcolors
+
+try:
+    from django.utils.encoding import smart_text
+except ImportError:
+    smart_text = six.u
 
 
 def color_style():
@@ -27,7 +33,7 @@ def format_block(block, nlspaces=0):
     import re
 
     # separate block into lines
-    lines = str(block).split('\n')
+    lines = smart_text(block).split('\n')
 
     # remove leading/trailing empty lines
     while lines and not lines[0]:
@@ -58,7 +64,7 @@ class Command(BaseCommand):
     results = ""
 
     def add_result(self, s, depth=0):
-        self.results += '\n%s\n' % s.rjust(depth * 4 + len(s))
+        self.results += '%s\n' % s.rjust(depth * 4 + len(s))
 
     def handle(self, *args, **options):
         if args:
@@ -87,7 +93,7 @@ class Command(BaseCommand):
                     except:
                         continue
                     if not app_labeled:
-                        self.add_result('\nApp: %s' % style.MODULE_NAME(app))
+                        self.add_result('App: %s' % style.MODULE_NAME(app))
                         app_labeled = True
                     self.add_result('load: %s' % style.TAGLIB(taglib), 1)
                     for items, label, style_func in [(lib.tags, 'Tag:', style.TAG), (lib.filters, 'Filter:', style.FILTER)]:

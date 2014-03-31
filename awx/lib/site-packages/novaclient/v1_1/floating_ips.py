@@ -44,7 +44,7 @@ class FloatingIPManager(base.ManagerWithFind):
         """
         Delete (deallocate) a  floating ip for a tenant
 
-        :param key: The :class:`Keypair` (or its ID) to delete.
+        :param floating_ip: The floating ip address to delete.
         """
         self._delete("/os-floating-ips/%s" % base.getid(floating_ip))
 

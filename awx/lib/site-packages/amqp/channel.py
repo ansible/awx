@@ -31,6 +31,15 @@ __all__ = ['Channel']
 
 AMQP_LOGGER = logging.getLogger('amqp')
 
+EXCHANGE_AUTODELETE_DEPRECATED = """\
+The auto_delete flag for exchanges has been deprecated and will be removed
+from py-amqp v1.5.0.\
+"""
+
+
+class VDeprecationWarning(DeprecationWarning):
+    pass
+
 
 class Channel(AbstractChannel):
     """Work with channels
@@ -604,8 +613,7 @@ class Channel(AbstractChannel):
         self._send_method((40, 10), args)
 
         if auto_delete:
-            warn(DeprecationWarning(
-                'auto_delete exchanges has been deprecated'))
+            warn(VDeprecationWarning(EXCHANGE_AUTODELETE_DEPRECATED))
 
         if not nowait:
             return self.wait(allowed_methods=[

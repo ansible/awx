@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 
-import os
 import logging
+import numbers
+import os
 import sys
 
 from logging.handlers import WatchedFileHandler
@@ -13,9 +14,13 @@ from .utils.functional import maybe_evaluate
 
 __all__ = ['LogMixin', 'LOG_LEVELS', 'get_loglevel', 'setup_logging']
 
-LOG_LEVELS = dict(logging._levelNames)
-LOG_LEVELS['FATAL'] = logging.FATAL
-LOG_LEVELS[logging.FATAL] = 'FATAL'
+try:
+    LOG_LEVELS = dict(logging._nameToLevel)
+    LOG_LEVELS.update(logging._levelToName)
+except AttributeError:
+    LOG_LEVELS = dict(logging._levelNames)
+LOG_LEVELS.setdefault('FATAL', logging.FATAL)
+LOG_LEVELS.setdefault(logging.FATAL, 'FATAL')
 DISABLE_TRACEBACKS = os.environ.get('DISABLE_TRACEBACKS')
 
 
@@ -99,7 +104,7 @@ class LogMixin(object):
         return self.logger.isEnabledFor(self.get_loglevel(level))
 
     def get_loglevel(self, level):
-        if not isinstance(level, int):
+        if not isinstance(level, numbers.Integral):
             return LOG_LEVELS[level]
         return level
 

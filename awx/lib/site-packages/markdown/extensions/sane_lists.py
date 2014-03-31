@@ -4,7 +4,7 @@ Sane List Extension for Python-Markdown
 
 Modify the behavior of Lists in Python-Markdown t act in a sane manor.
 
-In standard Markdown sytex, the following would constitute a single 
+In standard Markdown syntax, the following would constitute a single 
 ordered list. However, with this extension, the output would include 
 two lists, the first an ordered list and the second and unordered list.
 

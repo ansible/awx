@@ -74,7 +74,7 @@ class Layer1(AWSAuthConnection):
     def __init__(self, aws_access_key_id=None, aws_secret_access_key=None,
                  is_secure=True, port=None, proxy=None, proxy_port=None,
                  debug=0, security_token=None, region=None,
-                 validate_certs=True, validate_checksums=True):
+                 validate_certs=True, validate_checksums=True, profile_name=None):
         if not region:
             region_name = boto.config.get('DynamoDB', 'region',
                                           self.DefaultRegionName)
@@ -89,7 +89,8 @@ class Layer1(AWSAuthConnection):
                                    aws_secret_access_key,
                                    is_secure, port, proxy, proxy_port,
                                    debug=debug, security_token=security_token,
-                                   validate_certs=validate_certs)
+                                   validate_certs=validate_certs,
+                                   profile_name=profile_name)
         self.throughput_exceeded_events = 0
         self._validate_checksums = boto.config.getbool(
             'DynamoDB', 'validate_checksums', validate_checksums)

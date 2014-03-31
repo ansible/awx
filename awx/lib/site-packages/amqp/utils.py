@@ -11,7 +11,8 @@ except ImportError:
 class promise(object):
     if not hasattr(sys, 'pypy_version_info'):
         __slots__ = tuple(
-            'fun args kwargs value ready failed on_success on_error'.split()
+            'fun args kwargs value ready failed '
+            ' on_success on_error calls'.split()
         )
 
     def __init__(self, fun, args=(), kwargs=(),
@@ -24,6 +25,7 @@ class promise(object):
         self.on_success = on_success
         self.on_error = on_error
         self.value = None
+        self.calls = 0
 
     def __repr__(self):
         return '<$: {0.fun.__name__}(*{0.args!r}, **{0.kwargs!r})'.format(
@@ -43,6 +45,7 @@ class promise(object):
                 self.on_success(self.value)
         finally:
             self.ready = True
+            self.calls += 1
 
     def then(self, callback=None, on_error=None):
         self.on_success = callback

@@ -5,7 +5,6 @@ import os
 import re
 import mimetypes
 import posixpath
-import pkg_resources
 
 from pip.log import logger
 from pip.util import Inf, normalize_name, splitext, is_prerelease
@@ -13,9 +12,9 @@ from pip.exceptions import (DistributionNotFound, BestVersionAlreadyInstalled,
                             InstallationError, InvalidWheelFilename, UnsupportedWheel)
 from pip.backwardcompat import urlparse, url2pathname
 from pip.download import PipSession, url_to_path, path_to_url
-from pip.wheel import Wheel, wheel_ext, wheel_setuptools_support
+from pip.wheel import Wheel, wheel_ext
 from pip.pep425tags import supported_tags, supported_tags_noarch, get_platform
-from pip._vendor import html5lib, requests
+from pip._vendor import html5lib, requests, pkg_resources
 from pip._vendor.requests.exceptions import SSLError
 
 
@@ -57,6 +56,9 @@ class PackageFinder(object):
             normalize_name(n) for n in allow_unverified
         )
 
+        # Anything that is allowed unverified is also allowed external
+        self.allow_external |= self.allow_unverified
+
         # Do we allow all (safe and verifiable) externally hosted files?
         self.allow_all_external = allow_all_external
 
@@ -77,16 +79,6 @@ class PackageFinder(object):
 
         # The Session we'll use to make requests
         self.session = session or PipSession()
-
-    @property
-    def use_wheel(self):
-        return self._use_wheel
-
-    @use_wheel.setter
-    def use_wheel(self, value):
-        self._use_wheel = value
-        if self._use_wheel and not wheel_setuptools_support():
-            raise InstallationError("pip's wheel support requires setuptools >= 0.8 for dist-info support.")
 
     def add_dependency_links(self, links):
         ## FIXME: this shouldn't be global list this, it should only
@@ -675,7 +667,7 @@ class HTMLPage(object):
                 url = urlparse.urljoin(url, 'index.html')
                 logger.debug(' file: URL is directory, getting %s' % url)
 
-            resp = session.get(url)
+            resp = session.get(url, headers={"Accept": "text/html"})
             resp.raise_for_status()
 
             # The check for archives above only works if the url ends with
@@ -697,6 +689,11 @@ class HTMLPage(object):
         except requests.HTTPError as exc:
             level = 2 if exc.response.status_code == 404 else 1
             cls._handle_fail(req, link, exc, url, cache=cache, level=level)
+        except requests.ConnectionError as exc:
+            cls._handle_fail(
+                req, link, "connection error: %s" % exc, url,
+                cache=cache,
+            )
         except requests.Timeout:
             cls._handle_fail(req, link, "timed out", url, cache=cache)
         except SSLError as exc:

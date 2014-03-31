@@ -16,7 +16,7 @@ from __future__ import absolute_import, unicode_literals
 try:
     from django.conf.urls import patterns, url
 except ImportError:  # deprecated since Django 1.4
-    from django.conf.urls import patterns, url  # noqa
+    from django.conf.urls.defaults import patterns, url  # noqa
 
 from . import views
 

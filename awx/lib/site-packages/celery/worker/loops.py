@@ -10,7 +10,7 @@ from __future__ import absolute_import
 import socket
 
 from celery.bootsteps import RUN
-from celery.exceptions import SystemTerminate, WorkerLostError
+from celery.exceptions import WorkerShutdown, WorkerTerminate, WorkerLostError
 from celery.utils.log import get_logger
 
 from . import state
@@ -25,11 +25,11 @@ def asynloop(obj, connection, consumer, blueprint, hub, qos,
              heartbeat, clock, hbrate=2.0, RUN=RUN):
     """Non-blocking event loop consuming messages until connection is lost,
     or shutdown is requested."""
-
     update_qos = qos.update
     readers, writers = hub.readers, hub.writers
     hbtick = connection.heartbeat_check
     errors = connection.connection_errors
+    heartbeat = connection.get_heartbeat_interval()  # negotiated
     hub_add, hub_remove = hub.add, hub.remove
 
     on_task_received = obj.create_task_handler()
@@ -58,9 +58,9 @@ def asynloop(obj, connection, consumer, blueprint, hub, qos,
         while blueprint.state == RUN and obj.connection:
             # shutdown if signal handlers told us to.
             if state.should_stop:
-                raise SystemExit()
+                raise WorkerShutdown()
             elif state.should_terminate:
-                raise SystemTerminate()
+                raise WorkerTerminate()
 
             # We only update QoS when there is no more messages to read.
             # This groups together qos calls, and makes sure that remote
@@ -74,7 +74,7 @@ def asynloop(obj, connection, consumer, blueprint, hub, qos,
                 loop = hub.create_loop()
     finally:
         try:
-            hub.close()
+            hub.reset()
         except Exception as exc:
             error(
                 'Error cleaning up after event loop: %r', exc, exc_info=1,

@@ -19,6 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+import boto
 from boto.connection import AWSQueryConnection
 from boto.sqs.regioninfo import SQSRegionInfo
 from boto.sqs.queue import Queue
@@ -32,9 +33,10 @@ class SQSConnection(AWSQueryConnection):
     """
     A Connection to the SQS Service.
     """
-    DefaultRegionName = 'us-east-1'
-    DefaultRegionEndpoint = 'queue.amazonaws.com'
-    APIVersion = '2012-11-05'
+    DefaultRegionName = boto.config.get('Boto', 'sqs_region_name', 'us-east-1')
+    DefaultRegionEndpoint = boto.config.get('Boto', 'sqs_region_endpoint',
+                                            'queue.amazonaws.com')
+    APIVersion = boto.config.get('Boto', 'sqs_version', '2012-11-05')
     DefaultContentType = 'text/plain'
     ResponseError = SQSError
     AuthServiceName = 'sqs'
@@ -113,7 +115,7 @@ class SQSConnection(AWSQueryConnection):
         Gets one or all attributes of a Queue
 
         :type queue: A Queue object
-        :param queue: The SQS queue to be deleted
+        :param queue: The SQS queue to get attributes for
 
         :type attribute: str
         :type attribute: The specific attribute requested.  If not
@@ -127,6 +129,7 @@ class SQSConnection(AWSQueryConnection):
             * LastModifiedTimestamp
             * Policy
             * ReceiveMessageWaitTimeSeconds
+            * RedrivePolicy
 
         :rtype: :class:`boto.sqs.attributes.Attributes`
         :return: An Attributes object containing request value(s).
@@ -356,6 +359,19 @@ class SQSConnection(AWSQueryConnection):
             return None
 
     lookup = get_queue
+
+    def get_dead_letter_source_queues(self, queue):
+        """
+        Retrieves the dead letter source queues for a given queue.
+
+        :type queue: A :class:`boto.sqs.queue.Queue` object.
+        :param queue: The queue for which to get DL source queues
+        :rtype: list
+        :returns: A list of :py:class:`boto.sqs.queue.Queue` instances.
+        """
+        params = {'QueueUrl': queue.url}
+        return self.get_list('ListDeadLetterSourceQueues', params,
+                             [('QueueUrl', Queue)])
 
     #
     # Permissions methods

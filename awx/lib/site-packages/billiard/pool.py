@@ -1096,7 +1096,8 @@ class Pool(object):
             if popen is None or exitcode is not None:
                 # worker exited
                 debug('Supervisor: cleaning up worker %d', i)
-                worker.join()
+                if popen is not None:
+                    worker.join()
                 debug('Supervisor: worked %d joined', i)
                 cleaned[worker.pid] = worker
                 exitcodes[worker.pid] = exitcode
@@ -1591,7 +1592,8 @@ class Pool(object):
                 if p.is_alive():
                     # worker has not yet exited
                     debug('cleaning up worker %d', p.pid)
-                    p.join()
+                    if p._popen is not None:
+                        p.join()
             debug('pool workers joined')
 
     @property

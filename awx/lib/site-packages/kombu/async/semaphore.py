@@ -71,11 +71,10 @@ class LaxBoundedSemaphore(object):
         that is waiting for the resource (FIFO order).
 
         """
-        self.value = min(self.value + 1, self.initial_value)
         try:
             waiter, args = self._pop_waiter()
         except IndexError:
-            pass
+            self.value = min(self.value + 1, self.initial_value)
         else:
             waiter(*args)
 

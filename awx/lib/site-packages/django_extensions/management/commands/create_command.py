@@ -1,6 +1,6 @@
 import os
 import sys
-from django.core.management.base import CommandError, AppCommand
+from django.core.management.base import AppCommand
 from django_extensions.management.utils import _make_writeable
 from optparse import make_option
 
@@ -14,7 +14,7 @@ class Command(AppCommand):
     )
 
     help = ("Creates a Django management command directory structure for the given app name"
-            " in the current directory.")
+            " in the app's directory.")
     args = "[appname]"
     label = 'application name'
 
@@ -24,16 +24,8 @@ class Command(AppCommand):
     can_import_settings = True
 
     def handle_app(self, app, **options):
-        directory = os.getcwd()
-        app_name = app.__name__.split('.')[-2]
-        project_dir = os.path.join(directory, app_name)
-        if not os.path.exists(project_dir):
-            try:
-                os.mkdir(project_dir)
-            except OSError as e:
-                raise CommandError(e)
-
-        copy_template('command_template', project_dir, options.get('command_name'), '%sCommand' % options.get('base_command'))
+        app_dir = os.path.dirname(app.__file__)
+        copy_template('command_template', app_dir, options.get('command_name'), '%sCommand' % options.get('base_command'))
 
 
 def copy_template(template_name, copy_to, command_name, base_command):

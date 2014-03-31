@@ -8,7 +8,7 @@ except ValueError:
     # see http://bugs.python.org/issue16396
     raise ImportError("wintypes")
 
-from keyring.util.escape import u
+from ..util.escape import u
 
 # Crypto API ctypes bindings
 

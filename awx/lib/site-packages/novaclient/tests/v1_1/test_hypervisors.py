@@ -17,10 +17,14 @@ from novaclient.tests import utils
 from novaclient.tests.v1_1 import fakes
 
 
-cs = fakes.FakeClient()
-
-
 class HypervisorsTest(utils.TestCase):
+    def setUp(self):
+        super(HypervisorsTest, self).setUp()
+        self.cs = self._get_fake_client()
+
+    def _get_fake_client(self):
+        return fakes.FakeClient()
+
     def compare_to_expected(self, expected, hyper):
         for key, value in expected.items():
             self.assertEqual(getattr(hyper, key), value)
@@ -31,8 +35,8 @@ class HypervisorsTest(utils.TestCase):
             dict(id=5678, hypervisor_hostname='hyper2'),
             ]
 
-        result = cs.hypervisors.list(False)
-        cs.assert_called('GET', '/os-hypervisors')
+        result = self.cs.hypervisors.list(False)
+        self.cs.assert_called('GET', '/os-hypervisors')
 
         for idx, hyper in enumerate(result):
             self.compare_to_expected(expected[idx], hyper)
@@ -74,8 +78,8 @@ class HypervisorsTest(utils.TestCase):
                  cpu_info='cpu_info',
                  disk_available_least=100)]
 
-        result = cs.hypervisors.list()
-        cs.assert_called('GET', '/os-hypervisors/detail')
+        result = self.cs.hypervisors.list()
+        self.cs.assert_called('GET', '/os-hypervisors/detail')
 
         for idx, hyper in enumerate(result):
             self.compare_to_expected(expected[idx], hyper)
@@ -86,8 +90,8 @@ class HypervisorsTest(utils.TestCase):
             dict(id=5678, hypervisor_hostname='hyper2'),
             ]
 
-        result = cs.hypervisors.search('hyper')
-        cs.assert_called('GET', '/os-hypervisors/hyper/search')
+        result = self.cs.hypervisors.search('hyper')
+        self.cs.assert_called('GET', '/os-hypervisors/hyper/search')
 
         for idx, hyper in enumerate(result):
             self.compare_to_expected(expected[idx], hyper)
@@ -106,8 +110,8 @@ class HypervisorsTest(utils.TestCase):
                     dict(name='inst4', uuid='uuid4')]),
             ]
 
-        result = cs.hypervisors.search('hyper', True)
-        cs.assert_called('GET', '/os-hypervisors/hyper/servers')
+        result = self.cs.hypervisors.search('hyper', True)
+        self.cs.assert_called('GET', '/os-hypervisors/hyper/servers')
 
         for idx, hyper in enumerate(result):
             self.compare_to_expected(expected[idx], hyper)
@@ -132,8 +136,8 @@ class HypervisorsTest(utils.TestCase):
             cpu_info='cpu_info',
             disk_available_least=100)
 
-        result = cs.hypervisors.get(1234)
-        cs.assert_called('GET', '/os-hypervisors/1234')
+        result = self.cs.hypervisors.get(1234)
+        self.cs.assert_called('GET', '/os-hypervisors/1234')
 
         self.compare_to_expected(expected, result)
 
@@ -143,8 +147,8 @@ class HypervisorsTest(utils.TestCase):
             hypervisor_hostname="hyper1",
             uptime="fake uptime")
 
-        result = cs.hypervisors.uptime(1234)
-        cs.assert_called('GET', '/os-hypervisors/1234/uptime')
+        result = self.cs.hypervisors.uptime(1234)
+        self.cs.assert_called('GET', '/os-hypervisors/1234/uptime')
 
         self.compare_to_expected(expected, result)
 
@@ -164,7 +168,7 @@ class HypervisorsTest(utils.TestCase):
             disk_available_least=200,
             )
 
-        result = cs.hypervisors.statistics()
-        cs.assert_called('GET', '/os-hypervisors/statistics')
+        result = self.cs.hypervisors.statistics()
+        self.cs.assert_called('GET', '/os-hypervisors/statistics')
 
         self.compare_to_expected(expected, result)

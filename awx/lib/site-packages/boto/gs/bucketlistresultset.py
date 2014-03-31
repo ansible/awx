@@ -38,7 +38,7 @@ def versioned_bucket_lister(bucket, prefix='', delimiter='',
         generation_marker = rs.next_generation_marker
         more_results= rs.is_truncated
 
-class VersionedBucketListResultSet:
+class VersionedBucketListResultSet(object):
     """
     A resultset for listing versions within a bucket.  Uses the bucket_lister
     generator function and implements the iterator interface.  This

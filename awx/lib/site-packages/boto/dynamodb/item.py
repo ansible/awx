@@ -41,13 +41,13 @@ class Item(dict):
         self._updates = None
         self._hash_key_name = self.table.schema.hash_key_name
         self._range_key_name = self.table.schema.range_key_name
-        if attrs == None:
+        if attrs is None:
             attrs = {}
-        if hash_key == None:
+        if hash_key is None:
             hash_key = attrs.get(self._hash_key_name, None)
         self[self._hash_key_name] = hash_key
         if self._range_key_name:
-            if range_key == None:
+            if range_key is None:
                 range_key = attrs.get(self._range_key_name, None)
             self[self._range_key_name] = range_key
         self._updates = {}

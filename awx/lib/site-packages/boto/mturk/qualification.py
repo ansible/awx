@@ -22,7 +22,7 @@
 class Qualifications(object):
 
     def __init__(self, requirements=None):
-        if requirements == None:
+        if requirements is None:
             requirements = []
         self.requirements = requirements
 

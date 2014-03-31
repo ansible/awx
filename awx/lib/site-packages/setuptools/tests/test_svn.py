@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """svn tests"""
 
-
+import io
 import os
+import subprocess
 import sys
 import unittest
-import codecs
-import subprocess
 from setuptools.tests import environment
 from setuptools.compat import unicode, unichr
 
@@ -54,7 +53,7 @@ class TestSvnVersion(unittest.TestCase):
 def _read_utf8_file(path):
     fileobj = None
     try:
-        fileobj = codecs.open(path, 'r', 'utf-8')
+        fileobj = io.open(path, 'r', encoding='utf-8')
         data = fileobj.read()
         return data
     finally:

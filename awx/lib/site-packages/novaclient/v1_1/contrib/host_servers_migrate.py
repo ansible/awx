@@ -14,6 +14,7 @@
 #    under the License.
 
 from novaclient import base
+from novaclient.openstack.common.gettextutils import _
 from novaclient import utils
 
 
@@ -28,7 +29,7 @@ def _server_migrate(cs, server):
         cs.servers.migrate(server['uuid'])
     except Exception as e:
         success = False
-        error_message = "Error while migrating instance: %s" % e
+        error_message = _("Error while migrating instance: %s") % e
     return HostServersMigrateResponse(base.Manager,
                                       {"server_uuid": server['uuid'],
                                        "migration_accepted": success,

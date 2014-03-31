@@ -74,21 +74,26 @@ class Entry(object):
             self.fun.__name__, self.args, self.kwargs)
 
     def __hash__(self):
-        return hash((self.fun, self.args))
+        return hash((self.fun, repr(self.args), repr(self.kwargs)))
 
-    if sys.version_info[0] == 3:  # pragma: no cover
+    # must not use hash() to order entries
+    def __lt__(self, other):
+        return id(self) < id(other)
 
-        def __lt__(self, other):
-            return hash(self) < hash(other)
+    def __gt__(self, other):
+        return id(self) > id(other)
 
-        def __gt__(self, other):
-            return hash(self) > hash(other)
+    def __le__(self, other):
+        return id(self) <= id(other)
 
-        def __eq__(self, other):
-            return hash(self) == hash(other)
+    def __ge__(self, other):
+        return id(self) >= id(other)
 
-        def __ne__(self, other):
-            return not self.__eq__(other)
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class Timer(object):

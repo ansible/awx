@@ -120,6 +120,9 @@ class Transport(base.Transport):
         connection.client = None
         connection.close()
 
+    def get_heartbeat_interval(self, connection):
+        return connection.heartbeat
+
     def register_with_event_loop(self, connection, loop):
         loop.add_reader(connection.sock, self.on_readable, connection, loop)
 

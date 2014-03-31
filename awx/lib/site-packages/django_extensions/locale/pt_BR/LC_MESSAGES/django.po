@@ -1,0 +1,79 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Claudemiro Alves Feitosa Neto <dimiro1@gmail.com>, 2013.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-09-13 22:49-0300\n"
+"PO-Revision-Date: 2013-09-13 22:49-0300\n"
+"Last-Translator: Claudemiro Alves Feitosa <dimiro1@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: admin/__init__.py:128
+msgid "and"
+msgstr "e"
+
+#: admin/__init__.py:130
+#, python-format
+msgid ""
+"Use the left field to do %(model_name)s lookups in the fields %(field_list)s."
+msgstr "Use o campo da esquerda para fazer com que o modelo %(model_name)s procure nos "
+"campos %(field_list)s"
+
+#: db/models.py:22 mongodb/models.py:17
+msgid "created"
+msgstr "criado"
+
+#: db/models.py:23 mongodb/models.py:18
+msgid "modified"
+msgstr "modificado"
+
+#: db/models.py:36 mongodb/models.py:29
+msgid "title"
+msgstr "título"
+
+#: db/models.py:37 mongodb/models.py:30
+msgid "slug"
+msgstr "slug"
+
+#: db/models.py:38 mongodb/models.py:31
+msgid "description"
+msgstr "descrição"
+
+#: db/models.py:63 mongodb/models.py:55
+msgid "Inactive"
+msgstr "Inativo"
+
+#: db/models.py:64 mongodb/models.py:56
+msgid "Active"
+msgstr "Ativo"
+
+#: db/models.py:66 mongodb/models.py:58
+msgid "status"
+msgstr "status"
+
+#: db/models.py:67 mongodb/models.py:59
+msgid "keep empty for an immediate activation"
+msgstr "deixe vazio para uma ativação imediata"
+
+#: db/models.py:68 mongodb/models.py:60
+msgid "keep empty for indefinite activation"
+msgstr "deixe vazio para ativação por tempo indeterminado"
+
+#: mongodb/fields/__init__.py:24
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr "Cadeia de Caracteres (até %(max_length)s)"
+
+#: templates/django_extensions/widgets/foreignkey_searchinput.html:4
+msgid "Lookup"
+msgstr "Busca"

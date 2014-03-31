@@ -644,7 +644,9 @@ class Metadata(object):
         'summary': ('legacy',),
     }
 
-    INDEX_KEYS = 'name version license summary description'
+    INDEX_KEYS = ('name version license summary description author '
+                  'author_email keywords platform home_page classifiers '
+                  'download_url')
 
     DEPENDENCY_KEYS = ('extras run_requires test_requires build_requires '
                        'dev_requires provides meta_requires obsoleted_by '

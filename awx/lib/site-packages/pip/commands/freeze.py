@@ -1,11 +1,12 @@
 import re
 import sys
-import pkg_resources
 import pip
+
 from pip.req import InstallRequirement
 from pip.log import logger
 from pip.basecommand import Command
 from pip.util import get_installed_distributions
+from pip._vendor import pkg_resources
 
 
 class FreezeCommand(Command):

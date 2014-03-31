@@ -36,6 +36,7 @@ class AvailabilityZoneManager(base.ManagerWithFind):
     Manage :class:`AvailabilityZone` resources.
     """
     resource_class = AvailabilityZone
+    return_parameter_name = "availabilityZoneInfo"
 
     def list(self, detailed=True):
         """
@@ -45,6 +46,7 @@ class AvailabilityZoneManager(base.ManagerWithFind):
         """
         if detailed is True:
             return self._list("/os-availability-zone/detail",
-                              "availabilityZoneInfo")
+                              self.return_parameter_name)
         else:
-            return self._list("/os-availability-zone", "availabilityZoneInfo")
+            return self._list("/os-availability-zone",
+                              self.return_parameter_name)

@@ -1,7 +1,10 @@
-from django.template import Library
-from django.utils.encoding import force_unicode
 import re
-import six
+from django.template import Library
+try:
+    from django.utils.encoding import force_text
+except ImportError:
+    # Django 1.4 compatibility
+    from django.utils.encoding import force_unicode as force_text
 
 register = Library()
 re_widont = re.compile(r'\s+(\S+\s*)$')
@@ -25,9 +28,9 @@ def widont(value, count=1):
     NoEffect
     """
     def replace(matchobj):
-        return six.u('&nbsp;%s' % matchobj.group(1))
+        return force_text('&nbsp;%s' % matchobj.group(1))
     for i in range(count):
-        value = re_widont.sub(replace, force_unicode(value))
+        value = re_widont.sub(replace, force_text(value))
     return value
 
 
@@ -49,8 +52,8 @@ def widont_html(value):
     leading&nbsp;text  <p>test me&nbsp;out</p>  trailing&nbsp;text
     """
     def replace(matchobj):
-        return six.u('%s&nbsp;%s%s' % matchobj.groups())
-    return re_widont_html.sub(replace, force_unicode(value))
+        return force_text('%s&nbsp;%s%s' % matchobj.groups())
+    return re_widont_html.sub(replace, force_text(value))
 
 register.filter(widont)
 register.filter(widont_html)

@@ -142,14 +142,8 @@ class QoS(object):
             An integer > 0
         """
         pcount = self.prefetch_count
-        count = None
         if pcount:
-            count = pcount - (len(self._delivered) - len(self._dirty))
-
-        if count < 1:
-            return 1
-
-        return count
+            return max(pcount - (len(self._delivered) - len(self._dirty)), 0)
 
     def append(self, message, delivery_tag):
         """Append message to transactional state."""
@@ -505,6 +499,9 @@ class Channel(AbstractChannel, base.StdChannel):
         """Remove all ready messages from queue."""
         return self._purge(queue)
 
+    def _next_delivery_tag(self):
+        return uuid()
+
     def basic_publish(self, message, exchange, routing_key, **kwargs):
         """Publish message."""
         message['body'], body_encoding = self.encode_body(
@@ -513,15 +510,18 @@ class Channel(AbstractChannel, base.StdChannel):
         props = message['properties']
         props.update(
             body_encoding=body_encoding,
-            delivery_tag=next(self._delivery_tags),
+            delivery_tag=self._next_delivery_tag(),
         )
         props['delivery_info'].update(
             exchange=exchange,
             routing_key=routing_key,
         )
-        self.typeof(exchange).deliver(
-            message, exchange, routing_key, **kwargs
-        )
+        if exchange:
+            return self.typeof(exchange).deliver(
+                message, exchange, routing_key, **kwargs
+            )
+        # anon exchange: routing_key is the destintaion queue
+        return self._put(routing_key, message, **kwargs)
 
     def basic_consume(self, queue, no_ack, callback, consumer_tag, **kwargs):
         """Consume from `queue`"""

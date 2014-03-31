@@ -136,6 +136,9 @@ def dynamize_value(val):
 
 class Binary(object):
     def __init__(self, value):
+        if not isinstance(value, basestring):
+            raise TypeError('Value must be a string of binary data!')
+
         self.value = value
 
     def encode(self):

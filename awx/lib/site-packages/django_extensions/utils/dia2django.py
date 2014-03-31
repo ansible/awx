@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: UTF-8 -*-
 ##Author Igor Támara igor@tamarapatino.org
 ##Use this little program as you wish, if you
@@ -12,12 +11,12 @@
 
 dependclasses = ["User", "Group", "Permission", "Message"]
 
-import codecs
-import sys
-import gzip
-from xml.dom.minidom import *  # NOQA
 import re
 import six
+import sys
+import gzip
+import codecs
+from xml.dom.minidom import *  # NOQA
 
 #Type dictionary translation types SQL -> Django
 tsd = {
@@ -172,7 +171,7 @@ def dia2django(archivo):
     #Ordering the appearance of classes
     #First we make a list of the classes each classs is related to.
     ordered = []
-    for j, k in clases.iteritems():
+    for j, k in six.iteritems(clases):
         k[2] = k[2] + "\n    def __unicode__(self):\n        return u\"\"\n"
         for fk in k[0]:
             if fk not in dependclasses:

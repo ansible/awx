@@ -1,4 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
 #
 # Copyright 2013 Canonical Ltd.
 # All Rights Reserved.
@@ -24,22 +23,36 @@ import six
 
 if six.PY3:
     # python3
+    import urllib.error
     import urllib.parse
+    import urllib.request
 
     urlencode = urllib.parse.urlencode
     urljoin = urllib.parse.urljoin
     quote = urllib.parse.quote
+    quote_plus = urllib.parse.quote_plus
     parse_qsl = urllib.parse.parse_qsl
+    unquote = urllib.parse.unquote
+    unquote_plus = urllib.parse.unquote_plus
     urlparse = urllib.parse.urlparse
     urlsplit = urllib.parse.urlsplit
     urlunsplit = urllib.parse.urlunsplit
+    SplitResult = urllib.parse.SplitResult
+
+    urlopen = urllib.request.urlopen
+    URLError = urllib.error.URLError
+    pathname2url = urllib.request.pathname2url
 else:
     # python2
     import urllib
+    import urllib2
     import urlparse
 
     urlencode = urllib.urlencode
     quote = urllib.quote
+    quote_plus = urllib.quote_plus
+    unquote = urllib.unquote
+    unquote_plus = urllib.unquote_plus
 
     parse = urlparse
     parse_qsl = parse.parse_qsl
@@ -47,3 +60,8 @@ else:
     urlparse = parse.urlparse
     urlsplit = parse.urlsplit
     urlunsplit = parse.urlunsplit
+    SplitResult = parse.SplitResult
+
+    urlopen = urllib2.urlopen
+    URLError = urllib2.URLError
+    pathname2url = urllib.pathname2url

@@ -64,22 +64,31 @@ def super_len(o):
         # e.g. BytesIO, cStringIO.StringI
         return len(o.getvalue())
 
+
 def get_netrc_auth(url):
     """Returns the Requests tuple auth for a given url from netrc."""
 
     try:
         from netrc import netrc, NetrcParseError
 
-        locations = (os.path.expanduser('~/{0}'.format(f)) for f in NETRC_FILES)
         netrc_path = None
 
-        for loc in locations:
-            if os.path.exists(loc) and not netrc_path:
+        for f in NETRC_FILES:
+            try:
+                loc = os.path.expanduser('~/{0}'.format(f))
+            except KeyError:
+                # os.path.expanduser can fail when $HOME is undefined and
+                # getpwuid fails. See http://bugs.python.org/issue20164 &
+                # https://github.com/kennethreitz/requests/issues/1846
+                return
+
+            if os.path.exists(loc):
                 netrc_path = loc
+                break
 
         # Abort early if there isn't one.
         if netrc_path is None:
-            return netrc_path
+            return
 
         ri = urlparse(url)
 
@@ -487,7 +496,16 @@ def get_environ_proxies(url):
 
     # If the system proxy settings indicate that this URL should be bypassed,
     # don't proxy.
-    if proxy_bypass(netloc):
+    # The proxy_bypass function is incredibly buggy on OS X in early versions
+    # of Python 2.6, so allow this call to fail. Only catch the specific
+    # exceptions we've seen, though: this call failing in other ways can reveal
+    # legitimate problems.
+    try:
+        bypass = proxy_bypass(netloc)
+    except (TypeError, socket.gaierror):
+        bypass = False
+
+    if bypass:
         return {}
 
     # If we get here, we either didn't have no_proxy set or we're not going
@@ -616,12 +634,14 @@ def except_on_missing_scheme(url):
 def get_auth_from_url(url):
     """Given a url with authentication components, extract them into a tuple of
     username,password."""
-    if url:
-        url = unquote(url)
-        parsed = urlparse(url)
-        return (parsed.username, parsed.password)
-    else:
-        return ('', '')
+    parsed = urlparse(url)
+
+    try:
+        auth = (unquote(parsed.username), unquote(parsed.password))
+    except (AttributeError, TypeError):
+        auth = ('', '')
+
+    return auth
 
 
 def to_native_string(string, encoding='ascii'):

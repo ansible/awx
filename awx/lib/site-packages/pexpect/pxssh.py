@@ -140,37 +140,70 @@ class pxssh (spawn):
                 current[j] = min(add, delete, change)
         return current[n]
 
-    def sync_original_prompt (self):
+    def try_read_prompt(self, timeout_multiplier):
+
+        '''This facilitates using communication timeouts to perform
+        synchronization as quickly as possible, while supporting high latency
+        connections with a tunable worst case performance. Fast connections
+        should be read almost immediately. Worst case performance for this
+        method is timeout_multiplier * 3 seconds.
+        '''
+
+        # maximum time allowed to read the first response
+        first_char_timeout = timeout_multiplier * 0.5
+
+        # maximum time allowed between subsequent characters
+        inter_char_timeout = timeout_multiplier * 0.1
+
+        # maximum time for reading the entire prompt
+        total_timeout = timeout_multiplier * 3.0
+
+        prompt = b''
+        begin = time.time()
+        expired = 0.0
+        timeout = first_char_timeout
+
+        while expired < total_timeout:
+            try:
+                prompt += self.read_nonblocking(size=1, timeout=timeout)
+                expired = time.time() - begin # updated total time expired
+                timeout = inter_char_timeout 
+            except TIMEOUT:
+                break
+
+        return prompt
+
+    def sync_original_prompt (self, sync_multiplier=1.0):
 
         '''This attempts to find the prompt. Basically, press enter and record
         the response; press enter again and record the response; if the two
-        responses are similar then assume we are at the original prompt. This
-        is a slow function. It can take over 10 seconds. '''
+        responses are similar then assume we are at the original prompt.
+        This can be a slow function. Worst case with the default sync_multiplier
+        can take 12 seconds. Low latency connections are more likely to fail
+        with a low sync_multiplier. Best case sync time gets worse with a
+        high sync multiplier (500 ms with default). '''
 
         # All of these timing pace values are magic.
         # I came up with these based on what seemed reliable for
         # connecting to a heavily loaded machine I have.
         self.sendline()
         time.sleep(0.1)
-        # If latency is worse than these values then this will fail.
 
         try:
             # Clear the buffer before getting the prompt.
-            self.read_nonblocking(size=10000,timeout=1)
+            self.try_read_prompt(sync_multiplier)
         except TIMEOUT:
             pass
-        time.sleep(0.1)
+
         self.sendline()
-        time.sleep(0.5)
-        x = self.read_nonblocking(size=1000,timeout=1)
-        time.sleep(0.1)
+        x = self.try_read_prompt(sync_multiplier)
+
         self.sendline()
-        time.sleep(0.5)
-        a = self.read_nonblocking(size=1000,timeout=1)
-        time.sleep(0.1)
+        a = self.try_read_prompt(sync_multiplier)
+
         self.sendline()
-        time.sleep(0.5)
-        b = self.read_nonblocking(size=1000,timeout=1)
+        b = self.try_read_prompt(sync_multiplier)
+
         ld = self.levenshtein_distance(a,b)
         len_a = len(a)
         if len_a == 0:
@@ -181,7 +214,7 @@ class pxssh (spawn):
 
     ### TODO: This is getting messy and I'm pretty sure this isn't perfect.
     ### TODO: I need to draw a flow chart for this.
-    def login (self,server,username,password='',terminal_type='ansi',original_prompt=r"[#$]",login_timeout=10,port=None,auto_prompt_reset=True,ssh_key=None):
+    def login (self,server,username,password='',terminal_type='ansi',original_prompt=r"[#$]",login_timeout=10,port=None,auto_prompt_reset=True,ssh_key=None,quiet=True,sync_multiplier=1,check_local_ip=True):
 
         '''This logs the user into the given server. It uses the
         'original_prompt' to try to find the prompt right after login. When it
@@ -206,7 +239,11 @@ class pxssh (spawn):
         not reset then this will disable the prompt() method unless you
         manually set the PROMPT attribute. '''
 
-        ssh_options = '-q'
+        ssh_options = ''
+        if quiet:
+            ssh_options = ssh_options + ' -q'
+        if not check_local_ip:
+            ssh_options = ssh_options + " -o'NoHostAuthenticationForLocalhost=yes'"
         if self.force_password:
             ssh_options = ssh_options + ' ' + self.SSH_OPTS
         if port is not None:
@@ -273,7 +310,7 @@ class pxssh (spawn):
         else: # Unexpected
             self.close()
             raise ExceptionPxssh ('unexpected login response')
-        if not self.sync_original_prompt():
+        if not self.sync_original_prompt(sync_multiplier):
             self.close()
             raise ExceptionPxssh ('could not synchronize with original prompt')
         # We appear to be in.

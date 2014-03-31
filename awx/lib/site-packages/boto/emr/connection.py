@@ -55,7 +55,7 @@ class EmrConnection(AWSQueryConnection):
                  is_secure=True, port=None, proxy=None, proxy_port=None,
                  proxy_user=None, proxy_pass=None, debug=0,
                  https_connection_factory=None, region=None, path='/',
-                 security_token=None, validate_certs=True):
+                 security_token=None, validate_certs=True, profile_name=None):
         if not region:
             region = RegionInfo(self, self.DefaultRegionName,
                                 self.DefaultRegionEndpoint)
@@ -67,7 +67,8 @@ class EmrConnection(AWSQueryConnection):
                                     self.region.endpoint, debug,
                                     https_connection_factory, path,
                                     security_token,
-                                    validate_certs=validate_certs)
+                                    validate_certs=validate_certs,
+                                    profile_name=profile_name)
         # Many of the EMR hostnames are of the form:
         #     <region>.<service_name>.amazonaws.com
         # rather than the more common:
@@ -265,7 +266,7 @@ class EmrConnection(AWSQueryConnection):
         if step_states:
             self.build_list_params(params, step_states, 'StepStateList.member')
 
-        self.get_object('ListSteps', params, StepSummaryList)
+        return self.get_object('ListSteps', params, StepSummaryList)
 
     def add_tags(self, resource_id, tags):
         """

@@ -13,9 +13,9 @@ from amqp import ChannelError, ConnectionError, ResourceError
 
 __all__ = ['NotBoundError', 'MessageStateError', 'TimeoutError',
            'LimitExceeded', 'ConnectionLimitExceeded',
-           'ChannelLimitExceeded', 'ConnectionError',
-           'ChannelError', 'VersionMismatch', 'SerializerNotInstalled',
-           'ResourceError']
+           'ChannelLimitExceeded', 'ConnectionError', 'ChannelError',
+           'VersionMismatch', 'SerializerNotInstalled', 'ResourceError',
+           'SerializationError', 'EncodeError', 'DecodeError']
 
 TimeoutError = socket.timeout
 

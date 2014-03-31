@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -32,23 +32,10 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     import boto.cloudsearch.layer1
-    return [RegionInfo(name='us-east-1',
-                       endpoint='cloudsearch.us-east-1.amazonaws.com',
-                       connection_cls=boto.cloudsearch.layer1.Layer1),
-            RegionInfo(name='eu-west-1',
-                       endpoint='cloudsearch.eu-west-1.amazonaws.com',
-                       connection_cls=boto.cloudsearch.layer1.Layer1),
-            RegionInfo(name='us-west-1',
-                       endpoint='cloudsearch.us-west-1.amazonaws.com',
-                       connection_cls=boto.cloudsearch.layer1.Layer1),
-            RegionInfo(name='us-west-2',
-                       endpoint='cloudsearch.us-west-2.amazonaws.com',
-                       connection_cls=boto.cloudsearch.layer1.Layer1),
-            RegionInfo(name='ap-southeast-1',
-                       endpoint='cloudsearch.ap-southeast-1.amazonaws.com',
-                       connection_cls=boto.cloudsearch.layer1.Layer1),
-
-            ]
+    return get_regions(
+        'cloudsearch',
+        connection_cls=boto.cloudsearch.layer1.Layer1
+    )
 
 
 def connect_to_region(region_name, **kw_params):

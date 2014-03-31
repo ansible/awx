@@ -52,7 +52,7 @@ class OriginAccessIdentity(object):
         new_config = OriginAccessIdentityConfig(self.connection,
                                                 self.config.caller_reference,
                                                 self.config.comment)
-        if comment != None:
+        if comment is not None:
             new_config.comment = comment
         self.etag = self.connection.set_origin_identity_config(self.id, self.etag, new_config)
         self.config = new_config

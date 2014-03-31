@@ -23,16 +23,18 @@
 
 class Rule(object):
     """
-    A Lifcycle rule for an S3 bucket.
+    A Lifecycle rule for an S3 bucket.
 
     :ivar id: Unique identifier for the rule. The value cannot be longer
-        than 255 characters.
+        than 255 characters. This value is optional. The server will
+        generate a unique value for the rule if no value is provided.
 
     :ivar prefix: Prefix identifying one or more objects to which the
-        rule applies.
+        rule applies. If prefix is not provided, Boto generates a default
+        prefix which will match all objects.
 
-    :ivar status: If Enabled, the rule is currently being applied.
-        If Disabled, the rule is not currently being applied.
+    :ivar status: If 'Enabled', the rule is currently being applied.
+        If 'Disabled', the rule is not currently being applied.
 
     :ivar expiration: An instance of `Expiration`. This indicates
         the lifetime of the objects that are subject to the rule.
@@ -44,7 +46,7 @@ class Rule(object):
     def __init__(self, id=None, prefix=None, status=None, expiration=None,
                  transition=None):
         self.id = id
-        self.prefix = prefix
+        self.prefix = '' if prefix is None else prefix
         self.status = status
         if isinstance(expiration, (int, long)):
             # retain backwards compatibility???
@@ -78,7 +80,8 @@ class Rule(object):
 
     def to_xml(self):
         s = '<Rule>'
-        s += '<ID>%s</ID>' % self.id
+        if self.id is not None:
+            s += '<ID>%s</ID>' % self.id
         s += '<Prefix>%s</Prefix>' % self.prefix
         s += '<Status>%s</Status>' % self.status
         if self.expiration is not None:
@@ -199,7 +202,8 @@ class Lifecycle(list):
         s += '</LifecycleConfiguration>'
         return s
 
-    def add_rule(self, id, prefix, status, expiration, transition=None):
+    def add_rule(self, id=None, prefix='', status='Enabled',
+                 expiration=None, transition=None):
         """
         Add a rule to this Lifecycle configuration.  This only adds
         the rule to the local copy.  To install the new rule(s) on
@@ -208,7 +212,8 @@ class Lifecycle(list):
 
         :type id: str
         :param id: Unique identifier for the rule. The value cannot be longer
-            than 255 characters.
+            than 255 characters. This value is optional. The server will
+            generate a unique value for the rule if no value is provided.
 
         :type prefix: str
         :iparam prefix: Prefix identifying one or more objects to which the

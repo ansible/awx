@@ -25,14 +25,14 @@ from boto.s3.connection import SubdomainCallingFormat
 from boto.s3.connection import check_lowercase_bucketname
 from boto.utils import get_utf8_value
 
-class Location:
+class Location(object):
     DEFAULT = 'US'
     EU = 'EU'
 
 class GSConnection(S3Connection):
 
     DefaultHost = 'storage.googleapis.com'
-    QueryString = 'Signature=%s&Expires=%d&AWSAccessKeyId=%s'
+    QueryString = 'Signature=%s&Expires=%d&GoogleAccessId=%s'
 
     def __init__(self, gs_access_key_id=None, gs_secret_access_key=None,
                  is_secure=True, port=None, proxy=None, proxy_port=None,
@@ -103,3 +103,27 @@ class GSConnection(S3Connection):
             raise self.provider.storage_response_error(
                 response.status, response.reason, body)
 
+    def get_bucket(self, bucket_name, validate=True, headers=None):
+        """
+        Retrieves a bucket by name.
+
+        If the bucket does not exist, an ``S3ResponseError`` will be raised. If
+        you are unsure if the bucket exists or not, you can use the
+        ``S3Connection.lookup`` method, which will either return a valid bucket
+        or ``None``.
+
+        :type bucket_name: string
+        :param bucket_name: The name of the bucket
+
+        :type headers: dict
+        :param headers: Additional headers to pass along with the request to
+            AWS.
+
+        :type validate: boolean
+        :param validate: If ``True``, it will try to fetch all keys within the
+            given bucket. (Default: ``True``)
+        """
+        bucket = self.bucket_class(self, bucket_name)
+        if validate:
+            bucket.get_all_keys(headers, maxkeys=0)
+        return bucket

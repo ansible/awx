@@ -10,6 +10,9 @@ This command can optionally do the following but it is off by default:
 * gzip compress any CSS and Javascript files it finds and adds the appropriate
   'Content-Encoding' header.
 * set a far future 'Expires' header for optimal caching.
+* upload only media or static files.
+* use any other provider compatible with Amazon S3.
+* set other than 'public-read' ACL.
 
 Note: This script requires the Python boto library and valid Amazon Web
 Services API keys.
@@ -33,18 +36,20 @@ Command options are:
   --force               Skip the file mtime check to force upload of all
                         files.
   --filter-list         Override default directory and file exclusion
-                        filters. (enter as comma seperated line)
+                        filters. (enter as comma separated line)
   --renamegzip          Enables renaming of gzipped files by appending '.gz'.
                         to the original file name. This way your original
                         assets will not be replaced by the gzipped ones.
                         You can change the extension setting the
                         `SYNC_S3_RENAME_GZIP_EXT` var in your settings.py
                         file.
-  --invalidate          Invalidates the objects in CloudFront after uploaading
+  --invalidate          Invalidates the objects in CloudFront after uploading
                         stuff to s3.
   --media-only          Only MEDIA_ROOT files will be uploaded to S3.
   --static-only         Only STATIC_ROOT files will be uploaded to S3.
-
+  --s3host              Override default s3 host.
+  --acl                 Override default ACL settings ('public-read' if
+                        settings.AWS_DEFAULT_ACL is not defined).
 
 TODO:
  * Use fnmatch (or regex) to allow more complex FILTER_LIST rules.
@@ -105,6 +110,14 @@ class Command(BaseCommand):
         make_option('-d', '--dir',
                     dest='dir',
                     help="Custom static root directory to use"),
+        make_option('--s3host',
+                    dest='s3host',
+                    default=getattr(settings, 'AWS_S3_HOST', ''),
+                    help="The s3 host (enables connecting to other providers/regions)"),
+        make_option('--acl',
+                    dest='acl',
+                    default=getattr(settings, 'AWS_DEFAULT_ACL', 'public-read'),
+                    help="Enables to override default acl (public-read)."),
         make_option('--gzip',
                     action='store_true', dest='gzip', default=False,
                     help="Enables gzipping CSS and Javascript files."),
@@ -173,6 +186,8 @@ class Command(BaseCommand):
         self.do_force = options.get('force')
         self.invalidate = options.get('invalidate')
         self.DIRECTORIES = options.get('dir')
+        self.s3host = options.get('s3host')
+        self.default_acl = options.get('acl')
         self.FILTER_LIST = getattr(settings, 'FILTER_LIST', self.FILTER_LIST)
         filter_list = options.get('filter_list')
         if filter_list:
@@ -255,11 +270,21 @@ class Command(BaseCommand):
         zfile.close()
         return zbuf.getvalue()
 
+    def get_s3connection_kwargs(self):
+        """Returns connection kwargs as a dict"""
+        kwargs = {}
+        if self.s3host:
+            kwargs['host'] = self.s3host
+        return kwargs
+
     def open_s3(self):
         """
         Opens connection to S3 returning bucket and key
         """
-        conn = boto.connect_s3(self.AWS_ACCESS_KEY_ID, self.AWS_SECRET_ACCESS_KEY)
+        conn = boto.connect_s3(
+            self.AWS_ACCESS_KEY_ID,
+            self.AWS_SECRET_ACCESS_KEY,
+            **self.get_s3connection_kwargs())
         try:
             bucket = conn.get_bucket(self.AWS_BUCKET_NAME)
         except boto.exception.S3ResponseError:
@@ -345,8 +370,8 @@ class Command(BaseCommand):
 
             try:
                 key.name = file_key
-                key.set_contents_from_string(filedata, headers, replace=True)
-                key.set_acl('public-read')
+                key.set_contents_from_string(filedata, headers, replace=True,
+                                             policy=self.default_acl)
             except boto.exception.S3CreateError as e:
                 print("Failed: %s" % e)
             except Exception as e:

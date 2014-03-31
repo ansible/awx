@@ -21,7 +21,7 @@
 # IN THE SOFTWARE.
 #
 
-from boto.ec2.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -32,28 +32,7 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     from boto.glacier.layer2 import Layer2
-    return [RegionInfo(name='us-east-1',
-                       endpoint='glacier.us-east-1.amazonaws.com',
-                       connection_cls=Layer2),
-            RegionInfo(name='us-west-1',
-                       endpoint='glacier.us-west-1.amazonaws.com',
-                       connection_cls=Layer2),
-            RegionInfo(name='us-west-2',
-                       endpoint='glacier.us-west-2.amazonaws.com',
-                       connection_cls=Layer2),
-            RegionInfo(name='ap-northeast-1',
-                       endpoint='glacier.ap-northeast-1.amazonaws.com',
-                       connection_cls=Layer2),
-            RegionInfo(name='eu-west-1',
-                       endpoint='glacier.eu-west-1.amazonaws.com',
-                       connection_cls=Layer2),
-            RegionInfo(name='ap-southeast-2',
-                       endpoint='glacier.ap-southeast-2.amazonaws.com',
-                       connection_cls=Layer2),
-            RegionInfo(name='cn-north-1',
-                       endpoint='glacier.cn-north-1.amazonaws.com.cn',
-                       connection_cls=Layer2),
-            ]
+    return get_regions('glacier', connection_cls=Layer2)
 
 
 def connect_to_region(region_name, **kw_params):

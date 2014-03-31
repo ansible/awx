@@ -5,10 +5,8 @@ import sys
 import os
 import logging
 
-import pkg_resources
-
 from pip import backwardcompat
-from pip._vendor import colorama
+from pip._vendor import colorama, pkg_resources
 
 
 def _color_wrap(*colors):

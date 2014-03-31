@@ -1,0 +1,81 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# mathiasuk, 2014
+# mathiasuk, 2014
+# stevandoh <stevandoh@gmail.com>, 2013
+msgid ""
+msgstr ""
+"Project-Id-Version: django-extensions\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-02-02 11:42+0100\n"
+"PO-Revision-Date: 2014-01-11 11:14+0000\n"
+"Last-Translator: mathiasuk\n"
+"Language-Team: French (http://www.transifex.com/projects/p/django-extensions/language/fr/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: admin/__init__.py:121
+msgid "and"
+msgstr "et"
+
+#: admin/__init__.py:123
+#, python-format
+msgid ""
+"Use the left field to do %(model_name)s lookups in the fields "
+"%(field_list)s."
+msgstr "Utilisez le champ de gauche pour faire des recheres de %(model_name)s dans les champs %(field_list)s."
+
+#: db/models.py:15
+msgid "created"
+msgstr "créé"
+
+#: db/models.py:16
+msgid "modified"
+msgstr "mis à jour"
+
+#: db/models.py:26
+msgid "title"
+msgstr "titre"
+
+#: db/models.py:27
+msgid "slug"
+msgstr "slug"
+
+#: db/models.py:28
+msgid "description"
+msgstr "description"
+
+#: db/models.py:50
+msgid "Inactive"
+msgstr "Inactif"
+
+#: db/models.py:51
+msgid "Active"
+msgstr "Actif"
+
+#: db/models.py:53
+msgid "status"
+msgstr "état"
+
+#: db/models.py:56
+msgid "keep empty for an immediate activation"
+msgstr "laisser vide pour activation immédiate"
+
+#: db/models.py:58
+msgid "keep empty for indefinite activation"
+msgstr "laisser vide pour activation indéterminée"
+
+#: management/commands/show_urls.py:34
+#, python-format
+msgid "%s does not appear to be a urlpattern object"
+msgstr "%s ne semble pas etre un object urlpattern"
+
+#: templates/django_extensions/widgets/foreignkey_searchinput.html:4
+msgid "Lookup"
+msgstr "Recherche"

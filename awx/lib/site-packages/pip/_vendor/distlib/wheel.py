@@ -601,7 +601,8 @@ class Wheel(object):
                 shutil.rmtree(workdir)
 
     def _get_dylib_cache(self):
-        result = os.path.join(get_cache_base(), 'dylib-cache', sys.version[:3])
+        # Use native string to avoid issues on 2.x: see Python #20140.
+        result = os.path.join(get_cache_base(), str('dylib-cache'), sys.version[:3])
         if not os.path.isdir(result):
             os.makedirs(result)
         return result

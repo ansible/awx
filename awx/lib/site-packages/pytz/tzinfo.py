@@ -149,7 +149,7 @@ class StaticTzInfo(BaseTzInfo):
 class DstTzInfo(BaseTzInfo):
     '''A timezone that has a variable offset from UTC
 
-    The offset might change if daylight savings time comes into effect,
+    The offset might change if daylight saving time comes into effect,
     or at a point in history when the region decides to change their
     timezone definition.
     '''
@@ -248,7 +248,7 @@ class DstTzInfo(BaseTzInfo):
         than passing a tzinfo argument to a datetime constructor.
 
         is_dst is used to determine the correct timezone in the ambigous
-        period at the end of daylight savings time.
+        period at the end of daylight saving time.
 
         >>> from pytz import timezone
         >>> fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'
@@ -264,7 +264,7 @@ class DstTzInfo(BaseTzInfo):
         '1:00:00'
 
         Use is_dst=None to raise an AmbiguousTimeError for ambiguous
-        times at the end of daylight savings
+        times at the end of daylight saving time
 
         >>> try:
         ...     loc_dt1 = amdam.localize(dt, is_dst=None)
@@ -278,7 +278,7 @@ class DstTzInfo(BaseTzInfo):
         True
 
         is_dst is also used to determine the correct timezone in the
-        wallclock times jumped over at the start of daylight savings time.
+        wallclock times jumped over at the start of daylight saving time.
 
         >>> pacific = timezone('US/Pacific')
         >>> dt = datetime(2008, 3, 9, 2, 0, 0)

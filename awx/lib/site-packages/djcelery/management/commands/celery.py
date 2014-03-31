@@ -18,6 +18,8 @@ class Command(CeleryCommand):
 
     def run_from_argv(self, argv):
         argv = self.handle_default_options(argv)
+        if self.requires_model_validation:
+            self.validate()
         base.execute_from_commandline(
             ['{0[0]} {0[1]}'.format(argv)] + argv[2:],
         )

@@ -2,12 +2,11 @@ from contextlib import contextmanager
 import functools
 
 from django.conf import settings
-from django.core.management import call_command
 from django.db import connection, models
 from django.db.models import loading
-from django.utils import unittest
 
 from django_extensions.tests.models import Secret
+from django_extensions.tests.fields import FieldTestCase
 
 # Only perform encrypted fields tests if keyczar is present. Resolves
 # http://github.com/django-extensions/django-extensions/issues/#issue/17
@@ -128,18 +127,7 @@ def secret_model():
             pass
 
 
-class EncryptedFieldsTestCase(unittest.TestCase):
-
-    def setUp(self):
-        self.old_installed_apps = settings.INSTALLED_APPS
-        settings.INSTALLED_APPS = list(settings.INSTALLED_APPS)
-        settings.INSTALLED_APPS.append('django_extensions.tests')
-        loading.cache.loaded = False
-        call_command('syncdb', verbosity=0)
-
-    def tearDown(self):
-        settings.INSTALLED_APPS = self.old_installed_apps
-
+class EncryptedFieldsTestCase(FieldTestCase):
     @run_if_active
     def testCharFieldCreate(self):
         """

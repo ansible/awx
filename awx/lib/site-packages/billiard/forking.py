@@ -433,6 +433,8 @@ def main():
         os.environ["MP_MAIN_FILE"] = sys.modules["__main__"].__file__
     except KeyError:
         pass
+    except AttributeError:
+        pass
     loglevel = os.environ.get("_MP_FORK_LOGLEVEL_")
     logfile = os.environ.get("_MP_FORK_LOGFILE_") or None
     format = os.environ.get("_MP_FORK_LOGFORMAT_")

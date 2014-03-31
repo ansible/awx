@@ -7,8 +7,8 @@ import getpass
 from optparse import OptionParser
 import sys
 
-import keyring
-import keyring.core
+from . import get_keyring, set_keyring, get_password, set_password, delete_password
+from . import core
 
 
 class CommandLineTool(object):
@@ -37,9 +37,9 @@ class CommandLineTool(object):
 
         if opts.keyring_backend is not None:
             try:
-                backend = keyring.core.load_keyring(opts.keyring_path,
-                                                    opts.keyring_backend)
-                keyring.set_keyring(backend)
+                backend = core.load_keyring(opts.keyring_path,
+                                            opts.keyring_backend)
+                set_keyring(backend)
             except (Exception,):
                 # Tons of things can go wrong here:
                 #   ImportError when using "fjkljfljkl"
@@ -50,7 +50,7 @@ class CommandLineTool(object):
                 self.parser.error("Unable to load specified keyring: %s" % e)
 
         if kind == 'get':
-            password = keyring.get_password(service, username)
+            password = get_password(service, username)
             if password is None:
                 return 1
 
@@ -60,13 +60,13 @@ class CommandLineTool(object):
         elif kind == 'set':
             password = self.input_password("Password for '%s' in '%s': " %
                                            (username, service))
-            keyring.set_password(service, username, password)
+            set_password(service, username, password)
             return 0
 
         elif kind == 'del':
             password = self.input_password("Deleting password for '%s' in '%s': " %
                                       (username, service))
-            keyring.delete_password(service, username)
+            delete_password(service, username)
             return 0
 
         else:

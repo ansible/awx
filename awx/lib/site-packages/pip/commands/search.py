@@ -1,13 +1,15 @@
 import sys
 import textwrap
-import pkg_resources
+
 import pip.download
+
 from pip.basecommand import Command, SUCCESS
 from pip.util import get_terminal_size
 from pip.log import logger
 from pip.backwardcompat import xmlrpclib, reduce, cmp
 from pip.exceptions import CommandError
 from pip.status_codes import NO_MATCHES_FOUND
+from pip._vendor import pkg_resources
 from distutils.version import StrictVersion, LooseVersion
 
 

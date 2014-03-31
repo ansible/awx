@@ -120,6 +120,9 @@ class Transport(object):
     def driver_version(self):
         return 'N/A'
 
+    def get_heartbeat_interval(self, connection):
+        return 0
+
     def register_with_event_loop(self, loop):
         pass
 

@@ -35,7 +35,7 @@ class CloudpipeManager(base.ManagerWithFind):
         """
         Launch a cloudpipe instance.
 
-        :param project: name of the project for the cloudpipe
+        :param project: UUID of the project (tenant) for the cloudpipe
         """
         body = {'cloudpipe': {'project_id': project}}
         return self._create('/os-cloudpipe', body, 'instance_id',

@@ -15,6 +15,7 @@ from celery.utils.timeutils import is_naive
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
+from .db import commit_on_success
 from .models import (PeriodicTask, PeriodicTasks,
                      CrontabSchedule, IntervalSchedule)
 from .utils import DATABASE_ERRORS, make_aware
@@ -195,12 +196,11 @@ class DatabaseScheduler(Scheduler):
         self._dirty.add(new_entry.name)
         return new_entry
 
-    @transaction.commit_manually
     def sync(self):
         info('Writing entries...')
         _tried = set()
         try:
-            try:
+            with commit_on_success():
                 while self._dirty:
                     try:
                         name = self._dirty.pop()
@@ -208,11 +208,6 @@ class DatabaseScheduler(Scheduler):
                         self.schedule[name].save()
                     except (KeyError, ObjectDoesNotExist):
                         pass
-            except:
-                transaction.rollback()
-                raise
-            else:
-                transaction.commit()
         except DATABASE_ERRORS as exc:
             # retry later
             self._dirty |= _tried

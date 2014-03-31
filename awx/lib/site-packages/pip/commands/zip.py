@@ -15,7 +15,7 @@ class ZipCommand(Command):
     name = 'zip'
     usage = """
      %prog [options] <package> ..."""
-    summary = 'Zip individual packages.'
+    summary = 'DEPRECATED. Zip individual packages.'
 
     def __init__(self, *args, **kw):
         super(ZipCommand, self).__init__(*args, **kw)
@@ -90,6 +90,9 @@ class ZipCommand(Command):
         return result
 
     def run(self, options, args):
+
+        logger.deprecated('1.7', "DEPRECATION: 'pip zip' and 'pip unzip` are deprecated, and will be removed in a future release.")
+
         self.select_paths = options.paths
         self.simulate = options.simulate
         if options.list:

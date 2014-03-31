@@ -211,7 +211,7 @@ class ListIndentProcessor(BlockProcessor):
         # Step through children of tree to find matching indent level.
         while indent_level > level:
             child = self.lastChild(parent)
-            if child and (child.tag in self.LIST_TYPES or child.tag in self.ITEM_TYPES):
+            if child is not None and (child.tag in self.LIST_TYPES or child.tag in self.ITEM_TYPES):
                 if child.tag in self.LIST_TYPES:
                     level += 1
                 parent = child
@@ -232,7 +232,7 @@ class CodeBlockProcessor(BlockProcessor):
         sibling = self.lastChild(parent)
         block = blocks.pop(0)
         theRest = ''
-        if sibling and sibling.tag == "pre" and len(sibling) \
+        if sibling is not None and sibling.tag == "pre" and len(sibling) \
                     and sibling[0].tag == "code":
             # The previous block was a code block. As blank lines do not start
             # new code blocks, append this block to the previous, adding back
@@ -271,7 +271,7 @@ class BlockQuoteProcessor(BlockProcessor):
             block = '\n'.join([self.clean(line) for line in 
                             block[m.start():].split('\n')])
         sibling = self.lastChild(parent)
-        if sibling and sibling.tag == "blockquote":
+        if sibling is not None and sibling.tag == "blockquote":
             # Previous block was a blockquote so set that as this blocks parent
             quote = sibling
         else:
@@ -319,7 +319,7 @@ class OListProcessor(BlockProcessor):
         items = self.get_items(blocks.pop(0))
         sibling = self.lastChild(parent)
 
-        if sibling and sibling.tag in self.SIBLING_TAGS:
+        if sibling is not None and sibling.tag in self.SIBLING_TAGS:
             # Previous block was a list item, so set that as parent
             lst = sibling
             # make sure previous item is in a p- if the item has text, then it
@@ -515,7 +515,7 @@ class EmptyBlockProcessor(BlockProcessor):
                 # Add remaining lines to master blocks for later.
                 blocks.insert(0, theRest)
         sibling = self.lastChild(parent)
-        if sibling and sibling.tag == 'pre' and len(sibling) and sibling[0].tag == 'code':
+        if sibling is not None and sibling.tag == 'pre' and len(sibling) and sibling[0].tag == 'code':
             # Last block is a codeblock. Append to preserve whitespace.
             sibling[0].text = util.AtomicString('%s%s' % (sibling[0].text, filler))
 

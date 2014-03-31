@@ -265,8 +265,6 @@ class FSM:
 ##############################################################################
 
 import sys
-import os
-import traceback
 import string
 
 PY3 = (sys.version_info[0] >= 3)

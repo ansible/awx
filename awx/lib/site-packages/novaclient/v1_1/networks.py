@@ -19,6 +19,7 @@ Network interface.
 
 from novaclient import base
 from novaclient import exceptions
+from novaclient.openstack.common.gettextutils import _
 
 
 class Network(base.Resource):
@@ -110,7 +111,7 @@ class NetworkManager(base.ManagerWithFind):
             body = {"disassociate_host": None}
         else:
             raise exceptions.CommandError(
-                "Must disassociate either host or project or both")
+                _("Must disassociate either host or project or both"))
 
         self.api.client.post("/os-networks/%s/action" %
                              base.getid(network), body=body)

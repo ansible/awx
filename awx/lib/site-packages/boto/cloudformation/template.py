@@ -1,21 +1,29 @@
 from boto.resultset import ResultSet
+from boto.cloudformation.stack import Capability
 
 class Template(object):
     def __init__(self, connection=None):
         self.connection = connection
         self.description = None
         self.template_parameters = None
+        self.capabilities_reason = None
+        self.capabilities = None
 
     def startElement(self, name, attrs, connection):
         if name == "Parameters":
             self.template_parameters = ResultSet([('member', TemplateParameter)])
             return self.template_parameters
+        elif name == "Capabilities":
+            self.capabilities = ResultSet([('member', Capability)])
+            return self.capabilities
         else:
             return None
 
     def endElement(self, name, value, connection):
         if name == "Description":
             self.description = value
+        elif name == "CapabilitiesReason":
+            self.capabilities_reason = value
         else:
             setattr(self, name, value)
 

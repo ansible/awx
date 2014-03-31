@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """
       Title: Dumpscript management command
@@ -35,7 +34,7 @@ import datetime
 import six
 
 import django
-from django.db.models import AutoField, BooleanField, FileField, ForeignKey
+from django.db.models import AutoField, BooleanField, FileField, ForeignKey, DateField, DateTimeField
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
@@ -329,9 +328,12 @@ class InstanceCode(Code):
             # TODO: check if batches are really needed. If not, remove them.
             sub_objects = sum([list(i) for i in collector.data.values()], [])
 
-            for batch in collector.batches.values():
-                # batch.values can be sets, which must be converted to lists
-                sub_objects += sum([list(i) for i in batch.values()], [])
+            if hasattr(collector, 'batches'):
+                # Django 1.6 removed batches for being dead code
+                # https://github.com/django/django/commit/a170c3f755351beb35f8166ec3c7e9d524d9602
+                for batch in collector.batches.values():
+                    # batch.values can be sets, which must be converted to lists
+                    sub_objects += sum([list(i) for i in batch.values()], [])
 
         sub_objects_parents = [so._meta.parents for so in sub_objects]
         if [self.model in p for p in sub_objects_parents].count(True) == 1:
@@ -624,6 +626,12 @@ import datetime
 from decimal import Decimal
 from django.contrib.contenttypes.models import ContentType
 
+try:
+    import dateutil.parser
+except ImportError:
+    print("Please install python-dateutil")
+    sys.exit(os.EX_USAGE)
+
 def run():
     importer.pre_import()
     importer.run_import(import_data)
@@ -705,6 +713,9 @@ def get_attribute_value(item, field, context, force=False):
             return item_locator
         else:
             raise DoLater('(FK) %s.%s\n' % (item.__class__.__name__, field.name))
+
+    elif isinstance(field, (DateField, DateTimeField)):
+        return "dateutil.parser.parse(\"%s\")" % value.isoformat()
 
     # A normal field (e.g. a python built-in)
     else:

@@ -12,6 +12,7 @@ from __future__ import absolute_import, print_function
 import atexit
 import errno
 import math
+import numbers
 import os
 import platform as _platform
 import signal as _signal
@@ -49,6 +50,7 @@ EX_OK = getattr(os, 'EX_OK', 0)
 EX_FAILURE = 1
 EX_UNAVAILABLE = getattr(os, 'EX_UNAVAILABLE', 69)
 EX_USAGE = getattr(os, 'EX_USAGE', 64)
+EX_CANTCREAT = getattr(os, 'EX_CANTCREAT', 73)
 
 SYSTEM = _platform.system()
 IS_OSX = SYSTEM == 'Darwin'
@@ -258,7 +260,8 @@ def create_pidlock(pidfile):
 def _create_pidlock(pidfile):
     pidlock = Pidfile(pidfile)
     if pidlock.is_locked() and not pidlock.remove_if_stale():
-        raise SystemExit(PIDLOCKED.format(pidfile, pidlock.read_pid()))
+        print(PIDLOCKED.format(pidfile, pidlock.read_pid()), file=sys.stderr)
+        raise SystemExit(EX_CANTCREAT)
     pidlock.acquire()
     return pidlock
 
@@ -266,9 +269,10 @@ def _create_pidlock(pidfile):
 if hasattr(os, 'closerange'):
 
     def close_open_fds(keep=None):
-        keep = list(uniq(sorted(filter(None, (
-            maybe_fileno(f) for f in keep or []
-        )))))
+        # must make sure this is 0-inclusive (Issue #1882)
+        keep = list(uniq(sorted(
+            f for f in map(maybe_fileno, keep or []) if f is not None
+        )))
         maxfd = get_fdmax(default=2048)
         kL, kH = iter([-1] + keep), iter(keep + [maxfd])
         for low, high in zip_longest(kL, kH):
@@ -606,7 +610,7 @@ class Signals(object):
 
     def signum(self, signal_name):
         """Get signal number from signal name."""
-        if isinstance(signal_name, int):
+        if isinstance(signal_name, numbers.Integral):
             return signal_name
         if not isinstance(signal_name, string_t) \
                 or not signal_name.isupper():

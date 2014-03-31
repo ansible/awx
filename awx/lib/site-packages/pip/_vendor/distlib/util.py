@@ -598,8 +598,20 @@ def get_cache_base(suffix=None):
     result = os.path.join(result, suffix)
     # we use 'isdir' instead of 'exists', because we want to
     # fail if there's a file with that name
-    if not os.path.isdir(result):
-        os.makedirs(result)
+    if os.path.isdir(result):
+        usable = os.access(result, os.W_OK)
+        if not usable:
+            logger.warning('Directory exists but is not writable: %s', result)
+    else:
+        try:
+            os.makedirs(result)
+            usable = True
+        except OSError:
+            logger.warning('Unable to create %s', result, exc_info=True)
+            usable = False
+    if not usable:
+        result = tempfile.mkdtemp()
+        logger.warning('Default location unusable, using %s', result)
     return result
 
 

@@ -14,7 +14,9 @@ from celery import signals
 from celery.app import trace
 from celery.apps import worker as cd
 from celery.bin.worker import worker, main as worker_main
-from celery.exceptions import ImproperlyConfigured, SystemTerminate
+from celery.exceptions import (
+    ImproperlyConfigured, WorkerShutdown, WorkerTerminate,
+)
 from celery.utils.log import ensure_process_aware_logger
 from celery.worker import state
 
@@ -514,12 +516,12 @@ class test_signal_handlers(WorkerAppCase):
             c.return_value = 1
             p, platforms.signals = platforms.signals, Signals()
             try:
-                with self.assertRaises(SystemExit):
+                with self.assertRaises(WorkerShutdown):
                     handlers['SIGINT']('SIGINT', object())
             finally:
                 platforms.signals = p
 
-            with self.assertRaises(SystemTerminate):
+            with self.assertRaises(WorkerTerminate):
                 next_handlers['SIGINT']('SIGINT', object())
 
     @disable_stdouts
@@ -546,7 +548,7 @@ class test_signal_handlers(WorkerAppCase):
             try:
                 worker = self._Worker()
                 handlers = self.psig(cd.install_worker_int_handler, worker)
-                with self.assertRaises(SystemExit):
+                with self.assertRaises(WorkerShutdown):
                     handlers['SIGINT']('SIGINT', object())
             finally:
                 process.name = name
@@ -582,7 +584,7 @@ class test_signal_handlers(WorkerAppCase):
                 worker = self._Worker()
                 handlers = self.psig(
                     cd.install_worker_term_hard_handler, worker)
-                with self.assertRaises(SystemTerminate):
+                with self.assertRaises(WorkerTerminate):
                     handlers['SIGQUIT']('SIGQUIT', object())
         finally:
             process.name = name
@@ -606,7 +608,7 @@ class test_signal_handlers(WorkerAppCase):
             worker = self._Worker()
             handlers = self.psig(cd.install_worker_term_handler, worker)
             try:
-                with self.assertRaises(SystemExit):
+                with self.assertRaises(WorkerShutdown):
                     handlers['SIGTERM']('SIGTERM', object())
             finally:
                 state.should_stop = False
@@ -638,16 +640,17 @@ class test_signal_handlers(WorkerAppCase):
                 c.return_value = 1
                 worker = self._Worker()
                 handlers = self.psig(cd.install_worker_term_handler, worker)
-                with self.assertRaises(SystemExit):
+                with self.assertRaises(WorkerShutdown):
                     handlers['SIGTERM']('SIGTERM', object())
         finally:
             process.name = name
             state.should_stop = False
 
     @disable_stdouts
+    @patch('celery.platforms.close_open_fds')
     @patch('atexit.register')
     @patch('os.close')
-    def test_worker_restart_handler(self, _close, register):
+    def test_worker_restart_handler(self, _close, register, close_open):
         if getattr(os, 'execv', None) is None:
             raise SkipTest('platform does not have excv')
         argv = []
@@ -687,5 +690,5 @@ class test_signal_handlers(WorkerAppCase):
             c.return_value = 1
             worker = self._Worker()
             handlers = self.psig(cd.install_worker_term_hard_handler, worker)
-            with self.assertRaises(SystemTerminate):
+            with self.assertRaises(WorkerTerminate):
                 handlers['SIGQUIT']('SIGQUIT', object())

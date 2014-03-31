@@ -25,7 +25,9 @@ from kombu.utils.encoding import safe_str
 
 from celery import VERSION_BANNER, platforms, signals
 from celery.app import trace
-from celery.exceptions import CDeprecationWarning, SystemTerminate
+from celery.exceptions import (
+    CDeprecationWarning, WorkerShutdown, WorkerTerminate,
+)
 from celery.five import string, string_t
 from celery.loaders.app import AppLoader
 from celery.platforms import check_privileges
@@ -163,10 +165,10 @@ class Worker(WorkController):
 
         # Dump configuration to screen so we have some basic information
         # for when users sends bug reports.
-        print(''.join([
+        print(safe_str(''.join([
             string(self.colored.cyan(' \n', self.startup_info())),
             string(self.colored.reset(self.extra_info() or '')),
-        ]), file=sys.__stdout__)
+        ])), file=sys.__stdout__)
         self.set_process_status('-active-')
         self.install_platform_tweaks(self)
 
@@ -179,7 +181,7 @@ class Worker(WorkController):
             colorize = not self.no_color
         return self.app.log.setup(
             self.loglevel, self.logfile,
-            redirect_stdouts=False, colorize=colorize,
+            redirect_stdouts=False, colorize=colorize, hostname=self.hostname,
         )
 
     def purge_messages(self):
@@ -275,7 +277,7 @@ class Worker(WorkController):
 
 
 def _shutdown_handler(worker, sig='TERM', how='Warm',
-                      exc=SystemExit, callback=None):
+                      exc=WorkerShutdown, callback=None):
 
     def _handle_request(*args):
         with in_sighandler():
@@ -292,11 +294,11 @@ def _shutdown_handler(worker, sig='TERM', how='Warm',
     _handle_request.__name__ = str('worker_{0}'.format(how))
     platforms.signals[sig] = _handle_request
 install_worker_term_handler = partial(
-    _shutdown_handler, sig='SIGTERM', how='Warm', exc=SystemExit,
+    _shutdown_handler, sig='SIGTERM', how='Warm', exc=WorkerShutdown,
 )
 if not is_jython:  # pragma: no cover
     install_worker_term_hard_handler = partial(
-        _shutdown_handler, sig='SIGQUIT', how='Cold', exc=SystemTerminate,
+        _shutdown_handler, sig='SIGQUIT', how='Cold', exc=WorkerTerminate,
     )
 else:  # pragma: no cover
     install_worker_term_handler = \
@@ -315,6 +317,9 @@ else:  # pragma: no cover
 
 
 def _reload_current_worker():
+    platforms.close_open_fds([
+        sys.__stdin__, sys.__stdout__, sys.__stderr__,
+    ])
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
 

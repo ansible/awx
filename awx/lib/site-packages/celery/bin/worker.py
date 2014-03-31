@@ -171,7 +171,7 @@ class worker(Command):
         # parse options before detaching so errors can be handled.
         options, args = self.prepare_args(
             *self.parse_options(prog_name, argv, command))
-        self.maybe_detach([command] + argv)
+        self.maybe_detach([command] + sys.argv[1:])
         return self(*args, **options)
 
     def maybe_detach(self, argv, dopts=['-D', '--detach']):
@@ -192,7 +192,7 @@ class worker(Command):
         if self.app.IS_WINDOWS and kwargs.get('beat'):
             self.die('-B option does not work on Windows.  '
                      'Please run celery beat as a separate service.')
-        hostname = self.simple_format(default_nodename(hostname))
+        hostname = self.host_format(default_nodename(hostname))
         if loglevel:
             try:
                 loglevel = mlevel(loglevel)
@@ -203,7 +203,7 @@ class worker(Command):
 
         return self.app.Worker(
             hostname=hostname, pool_cls=pool_cls, loglevel=loglevel,
-            logfile=self.node_format(logfile, hostname),
+            logfile=logfile,  # node format handled by celery.app.log.setup
             pidfile=self.node_format(pidfile, hostname),
             state_db=self.node_format(state_db, hostname), **kwargs
         ).start()

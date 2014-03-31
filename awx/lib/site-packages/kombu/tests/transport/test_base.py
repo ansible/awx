@@ -46,8 +46,10 @@ class test_Message(Case):
         self.message = Message(self.channel, delivery_tag=313)
 
     def test_postencode(self):
+        m = Message(self.channel, text_t('FOO'), postencode='ccyzz')
         with self.assertRaises(LookupError):
-            Message(self.channel, text_t('FOO'), postencode='ccyzz')
+            m._reraise_error()
+        m.ack()
 
     def test_ack_respects_no_ack_consumers(self):
         self.channel.no_ack_consumers = set(['abc'])

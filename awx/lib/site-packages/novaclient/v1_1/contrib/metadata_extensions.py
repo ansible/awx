@@ -13,23 +13,25 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.openstack.common.gettextutils import _
 from novaclient import utils
 from novaclient.v1_1 import shell
 
 
 @utils.arg('host',
            metavar='<host>',
-           help='Name of host.')
+           help=_('Name of host.'))
 @utils.arg('action',
            metavar='<action>',
            choices=['set', 'delete'],
-           help="Actions: 'set' or 'delete'")
+           help=_("Actions: 'set' or 'delete'"))
 @utils.arg('metadata',
            metavar='<key=value>',
            nargs='+',
            action='append',
            default=[],
-           help='Metadata to set or delete (only key is necessary on delete)')
+           help=_('Metadata to set or delete (only key is necessary on '
+                  'delete)'))
 def do_host_meta(cs, args):
     """Set or Delete metadata on all instances of a host."""
     hypervisors = cs.hypervisors.search(args.host, servers=True)

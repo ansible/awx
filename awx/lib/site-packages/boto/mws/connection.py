@@ -78,7 +78,7 @@ def http_body(field):
     def decorator(func):
 
         def wrapper(*args, **kw):
-            if filter(lambda x: not x in kw, (field, 'content_type')):
+            if any([f not in kw for f in (field, 'content_type')]):
                 message = "{0} requires {1} and content_type arguments for " \
                           "building HTTP body".format(func.action, field)
                 raise KeyError(message)
@@ -94,16 +94,18 @@ def http_body(field):
     return decorator
 
 
-def destructure_object(value, into={}, prefix=''):
+def destructure_object(value, into, prefix=''):
     if isinstance(value, ResponseElement):
-        for name, attr in value.__dict__.items():
+        destructure_object(value.__dict__, into, prefix=prefix)
+    elif isinstance(value, dict):
+        for name, attr in value.iteritems():
             if name.startswith('_'):
                 continue
-            destructure_object(attr, into=into, prefix=prefix + '.' + name)
-    elif filter(lambda x: isinstance(value, x), (list, set, tuple)):
-        for index, element in [(prefix + '.' + str(i + 1), value[i])
-                               for i in range(len(value))]:
-            destructure_object(element, into=into, prefix=index)
+            destructure_object(attr, into, prefix=prefix + '.' + name)
+    elif any([isinstance(value, typ) for typ in (list, set, tuple)]):
+        for index, element in enumerate(value):
+            newprefix = prefix + '.' + str(index + 1)
+            destructure_object(element, into, prefix=newprefix)
     elif isinstance(value, bool):
         into[prefix] = str(value).lower()
     else:
@@ -116,10 +118,10 @@ def structured_objects(*fields):
 
         def wrapper(*args, **kw):
             for field in filter(kw.has_key, fields):
-                destructure_object(kw.pop(field), into=kw, prefix=field)
+                destructure_object(kw.pop(field), kw, prefix=field)
             return func(*args, **kw)
-        wrapper.__doc__ = "{0}\nObjects: {1}".format(func.__doc__,
-                                                     ', '.join(fields))
+        wrapper.__doc__ = "{0}\nObjects|dicts: {1}".format(func.__doc__,
+                                                           ', '.join(fields))
         return add_attrs_from(func, to=wrapper)
     return decorator
 
@@ -203,7 +205,7 @@ def boolean_arguments(*fields):
     def decorator(func):
 
         def wrapper(*args, **kw):
-            for field in filter(lambda x: isinstance(kw.get(x), bool), fields):
+            for field in [f for f in fields if isinstance(kw.get(f), bool)]:
                 kw[field] = str(kw[field]).lower()
             return func(*args, **kw)
         wrapper.__doc__ = "{0}\nBooleans: {1}".format(func.__doc__,
@@ -256,11 +258,13 @@ class MWSConnection(AWSQueryConnection):
     def _required_auth_capability(self):
         return ['mws']
 
-    def post_request(self, path, params, cls, body='', headers={}, isXML=True):
+    def post_request(self, path, params, cls, body='', headers=None,
+                     isXML=True):
         """Make a POST request, optionally with a content body,
            and return the response, optionally as raw text.
            Modelled off of the inherited get_object/make_request flow.
         """
+        headers = headers or {}
         request = self.build_base_http_request('POST', path, None, data=body,
                                                params=params, headers=headers,
                                                host=self.host)
@@ -321,9 +325,10 @@ class MWSConnection(AWSQueryConnection):
     @structured_lists('MarketplaceIdList.Id')
     @requires(['FeedType'])
     @api_action('Feeds', 15, 120)
-    def submit_feed(self, path, response, headers={}, body='', **kw):
+    def submit_feed(self, path, response, headers=None, body='', **kw):
         """Uploads a feed for processing by Amazon MWS.
         """
+        headers = headers or {}
         return self.post_request(path, kw, response, body=body,
                                  headers=headers)
 

@@ -323,7 +323,10 @@ class GlobalIncludeIndex(GlobalBaseIndexField, IncludeIndex):
     projection_type = 'INCLUDE'
 
     def __init__(self, *args, **kwargs):
+        throughput = kwargs.pop('throughput', None)
         IncludeIndex.__init__(self, *args, **kwargs)
+        if throughput:
+            kwargs['throughput'] = throughput
         GlobalBaseIndexField.__init__(self, *args, **kwargs)
 
     def schema(self):

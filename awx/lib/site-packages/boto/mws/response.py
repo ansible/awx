@@ -609,7 +609,7 @@ class ProductCategory(ResponseElement):
 
 
 class GetProductCategoriesResult(ResponseElement):
-    Self = Element(ProductCategory)
+    Self = ElementList(ProductCategory)
 
 
 class GetProductCategoriesForSKUResult(GetProductCategoriesResult):

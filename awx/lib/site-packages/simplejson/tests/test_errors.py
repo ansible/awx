@@ -45,7 +45,7 @@ class TestErrors(TestCase):
         s = pickle.dumps(err)
         e = pickle.loads(s)
 
-        self.assertEquals(err.msg, e.msg)
-        self.assertEquals(err.doc, e.doc)
-        self.assertEquals(err.pos, e.pos)
-        self.assertEquals(err.end, e.end)
+        self.assertEqual(err.msg, e.msg)
+        self.assertEqual(err.doc, e.doc)
+        self.assertEqual(err.pos, e.pos)
+        self.assertEqual(err.end, e.end)

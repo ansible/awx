@@ -47,16 +47,17 @@ class Alarm(object):
 class AdjustmentType(object):
     def __init__(self, connection=None):
         self.connection = connection
-        self.adjustment_types = ListElement([])
+        self.adjustment_type = None
 
     def __repr__(self):
-        return 'AdjustmentType:%s' % self.adjustment_types
+        return 'AdjustmentType:%s' % self.adjustment_type
 
     def startElement(self, name, attrs, connection):
-        if name == 'AdjustmentType':
-            return self.adjustment_types
+        return
 
     def endElement(self, name, value, connection):
+        if name == 'AdjustmentType':
+            self.adjustment_type = value
         return
 
 

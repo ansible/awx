@@ -314,6 +314,10 @@ class test_Serialization(Case):
         self.assertEqual(ctyp, 'application/data')
         self.assertEqual(cenc, 'binary')
 
+    def test_loads__trusted_content(self):
+        loads('tainted', 'application/data', 'binary', accept=[])
+        loads('tainted', 'application/text', 'utf-8', accept=[])
+
     def test_loads__not_accepted(self):
         with self.assertRaises(ContentDisallowed):
             loads('tainted', 'application/x-evil', 'binary', accept=[])

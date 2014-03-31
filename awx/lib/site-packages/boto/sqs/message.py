@@ -177,7 +177,7 @@ class MHMessage(Message):
     """
 
     def __init__(self, queue=None, body=None, xml_attrs=None):
-        if body == None or body == '':
+        if body is None or body == '':
             body = {}
         super(MHMessage, self).__init__(queue, body)
 

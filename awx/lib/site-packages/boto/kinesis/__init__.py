@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -31,11 +31,7 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     from boto.kinesis.layer1 import KinesisConnection
-
-    return [RegionInfo(name='us-east-1',
-                       endpoint='kinesis.us-east-1.amazonaws.com',
-                       connection_cls=KinesisConnection),
-            ]
+    return get_regions('kinesis', connection_cls=KinesisConnection)
 
 
 def connect_to_region(region_name, **kw_params):

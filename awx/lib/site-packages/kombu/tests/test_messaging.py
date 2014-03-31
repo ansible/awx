@@ -245,8 +245,10 @@ class test_Consumer(Case):
 
     def test_receive_callback_accept(self):
         message = Mock(name='Message')
+        message.errors = []
         callback = Mock(name='on_message')
         c = Consumer(self.connection, accept=['json'], on_message=callback)
+        c.on_decode_error = None
         c.channel = Mock(name='channel')
         c.channel.message_to_python = None
 
@@ -339,6 +341,7 @@ class test_Consumer(Case):
         channel.message_to_python = None
         try:
             message = Mock()
+            message.errors = []
             message.decode.return_value = 'Hello'
             recv = c.receive = Mock()
             c._receive_callback(message)

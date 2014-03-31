@@ -7,9 +7,11 @@ Message class.
 """
 from __future__ import absolute_import
 
+import sys
+
 from .compression import decompress
 from .exceptions import MessageStateError
-from .five import text_t
+from .five import reraise, text_t
 from .serialization import loads
 
 ACK_STATES = frozenset(['ACK', 'REJECTED', 'REQUEUED'])
@@ -23,10 +25,13 @@ class Message(object):
                  'body', '_decoded_cache', 'accept', '__dict__')
     MessageStateError = MessageStateError
 
+    errors = None
+
     def __init__(self, channel, body=None, delivery_tag=None,
                  content_type=None, content_encoding=None, delivery_info={},
                  properties=None, headers=None, postencode=None,
                  accept=None, **kwargs):
+        self.errors = [] if self.errors is None else self.errors
         self.channel = channel
         self.delivery_tag = delivery_tag
         self.content_type = content_type
@@ -38,13 +43,27 @@ class Message(object):
         self._state = 'RECEIVED'
         self.accept = accept
 
-        try:
-            body = decompress(body, self.headers['compression'])
-        except KeyError:
-            pass
-        if postencode and isinstance(body, text_t):
-            body = body.encode(postencode)
+        compression = self.headers.get('compression')
+        if not self.errors and compression:
+            try:
+                body = decompress(body, compression)
+            except Exception:
+                self.errors.append(sys.exc_info())
+
+        if not self.errors and postencode and isinstance(body, text_t):
+            try:
+                body = body.encode(postencode)
+            except Exception:
+                self.errors.append(sys.exc_info())
         self.body = body
+
+    def _reraise_error(self, callback=None):
+        try:
+            reraise(*self.errors[0])
+        except Exception as exc:
+            if not callback:
+                raise
+            callback(self, exc)
 
     def ack(self):
         """Acknowledge this message as being processed.,

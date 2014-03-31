@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import os
 import socket
@@ -16,7 +16,9 @@ from celery.app.defaults import DEFAULTS
 from celery.bootsteps import RUN, CLOSE, StartStopStep
 from celery.concurrency.base import BasePool
 from celery.datastructures import AttributeDict
-from celery.exceptions import SystemTerminate, TaskRevokedError
+from celery.exceptions import (
+    WorkerShutdown, WorkerTerminate, TaskRevokedError,
+)
 from celery.five import Empty, range, Queue as FastQueue
 from celery.utils import uuid
 from celery.worker import components
@@ -268,9 +270,9 @@ class test_Consumer(AppCase):
         l.event_dispatcher = mock_event_dispatcher()
         l.task_consumer = Mock()
         l.connection = Mock()
-        l.connection.drain_events.side_effect = SystemExit()
+        l.connection.drain_events.side_effect = WorkerShutdown()
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(WorkerShutdown):
             l.loop(*l.loop_args())
         self.assertTrue(l.task_consumer.register_callback.called)
         return l.task_consumer.register_callback.call_args[0][0]
@@ -514,30 +516,56 @@ class test_Consumer(AppCase):
         self.assertTrue(logger.critical.call_count)
 
     def test_receive_message_eta(self):
+        import sys
+        from functools import partial
+        if os.environ.get('C_DEBUG_TEST'):
+            pp = partial(print, file=sys.__stderr__)
+        else:
+            def pp(*args, **kwargs):
+                pass
+        pp('TEST RECEIVE MESSAGE ETA')
+        pp('+CREATE MYKOMBUCONSUMER')
         l = _MyKombuConsumer(self.buffer.put, timer=self.timer, app=self.app)
+        pp('-CREATE MYKOMBUCONSUMER')
         l.steps.pop()
         l.event_dispatcher = mock_event_dispatcher()
         backend = Mock()
+        pp('+ CREATE MESSAGE')
         m = create_message(
             backend, task=self.foo_task.name,
             args=[2, 4, 8], kwargs={},
             eta=(datetime.now() + timedelta(days=1)).isoformat(),
         )
+        pp('- CREATE MESSAGE')
 
         try:
+            pp('+ BLUEPRINT START 1')
             l.blueprint.start(l)
+            pp('- BLUEPRINT START 1')
             p = l.app.conf.BROKER_CONNECTION_RETRY
             l.app.conf.BROKER_CONNECTION_RETRY = False
+            pp('+ BLUEPRINT START 2')
             l.blueprint.start(l)
+            pp('- BLUEPRINT START 2')
             l.app.conf.BROKER_CONNECTION_RETRY = p
+            pp('+ BLUEPRINT RESTART')
             l.blueprint.restart(l)
+            pp('- BLUEPRINT RESTART')
             l.event_dispatcher = mock_event_dispatcher()
+            pp('+ GET ON MESSAGE')
             callback = self._get_on_message(l)
+            pp('- GET ON MESSAGE')
+            pp('+ CALLBACK')
             callback(m.decode(), m)
+            pp('- CALLBACK')
         finally:
+            pp('+ STOP TIMER')
             l.timer.stop()
+            pp('- STOP TIMER')
             try:
+                pp('+ JOIN TIMER')
                 l.timer.join()
+                pp('- JOIN TIMER')
             except RuntimeError:
                 pass
 
@@ -918,10 +946,10 @@ class test_WorkController(AppCase):
         with self.assertRaises(KeyboardInterrupt):
             worker._process_task(task)
 
-    def test_process_task_raise_SystemTerminate(self):
+    def test_process_task_raise_WorkerTerminate(self):
         worker = self.worker
         worker.pool = Mock()
-        worker.pool.apply_async.side_effect = SystemTerminate()
+        worker.pool.apply_async.side_effect = WorkerTerminate()
         backend = Mock()
         m = create_message(backend, task=self.foo_task.name, args=[4, 8, 10],
                            kwargs={})
@@ -946,7 +974,7 @@ class test_WorkController(AppCase):
         worker1 = self.create_worker()
         worker1.blueprint.state = RUN
         stc = MockStep()
-        stc.start.side_effect = SystemTerminate()
+        stc.start.side_effect = WorkerTerminate()
         worker1.steps = [stc]
         worker1.start()
         stc.start.assert_called_with(worker1)
@@ -955,7 +983,7 @@ class test_WorkController(AppCase):
         worker2 = self.create_worker()
         worker2.blueprint.state = RUN
         sec = MockStep()
-        sec.start.side_effect = SystemExit()
+        sec.start.side_effect = WorkerShutdown()
         sec.terminate = None
         worker2.steps = [sec]
         worker2.start()

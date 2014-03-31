@@ -106,6 +106,8 @@ class test_Message(Case):
         message = c.message_to_python(data)
         self.assertIsInstance(message, virtual.Message)
         self.assertIs(message, c.message_to_python(message))
+        if message.errors:
+            message._reraise_error()
 
         self.assertEqual(message.body,
                          'the quick brown fox...'.encode('utf-8'))
@@ -290,6 +292,28 @@ class test_Channel(Case):
         c.queue_bind(n, n, n)
         c.queue_purge(n)
         self.assertIn(n, c.purged)
+
+    def test_basic_publish_unique_delivery_tags(self, n='test_uniq_tag'):
+        c1 = memory_client().channel()
+        c2 = memory_client().channel()
+
+        for c in (c1, c2):
+            c.exchange_declare(n)
+            c.queue_declare(n)
+            c.queue_bind(n, n, n)
+        m1 = c1.prepare_message('George Costanza')
+        m2 = c2.prepare_message('Elaine Marie Benes')
+        c1.basic_publish(m1, n, n)
+        c2.basic_publish(m2, n, n)
+
+        r1 = c1.message_to_python(c1.basic_get(n))
+        r2 = c2.message_to_python(c2.basic_get(n))
+
+        self.assertNotEqual(r1.delivery_tag, r2.delivery_tag)
+        with self.assertRaises(ValueError):
+            int(r1.delivery_tag)
+        with self.assertRaises(ValueError):
+            int(r2.delivery_tag)
 
     def test_basic_publish__get__consume__restore(self,
                                                   n='test_basic_publish'):

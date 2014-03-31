@@ -216,6 +216,18 @@ class LDAPSearchUnion(object):
         self.searches = args
         self.ldap = _LDAPConfig.get_ldap()
 
+    def search_with_additional_terms(self, term_dict, escape=True):
+        searches = [s.search_with_additional_terms(term_dict, escape)
+                    for s in self.searches]
+
+        return self.__class__(*searches)
+
+    def search_with_additional_term_string(self, filterstr):
+        searches = [s.search_with_additional_term_string(filterstr)
+                    for s in self.searches]
+
+        return self.__class__(*searches)
+
     def execute(self, connection, filterargs=()):
         msgids = [search._begin(connection, filterargs) for search in self.searches]
         results = {}

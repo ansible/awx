@@ -21,7 +21,7 @@ from kombu.utils import cached_property
 from kombu.utils.encoding import bytes_to_str, str_to_bytes
 
 VERSION = (1, 0, 0)
-__version__ = ".".join(map(str, VERSION))
+__version__ = '.'.join(map(str, VERSION))
 
 # needs win32all to work on Windows
 if os.name == 'nt':
@@ -148,7 +148,7 @@ class Channel(virtual.Channel):
         """Return the number of messages in `queue` as an :class:`int`."""
         count = 0
 
-        queue_find = "." + queue + '.msg'
+        queue_find = '.{0}.msg'.format(queue)
         folder = os.listdir(self.data_folder_in)
         while len(folder) > 0:
             filename = folder.pop()

@@ -19,12 +19,6 @@ from __future__ import absolute_import
 from .exceptions import AMQPNotImplementedError, RecoverableConnectionError
 from .serialization import AMQPWriter
 
-try:
-    bytes
-except NameError:
-    # Python 2.5 and lower
-    bytes = str
-
 __all__ = ['AbstractChannel']
 
 

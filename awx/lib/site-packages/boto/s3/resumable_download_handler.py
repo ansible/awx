@@ -140,7 +140,7 @@ class ResumableDownloadHandler(object):
             # is attempted on an object), but warn user for other errors.
             if e.errno != errno.ENOENT:
                 # Will restart because
-                # self.etag_value_for_current_download == None.
+                # self.etag_value_for_current_download is None.
                 print('Couldn\'t read URI tracker file (%s): %s. Restarting '
                       'download from scratch.' %
                       (self.tracker_file_name, e.strerror))

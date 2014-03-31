@@ -110,7 +110,7 @@ class ItemSet(ResponseGroup):
     def startElement(self, name, attrs, connection):
         if name == "Item":
             self.curItem = Item(self._connection)
-        elif self.curItem != None:
+        elif self.curItem is not None:
             self.curItem.startElement(name, attrs, connection)
         return None
 
@@ -123,13 +123,13 @@ class ItemSet(ResponseGroup):
             self.objs.append(self.curItem)
             self._xml.write(self.curItem.to_xml())
             self.curItem = None
-        elif self.curItem != None:
+        elif self.curItem is not None:
             self.curItem.endElement(name, value, connection)
         return None
 
     def next(self):
         """Special paging functionality"""
-        if self.iter == None:
+        if self.iter is None:
             self.iter = iter(self.objs)
         try:
             return self.iter.next()

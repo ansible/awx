@@ -40,6 +40,41 @@ class CrossZoneLoadBalancingAttribute(object):
             else:
                 self.enabled = False
 
+class AccessLogAttribute(object):
+    """
+    Represents the AccessLog segment of ELB attributes.
+    """
+    def __init__(self, connection=None):
+        self.enabled = None
+        self.s3_bucket_name = None
+        self.s3_bucket_prefix = None
+        self.emit_interval = None
+
+    def __repr__(self):
+        return 'AccessLog(%s, %s, %s, %s)' % (
+            self.enabled,
+            self.s3_bucket_name,
+            self.s3_bucket_prefix,
+            self.emit_interval
+        )
+
+    def startElement(self, name, attrs, connection):
+        pass
+
+    def endElement(self, name, value, connection):
+        if name == 'Enabled':
+            if value.lower() == 'true':
+                self.enabled = True
+            else:
+                self.enabled = False
+        elif name == 'S3BucketName':
+            self.s3_bucket_name = value
+        elif name == 'S3BucketPrefix':
+            self.s3_bucket_prefix = value
+        elif name == 'EmitInterval':
+            self.emit_interval = int(value)
+
+
 class LbAttributes(object):
     """
     Represents the Attributes of an Elastic Load Balancer.
@@ -48,14 +83,18 @@ class LbAttributes(object):
         self.connection = connection
         self.cross_zone_load_balancing = CrossZoneLoadBalancingAttribute(
           self.connection)
+        self.access_log = AccessLogAttribute(self.connection)
 
     def __repr__(self):
-        return 'LbAttributes(%s)' % (
-            repr(self.cross_zone_load_balancing))
+        return 'LbAttributes(%s, %s)' % (
+            repr(self.cross_zone_load_balancing),
+            repr(self.access_log))
 
     def startElement(self, name, attrs, connection):
         if name == 'CrossZoneLoadBalancing':
             return self.cross_zone_load_balancing
-        
+        if name == 'AccessLog':
+            return self.access_log
+
     def endElement(self, name, value, connection):
         pass

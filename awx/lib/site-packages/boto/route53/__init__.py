@@ -23,8 +23,8 @@
 
 # this is here for backward compatibility
 # originally, the Route53Connection class was defined here
-from connection import Route53Connection
-from boto.regioninfo import RegionInfo
+from boto.route53.connection import Route53Connection
+from boto.regioninfo import RegionInfo, get_regions
 
 
 class Route53RegionInfo(RegionInfo):
@@ -51,10 +51,22 @@ def regions():
     :rtype: list
     :return: A list of :class:`boto.regioninfo.RegionInfo` instances
     """
-    return [Route53RegionInfo(name='universal',
-                              endpoint='route53.amazonaws.com',
-                              connection_cls=Route53Connection)
-            ]
+    regions = get_regions(
+        'route53',
+        region_cls=Route53RegionInfo,
+        connection_cls=Route53Connection
+    )
+
+    # For historical reasons, we had a "universal" endpoint as well.
+    regions.append(
+        Route53RegionInfo(
+            name='universal',
+            endpoint='route53.amazonaws.com',
+            connection_cls=Route53Connection
+        )
+    )
+
+    return regions
 
 
 def connect_to_region(region_name, **kw_params):

@@ -54,8 +54,10 @@ class test_Fanout(ExchangeCase):
         self.e.channel.supports_fanout = True
         message = Mock()
 
-        self.e.deliver(message, 'exchange', None)
-        self.e.channel._put_fanout.assert_called_with('exchange', message)
+        self.e.deliver(message, 'exchange', 'rkey')
+        self.e.channel._put_fanout.assert_called_with(
+            'exchange', message, 'rkey',
+        )
 
     def test_deliver_when_fanout_unsupported(self):
         self.e.channel = Mock()

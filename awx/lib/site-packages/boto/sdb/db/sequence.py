@@ -59,7 +59,7 @@ class SequenceGenerator(object):
         # If they pass us in a string that's not at least
         # the lenght of our sequence, then return the
         # first element in our sequence
-        if val == None or len(val) < self.sequence_length:
+        if val is None or len(val) < self.sequence_length:
             return self.sequence_string[0]
         last_value = val[-self.sequence_length:]
         if (not self.rollover) and (last_value == self.last_item):
@@ -79,21 +79,21 @@ class SequenceGenerator(object):
 # Simple Sequence Functions
 #
 def increment_by_one(cv=None, lv=None):
-    if cv == None:
+    if cv is None:
         return 0
     return cv + 1
 
 def double(cv=None, lv=None):
-    if cv == None:
+    if cv is None:
         return 1
     return cv * 2
 
 def fib(cv=1, lv=0):
     """The fibonacci sequence, this incrementer uses the
     last value"""
-    if cv == None:
+    if cv is None:
         cv = 1
-    if lv == None:
+    if lv is None:
         lv = 0
     return cv + lv
 
@@ -136,17 +136,17 @@ class Sequence(object):
         self.last_value = None
         self.domain_name = domain_name
         self.id = id
-        if init_val == None:
+        if init_val is None:
             init_val = fnc(init_val)
 
-        if self.id == None:
+        if self.id is None:
             import uuid
             self.id = str(uuid.uuid4())
 
         self.item_type = type(fnc(None))
         self.timestamp = None
         # Allow us to pass in a full name to a function
-        if isinstance(fnc, str):
+        if isinstance(fnc, basestring):
             from boto.utils import find_class
             fnc = find_class(fnc)
         self.fnc = fnc
@@ -162,7 +162,7 @@ class Sequence(object):
         expected_value = []
         new_val = {}
         new_val['timestamp'] = now
-        if self._value != None:
+        if self._value is not None:
             new_val['last_value'] = self._value
             expected_value = ['current_value', str(self._value)]
         new_val['current_value'] = val
@@ -184,7 +184,7 @@ class Sequence(object):
                 self.timestamp = val['timestamp']
             if 'current_value' in val:
                 self._value = self.item_type(val['current_value'])
-            if "last_value" in val and val['last_value'] != None:
+            if "last_value" in val and val['last_value'] is not None:
                 self.last_value = self.item_type(val['last_value'])
         return self._value
 

@@ -262,11 +262,12 @@ class Cluster(EmrObject):
         if name == 'Status':
             self.status = ClusterStatus()
             return self.status
-        elif name == 'EC2InstanceAttributes':
+        elif name == 'Ec2InstanceAttributes':
             self.ec2instanceattributes = Ec2InstanceAttributes()
             return self.ec2instanceattributes
         elif name == 'Applications':
             self.applications = ResultSet([('member', Application)])
+            return self.applications
         elif name == 'Tags':
             self.tags = ResultSet([('member', KeyValue)])
             return self.tags

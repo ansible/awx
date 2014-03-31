@@ -36,7 +36,8 @@ class ServiceCatalog(object):
                     service_name=None, volume_service_name=None):
         """Fetch the public URL from the Compute service for
         a particular endpoint attribute. If none given, return
-        the first. See tests for sample service catalog."""
+        the first. See tests for sample service catalog.
+        """
         matching_endpoints = []
         if 'endpoints' in self.catalog:
             # We have a bastardized service catalog. Treat it special. :/

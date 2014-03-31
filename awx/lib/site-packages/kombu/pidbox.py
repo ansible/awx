@@ -85,9 +85,13 @@ class Node(object):
         self.handlers[fun.__name__] = fun
         return fun
 
+    def on_decode_error(self, message, exc):
+        error('Cannot decode message: %r', exc, exc_info=1)
+
     def listen(self, channel=None, callback=None):
         consumer = self.Consumer(channel=channel,
-                                 callbacks=[callback or self.handle_message])
+                                 callbacks=[callback or self.handle_message],
+                                 on_decode_error=self.on_decode_error)
         consumer.consume()
         return consumer
 

@@ -40,7 +40,7 @@ class DBSubnetGroup(object):
         self.connection = connection
         self.name = name
         self.description = description
-        if subnet_ids != None:
+        if subnet_ids is not None:
             self.subnet_ids = subnet_ids
         else:
             self.subnet_ids = []

@@ -78,6 +78,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 from . import Extension
 from ..treeprocessors import Treeprocessor
+from ..util import HTML_PLACEHOLDER_RE, parseBoolValue
 import re
 import logging
 import unicodedata
@@ -121,6 +122,22 @@ def itertext(elem):
             yield e.tail
 
 
+def stashedHTML2text(text, md):
+    """ Extract raw HTML, reduce to plain text and swap with placeholder. """
+    def _html_sub(m):
+        """ Substitute raw html with plain text. """
+        try:
+    	    raw, safe = md.htmlStash.rawHtmlBlocks[int(m.group(1))]
+        except (IndexError, TypeError):
+            return m.group(0)
+        if md.safeMode and not safe:
+            return ''
+        # Strip out tags and entities - leaveing text
+        return re.sub(r'(<[^>]+>)|(&[\#a-zA-Z0-9]+;)', '', raw)
+
+    return HTML_PLACEHOLDER_RE.sub(_html_sub, text)
+
+
 class HeaderIdTreeprocessor(Treeprocessor):
     """ Assign IDs to headers. """
 
@@ -136,7 +153,8 @@ class HeaderIdTreeprocessor(Treeprocessor):
                     if "id" in elem.attrib:
                         id = elem.get('id')
                     else:
-                        id = slugify(''.join(itertext(elem)), sep)
+                        id = stashedHTML2text(''.join(itertext(elem)), self.md)
+                        id = slugify(id, sep)
                     elem.set('id', unique(id, self.IDs))
                 if start_level:
                     level = int(elem.tag[-1]) + start_level
@@ -148,22 +166,13 @@ class HeaderIdTreeprocessor(Treeprocessor):
     def _get_meta(self):
         """ Return meta data suported by this ext as a tuple """
         level = int(self.config['level']) - 1
-        force = self._str2bool(self.config['forceid'])
+        force = parseBoolValue(self.config['forceid'])
         if hasattr(self.md, 'Meta'):
             if 'header_level' in self.md.Meta:
                 level = int(self.md.Meta['header_level'][0]) - 1
             if 'header_forceid' in self.md.Meta: 
-                force = self._str2bool(self.md.Meta['header_forceid'][0])
+                force = parseBoolValue(self.md.Meta['header_forceid'][0])
         return level, force
-
-    def _str2bool(self, s, default=False):
-        """ Convert a string to a booleen value. """
-        s = str(s)
-        if s.lower() in ['0', 'f', 'false', 'off', 'no', 'n']:
-            return False
-        elif s.lower() in ['1', 't', 'true', 'on', 'yes', 'y']:
-            return True
-        return default
 
 
 class HeaderIdExtension(Extension):

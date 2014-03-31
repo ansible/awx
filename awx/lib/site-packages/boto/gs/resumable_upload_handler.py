@@ -102,13 +102,13 @@ class ResumableUploadHandler(object):
             # Ignore non-existent file (happens first time an upload
             # is attempted on a file), but warn user for other errors.
             if e.errno != errno.ENOENT:
-                # Will restart because self.tracker_uri == None.
+                # Will restart because self.tracker_uri is None.
                 print('Couldn\'t read URI tracker file (%s): %s. Restarting '
                       'upload from scratch.' %
                       (self.tracker_file_name, e.strerror))
         except InvalidUriError, e:
             # Warn user, but proceed (will restart because
-            # self.tracker_uri == None).
+            # self.tracker_uri is None).
             print('Invalid tracker URI (%s) found in URI tracker file '
                   '(%s). Restarting upload from scratch.' %
                   (uri, self.tracker_file_name))
@@ -124,8 +124,9 @@ class ResumableUploadHandler(object):
             return
         f = None
         try:
-            f = open(self.tracker_file_name, 'w')
-            f.write(self.tracker_uri)
+            with os.fdopen(os.open(self.tracker_file_name,
+                                   os.O_WRONLY | os.O_CREAT, 0600), 'w') as f:
+              f.write(self.tracker_uri)
         except IOError, e:
             raise ResumableUploadException(
                 'Couldn\'t write URI tracker file (%s): %s.\nThis can happen'
@@ -134,9 +135,6 @@ class ResumableUploadHandler(object):
                 'unwritable directory)' %
                 (self.tracker_file_name, e.strerror),
                 ResumableTransferDisposition.ABORT)
-        finally:
-            if f:
-                f.close()
 
     def _set_tracker_uri(self, uri):
         """

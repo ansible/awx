@@ -52,19 +52,20 @@ class TCPTransport(transport.TCPTransport):
                 'Framing Error, received 0x%02x while expecting 0xce' % ch)
 
     def _read(self, n, initial=False):
-        while len(self._read_buffer) < n:
+        read_buffer = self._read_buffer
+        while len(read_buffer) < n:
             try:
-                s = self.sock.recv(65536)
+                s = self.sock.recv(n - len(read_buffer))
             except socket.error as exc:
                 if not initial and exc.errno in (errno.EAGAIN, errno.EINTR):
                     continue
                 raise
             if not s:
                 raise IOError('Socket closed')
-            self._read_buffer += s
+            read_buffer += s
 
-        result = self._read_buffer[:n]
-        self._read_buffer = self._read_buffer[n:]
+        result = read_buffer[:n]
+        self._read_buffer = read_buffer[n:]
 
         return result
 
@@ -125,6 +126,7 @@ transport.SSLTransport = SSLTransport
 
 
 class Connection(amqp.Connection):  # pragma: no cover
+    connected = True
 
     def _do_close(self, *args, **kwargs):
         # amqplib does not ignore socket errors when connection

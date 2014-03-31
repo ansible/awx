@@ -68,7 +68,6 @@ from __future__ import absolute_import, print_function, unicode_literals
 import os
 import random
 import re
-import socket
 import sys
 import warnings
 import json
@@ -86,8 +85,13 @@ from celery.five import items, string, string_t
 from celery.platforms import EX_FAILURE, EX_OK, EX_USAGE
 from celery.utils import term
 from celery.utils import text
-from celery.utils import NODENAME_DEFAULT, nodesplit
+from celery.utils import node_format, host_format
 from celery.utils.imports import symbol_by_name, import_from_cwd
+
+try:
+    input = raw_input
+except NameError:
+    pass
 
 # always enable DeprecationWarnings, so our users can see them.
 for warning in (CDeprecationWarning, CPendingDeprecationWarning):
@@ -101,7 +105,6 @@ Try --help?
 
 find_long_opt = re.compile(r'.+?(--.+?)(?:\s|,|$)')
 find_rst_ref = re.compile(r':\w+:`(.+?)`')
-find_sformat = re.compile(r'%(\w)')
 
 __all__ = ['Error', 'UsageError', 'Extensions', 'HelpFormatter',
            'Command', 'Option', 'daemon_options']
@@ -236,8 +239,8 @@ class Command(object):
         self.get_app = get_app or self._get_default_app
         self.stdout = stdout or sys.stdout
         self.stderr = stderr or sys.stderr
-        self.no_color = no_color
-        self.colored = term.colored(enabled=not self.no_color)
+        self._colored = None
+        self._no_color = no_color
         self.quiet = quiet
         if not self.description:
             self.description = self.__doc__
@@ -325,6 +328,34 @@ class Command(object):
             return os.path.expanduser(value)
         return value
 
+    def ask(self, q, choices, default=None):
+        """Prompt user to choose from a tuple of string values.
+
+        :param q: the question to ask (do not include questionark)
+        :param choice: tuple of possible choices, must be lowercase.
+        :param default: Default value if any.
+
+        If a default is not specified the question will be repeated
+        until the user gives a valid choice.
+
+        Matching is done case insensitively.
+
+        """
+        schoices = choices
+        if default is not None:
+            schoices = [c.upper() if c == default else c.lower()
+                        for c in choices]
+        schoices = '/'.join(schoices)
+
+        p = '{0} ({1})? '.format(q.capitalize(), schoices)
+        while 1:
+            val = input(p).lower()
+            if val in choices:
+                return val
+            elif default is not None:
+                break
+        return default
+
     def handle_argv(self, prog_name, argv, command=None):
         """Parse command-line arguments from ``argv`` and dispatch
         to :meth:`run`.
@@ -405,8 +436,10 @@ class Command(object):
         quiet = preload_options.get('quiet')
         if quiet is not None:
             self.quiet = quiet
-        self.colored.enabled = \
-            not preload_options.get('no_color', self.no_color)
+        try:
+            self.no_color = preload_options['no_color']
+        except KeyError:
+            pass
         workdir = preload_options.get('working_directory')
         if workdir:
             os.chdir(workdir)
@@ -427,7 +460,7 @@ class Command(object):
         if config:
             os.environ['CELERY_CONFIG_MODULE'] = config
         if self.respects_app_option:
-            if app and self.respects_app_option:
+            if app:
                 self.app = self.find_app(app)
             elif self.app is None:
                 self.app = self.get_app(loader=loader)
@@ -495,7 +528,12 @@ class Command(object):
                 opt = opts.get(arg)
                 if opt:
                     if opt.takes_value():
-                        acc[opt.dest] = args[index + 1]
+                        try:
+                            acc[opt.dest] = args[index + 1]
+                        except IndexError:
+                            raise ValueError(
+                                'Missing required argument for {0}'.format(
+                                    arg))
                         index += 1
                     elif opt.action == 'store_true':
                         acc[opt.dest] = True
@@ -526,20 +564,10 @@ class Command(object):
         pass
 
     def node_format(self, s, nodename, **extra):
-        name, host = nodesplit(nodename)
-        return self._simple_format(
-            s, host, n=name or NODENAME_DEFAULT, **extra)
+        return node_format(s, nodename, **extra)
 
-    def simple_format(self, s, **extra):
-        return self._simple_format(s, socket.gethostname(), **extra)
-
-    def _simple_format(self, s, host,
-                       match=find_sformat, expand=r'\1', **keys):
-        if s:
-            name, _, domain = host.partition('.')
-            keys = dict({'%': '%', 'h': host, 'n': name, 'd': domain}, **keys)
-            return match.sub(lambda m: keys[m.expand(expand)], s)
-        return s
+    def host_format(self, s, **extra):
+        return host_format(s, **extra)
 
     def _get_default_app(self, *args, **kwargs):
         from celery._state import get_current_app
@@ -592,6 +620,26 @@ class Command(object):
         self.out(c.reset(dirstr, title))
         if body and self.show_body:
             self.out(body)
+
+    @property
+    def colored(self):
+        if self._colored is None:
+            self._colored = term.colored(enabled=not self.no_color)
+        return self._colored
+
+    @colored.setter
+    def colored(self, obj):
+        self._colored = obj
+
+    @property
+    def no_color(self):
+        return self._no_color
+
+    @no_color.setter
+    def no_color(self, value):
+        self._no_color = value
+        if self._colored is not None:
+            self._colored.enabled = not self._no_color
 
 
 def daemon_options(default_pidfile=None, default_logfile=None):

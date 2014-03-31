@@ -36,8 +36,12 @@ STX = '\u0002'  # Use STX ("Start of text") for start-of-placeholder
 ETX = '\u0003'  # Use ETX ("End of text") for end-of-placeholder
 INLINE_PLACEHOLDER_PREFIX = STX+"klzzwxh:"
 INLINE_PLACEHOLDER = INLINE_PLACEHOLDER_PREFIX + "%s" + ETX
-INLINE_PLACEHOLDER_RE = re.compile(INLINE_PLACEHOLDER % r'([0-9]{4})')
+INLINE_PLACEHOLDER_RE = re.compile(INLINE_PLACEHOLDER % r'([0-9]+)')
 AMP_SUBSTITUTE = STX+"amp"+ETX
+HTML_PLACEHOLDER = STX + "wzxhzdk:%s" + ETX
+HTML_PLACEHOLDER_RE = re.compile(HTML_PLACEHOLDER % r'([0-9]+)')
+TAG_PLACEHOLDER = STX + "hzzhzkh:%s" + ETX
+
 
 """
 Constants you probably do not need to change
@@ -54,7 +58,7 @@ RTL_BIDI_RANGES = ( ('\u0590', '\u07FF'),
 # Extensions should use "markdown.util.etree" instead of "etree" (or do `from
 # markdown.util import etree`).  Do not import it by yourself.
 
-try: # Is the C implemenation of ElementTree available?
+try: # Is the C implementation of ElementTree available?
     import xml.etree.cElementTree as etree
     from xml.etree.ElementTree import Comment
     # Serializers (including ours) test with non-c Comment
@@ -81,6 +85,19 @@ def isBlockLevel(tag):
     # Some ElementTree tags are not strings, so return False.
     return False
 
+def parseBoolValue(value, fail_on_errors=True):
+    """Parses a string representing bool value. If parsing was successful,
+       returns True or False. If parsing was not successful, raises
+       ValueError, or, if fail_on_errors=False, returns None."""
+    if not isinstance(value, string_type):
+        return bool(value)
+    elif value.lower() in ('true', 'yes', 'y', 'on', '1'):
+        return True
+    elif value.lower() in ('false', 'no', 'n', 'off', '0'):
+        return False
+    elif fail_on_errors:
+        raise ValueError('Cannot parse bool value: %r' % value)
+
 """
 MISC AUXILIARY CLASSES
 =============================================================================
@@ -103,10 +120,12 @@ class HtmlStash(object):
     in the beginning and replace with place-holders.
     """
 
-    def __init__ (self):
+    def __init__(self):
         """ Create a HtmlStash. """
-        self.html_counter = 0 # for counting inline html segments
-        self.rawHtmlBlocks=[]
+        self.html_counter = 0  # for counting inline html segments
+        self.rawHtmlBlocks = []
+        self.tag_counter = 0
+        self.tag_data = []  # list of dictionaries in the order tags appear
 
     def store(self, html, safe=False):
         """
@@ -132,5 +151,13 @@ class HtmlStash(object):
         self.rawHtmlBlocks = []
 
     def get_placeholder(self, key):
-        return "%swzxhzdk:%d%s" % (STX, key, ETX)
+        return HTML_PLACEHOLDER % key
 
+    def store_tag(self, tag, attrs, left_index, right_index):
+        """Store tag data and return a placeholder."""
+        self.tag_data.append({'tag': tag, 'attrs': attrs,
+                              'left_index': left_index,
+                              'right_index': right_index})
+        placeholder = TAG_PLACEHOLDER % str(self.tag_counter)
+        self.tag_counter += 1  # equal to the tag's index in self.tag_data
+        return placeholder

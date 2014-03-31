@@ -24,7 +24,8 @@ class DecryptionFailure(Exception):
 def decrypt_password(private_key, password):
     """Base64 decodes password and unecrypts it with private key.
 
-    Requires openssl binary available in the path"""
+    Requires openssl binary available in the path.
+    """
     unencoded = base64.b64decode(password)
     cmd = ['openssl', 'rsautl', '-decrypt', '-inkey', private_key]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE,

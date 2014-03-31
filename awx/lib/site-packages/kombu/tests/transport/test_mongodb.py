@@ -13,35 +13,67 @@ class MockConnection(dict):
 
 class test_mongodb(Case):
 
-    @skip_if_not_module('pymongo')
-    def test_url_parser(self):
+    def _get_connection(self, url, **kwargs):
         from kombu.transport import mongodb
+
+        class Transport(mongodb.Transport):
+            Connection = MockConnection
+
+        return Connection(url, transport=Transport, **kwargs).connect()
+
+    @skip_if_not_module('pymongo')
+    def test_defaults(self):
+        url = 'mongodb://'
+
+        c = self._get_connection(url)
+        hostname, dbname, options = c.channels[0]._parse_uri()
+
+        self.assertEquals(dbname, 'kombu_default')
+        self.assertEquals(hostname, 'mongodb://127.0.0.1')
+
+    @skip_if_not_module('pymongo')
+    def test_custom_host(self):
+        url = 'mongodb://localhost'
+        c = self._get_connection(url)
+        hostname, dbname, options = c.channels[0]._parse_uri()
+
+        self.assertEquals(dbname, 'kombu_default')
+
+    @skip_if_not_module('pymongo')
+    def test_custom_database(self):
+        url = 'mongodb://localhost/dbname'
+        c = self._get_connection(url)
+        hostname, dbname, options = c.channels[0]._parse_uri()
+
+        self.assertEquals(dbname, 'dbname')
+
+    @skip_if_not_module('pymongo')
+    def test_custom_credentions(self):
+        url = 'mongodb://localhost/dbname'
+        c = self._get_connection(url, userid='foo', password='bar')
+        hostname, dbname, options = c.channels[0]._parse_uri()
+
+        self.assertEquals(hostname, 'mongodb://foo:bar@localhost/dbname')
+        self.assertEquals(dbname, 'dbname')
+
+    @skip_if_not_module('pymongo')
+    def test_options(self):
+        url = 'mongodb://localhost,localhost2:29017/dbname?safe=true'
+        c = self._get_connection(url)
+
+        hostname, dbname, options = c.channels[0]._parse_uri()
+
+        self.assertEqual(options['safe'], True)
+
+    @skip_if_not_module('pymongo')
+    def test_real_connections(self):
         from pymongo.errors import ConfigurationError
 
         raise SkipTest(
             'Test is functional: it actually connects to mongod')
 
-        class Transport(mongodb.Transport):
-            Connection = MockConnection
-
-        url = 'mongodb://'
-        c = Connection(url, transport=Transport).connect()
-        client = c.channels[0].client
-        self.assertEquals(client.name, 'kombu_default')
-        self.assertEquals(client.connection.host, '127.0.0.1')
-
-        url = 'mongodb://localhost'
-        c = Connection(url, transport=Transport).connect()
-        client = c.channels[0].client
-        self.assertEquals(client.name, 'kombu_default')
-
-        url = 'mongodb://localhost/dbname'
-        c = Connection(url, transport=Transport).connect()
-        client = c.channels[0].client
-        self.assertEquals(client.name, 'dbname')
-
         url = 'mongodb://localhost,localhost:29017/dbname'
-        c = Connection(url, transport=Transport).connect()
+        c = self._get_connection(url)
         client = c.channels[0].client
 
         nodes = client.connection.nodes
@@ -51,40 +83,32 @@ class test_mongodb(Case):
             self.assertTrue(('localhost', 29017) in nodes)
             self.assertEquals(client.name, 'dbname')
 
-        # Passing options breaks kombu's _init_params method
-        # url = 'mongodb://localhost,localhost2:29017/dbname?safe=true'
-        # c = Connection(url, transport=Transport).connect()
-        # client = c.channels[0].client
-
         url = 'mongodb://localhost:27017,localhost2:29017/dbname'
-        c = Connection(url, transport=Transport).connect()
+        c = self._get_connection(url)
         client = c.channels[0].client
 
         # Login to admin db since there's no db specified
-        url = "mongodb://adminusername:adminpassword@localhost"
-        c = Connection(url, transport=Transport).connect()
+        url = 'mongodb://adminusername:adminpassword@localhost'
+        c = self._get_connection()
         client = c.channels[0].client
-        self.assertEquals(client.name, "kombu_default")
+        self.assertEquals(client.name, 'kombu_default')
 
         # Lets make sure that using admin db doesn't break anything
         # when no user is specified
-        url = "mongodb://localhost"
-        c = Connection(url, transport=Transport).connect()
+        url = 'mongodb://localhost'
+        c = self._get_connection(url)
         client = c.channels[0].client
 
         # Assuming there's user 'username' with password 'password'
         # configured in mongodb
-        url = "mongodb://username:password@localhost/dbname"
-        c = Connection(url, transport=Transport).connect()
+        url = 'mongodb://username:password@localhost/dbname'
+        c = self._get_connection(url)
         client = c.channels[0].client
 
         # Assuming there's no user 'nousername' with password 'nopassword'
         # configured in mongodb
-        url = "mongodb://nousername:nopassword@localhost/dbname"
-        c = Connection(url, transport=Transport).connect()
+        url = 'mongodb://nousername:nopassword@localhost/dbname'
+        c = self._get_connection(url)
 
-        # Needed, otherwise the error would be rose before
-        # the assertRaises is called
-        def get_client():
+        with self.assertRaises(ConfigurationError):
             c.channels[0].client
-        self.assertRaises(ConfigurationError, get_client)

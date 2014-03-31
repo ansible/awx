@@ -55,25 +55,26 @@ class BlockDeviceType(object):
         pass
 
     def endElement(self, name, value, connection):
+        lname = name.lower()
         if name == 'volumeId':
             self.volume_id = value
-        elif name == 'virtualName':
+        elif lname == 'virtualname':
             self.ephemeral_name = value
-        elif name == 'NoDevice':
+        elif lname == 'nodevice':
             self.no_device = (value == 'true')
-        elif name == 'snapshotId':
+        elif lname == 'snapshotid':
             self.snapshot_id = value
-        elif name == 'volumeSize':
+        elif lname == 'volumesize':
             self.size = int(value)
-        elif name == 'status':
+        elif lname == 'status':
             self.status = value
-        elif name == 'attachTime':
+        elif lname == 'attachtime':
             self.attach_time = value
-        elif name == 'deleteOnTermination':
+        elif lname == 'deleteontermination':
             self.delete_on_termination = (value == 'true')
-        elif name == 'volumeType':
+        elif lname == 'volumetype':
             self.volume_type = value
-        elif name == 'iops':
+        elif lname == 'iops':
             self.iops = int(value)
         else:
             setattr(self, name, value)
@@ -105,14 +106,16 @@ class BlockDeviceMapping(dict):
         self.current_value = None
 
     def startElement(self, name, attrs, connection):
-        if name == 'ebs' or name == 'virtualName':
+        lname = name.lower()
+        if lname in ['ebs', 'virtualname']:
             self.current_value = BlockDeviceType(self)
             return self.current_value
 
     def endElement(self, name, value, connection):
-        if name == 'device' or name == 'deviceName':
+        lname = name.lower()
+        if lname in ['device', 'devicename']:
             self.current_name = value
-        elif name == 'item':
+        elif lname in ['item', 'member']:
             self[self.current_name] = self.current_value
 
     def ec2_build_list_params(self, params, prefix=''):

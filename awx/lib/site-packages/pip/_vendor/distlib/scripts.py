@@ -13,7 +13,8 @@ import sys
 
 from .compat import sysconfig, fsencode, detect_encoding, ZipFile
 from .resources import finder
-from .util import FileOperator, get_export_entry, convert_path, get_executable
+from .util import (FileOperator, get_export_entry, convert_path,
+                   get_executable, in_venv)
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +96,7 @@ class ScriptMaker(object):
             executable = self.executable
         elif not sysconfig.is_python_build():
             executable = get_executable()
-        elif hasattr(sys, 'base_prefix') and sys.prefix != sys.base_prefix:
+        elif in_venv():
             executable = os.path.join(sysconfig.get_path('scripts'),
                             'python%s' % sysconfig.get_config_var('EXE'))
         else:

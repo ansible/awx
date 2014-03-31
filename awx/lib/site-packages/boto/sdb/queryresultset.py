@@ -33,7 +33,7 @@ def query_lister(domain, query='', max_items=None, attr_names=None):
             yield item
             num_results += 1
         next_token = rs.next_token
-        more_results = next_token != None
+        more_results = next_token is not None
 
 class QueryResultSet(object):
 
@@ -59,7 +59,7 @@ def select_lister(domain, query='', max_items=None):
             yield item
             num_results += 1
         next_token = rs.next_token
-        more_results = next_token != None
+        more_results = next_token is not None
 
 class SelectResultSet(object):
 
@@ -86,7 +86,7 @@ class SelectResultSet(object):
             self.next_token = rs.next_token
             if self.max_items and num_results >= self.max_items:
                 raise StopIteration
-            more_results = self.next_token != None
+            more_results = self.next_token is not None
 
     def next(self):
         return self.__iter__().next()

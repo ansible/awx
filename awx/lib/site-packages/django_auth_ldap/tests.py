@@ -67,6 +67,7 @@ class LDAPTest(TestCase):
     top = ("o=test", {"o": "test"})
     people = ("ou=people,o=test", {"ou": "people"})
     groups = ("ou=groups,o=test", {"ou": "groups"})
+    moregroups = ("ou=moregroups,o=test", {"ou": "moregroups"})
 
     alice = ("uid=alice,ou=people,o=test", {
         "uid": ["alice"],
@@ -122,7 +123,7 @@ class LDAPTest(TestCase):
         "memberUid": ["alice"],
     })
 
-    # groupOfUniqueName groups
+    # groupOfNames groups
     empty_gon = ("cn=empty_gon,ou=groups,o=test", {
         "cn": ["empty_gon"],
         "objectClass": ["groupOfNames"],
@@ -142,6 +143,11 @@ class LDAPTest(TestCase):
         "cn": ["superuser_gon"],
         "objectClass": ["groupOfNames"],
         "member": ["uid=alice,ou=people,o=test"]
+    })
+    other_gon = ("cn=other_gon,ou=moregroups,o=test", {
+        "cn": ["other_gon"],
+        "objectClass": ["groupOfNames"],
+        "member": ["uid=bob,ou=people,o=test"]
     })
 
     # Nested groups with a circular reference
@@ -164,10 +170,10 @@ class LDAPTest(TestCase):
         "member": ["cn=parent_gon,ou=groups,o=test"]
     })
 
-    directory = dict([top, people, groups, alice, bob, dressler, nobody,
-                      active_px, staff_px, superuser_px, empty_gon, active_gon,
-                      staff_gon, superuser_gon, parent_gon, nested_gon,
-                      circular_gon])
+    directory = dict([top, people, groups, moregroups, alice, bob, dressler,
+                      nobody, active_px, staff_px, superuser_px, empty_gon,
+                      active_gon, staff_gon, superuser_gon, other_gon,
+                      parent_gon, nested_gon, circular_gon])
 
     @classmethod
     def configure_logger(cls):
@@ -594,7 +600,7 @@ class LDAPTest(TestCase):
     def test_require_group(self):
         self._init_settings(
             USER_DN_TEMPLATE='uid=%(user)s,ou=people,o=test',
-            GROUP_SEARCH=LDAPSearch('ou=groups,o=test', ldap.SCOPE_SUBTREE),
+            GROUP_SEARCH=LDAPSearch('ou=groups,o=test', ldap.SCOPE_SUBTREE, '(objectClass=groupOfNames)'),
             GROUP_TYPE=MemberDNGroupType(member_attr='member'),
             REQUIRE_GROUP="cn=active_gon,ou=groups,o=test"
         )
@@ -609,6 +615,42 @@ class LDAPTest(TestCase):
             ['initialize', 'simple_bind_s', 'simple_bind_s', 'compare_s',
              'initialize', 'simple_bind_s', 'simple_bind_s', 'compare_s']
         )
+
+    def test_group_union(self):
+        self._init_settings(
+            USER_DN_TEMPLATE='uid=%(user)s,ou=people,o=test',
+            GROUP_SEARCH=LDAPSearchUnion(
+                LDAPSearch('ou=groups,o=test', ldap.SCOPE_SUBTREE, '(objectClass=groupOfNames)'),
+                LDAPSearch('ou=moregroups,o=test', ldap.SCOPE_SUBTREE, '(objectClass=groupOfNames)')
+            ),
+            GROUP_TYPE=MemberDNGroupType(member_attr='member'),
+            REQUIRE_GROUP="cn=other_gon,ou=moregroups,o=test"
+        )
+
+        alice = self.backend.authenticate(username='alice', password='password')
+        bob = self.backend.authenticate(username='bob', password='password')
+
+        self.assertTrue(alice is None)
+        self.assertTrue(bob is not None)
+        self.assertEqual(bob.ldap_user.group_names, set(['other_gon']))
+
+    def test_nested_group_union(self):
+        self._init_settings(
+            USER_DN_TEMPLATE='uid=%(user)s,ou=people,o=test',
+            GROUP_SEARCH=LDAPSearchUnion(
+                LDAPSearch('ou=groups,o=test', ldap.SCOPE_SUBTREE, '(objectClass=groupOfNames)'),
+                LDAPSearch('ou=moregroups,o=test', ldap.SCOPE_SUBTREE, '(objectClass=groupOfNames)')
+            ),
+            GROUP_TYPE=NestedMemberDNGroupType(member_attr='member'),
+            REQUIRE_GROUP="cn=other_gon,ou=moregroups,o=test"
+        )
+
+        alice = self.backend.authenticate(username='alice', password='password')
+        bob = self.backend.authenticate(username='bob', password='password')
+
+        self.assertTrue(alice is None)
+        self.assertTrue(bob is not None)
+        self.assertEqual(bob.ldap_user.group_names, set(['other_gon']))
 
     def test_denied_group(self):
         self._init_settings(

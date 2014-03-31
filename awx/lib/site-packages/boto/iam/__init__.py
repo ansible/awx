@@ -22,8 +22,8 @@
 
 # this is here for backward compatibility
 # originally, the IAMConnection class was defined here
-from connection import IAMConnection
-from boto.regioninfo import RegionInfo
+from boto.iam.connection import IAMConnection
+from boto.regioninfo import RegionInfo, get_regions
 
 
 class IAMRegionInfo(RegionInfo):
@@ -50,16 +50,22 @@ def regions():
     :rtype: list
     :return: A list of :class:`boto.regioninfo.RegionInfo` instances
     """
-    return [IAMRegionInfo(name='universal',
-                          endpoint='iam.amazonaws.com',
-                          connection_cls=IAMConnection),
-            IAMRegionInfo(name='us-gov-west-1',
-                          endpoint='iam.us-gov.amazonaws.com',
-                          connection_cls=IAMConnection),
-            IAMRegionInfo(name='cn-north-1',
-                          endpoint='iam.cn-north-1.amazonaws.com.cn',
-                          connection_cls=IAMConnection)
-            ]
+    regions = get_regions(
+        'iam',
+        region_cls=IAMRegionInfo,
+        connection_cls=IAMConnection
+    )
+
+    # For historical reasons, we had a "universal" endpoint as well.
+    regions.append(
+        IAMRegionInfo(
+            name='universal',
+            endpoint='iam.amazonaws.com',
+            connection_cls=IAMConnection
+        )
+    )
+
+    return regions
 
 
 def connect_to_region(region_name, **kw_params):

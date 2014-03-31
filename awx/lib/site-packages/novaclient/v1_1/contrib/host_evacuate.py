@@ -14,6 +14,7 @@
 #    under the License.
 
 from novaclient import base
+from novaclient.openstack.common.gettextutils import _
 from novaclient import utils
 
 
@@ -29,7 +30,7 @@ def _server_evacuate(cs, server, args):
                             args.on_shared_storage)
     except Exception as e:
         success = False
-        error_message = "Error while evacuating instance: %s" % e
+        error_message = _("Error while evacuating instance: %s") % e
     return EvacuateHostResponse(base.Manager,
                                 {"server_uuid": server['uuid'],
                                 "evacuate_accepted": success,
@@ -40,12 +41,13 @@ def _server_evacuate(cs, server, args):
 @utils.arg('--target_host',
            metavar='<target_host>',
            default=None,
-           help='Name of target host.')
+           help=_('Name of target host.'))
 @utils.arg('--on-shared-storage',
            dest='on_shared_storage',
            action="store_true",
            default=False,
-           help='Specifies whether all instances files are on shared storage')
+           help=_('Specifies whether all instances files are on shared '
+                  ' storage'))
 def do_host_evacuate(cs, args):
     """Evacuate all instances from failed host to specified one."""
     hypervisors = cs.hypervisors.search(args.host, servers=True)

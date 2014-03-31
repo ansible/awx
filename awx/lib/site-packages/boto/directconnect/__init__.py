@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -31,32 +31,7 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     from boto.directconnect.layer1 import DirectConnectConnection
-
-    return [RegionInfo(name='us-east-1',
-                       endpoint='directconnect.us-east-1.amazonaws.com',
-                       connection_cls=DirectConnectConnection),
-            RegionInfo(name='us-west-1',
-                       endpoint='directconnect.us-west-1.amazonaws.com',
-                       connection_cls=DirectConnectConnection),
-            RegionInfo(name='us-west-2',
-                       endpoint='directconnect.us-west-2.amazonaws.com',
-                       connection_cls=DirectConnectConnection),
-            RegionInfo(name='eu-west-1',
-                       endpoint='directconnect.eu-west-1.amazonaws.com',
-                       connection_cls=DirectConnectConnection),
-            RegionInfo(name='ap-southeast-1',
-                       endpoint='directconnect.ap-southeast-1.amazonaws.com',
-                       connection_cls=DirectConnectConnection),
-            RegionInfo(name='ap-southeast-2',
-                       endpoint='directconnect.ap-southeast-2.amazonaws.com',
-                       connection_cls=DirectConnectConnection),
-            RegionInfo(name='ap-southeast-3',
-                       endpoint='directconnect.ap-southeast-3.amazonaws.com',
-                       connection_cls=DirectConnectConnection),
-            RegionInfo(name='sa-east-1',
-                       endpoint='directconnect.sa-east-1.amazonaws.com',
-                       connection_cls=DirectConnectConnection),
-            ]
+    return get_regions('directconnect', connection_cls=DirectConnectConnection)
 
 
 def connect_to_region(region_name, **kw_params):

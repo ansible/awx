@@ -88,10 +88,7 @@ class Connection(object):
       documentation for available options.
     :keyword heartbeat: Heartbeat interval in int/float seconds.
         Note that if heartbeats are enabled then the :meth:`heartbeat_check`
-        method must be called at an interval twice the frequency of the
-        heartbeat: e.g. if the heartbeat is 10, then the heartbeats must be
-        checked every 5 seconds (the rate can also be controlled by
-        the ``rate`` argument to :meth:`heartbeat_check``).
+        method must be called regularly, around once per second.
 
     .. note::
 
@@ -254,7 +251,9 @@ class Connection(object):
         return chan
 
     def heartbeat_check(self, rate=2):
-        """Verify that heartbeats are sent and received.
+        """Allow the transport to perform any periodic tasks
+        required to make heartbeats work.  This should be called
+        approximately every second.
 
         If the current transport does not support heartbeats then
         this is a noop operation.
@@ -263,6 +262,7 @@ class Connection(object):
             compared to the actual heartbeat value.  E.g. if
             the heartbeat is set to 3 seconds, and the tick
             is called every 3 / 2 seconds, then the rate is 2.
+            This value is currently unused by any transports.
 
         """
         return self.transport.heartbeat_check(self.connection, rate=rate)
@@ -528,6 +528,9 @@ class Connection(object):
         """Create a copy of the connection with the same connection
         settings."""
         return self.__class__(**dict(self._info(resolve=False), **kwargs))
+
+    def get_heartbeat_interval(self):
+        return self.transport.get_heartbeat_interval(self.connection)
 
     def _info(self, resolve=True):
         transport_cls = self.transport_cls

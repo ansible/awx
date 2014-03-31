@@ -22,7 +22,7 @@
 # IN THE SOFTWARE.
 #
 
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 class S3RegionInfo(RegionInfo):
@@ -50,37 +50,11 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     from .connection import S3Connection
-    return [S3RegionInfo(name='us-east-1',
-                         endpoint='s3.amazonaws.com',
-                         connection_cls=S3Connection),
-            S3RegionInfo(name='us-gov-west-1',
-                         endpoint='s3-us-gov-west-1.amazonaws.com',
-                       connection_cls=S3Connection),
-            S3RegionInfo(name='us-west-1',
-                         endpoint='s3-us-west-1.amazonaws.com',
-                       connection_cls=S3Connection),
-            S3RegionInfo(name='us-west-2',
-                         endpoint='s3-us-west-2.amazonaws.com',
-                         connection_cls=S3Connection),
-            S3RegionInfo(name='ap-northeast-1',
-                         endpoint='s3-ap-northeast-1.amazonaws.com',
-                         connection_cls=S3Connection),
-            S3RegionInfo(name='ap-southeast-1',
-                         endpoint='s3-ap-southeast-1.amazonaws.com',
-                         connection_cls=S3Connection),
-            S3RegionInfo(name='ap-southeast-2',
-                         endpoint='s3-ap-southeast-2.amazonaws.com',
-                         connection_cls=S3Connection),
-            S3RegionInfo(name='eu-west-1',
-                         endpoint='s3-eu-west-1.amazonaws.com',
-                         connection_cls=S3Connection),
-            S3RegionInfo(name='sa-east-1',
-                         endpoint='s3-sa-east-1.amazonaws.com',
-                         connection_cls=S3Connection),
-            S3RegionInfo(name='cn-north-1',
-                         endpoint='s3.cn-north-1.amazonaws.com.cn',
-                         connection_cls=S3Connection),
-            ]
+    return get_regions(
+        's3',
+        region_cls=S3RegionInfo,
+        connection_cls=S3Connection
+    )
 
 
 def connect_to_region(region_name, **kw_params):

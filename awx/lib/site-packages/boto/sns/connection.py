@@ -48,15 +48,18 @@ class SNSConnection(AWSQueryConnection):
     requests, and handling error responses. For a list of available
     SDKs, go to `Tools for Amazon Web Services`_.
     """
-    DefaultRegionName = 'us-east-1'
-    DefaultRegionEndpoint = 'sns.us-east-1.amazonaws.com'
-    APIVersion = '2010-03-31'
+    DefaultRegionName = boto.config.get('Boto', 'sns_region_name', 'us-east-1')
+    DefaultRegionEndpoint = boto.config.get('Boto', 'sns_region_endpoint', 
+                                            'sns.us-east-1.amazonaws.com')
+    APIVersion = boto.config.get('Boto', 'sns_version', '2010-03-31')
+
 
     def __init__(self, aws_access_key_id=None, aws_secret_access_key=None,
                  is_secure=True, port=None, proxy=None, proxy_port=None,
                  proxy_user=None, proxy_pass=None, debug=0,
                  https_connection_factory=None, region=None, path='/',
-                 security_token=None, validate_certs=True):
+                 security_token=None, validate_certs=True,
+                 profile_name=None):
         if not region:
             region = RegionInfo(self, self.DefaultRegionName,
                                 self.DefaultRegionEndpoint,
@@ -69,7 +72,8 @@ class SNSConnection(AWSQueryConnection):
                                     self.region.endpoint, debug,
                                     https_connection_factory, path,
                                     security_token=security_token,
-                                    validate_certs=validate_certs)
+                                    validate_certs=validate_certs,
+                                    profile_name=profile_name)
 
     def _build_dict_as_list_params(self, params, dictionary, name):
       """
@@ -264,7 +268,7 @@ class SNSConnection(AWSQueryConnection):
         :type protocol: string
         :param protocol: The protocol used to communicate with
                          the subscriber.  Current choices are:
-                         email|email-json|http|https|sqs|sms
+                         email|email-json|http|https|sqs|sms|application
 
         :type endpoint: string
         :param endpoint: The location of the endpoint for
@@ -274,7 +278,10 @@ class SNSConnection(AWSQueryConnection):
                          * For http, this would be a URL beginning with http
                          * For https, this would be a URL beginning with https
                          * For sqs, this would be the ARN of an SQS Queue
-                         * For sms, this would be a phone number of an SMS-enabled device
+                         * For sms, this would be a phone number of an
+                           SMS-enabled device
+                         * For application, the endpoint is the EndpointArn
+                           of a mobile app and device.
         """
         params = {'TopicArn': topic,
                   'Protocol': protocol,

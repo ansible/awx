@@ -22,4 +22,5 @@ class Command(CeleryCommand):
                + worker.preload_options)
 
     def handle(self, *args, **options):
-        worker.run(*args, **options)
+        worker.check_args(args)
+        worker.run(**options)

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -31,34 +31,7 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     from boto.elasticache.layer1 import ElastiCacheConnection
-    return [RegionInfo(name='us-east-1',
-                       endpoint='elasticache.us-east-1.amazonaws.com',
-                       connection_cls=ElastiCacheConnection),
-            RegionInfo(name='us-west-1',
-                       endpoint='elasticache.us-west-1.amazonaws.com',
-                       connection_cls=ElastiCacheConnection),
-            RegionInfo(name='us-west-2',
-                       endpoint='elasticache.us-west-2.amazonaws.com',
-                       connection_cls=ElastiCacheConnection),
-            RegionInfo(name='eu-west-1',
-                       endpoint='elasticache.eu-west-1.amazonaws.com',
-                       connection_cls=ElastiCacheConnection),
-            RegionInfo(name='ap-northeast-1',
-                       endpoint='elasticache.ap-northeast-1.amazonaws.com',
-                       connection_cls=ElastiCacheConnection),
-            RegionInfo(name='ap-southeast-1',
-                       endpoint='elasticache.ap-southeast-1.amazonaws.com',
-                       connection_cls=ElastiCacheConnection),
-            RegionInfo(name='ap-southeast-2',
-                       endpoint='elasticache.ap-southeast-2.amazonaws.com',
-                       connection_cls=ElastiCacheConnection),
-            RegionInfo(name='sa-east-1',
-                       endpoint='elasticache.sa-east-1.amazonaws.com',
-                       connection_cls=ElastiCacheConnection),
-            RegionInfo(name='cn-north-1',
-                       endpoint='elasticache.cn-north-1.amazonaws.com.cn',
-                       connection_cls=ElastiCacheConnection),
-            ]
+    return get_regions('elasticache', connection_cls=ElastiCacheConnection)
 
 
 def connect_to_region(region_name, **kw_params):

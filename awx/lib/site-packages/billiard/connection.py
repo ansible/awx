@@ -5,9 +5,9 @@ import sys
 is_pypy = hasattr(sys, 'pypy_version_info')
 
 if sys.version_info[0] == 3:
-    from . import _connection3 as connection
+    from .py3 import connection
 else:
-    from . import _connection as connection  # noqa
+    from .py2 import connection  # noqa
 
 
 if is_pypy:

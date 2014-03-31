@@ -3,11 +3,11 @@ import subprocess
 import re
 import binascii
 
-from keyring.backend import KeyringBackend
-from keyring.errors import PasswordSetError
-from keyring.errors import PasswordDeleteError
-from keyring.util import properties
-from keyring.py27compat import unicode_str
+from ..backend import KeyringBackend
+from ..errors import PasswordSetError
+from ..errors import PasswordDeleteError
+from ..util import properties
+from ..py27compat import unicode_str
 
 
 class SecurityCommand(unicode_str):

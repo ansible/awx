@@ -105,7 +105,7 @@ class Task(Model):
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         nsecs = 5
         current_timeout = vtimeout
-        while process.poll() == None:
+        while process.poll() is None:
             boto.log.info('nsecs=%s, timeout=%s' % (nsecs, current_timeout))
             if nsecs >= current_timeout:
                 current_timeout += vtimeout

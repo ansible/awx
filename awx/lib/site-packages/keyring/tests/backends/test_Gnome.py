@@ -18,8 +18,7 @@ def ImportBlesser(*names, **changes):
 class GnomeKeyringTestCase(BackendBasicTests, unittest.TestCase):
 
     def environ(self):
-        return dict(GNOME_KEYRING_CONTROL='1',
-                    DISPLAY='1',
+        return dict(DISPLAY='1',
                     DBUS_SESSION_BUS_ADDRESS='1')
 
     def init_keyring(self):
@@ -40,12 +39,6 @@ class GnomeKeyringTestCase(BackendBasicTests, unittest.TestCase):
         with NoNoneDictMutator(Gnome.__dict__, GnomeKeyring=None):
             with Environ(**self.environ()):
                 self.assertFalse(Gnome.Keyring.viable)
-
-    def test_supported_no_keyring(self):
-        environ = self.environ()
-        environ['GNOME_KEYRING_CONTROL'] = None
-        with Environ(**environ):
-            self.assertFalse(Gnome.Keyring.viable)
 
     def test_supported_no_display(self):
         environ = self.environ()

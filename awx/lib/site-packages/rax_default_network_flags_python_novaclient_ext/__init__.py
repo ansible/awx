@@ -20,15 +20,31 @@ from novaclient import utils
 from novaclient.v1_1 import servers
 from novaclient.v1_1 import shell
 
+# This function was removed from python-novaclient, so we are defining it here
+# So the add_args() function will work again.
+
+def add_arg(f, *args, **kwargs):
+    """Bind CLI arguments to a shell.py `do_foo` function."""
+
+    if not hasattr(f, 'arguments'):
+        f.arguments = []
+
+    # NOTE(sirp): avoid dups that can occur when the module is shared across
+    # tests.
+    if (args, kwargs) not in f.arguments:
+        # Because of the semantics of the decorator composition if we just append
+        # to the options list positional options will appear to be backwards.
+        f.arguments.insert(0, (args, kwargs))
+
 
 def add_args():
-    utils.add_arg(shell.do_boot,
+    add_arg(shell.do_boot,
         '--no-public',
         dest='public',
         action='store_false',
         default=True,
         help='Boot instance without public network connectivity.')
-    utils.add_arg(shell.do_boot,
+    add_arg(shell.do_boot,
         '--no-service-net',
         dest='service_net',
         action='store_false',

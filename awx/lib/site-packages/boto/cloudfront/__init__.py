@@ -43,12 +43,14 @@ class CloudFrontConnection(AWSAuthConnection):
     def __init__(self, aws_access_key_id=None, aws_secret_access_key=None,
                  port=None, proxy=None, proxy_port=None,
                  host=DefaultHost, debug=0, security_token=None,
-                 validate_certs=True):
+                 validate_certs=True, profile_name=None, https_connection_factory=None):
         super(CloudFrontConnection, self).__init__(host,
                                    aws_access_key_id, aws_secret_access_key,
                                    True, port, proxy, proxy_port, debug=debug,
                                    security_token=security_token,
-                                   validate_certs=validate_certs)
+                                   validate_certs=validate_certs,
+                                   https_connection_factory=https_connection_factory,
+                                   profile_name=profile_name)
 
     def get_etag(self, response):
         response_headers = response.msg

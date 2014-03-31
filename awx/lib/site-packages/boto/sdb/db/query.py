@@ -39,7 +39,7 @@ class Query(object):
         return iter(self.manager.query(self))
 
     def next(self):
-        if self.__local_iter__ == None:
+        if self.__local_iter__ is None:
             self.__local_iter__ = self.__iter__()
         return self.__local_iter__.next()
 

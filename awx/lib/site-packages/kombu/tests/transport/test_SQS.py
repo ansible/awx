@@ -144,38 +144,40 @@ class test_Channel(Case):
         self.assertIn(self.queue_name, self.channel._queue_cache)
 
     def test_new_queue(self):
-        queue_name = "new_unittest_queue"
+        queue_name = 'new_unittest_queue'
         self.channel._new_queue(queue_name)
         self.assertIn(queue_name, self.sqs_conn_mock.queues)
         # For cleanup purposes, delete the queue and the queue file
         self.channel._delete(queue_name)
 
     def test_delete(self):
-        queue_name = "new_unittest_queue"
+        queue_name = 'new_unittest_queue'
         self.channel._new_queue(queue_name)
         self.channel._delete(queue_name)
         self.assertNotIn(queue_name, self.channel._queue_cache)
 
     def test_get_from_sqs(self):
         # Test getting a single message
-        message = "my test message"
+        message = 'my test message'
         self.producer.publish(message)
         results = self.channel._get_from_sqs(self.queue_name)
         self.assertEquals(len(results), 1)
 
         # Now test getting many messages
         for i in xrange(3):
-            message = "message: %s" % i
+            message = 'message: {0}'.format(i)
             self.producer.publish(message)
 
         results = self.channel._get_from_sqs(self.queue_name, count=3)
         self.assertEquals(len(results), 3)
 
     def test_get_with_empty_list(self):
-        self.assertRaises(five.Empty, self.channel._get, self.queue_name)
+        with self.assertRaises(five.Empty):
+            self.channel._get(self.queue_name)
 
     def test_get_bulk_raises_empty(self):
-        self.assertRaises(five.Empty, self.channel._get_bulk, self.queue_name)
+        with self.assertRaises(five.Empty):
+            self.channel._get_bulk(self.queue_name)
 
     def test_messages_to_python(self):
         message_count = 3
@@ -248,7 +250,8 @@ class test_Channel(Case):
         def mock_can_consume():
             return False
         self.channel.qos.can_consume = mock_can_consume
-        self.assertRaises(five.Empty, self.channel.drain_events)
+        with self.assertRaises(five.Empty):
+            self.channel.drain_events()
 
     def test_drain_events_with_prefetch_5(self):
         # Generate 20 messages
@@ -274,7 +277,7 @@ class test_Channel(Case):
     def test_drain_events_with_prefetch_none(self):
         # Generate 20 messages
         message_count = 20
-        expected_get_message_count = 20
+        expected_get_message_count = 2
 
         # Set the prefetch_count to None
         self.channel.qos.prefetch_count = None

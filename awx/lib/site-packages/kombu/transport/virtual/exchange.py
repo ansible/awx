@@ -124,7 +124,8 @@ class FanoutExchange(ExchangeType):
 
     def deliver(self, message, exchange, routing_key, **kwargs):
         if self.channel.supports_fanout:
-            self.channel._put_fanout(exchange, message, **kwargs)
+            self.channel._put_fanout(
+                exchange, message, routing_key, **kwargs)
 
 
 #: Map of standard exchange types and corresponding classes.

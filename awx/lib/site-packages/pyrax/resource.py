@@ -21,6 +21,8 @@
 Base utilities to build API operation managers and objects on top of.
 """
 
+import six
+
 import pyrax
 import pyrax.utils as utils
 
@@ -66,7 +68,7 @@ class BaseResource(object):
         corresponding attributes on the object.
         """
         for (key, val) in info.iteritems():
-            if isinstance(key, unicode):
+            if isinstance(key, six.text_type):
                 key = key.encode(pyrax.get_encoding())
             setattr(self, key, val)
 

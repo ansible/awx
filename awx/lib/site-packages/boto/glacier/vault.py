@@ -300,7 +300,9 @@ class Vault(object):
         return self.get_job(response['JobId'])
 
     def retrieve_inventory(self, sns_topic=None,
-                           description=None):
+                           description=None, byte_range=None,
+                           start_date=None, end_date=None,
+                           limit=None):
         """
         Initiate a inventory retrieval job to list the items in the
         vault. You will need to wait for the notification from
@@ -315,6 +317,18 @@ class Vault(object):
             sends notification when the job is completed and the output
             is ready for you to download.
 
+        :type byte_range: str
+        :param byte_range: Range of bytes to retrieve.
+
+        :type start_date: DateTime
+        :param start_date: Beginning of the date range to query.
+
+        :type end_date: DateTime
+        :param end_date: End of the date range to query.
+
+        :type limit: int
+        :param limit: Limits the number of results returned.
+
         :rtype: str
         :return: The ID of the job
         """
@@ -323,6 +337,19 @@ class Vault(object):
             job_data['SNSTopic'] = sns_topic
         if description is not None:
             job_data['Description'] = description
+        if byte_range is not None:
+            job_data['RetrievalByteRange'] = byte_range
+        if start_date is not None or end_date is not None or limit is not None:
+            rparams = {}
+
+            if start_date is not None:
+                rparams['StartDate'] = start_date.isoformat()
+            if end_date is not None:
+                rparams['EndDate'] = end_date.isoformat()
+            if limit is not None:
+                rparams['Limit'] = limit
+
+            job_data['InventoryRetrievalParameters'] = rparams
 
         response = self.layer1.initiate_job(self.name, job_data)
         return response['JobId']
@@ -339,6 +366,18 @@ class Vault(object):
         :param sns_topic: The Amazon SNS topic ARN where Amazon Glacier
             sends notification when the job is completed and the output
             is ready for you to download.
+
+        :type byte_range: str
+        :param byte_range: Range of bytes to retrieve.
+
+        :type start_date: DateTime
+        :param start_date: Beginning of the date range to query.
+
+        :type end_date: DateTime
+        :param end_date: End of the date range to query.
+
+        :type limit: int
+        :param limit: Limits the number of results returned.
 
         :rtype: :class:`boto.glacier.job.Job`
         :return: A Job object representing the retrieval job.

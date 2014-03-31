@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from itertools import chain
 import sys
 from time import sleep
 from Queue import Queue
@@ -134,7 +135,7 @@ class QueueFunctionManager(object):
         self.thread_kwargs = thread_kwargs if thread_kwargs else {}
 
     def __enter__(self):
-        for _junk in xrange(self.thread_count):
+        for _junk in range(self.thread_count):
             if self.connection_maker:
                 thread_args = (self.connection_maker(),) + self.thread_args
             else:
@@ -223,6 +224,29 @@ class MultiThreadingManager(object):
         if fmt_args:
             msg = msg % fmt_args
         self.printer.queue.put(msg)
+
+    def print_items(self, items, offset=14, skip_missing=False):
+        lines = []
+        template = '%%%ds: %%s' % offset
+        for k, v in items:
+            if skip_missing and not v:
+                continue
+            lines.append((template % (k, v)).rstrip())
+        self.print_msg('\n'.join(lines))
+
+    def print_headers(self, headers, meta_prefix='', exclude_headers=None,
+                      offset=14):
+        exclude_headers = exclude_headers or []
+        meta_headers = []
+        other_headers = []
+        template = '%%%ds: %%s' % offset
+        for key, value in headers.items():
+            if key.startswith(meta_prefix):
+                meta_key = 'Meta %s' % key[len(meta_prefix):].title()
+                meta_headers.append(template % (meta_key, value))
+            elif key not in exclude_headers:
+                other_headers.append(template % (key.title(), value))
+        self.print_msg('\n'.join(chain(meta_headers, other_headers)))
 
     def error(self, msg, *fmt_args):
         if fmt_args:

@@ -10,15 +10,16 @@ from __future__ import absolute_import
 import os
 import socket
 import threading
-import uuid as _uuid
 
 from collections import deque
 from contextlib import contextmanager
 from functools import partial
 from itertools import count
+from uuid import getnode as _getnode, uuid4, uuid3, NAMESPACE_OID
+
+from amqp import RecoverableConnectionError
 
 from .entity import Exchange, Queue
-from .exceptions import ChannelError
 from .five import range
 from .log import get_logger
 from .messaging import Consumer as _Consumer
@@ -42,16 +43,24 @@ __all__ = ['Broadcast', 'maybe_declare', 'uuid',
 PREFETCH_COUNT_MAX = 0xFFFF
 
 logger = get_logger(__name__)
-_nodeid = _uuid.getnode()
+
+_node_id = None
+
+
+def get_node_id():
+    global _node_id
+    if _node_id is None:
+        _node_id = uuid4().int
+    return _node_id
 
 
 def generate_oid(node_id, process_id, thread_id, instance):
-    ent = '%x-%x-%x-%x' % (node_id, process_id, thread_id, id(instance))
-    return str(_uuid.uuid3(_uuid.NAMESPACE_OID, ent))
+    ent = '%x-%x-%x-%x' % (get_node_id(), process_id, thread_id, id(instance))
+    return str(uuid3(NAMESPACE_OID, ent))
 
 
 def oid_from(instance):
-    return generate_oid(_nodeid, os.getpid(), get_ident(), instance)
+    return generate_oid(_getnode(), os.getpid(), get_ident(), instance)
 
 
 class Broadcast(Queue):
@@ -93,7 +102,7 @@ def maybe_declare(entity, channel=None, retry=False, **retry_policy):
 def _maybe_declare(entity):
     channel = entity.channel
     if not channel.connection:
-        raise ChannelError('channel disconnected')
+        raise RecoverableConnectionError('channel disconnected')
     if entity.can_cache_declaration:
         declared = channel.connection.client.declared_entities
         ident = hash(entity)

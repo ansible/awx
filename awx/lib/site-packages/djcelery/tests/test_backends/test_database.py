@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+import celery
+
 from datetime import timedelta
 
 from celery import current_app
@@ -65,6 +67,9 @@ class TestDatabaseBackend(unittest.TestCase):
         x = AsyncResult(tid)
         self.assertEqual(x.result.get('foo'), 'bar')
         x.forget()
+        if celery.VERSION[0:3] == (3, 1, 10):
+            # bug in 3.1.10 means result did not clear cache after forget.
+            x._cache = None
         self.assertIsNone(x.result)
 
     def test_group_store(self):

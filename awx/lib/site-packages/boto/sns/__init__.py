@@ -23,7 +23,7 @@
 # this is here for backward compatibility
 # originally, the SNSConnection class was defined here
 from connection import SNSConnection
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -33,37 +33,7 @@ def regions():
     :rtype: list
     :return: A list of :class:`boto.regioninfo.RegionInfo` instances
     """
-    return [RegionInfo(name='us-east-1',
-                       endpoint='sns.us-east-1.amazonaws.com',
-                       connection_cls=SNSConnection),
-            RegionInfo(name='eu-west-1',
-                       endpoint='sns.eu-west-1.amazonaws.com',
-                       connection_cls=SNSConnection),
-            RegionInfo(name='us-gov-west-1',
-                       endpoint='sns.us-gov-west-1.amazonaws.com',
-                       connection_cls=SNSConnection),
-            RegionInfo(name='us-west-1',
-                       endpoint='sns.us-west-1.amazonaws.com',
-                       connection_cls=SNSConnection),
-            RegionInfo(name='sa-east-1',
-                       endpoint='sns.sa-east-1.amazonaws.com',
-                       connection_cls=SNSConnection),
-            RegionInfo(name='us-west-2',
-                       endpoint='sns.us-west-2.amazonaws.com',
-                       connection_cls=SNSConnection),
-            RegionInfo(name='ap-northeast-1',
-                       endpoint='sns.ap-northeast-1.amazonaws.com',
-                       connection_cls=SNSConnection),
-            RegionInfo(name='ap-southeast-1',
-                       endpoint='sns.ap-southeast-1.amazonaws.com',
-                       connection_cls=SNSConnection),
-            RegionInfo(name='ap-southeast-2',
-                       endpoint='sns.ap-southeast-2.amazonaws.com',
-                       connection_cls=SNSConnection),
-            RegionInfo(name='cn-north-1',
-                       endpoint=' sns.cn-north-1.amazonaws.com.cn',
-                       connection_cls=SNSConnection),
-            ]
+    return get_regions('sns', connection_cls=SNSConnection)
 
 
 def connect_to_region(region_name, **kw_params):

@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
 import imp
 import inspect
+
+import mock
 import pkg_resources
 
 import novaclient.shell

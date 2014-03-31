@@ -369,11 +369,11 @@ class CloudMonitorEntityManager(BaseManager):
                     errmsg = "".join(["The value passed for '%s' in the ",
                             "details parameter is not valid."]) % missing
                 else:
-                    errcls = exc.MissingMonitoringCheckDetails
                     errmsg = "".join(["The required value for the '%s' ",
                             "setting is missing from the 'details' ",
                             "parameter."]) % missing
-                raise errcls(errmsg)
+                    utils.update_exc(e, errmsg)
+                raise e
             else:
                 if msg == "Validation error":
                     # Info is in the 'details'
@@ -623,6 +623,39 @@ class CloudMonitorEntityManager(BaseManager):
 
 
 
+class CloudMonitorChangelogManager(BaseManager):
+    """
+    Handles calls to retrieve changelogs.
+    """
+    def list(self, entity=None):
+        """
+        Returns a dictionary of changelog data, optionally filtered for a given
+        entity.
+        """
+        uri = "/%s" % self.uri_base
+        if entity:
+            uri = "%s?entityId=%s" % (uri, utils.get_id(entity))
+        resp, resp_body = self._list(uri, return_raw=True)
+        return resp_body
+
+
+
+class CloudMonitorOverviewManager(BaseManager):
+    """
+    Handles calls to retrieve overview information.
+    """
+    def list(self, entity=None):
+        """
+        Returns overview information, optionally filtered for a given entity.
+        """
+        uri = "/%s" % self.uri_base
+        if entity:
+            uri = "%s?entityId=%s" % (uri, utils.get_id(entity))
+        resp, resp_body = self._list(uri, return_raw=True)
+        return resp_body
+
+
+
 class CloudMonitorCheck(BaseResource):
     """
     Represents a check defined for an entity.
@@ -867,6 +900,12 @@ class CloudMonitorClient(BaseClient):
                 self, uri_base="notification_plans",
                 resource_class=CloudMonitorNotificationPlan,
                 response_key=None, plural_response_key=None)
+        self._changelog_manager = CloudMonitorChangelogManager(self,
+                uri_base="changelogs/alarms", resource_class=None,
+                response_key=None, plural_response_key=None)
+        self._overview_manager = CloudMonitorOverviewManager(self,
+                uri_base="views/overview", resource_class=None,
+                response_key="value", plural_response_key=None)
 
 
     def get_account(self):
@@ -1186,6 +1225,33 @@ class CloudMonitorClient(BaseClient):
         Returns the monitoring zone for the given ID.
         """
         return self._monitoring_zone_manager.get(mz_id)
+
+
+    def get_changelogs(self, entity=None):
+        """
+        Returns a dictionary containing the changelogs. The monitoring service
+        records changelogs for alarm statuses.
+
+        You may supply an entity to filter the results to show only the alarms
+        for the specified entity.
+        """
+        return self._changelog_manager.list(entity=entity)
+
+
+    def get_overview(self, entity=None):
+        """
+        Returns a dictionary containing the overview information.
+
+        Views contain a combination of data that usually includes multiple,
+        different objects. The primary purpose of a view is to save API calls
+        and make data retrieval more efficient. Instead of doing multiple API
+        calls and then combining the result yourself, you can perform a single
+        API call against the view endpoint.
+
+        You may supply an entity to filter the results to show only the data
+        for the specified entity.
+        """
+        return self._overview_manager.list(entity=entity)
 
 
     #################################################################

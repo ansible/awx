@@ -152,7 +152,7 @@ def _serialize_html(write, elem, qnames, namespaces, format):
             write("<" + tag)
             items = elem.items()
             if items or namespaces:
-                items.sort() # lexical order
+                items = sorted(items) # lexical order
                 for k, v in items:
                     if isinstance(k, QName):
                         k = k.text
@@ -172,19 +172,18 @@ def _serialize_html(write, elem, qnames, namespaces, format):
                         if k:
                             k = ":" + k
                         write(" xmlns%s=\"%s\"" % (k, _escape_attrib(v)))
-            if format == "xhtml" and tag in HTML_EMPTY:
+            if format == "xhtml" and tag.lower() in HTML_EMPTY:
                 write(" />")
             else:
                 write(">")
-                tag = tag.lower()
                 if text:
-                    if tag == "script" or tag == "style":
+                    if tag.lower() in ["script", "style"]:
                         write(text)
                     else:
                         write(_escape_cdata(text))
                 for e in elem:
                     _serialize_html(write, e, qnames, None, format)
-                if tag not in HTML_EMPTY:
+                if tag.lower() not in HTML_EMPTY:
                     write("</" + tag + ">")
     if elem.tail:
         write(_escape_cdata(elem.tail))

@@ -270,7 +270,7 @@ class Model(object):
             return cls
         for sc in cls.__sub_classes__:
             r = sc.find_subclass(name)
-            if r != None:
+            if r is not None:
                 return r
 
 class Expando(Model):

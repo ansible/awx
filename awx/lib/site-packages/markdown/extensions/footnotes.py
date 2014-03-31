@@ -69,9 +69,6 @@ class FootnoteExtension(Extension):
         md.registerExtension(self)
         self.parser = md.parser
         self.md = md
-        self.sep = ':'
-        if self.md.output_format in ['html5', 'xhtml5']:
-            self.sep = '-'
         # Insert a preprocessor before ReferencePreprocessor
         md.preprocessors.add("footnote", FootnotePreprocessor(self),
                              "<reference")
@@ -113,19 +110,24 @@ class FootnoteExtension(Extension):
         """ Store a footnote for later retrieval. """
         self.footnotes[id] = text
 
+    def get_separator(self):
+        if self.md.output_format in ['html5', 'xhtml5']:
+            return '-'
+        return ':'
+
     def makeFootnoteId(self, id):
         """ Return footnote link id. """
         if self.getConfig("UNIQUE_IDS"):
-            return 'fn%s%d-%s' % (self.sep, self.unique_prefix, id)
+            return 'fn%s%d-%s' % (self.get_separator(), self.unique_prefix, id)
         else:
-            return 'fn%s%s' % (self.sep, id)
+            return 'fn%s%s' % (self.get_separator(), id)
 
     def makeFootnoteRefId(self, id):
         """ Return footnote back-link id. """
         if self.getConfig("UNIQUE_IDS"):
-            return 'fnref%s%d-%s' % (self.sep, self.unique_prefix, id)
+            return 'fnref%s%d-%s' % (self.get_separator(), self.unique_prefix, id)
         else:
-            return 'fnref%s%s' % (self.sep, id)
+            return 'fnref%s%s' % (self.get_separator(), id)
 
     def makeFootnotesDiv(self, root):
         """ Return div of footnotes as et Element. """

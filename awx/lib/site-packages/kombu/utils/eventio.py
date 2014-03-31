@@ -11,7 +11,7 @@ import errno
 import select as __select__
 import socket
 
-from kombu.five import int_types
+from numbers import Integral
 
 _selectf = __select__.select
 _selecterr = __select__.error
@@ -221,15 +221,15 @@ class _select(Poller):
 
         events = {}
         for fd in read:
-            if not isinstance(fd, int_types):
+            if not isinstance(fd, Integral):
                 fd = fd.fileno()
             events[fd] = events.get(fd, 0) | READ
         for fd in write:
-            if not isinstance(fd, int_types):
+            if not isinstance(fd, Integral):
                 fd = fd.fileno()
             events[fd] = events.get(fd, 0) | WRITE
         for fd in error:
-            if not isinstance(fd, int_types):
+            if not isinstance(fd, Integral):
                 fd = fd.fileno()
             events[fd] = events.get(fd, 0) | ERR
         return list(events.items())

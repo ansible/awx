@@ -1,4 +1,6 @@
-import setuptools, sys, glob
+import setuptools
+import sys
+import glob
 from distutils.command.install import install as _install
 from distutils.errors import DistutilsArgError
 
@@ -15,7 +17,7 @@ class install(_install):
     ]
     new_commands = [
         ('install_egg_info', lambda self: True),
-        ('install_scripts',  lambda self: True),
+        ('install_scripts', lambda self: True),
     ]
     _nc = dict(new_commands)
 
@@ -46,7 +48,6 @@ class install(_install):
         self.path_file = None
         self.extra_dirs = ''
 
-
     def run(self):
         # Explicit request for old-style install?  Just do it
         if self.old_and_unmanageable or self.single_version_externally_managed:
@@ -71,11 +72,6 @@ class install(_install):
             _install.run(self)
         else:
             self.do_egg_install()
-
-
-
-
-
 
     def do_egg_install(self):
 
@@ -105,20 +101,3 @@ class install(_install):
 install.sub_commands = [
         cmd for cmd in _install.sub_commands if cmd[0] not in install._nc
     ] + install.new_commands
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#

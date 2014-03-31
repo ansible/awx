@@ -27,6 +27,7 @@ Exception classes - Subclassing allows you to check for specific errors
 import base64
 import xml.sax
 from boto import handler
+from boto.compat import json
 from boto.resultset import ResultSet
 
 
@@ -88,12 +89,25 @@ class BotoServerError(StandardError):
                 h = handler.XmlHandlerWrapper(self, self)
                 h.parseString(self.body)
             except (TypeError, xml.sax.SAXParseException), pe:
-                # Remove unparsable message body so we don't include garbage
-                # in exception. But first, save self.body in self.error_message
-                # because occasionally we get error messages from Eucalyptus
-                # that are just text strings that we want to preserve.
-                self.message = self.body
-                self.body = None
+                # What if it's JSON? Let's try that.
+                try:
+                    parsed = json.loads(self.body)
+
+                    if 'RequestId' in parsed:
+                        self.request_id = parsed['RequestId']
+                    if 'Error' in parsed:
+                        if 'Code' in parsed['Error']:
+                            self.error_code = parsed['Error']['Code']
+                        if 'Message' in parsed['Error']:
+                            self.message = parsed['Error']['Message']
+
+                except ValueError:
+                    # Remove unparsable message body so we don't include garbage
+                    # in exception. But first, save self.body in self.error_message
+                    # because occasionally we get error messages from Eucalyptus
+                    # that are just text strings that we want to preserve.
+                    self.message = self.body
+                    self.body = None
 
     def __getattr__(self, name):
         if name == 'error_message':

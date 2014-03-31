@@ -200,8 +200,8 @@ class TaskMonitor(ModelMonitor):
         actions.pop('delete_selected', None)
         return actions
 
-    def queryset(self, request):
-        qs = super(TaskMonitor, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(TaskMonitor, self).get_queryset(request)
         return qs.select_related('worker')
 
 
@@ -261,6 +261,7 @@ def periodic_task_form():
 
         class Meta:
             model = PeriodicTask
+            exclude = ()
 
         def clean(self):
             data = super(PeriodicTaskForm, self).clean()
@@ -326,8 +327,8 @@ class PeriodicTaskAdmin(admin.ModelAdmin):
         return super(PeriodicTaskAdmin, self).changelist_view(request,
                                                               extra_context)
 
-    def queryset(self, request):
-        qs = super(PeriodicTaskAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(PeriodicTaskAdmin, self).get_queryset(request)
         return qs.select_related('interval', 'crontab')
 
 

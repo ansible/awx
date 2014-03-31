@@ -80,6 +80,9 @@ class CeleryCommand(BaseCommand):
         acc = []
         broker = None
         for i, arg in enumerate(argv):
+            # --settings and --pythonpath are also handled
+            # by BaseCommand.handle_default_options, but that is
+            # called with the resulting options parsed by optparse.
             if '--settings=' in arg:
                 _, settings_module = arg.split('=')
                 os.environ['DJANGO_SETTINGS_MODULE'] = settings_module

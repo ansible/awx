@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import ConfigParser
+from six.moves import configparser
 
 from pyrax.base_identity import BaseAuth
 from pyrax.base_identity import User
@@ -31,7 +31,7 @@ class RaxIdentity(BaseAuth):
         self.username = cfg.get("rackspace_cloud", "username")
         try:
             self.password = cfg.get("rackspace_cloud", "api_key", raw=True)
-        except ConfigParser.NoOptionError as e:
+        except configparser.NoOptionError as e:
             # Allow either the use of either 'api_key' or 'password'.
             self.password = cfg.get("rackspace_cloud", "password", raw=True)
 

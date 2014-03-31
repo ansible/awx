@@ -1,7 +1,7 @@
 import os
 import abc
 
-from keyring.py27compat import add_metaclass
+from .py27compat import add_metaclass
 
 @add_metaclass(abc.ABCMeta)
 class Credential(object):

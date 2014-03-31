@@ -122,12 +122,19 @@ class BaseTestCase(testtools.TestCase, testresources.ResourcedTestCase):
         working copy--returns the stdout and stderr streams and the exit code
         from the subprocess.
         """
+        return _run_cmd([cmd] + list(args), cwd=self.package_dir)
 
-        os.chdir(self.package_dir)
-        p = subprocess.Popen([cmd] + list(args), stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
 
-        streams = tuple(s.decode('latin1').strip() for s in p.communicate())
-        for line in streams:
-            print(line)
-        return (streams) + (p.returncode,)
+def _run_cmd(args, cwd):
+    """Run the command args in cwd.
+
+    :param args: The command to run e.g. ['git', 'status']
+    :param cwd: The directory to run the comamnd in.
+    :return: ((stdout, stderr), returncode)
+    """
+    p = subprocess.Popen(
+        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
+    streams = tuple(s.decode('latin1').strip() for s in p.communicate())
+    for content in streams:
+        print(content)
+    return (streams) + (p.returncode,)

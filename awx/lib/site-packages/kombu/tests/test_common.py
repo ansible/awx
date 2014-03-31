@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 import socket
 
+from amqp import RecoverableConnectionError
+
 from kombu import common
 from kombu.common import (
     Broadcast, maybe_declare,
@@ -9,7 +11,6 @@ from kombu.common import (
     declaration_cached, ignore_errors,
     QoS, PREFETCH_COUNT_MAX,
 )
-from kombu.exceptions import ChannelError
 
 from .case import Case, ContextMock, Mock, MockPool, patch
 
@@ -87,7 +88,7 @@ class test_maybe_declare(Case):
         self.assertEqual(entity.declare.call_count, 1)
 
         entity.channel.connection = None
-        with self.assertRaises(ChannelError):
+        with self.assertRaises(RecoverableConnectionError):
             maybe_declare(entity)
 
     def test_binds_entities(self):

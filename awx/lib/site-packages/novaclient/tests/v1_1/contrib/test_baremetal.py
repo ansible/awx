@@ -33,18 +33,18 @@ class BaremetalExtensionTest(utils.TestCase):
         nl = cs.baremetal.list()
         cs.assert_called('GET', '/os-baremetal-nodes')
         for n in nl:
-            self.assertTrue(isinstance(n, baremetal.BareMetalNode))
+            self.assertIsInstance(n, baremetal.BareMetalNode)
 
     def test_get_node(self):
         n = cs.baremetal.get(1)
         cs.assert_called('GET', '/os-baremetal-nodes/1')
-        self.assertTrue(isinstance(n, baremetal.BareMetalNode))
+        self.assertIsInstance(n, baremetal.BareMetalNode)
 
     def test_create_node(self):
         n = cs.baremetal.create("service_host", 1, 1024, 2048,
                                 "aa:bb:cc:dd:ee:ff")
         cs.assert_called('POST', '/os-baremetal-nodes')
-        self.assertTrue(isinstance(n, baremetal.BareMetalNode))
+        self.assertIsInstance(n, baremetal.BareMetalNode)
 
     def test_delete_node(self):
         n = cs.baremetal.get(1)
@@ -54,7 +54,7 @@ class BaremetalExtensionTest(utils.TestCase):
     def test_node_add_interface(self):
         i = cs.baremetal.add_interface(1, "bb:cc:dd:ee:ff:aa", 1, 2)
         cs.assert_called('POST', '/os-baremetal-nodes/1/action')
-        self.assertTrue(isinstance(i, baremetal.BareMetalNodeInterface))
+        self.assertIsInstance(i, baremetal.BareMetalNodeInterface)
 
     def test_node_remove_interface(self):
         cs.baremetal.remove_interface(1, "bb:cc:dd:ee:ff:aa")

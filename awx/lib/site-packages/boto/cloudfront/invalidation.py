@@ -75,7 +75,7 @@ class InvalidationBatch(object):
 
     def to_xml(self):
         """Get this batch as XML"""
-        assert self.connection != None
+        assert self.connection is not None
         s = '<?xml version="1.0" encoding="UTF-8"?>\n'
         s += '<InvalidationBatch xmlns="http://cloudfront.amazonaws.com/doc/%s/">\n' % self.connection.Version
         for p in self.paths:

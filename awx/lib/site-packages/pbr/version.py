@@ -25,6 +25,7 @@ class VersionInfo(object):
 
     def __init__(self, package):
         """Object that understands versioning for a package
+
         :param package: name of the python package, such as glance, or
                         python-glanceclient
         """
@@ -39,11 +40,15 @@ class VersionInfo(object):
 
     def __repr__(self):
         """Include the name."""
-        return "VersionInfo(%s:%s)" % (self.package, self.version_string())
+        return "pbr.version.VersionInfo(%s:%s)" % (
+            self.package, self.version_string())
 
     def _get_version_from_pkg_resources(self):
-        """Get the version of the package from the pkg_resources record
-        associated with the package.
+        """Obtain a version from pkg_resources or setup-time logic if missing.
+
+        This will try to get the version of the package from the pkg_resources
+        record associated with the package, and if there is no such record
+        falls back to the logic sdist would use.
         """
         try:
             requirement = pkg_resources.Requirement.parse(self.package)
@@ -57,8 +62,9 @@ class VersionInfo(object):
             return packaging.get_version(self.package)
 
     def release_string(self):
-        """Return the full version of the package including suffixes indicating
-        VCS status.
+        """Return the full version of the package.
+
+        This including suffixes indicating VCS status.
         """
         if self.release is None:
             self.release = self._get_version_from_pkg_resources()
@@ -83,11 +89,11 @@ class VersionInfo(object):
     version_string_with_vcs = release_string
 
     def cached_version_string(self, prefix=""):
-        """Generate an object which will expand in a string context to
-        the results of version_string(). We do this so that don't
-        call into pkg_resources every time we start up a program when
-        passing version information into the CONF constructor, but
-        rather only do the calculation when and if a version is requested
+        """Return a cached version string.
+
+        This will return a cached version string if one is already cached,
+        irrespective of prefix. If none is cached, one will be created with
+        prefix and then cached and returned.
         """
         if not self._cached_version:
             self._cached_version = "%s%s" % (prefix,

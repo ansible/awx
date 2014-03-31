@@ -5,22 +5,29 @@ from datetime import datetime
 from django.utils.translation import ungettext, ugettext as _
 from .utils import now
 
-JUST_NOW = _('just now')
-SECONDS_AGO = (_('{seconds} second ago'), _('{seconds} seconds ago'))
-MINUTES_AGO = (_('{minutes} minute ago'), _('{minutes} minutes ago'))
-HOURS_AGO = (_('{hours} hour ago'), _('{hours} hours ago'))
-YESTERDAY_AT = _('yesterday at {time}')
-OLDER_YEAR = (_('year'), _('years'))
-OLDER_MONTH = (_('month'), _('months'))
-OLDER_WEEK = (_('week'), _('weeks'))
-OLDER_DAY = (_('day'), _('days'))
+
+def pluralize_year(n):
+    return ungettext(_('{num} year ago'), _('{num} years ago'), n)
+
+
+def pluralize_month(n):
+    return ungettext(_('{num} month ago'), _('{num} months ago'), n)
+
+
+def pluralize_week(n):
+    return ungettext(_('{num} week ago'), _('{num} weeks ago'), n)
+
+
+def pluralize_day(n):
+    return ungettext(_('{num} day ago'), _('{num} days ago'), n)
+
+
 OLDER_CHUNKS = (
-    (365.0, OLDER_YEAR),
-    (30.0, OLDER_MONTH),
-    (7.0, OLDER_WEEK),
-    (1.0, OLDER_DAY),
+    (365.0, pluralize_year),
+    (30.0, pluralize_month),
+    (7.0, pluralize_week),
+    (1.0, pluralize_day),
 )
-OLDER_AGO = _('{number} {type} ago')
 
 
 def _un(singular__plural, n=None):
@@ -28,7 +35,7 @@ def _un(singular__plural, n=None):
     return ungettext(singular, plural, n)
 
 
-def naturaldate(date):
+def naturaldate(date, include_seconds=False):
     """Convert datetime into a human natural date string."""
 
     if not date:
@@ -41,29 +48,38 @@ def naturaldate(date):
     delta_midnight = today - date
 
     days = delta.days
-    hours = round(delta.seconds / 3600, 0)
+    hours = int(round(delta.seconds / 3600, 0))
     minutes = delta.seconds / 60
+    seconds = delta.seconds
 
     if days < 0:
-        return JUST_NOW
+        return _('just now')
 
     if days == 0:
         if hours == 0:
             if minutes > 0:
-                return _un(MINUTES_AGO, n=minutes).format(minutes=minutes)
+                return ungettext(
+                    _('{minutes} minute ago'),
+                    _('{minutes} minutes ago'), minutes
+                ).format(minutes=minutes)
             else:
-                return JUST_NOW
+                if include_seconds and seconds:
+                    return ungettext(
+                        _('{seconds} second ago'),
+                        _('{seconds} seconds ago'), seconds
+                    ).format(seconds=seconds)
+                return _('just now')
         else:
-            return _un(HOURS_AGO, n=hours).format(hours=hours)
+            return ungettext(
+                _('{hours} hour ago'), _('{hours} hours ago'), hours
+            ).format(hours=hours)
 
     if delta_midnight.days == 0:
-        return YESTERDAY_AT.format(time=date.strftime('%H:%M'))
+        return _('yesterday at {time}').format(time=date.strftime('%H:%M'))
 
     count = 0
-    for chunk, singular_plural in OLDER_CHUNKS:
+    for chunk, pluralizefun in OLDER_CHUNKS:
         if days >= chunk:
             count = round((delta_midnight.days + 1) / chunk, 0)
-            type_ = _un(singular_plural, n=count)
-            break
-
-    return OLDER_AGO.format(number=count, type=type_)
+            fmt = pluralizefun(count)
+            return fmt.format(num=count)

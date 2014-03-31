@@ -179,7 +179,7 @@ class Order(IObject):
                                               item.ami.id, item.groups, item.key.name)
 
     def place(self, block=True):
-        if get_domain() == None:
+        if get_domain() is None:
             print 'SDB Persistence Domain not set'
             domain_name = self.get_string('Specify SDB Domain')
             set_domain(domain_name)

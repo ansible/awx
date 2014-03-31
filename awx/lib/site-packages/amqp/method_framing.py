@@ -19,12 +19,6 @@ from __future__ import absolute_import
 from collections import defaultdict, deque
 from struct import pack, unpack
 
-try:
-    bytes
-except NameError:
-    # Python 2.5 and lower
-    bytes = str
-
 from .basic_message import Message
 from .exceptions import AMQPError, UnexpectedFrame
 from .five import range, string

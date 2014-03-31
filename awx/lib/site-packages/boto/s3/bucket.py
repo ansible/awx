@@ -143,24 +143,46 @@ class Bucket(object):
         return self.get_key(key_name, headers=headers)
 
     def get_key(self, key_name, headers=None, version_id=None,
-                response_headers=None):
+                response_headers=None, validate=True):
         """
         Check to see if a particular key exists within the bucket.  This
         method uses a HEAD request to check for the existance of the key.
         Returns: An instance of a Key object or None
 
-        :type key_name: string
         :param key_name: The name of the key to retrieve
+        :type key_name: string
 
-        :type response_headers: dict
+        :param headers: The headers to send when retrieving the key
+        :type headers: dict
+
+        :param version_id:
+        :type version_id: string
+
         :param response_headers: A dictionary containing HTTP
             headers/values that will override any headers associated
             with the stored object in the response.  See
             http://goo.gl/EWOPb for details.
+        :type response_headers: dict
+
+        :param validate: Verifies whether the key exists. If ``False``, this
+            will not hit the service, constructing an in-memory object.
+            Default is ``True``.
+        :type validate: bool
 
         :rtype: :class:`boto.s3.key.Key`
         :returns: A Key object from this bucket.
         """
+        if validate is False:
+            if headers or version_id or response_headers:
+                raise BotoClientError(
+                    "When providing 'validate=False', no other params " + \
+                    "are allowed."
+                )
+
+            # This leans on the default behavior of ``new_key`` (not hitting
+            # the service). If that changes, that behavior should migrate here.
+            return self.new_key(key_name)
+
         query_args_l = []
         if version_id:
             query_args_l.append('versionId=%s' % version_id)
@@ -545,6 +567,7 @@ class Bucket(object):
             list only if they have an upload ID lexicographically
             greater than the specified upload_id_marker.
 
+        :type encoding_type: string
         :param encoding_type: Requests Amazon S3 to encode the response and
             specifies the encoding method to use.
 
@@ -555,14 +578,31 @@ class Bucket(object):
             encode the keys in the response.
 
             Valid options: ``url``
-        :type encoding_type: string
+
+        :type delimiter: string
+        :param delimiter: Character you use to group keys.
+            All keys that contain the same string between the prefix, if
+            specified, and the first occurrence of the delimiter after the
+            prefix are grouped under a single result element, CommonPrefixes.
+            If you don't specify the prefix parameter, then the substring
+            starts at the beginning of the key. The keys that are grouped
+            under CommonPrefixes result element are not returned elsewhere
+            in the response.
+
+        :type prefix: string
+        :param prefix: Lists in-progress uploads only for those keys that
+            begin with the specified prefix. You can use prefixes to separate
+            a bucket into different grouping of keys. (You can think of using
+            prefix to make groups in the same way you'd use a folder in a
+            file system.)
 
         :rtype: ResultSet
         :return: The result from S3 listing the uploads requested
 
         """
         self.validate_kwarg_names(params, ['max_uploads', 'key_marker',
-                                           'upload_id_marker', 'encoding_type'])
+                                           'upload_id_marker', 'encoding_type',
+                                           'delimiter', 'prefix'])
         return self._get_all([('Upload', MultiPartUpload),
                               ('CommonPrefixes', Prefix)],
                              'uploads', headers, **params)

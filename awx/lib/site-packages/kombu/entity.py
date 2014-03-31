@@ -572,6 +572,8 @@ class Queue(MaybeChannelBound):
             m2p = getattr(self.channel, 'message_to_python', None)
             if m2p:
                 message = m2p(message)
+            if message.errors:
+                message._reraise_error()
             message.accept = prepare_accept_content(accept)
         return message
 

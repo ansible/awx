@@ -19,6 +19,7 @@ Security group rules interface (1.1 extension).
 
 from novaclient import base
 from novaclient import exceptions
+from novaclient.openstack.common.gettextutils import _
 
 
 class SecurityGroupRule(base.Resource):
@@ -48,14 +49,14 @@ class SecurityGroupRuleManager(base.Manager):
         try:
             from_port = int(from_port)
         except (TypeError, ValueError):
-            raise exceptions.CommandError("From port must be an integer.")
+            raise exceptions.CommandError(_("From port must be an integer."))
         try:
             to_port = int(to_port)
         except (TypeError, ValueError):
-            raise exceptions.CommandError("To port must be an integer.")
+            raise exceptions.CommandError(_("To port must be an integer."))
         if ip_protocol.upper() not in ['TCP', 'UDP', 'ICMP']:
-            raise exceptions.CommandError("Ip protocol must be 'tcp', 'udp', "
-                                          "or 'icmp'.")
+            raise exceptions.CommandError(_("Ip protocol must be 'tcp', 'udp'"
+                                            ", or 'icmp'."))
 
         body = {"security_group_rule": {
                     "ip_protocol": ip_protocol,

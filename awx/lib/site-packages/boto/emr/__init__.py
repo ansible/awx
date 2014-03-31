@@ -29,7 +29,7 @@ service from AWS.
 from connection import EmrConnection
 from step import Step, StreamingStep, JarStep
 from bootstrap_action import BootstrapAction
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -39,34 +39,7 @@ def regions():
     :rtype: list
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
-    return [RegionInfo(name='us-east-1',
-                       endpoint='elasticmapreduce.us-east-1.amazonaws.com',
-                       connection_cls=EmrConnection),
-            RegionInfo(name='us-west-1',
-                       endpoint='us-west-1.elasticmapreduce.amazonaws.com',
-                       connection_cls=EmrConnection),
-            RegionInfo(name='us-west-2',
-                       endpoint='us-west-2.elasticmapreduce.amazonaws.com',
-                       connection_cls=EmrConnection),
-            RegionInfo(name='ap-northeast-1',
-                       endpoint='ap-northeast-1.elasticmapreduce.amazonaws.com',
-                       connection_cls=EmrConnection),
-            RegionInfo(name='ap-southeast-1',
-                       endpoint='ap-southeast-1.elasticmapreduce.amazonaws.com',
-                       connection_cls=EmrConnection),
-            RegionInfo(name='ap-southeast-2',
-                       endpoint='ap-southeast-2.elasticmapreduce.amazonaws.com',
-                       connection_cls=EmrConnection),
-            RegionInfo(name='eu-west-1',
-                       endpoint='eu-west-1.elasticmapreduce.amazonaws.com',
-                       connection_cls=EmrConnection),
-            RegionInfo(name='sa-east-1',
-                       endpoint='sa-east-1.elasticmapreduce.amazonaws.com',
-                       connection_cls=EmrConnection),
-            RegionInfo(name='cn-north-1',
-                       endpoint='elasticmapreduce.cn-north-1.amazonaws.com.cn',
-                       connection_cls=EmrConnection),
-            ]
+    return get_regions('elasticmapreduce', connection_cls=EmrConnection)
 
 
 def connect_to_region(region_name, **kw_params):

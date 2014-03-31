@@ -68,8 +68,12 @@ class Command(NoArgsCommand):
 
         def run_notebook():
             from django.conf import settings
-            from IPython.frontend.html.notebook import notebookapp
-            app = notebookapp.NotebookApp.instance()
+            try:
+                from IPython.html.notebookapp import NotebookApp
+            except ImportError:
+                from IPython.frontend.html.notebook import notebookapp
+                NotebookApp = notebookapp.NotebookApp
+            app = NotebookApp.instance()
             ipython_arguments = getattr(settings, 'IPYTHON_ARGUMENTS', ['--ext', 'django_extensions.management.notebook_extension'])
             app.initialize(ipython_arguments)
             app.start()

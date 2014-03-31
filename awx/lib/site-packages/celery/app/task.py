@@ -343,6 +343,8 @@ class Task(object):
             'CELERY_STORE_ERRORS_EVEN_IF_IGNORED'),
     )
 
+    _backend = None  # set by backend property.
+
     __bound__ = False
 
     # - Tasks are lazily bound, so that configuration is not set
@@ -360,7 +362,6 @@ class Task(object):
                 setattr(self, attr_name, conf[config_name])
         if self.accept_magic_kwargs is None:
             self.accept_magic_kwargs = app.accept_magic_kwargs
-        self.backend = app.backend
 
         # decorate with annotations from config.
         if not was_bound:
@@ -555,12 +556,12 @@ class Task(object):
         )
 
     def subtask_from_request(self, request=None, args=None, kwargs=None,
-                             **extra_options):
+                             queue=None, **extra_options):
         request = self.request if request is None else request
         args = request.args if args is None else args
         kwargs = request.kwargs if kwargs is None else kwargs
         limit_hard, limit_soft = request.timelimit or (None, None)
-        options = dict({
+        options = {
             'task_id': request.id,
             'link': request.callbacks,
             'link_error': request.errbacks,
@@ -568,7 +569,10 @@ class Task(object):
             'chord': request.chord,
             'soft_time_limit': limit_soft,
             'time_limit': limit_hard,
-        }, **request.delivery_info or {})
+        }
+        options.update(
+            {'queue': queue} if queue else (request.delivery_info or {})
+        )
         return self.subtask(args, kwargs, options, type=self, **extra_options)
 
     def retry(self, args=None, kwargs=None, exc=None, throw=True,
@@ -651,7 +655,10 @@ class Task(object):
 
         if max_retries is not None and retries > max_retries:
             if exc:
+                # first try to reraise the original exception
                 maybe_reraise()
+                # or if not in an except block then raise the custom exc.
+                raise exc()
             raise self.MaxRetriesExceededError(
                 "Can't retry {0}[{1}] args:{2} kwargs:{3}".format(
                     self.name, request.id, S.args, S.kwargs))
@@ -706,6 +713,7 @@ class Task(object):
                    'loglevel': options.get('loglevel', 0),
                    'callbacks': maybe_list(link),
                    'errbacks': maybe_list(link_error),
+                   'headers': options.get('headers'),
                    'delivery_info': {'is_eager': True}}
         if self.accept_magic_kwargs:
             default_kwargs = {'task_name': task.name,
@@ -895,6 +903,17 @@ class Task(object):
         if self._exec_options is None:
             self._exec_options = extract_exec_options(self)
         return self._exec_options
+
+    @property
+    def backend(self):
+        backend = self._backend
+        if backend is None:
+            return self.app.backend
+        return backend
+
+    @backend.setter
+    def backend(self, value):  # noqa
+        self._backend = value
 
     @property
     def __name__(self):

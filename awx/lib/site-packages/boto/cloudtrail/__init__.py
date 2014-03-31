@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -31,14 +31,7 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     from boto.cloudtrail.layer1 import CloudTrailConnection
-
-    return [RegionInfo(name='us-east-1',
-                       endpoint='cloudtrail.us-east-1.amazonaws.com',
-                       connection_cls=CloudTrailConnection),
-            RegionInfo(name='us-west-2',
-                       endpoint='cloudtrail.us-west-2.amazonaws.com',
-                       connection_cls=CloudTrailConnection),
-            ]
+    return get_regions('cloudtrail', connection_cls=CloudTrailConnection)
 
 
 def connect_to_region(region_name, **kw_params):

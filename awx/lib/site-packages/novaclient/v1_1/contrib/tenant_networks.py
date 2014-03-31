@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from novaclient import base
+from novaclient.openstack.common.gettextutils import _
 from novaclient import utils
 
 
@@ -57,10 +58,10 @@ def do_net_list(cs, args):
 
 
 @utils.arg('label', metavar='<network_label>',
-           help='Network label (ex. my_new_network)')
+           help=_('Network label (ex. my_new_network)'))
 @utils.arg('cidr', metavar='<cidr>',
-           help='IP block to allocate from (ex. 172.16.0.0/24 or '
-                '2001:DB8::/64)')
+           help=_('IP block to allocate from (ex. 172.16.0.0/24 or '
+                '2001:DB8::/64)'))
 def do_net_create(cs, args):
     """
     Create a network

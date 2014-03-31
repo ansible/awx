@@ -14,6 +14,7 @@
 #    under the License.
 
 from novaclient import base
+from novaclient.openstack.common.gettextutils import _
 from novaclient import utils
 
 
@@ -47,7 +48,7 @@ class CellsManager(base.Manager):
 
 @utils.arg('cell',
         metavar='<cell-name>',
-        help='Name of the cell.')
+        help=_('Name of the cell.'))
 def do_cell_show(cs, args):
     """Show details of a given cell."""
     cell = cs.cells.get(args.cell)
@@ -56,14 +57,15 @@ def do_cell_show(cs, args):
 
 @utils.arg('--cell',
         metavar='<cell-name>',
-        help="Name of the cell to get the capacities.",
+        help=_("Name of the cell to get the capacities."),
         default=None)
 def do_cell_capacities(cs, args):
     """Get cell capacities for all cells or a given cell."""
     cell = cs.cells.capacities(args.cell)
-    print("Ram Available: %s MB" % cell.capacities['ram_free']['total_mb'])
+    print(_("Ram Available: %s MB") % cell.capacities['ram_free']['total_mb'])
     utils.print_dict(cell.capacities['ram_free']['units_by_mb'],
                      dict_property='Ram(MB)', dict_value="Units")
-    print("\nDisk Available: %s MB" % cell.capacities['disk_free']['total_mb'])
+    print(_("\nDisk Available: %s MB") %
+          cell.capacities['disk_free']['total_mb'])
     utils.print_dict(cell.capacities['disk_free']['units_by_mb'],
                      dict_property='Disk(MB)', dict_value="Units")

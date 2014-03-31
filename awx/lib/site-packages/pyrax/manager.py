@@ -145,6 +145,17 @@ class BaseManager(object):
         if obj_class is None:
             obj_class = self.resource_class
 
+        data = self._data_from_response(resp_body)
+        return [obj_class(self, res, loaded=False)
+                for res in data if res]
+
+
+    def _data_from_response(self, resp_body):
+        """
+        This works for most API responses, but some don't structure their
+        listing responses the same way, so overriding this method allows
+        subclasses to handle extraction for those outliers.
+        """
         data = resp_body.get(self.plural_response_key, resp_body)
         # NOTE(ja): keystone returns values as list as {"values": [ ... ]}
         #           unlike other services which just return the list...
@@ -153,8 +164,7 @@ class BaseManager(object):
                 data = data["values"]
             except KeyError:
                 pass
-        return [obj_class(self, res, loaded=False)
-                for res in data if res]
+        return data
 
 
     def _head(self, uri):

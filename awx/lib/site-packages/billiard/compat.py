@@ -4,7 +4,7 @@ import errno
 import os
 import sys
 
-from .five import builtins, range
+from .five import range
 
 if sys.platform == 'win32':
     try:
@@ -45,10 +45,9 @@ else:  # non-posix platform
 if sys.version_info[0] == 3:
     bytes = bytes
 else:
-    try:
-        _bytes = builtins.bytes
-    except AttributeError:
-        _bytes = str
+    _bytes = bytes
+
+    # the 'bytes' alias in Python2 does not support an encoding argument.
 
     class bytes(_bytes):  # noqa
 

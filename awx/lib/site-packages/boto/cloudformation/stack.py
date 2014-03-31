@@ -107,6 +107,35 @@ class Stack(object):
     def get_template(self):
         return self.connection.get_template(stack_name_or_id=self.stack_id)
 
+    def get_policy(self):
+        """
+        Returns the stack policy for this stack. If it has no policy
+        then, a null value is returned.
+        """
+        return self.connection.get_stack_policy(self.stack_id)
+
+    def set_policy(self, stack_policy_body=None, stack_policy_url=None):
+        """
+        Sets a stack policy for this stack.
+
+        :type stack_policy_body: string
+        :param stack_policy_body: Structure containing the stack policy body.
+            (For more information, go to ` Prevent Updates to Stack Resources`_
+            in the AWS CloudFormation User Guide.)
+        You must pass `StackPolicyBody` or `StackPolicyURL`. If both are
+            passed, only `StackPolicyBody` is used.
+
+        :type stack_policy_url: string
+        :param stack_policy_url: Location of a file containing the stack
+            policy. The URL must point to a policy (max size: 16KB) located in
+            an S3 bucket in the same region as the stack. You must pass
+            `StackPolicyBody` or `StackPolicyURL`. If both are passed, only
+            `StackPolicyBody` is used.
+        """
+        return self.connection.set_stack_policy(self.stack_id,
+            stack_policy_body=stack_policy_body,
+            stack_policy_url=stack_policy_url)
+
 
 class StackSummary(object):
     def __init__(self, connection=None):

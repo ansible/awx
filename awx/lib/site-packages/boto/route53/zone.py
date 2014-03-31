@@ -34,8 +34,8 @@ class Zone(object):
     """
     A Route53 Zone.
 
-    :ivar Route53Connection route53connection
-    :ivar str Id: The ID of the hosted zone.
+    :ivar route53connection: A :class:`boto.route53.connection.Route53Connection` connection
+    :ivar id: The ID of the hosted zone
     """
     def __init__(self, route53connection, zone_dict):
         self.route53connection = route53connection

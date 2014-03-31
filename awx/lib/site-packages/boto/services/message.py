@@ -34,7 +34,7 @@ class ServiceMessage(MHMessage):
             self['OriginalLocation'] = t[0]
             self['OriginalFileName'] = t[1]
             mime_type = mimetypes.guess_type(t[1])[0]
-            if mime_type == None:
+            if mime_type is None:
                 mime_type = 'application/octet-stream'
             self['Content-Type'] = mime_type
             s = os.stat(key.path)

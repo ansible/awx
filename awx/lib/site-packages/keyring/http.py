@@ -12,9 +12,9 @@ This will prompt for a password if one is required and isn't already
 in the keyring. Then, it adds it to the keyring for subsequent use.
 """
 
-import keyring
 import getpass
 
+from . import get_password, delete_password, set_password
 
 class PasswordMgr(object):
     def get_username(self, realm, authuri):
@@ -22,18 +22,18 @@ class PasswordMgr(object):
 
     def add_password(self, realm, authuri, password):
         user = self.get_username(realm, authuri)
-        keyring.set_password(realm, user, password)
+        set_password(realm, user, password)
 
     def find_user_password(self, realm, authuri):
         user = self.get_username(realm, authuri)
-        password = keyring.get_password(realm, user)
+        password = get_password(realm, user)
         if password is None:
             prompt = 'password for %(user)s@%(realm)s for '\
                 '%(authuri)s: ' % vars()
             password = getpass.getpass(prompt)
-            keyring.set_password(realm, user, password)
+            set_password(realm, user, password)
         return user, password
 
     def clear_password(self, realm, authuri):
         user = self.get_username(realm, authuri)
-        keyring.delete_password(realm, user)
+        delete_password(realm, user)

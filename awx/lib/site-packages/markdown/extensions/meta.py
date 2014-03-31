@@ -65,7 +65,7 @@ class MetaPreprocessor(Preprocessor):
         """ Parse Meta-Data and store in Markdown.Meta. """
         meta = {}
         key = None
-        while 1:
+        while lines:
             line = lines.pop(0)
             if line.strip() == '':
                 break # blank line - done

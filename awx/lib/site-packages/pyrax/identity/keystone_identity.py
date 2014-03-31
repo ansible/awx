@@ -19,5 +19,5 @@ class KeystoneIdentity(BaseAuth):
     def _get_auth_endpoint(self):
         ep = pyrax.get_setting("auth_endpoint")
         if ep is None:
-            raise exc.EndpointNotDefined("No auth enpoint has been specified.")
+            raise exc.EndpointNotDefined("No auth endpoint has been specified.")
         return ep

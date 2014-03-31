@@ -28,7 +28,7 @@ from __future__ import unicode_literals
 from . import Extension
 from ..preprocessors import Preprocessor
 from ..inlinepatterns import Pattern
-from ..util import etree
+from ..util import etree, AtomicString
 import re
 
 # Global Vars
@@ -88,7 +88,7 @@ class AbbrPattern(Pattern):
 
     def handleMatch(self, m):
         abbr = etree.Element('abbr')
-        abbr.text = m.group('abbr')
+        abbr.text = AtomicString(m.group('abbr'))
         abbr.set('title', self.title)
         return abbr
 

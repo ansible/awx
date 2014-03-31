@@ -114,12 +114,14 @@ class SimpleQueue(SimpleBase):
         if not isinstance(queue, entity.Queue):
             exchange = entity.Exchange(name, **exchange_opts)
             queue = entity.Queue(name, exchange, name, **queue_opts)
+            routing_key = name
         else:
             name = queue.name
             exchange = queue.exchange
+            routing_key = queue.routing_key
         producer = messaging.Producer(channel, exchange,
                                       serializer=serializer,
-                                      routing_key=name,
+                                      routing_key=routing_key,
                                       compression=compression)
         consumer = messaging.Consumer(channel, queue)
         super(SimpleQueue, self).__init__(channel, producer,

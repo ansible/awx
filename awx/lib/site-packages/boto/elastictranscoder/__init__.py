@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -31,27 +31,10 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     from boto.elastictranscoder.layer1 import ElasticTranscoderConnection
-    cls = ElasticTranscoderConnection
-    return [
-        RegionInfo(name='us-east-1',
-                   endpoint='elastictranscoder.us-east-1.amazonaws.com',
-                   connection_cls=cls),
-        RegionInfo(name='us-west-1',
-                    endpoint='elastictranscoder.us-west-1.amazonaws.com',
-                    connection_cls=cls),
-        RegionInfo(name='us-west-2',
-                    endpoint='elastictranscoder.us-west-2.amazonaws.com',
-                    connection_cls=cls),
-        RegionInfo(name='ap-northeast-1',
-                    endpoint='elastictranscoder.ap-northeast-1.amazonaws.com',
-                    connection_cls=cls),
-        RegionInfo(name='ap-southeast-1',
-                    endpoint='elastictranscoder.ap-southeast-1.amazonaws.com',
-                    connection_cls=cls),
-        RegionInfo(name='eu-west-1',
-                    endpoint='elastictranscoder.eu-west-1.amazonaws.com',
-                    connection_cls=cls),
-    ]
+    return get_regions(
+        'elastictranscoder',
+        connection_cls=ElasticTranscoderConnection
+    )
 
 
 def connect_to_region(region_name, **kw_params):

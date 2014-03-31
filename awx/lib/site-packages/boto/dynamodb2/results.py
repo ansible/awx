@@ -20,7 +20,7 @@ class ResultSet(object):
         ...     print res['username']
 
     """
-    def __init__(self):
+    def __init__(self, max_page_size=None):
         super(ResultSet, self).__init__()
         self.the_callable = None
         self.call_args = []
@@ -29,6 +29,9 @@ class ResultSet(object):
         self._offset = -1
         self._results_left = True
         self._last_key_seen = None
+        self._fetches = 0
+        self._max_page_size = max_page_size
+        self._limit = None
 
     @property
     def first_key(self):
@@ -65,6 +68,12 @@ class ResultSet(object):
                 self.fetch_more()
 
         if self._offset < len(self._results):
+            if self._limit is not None:
+                self._limit -= 1
+
+                if self._limit < 0:
+                    raise StopIteration()
+
             return self._results[self._offset]
         else:
             raise StopIteration()
@@ -92,6 +101,14 @@ class ResultSet(object):
                 'You must supply an object or function to be called.'
             )
 
+        # We pop the ``limit``, if present, to track how many we should return
+        # to the user. This isn't the same as the ``limit`` that the low-level
+        # DDB api calls use (which limit page size, not the overall result set).
+        self._limit = kwargs.pop('limit', None)
+
+        if self._limit < 0:
+            self._limit = None
+
         self.the_callable = the_callable
         self.call_args = args
         self.call_kwargs = kwargs
@@ -111,19 +128,34 @@ class ResultSet(object):
         if self._last_key_seen is not None:
             kwargs[self.first_key] = self._last_key_seen
 
+        # If the page size is greater than limit set them
+        #   to the same value
+        if self._limit and self._max_page_size > self._limit:
+            self._max_page_size = self._limit
+
+        # Put in the max page size.
+        if self._max_page_size is not None:
+            kwargs['limit'] = self._max_page_size
+        elif self._limit is not None:
+            # If max_page_size is not set and limit is available
+            #   use it as the page size
+            kwargs['limit'] = self._limit
+
         results = self.the_callable(*args, **kwargs)
+        self._fetches += 1
         new_results = results.get('results', [])
         self._last_key_seen = results.get('last_key', None)
 
         if len(new_results):
             self._results.extend(results['results'])
 
-        # Decrease the limit, if it's present.
-        if self.call_kwargs.get('limit'):
-            self.call_kwargs['limit'] -= len(results['results'])
-            # and if limit hits zero, we don't have any more
-            # results to look for
-            if 0 == self.call_kwargs['limit']:
+        # Check the limit, if it's present.
+        if self._limit is not None and self._limit >= 0:
+            limit = self._limit
+            limit -= len(results['results'])
+            # If we've exceeded the limit, we don't have any more
+            # results to look for.
+            if limit <= 0:
                 self._results_left = False
 
         if self._last_key_seen is None:

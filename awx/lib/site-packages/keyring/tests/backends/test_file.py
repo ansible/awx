@@ -1,6 +1,7 @@
 import os
 import tempfile
 import sys
+import errno
 
 from ..py30compat import unittest
 
@@ -21,7 +22,7 @@ class FileKeyringTests(BackendBasicTests):
             os.unlink(self.tmp_keyring_file)
         except (OSError,):
             e = sys.exc_info()[1]
-            if e.errno != 2: # No such file or directory
+            if e.errno != errno.ENOENT: # No such file or directory
                 raise
 
     def test_encrypt_decrypt(self):

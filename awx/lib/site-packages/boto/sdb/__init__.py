@@ -21,6 +21,7 @@
 #
 
 from .regioninfo import SDBRegionInfo
+from boto.regioninfo import get_regions
 
 
 def regions():
@@ -30,23 +31,10 @@ def regions():
     :rtype: list
     :return: A list of :class:`boto.sdb.regioninfo.RegionInfo` instances
     """
-    return [SDBRegionInfo(name='us-east-1',
-                          endpoint='sdb.amazonaws.com'),
-            SDBRegionInfo(name='eu-west-1',
-                          endpoint='sdb.eu-west-1.amazonaws.com'),
-            SDBRegionInfo(name='us-west-1',
-                          endpoint='sdb.us-west-1.amazonaws.com'),
-            SDBRegionInfo(name='sa-east-1',
-                          endpoint='sdb.sa-east-1.amazonaws.com'),
-            SDBRegionInfo(name='us-west-2',
-                          endpoint='sdb.us-west-2.amazonaws.com'),
-            SDBRegionInfo(name='ap-northeast-1',
-                          endpoint='sdb.ap-northeast-1.amazonaws.com'),
-            SDBRegionInfo(name='ap-southeast-1',
-                          endpoint='sdb.ap-southeast-1.amazonaws.com'),
-            SDBRegionInfo(name='ap-southeast-2',
-                          endpoint='sdb.ap-southeast-2.amazonaws.com')
-            ]
+    return get_regions(
+        'sdb',
+        region_cls=SDBRegionInfo
+    )
 
 
 def connect_to_region(region_name, **kw_params):

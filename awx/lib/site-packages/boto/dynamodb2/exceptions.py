@@ -72,3 +72,7 @@ class UnknownFilterTypeError(DynamoDBError):
 
 class QueryError(DynamoDBError):
     pass
+
+
+class ItemNotFound(DynamoDBError):
+    pass

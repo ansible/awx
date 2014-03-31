@@ -7,13 +7,15 @@ Sending and receiving messages.
 """
 from __future__ import absolute_import
 
+import numbers
+
 from itertools import count
 
 from .compression import compress
 from .connection import maybe_channel, is_connection
 from .entity import Exchange, Queue, DELIVERY_MODES
 from .exceptions import ContentDisallowed
-from .five import int_types, text_t, values
+from .five import text_t, values
 from .serialization import dumps, prepare_accept_content
 from .utils import ChannelPromise, maybe_list
 
@@ -82,7 +84,7 @@ class Producer(object):
             self.revive(self._channel)
 
     def __repr__(self):
-        return '<Producer: {0.channel}>'.format(self)
+        return '<Producer: {0._channel}>'.format(self)
 
     def __reduce__(self):
         return self.__class__, self.__reduce_args__()
@@ -150,7 +152,7 @@ class Producer(object):
             exchange = exchange.name
         else:
             delivery_mode = delivery_mode or self.exchange.delivery_mode
-        if not isinstance(delivery_mode, int_types):
+        if not isinstance(delivery_mode, numbers.Integral):
             delivery_mode = DELIVERY_MODES[delivery_mode]
         properties['delivery_mode'] = delivery_mode
 
@@ -580,6 +582,8 @@ class Consumer(object):
                 message = m2p(message)
             if accept is not None:
                 message.accept = accept
+            if message.errors:
+                return message._reraise_error(self.on_decode_error)
             decoded = None if on_m else message.decode()
         except Exception as exc:
             if not self.on_decode_error:

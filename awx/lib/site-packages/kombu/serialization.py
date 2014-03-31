@@ -29,6 +29,7 @@ from .utils.encoding import str_to_bytes, bytes_t
 
 __all__ = ['pickle', 'loads', 'dumps', 'register', 'unregister']
 SKIP_DECODE = frozenset(['binary', 'ascii-8bit'])
+TRUSTED_CONTENT = frozenset(['application/data', 'application/text'])
 
 if sys.platform.startswith('java'):  # pragma: no cover
 
@@ -165,14 +166,15 @@ class SerializerRegistry(object):
     encode = dumps  # XXX compat
 
     def loads(self, data, content_type, content_encoding,
-              accept=None, force=False):
+              accept=None, force=False, _trusted_content=TRUSTED_CONTENT):
+        content_type = content_type or 'application/data'
         if accept is not None:
-            if content_type not in accept:
+            if content_type not in _trusted_content \
+                    and content_type not in accept:
                 raise self._for_untrusted_content(content_type, 'untrusted')
         else:
             if content_type in self._disabled_content_types and not force:
                 raise self._for_untrusted_content(content_type, 'disabled')
-        content_type = content_type or 'application/data'
         content_encoding = (content_encoding or 'utf-8').lower()
 
         if data:

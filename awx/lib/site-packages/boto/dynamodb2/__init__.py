@@ -21,7 +21,7 @@
 # IN THE SOFTWARE.
 #
 
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -32,37 +32,7 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     from boto.dynamodb2.layer1 import DynamoDBConnection
-    return [RegionInfo(name='us-east-1',
-                       endpoint='dynamodb.us-east-1.amazonaws.com',
-                       connection_cls=DynamoDBConnection),
-            RegionInfo(name='us-gov-west-1',
-                       endpoint='dynamodb.us-gov-west-1.amazonaws.com',
-                       connection_cls=DynamoDBConnection),
-            RegionInfo(name='us-west-1',
-                       endpoint='dynamodb.us-west-1.amazonaws.com',
-                       connection_cls=DynamoDBConnection),
-            RegionInfo(name='us-west-2',
-                       endpoint='dynamodb.us-west-2.amazonaws.com',
-                       connection_cls=DynamoDBConnection),
-            RegionInfo(name='eu-west-1',
-                       endpoint='dynamodb.eu-west-1.amazonaws.com',
-                       connection_cls=DynamoDBConnection),
-            RegionInfo(name='ap-northeast-1',
-                       endpoint='dynamodb.ap-northeast-1.amazonaws.com',
-                       connection_cls=DynamoDBConnection),
-            RegionInfo(name='ap-southeast-1',
-                       endpoint='dynamodb.ap-southeast-1.amazonaws.com',
-                       connection_cls=DynamoDBConnection),
-            RegionInfo(name='ap-southeast-2',
-                       endpoint='dynamodb.ap-southeast-2.amazonaws.com',
-                       connection_cls=DynamoDBConnection),
-            RegionInfo(name='sa-east-1',
-                       endpoint='dynamodb.sa-east-1.amazonaws.com',
-                       connection_cls=DynamoDBConnection),
-            RegionInfo(name='cn-north-1',
-                       endpoint='dynamodb.cn-north-1.amazonaws.com.cn',
-                       connection_cls=DynamoDBConnection),
-            ]
+    return get_regions('dynamodb', connection_cls=DynamoDBConnection)
 
 
 def connect_to_region(region_name, **kw_params):

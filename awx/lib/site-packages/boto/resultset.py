@@ -117,6 +117,11 @@ class ResultSet(list):
             self.append(value)
         elif name == 'NextToken':
             self.next_token = value
+        elif name == 'nextToken':
+            self.next_token = value
+            # Code exists which expects nextToken to be available, so we
+            # set it here to remain backwards-compatibile.
+            self.nextToken = value
         elif name == 'BoxUsage':
             try:
                 connection.box_usage += float(value)

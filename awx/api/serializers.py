@@ -302,6 +302,24 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.active
 
+    def get_validation_exclusions(self, instance=None):
+        # Override base class method to continue to use model validation for
+        # fields (including optional ones), appears this was broken by DRF
+        # 2.3.13 update.
+        cls = self.opts.model
+        opts = get_concrete_model(cls)._meta
+        exclusions = [field.name for field in opts.fields + opts.many_to_many]
+        for field_name, field in self.fields.items():
+            field_name = field.source or field_name
+            if field_name not in exclusions:
+                continue
+            if field.read_only:
+                continue
+            if isinstance(field, serializers.Serializer):
+                continue
+            exclusions.remove(field_name)
+        return exclusions
+
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
 

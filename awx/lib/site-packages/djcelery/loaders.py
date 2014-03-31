@@ -72,7 +72,10 @@ class DjangoLoader(BaseLoader):
         try:
             funs = [conn.close for conn in db.connections]
         except AttributeError:
-            funs = [db.close_connection]  # pre multidb
+            if hasattr(db, 'close_old_connections'):  # Django 1.6+
+                funs = [db.close_old_connections]
+            else:
+                funs = [db.close_connection]  # pre multidb
 
         for close in funs:
             try:

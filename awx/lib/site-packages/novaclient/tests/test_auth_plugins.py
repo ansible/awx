@@ -25,8 +25,8 @@ except ImportError:
 
 from novaclient import auth_plugin
 from novaclient import exceptions
-from novaclient.v1_1 import client
 from novaclient.tests import utils
+from novaclient.v1_1 import client
 
 
 def mock_http_request(resp=None):

@@ -105,7 +105,6 @@ if PY3:  # pragma: no cover
     long_t = int
     text_t = str
     range = range
-    int_types = (int, )
     module_name_t = str
 
     open_fqdn = 'builtins.open'
@@ -154,7 +153,6 @@ else:
     text_t = unicode
     long_t = long                   # noqa
     range = xrange
-    int_types = (int, long)
     module_name_t = str
 
     open_fqdn = '__builtin__.open'

@@ -131,7 +131,7 @@ class InlineProcessor(Treeprocessor):
         childResult = self.__processPlaceholders(text, subnode)
 
         if not isText and node is not subnode:
-            pos = node.getchildren().index(subnode)
+            pos = list(node).index(subnode)
             node.remove(subnode)
         else:
             pos = 0
@@ -179,7 +179,7 @@ class InlineProcessor(Treeprocessor):
                         linkText(text)
 
                     if not isString(node): # it's Element
-                        for child in [node] + node.getchildren():
+                        for child in [node] + list(node):
                             if child.tail:
                                 if child.tail.strip():
                                     self.__processElementText(node, child,False)
@@ -237,7 +237,7 @@ class InlineProcessor(Treeprocessor):
         if not isString(node):
             if not isinstance(node.text, util.AtomicString):
                 # We need to process current node too
-                for child in [node] + node.getchildren():
+                for child in [node] + list(node):
                     if not isString(node):
                         if child.text: 
                             child.text = self.__handleInline(child.text,
@@ -276,7 +276,7 @@ class InlineProcessor(Treeprocessor):
         while stack:
             currElement = stack.pop()
             insertQueue = []
-            for child in currElement.getchildren():
+            for child in currElement:
                 if child.text and not isinstance(child.text, util.AtomicString):
                     text = child.text
                     child.text = None
@@ -292,11 +292,11 @@ class InlineProcessor(Treeprocessor):
                         child.tail = dumby.text
                     else:
                         child.tail = None
-                    pos = currElement.getchildren().index(child) + 1
+                    pos = list(currElement).index(child) + 1
                     tailResult.reverse()
                     for newChild in tailResult:
                         currElement.insert(pos, newChild)
-                if child.getchildren():
+                if len(child):
                     stack.append(child)
 
             for element, lst in insertQueue:

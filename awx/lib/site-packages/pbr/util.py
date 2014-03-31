@@ -150,9 +150,6 @@ BOOL_FIELDS = ("use_2to3", "zip_safe", "include_package_data")
 CSV_FIELDS = ("keywords",)
 
 
-log.set_verbosity(log.INFO)
-
-
 def resolve_name(name):
     """Resolve a name like ``module.object`` to an object and return it.
 

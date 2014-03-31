@@ -219,7 +219,7 @@ class EBSInstaller(Installer):
         # Set up the backup cleanup script
         minute = boto.config.get('EBS', 'backup_cleanup_cron_minute')
         hour = boto.config.get('EBS', 'backup_cleanup_cron_hour')
-        if (minute != None) and (hour != None):
+        if (minute is not None) and (hour is not None):
             # Snapshot clean up can either be done via the manage module, or via the new tag based
             # snapshot code, if the snapshots have been tagged with the name of the associated
             # volume. Check for the presence of the new configuration flag, and use the appropriate

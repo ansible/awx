@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions
 
 
 def regions():
@@ -31,27 +31,7 @@ def regions():
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
     from boto.redshift.layer1 import RedshiftConnection
-    cls = RedshiftConnection
-    return [
-        RegionInfo(name='us-east-1',
-                   endpoint='redshift.us-east-1.amazonaws.com',
-                   connection_cls=cls),
-        RegionInfo(name='us-west-2',
-                   endpoint='redshift.us-west-2.amazonaws.com',
-                   connection_cls=cls),
-        RegionInfo(name='eu-west-1',
-                   endpoint='redshift.eu-west-1.amazonaws.com',
-                   connection_cls=cls),
-        RegionInfo(name='ap-northeast-1',
-                   endpoint='redshift.ap-northeast-1.amazonaws.com',
-                   connection_cls=cls),
-        RegionInfo(name='ap-southeast-1',
-                   endpoint='redshift.ap-southeast-1.amazonaws.com',
-                   connection_cls=cls),
-        RegionInfo(name='ap-southeast-2',
-                   endpoint='redshift.ap-southeast-2.amazonaws.com',
-                   connection_cls=cls),
-    ]
+    return get_regions('redshift', connection_cls=RedshiftConnection)
 
 
 def connect_to_region(region_name, **kw_params):

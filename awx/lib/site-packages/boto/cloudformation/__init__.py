@@ -21,19 +21,9 @@
 # IN THE SOFTWARE.
 
 from connection import CloudFormationConnection
-from boto.regioninfo import RegionInfo
+from boto.regioninfo import RegionInfo, get_regions, load_regions
 
-RegionData = {
-    'us-east-1': 'cloudformation.us-east-1.amazonaws.com',
-    'us-west-1': 'cloudformation.us-west-1.amazonaws.com',
-    'us-west-2': 'cloudformation.us-west-2.amazonaws.com',
-    'sa-east-1': 'cloudformation.sa-east-1.amazonaws.com',
-    'eu-west-1': 'cloudformation.eu-west-1.amazonaws.com',
-    'ap-northeast-1': 'cloudformation.ap-northeast-1.amazonaws.com',
-    'ap-southeast-1': 'cloudformation.ap-southeast-1.amazonaws.com',
-    'ap-southeast-2': 'cloudformation.ap-southeast-2.amazonaws.com',
-    'cn-north-1': 'cloudformation.cn-north-1.amazonaws.com.cn',
-}
+RegionData = load_regions().get('cloudformation')
 
 
 def regions():
@@ -43,13 +33,10 @@ def regions():
     :rtype: list
     :return: A list of :class:`boto.RegionInfo` instances
     """
-    regions = []
-    for region_name in RegionData:
-        region = RegionInfo(name=region_name,
-                            endpoint=RegionData[region_name],
-                            connection_cls=CloudFormationConnection)
-        regions.append(region)
-    return regions
+    return get_regions(
+        'cloudformation',
+        connection_cls=CloudFormationConnection
+    )
 
 
 def connect_to_region(region_name, **kw_params):

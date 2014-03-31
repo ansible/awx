@@ -54,22 +54,24 @@ class Route53Connection(AWSAuthConnection):
     DefaultHost = 'route53.amazonaws.com'
     """The default Route53 API endpoint to connect to."""
 
-    Version = '2012-02-29'
+    Version = '2013-04-01'
     """Route53 API version."""
 
-    XMLNameSpace = 'https://route53.amazonaws.com/doc/2012-02-29/'
+    XMLNameSpace = 'https://route53.amazonaws.com/doc/2013-04-01/'
     """XML schema for this Route53 API version."""
 
     def __init__(self, aws_access_key_id=None, aws_secret_access_key=None,
                  port=None, proxy=None, proxy_port=None,
                  host=DefaultHost, debug=0, security_token=None,
-                 validate_certs=True, https_connection_factory=None):
+                 validate_certs=True, https_connection_factory=None,
+                 profile_name=None):
         super(Route53Connection, self).__init__(host,
                                    aws_access_key_id, aws_secret_access_key,
                                    True, port, proxy, proxy_port, debug=debug,
                                    security_token=security_token,
                                    validate_certs=validate_certs,
-                                   https_connection_factory=https_connection_factory)
+                                   https_connection_factory=https_connection_factory,
+                                   profile_name=profile_name)
 
     def _required_auth_capability(self):
         return ['route53']
@@ -223,6 +225,101 @@ class Route53Connection(AWSAuthConnection):
         h = boto.jsonresponse.XmlHandler(e, None)
         h.parse(body)
         return e
+
+
+    # Health checks
+
+    POSTHCXMLBody = """<CreateHealthCheckRequest xmlns="%(xmlns)s">
+    <CallerReference>%(caller_ref)s</CallerReference>
+    %(health_check)s
+    </CreateHealthCheckRequest>"""
+
+    def create_health_check(self, health_check, caller_ref=None):
+        """
+        Create a new Health Check
+
+        :type health_check: HealthCheck
+        :param health_check: HealthCheck object
+
+        :type caller_ref: str
+        :param caller_ref: A unique string that identifies the request
+            and that allows failed CreateHealthCheckRequest requests to be retried
+            without the risk of executing the operation twice.  If you don't
+            provide a value for this, boto will generate a Type 4 UUID and
+            use that.
+
+        """
+        if caller_ref is None:
+            caller_ref = str(uuid.uuid4())
+        uri = '/%s/healthcheck' % self.Version
+        params = {'xmlns': self.XMLNameSpace,
+                  'caller_ref': caller_ref,
+                  'health_check': health_check.to_xml()
+                  }
+        xml_body = self.POSTHCXMLBody % params
+        response = self.make_request('POST', uri, {'Content-Type': 'text/xml'}, xml_body)
+        body = response.read()
+        boto.log.debug(body)
+        if response.status == 201:
+            e = boto.jsonresponse.Element()
+            h = boto.jsonresponse.XmlHandler(e, None)
+            h.parse(body)
+            return e
+        else:
+            raise exception.DNSServerError(response.status, response.reason, body)
+
+    def get_list_health_checks(self, maxitems=None, marker=None):
+        """
+        Return a list of health checks
+
+        :type maxitems: int
+        :param maxitems: Maximum number of items to return
+
+        :type marker: str
+        :param marker: marker to get next set of items to list
+
+        """
+
+        params = {}
+        if maxitems is not None:
+            params['maxitems'] = maxitems
+        if marker is not None:
+            params['marker'] = marker
+
+        uri = '/%s/healthcheck' % (self.Version, )
+        response = self.make_request('GET', uri, params=params)
+        body = response.read()
+        boto.log.debug(body)
+        if response.status >= 300:
+            raise exception.DNSServerError(response.status,
+                                           response.reason,
+                                           body)
+        e = boto.jsonresponse.Element(list_marker='HealthChecks', item_marker=('HealthCheck',))
+        h = boto.jsonresponse.XmlHandler(e, None)
+        h.parse(body)
+        return e
+
+    def delete_health_check(self, health_check_id):
+        """
+        Delete a health check
+
+        :type health_check_id: str
+        :param health_check_id: ID of the health check to delete
+
+        """
+        uri = '/%s/healthcheck/%s' % (self.Version, health_check_id)
+        response = self.make_request('DELETE', uri)
+        body = response.read()
+        boto.log.debug(body)
+        if response.status not in (200, 204):
+            raise exception.DNSServerError(response.status,
+                                           response.reason,
+                                           body)
+        e = boto.jsonresponse.Element()
+        h = boto.jsonresponse.XmlHandler(e, None)
+        h.parse(body)
+        return e
+
 
     # Resource Record Sets
 

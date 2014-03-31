@@ -22,7 +22,7 @@
 class LayoutParameters(object):
 
     def __init__(self, layoutParameters=None):
-        if layoutParameters == None:
+        if layoutParameters is None:
             layoutParameters = []
         self.layoutParameters = layoutParameters
 

@@ -67,7 +67,7 @@ class Converter(object):
         except:
             raise ValidationException(param, '')
 
-class Param(object):
+class Param(Converter):
 
     def __init__(self, name=None, ptype='string', optional=True,
                  short_name=None, long_name=None, doc='',
@@ -142,6 +142,6 @@ class Param(object):
         :param value: The value to convert.  This should always
                       be a string.
         """
-        return super(Param, self).convert(value)
+        return super(Param, self).convert(self,value)
 
 

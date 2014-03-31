@@ -11,7 +11,7 @@ class BundleCommand(InstallCommand):
     name = 'bundle'
     usage = """
       %prog [options] <bundle name>.pybundle <package>..."""
-    summary = 'Create pybundles.'
+    summary = 'DEPRECATED. Create pybundles.'
     bundle = True
 
     def __init__(self, *args, **kw):
@@ -28,20 +28,8 @@ class BundleCommand(InstallCommand):
 
     def run(self, options, args):
 
-        deprecation = textwrap.dedent("""
-
-            ###############################################
-            ##                                           ##
-            ##  Due to lack of interest and maintenance, ##
-            ##  'pip bundle' and support for installing  ##
-            ##  from *.pybundle files is deprecated, as  ##
-            ##  of v1.4 and will be removed in a         ##
-            ##  future release.                          ##
-            ##                                           ##
-            ###############################################
-
-        """)
-        logger.warn(deprecation)
+        logger.deprecated('1.6', "DEPRECATION: 'pip bundle' and support for installing from *.pybundle files is deprecated. "
+                    "See https://github.com/pypa/pip/pull/1046")
 
         if not args:
             raise InstallationError('You must give a bundle filename')

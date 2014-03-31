@@ -145,13 +145,12 @@ class Channel(virtual.Channel):
             host = os.environ.get('SLMQ_HOST', conninfo.hostname)
             port = os.environ.get('SLMQ_PORT', conninfo.port)
             secure = bool(os.environ.get(
-                'SLMQ_SECURE', self.transport_options.get('secure')) or True)
-            if secure:
-                endpoint = "https://%s" % host
-            else:
-                endpoint = "http://%s" % host
-            if port:
-                endpoint = "%s:%s" % (endpoint, port)
+                'SLMQ_SECURE', self.transport_options.get('secure')) or True,
+            )
+            endpoint = '{0}://{1}{2}'.format(
+                'https' if secure else 'http', host,
+                ':{0}'.format(port) if port else '',
+            )
 
             self._slmq = get_client(account, endpoint=endpoint)
             self._slmq.authenticate(user, api_key)

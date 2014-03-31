@@ -98,9 +98,9 @@ class WikiLinkExtension(Extension):
                         'html_class' : ['wikilink', 'CSS hook. Leave blank for none.'],
                         'build_url' : [build_url, 'Callable formats URL from label.'],
         }
-        
+        configs = dict(configs) or {}
         # Override defaults with user settings
-        for key, value in configs :
+        for key, value in configs.items():
             self.setConfig(key, value)
         
     def extendMarkdown(self, md, md_globals):

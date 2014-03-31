@@ -15,11 +15,12 @@
 #    under the License.
 
 import logging
-import pkg_resources
 
+import pkg_resources
 import six
 
 from novaclient import exceptions
+from novaclient.openstack.common.gettextutils import _
 from novaclient import utils
 
 
@@ -39,7 +40,7 @@ def discover_auth_systems():
         try:
             auth_plugin = ep.load()
         except (ImportError, pkg_resources.UnknownExtra, AttributeError) as e:
-            logger.debug("ERROR: Cannot load auth plugin %s" % ep.name)
+            logger.debug(_("ERROR: Cannot load auth plugin %s") % ep.name)
             logger.debug(e, exc_info=1)
         else:
             _discovered_plugins[ep.name] = auth_plugin

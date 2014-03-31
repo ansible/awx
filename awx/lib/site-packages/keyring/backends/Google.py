@@ -13,12 +13,12 @@ except ImportError:
     pass
 
 from . import keyczar
-from keyring import errors
-from keyring import credentials
-from keyring.py27compat import input, pickle
-from keyring.backend import KeyringBackend
-from keyring.util import properties
-from keyring.errors import ExceptionRaisedContext
+from .. import errors
+from .. import credentials
+from ..py27compat import input, pickle
+from ..backend import KeyringBackend
+from ..util import properties
+from ..errors import ExceptionRaisedContext
 
 class EnvironCredential(credentials.EnvironCredential):
     """Retrieve credentials from specifically named environment variables

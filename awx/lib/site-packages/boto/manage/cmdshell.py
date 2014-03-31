@@ -118,7 +118,7 @@ class SSHClient(object):
     def run(self, command):
         """
         Execute a command on the remote host.  Return a tuple containing
-        an integer status and a two strings, the first containing stdout
+        an integer status and two strings, the first containing stdout
         and the second containing stderr from the command.
         """
         boto.log.debug('running:%s on %s' % (command, self.server.instance_id))
@@ -182,7 +182,7 @@ class LocalClient(object):
         log_fp = StringIO.StringIO()
         process = subprocess.Popen(self.command, shell=True, stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        while process.poll() == None:
+        while process.poll() is None:
             time.sleep(1)
             t = process.communicate()
             log_fp.write(t[0])
