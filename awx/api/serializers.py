@@ -272,7 +272,11 @@ class BaseSerializer(serializers.ModelSerializer):
                 for field in related_fields:
                     fval = getattr(fkval, field, None)
                     if fval is None and field == 'type':
-                        summary_fields[fk][field] = get_type_for_model(fkval)
+                        if type(fkval) == UnifiedJobTemplate:
+                            obj_actual = UnifiedJobTemplate.objects.get(id=fkval.id)
+                            summary_fields[fk][field] = get_type_for_model(obj_actual._get_unified_job_class())
+                        else:
+                            summary_fields[fk][field] = get_type_for_model(fkval)
                     if fval is not None:
                         summary_fields[fk][field] = fval
             # Can be raised by the reverse accessor for a OneToOneField.
