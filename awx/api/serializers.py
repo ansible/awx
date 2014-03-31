@@ -30,7 +30,7 @@ from rest_framework import serializers
 
 # AWX
 from awx.main.models import *
-from awx.main.utils import update_scm_url, get_type_for_model
+from awx.main.utils import update_scm_url, get_type_for_model, get_model_for_type
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -218,6 +218,18 @@ class BaseSerializer(serializers.ModelSerializer):
 
     def get_types(self):
         return [self.get_type(None)]
+
+    def get_type_choices(self):
+        type_name_map = {
+            'job': 'playbook run',
+            'project_update': 'project sync',
+            'inventory_update': 'inventory sync',
+        }
+        choices = []
+        for t in self.get_types():
+            name = type_name_map.get(t, unicode(get_model_for_type(t)._meta.verbose_name))
+            choices.append((t, name))
+        return choices
 
     def get_url(self, obj):
         if obj is None:

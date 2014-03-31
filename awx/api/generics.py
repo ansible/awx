@@ -201,10 +201,7 @@ class GenericAPIView(generics.GenericAPIView, APIView):
                 # the metadata itself.
                 if 'type' in actions['GET']:
                     actions['GET']['type']['type'] = 'multiple choice'
-                    actions['GET']['type']['choices'] = [
-                        (x, unicode(get_model_for_type(x)._meta.verbose_name))
-                        for x in serializer.get_types()
-                    ]
+                    actions['GET']['type']['choices'] = serializer.get_type_choices()
                 ret['types'] = serializer.get_types()
         if actions:
             ret['actions'] = actions
