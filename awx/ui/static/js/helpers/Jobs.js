@@ -395,7 +395,7 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt){
             action_label = 'cancel';
             hdr = 'Cancel Job';
         } else {
-            url = job.related.cancel;   //GetBasePath('unified_jobs') + id + '/';
+            url = job.url;
             action_label = 'delete';
             hdr = 'Delete Job';
         }
