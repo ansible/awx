@@ -92,7 +92,7 @@ class Schedule(CommonModel):
 
         self.next_run = next_run_actual
         if self.dtstart is None:
-            self.dtstart = self.next_run
+            self.dtstart = future_rs[0]
         if self.dtend is None and "until" in self.rrule.lower() or 'count' in self.rrule.lower():
             self.dtend = future_rs[-1]
         self.unified_job_template.update_computed_fields()
