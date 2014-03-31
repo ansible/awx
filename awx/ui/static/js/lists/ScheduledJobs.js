@@ -11,8 +11,8 @@
 angular.module('ScheduledJobsDefinition', [])
     .value( 'ScheduledJobsList', {
         
-        name: 'scheduled_jobs',
-        iterator: 'scheduled_job',
+        name: 'schedules',
+        iterator: 'schedule',
         editTitle: 'Scheduled Jobs',
         'class': 'table-condensed',
         index: true,
@@ -20,32 +20,35 @@ angular.module('ScheduledJobsDefinition', [])
         well: false,
         
         fields: {
+            status: {
+                label: 'Status',
+                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                awToolTip: "{{ scheduled_job.status_tip }}",
+                awTipPlacement: "top",
+                icon: 'icon-job-{{ scheduled_job.status }}',
+                iconOnly: true,
+                ngClick: "toggleSchedule(scheduled_job.id)"
+            },
             next_run: {
                 label: 'Next Run',
                 link: false,
                 searchable: false,
                 columnClass: "col-md-2 hidden-xs",
+                filter: "date:'MM/dd/yy HH:mm:ss'",
                 key: true,
                 desc: true
             },
             type: {
                 label: 'Type',
                 link: false,
+                sourceModel: '',
+                sourceField: '',
                 columnClass: "col-md-2 hidden-sm hidden-xs"
             },
-            template_name: {
+            name: {
                 label: 'Name',
                 columnClass: "col-md-3 col-xs-5",
-                sourceModel: "template",
-                sourceField: "name"
             }
-            /*,
-            dtend: {
-                label: 'Ends On',
-                searchable: false,
-                filter: "date:'MM/dd/yy HH:mm:ss'",
-                columnClass: "col-md-2 hidden-xs"
-            }*/
         },
 
         actions: {
@@ -60,7 +63,7 @@ angular.module('ScheduledJobsDefinition', [])
         fieldActions: {
             "play": {
                 mode: "all",
-                ngClick: "toggleSchedule(scheduled_job.id)",
+                ngClick: "toggleSchedule($event, schedule.id)",
                 awToolTip: "{{ scheduled_job.play_tip }}",
                 dataTipWatch: "scheduled_job.play_tip",
                 iconClass: "{{ 'fa icon-schedule-enabled-' + scheduled_job.enabled }}",

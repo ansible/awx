@@ -10,7 +10,7 @@
 'use strict';
 
 angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers',
-    'JobSubmissionHelper', 'SchedulesHelper', 'LogViewerHelper'])
+    'JobSubmissionHelper', 'LogViewerHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator'])
 
 /**
  *  JobsControllerInit({ scope: $scope });
@@ -261,7 +261,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
  *  Called from JobsList controller to load each section or list on the page
  *
  */
-.factory('LoadScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'JobsControllerInit', 'Rest',
+.factory('LoadJobsScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'JobsControllerInit', 'Rest',
     function(SearchInit, PaginateInit, GenerateList, JobsControllerInit, Rest) {
     return function(params) {
         var parent_scope = params.parent_scope,
@@ -344,10 +344,6 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 }
                 else if (list.name === 'queued_jobs') {
                     itm.status_tip = 'Pending';
-                }
-                else if (list.name === 'scheduled_jobs') {
-                    itm.enabled = (itm.enabled) ? true : false;
-                    itm.play_tip = (itm.enabled) ? 'Schedule is Active. Click to temporarily stop.' : 'Schedule is temporarily stopped. Click to activate.';
                 }
 
                 // Copy summary_field values

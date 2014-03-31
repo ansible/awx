@@ -24,7 +24,7 @@ angular.module('SchedulesListDefinition', [])
                 key: true,
                 label: 'Name',
                 ngClick: "editSchedule(schedule.id)",
-                columnClass: "col-md-5 col-sm-3 col-xs-3"
+                columnClass: "col-md-3 col-sm-3 col-xs-3"
             },
             next_run: {
                 label: 'Next Run',
@@ -62,7 +62,7 @@ angular.module('SchedulesListDefinition', [])
         fieldActions: {
             "play": {
                 mode: "all",
-                ngClick: "toggleSchedule(schedule.id)",
+                ngClick: "toggleSchedule($event, schedule.id)",
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",

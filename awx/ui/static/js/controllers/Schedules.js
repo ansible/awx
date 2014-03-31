@@ -10,13 +10,13 @@
 
 'use strict';
 
-function ScheduleEditController($scope, $compile, $location, $routeParams, SchedulesList, GenerateList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-GetBasePath, LookUpInit, Wait, SchedulerInit, Breadcrumbs, SearchInit, PaginateInit, PageRangeSetup, EditSchedule, AddSchedule, Find, ToggleSchedule, DeleteSchedule,
-LoadDialogPartial) {
+function ScheduleEditController($scope, $compile, $location, $routeParams, SchedulesList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope) {
     
     ClearScope();
 
-    var base, e, id, url, parentObject;
+    var base, e, id, url, parentObject,
+        schedules_scope = $scope.$new();
 
     base = $location.path().replace(/^\//, '').split('/')[0];
 
@@ -43,111 +43,32 @@ LoadDialogPartial) {
         e.html(Breadcrumbs({ list: SchedulesList, mode: 'edit' }));
         $compile(e)($scope);
 
-        // Add schedules list
-        GenerateList.inject(SchedulesList, {
-            mode: 'edit',
-            id: 'schedule-list-target',
-            breadCrumbs: false,
-            searchSize: 'col-lg-4 col-md-4 col-sm-3'
-        });
-
-        // Change later to use GetBasePath(base)
-        //switch(base) {
-        //    case 'job_templates':
-        //        url = '/static/sample/data/schedules/data.json';
-        //        break;
-        //    case 'projects':
-        //        url = '/static/sample/data/schedules/projects/data.json';
-        //        break;
-        //}
-        
         url += "schedules/";
 
-        SearchInit({
-            scope: $scope,
-            set: 'schedules',
+        LoadSchedulesScope({
+            parent_scope: $scope,
+            scope: schedules_scope,
             list: SchedulesList,
+            id: 'schedule-list-target',
             url: url
         });
-
-        PaginateInit({
-            scope: $scope,
-            list: SchedulesList,
-            url: url
-        });
-        
-        $scope.search(SchedulesList.iterator);
     });
 
-    $scope.editSchedule = function(id) {
-        var schedule = Find({ list: $scope.schedules, key: 'id', val: id });
-        EditSchedule({ scope: $scope, schedule: schedule, url: url });
-    };
-
-    $scope.addSchedule = function() {
-        var schedule = { };
-        schedule.enabled =  true;
-        AddSchedule({ scope: $scope, schedule: schedule, url: url });
-    };
-
-    if ($scope.removeScheduleRefresh) {
-        $scope.removeScheduleRefresh();
-    }
-    $scope.removeScheduleToggled = $scope.$on('ScheduleRefresh', function() {
-        $scope.search(SchedulesList.iterator);
-    });
-
-    $scope.toggleSchedule = function(id) {
-        ToggleSchedule({
-            scope: $scope,
-            id: id,
-            callback: 'ScheduleToggled'
+    // Load the parent object
+    Wait('start');
+    id = $routeParams.id;
+    url = GetBasePath(base) + id + '/';
+    Rest.setUrl(url);
+    Rest.get()
+        .success(function(data) {
+            parentObject = data;
+            $scope.$emit('ParentLoaded');
+        })
+        .error(function(data, status) {
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                msg: 'Call to ' + url + ' failed. GET returned: ' + status });
         });
-    };
-
-    $scope.toggleSchedule = function(id) {
-        ToggleSchedule({
-            scope: $scope,
-            id: id,
-            callback: 'SchedulesRefresh'
-        });
-    };
-
-    $scope.deleteSchedule = function(id) {
-        DeleteSchedule({
-            scope: $scope,
-            id: id,
-            callback: 'SchedulesRefresh'
-        });
-    };
-
-    if ($scope.removeLoadParent) {
-        $scope.removeLoadParent();
-    }
-    $scope.removeLoadParent = $scope.$on('LoadParent', function() {
-        // Load the parent object
-        id = $routeParams.id;
-        url = GetBasePath(base) + id + '/';
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                parentObject = data;
-                $scope.$emit('ParentLoaded');
-            })
-            .error(function(status) {
-                ProcessErrors($scope, null, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-            });
-    });
-
-    LoadDialogPartial({
-        scope: $scope,
-        element_id: 'schedule-dialog-target',
-        callback: 'LoadParent',
-    });
 }
 
-ScheduleEditController.$inject = ['$scope', '$compile', '$location', '$routeParams', 'SchedulesList', 'GenerateList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
-'ClearScope', 'GetBasePath', 'LookUpInit', 'Wait', 'SchedulerInit', 'Breadcrumbs', 'SearchInit', 'PaginateInit', 'PageRangeSetup', 'EditSchedule', 'AddSchedule',
-'Find', 'ToggleSchedule', 'DeleteSchedule', 'LoadDialogPartial'
-];
+ScheduleEditController.$inject = [ '$scope', '$compile', '$location', '$routeParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
+    'GetBasePath', 'Wait', 'Breadcrumbs', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope' ];

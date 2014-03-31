@@ -9,7 +9,7 @@
 
 'use strict';
 
-angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
+angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator'])
   
     .factory('ShowSchedulerModal', ['Wait', function(Wait) {
         return function(params) {
@@ -111,34 +111,43 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
         };
     }])
 
-    .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest', 'ToAPI', 'ProcessErrors',
-    function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ToAPI, ProcessErrors) {
+    .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest', 'ToAPI', 'ProcessErrors', 'GetBasePath',
+    function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ToAPI, ProcessErrors, GetBasePath) {
         return function(params) {
             var scope = params.scope,
-                schedule = params.schedule,
-                url = params.url,
-                scheduler;
-            Wait('start');
-            $('#form-container').empty();
-            scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
-            scheduler.inject('form-container', false);
-            scheduler.injectDetail('occurrences', false);
-
-            ShowSchedulerModal({ scope: scope });
-            scope.showRRuleDetail = false;
-
-            if (!/DTSTART/.test(schedule.rrule)) {
-                schedule.rrule += ";DTSTART=" + schedule.dtstart.replace(/\.\d+Z$/,'Z');
+                id = params.id,
+                schedule, scheduler,
+                url = GetBasePath('schedules') + id + '/';
+                
+            if (scope.removeScheduleFound) {
+                scope.removeScheduleFound();
             }
-           
-            setTimeout(function(){
-                $('#scheduler-modal-dialog').dialog('open');
-                scope.$apply(function() {
-                    scheduler.setRRule(schedule.rrule);
-                    scheduler.setName(schedule.name);
-                });
-                $('#schedulerName').focus();
-            }, 500);
+            scope.removeScheduleFound = scope.$on('ScheduleFound', function() {
+                $('#form-container').empty();
+                scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
+                scheduler.inject('form-container', false);
+                scheduler.injectDetail('occurrences', false);
+
+                ShowSchedulerModal({ scope: scope });
+                scope.showRRuleDetail = false;
+
+                if (!/DTSTART/.test(schedule.rrule)) {
+                    schedule.rrule += ";DTSTART=" + schedule.dtstart.replace(/\.\d+Z$/,'Z');
+                }
+                schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
+                schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
+                
+                setTimeout(function(){
+                    Wait('stop');
+                    $('#scheduler-modal-dialog').dialog('open');
+                    scope.$apply(function() {
+                        scheduler.setRRule(schedule.rrule);
+                        scheduler.setName(schedule.name);
+                    });
+                    $('#schedulerName').focus();
+                }, 500);
+
+            });
 
             scope.saveSchedule = function() {
                 var newSchedule, rrule;
@@ -151,7 +160,7 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                     schedule.rrule = ToAPI(rrule.toString());
                     schedule.description = (/error/.test(rrule.toText())) ? '' : rrule.toText();
                     Rest.setUrl(url);
-                    Rest.post(schedule)
+                    Rest.put(schedule)
                         .success(function(){
                             Wait('stop');
                             $('#scheduler-modal-dialog').dialog('close');
@@ -170,16 +179,33 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                     }
                 }
             });
+
+            Wait('start');
+
+            // Get the existing record
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    schedule = data;
+                    scope.$emit('ScheduleFound');
+                })
+                .error(function(data,status){
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Failed to retrieve schedule ' + id + ' GET returned: ' + status });
+                });
         };
     }])
 
-    .factory('AddSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest', 'ToAPI', 'ProcessErrors',
-    function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ToAPI, ProcessErrors) {
+    .factory('AddSchedule', ['$location', '$routeParams', 'SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest', 'ToAPI', 'ProcessErrors', 'GetBasePath', 'Empty',
+    function($location, $routeParams, SchedulerInit, ShowSchedulerModal, Wait, Rest, ToAPI, ProcessErrors, GetBasePath, Empty) {
         return function(params) {
             var scope = params.scope,
-                url = params.url,
-                schedule = params.schedule,
+                callback= params.callback,
+                base = $location.path().replace(/^\//, '').split('/')[0],
+                url =  GetBasePath(base),
                 scheduler;
+
+            url += (!Empty($routeParams.id)) ? $routeParams.id + '/schedules/' : '';
 
             Wait('start');
             $('#form-container').empty();
@@ -195,7 +221,7 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
             }, 300);
 
             scope.saveSchedule = function() {
-                var newSchedule, rrule;
+                var newSchedule, rrule, schedule = {};
                 $('#scheduler-tabs a:first').tab('show');
                 if (scheduler.isValid()) {
                     Wait('start');
@@ -207,8 +233,13 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                     Rest.setUrl(url);
                     Rest.post(schedule)
                         .success(function(){
-                            Wait('stop');
                             $('#scheduler-modal-dialog').dialog('close');
+                            if (callback) {
+                                scope.$emit(callback);
+                            }
+                            else {
+                                Wait('stop');
+                            }
                         })
                         .error(function(data, status){
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -227,6 +258,9 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
         };
     }])
 
+    /**
+     * Inject the scheduler_dialog.html wherever needed 
+     */
     .factory('LoadDialogPartial', ['Rest', '$compile', 'ProcessErrors', function(Rest, $compile, ProcessErrors) {
         return function(params) {
             
@@ -273,12 +307,15 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
             if (scope.removeScheduleFound) {
                 scope.removeScheduleFound();
             }
-            scope.removeScheduleFound = scope.$on('removeScheduleFound', function(e, data) {
+            scope.removeScheduleFound = scope.$on('ScheduleFound', function(e, data) {
                 data.enabled = (data.enabled) ? false : true;
                 Rest.put(data)
                     .success( function() {
                         if (callback) {
                             scope.$emit(callback, id);
+                        }
+                        else {
+                            Wait('stop');
                         }
                     })
                     .error( function() {
@@ -287,11 +324,13 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                     });
             });
 
-            // Get the existing record
+            Wait('start');
+
+            // Get the schedule
             Rest.setUrl(url);
             Rest.get()
-                .success(function(){
-                    
+                .success(function(data) {
+                scope.$emit('ScheduleFound', data);
             })
             .error(function(data,status){
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -354,6 +393,10 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
         };
     }])
 
+    /**
+     * Convert rrule string to an API agreeable format
+     *
+     */
     .factory('ToAPI', [ function() {
         return function(rrule) {
             var response;
@@ -361,6 +404,136 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                 return p2.replace(/\;/,'').replace(/=/,':') + ' ' + 'RRULE:' + p1 + p3;
             });
             return response;
+        };
+    }])
+
+
+    .factory('SchedulesControllerInit', ['ToggleSchedule', 'DeleteSchedule', 'EditSchedule', 'AddSchedule',
+        function(ToggleSchedule, DeleteSchedule, EditSchedule, AddSchedule) {
+        return function(params) {
+            var scope = params.scope,
+                list = params.list;
+
+            scope.toggleSchedule = function(event, id) {
+                try {
+                    $(event.target).tooltip('hide');
+                }
+                catch(e) {
+                    // ignore
+                }
+                ToggleSchedule({
+                    scope: scope,
+                    id: id,
+                    callback: 'SchedulesRefresh'
+                });
+            };
+
+            scope.deleteSchedule = function(id) {
+                DeleteSchedule({
+                    scope: scope,
+                    id: id,
+                    callback: 'SchedulesRefresh'
+                });
+            };
+
+            scope.editSchedule = function(id) {
+                EditSchedule({
+                    scope: scope,
+                    id: id,
+                    callback: 'SchedulesRefresh'
+                });
+            };
+
+            scope.addSchedule = function() {
+                AddSchedule({
+                    scope: scope,
+                    callback: 'SchedulesRefresh'
+                });
+            };
+
+            scope.$on('SchedulesRefresh', function() {
+                scope.search(list.iterator);
+            });
+        };
+    }])
+
+    /**
+     * 
+     *  Called from a controller to setup the scope for a schedules list
+     *
+     */
+    .factory('LoadSchedulesScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'SchedulesControllerInit',
+        function(SearchInit, PaginateInit, GenerateList, SchedulesControllerInit) {
+        return function(params) {
+            var parent_scope = params.parent_scope,
+                scope = params.scope,
+                list = params.list,
+                id = params.id,
+                url = params.url,
+                pageSize = params.pageSize || 5;
+
+            GenerateList.inject(list, {
+                mode: 'edit',
+                id: id,
+                breadCrumbs: false,
+                scope: scope,
+                searchSize: 'col-lg-4 col-md-6 col-sm-12 col-xs-12',
+                showSearch: true
+            });
+
+            SearchInit({
+                scope: scope,
+                set: list.name,
+                list: list,
+                url: url
+            });
+
+            PaginateInit({
+                scope: scope,
+                list: list,
+                url: url,
+                pageSize: pageSize
+            });
+
+            scope.iterator = list.iterator;
+
+            if (scope.removePostRefresh) {
+                scope.removePostRefresh();
+            }
+            scope.$on('PostRefresh', function(){
+                
+                SchedulesControllerInit({
+                    scope: scope,
+                    list: list
+                });
+
+                scope[list.name].forEach(function(item, item_idx) {
+                    var fld, field,
+                        itm = scope[list.name][item_idx];
+                    itm.enabled = (itm.enabled) ? true : false;
+                    if (itm.enabled) {
+                        itm.play_tip = 'Schedule is Active. Click to temporarily stop.';
+                        itm.status = 'active';
+                        itm.status_tip = 'Schedule is Active. Click to temporarily stop.';
+                    }
+                    else {
+                        itm.play_tip = 'Schedule is temporarily stopped. Click to activate.';
+                        itm.status = 'stopped';
+                        itm.status_tip = 'Schedule is temporarily stopped. Click to activate.';
+                    }
+                    // Copy summary_field values
+                    for (field in list.fields) {
+                        fld = list.fields[field];
+                        if (fld.sourceModel) {
+                            if (itm.summary_fields[fld.sourceModel]) {
+                                itm[field] = itm.summary_fields[fld.sourceModel][fld.sourceField];
+                            }
+                        }
+                    }
+                });
+                parent_scope.$emit('listLoaded');
+            });
+            scope.search(list.iterator);
         };
     }]);
 
