@@ -62,6 +62,7 @@ class Migration(DataMigration):
         "Write your forwards methods here."
 
         # Copy Project old to new.
+        print('Migrating Projects...')
         new_ctype = self._get_content_type_for_model(orm, orm.Project)
         for project in orm.Project.objects.order_by('pk'):
             d = self._get_dict_from_common_model(project)
@@ -80,6 +81,7 @@ class Migration(DataMigration):
             new_project, created = orm.ProjectNew.objects.get_or_create(old_pk=project.pk, defaults=d)
 
         # Copy ProjectUpdate old to new.
+        print('Migrating Project Updates...')
         new_ctype = self._get_content_type_for_model(orm, orm.ProjectUpdate)
         for project_update in orm.ProjectUpdate.objects.order_by('pk'):
             project = project_update.project
@@ -101,6 +103,7 @@ class Migration(DataMigration):
             new_project_update, created = orm.ProjectUpdateNew.objects.get_or_create(old_pk=project_update.pk, defaults=d)
 
         # Update Project last run.
+        print('Updating Projects last run...')
         for project in orm.Project.objects.order_by('pk'):
             new_project = orm.ProjectNew.objects.get(old_pk=project.pk)
             if project.current_update:
@@ -113,18 +116,21 @@ class Migration(DataMigration):
             new_project.save()
 
         # Update Organization projects.
+        print('Updating Organization projects...')
         for organization in orm.Organization.objects.order_by('pk'):
             for project in organization.projects.order_by('pk'):
                 new_project = orm.ProjectNew.objects.get(old_pk=project.pk)
                 organization.new_projects.add(new_project)
 
         # Update Team projects.
+        print('Updating Team projects...')
         for team in orm.Team.objects.order_by('pk'):
             for project in team.projects.order_by('pk'):
                 new_project = orm.ProjectNew.objects.get(old_pk=project.pk)
                 team.new_projects.add(new_project)
 
         # Update Permission project.
+        print('Updating Permissions...')
         for permission in orm.Permission.objects.order_by('pk'):
             if not permission.project_id:
                 continue
@@ -133,6 +139,7 @@ class Migration(DataMigration):
             permission.save()
 
         # Copy InventorySource old to new.
+        print ('Migrating Inventory Sources...')
         new_ctype = self._get_content_type_for_model(orm, orm.InventorySource)
         for inventory_source in orm.InventorySource.objects.order_by('pk'):
             d = self._get_dict_from_common_model(inventory_source)
@@ -152,6 +159,7 @@ class Migration(DataMigration):
             new_inventory_source, created = orm.InventorySourceNew.objects.get_or_create(old_pk=inventory_source.pk, defaults=d)
 
         # Copy InventoryUpdate old to new.
+        print ('Migrating Inventory Updates...')
         new_ctype = self._get_content_type_for_model(orm, orm.InventoryUpdate)
         for inventory_update in orm.InventoryUpdate.objects.order_by('pk'):
             inventory_source = inventory_update.inventory_source
@@ -174,6 +182,7 @@ class Migration(DataMigration):
             new_inventory_update, created = orm.InventoryUpdateNew.objects.get_or_create(old_pk=inventory_update.pk, defaults=d)
 
         # Update InventorySource last run.
+        print('Updating Inventory Sources last run...')
         for inventory_source in orm.InventorySource.objects.order_by('pk'):
             new_inventory_source = orm.InventorySourceNew.objects.get(old_pk=inventory_source.pk)
             if inventory_source.current_update:
@@ -186,18 +195,21 @@ class Migration(DataMigration):
             new_inventory_source.save()
 
         # Update Group inventory_sources.
+        print('Updating Group inventory sources...')
         for group in orm.Group.objects.order_by('pk'):
             for inventory_source in group.inventory_sources.order_by('pk'):
                 new_inventory_source = orm.InventorySourceNew.objects.get(old_pk=inventory_source.pk)
                 group.new_inventory_sources.add(new_inventory_source)
         
         # Update Host inventory_sources.
+        print('Updating Host inventory sources...')
         for host in orm.Host.objects.order_by('pk'):
             for inventory_source in host.inventory_sources.order_by('pk'):
                 new_inventory_source = orm.InventorySourceNew.objects.get(old_pk=inventory_source.pk)
                 host.new_inventory_sources.add(new_inventory_source)
 
         # Copy JobTemplate old to new.
+        print('Migrating Job Templates...')
         new_ctype = self._get_content_type_for_model(orm, orm.JobTemplate)
         for job_template in orm.JobTemplate.objects.order_by('pk'):
             d = self._get_dict_from_common_model(job_template)
@@ -219,6 +231,7 @@ class Migration(DataMigration):
             new_job_template, created = orm.JobTemplateNew.objects.get_or_create(old_pk=job_template.pk, defaults=d)
 
         # Copy Job old to new.
+        print('Migrating Jobs...')
         new_ctype = self._get_content_type_for_model(orm, orm.Job)
         for job in orm.Job.objects.order_by('pk'):
             d = self._get_dict_from_common_task_model(job)
@@ -246,6 +259,7 @@ class Migration(DataMigration):
             new_job, created = orm.JobNew.objects.get_or_create(old_pk=job.pk, defaults=d)
 
         # Update JobTemplate last run.
+        print('Updating Job Template last run...')
         for new_job_template in orm.JobTemplateNew.objects.order_by('pk'):
             try:
                 new_last_job = new_job_template.jobs.order_by('-pk')[0]
@@ -258,18 +272,21 @@ class Migration(DataMigration):
             new_inventory_source.save()
 
         # Update JobHostSummary job.
+        print('Updating Job Host Summaries...')
         for job_host_summary in orm.JobHostSummary.objects.order_by('pk'):
             new_job = orm.JobNew.objects.get(old_pk=job_host_summary.job_id)
             job_host_summary.new_job = new_job
             job_host_summary.save()
 
         # Update JobEvent job.
+        print('Updating Job Events...')
         for job_event in orm.JobEvent.objects.order_by('pk'):
             new_job = orm.JobNew.objects.get(old_pk=job_event.job_id)
             job_event.new_job = new_job
             job_event.save()
 
         # Update Host last_job.
+        print('Updating Host last job...')
         for host in orm.Host.objects.order_by('pk'):
             if not host.last_job:
                 continue
@@ -278,6 +295,7 @@ class Migration(DataMigration):
             host.save()
 
         # Update ActivityStream
+        print ('Migrating Activity Streams...')
         for a_s in orm.ActivityStream.objects.order_by('pk'):
             for project in a_s.project.all():
                 new_project = orm.ProjectNew.objects.get(old_pk=project.pk)
