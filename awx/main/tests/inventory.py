@@ -1046,15 +1046,30 @@ class InventoryUpdatesTest(BaseTransactionTest):
         if initial:
             self.assertEqual(inventory.groups.count(), 1)
             self.assertEqual(inventory.hosts.count(), 0)
+            self.assertEqual(inventory_source.groups.count(), 0)
+            self.assertEqual(inventory_source.hosts.count(), 0)
         inventory_update = self.check_inventory_update(inventory_source)
         inventory_source = InventorySource.objects.get(pk=inventory_source.pk)
         self.assertNotEqual(inventory.groups.count(), 1)
         self.assertNotEqual(inventory.hosts.count(), 0)
+        self.assertNotEqual(inventory_source.groups.count(), 0)
+        self.assertNotEqual(inventory_source.hosts.count(), 0)
+        with self.current_user(self.super_django_user):
+            url = reverse('api:inventory_source_groups_list', args=(inventory_source.pk,))
+            response = self.get(url, expect=200)
+            self.assertNotEqual(response['count'], 0)
+            url = reverse('api:inventory_source_hosts_list', args=(inventory_source.pk,))
+            response = self.get(url, expect=200)
+            self.assertNotEqual(response['count'], 0)
         for host in inventory.hosts.all():
             source_pks = host.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(host.has_inventory_sources)
             self.assertTrue(host.enabled)
+            with self.current_user(self.super_django_user):
+                url = reverse('api:host_inventory_sources_list', args=(host.pk,))
+                response = self.get(url, expect=200)
+                self.assertNotEqual(response['count'], 0)
         for group in inventory.groups.all():
             source_pks = group.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
@@ -1062,6 +1077,23 @@ class InventoryUpdatesTest(BaseTransactionTest):
             # Make sure EC2 instance ID groups are excluded.
             self.assertFalse(re.match(r'^i-[0-9a-f]{8}$', group.name, re.I),
                              group.name)
+            with self.current_user(self.super_django_user):
+                url = reverse('api:group_inventory_sources_list', args=(group.pk,))
+                response = self.get(url, expect=200)
+                self.assertNotEqual(response['count'], 0)
+        # Try to set a source on a child group that was imported.  Should not
+        # be allowed.
+        for group in inventory_source.group.children.all():
+            inv_src_2 = group.inventory_source
+            inv_src_url2 = reverse('api:inventory_source_detail', args=(inv_src_2.pk,))
+            with self.current_user(self.super_django_user):
+                data = self.get(inv_src_url2, expect=200)
+                data.update({
+                    'source': inventory_source.source,
+                    'credential': inventory_source.credential.pk,
+                })
+                response = self.put(inv_src_url2, data, expect=400)
+                self.assertTrue('source' in response, response)
 
     def test_put_inventory_source_detail_with_regions(self):
         creds_url = reverse('api:credential_list')

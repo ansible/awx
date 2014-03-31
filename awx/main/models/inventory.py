@@ -682,6 +682,16 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 return True
         return False
 
+    def clean_source(self):
+        source = self.source
+        if source and self.group:
+            qs = self.group.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES, active=True, group__active=True)
+            existing_sources = qs.exclude(pk=self.pk)
+            if existing_sources.count():
+                s = u', '.join([x.group.name for x in existing_sources])
+                raise ValidationError('Unable to configure this item for cloud sync. It is already managed by %s.' % s)
+        return source
+
 
 class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     '''

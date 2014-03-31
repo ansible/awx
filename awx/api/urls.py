@@ -81,7 +81,7 @@ host_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/job_events/',                 'host_job_events_list'),
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'host_job_host_summaries_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'host_activity_stream_list'),
-    #url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'host_inventory_sources_list'),
+    url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'host_inventory_sources_list'),
 )
 
 group_urls = patterns('awx.api.views',
@@ -95,7 +95,7 @@ group_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'group_job_host_summaries_list'),
     url(r'^(?P<pk>[0-9]+)/potential_children/$',        'group_potential_children_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'group_activity_stream_list'),
-    #url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'group_inventory_sources_list'),
+    url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'group_inventory_sources_list'),
 )
 
 inventory_source_urls = patterns('awx.api.views',
@@ -105,8 +105,8 @@ inventory_source_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/inventory_updates/$',         'inventory_source_updates_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'inventory_source_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/schedules/$',                 'inventory_source_schedules_list'),
-    #url(r'^(?P<pk>[0-9]+)/groups/$',                    'inventory_source_groups_list'),
-    #url(r'^(?P<pk>[0-9]+)/hosts/$',                     'inventory_source_hosts_list'),
+    url(r'^(?P<pk>[0-9]+)/groups/$',                    'inventory_source_groups_list'),
+    url(r'^(?P<pk>[0-9]+)/hosts/$',                     'inventory_source_hosts_list'),
 )
 
 inventory_update_urls = patterns('awx.api.views',

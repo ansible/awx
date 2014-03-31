@@ -722,6 +722,14 @@ class HostAllGroupsList(SubListAPIView):
         sublist_qs = parent.all_groups.distinct()
         return qs & sublist_qs
 
+class HostInventorySourcesList(SubListAPIView):
+
+    model = InventorySource
+    serializer_class = InventorySourceSerializer
+    parent_model = Host
+    relationship = 'inventory_sources'
+    new_in_148 = True
+
 class HostActivityStreamList(SubListAPIView):
 
     model = ActivityStream
@@ -814,6 +822,14 @@ class GroupAllHostsList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         sublist_qs = parent.all_hosts.distinct()
         return qs & sublist_qs
+
+class GroupInventorySourcesList(SubListAPIView):
+
+    model = InventorySource
+    serializer_class = InventorySourceSerializer
+    parent_model = Group
+    relationship = 'inventory_sources'
+    new_in_148 = True
 
 class GroupActivityStreamList(SubListAPIView):
 
@@ -980,7 +996,6 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
     serializer_class = InventorySourceSerializer
     new_in_14 = True
 
-
 class InventorySourceSchedulesList(SubListCreateAPIView):
 
     view_name = "Inventory Source Schedules"
@@ -999,6 +1014,22 @@ class InventorySourceActivityStreamList(SubListAPIView):
     parent_model = InventorySource
     relationship = 'activitystream_set'
     new_in_145 = True
+
+class InventorySourceHostsList(SubListAPIView):
+
+    model = Host
+    serializer_class = HostSerializer
+    parent_model = InventorySource
+    relationship = 'hosts'
+    new_in_148 = True
+
+class InventorySourceGroupsList(SubListAPIView):
+
+    model = Group
+    serializer_class = GroupSerializer
+    parent_model = InventorySource
+    relationship = 'groups'
+    new_in_148 = True
 
 class InventorySourceUpdatesList(SubListAPIView):
 

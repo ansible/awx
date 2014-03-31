@@ -722,7 +722,7 @@ class HostSerializer(BaseSerializerWithVariables):
             job_events    = reverse('api:host_job_events_list',  args=(obj.pk,)),
             job_host_summaries = reverse('api:host_job_host_summaries_list', args=(obj.pk,)),
             activity_stream = reverse('api:host_activity_stream_list', args=(obj.pk,)),
-            #inventory_sources = reverse('api:host_inventory_sources_list', args=(obj.pk,)),
+            inventory_sources = reverse('api:host_inventory_sources_list', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -833,7 +833,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             job_events    = reverse('api:group_job_events_list',   args=(obj.pk,)),
             job_host_summaries = reverse('api:group_job_host_summaries_list', args=(obj.pk,)),
             activity_stream = reverse('api:group_activity_stream_list', args=(obj.pk,)),
-            #inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
+            inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -981,8 +981,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             inventory_updates = reverse('api:inventory_source_updates_list', args=(obj.pk,)),
             schedules = reverse('api:inventory_source_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
-            #hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
-            #groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
+            hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
+            groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
