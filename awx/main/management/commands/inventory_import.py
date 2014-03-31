@@ -649,7 +649,7 @@ class Command(NoArgsCommand):
                         self.logger.info('Group "%s" variables updated', k)
                 else:
                     self.logger.info('Group "%s" variables unmodified', k)
-            if self.inventory_source.group:
+            if self.inventory_source.group and self.inventory_source.group != group:
                 self.inventory_source.group.children.add(group)
             group.inventory_sources.add(self.inventory_source)
 

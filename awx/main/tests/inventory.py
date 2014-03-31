@@ -1270,6 +1270,11 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                user=self.super_django_user,
                                                username=source_username,
                                                password=source_password)
+        # Set parent group name to one that might be created by the sync.
+        group = self.group
+        group.name = 'ec2'
+        group.save()
+        self.group = group
         inventory_source = self.update_inventory_source(self.group,
             source='ec2', credential=credential, source_regions=source_regions,
             source_vars='---')
@@ -1279,7 +1284,10 @@ class InventoryUpdatesTest(BaseTransactionTest):
             host.enabled = False
             host.save()
         self.check_inventory_source(inventory_source, initial=False)
-
+        # Verify that main group is in top level groups (hasn't been added as
+        # its own child).
+        self.assertTrue(self.group in self.inventory.root_groups)
+        
     def test_update_from_rax(self):
         source_username = getattr(settings, 'TEST_RACKSPACE_USERNAME', '')
         source_password = getattr(settings, 'TEST_RACKSPACE_API_KEY', '')
@@ -1290,6 +1298,11 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                user=self.super_django_user,
                                                username=source_username,
                                                password=source_password)
+        # Set parent group name to one that might be created by the sync.
+        group = self.group
+        group.name = 'DFW'
+        group.save()
+        self.group = group
         inventory_source = self.update_inventory_source(self.group,
             source='rax', credential=credential, source_regions=source_regions)
         self.check_inventory_source(inventory_source)
@@ -1303,3 +1316,6 @@ class InventoryUpdatesTest(BaseTransactionTest):
             inventory_source2 = self.update_inventory_source(self.group2,
                 source='rax', credential=credential, source_regions='')
             self.check_inventory_source(inventory_source2)
+        # Verify that main group is in top level groups (hasn't been added as
+        # its own child).
+        self.assertTrue(self.group in self.inventory.root_groups)
