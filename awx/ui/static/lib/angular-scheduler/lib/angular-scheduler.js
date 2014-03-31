@@ -638,11 +638,11 @@ angular.module('AngularScheduler', ['underscore'])
                 if (key === 'DTSTART') {
                     // The form has been reset to the local zone
                     setStartDate = true;
-                    if (/\d{8}T\d{6}Z/.test(value)) {
+                    if (/\d{8}T\d{6}.*Z/.test(value)) {
                         // date may come in without separators. add them so new Date constructor will work
-                        value = value.replace(/(\d{4})(\d{2})(\d{2}T)(\d{2})(\d{2})(\d{2}Z)/,
+                        value = value.replace(/(\d{4})(\d{2})(\d{2}T)(\d{2})(\d{2})(\d{2}.*$)/,
                             function(match, p1, p2, p3, p4,p5,p6) {
-                                return p1 + '-' + p2 + '-' + p3 + p4 + ':' + p5 + ':' + p6;
+                                return p1 + '-' + p2 + '-' + p3 + p4 + ':' + p5 + ':' + p6.substr(0,2) + 'Z';
                             });
                     }
                     if (useTimezone) {
@@ -660,7 +660,7 @@ angular.module('AngularScheduler', ['underscore'])
                         scope.schedulerStartDt = value.replace(/T.*$/,'');
                         scope.schedulerStartHour = timeString.substr(0,2);
                         scope.schedulerStartMinute = timeString.substr(3,2);
-                        scope.schedulerStartMinute  = timeString.substr(6,2);
+                        scope.schedulerStartSecond  = timeString.substr(6,2);
                     }
                     scope.scheduleTimeChange();
                 }
@@ -695,11 +695,11 @@ angular.module('AngularScheduler', ['underscore'])
                 }
 
                 if (key === 'UNTIL') {
-                    if (/\d{8}T\d{6}Z/.test(value)) {
+                    if (/\d{8}T\d{6}.*Z/.test(value)) {
                         // date may come in without separators. add them so new Date constructor will work
-                        value = value.replace(/(\d{4})(\d{2})(\d{2}T)(\d{2})(\d{2})(\d{2}Z)/,
+                        value = value.replace(/(\d{4})(\d{2})(\d{2}T)(\d{2})(\d{2})(\d{2}.*$)/,
                             function(match, p1, p2, p3, p4,p5,p6) {
-                                return p1 + '-' + p2 + '-' + p3 + p4 + ':' + p5 + ':' + p6;
+                                return p1 + '-' + p2 + '-' + p3 + p4 + ':' + p5 + ':' + p6.substr(0,2) + 'Z';
                             });
                     }
                     scope.schedulerEnd = scope.endOptions[2];

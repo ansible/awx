@@ -35,5 +35,14 @@
     "schedule",
     "rrule",
     "calendar"
-  ]
+  ],
+  "_release": "0.0.4",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.0.4",
+    "commit": "ecde5da79b5bd3b468cd14fc2784e17a8f7e6eee"
+  },
+  "_source": "git://github.com/chouseknecht/angular-scheduler.git",
+  "_target": "~0.0.4",
+  "_originalSource": "angular-scheduler"
 }
