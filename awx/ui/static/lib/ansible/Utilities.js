@@ -79,6 +79,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     return function (hdr, msg, cls, action, secondAlert, disableButtons) {
         var scope = $rootScope.$new(), e;
         if (secondAlert) {
+            $('#alert2-modal-msg').attr({ "class": "alert" });
             scope.alertHeader2 = hdr;
             scope.alertBody2 = msg;
             scope.alertClass2 = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
@@ -102,9 +103,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 }
             });
         } else {
+            $('#alert-modal-msg').attr({ "class": "alert" });
             scope.alertHeader = hdr;
             scope.alertBody = msg;
             scope.alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
+            //console.log('msg: ' + msg + ' cls: ' + cls);
             e = angular.element(document.getElementById('alert-modal'));
             $compile(e)(scope);
             $('#alert-modal').modal({

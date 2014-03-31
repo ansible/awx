@@ -3,8 +3,6 @@
  *
  *  VariablesHelper
  *
- *  Show the CodeMirror variable editor and allow
- *  toggle between JSON and YAML
  *
  */
 
@@ -35,6 +33,7 @@ angular.module('VariablesHelper', ['Utilities'])
                         $log.info('Attempt to parse extra_vars as JSON failed. Attempting to parse as YAML');
                         try {
                             json_obj = jsyaml.safeLoad(variables);
+                            json_obj = SortVariables(json_obj);
                             result = jsyaml.safeDump(json_obj);
                         }
                         catch(e2) {

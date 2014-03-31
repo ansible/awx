@@ -7,12 +7,12 @@
 
 'use strict';
 
-angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
+angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 'VariablesHelper'])
 
     .factory('LogViewer', ['$compile', 'CreateDialog', 'GetJob', 'Wait', 'GenerateForm', 'LogViewerStatusForm', 'AddTable', 'AddTextarea',
-    'LogViewerOptionsForm', 'EnvTable', 'GetBasePath', 'LookUpName', 'Empty',
+    'LogViewerOptionsForm', 'EnvTable', 'GetBasePath', 'LookUpName', 'Empty', 'AddPreFormattedText', 'ParseVariableString',
     function($compile, CreateDialog, GetJob, Wait, GenerateForm, LogViewerStatusForm, AddTable, AddTextarea, LogViewerOptionsForm, EnvTable,
-    GetBasePath, LookUpName, Empty) {
+    GetBasePath, LookUpName, Empty, AddPreFormattedText, ParseVariableString) {
         return function(params) {
             var parent_scope = params.scope,
                 url = params.url,
@@ -41,21 +41,19 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
                 AddTable({ scope: scope, form: LogViewerOptionsForm, id: 'options-form-container', status_icon: status_icon });
                 
                 if (data.result_stdout) {
-                    AddTextarea({
-                        container_id: 'stdout-form-container',
-                        val: data.result_stdout,
-                        fld_id: 'stdout-textarea'
+                    AddPreFormattedText({
+                        id: 'stdout-form-container',
+                        val: data.result_stdout
                     });
                 }
                 else {
-                    $('#logview-tabs li:eq(2)').hide();
+                    $('#logview-tabs li:eq(1)').hide();
                 }
 
                 if (data.result_traceback) {
-                    AddTextarea({
-                        container_id: 'traceback-form-container',
-                        val: data.result_traceback,
-                        fld_id: 'traceback-textarea'
+                    AddPreFormattedText({
+                        id: 'traceback-form-container',
+                        val: data.result_traceback
                     });
                 }
                 else {
@@ -68,6 +66,28 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
                         vars: data.job_env
                     });
                 }*/
+                
+                if (data.extra_vars) {
+                    AddTextarea({
+                        container_id: 'variables-container',
+                        fld_id: 'variables',
+                        val: ParseVariableString(data.extra_vars)
+                    });
+                }
+                else {
+                    $('#logview-tabs li:eq(4)').hide();
+                }
+
+                if (data.source_vars) {
+                    AddTextarea({
+                        container_id: 'source-container',
+                        fld_id: 'source-variables',
+                        val: ParseVariableString(data.source_vars)
+                    });
+                }
+                else {
+                    $('#logview-tabs li:eq(5)').hide();
+                }
 
                 if (!Empty(scope.credential)) {
                     LookUpName({
@@ -81,7 +101,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
                     LookUpName({
                         scope: scope,
                         scope_var: 'inventory',
-                        url: GetBasePath('inventories') + scope.inventory + '/'
+                        url: GetBasePath('inventory') + scope.inventory + '/'
                     });
                 }
 
@@ -115,8 +135,8 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
                         rows = Math.floor((h - u) / 20);
                     rows -= 3;
                     rows = (rows < 6) ? 6 : rows;
-                    $('#stdout-textarea').attr({ rows: rows });
-                    $('#traceback-textarea').attr({ rows: rows });
+                    $('#logviewer-modal-dialog #variables').attr({ rows: rows });
+                    $('#logviewer-modal-dialog #source-variables').attr({ rows: rows });
                 };
 
                 elem = angular.element(document.getElementById('logviewer-modal-dialog'));
@@ -237,9 +257,19 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator'])
                 fld_id = params.fld_id,
                 html;
             html = "<div class=\"form-group\">\n" +
-                "<textarea id=\"" + fld_id + "\" class=\"form-control nowrap mono-space\" rows=\"12\" readonly>" + val + "</textarea>" +
+                "<textarea id=\"" + fld_id + "\" class=\"form-control mono-space\" rows=\"12\" readonly>" + val + "</textarea>" +
                 "</div>\n";
             $('#' + container_id).empty().html(html);
+        };
+    }])
+
+    .factory('AddPreFormattedText', [function() {
+        return function(params) {
+            var id = params.id,
+                val = params.val,
+                html;
+            html = "<pre>" + val + "</pre>\n";
+            $('#' + id).empty().html(html);
         };
     }])
 

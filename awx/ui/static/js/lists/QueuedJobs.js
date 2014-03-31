@@ -22,10 +22,21 @@ angular.module('QueuedJobsDefinition', [])
         fields: {
             id: {
                 label: 'Job ID',
+                ngClick:"viewJobLog(queued_job.id)",
                 key: true,
                 desc: true,
                 searchType: 'int',
                 columnClass: 'col-md-1 col-sm-2 col-xs-2'
+            },
+            status: {
+                label: 'Status',
+                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                awToolTip: "{{ queued_job.status_tip }}",
+                awTipPlacement: "top",
+                dataTitle: "{{ queued_job.status_popover_title }}",
+                icon: 'icon-job-{{ queued_job.status }}',
+                iconOnly: true,
+                ngClick:"viewJobLog(queued_job.id)"
             },
             inventory: {
                 label: 'Inventory ID',
@@ -48,9 +59,7 @@ angular.module('QueuedJobsDefinition', [])
             name: {
                 label: 'Name',
                 columnClass: 'col-sm-3 col-xs-5',
-                ngHref: 'nameHref',
-                sourceModel: 'template',
-                sourceField: 'name'
+                ngClick: "viewJobLog(queued_job.id, queued_job.nameHref)"
             }
         },
 
@@ -59,22 +68,16 @@ angular.module('QueuedJobsDefinition', [])
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()"
+                ngClick: "refreshJobs()"
             }
         },
 
         fieldActions: {
-            status: {
-                mode: 'all',
-                iconClass: 'fa icon-job-{{ queued_job.status }}',
-                awToolTip: "{{ queued_job.statusToolTip }}",
-                dataPlacement: 'top'
-            },
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
-                ngClick: 'relaunch(queued_job.id)',
-                awToolTip: 'Launch another instance of the job',
+                ngClick: 'relaunchJob(queued_job.id)',
+                awToolTip: 'Relaunch using the same parameters',
                 dataPlacement: 'top'
             },
             cancel: {

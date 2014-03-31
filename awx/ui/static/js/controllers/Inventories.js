@@ -189,7 +189,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
 
         Prompt({
             hdr: 'Delete',
-            body: 'Are you sure you want to delete ' + name + '?',
+            body: '<div class=\"alert alert-info\">Are you sure you want to delete ' + name + '?</div>',
             action: action
         });
     };

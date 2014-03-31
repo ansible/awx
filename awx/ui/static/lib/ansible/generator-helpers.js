@@ -264,6 +264,7 @@ angular.module('GeneratorHelpers', [])
             html += "<a href=\"\" class=\"toggle";
             html += "\" ";
             html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
+            html += (field.ngShow) ? "ng-show=\"" + field.ngShow + "\" " : "";
             html += "data-toggle=\"dropdown\" ";
             html += ">";
             html += (field.icon) ? Icon(field.icon) : "";
@@ -448,7 +449,7 @@ angular.module('GeneratorHelpers', [])
                 options = params.options,
                 base = params.base,
                 field = list.fields[fld],
-                html = '', cap;
+                html = '';
 
             if (field.type !== undefined && field.type === 'DropDown') {
                 html = DropDown(params);
@@ -493,21 +494,17 @@ angular.module('GeneratorHelpers', [])
                 }
 
                 // Start the Link
-                if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref) &&
+                if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref || field.awToolTip || field.awPopOver) &&
                     options.mode !== 'lookup' && options.mode !== 'select' && !field.noLink && !field.ngBindHtml) {
-                    cap = false;
+                    html += "<a ";
                     if (field.linkTo) {
-                        html += "<a href=\"" + field.linkTo + "\" ";
-                        cap = true;
+                        html += "href=\"" + field.linkTo + "\" ";
                     } else if (field.ngClick) {
-                        html += "<a href=\"\"" + Attr(field, 'ngClick') + " ";
-                        cap = true;
+                        html += "href=\"\"" + Attr(field, 'ngClick') + " ";
                     } else if (field.ngHref) {
-                        html += "<a ng-href=\"" + field.ngHref + "\" ";
-                        cap = true;
+                        html += "ng-href=\"" + field.ngHref + "\" ";
                     } else if (field.link || (field.key && (field.link === undefined || field.link))) {
-                        html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
-                        cap = true;
+                        html += "href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
                     }
                     if (field.awDroppable) {
                         html += Attr(field, 'awDroppable');
@@ -523,10 +520,15 @@ angular.module('GeneratorHelpers', [])
                     }
                     if (field.awToolTip) {
                         html += Attr(field, 'awToolTip');
-                        html += (field.dataPlacement) ? Attr(field, 'dataPlacement') : "";
+                        html += (field.dataPlacement && !field.awPopOver) ? Attr(field, 'dataPlacement') : "";
                         html += (field.dataTipWatch) ? Attr(field, 'dataTipWatch') : "";
+                        html += (field.awTipPlacement) ? Attr(field, 'awTipPlacement') : "";
                     }
-                    html += (cap) ? ">" : "";
+                    if (field.awPopOver) {
+                        html += "aw-pop-over=\"" + field.awPopOver + "\" ";
+                        html += (field.dataPlacement) ? "data-placement=\"" + field.dataPlacement + "\" " : "";
+                    }
+                    html += ">";
                 }
 
                 // Add icon:
@@ -563,7 +565,7 @@ angular.module('GeneratorHelpers', [])
                 //}
 
                 // close the link
-                if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref) &&
+                if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref || field.awToolTip || field.awPopOver) &&
                     options.mode !== 'lookup' && options.mode !== 'select' && !field.noLink && !field.ngBindHtml) {
                     html += "</a>";
                 }

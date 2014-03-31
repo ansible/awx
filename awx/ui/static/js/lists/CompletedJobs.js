@@ -22,7 +22,7 @@ angular.module('CompletedJobsDefinition', [])
         fields: {
             id: {
                 label: 'Job ID',
-                linkTo: '/#/jobs/{{ completed_job.id }}',
+                ngClick:"viewJobLog(completed_job.id)",
                 key: true,
                 desc: true,
                 searchType: 'int',
@@ -30,13 +30,15 @@ angular.module('CompletedJobsDefinition', [])
             },
             status: {
                 label: 'Status',
+                columnClass: 'col-md-2 col-sm-2 col-xs-2',
                 awToolTip: "{{ completed_job.status_tip }}",
                 awTipPlacement: "top",
                 dataTitle: "{{ completed_job.status_popover_title }}",
                 icon: 'icon-job-{{ completed_job.status }}',
                 iconOnly: true,
-                awPopOver: "{{ completed_job.status_popover }}",
-                dataPlacement: 'right',
+                ngClick:"viewJobLog(completed_job.id)",
+                /*awPopOver: "{{ completed_job.status_popover }}",
+                dataPlacement: 'right',*/
                 searchType: 'select',
                 searchOptions: [
                     { name: "Success", value: "successful" },
@@ -50,8 +52,8 @@ angular.module('CompletedJobsDefinition', [])
                 searchType: 'int',
                 searchOnly: true
             },
-            modified: {
-                label: 'Completed On',
+            finished: {
+                label: 'Finished On',
                 link: false,
                 searchable: false,
                 filter: "date:'MM/dd/yy HH:mm:ss'",
@@ -66,9 +68,7 @@ angular.module('CompletedJobsDefinition', [])
             name: {
                 label: 'Name',
                 columnClass: 'col-md-3 col-xs-5',
-                ngHref: 'nameHref',
-                sourceModel: 'template',
-                sourceField: 'name'
+                ngClick: "viewJobLog(completed_job.id, completed_job.nameHref)"
             },
             failed: {
                 label: 'Job failed?',
@@ -85,7 +85,7 @@ angular.module('CompletedJobsDefinition', [])
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()"
+                ngClick: "refreshJobs()"
             }
         },
         
@@ -93,8 +93,8 @@ angular.module('CompletedJobsDefinition', [])
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
-                ngClick: 'relaunch(completed_job.id)',
-                awToolTip: 'Relaunch the job',
+                ngClick: 'relaunchJob(completed_job.id)',
+                awToolTip: 'Relaunch using the same parameters',
                 dataPlacement: 'top'
             },
             "delete": {
@@ -105,11 +105,12 @@ angular.module('CompletedJobsDefinition', [])
             },
             dropdown: {
                 type: 'DropDown',
+                ngShow: "completed_job.type === 'job'",
                 label: 'View',
                 icon: 'fa-search-plus',
                 'class': 'btn-default btn-xs',
                 options: [
-                    { ngHref: '/#/jobs/{{ completed_job.id }}', label: 'Status' },
+                    //{ ngHref: '/#/jobs/{{ completed_job.id }}', label: 'Status' },
                     { ngHref: '/#/jobs/{{ completed_job.id }}/job_events', label: 'Events', ngHide: "completed_job.status == 'new'" },
                     { ngHref: '/#/jobs/{{ completed_job.id }}/job_host_summaries', label: 'Host Summary' }
                 ]

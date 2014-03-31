@@ -162,9 +162,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         }
                     })
                     .error(function (data, status) {
-                        Wait('stop');
-                        ProcessErrors(scope, data, status, null, {
-                            hdr: 'Error!',
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                             msg: 'Failed to get inventory tree for: ' + inventory_id + '. GET returned: ' + status
                         });
                     });
@@ -309,10 +307,10 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
             html += "<div class=\"modal-body\">\n";
 
             if (target.id === 1) {
-                html += "<p>Are you sure you want to move group " + inbound.name + " to the top level?</p>";
+                html += "<div class=\"alert alert-info\">Are you sure you want to move group " + inbound.name + " to the top level?</div>";
             } else if (inbound.parent === 0) {
-                html += "<p>Are you sure you want to move group " + inbound.name + " from the top level and make it a child of " +
-                    target.name + "?</p>";
+                html += "<div class=\"alert alert-info\">Are you sure you want to move group " + inbound.name + " from the top level and make it a child of " +
+                    target.name + "?</div>";
             } else {
                 html += "<div class=\"text-center\">\n";
                 html += "<p>Would you like to copy or move group <em>" + inbound.name + "</em> to group <em>" + target.name + "</em>?</p>\n";
@@ -502,7 +500,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 html += "<h3>Copy Host</h3>\n";
                 html += "</div>\n";
                 html += "<div class=\"modal-body\">\n";
-                html += "<p>Are you sure you want to copy host " + host.name + ' to group ' + target.name + '?</p>';
+                html += "<div class=\"alert alert-info\">Are you sure you want to copy host " + host.name + ' to group ' + target.name + '?</div>';
                 html += "</div>\n";
                 html += "<div class=\"modal-footer\">\n";
                 html += "<a href=\"#\" data-target=\"#prompt-modal\" data-dismiss=\"modal\" class=\"btn btn-default\">No</a>\n";

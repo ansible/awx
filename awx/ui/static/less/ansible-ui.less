@@ -64,9 +64,14 @@ body.modal-open {
 .nowrap { white-space: nowrap; }
 .capitalize { text-transform: capitalize; }
 .grey-txt { color: @grey; }
-.red-txt { color: @red; } a.red-txt:hover { color: @red; }  //make red links (for things like cancel)
 .text-center { text-align: center !important; }
 
+.red-txt,
+a.red-txt:visited,
+a.red-txt:hover,
+a.red-txt:active {
+  color: @red;
+}
 
 /* Used on inventory groups/hosts lists for long names */
 .ellipsis {
@@ -973,12 +978,9 @@ input[type="checkbox"].checkbox-no-label {
       color: @green;
   }
 
-  .icon-job-pending:before,
   .icon-job-running:before,
   .icon-job-success:before,
   .icon-job-successful:before,
-  .icon-job-waiting:before,
-  .icon-job-new:before,
   .icon-job-changed:before {
       content: "\f111";
   }
@@ -989,12 +991,16 @@ input[type="checkbox"].checkbox-no-label {
       content: "\f06a";
   }
 
-  .icon-job-pending,
+  .icon-job-pending:before,
+  .icon-job-waiting:before,
+  .icon-job-new:before,
+  .icon-job-none:before {
+      content: "\f10c";
+  }
+
   .icon-job-running,
   .icon-job-success,
-  .icon-job-successful,
-  .icon-job-waiting,
-  .icon-job-new {
+  .icon-job-successful {
       color: @green;
   }
   
@@ -1013,13 +1019,12 @@ input[type="checkbox"].checkbox-no-label {
       color: @red;
   }
 
-  .icon-job-none {
+  .icon-job-none,
+  .icon-job-pending,
+  .icon-job-waiting,
+  .icon-job-new {
       color: @grey;
       opacity: 0.45;
-  }
-
-  .icon-job-none:before {
-      content: "\f10c";
   }
 
   .icon-schedule-enabled-true:before {
@@ -1048,14 +1053,11 @@ input[type="checkbox"].checkbox-no-label {
       .pagination li a {
           font-size: 12px;
       }
-      .list-table-container {
+      /*.list-table-container {
           min-height: 338px;
-      }
+      }*/
   }
-  .job-list-target {
-      min-height: 445px;
-  }
-
+  
 /* Inventory job status badge */
   .failures-true {
     background-color: @red;

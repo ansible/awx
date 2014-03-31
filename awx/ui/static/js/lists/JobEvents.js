@@ -21,12 +21,12 @@ angular.module('JobEventsListDefinition', [])
         filterBy: '{ show: true }',
 
         navigationLinks: {
-            details: {
-                href: '/#/jobs/{{ job_id }}',
-                label: 'Status',
-                icon: 'icon-zoom-in',
-                ngShow: 'job_id !== null'
-            },
+            //details: {
+            //    href: '/#/jobs/{{ job_id }}',
+            //    label: 'Status',
+            //    icon: 'icon-zoom-in',
+            //    ngShow: 'job_id !== null'
+            //},
             events: {
                 href: '/#/jobs/{{ job_id }}/job_events',
                 label: 'Events',

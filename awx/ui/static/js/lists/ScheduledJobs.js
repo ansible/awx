@@ -53,7 +53,7 @@ angular.module('ScheduledJobsDefinition', [])
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()"
+                ngClick: "refreshJobs()"
             }
         },
         

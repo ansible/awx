@@ -113,18 +113,18 @@ angular.module('ansible', [
                 controller: 'JobsListController'
             }).
 
-            when('/jobs/:id', {
+           /* when('/jobs/:id', {
                 templateUrl: urlPrefix + 'partials/jobs.html',
                 controller: 'JobsEdit'
-            }).
+            }). */
 
             when('/jobs/:id/job_events', {
-                templateUrl: urlPrefix + 'partials/jobs.html',
+                templateUrl: urlPrefix + 'partials/job_events.html',
                 controller: 'JobEventsList'
             }).
 
             when('/jobs/:id/job_host_summaries', {
-                templateUrl: urlPrefix + 'partials/jobs.html',
+                templateUrl: urlPrefix + 'partials/job_host_summaries.html',
                 controller: 'JobHostSummaryList'
             }).
 

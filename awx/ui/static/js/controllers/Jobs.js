@@ -11,14 +11,14 @@
 'use strict';
 
 function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
-    ScheduledJobsList, GetChoices, GetBasePath, Wait, DeleteJob, Find, DeleteSchedule, ToggleSchedule, RelaunchInventory, RelaunchPlaybook, RelaunchSCM,
+    ScheduledJobsList, GetChoices, GetBasePath, Wait, Find, JobsControllerInit, DeleteSchedule, ToggleSchedule,
     LoadDialogPartial, ScheduledJobEdit) {
     
     ClearScope();
 
     var e,
         completed_scope, running_scope, queued_scope, scheduled_scope,
-        choicesCount = 0, listsCount = 0, relaunch, getTypeId;
+        choicesCount = 0;
 
     LoadBreadCrumbs();
 
@@ -27,47 +27,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
     e.html(Breadcrumbs({ list: { editTitle: 'Jobs' } , mode: 'edit' }));
     $compile(e)($scope);
 
-    relaunch = function(params) {
-        var scope = params.scope,
-            id = params.id,
-            type = params.type,
-            name = params.name;
-        if (type === 'inventory_sync') {
-            RelaunchInventory({ scope: scope, id: id});
-        }
-        else if (type === 'playbook_run') {
-            RelaunchPlaybook({ scope: scope, id: id, name: name });
-        }
-        else if (type === 'scm_sync') {
-            RelaunchSCM({ });
-        }
-    };
 
-    getTypeId = function(job) {
-        var type_id;
-        if (job.type === 'inventory_sync') {
-            type_id = job.inventory_source;
-        }
-        else if (job.type === 'scm_sync') {
-            type_id = job.poject;
-        }
-        else if (job.type === 'playbook_run') {
-            type_id = job.id;
-        }
-        return type_id;
-    };
-
-    // After all the lists are loaded
-    if ($scope.removeListLoaded) {
-        $scope.removeListLoaded();
-    }
-    $scope.removeListLoaded = $scope.$on('listLoaded', function() {
-        listsCount++;
-        if (listsCount === 3) {
-            Wait('stop');
-        }
-    });
-    
     // After all choices are ready, load up the lists and populate the page
     if ($scope.removeBuildJobsList) {
         $scope.removeBuildJobsList();
@@ -113,18 +73,6 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             scheduled_scope.search(ScheduledJobsList.iterator);
         });
 
-        completed_scope.deleteJob = function(id) {
-            DeleteJob({ scope: completed_scope, id: id });
-        };
-
-        queued_scope.deleteJob = function(id) {
-            DeleteJob({ scope: queued_scope, id: id });
-        };
-
-        running_scope.deleteJob = function(id) {
-            DeleteJob({ scope: running_scope, id: id });
-        };
-
         scheduled_scope.toggleSchedule = function(id) {
             ToggleSchedule({
                 scope: scheduled_scope,
@@ -144,25 +92,6 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         scheduled_scope.editSchedule = function(id) {
             ScheduledJobEdit({ scope: scheduled_scope, id: id });
         };
-
-        completed_scope.relaunch = function(id) {
-            var job = Find({ list: completed_scope.completed_jobs, key: 'id', val: id }),
-                type_id = getTypeId(job);
-            relaunch({ scope: completed_scope, id: type_id, type: job.type, name: job.name });
-        };
-
-        running_scope.relaunch = function(id) {
-            var job = Find({ list: running_scope.running_jobs, key: 'id', val: id }),
-                type_id = getTypeId(job);
-            relaunch({ scope: running_scope, id: type_id, type: job.type, name: job.name });
-        };
-
-        queued_scope.relaunch = function(id) {
-            var job = Find({ list: queued_scope.queued_jobs, key: 'id', val: id }),
-                type_id = getTypeId(job);
-            relaunch({ scope: queued_scope, id: type_id, type: job.type, name: job.name });
-        };
-        
     });
 
     if ($scope.removeChoicesReady) {
@@ -198,11 +127,17 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         element_id: 'schedule-dialog-target',
         callback: 'choicesReady'
     });
+
+    $scope.refreshJobs = function() {
+        queued_scope.search('queued_job');
+        running_scope.search('running_job');
+        completed_scope.search('completed_job');
+    };
 }
 
 JobsListController.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadScope', 'RunningJobsList', 'CompletedJobsList',
-    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'DeleteJob', 'Find', 'DeleteSchedule', 'ToggleSchedule', 'RelaunchInventory',
-    'RelaunchPlaybook', 'RelaunchSCM', 'LoadDialogPartial', 'ScheduledJobEdit'];
+    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'Find', 'JobsControllerInit',
+    'DeleteSchedule', 'ToggleSchedule', 'LoadDialogPartial', 'ScheduledJobEdit'];
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,

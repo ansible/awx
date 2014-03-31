@@ -8,7 +8,7 @@
 'use strict';
 
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-    'LookUpHelper', 'JobSubmissionHelper' ])
+    'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition' ])
 
 .factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors', function(Rest, Wait, ProcessErrors) {
     return function(params) {
@@ -48,7 +48,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
         LookUpInit({
             url: GetBasePath('credentials') + '?kind=ssh',
             scope: scope,
-            form: JobTemplateForm,
+            form: JobTemplateForm(),
             current_item: null,
             list: CredentialList,
             field: 'credential',
@@ -68,7 +68,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                 callback = params.callback || 'PasswordsAccepted',
                 password,
                 form = CredentialForm,
-                html,
+                html = "",
                 acceptedPasswords = {},
                 scope = parent_scope.$new();
 
@@ -80,14 +80,12 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                 password = passwords.pop();
                 
                 // Prompt for password
-                html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";
+                html += "<form name=\"password_form\" novalidate>\n";
                 field = form.fields[password];
                 fld = password;
                 scope[fld] = '';
                 html += "<div class=\"form-group\">\n";
-                html += "<label class=\"col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3\" for=\"" + fld + "\">* ";
-                html += "</label>\n";
-                html += "<div class=\"col-md-8 col-sm-8 col-xs-9\">\n";
+                html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
                 html += "<input type=\"password\" ";
                 html += "ng-model=\"" + fld + '" ';
                 html += 'name="' + fld + '" ';
@@ -100,7 +98,6 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                     "password_form." + fld + ".$error.required\">A value is required!</span>\n";
                 html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
                 html += "</div>\n";
-                html += "</div>\n";
 
                 // Add the related confirm field
                 if (field.associated) {
@@ -108,9 +105,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                     field = form.fields[field.associated];
                     scope[fld] = '';
                     html += "<div class=\"form-group\">\n";
-                    html += "<label class=\"col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3\" for=\"" + fld + "\">* ";
-                    html += "</label>\n";
-                    html += "<div class=\"col-md-8 col-sm-8 col-xs-9\">\n";
+                    html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
                     html += "<input type=\"password\" ";
                     html += "ng-model=\"" + fld + '" ';
                     html += 'name="' + fld + '" ';
@@ -126,7 +121,6 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                         ".$error.awpassmatch\">Must match Password value</span>\n" : "";
                     html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
                     html += "</div>\n";
-                    html += "</div>\n";
                 }
                 html += "</form>\n";
                 $('#password-body').empty().html(html);
@@ -139,8 +133,9 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
             }
 
             scope.passwordAccept = function() {
+                $('#password-modal').modal('hide');
                 acceptedPasswords[password] = scope[password];
-                if (password.length > 0) {
+                if (passwords.length > 0) {
                     promptPassword();
                 }
                 else {
@@ -149,9 +144,12 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
             };
 
             scope.passwordCancel = function() {
-                Alert('Missing Password', 'Required password(s) not provided. The request will not be submitted.', 'alert-info');
+                $('#password-modal').modal('hide');
+                Alert('Missing Password', 'Required password(s) not provided. Your request will not be submitted.', 'alert-info');
                 parent_scope.$emit('PasswordsCanceled');
             };
+
+            promptPassword();
         };
     }])
 
@@ -178,7 +176,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                     new_job_id = data.id;
                     launch_url = data.related.start;
                     if (data.passwords_needed_to_start.length > 0) {
-                        scope.$emit('PromptForPasswords');
+                        scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
                     } else {
                         scope.$emit('StartPlaybookRun', {});
                     }
@@ -293,8 +291,13 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                 // Refresh the project list after update request submitted
                 Wait('stop');
                 Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
-                    'To monitor the update status, refresh the page by clicking the <em>Refresh</em> button.', 'alert-info');
-                scope.refresh();
+                    'To monitor the update status, refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info');
+                if (scope.refreshJobs) {
+                    scope.refreshJobs();
+                }
+                else if (scope.refresh) {
+                    scope.refresh();
+                }
             });
 
             if (scope.removePromptForPasswords) {

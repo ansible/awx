@@ -37,8 +37,7 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                         scope.$emit('sourceTypeOptionsReady');
                     })
                     .error(function (data, status) {
-                        ProcessErrors(scope, data, status, null, {
-                            hdr: 'Error!',
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                             msg: 'Failed to retrieve options for inventory_sources.source. OPTIONS status: ' + status
                         });
                     });
@@ -651,7 +650,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
             if (ww > 1199) {
                 // desktop
                 x = 675;
-                y = (780 > wh) ? wh - 15 : 780;
+                y = (800 > wh) ? wh - 15 : 800;
                 maxrows = 18;
             } else if (ww <= 1199 && ww >= 768) {
                 x = 550;
@@ -740,8 +739,8 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                     if (sources_scope.codeMirror) {
                         sources_scope.codeMirror.destroy();
                     }
-                    $('#group-modal-dialog').dialog('destroy');
                     $('#group-modal-dialog').hide();
+                    $('#group-modal-dialog').dialog('destroy');
                     $('#properties-tab').empty();
                     $('#sources-tab').empty();
                     $('#schedules-list').empty();
@@ -983,9 +982,12 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                 if (modal_scope.searchCleanUp) {
                     modal_scope.searchCleanup();
                 }
-
-                $('#group-modal-dialog').dialog('close');
-
+                try {
+                    $('#group-modal-dialog').dialog('close');
+                }
+                catch(e) {
+                    // ignore
+                }
                 // Change the selected group
                 if (groups_reload && parent_scope.selected_tree_id !== tree_id) {
                     parent_scope.showHosts(tree_id, group_id, false);
@@ -1058,7 +1060,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                         overwrite: sources_scope.overwrite,
                         overwrite_vars: sources_scope.overwrite_vars,
                         update_on_launch: sources_scope.update_on_launch,
-                        update_cache_timeout: sources_scope.update_cache_timeout
+                        update_cache_timeout: (sources_scope.update_cache_timeout || 0)
                     };
 
                 // Create a string out of selected list of regions
@@ -1165,7 +1167,6 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                                 }
                             })
                             .error(function (data, status) {
-                                Wait('stop');
                                 ProcessErrors(properties_scope, data, status, GroupForm, { hdr: 'Error!',
                                     msg: 'Failed to create group: ' + group_id + '. POST status: ' + status
                                 });
@@ -1243,7 +1244,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
 
             Prompt({
                 hdr: 'Delete Group',
-                body: '<p>Are you sure you want to delete group <em>' + node.name + '?</p>',
+                body: '<div class=\"alert alert-info\">Are you sure you want to delete group <em>' + node.name + '?</div>',
                 action: action_to_take,
                 'class': 'btn-danger'
             });

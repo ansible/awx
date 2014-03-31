@@ -22,18 +22,29 @@ angular.module('RunningJobsDefinition', [])
         fields: {
             id: {
                 label: 'Job ID',
+                ngClick:"viewJobLog(running_job.id)",
                 key: true,
                 desc: true,
                 searchType: 'int',
                 columnClass: 'col-md-1 col-sm-2 col-xs-2'
+            },
+            status: {
+                label: 'Status',
+                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                awToolTip: "{{ running_job.status_tip }}",
+                awTipPlacement: "top",
+                dataTitle: "{{ running_job.status_popover_title }}",
+                icon: 'icon-job-{{ running_job.status }}',
+                iconOnly: true,
+                ngClick:"viewJobLog(running_job.id)"
             },
             inventory: {
                 label: 'Inventory ID',
                 searchType: 'int',
                 searchOnly: true
             },
-            modified: {
-                label: 'Last Updated',
+            started: {
+                label: 'Started On',
                 link: false,
                 searchable: false,
                 filter: "date:'MM/dd/yy HH:mm:ss'",
@@ -48,9 +59,7 @@ angular.module('RunningJobsDefinition', [])
             name: {
                 label: 'Name',
                 columnClass: 'col-md-3 col-xs-5',
-                ngHref: 'nameHref',
-                sourceModel: 'template',
-                sourceField: 'name'
+                ngClick: "viewJobLog(running_job.id, running_job.nameHref)"
             }
         },
 
@@ -59,25 +68,16 @@ angular.module('RunningJobsDefinition', [])
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()"
+                ngClick: "refreshJobs()"
             }
         },
        
         fieldActions: {
-            status: {
-                mode: 'all',
-                awToolTip: "{{ running_job.status_tip }}",
-                awTipPlacement: "top",
-                dataTitle: "{{ running_job.status_popover_title }}",
-                iconClass: 'fa icon-job-{{ running_job.status }}',
-                awPopOver: "{{ running_job.status_popover }}",
-                dataPlacement: 'left'
-            },
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
-                ngClick: 'relaunch(running_job.id)',
-                awToolTip: 'Launch another instance of the job',
+                ngClick: 'relaunchJob(running_job.id)',
+                awToolTip: 'Relaunch using the same parameters',
                 dataPlacement: 'top'
             },
             cancel: {
@@ -88,11 +88,12 @@ angular.module('RunningJobsDefinition', [])
             },
             dropdown: {
                 type: 'DropDown',
+                ngShow: "running_job.type === 'job'",
                 label: 'View',
                 icon: 'fa-search-plus',
                 'class': 'btn-default btn-xs',
                 options: [
-                    { ngHref: '/#/jobs/{{ running_job.id }}', label: 'Status' },
+                    //{ ngHref: '/#/jobs/{{ running_job.id }}', label: 'Status' },
                     { ngHref: '/#/jobs/{{ running_job.id }}/job_events', label: 'Events' },
                     { ngHref: '/#/jobs/{{ running_job.id }}/job_host_summaries', label: 'Host Summary' }
                 ]
