@@ -334,8 +334,10 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
         return RunProjectUpdate
 
     def is_blocked_by(self, obj):
-        # FIXME: Block update when any job is running using this project!
         if type(obj) == ProjectUpdate:
+            if self.project == obj.project:
+                return True
+        if type(obj) == Job:
             if self.project == obj.project:
                 return True
         return False

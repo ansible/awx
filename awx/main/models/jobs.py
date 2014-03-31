@@ -256,9 +256,8 @@ class Job(UnifiedJob, JobOptions):
                 return True
             return False
         if type(obj) == InventoryUpdate:
-            for i_s in self.inventory.inventory_sources.filter(active=True):
-                if i_s == obj.inventory_source:
-                    return True
+            if self.inventory == obj.inventory_source.inventory:
+                return True
             return False
         if type(obj) == ProjectUpdate:
             if obj.project == self.project:

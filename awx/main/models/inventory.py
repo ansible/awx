@@ -724,10 +724,11 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
         return reverse('api:inventory_update_detail', args=(self.pk,))
 
     def is_blocked_by(self, obj):
-        # FIXME: Block update when any other update is touching the same inventory!
-        # FIXME: Block update when any job is running using this inventory!
         if type(obj) == InventoryUpdate:
-            if self.inventory_source == obj.inventory_source:
+            if self.inventory_source.inventory == obj.inventory_source.inventory:
+                return True
+        if type(obj) == Job:
+            if self.inventory_source.inventory == obj.inventory:
                 return True
         return False
 
