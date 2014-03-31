@@ -534,9 +534,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         try:
             start_args = json.loads(decrypt_field(self, 'start_args'))
         except Exception, e:
-            start_args = None
+            start_args = ''
         if start_args in (None, ''):
-            start_args = kwargs
+            start_args = ''
         opts = dict([(field, start_args.get(field, '')) for field in needed])
         if not all(opts.values()):
             missing_fields = ', '.join([k for k,v in opts.items() if not v])
