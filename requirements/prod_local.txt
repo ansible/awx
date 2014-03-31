@@ -1,6 +1,7 @@
 # PIP requirements for AWX production environment (using only local packages).
 # Install using "pip --no-index -r prod_local.txt".
 
+# May need to install this package separately the first time:
 Django-1.5.5.tar.gz
 
 # The following packages are bundled with AWX (in awx/lib/site-packages):
