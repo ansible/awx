@@ -521,6 +521,16 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
                         itm.status = 'stopped';
                         itm.status_tip = 'Schedule is temporarily stopped. Click to activate.';
                     }
+
+                    // Copy summary_field values
+                    for (field in list.fields) {
+                        fld = list.fields[field];
+                        if (fld.sourceModel) {
+                            if (itm.summary_fields[fld.sourceModel]) {
+                                itm[field] = itm.summary_fields[fld.sourceModel][fld.sourceField];
+                            }
+                        }
+                    }
                     
                     // Set the item type label
                     if (list.fields.type) {
@@ -533,15 +543,6 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
                         });
                     }
 
-                    // Copy summary_field values
-                    for (field in list.fields) {
-                        fld = list.fields[field];
-                        if (fld.sourceModel) {
-                            if (itm.summary_fields[fld.sourceModel]) {
-                                itm[field] = itm.summary_fields[fld.sourceModel][fld.sourceField];
-                            }
-                        }
-                    }
                 });
                 parent_scope.$emit('listLoaded');
             });
