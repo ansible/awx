@@ -54,7 +54,9 @@ def tower_periodic_scheduler(self):
         logger.warning('No PeriodicTask found for tower_periodic_scheduler')
         return
     logger.debug("Last run was: %s", periodic_task.last_run_at)
-    # TODO: Cleanup jobs that we missed
+    old_schedules = Schedule.objects.enabled().before(periodic_task.last_run_at)
+    for schedule in old_schedules:
+        schedule.save()
     schedules = Schedule.objects.enabled().between(periodic_task.last_run_at, run_now)
     for schedule in schedules:
         template = schedule.unified_job_template
