@@ -28,6 +28,9 @@ from rest_framework.compat import get_concrete_model
 from rest_framework import fields
 from rest_framework import serializers
 
+# Django-Polymorphic
+from polymorphic import PolymorphicModel
+
 # AWX
 from awx.main.models import *
 from awx.main.utils import update_scm_url, get_type_for_model, get_model_for_type
@@ -35,7 +38,7 @@ from awx.main.utils import update_scm_url, get_type_for_model, get_model_for_typ
 logger = logging.getLogger('awx.api.serializers')
 
 # Fields that should be summarized regardless of object type.
-DEFAULT_SUMMARY_FIELDS = ('name', 'description',)
+DEFAULT_SUMMARY_FIELDS = ('name', 'description')#, 'type')
 
 # Keys are fields (foreign keys) where, if found on an instance, summary info
 # should be added to the serialized data.  Values are a tuple of field names on
@@ -68,7 +71,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
-    'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('type',),
+    'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('job_type',),
     'last_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
@@ -272,11 +275,12 @@ class BaseSerializer(serializers.ModelSerializer):
                 for field in related_fields:
                     fval = getattr(fkval, field, None)
                     if fval is None and field == 'type':
-                        if type(fkval) == UnifiedJobTemplate:
-                            obj_actual = UnifiedJobTemplate.objects.get(id=fkval.id)
-                            summary_fields[fk][field] = get_type_for_model(obj_actual._get_unified_job_class())
-                        else:
-                            summary_fields[fk][field] = get_type_for_model(fkval)
+                        if isinstance(fkval, PolymorphicModel):
+                            fkval = fkval.get_real_instance()
+                        fval = get_type_for_model(fkval)
+                    elif fval is None and field == 'job_type' and isinstance(fkval, UnifiedJobTemplate):
+                        fkval = fkval.get_real_instance()
+                        fval = get_type_for_model(fkval._get_unified_job_class())
                     if fval is not None:
                         summary_fields[fk][field] = fval
             # Can be raised by the reverse accessor for a OneToOneField.
