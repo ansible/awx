@@ -73,7 +73,6 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             scope.viewJobLog = function(id, url) {
                 var list, job;
                 if (url) {
-                    console.log(url);
                     $location.url(url);
                 }
                 else {

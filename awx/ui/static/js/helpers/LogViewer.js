@@ -41,6 +41,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 AddTable({ scope: scope, form: LogViewerOptionsForm, id: 'options-form-container', getIcon: getIcon });
                 
                 if (data.result_stdout) {
+                    $('#logview-tabs li:eq(1)').show();
                     AddPreFormattedText({
                         id: 'stdout-form-container',
                         val: data.result_stdout
@@ -51,6 +52,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 }
 
                 if (data.result_traceback) {
+                    $('#logview-tabs li:eq(2)').show();
                     AddPreFormattedText({
                         id: 'traceback-form-container',
                         val: data.result_traceback
@@ -236,12 +238,16 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     else if (fld === 'elapsed') {
                         html += scope[fld] + " <span class=\"small-text\">seconds</span>";
                     }
-                    else if (getIcon && fld === 'status') {
-                        html += "<i class=\"fa icon-job-" + getIcon(scope[fld]) + "\"></i> " + scope[fld];
-                        //html += "<i class=\"fa " + status_icon + scope[fld] + "\"></i> " + scope[fld];
-                    }
                     else if (fld === 'status') {
-                        html += "<i class=\"fa icon-job-" + scope[fld] + "\"></i> " + scope[fld];
+                        if (getIcon) {
+                            html += "<i class=\"fa icon-job-" + getIcon(scope[fld]) + "\"></i> " + scope[fld];
+                        }
+                        else {
+                            html += "<i class=\"fa icon-job-" + scope[fld] + "\"></i> " + scope[fld];
+                        }
+                        if (scope.job_explanation) {
+                            html += "<p style=\"padding-top: 12px\">" + scope.job_explanation + "</p>";
+                        }
                     }
                     else {
                         html += scope[fld];

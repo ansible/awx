@@ -1,5 +1,6 @@
 awx/settings/local_settings.py*
 awx/*.sqlite3
+awx/job_status
 awx/projects
 awx/job_output
 awx/public/media

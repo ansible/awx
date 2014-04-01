@@ -18,6 +18,16 @@ angular.module('LogViewerStatusDefinition', [])
                 type: "text",
                 readonly: true,
             },
+            "status": {
+                label: "Status",
+                type: "text",
+                readonly: true
+            },
+            "license_error": {
+                label: "License Error",
+                type: "text",
+                readonly: true
+            },
             "started": {
                 label: "Started",
                 type: "text",
@@ -35,16 +45,6 @@ angular.module('LogViewerStatusDefinition', [])
             },
             "launch_type": {
                 label: "Launch Type",
-                type: "text",
-                readonly: true
-            },
-            "status": {
-                label: "Status",
-                type: "text",
-                readonly: true
-            },
-            "license_error": {
-                label: "License Error",
                 type: "text",
                 readonly: true
             }
