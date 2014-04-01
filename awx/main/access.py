@@ -1098,7 +1098,10 @@ class ScheduleAccess(BaseAccess):
         job_template_qs = self.user.get_queryset(JobTemplate)
         inventory_source_qs = self.user.get_queryset(InventorySource)
         project_qs = self.user.get_queryset(Project)
-        return qs | job_template_qs | inventory_source_qs | project_qs
+        unified_qs = UnifiedJobTemplate.objects.filter(jobtemplate__in=job_template_qs) | \
+                     UnifiedJobTemplate.objects.filter(Q(project__in=project_qs)) | \
+                     UnifiedJobTemplate.objects.filter(Q(inventorysource__in=inventory_source_qs))
+        return qs.filter(unified_job_template__in=unified_qs)
 
     def can_read(self, obj):
         if self.user.is_superuser:
