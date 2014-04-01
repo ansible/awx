@@ -60,7 +60,7 @@ angular.module('ProjectsListDefinition', [])
                 ngClick: 'addProject()',
                 awToolTip: 'Create a new project'
             },
-            help: {
+            /*help: {
                 awPopOver: "<dl>\n<dt>Updating</dt><dd>A source control update is in progress.</dd>\n" +
                     "<dt>Never Updated</dt><dd>This project has not yet been updated from source control.</dd>\n" +
                     "<dt>Failed</dt><dd>An error occurred during the most recent source control update, click the status " +
@@ -74,7 +74,7 @@ angular.module('ProjectsListDefinition', [])
                 mode: 'edit',
                 awToolTip: 'Click for help',
                 awTipPlacement: 'top'
-            },
+            },*/
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",

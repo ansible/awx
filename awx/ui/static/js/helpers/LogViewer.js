@@ -16,7 +16,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
         return function(params) {
             var parent_scope = params.scope,
                 url = params.url,
-                status_icon = params.status_icon,
+                getIcon = params.getIcon,
                 scope = parent_scope.$new();
             
             if (scope.removeModalReady) {
@@ -37,8 +37,8 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     scope[key] = data[key];
                 }
                 
-                AddTable({ scope: scope, form: LogViewerStatusForm, id: 'status-form-container', status_icon: status_icon });
-                AddTable({ scope: scope, form: LogViewerOptionsForm, id: 'options-form-container', status_icon: status_icon });
+                AddTable({ scope: scope, form: LogViewerStatusForm, id: 'status-form-container', getIcon: getIcon });
+                AddTable({ scope: scope, form: LogViewerOptionsForm, id: 'options-form-container', getIcon: getIcon });
                 
                 if (data.result_stdout) {
                     AddPreFormattedText({
@@ -212,7 +212,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
             var form = params.form,
                 id = params.id,
                 scope = params.scope,
-                status_icon = params.status_icon,
+                getIcon = params.getIcon,
                 fld, html, url,
                 urls = [
                     { "variable": "credential", "url": "/#/credentials/" },
@@ -236,8 +236,9 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     else if (fld === 'elapsed') {
                         html += scope[fld] + " <span class=\"small-text\">seconds</span>";
                     }
-                    else if (status_icon && fld === 'status') {
-                        html += "<i class=\"fa " + status_icon + "\"></i> " + scope[fld];
+                    else if (getIcon && fld === 'status') {
+                        html += "<i class=\"fa icon-job-" + getIcon(scope[fld]) + "\"></i> " + scope[fld];
+                        //html += "<i class=\"fa " + status_icon + scope[fld] + "\"></i> " + scope[fld];
                     }
                     else {
                         html += scope[fld];
