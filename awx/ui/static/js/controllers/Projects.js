@@ -58,6 +58,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                         $scope.projects[i].statusTip = 'No SCM updates have run for this project';
                         break;
                     case 'updating':
+                    case 'running':
                         $scope.projects[i].statusIcon = 'running pulsate';
                         $scope.projects[i].statusTip = 'Running! Click for details';
                         break;

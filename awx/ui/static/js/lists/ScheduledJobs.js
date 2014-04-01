@@ -27,7 +27,8 @@ angular.module('ScheduledJobsDefinition', [])
                 awTipPlacement: "top",
                 icon: 'icon-job-{{ schedule.status }}',
                 iconOnly: true,
-                ngClick: "toggleSchedule($event, schedule.id)"
+                ngClick: "toggleSchedule($event, schedule.id)",
+                searchable: false
             },
             next_run: {
                 label: 'Next Run',

@@ -64,6 +64,13 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             id: 'scheduled-jobs',
             url: GetBasePath('schedules')
         });
+
+        $scope.refreshJobs = function() {
+            queued_scope.search('queued_job');
+            running_scope.search('running_job');
+            completed_scope.search('completed_job');
+            scheduled_scope.search('schedule');
+        };
     });
 
     if ($scope.removeChoicesReady) {
@@ -94,12 +101,6 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         callback: 'choicesReady'
     });
 
-    $scope.refreshJobs = function() {
-        queued_scope.search('queued_job');
-        running_scope.search('running_job');
-        completed_scope.search('completed_job');
-        scheduled_scope.search('schedules');
-    };
 }
 
 JobsListController.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope', 'RunningJobsList', 'CompletedJobsList',

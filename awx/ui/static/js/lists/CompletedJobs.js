@@ -23,8 +23,6 @@ angular.module('CompletedJobsDefinition', [])
             id: {
                 label: 'Job ID',
                 ngClick:"viewJobLog(completed_job.id)",
-                key: true,
-                desc: true,
                 searchType: 'int',
                 columnClass: 'col-md-1 col-sm-2 col-xs-2'
             },
@@ -57,7 +55,9 @@ angular.module('CompletedJobsDefinition', [])
                 link: false,
                 searchable: false,
                 filter: "date:'MM/dd/yy HH:mm:ss'",
-                columnClass: "col-md-2 hidden-xs"
+                columnClass: "col-md-2 hidden-xs",
+                key: true,
+                desc: true
             },
             type: {
                 label: 'Type',

@@ -25,7 +25,7 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities', 'PaginationHelpers
                     set = params.set,
                     iterator = params.iterator,
                     url = params.url;
-
+                    
                 scope.current_url = url;
                 Rest.setUrl(url);
                 Rest.get()

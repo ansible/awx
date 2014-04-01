@@ -412,7 +412,7 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
         function(ToggleSchedule, DeleteSchedule, EditSchedule, AddSchedule) {
         return function(params) {
             var scope = params.scope,
-                list = params.list;
+                parent_scope = params.parent_scope;
 
             scope.toggleSchedule = function(event, id) {
                 try {
@@ -451,8 +451,12 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
                 });
             };
 
+            scope.refreshJobs = function() {
+                parent_scope.refreshJobs();
+            };
+
             scope.$on('SchedulesRefresh', function() {
-                scope.search(list.iterator);
+                parent_scope.refreshJobs();
             });
         };
     }])
@@ -504,6 +508,7 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
                 
                 SchedulesControllerInit({
                     scope: scope,
+                    parent_scope: parent_scope,
                     list: list
                 });
 
@@ -531,7 +536,7 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
                             }
                         }
                     }
-                    
+
                     // Set the item type label
                     if (list.fields.type) {
                         parent_scope.type_choices.every(function(choice) {

@@ -74,6 +74,10 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
             });
     });
 
+    $scope.refreshJobs = function() {
+        schedules_scope.search(SchedulesList.iterator);
+    };
+
     Wait('start');
     
     GetChoices({

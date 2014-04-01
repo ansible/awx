@@ -26,20 +26,20 @@ angular.module('SchedulesListDefinition', [])
                 ngClick: "editSchedule(schedule.id)",
                 columnClass: "col-md-3 col-sm-3 col-xs-3"
             },
+            dtstart: {
+                label: 'First Run',
+                filter: "date:'MM/dd/yy HH:mm:ss'",
+                searchable: false,
+                columnClass: "col-md-2 col-sm-3 hidden-xs"
+            },
             next_run: {
                 label: 'Next Run',
                 filter: "date:'MM/dd/yy HH:mm:ss'",
                 searchable: false,
                 columnClass: "col-md-2 col-sm-3 col-xs-3"
             },
-            dtstart: {
-                label: 'Start',
-                filter: "date:'MM/dd/yy HH:mm:ss'",
-                searchable: false,
-                columnClass: "col-md-2 col-sm-3 hidden-xs"
-            },
             dtend: {
-                label: 'End',
+                label: 'Final Run',
                 filter: "date:'MM/dd/yy HH:mm:ss'",
                 searchable: false,
                 columnClass: "col-md-2 col-sm-3 hidden-xs"
@@ -51,6 +51,11 @@ angular.module('SchedulesListDefinition', [])
                 mode: 'all',
                 ngClick: 'addSchedule()',
                 awToolTip: 'Add a new schedule'
+            },
+            refresh: {
+                mode: 'all',
+                awToolTip: "Refresh the page",
+                ngClick: "refreshJobs()"
             },
             stream: {
                 ngClick: "showActivity()",
