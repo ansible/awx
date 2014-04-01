@@ -1094,6 +1094,12 @@ class InventoryUpdatesTest(BaseTransactionTest):
                 })
                 response = self.put(inv_src_url2, data, expect=400)
                 self.assertTrue('source' in response, response)
+        # Make sure we can delete the inventory update.
+        inv_up_url = reverse('api:inventory_update_detail', args=(inventory_update.pk,))
+        with self.current_user(self.super_django_user):
+            self.get(inv_up_url, expect=200)
+            self.delete(inv_up_url, expect=204)
+            self.get(inv_up_url, expect=404)
 
     def test_put_inventory_source_detail_with_regions(self):
         creds_url = reverse('api:credential_list')

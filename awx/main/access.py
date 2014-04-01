@@ -482,6 +482,7 @@ class InventoryUpdateAccess(BaseAccess):
     '''
     I can see inventory updates when I can see the inventory source.
     I can change inventory updates whenever I can change their source.
+    I can delete when I can change/delete the inventory source.
     '''
 
     model = InventoryUpdate
@@ -673,6 +674,7 @@ class ProjectUpdateAccess(BaseAccess):
     '''
     I can see project updates when I can see the project.
     I can change when I can change the project.
+    I can delete when I can change/delete the project.
     '''
 
     model = ProjectUpdate

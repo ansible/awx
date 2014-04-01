@@ -26,11 +26,10 @@ from rest_framework import views
 from awx.main.models import *
 from awx.main.utils import *
 
-# FIXME: machinery for auto-adding audit trail logs to all CREATE/EDITS
-
-__all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView', 'ListCreateAPIView',
-           'SubListAPIView', 'SubListCreateAPIView', 'RetrieveAPIView',
-           'RetrieveUpdateAPIView', 'RetrieveUpdateDestroyAPIView']
+__all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
+           'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
+           'RetrieveAPIView', 'RetrieveUpdateAPIView',
+           'RetrieveDestroyAPIView', 'RetrieveUpdateDestroyAPIView']
 
 def get_view_name(cls, suffix=None):
     '''
@@ -433,7 +432,7 @@ class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
         ''' scrub any fields the user cannot/should not put/patch, based on user context.  This runs after read-only serialization filtering '''
         pass
 
-class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, generics.RetrieveUpdateDestroyAPIView):
+class RetrieveDestroyAPIView(RetrieveAPIView, generics.RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         # somewhat lame that delete has to call it's own permissions check
@@ -450,3 +449,6 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, generics.RetrieveUpdat
         else:
             raise NotImplementedError('destroy() not implemented yet for %s' % obj)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, RetrieveDestroyAPIView):
+    pass

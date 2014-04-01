@@ -1160,6 +1160,11 @@ class ProjectUpdatesTest(BaseTransactionTest):
                 self.check_project_update(project, should_fail=True)#should_still_fail)
             else:
                 self.check_project_update(project, should_fail=should_still_fail)
+        # Test that we can delete project updates.
+        for pu in project.project_updates.filter(active=True):
+            pu_url = reverse('api:project_update_detail', args=(pu.pk,))
+            with self.current_user(self.super_django_user):
+                self.delete(pu_url, expect=204)
 
     def test_create_project_with_scm(self):
         scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',

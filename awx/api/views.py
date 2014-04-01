@@ -500,7 +500,7 @@ class ProjectUpdateView(GenericAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
-class ProjectUpdateDetail(RetrieveAPIView):
+class ProjectUpdateDetail(RetrieveDestroyAPIView):
 
     model = ProjectUpdate
     serializer_class = ProjectUpdateSerializer
@@ -1064,7 +1064,7 @@ class InventorySourceUpdateView(GenericAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
-class InventoryUpdateDetail(RetrieveAPIView):
+class InventoryUpdateDetail(RetrieveDestroyAPIView):
 
     model = InventoryUpdate
     serializer_class = InventoryUpdateSerializer
