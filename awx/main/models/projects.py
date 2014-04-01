@@ -32,6 +32,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 # AWX
 from awx.lib.compat import slugify
 from awx.main.models.base import *
+from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import *
 from awx.main.utils import update_scm_url
 from awx.main.utils import encrypt_field

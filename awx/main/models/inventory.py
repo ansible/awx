@@ -31,6 +31,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 # AWX
 from awx.main.fields import AutoOneToOneField
 from awx.main.models.base import *
+from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import *
 from awx.main.utils import encrypt_field
 
