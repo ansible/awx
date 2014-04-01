@@ -42,7 +42,8 @@ class ActivityStreamTest(BaseTest):
              self.check_pagination_and_size(response, 1, previous=None, next=None)
 
     def test_basic_fields(self):
-        org_item = self.item(1)
+        item_id = ActivityStream.objects.order_by('pk')[0].pk
+        org_item = self.item(item_id)
 
         with self.current_user(self.super_django_user):
             response = self.get(org_item, expect=200)
@@ -54,7 +55,8 @@ class ActivityStreamTest(BaseTest):
             self.assertTrue(response['summary_fields']['organization'][0]['name'] == self.org_created['name'])
 
     def test_changeby_user(self):
-        org_item = self.item(1)
+        item_id = ActivityStream.objects.order_by('pk')[0].pk
+        org_item = self.item(item_id)
 
         with self.current_user(self.super_django_user):
             response = self.get(org_item, expect=200)

@@ -1,7 +1,7 @@
 awx/settings/local_settings.py*
 awx/*.sqlite3
 awx/projects
-awx/job_status
+awx/job_output
 awx/public/media
 awx/public/static
 awx/ui/static/js/awx.min.js
