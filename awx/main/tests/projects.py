@@ -259,9 +259,26 @@ class ProjectsTest(BaseTest):
         self.get(project, expect=200, auth=self.get_other_credentials())
         self.get(project, expect=403, auth=self.get_nobody_credentials())
 
-        # can delete projects
+        # can create a schedule for a project (doesn't matter if the project
+        # has SCM for this test).
+        project_schedules = reverse('api:project_schedules_list', args=(self.projects[3].pk,))
+        with self.current_user(self.super_django_user):
+            response = self.get(project_schedules, expect=200)
+            self.assertEqual(response['count'], 0)
+            dtstart = now().replace(microsecond=0).strftime('%Y%m%dT%H%M%SZ')
+            data = {
+                'name': 'test schedule',
+                'rrule': 'DTSTART:%s RRULE:FREQ=DAILY;INTERVAL=1' % dtstart,
+            }
+            response = self.post(project_schedules, data, expect=201)
+            schedule_url = response['url']
+            response = self.get(schedule_url, expect=200)
+
+        # can delete projects, schedule should be "deleted" along with project.
         self.delete(project, expect=204, auth=self.get_normal_credentials())
         self.get(project, expect=404, auth=self.get_normal_credentials())
+        with self.current_user(self.super_django_user):
+            self.get(schedule_url, expect=404)
 
         # can list playbooks for projects
         proj_playbooks = reverse('api:project_playbooks', args=(self.projects[2].pk,))
