@@ -337,7 +337,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                     // Do not respond. Button appears greyed out as if it is disabled. Not disabled though, because we need mouse over event
                     // to work. So user can click, but we just won't do anything.
                     //Alert('Missing SCM Setup', 'Before running an SCM update, edit the project and provide the SCM access information.', 'alert-info');
-                } else if (project.status === 'updating') {
+                } else if (project.status === 'updating' || project.status === 'running') {
                     Alert('Update in Progress', 'The SCM update process is running. Use the Refresh button to monitor the status.', 'alert-info');
                 } else {
                     ProjectUpdate({ scope: $scope, project_id: project.id });

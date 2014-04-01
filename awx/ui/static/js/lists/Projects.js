@@ -109,13 +109,13 @@ angular.module('ProjectsListDefinition', [])
             "delete": {
                 ngClick: "deleteProject(project.id, project.name)",
                 awToolTip: 'Delete the project',
-                ngShow: "project.status !== 'updating'",
+                ngShow: "project.status !== 'updating' && project.status !== 'running'",
                 dataPlacement: 'top'
             },
             cancel: {
                 ngClick: "cancelUpdate(project.id, project.name)",
                 awToolTip: 'Cancel the SCM update',
-                ngShow: "project.status == 'updating'",
+                ngShow: "project.status == 'updating' || project.status == 'running'",
                 dataPlacement: 'top'
             }
         }
