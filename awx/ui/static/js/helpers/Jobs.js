@@ -73,7 +73,8 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             scope.viewJobLog = function(id, url) {
                 var list, job;
                 if (url) {
-                    $location.path(url);
+                    console.log(url);
+                    $location.url(url);
                 }
                 else {
                     if (scope.completed_jobs) {
@@ -303,7 +304,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 Rest.setUrl(item.related.inventory_source);
                 Rest.get()
                     .success(function(data) {
-                        itm.nameHref = "/inventories/" + data.inventory;
+                        itm.nameHref = "/home/groups?id=" + data.group;
                     });
             }
             else if (item.type === "project_update") {

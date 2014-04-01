@@ -503,6 +503,8 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                         itm.status_tip = 'Schedule is temporarily stopped. Click to activate.';
                     }
 
+                    itm.nameTip = item.name + " schedule. Click to edit.";
+
                     // Copy summary_field values
                     for (field in list.fields) {
                         fld = list.fields[field];

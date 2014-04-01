@@ -45,7 +45,7 @@ angular.module('ScheduledJobsDefinition', [])
                 link: false,
                 columnClass: "col-md-2 hidden-sm hidden-xs",
                 sourceModel: 'unified_job_template',
-                sourceField: 'type',
+                sourceField: 'job_type',
                 ngBind: 'schedule.type_label',
                 searchable: false,
                 nosort: true
@@ -53,7 +53,11 @@ angular.module('ScheduledJobsDefinition', [])
             name: {
                 label: 'Name',
                 columnClass: "col-md-3 col-xs-5",
-                ngClick: "editSchedule(schedule.id)"
+                sourceModel: 'unified_job_template',
+                sourceField: 'name',
+                ngClick: "editSchedule(schedule.id)",
+                awToolTip: "{{ schedule.nameTip }}",
+                dataPlacement: "top"
             }
         },
 
