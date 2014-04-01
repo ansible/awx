@@ -7,8 +7,8 @@
  *
  *
  */
-angular.module('ProjectFormDefinition', [])
-    .value('ProjectsForm', {
+angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
+    .value('ProjectsFormObject', {
 
         addTitle: 'Create Project',
         editTitle: '{{ name }}',
@@ -282,53 +282,36 @@ angular.module('ProjectFormDefinition', [])
                 }
             },
 
-            schedules:  {
-                type: 'collection',
-                title: 'Schedules',
-                iterator: 'schedule',
-                index: true,
-                open: false,
-                
-                fields: {
-                    name: {
-                        key: true,
-                        label: 'Name'
-                    },
-                    dtstart: {
-                        label: 'Start'
-                    },
-                    dtend: {
-                        label: 'End'
-                    }
-                },
-
-                actions: {
-                    add: {
-                        mode: 'all',
-                        ngClick: 'addSchedule()',
-                        awToolTip: 'Add a new schedule'
-                    }
-                },
-
-                fieldActions: {
-                    edit: {
-                        label: 'Edit',
-                        ngClick: "editSchedule(schedule.id)",
-                        icon: 'icon-edit',
-                        awToolTip: 'Edit schedule',
-                        dataPlacement: 'top'
-                    },
-
-                    "delete": {
-                        label: 'Delete',
-                        ngClick: "deleteSchedule(schedule.id)",
-                        icon: 'icon-trash',
-                        awToolTip: 'Delete schedule',
-                        dataPlacement: 'top'
-                    }
-                }
-                
+            schedules: {
+                include: "SchedulesList"
             }
+
+        },
+
+        relatedSets: function(urls) {
+            return {
+                organizations: {
+                    iterator: 'organization',
+                    url: urls.organizations
+                },
+                schedules: {
+                    iterator: 'schedule',
+                    url: urls.schedules
+                }
+            };
         }
 
-    }); // Form
+    })
+
+    .factory('ProjectsForm', ['ProjectsFormObject', 'SchedulesList', function(ProjectsFormObject, ScheduleList) {
+        return function() {
+            var itm;
+            for (itm in ProjectsFormObject.related) {
+                if (ProjectsFormObject.related[itm].include === "SchedulesList") {
+                    ProjectsFormObject.related[itm] = ScheduleList;
+                    ProjectsFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
+                }
+            }
+            return ProjectsFormObject;
+        };
+    }]);

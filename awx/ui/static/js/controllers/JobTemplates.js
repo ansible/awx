@@ -337,7 +337,7 @@ JobTemplatesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$lo
 function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
-    Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON) {
+    Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit) {
     
     ClearScope();
 
@@ -466,7 +466,11 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             for (var set in relatedSets) {
                 $scope.search(relatedSets[set].iterator);
             }
-
+            SchedulesControllerInit({
+                scope: $scope,
+                parent_scope: $scope,
+                iterator: 'schedule'
+            });
         }
     });
 
@@ -753,5 +757,5 @@ JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$l
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
-    'ParseVariableString', 'ToJSON'
+    'ParseVariableString', 'ToJSON', 'SchedulesControllerInit'
 ];

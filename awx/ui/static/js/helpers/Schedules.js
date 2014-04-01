@@ -69,6 +69,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
         return function(params) {
             var scope = params.scope,
                 id = params.id,
+                callback = params.callback,
                 schedule, scheduler,
                 url = GetBasePath('schedules') + id + '/';
                 
@@ -118,8 +119,13 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                     Rest.setUrl(url);
                     Rest.put(schedule)
                         .success(function(){
-                            Wait('stop');
                             $('#scheduler-modal-dialog').dialog('close');
+                            if (callback) {
+                                scope.$emit(callback);
+                            }
+                            else {
+                                Wait('stop');
+                            }
                         })
                         .error(function(data, status){
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -368,11 +374,13 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
     }])
 
 
-    .factory('SchedulesControllerInit', ['ToggleSchedule', 'DeleteSchedule', 'EditSchedule', 'AddSchedule',
-        function(ToggleSchedule, DeleteSchedule, EditSchedule, AddSchedule) {
+    .factory('SchedulesControllerInit', ['$location', 'ToggleSchedule', 'DeleteSchedule', 'EditSchedule', 'AddSchedule',
+        function($location, ToggleSchedule, DeleteSchedule, EditSchedule, AddSchedule) {
         return function(params) {
             var scope = params.scope,
-                parent_scope = params.parent_scope;
+                parent_scope = params.parent_scope,
+                iterator = (params.iterator) ? params.iterator : scope.iterator,
+                base = $location.path().replace(/^\//, '').split('/')[0];
 
             scope.toggleSchedule = function(event, id) {
                 try {
@@ -412,11 +420,19 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
             };
 
             scope.refreshJobs = function() {
-                parent_scope.refreshJobs();
+                if (base === 'jobs') {
+                    parent_scope.refreshJobs();
+                }
+                else {
+                    scope.search(iterator);
+                }
             };
 
+            if (scope.removeSchedulesRefresh) {
+                scope.removeSchedulesRefresh();
+            }
             scope.$on('SchedulesRefresh', function() {
-                parent_scope.refreshJobs();
+                scope.refreshJobs();
             });
         };
     }])

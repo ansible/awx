@@ -373,7 +373,7 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
     ClearScope();
 
     // Inject dynamic view
-    var form = ProjectsForm,
+    var form = ProjectsForm(),
         generator = GenerateForm,
         base = $location.path().replace(/^\//, '').split('/')[0],
         defaultUrl = GetBasePath('projects'),
@@ -510,12 +510,12 @@ ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', 
 function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit, GetChoices,
-    Empty, DebugForm, Wait, Stream) {
+    Empty, DebugForm, Wait, Stream, SchedulesControllerInit) {
     
     ClearScope('htmlTemplate');
 
     // Inject dynamic view
-    var form = ProjectsForm,
+    var form = ProjectsForm(),
         generator = GenerateForm,
         defaultUrl = GetBasePath('projects') + $routeParams.id + '/',
         base = $location.path().replace(/^\//, '').split('/')[0],
@@ -539,6 +539,12 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
         for (set in relatedSets) {
             $scope.search(relatedSets[set].iterator);
         }
+
+        SchedulesControllerInit({
+            scope: $scope,
+            parent_scope: $scope,
+            iterator: 'schedule'
+        });
 
         if (Authorization.getUserInfo('is_superuser') === true) {
             GetProjectPath({ scope: $scope, master: master });
@@ -574,7 +580,7 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
         Rest.setUrl(defaultUrl);
         Rest.get({ params: { id: id } })
             .success(function (data) {
-                var related, set, fld, i;
+                var fld, i;
                 LoadBreadCrumbs({ path: '/projects/' + id, title: data.name });
                 for (fld in form.fields) {
                     if (form.fields[fld].type === 'checkbox_group') {
@@ -596,15 +602,8 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
                             data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                     }
                 }
-                related = data.related;
-                for (set in form.related) {
-                    if (related[set]) {
-                        relatedSets[set] = {
-                            url: related[set],
-                            iterator: form.related[set].iterator
-                        };
-                    }
-                }
+                
+                relatedSets = form.relatedSets(data.related);
 
                 data.scm_type = (Empty(data.scm_type)) ? '' : data.scm_type;
 
@@ -639,8 +638,7 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
                 $scope.$emit('projectLoaded');
             })
             .error(function (data, status) {
-                ProcessErrors($scope, data, status, form, {
-                    hdr: 'Error!',
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                     msg: 'Failed to retrieve project: ' + id + '. GET status: ' + status
                 });
             });
@@ -756,5 +754,5 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
 ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope',
     'GetBasePath', 'ReturnToCaller', 'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
-    'DebugForm', 'Wait', 'Stream'
+    'DebugForm', 'Wait', 'Stream', 'SchedulesControllerInit'
 ];

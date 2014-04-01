@@ -15,8 +15,7 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
     
     ClearScope();
 
-    var base, e, id, url, parentObject,
-        schedules_scope = $scope.$new();
+    var base, e, id, url, parentObject;
 
     base = $location.path().replace(/^\//, '').split('/')[0];
 
@@ -47,7 +46,7 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
 
         LoadSchedulesScope({
             parent_scope: $scope,
-            scope: schedules_scope,
+            scope: $scope,
             list: SchedulesList,
             id: 'schedule-list-target',
             url: url
@@ -75,7 +74,7 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
     });
 
     $scope.refreshJobs = function() {
-        schedules_scope.search(SchedulesList.iterator);
+        $scope.search(SchedulesList.iterator);
     };
 
     Wait('start');

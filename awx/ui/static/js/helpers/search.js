@@ -446,11 +446,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             };
 
 
-            scope.sort = function (fld) {
+            scope.sort = function (iterator, fld) {
                 // Reset sort icons back to 'icon-sort' on all columns
                 // except the one clicked.
                 $('.list-header').each(function () {
-                    if ($(this).attr('id') !== fld + '-header') {
+                    if ($(this).attr('id') !== iterator + '-' + fld + '-header') {
                         var icon = $(this).find('i');
                         icon.attr('class', 'fa fa-sort');
                     }
@@ -458,7 +458,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
 
                 // Toggle the icon for the clicked column
                 // and set the sort direction  
-                var icon = $('#' + fld + '-header i'),
+                var icon = $('#' + iterator + '-' + fld + '-header i'),
                     direction = '';
                 if (icon.hasClass('fa-sort')) {
                     icon.removeClass('fa-sort');
