@@ -22,7 +22,9 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
     function($location, Find, DeleteJob, RelaunchJob, LogViewer) {
         return function(params) {
             var scope = params.scope,
-                parent_scope = params.parent_scope;
+                parent_scope = params.parent_scope,
+                iterator = (params.iterator) ? params.iterator : scope.iterator,
+                base = $location.path().replace(/^\//, '').split('/')[0];
         
             scope.deleteJob = function(id) {
                 DeleteJob({ scope: scope, id: id });
@@ -59,7 +61,13 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             };
 
             scope.refreshJobs = function() {
-                parent_scope.refreshJobs();
+                if (base === 'jobs') {
+                    parent_scope.refreshJobs();
+                }
+                else {
+                    scope.search(iterator);
+                }
+
             };
 
             scope.viewJobLog = function(id, url) {
@@ -80,8 +88,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                     job = Find({ list: list, key: 'id', val: id });
                     LogViewer({
                         scope: scope,
-                        url: job.url,
-                        status_icon: 'icon-job-' + job.status
+                        url: job.url
                     });
                 }
             };
@@ -262,13 +269,77 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
     }
 ])
 
+
+.factory('JobsListUpdate', ['Rest', function(Rest) {
+    return function(params) {
+        var scope = params.scope,
+            parent_scope = params.scope,
+            list = params.list;
+
+        scope[list.name].forEach(function(item, item_idx) {
+            var fld, field,
+                itm = scope[list.name][item_idx];
+
+            // Set the item type label
+            if (list.fields.type) {
+                parent_scope.type_choices.every(function(choice) {
+                    if (choice.value === item.type) {
+                        itm.type_label = choice.label;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            // Set the job status label
+            parent_scope.status_choices.every(function(status) {
+                if (status.value === item.status) {
+                    itm.status_label = status.label;
+                    return false;
+                }
+                return true;
+            });
+            //Set the name link
+            if (item.type === "inventory_update") {
+                Rest.setUrl(item.related.inventory_source);
+                Rest.get()
+                    .success(function(data) {
+                        itm.nameHref = "/inventories/" + data.inventory;
+                    });
+            }
+            else if (item.type === "project_update") {
+                itm.nameHref = "/projects/" + item.project;
+            }
+            else if (item.type === "job") {
+                itm.nameHref = "";
+            }
+            
+            if (list.name === 'completed_jobs' || list.name === 'running_jobs') {
+                itm.status_tip = itm.status_label + '. Click for details.';
+            }
+            else if (list.name === 'queued_jobs') {
+                itm.status_tip = 'Pending';
+            }
+
+            // Copy summary_field values
+            for (field in list.fields) {
+                fld = list.fields[field];
+                if (fld.sourceModel) {
+                    if (itm.summary_fields[fld.sourceModel]) {
+                        itm[field] = itm.summary_fields[fld.sourceModel][fld.sourceField];
+                    }
+                }
+            }
+        });
+    };
+}])
+
 /**
  * 
  *  Called from JobsList controller to load each section or list on the page
  *
  */
-.factory('LoadJobsScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'JobsControllerInit', 'Rest',
-    function(SearchInit, PaginateInit, GenerateList, JobsControllerInit, Rest) {
+.factory('LoadJobsScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'JobsControllerInit', 'JobsListUpdate',
+    function(SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate) {
     return function(params) {
         var parent_scope = params.parent_scope,
             scope = params.scope,
@@ -298,70 +369,15 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             url: url,
             pageSize: 5
         });
-
+        
         scope.iterator = list.iterator;
 
         if (scope.removePostRefresh) {
             scope.removePostRefresh();
         }
         scope.$on('PostRefresh', function(){
-            
             JobsControllerInit({ scope: scope, parent_scope: parent_scope });
-
-            scope[list.name].forEach(function(item, item_idx) {
-                var fld, field,
-                    itm = scope[list.name][item_idx];
-
-                // Set the item type label
-                if (list.fields.type) {
-                    parent_scope.type_choices.every(function(choice) {
-                        if (choice.value === item.type) {
-                            itm.type_label = choice.label;
-                            return false;
-                        }
-                        return true;
-                    });
-                }
-                // Set the job status label
-                parent_scope.status_choices.every(function(status) {
-                    if (status.value === item.status) {
-                        itm.status_label = status.label;
-                        return false;
-                    }
-                    return true;
-                });
-                //Set the name link
-                if (item.type === "inventory_update") {
-                    Rest.setUrl(item.related.inventory_source);
-                    Rest.get()
-                        .success(function(data) {
-                            itm.nameHref = "/inventories/" + data.inventory;
-                        });
-                }
-                else if (item.type === "project_update") {
-                    itm.nameHref = "/projects/" + item.project;
-                }
-                else if (item.type === "job") {
-                    itm.nameHref = "";
-                }
-                
-                if (list.name === 'completed_jobs' || list.name === 'running_jobs') {
-                    itm.status_tip = itm.status_label + '. Click for details.';
-                }
-                else if (list.name === 'queued_jobs') {
-                    itm.status_tip = 'Pending';
-                }
-
-                // Copy summary_field values
-                for (field in list.fields) {
-                    fld = list.fields[field];
-                    if (fld.sourceModel) {
-                        if (itm.summary_fields[fld.sourceModel]) {
-                            itm[field] = itm.summary_fields[fld.sourceModel][fld.sourceField];
-                        }
-                    }
-                }
-            });
+            JobsListUpdate({ scope: scope, parent_scope: parent_scope, list: list });
             parent_scope.$emit('listLoaded');
         });
         scope.search(list.iterator);
@@ -415,7 +431,7 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt){
                 Rest.destroy()
                     .success(function () {
                         $('#prompt-modal').modal('hide');
-                        scope.search(scope.iterator);
+                        scope.refreshJobs();
                     })
                     .error(function (data, status) {
                         $('#prompt-modal').modal('hide');

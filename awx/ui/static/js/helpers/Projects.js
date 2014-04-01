@@ -29,7 +29,7 @@ angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDef
                     break;
                 case 'updating':
                 case 'running':
-                    result = 'running pulsate';
+                    result = 'running';
                     break;
                 case 'successful':
                     result = 'success';

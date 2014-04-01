@@ -21,6 +21,8 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
 
     LoadBreadCrumbs();
 
+    $scope.showJobType = true;
+    
     // Add breadcrumbs
     e = angular.element(document.getElementById('breadcrumbs'));
     e.html(Breadcrumbs({ list: { editTitle: 'Jobs' } , mode: 'edit' }));
@@ -62,7 +64,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             scope: scheduled_scope,
             list: ScheduledJobsList,
             id: 'scheduled-jobs',
-            url: GetBasePath('schedules')
+            url: GetBasePath('schedules') + '?next_run__isnull=false'
         });
 
         $scope.refreshJobs = function() {

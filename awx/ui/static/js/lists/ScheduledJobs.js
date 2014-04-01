@@ -28,7 +28,8 @@ angular.module('ScheduledJobsDefinition', [])
                 icon: 'icon-job-{{ schedule.status }}',
                 iconOnly: true,
                 ngClick: "toggleSchedule($event, schedule.id)",
-                searchable: false
+                searchable: false,
+                nosort: true
             },
             next_run: {
                 label: 'Next Run',
@@ -61,7 +62,7 @@ angular.module('ScheduledJobsDefinition', [])
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refreshJobs()"
+                ngClick: "refreshSchedule()"
             }
         },
         

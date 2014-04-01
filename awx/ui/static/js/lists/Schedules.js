@@ -15,7 +15,7 @@ angular.module('SchedulesListDefinition', [])
         iterator: 'schedule',
         selectTitle: '',
         editTitle: 'Schedules',
-        well: true,
+        well: false,
         index: true,
         hover: true,
 
@@ -55,7 +55,7 @@ angular.module('SchedulesListDefinition', [])
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refreshJobs()"
+                ngClick: "refreshSchedule()"
             },
             stream: {
                 ngClick: "showActivity()",

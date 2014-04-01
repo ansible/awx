@@ -64,6 +64,7 @@ angular.module('CompletedJobsDefinition', [])
                 ngBind: 'completed_job.type_label',
                 link: false,
                 columnClass: "col-md-2 hidden-sm hidden-xs",
+                columnShow: "showJobType",
                 searchable: false
             },
             name: {

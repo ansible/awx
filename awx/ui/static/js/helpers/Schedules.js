@@ -419,7 +419,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 });
             };
 
-            scope.refreshJobs = function() {
+            scope.refreshSchedule = function() {
                 if (base === 'jobs') {
                     parent_scope.refreshJobs();
                 }

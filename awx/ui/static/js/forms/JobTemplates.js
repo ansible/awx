@@ -23,7 +23,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
         collapse: true,
         collapseTitle: "Properties",
         collapseMode: 'edit',
-        collapseOpenFirst: true,   //Always open first panel
+        collapseOpenFirst: false,   //Always open first panel
 
         actions: {
             stream: {
@@ -291,7 +291,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
             schedules: {
                 include: "SchedulesList"
             },
-            completed_jobs: {
+            "completed_jobs": {
                 include: "CompletedJobsList"
             }
         },
@@ -300,7 +300,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
             return {
                 completed_jobs: {
                     iterator: 'completed_job',
-                    url: urls.jobs
+                    url: urls.jobs + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled'
                 },
                 schedules: {
                     iterator: 'schedule',

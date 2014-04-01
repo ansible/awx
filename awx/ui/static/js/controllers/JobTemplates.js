@@ -337,7 +337,8 @@ JobTemplatesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$lo
 function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
-    Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit) {
+    Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
+    GetChoices) {
     
     ClearScope();
 
@@ -347,13 +348,15 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         loadingFinishedCount = 0,
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
-        id = $routeParams.id,
+        id = $routeParams.template_id,
         relatedSets = {},
-        checkSCMStatus, getPlaybooks, callback;
+        checkSCMStatus, getPlaybooks, callback,
+        choicesCount = 0;
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
 
     $scope.parseType = 'yaml';
+    $scope.showJobType = false;
     
     // Our job type options
     $scope.job_type_options = [
@@ -475,22 +478,20 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     });
 
     // Set the status/badge for each related job
-    if ($scope.removeRelatedJobs) {
-        $scope.removeRelatedJobs();
+    if ($scope.removeRelatedCompletedJobs) {
+        $scope.removeRelatedCompletedJobs();
     }
-    $scope.removeRelatedJobs = $scope.$on('relatedjobs', function () {
-        var i, cDate;
-        if ($scope.jobs && $scope.jobs.length) {
-            for (i = 0; i < $scope.jobs.length; i++) {
-                // Convert created date to local time zone 
-                cDate = new Date($scope.jobs[i].created);
-                $scope.jobs[i].created = FormatDate(cDate);
-                // Set tooltip and link
-                $scope.jobs[i].statusBadgeToolTip = JobStatusToolTip($scope.jobs[i].status) +
-                    " Click to view status details.";
-                $scope.jobs[i].statusLinkTo = '/#/jobs/' + $scope.jobs[i].id;
-            }
-        }
+    $scope.removeRelatedCompletedJobs = $scope.$on('relatedcompleted_jobs', function () {
+        JobsControllerInit({
+            scope: $scope,
+            parent_scope: $scope,
+            iterator: form.related.completed_jobs.iterator
+        });
+        JobsListUpdate({
+            scope: $scope,
+            parent_scope: $scope,
+            list: form.related.completed_jobs
+        });
     });
 
     if ($scope.cloudCredentialReadyRemove) {
@@ -553,94 +554,126 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     });
 
     Wait('start');
-    // Retrieve detail record and prepopulate the form
-    Rest.setUrl(defaultUrl + ':id/');
-    Rest.get({ params: { id: id } })
-        .success(function (data) {
-            var fld, i;
-            LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
-            for (fld in form.fields) {
-                if (fld !== 'variables' && data[fld] !== null && data[fld] !== undefined) {
-                    if (form.fields[fld].type === 'select') {
-                        if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
-                            for (i = 0; i < $scope[fld + '_options'].length; i++) {
-                                if (data[fld] === $scope[fld + '_options'][i].value) {
-                                    $scope[fld] = $scope[fld + '_options'][i];
+
+    if ($scope.removeLoadJobs) {
+        $scope.rmoveLoadJobs();
+    }
+    $scope.removeLoadJobs = $scope.$on('LoadJobs', function() {
+        // Retrieve detail record and prepopulate the form
+        Rest.setUrl(defaultUrl + ':id/');
+        Rest.get({ params: { id: id } })
+            .success(function (data) {
+                var fld, i;
+                LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
+                for (fld in form.fields) {
+                    if (fld !== 'variables' && data[fld] !== null && data[fld] !== undefined) {
+                        if (form.fields[fld].type === 'select') {
+                            if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
+                                for (i = 0; i < $scope[fld + '_options'].length; i++) {
+                                    if (data[fld] === $scope[fld + '_options'][i].value) {
+                                        $scope[fld] = $scope[fld + '_options'][i];
+                                    }
                                 }
+                            } else {
+                                $scope[fld] = data[fld];
                             }
                         } else {
                             $scope[fld] = data[fld];
                         }
-                    } else {
-                        $scope[fld] = data[fld];
+                        master[fld] = $scope[fld];
                     }
-                    master[fld] = $scope[fld];
+                    if (fld === 'variables') {
+                        // Parse extra_vars, converting to YAML. 
+                        $scope.variables = ParseVariableString(data.extra_vars);
+                        master.variables = $scope.variables;
+                    }
+                    if (form.fields[fld].type === 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
+                        $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                            data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                        master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                            $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
+                    }
                 }
-                if (fld === 'variables') {
-                    // Parse extra_vars, converting to YAML. 
-                    $scope.variables = ParseVariableString(data.extra_vars);
-                    master.variables = $scope.variables;
-                }
-                if (form.fields[fld].type === 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
-                    $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                    master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                        $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
-                }
-            }
 
-            $scope.url = data.url;
-            
-            relatedSets = form.relatedSets(data.related);
-            
-            $scope.callback_url = data.related.callback;
-            master.callback_url = $scope.callback_url;
+                $scope.url = data.url;
+                
+                relatedSets = form.relatedSets(data.related);
+                
+                $scope.callback_url = data.related.callback;
+                master.callback_url = $scope.callback_url;
 
-            LookUpInit({
-                scope: $scope,
-                form: form,
-                current_item: data.inventory,
-                list: InventoryList,
-                field: 'inventory'
-            });
+                LookUpInit({
+                    scope: $scope,
+                    form: form,
+                    current_item: data.inventory,
+                    list: InventoryList,
+                    field: 'inventory'
+                });
 
-            LookUpInit({
-                url: GetBasePath('credentials') + '?kind=ssh',
-                scope: $scope,
-                form: form,
-                current_item: data.credential,
-                list: CredentialList,
-                field: 'credential',
-                hdr: 'Select Machine Credential'
-            });
+                LookUpInit({
+                    url: GetBasePath('credentials') + '?kind=ssh',
+                    scope: $scope,
+                    form: form,
+                    current_item: data.credential,
+                    list: CredentialList,
+                    field: 'credential',
+                    hdr: 'Select Machine Credential'
+                });
 
-            LookUpInit({
-                scope: $scope,
-                form: form,
-                current_item: data.project,
-                list: ProjectList,
-                field: 'project'
-            });
+                LookUpInit({
+                    scope: $scope,
+                    form: form,
+                    current_item: data.project,
+                    list: ProjectList,
+                    field: 'project'
+                });
 
-            RelatedSearchInit({
-                scope: $scope,
-                form: form,
-                relatedSets: relatedSets
-            });
-            
-            RelatedPaginateInit({
-                scope: $scope,
-                relatedSets: relatedSets
-            });
+                RelatedSearchInit({
+                    scope: $scope,
+                    form: form,
+                    relatedSets: relatedSets
+                });
+                
+                RelatedPaginateInit({
+                    scope: $scope,
+                    relatedSets: relatedSets
+                });
 
-            $scope.$emit('jobTemplateLoaded', data.related.cloud_credential);
-        })
-        .error(function (data, status) {
-            ProcessErrors($scope, data, status, form, {
-                hdr: 'Error!',
-                msg: 'Failed to retrieve job template: ' + $routeParams.id + '. GET status: ' + status
+                $scope.$emit('jobTemplateLoaded', data.related.cloud_credential);
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, form, {
+                    hdr: 'Error!',
+                    msg: 'Failed to retrieve job template: ' + $routeParams.template_id + '. GET status: ' + status
+                });
             });
-        });
+    });
+
+    if ($scope.removeChoicesReady) {
+        $scope.removeChoicesReady();
+    }
+    $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
+        choicesCount++;
+        if (choicesCount === 2) {
+            $scope.$emit('LoadJobs');
+        }
+    });
+
+    GetChoices({
+        scope: $scope,
+        url: GetBasePath('unified_jobs'),
+        field: 'status',
+        variable: 'status_choices',
+        callback: 'choicesReady'
+    });
+    
+    GetChoices({
+        scope: $scope,
+        url: GetBasePath('unified_jobs'),
+        field: 'type',
+        variable: 'type_choices',
+        callback: 'choicesReady'
+    });
 
     function saveCompleted() {
         setTimeout(function() { $scope.$apply(function() { $location.path('/job_templates'); }); }, 500);
@@ -713,7 +746,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     // Related set: Add button
     $scope.add = function (set) {
         $rootScope.flashMessage = null;
-        $location.path('/' + base + '/' + $routeParams.id + '/' + set);
+        $location.path('/' + base + '/' + $routeParams.template_id + '/' + set);
     };
 
     // Related set: Edit button
@@ -757,5 +790,5 @@ JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$l
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
-    'ParseVariableString', 'ToJSON', 'SchedulesControllerInit'
+    'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices'
 ];

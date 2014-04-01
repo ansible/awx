@@ -34,11 +34,25 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                             iterator = form.related[set].iterator;
                             for (fld in form.related[set].fields) {
                                 if (form.related[set].fields[fld].key) {
-                                    scope[iterator + 'SearchField'] = fld;
-                                    scope[iterator + 'SearchFieldLabel'] = form.related[set].fields[fld].label;
+                                    if (form.related[set].fields[fld].searchable === undefined || form.related[set].fields[fld].searchable === true) {
+                                        scope[iterator + 'SearchField'] = fld;
+                                        scope[iterator + 'SearchFieldLabel'] = form.related[set].fields[fld].label;
+                                    }
                                     break;
                                 }
                             }
+                            
+                            if (Empty(scope[iterator + 'SearchField'])) {
+                                // A field marked as key may not be 'searchable'. Find the first searchable field.
+                                for (fld in form.related[set].fields) {
+                                    if (form.related[set].fields[fld].searchable === undefined || form.related[set].fields[fld].searchable === true) {
+                                        scope[iterator + 'SearchField'] = fld;
+                                        scope[iterator + 'SearchFieldLabel'] = form.related[set].fields[fld].label;
+                                        break;
+                                    }
+                                }
+                            }
+
                             scope[iterator + 'SortOrder'] = null;
                             scope[iterator + 'SearchType'] = 'icontains';
                             scope[iterator + 'SearchTypeLabel'] = 'Contains';
@@ -121,7 +135,7 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                 scope.search = function (iterator) {
                     //scope[iterator + 'SearchSpin'] = true;
                     Wait('start');
-                    scope[iterator + 'Loading'] = true;
+                    scope[iterator + 'Loading'] = false;
                     scope[iterator + 'HoldInput'] = true;
 
                     if (scope[iterator + 'SearchValue']) {

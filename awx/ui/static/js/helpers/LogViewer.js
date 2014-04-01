@@ -240,6 +240,9 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         html += "<i class=\"fa icon-job-" + getIcon(scope[fld]) + "\"></i> " + scope[fld];
                         //html += "<i class=\"fa " + status_icon + scope[fld] + "\"></i> " + scope[fld];
                     }
+                    else if (fld === 'status') {
+                        html += "<i class=\"fa icon-job-" + scope[fld] + "\"></i> " + scope[fld];
+                    }
                     else {
                         html += scope[fld];
                     }

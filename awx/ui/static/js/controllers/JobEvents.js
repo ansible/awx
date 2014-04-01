@@ -38,8 +38,8 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
     $scope.removeSetHostLinks = $scope.$on('SetHostLinks', function (e, inventory_id) {
         for (var i = 0; i < $scope.jobevents.length; i++) {
             if ($scope.jobevents[i].summary_fields.host) {
-                $scope.jobevents[i].hostLink = "/#/inventories/" + inventory_id + "/hosts/?name=" +
-                    encodeURI($scope.jobevents[i].summary_fields.host.name);
+                $scope.jobevents[i].hostLink = "/#/inventories/" + inventory_id;
+                    //encodeURI($scope.jobevents[i].summary_fields.host.name);
             }
         }
     });

@@ -143,7 +143,7 @@ angular.module('ansible', [
                 controller: 'JobTemplatesAdd'
             }).
 
-            when('/job_templates/:id', {
+            when('/job_templates/:template_id', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: 'JobTemplatesEdit'
             }).

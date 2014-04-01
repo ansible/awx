@@ -154,16 +154,21 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
     }])
 
 // Submit request to run a playbook
-.factory('PlaybookRun', ['LaunchJob', 'PromptForPasswords', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Wait', 'Empty', 'PromptForCredential',
-    function (LaunchJob, PromptForPasswords, Rest, $location, GetBasePath, ProcessErrors, Wait, Empty, PromptForCredential) {
+.factory('PlaybookRun', ['$location','$routeParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'Empty', 'PromptForCredential',
+    function ($location, $routeParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, ProcessErrors, Wait, Empty, PromptForCredential) {
         return function (params) {
             var scope = params.scope,
                 id = params.id,
                 base = $location.path().replace(/^\//, '').split('/')[0],
-                url = GetBasePath(base) + id + '/',
-                job_template,
-                new_job_id,
-                launch_url;
+                url, job_template, new_job_id, launch_url;
+
+            if (!Empty($routeParams.template_id)) {
+                // launching a job from job_template detail page
+                url = GetBasePath('jobs') + id + '/';
+            }
+            else {
+                url = GetBasePath(base) + id + '/';
+            }
 
             if (scope.removePostTheJob) {
                 scope.removePostTheJob();
