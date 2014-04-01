@@ -1363,6 +1363,7 @@ class ScheduleSerializer(BaseSerializer):
     # We reject rrules if:
     # - DTSTART is not include
     # - INTERVAL is not included
+    # - SECONDLY is used
     # - TZID is used
     # - multiple BYDAY (except WEEKLY and YEARLY (see below)), BYMONTHDAY, BYMONTH
     # - multiple BYDAY yearly unless it lists all weekdays OR weekend days
