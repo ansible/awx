@@ -52,6 +52,7 @@ angular.module('ScheduledJobsDefinition', [])
             name: {
                 label: 'Name',
                 columnClass: "col-md-3 col-xs-5",
+                ngClick: "editSchedule(schedule.id)"
             }
         },
 

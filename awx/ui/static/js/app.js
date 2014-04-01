@@ -101,8 +101,8 @@ angular.module('ansible', [
 ])
     
     .constant('AngularScheduler.partials', $basePath + 'lib/angular-scheduler/lib/')
-    .constant('AngularScheduler.useTimezone', false)
-    .constant('AngularScheduler.showUTCField', false)
+    .constant('AngularScheduler.useTimezone', true)
+    .constant('AngularScheduler.showUTCField', true)
     .constant('$timezones.definitions.location', $basePath + 'lib/angular-tz-extensions/tz/data')
 
     .config(['$routeProvider',

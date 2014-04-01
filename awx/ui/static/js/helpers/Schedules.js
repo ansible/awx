@@ -9,104 +9,57 @@
 
 'use strict';
 
-angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator'])
+angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog' ])
   
-    .factory('ShowSchedulerModal', ['Wait', function(Wait) {
+    .factory('ShowSchedulerModal', ['Wait', 'CreateDialog', function(Wait, CreateDialog) {
         return function(params) {
             // Set modal dimensions based on viewport width
             
-            var ww, wh, x, y, maxrows, scope = params.scope;
+            var buttons,
+                scope = params.scope,
+                callback = params.callback;
 
-            ww = $(document).width();
-            wh = $('body').height();
-            if (ww > 1199) {
-                // desktop
-                x = 675;
-                y = (675 > wh) ? wh - 20 : 675;
-                maxrows = 20;
-            } else if (ww <= 1199 && ww >= 768) {
-                x = 550;
-                y = (675 > wh) ? wh - 15 : 675;
-                maxrows = 15;
-            } else {
-                x = (ww - 20);
-                y = (675 > wh) ? wh : 675;
-                maxrows = 10;
-            }
-
-            // Create the modal
-            $('#scheduler-modal-dialog').dialog({
-                buttons: {
-                    'Cancel': function() {
-                        $(this).dialog('close');
-                    },
-                    'Save': function () {
-                        setTimeout(function(){
-                            scope.$apply(function(){
-                                scope.saveSchedule();
-                            });
+            buttons = [{
+                "label": "Cancel",
+                "onClick": function() {
+                    $(this).dialog('close');
+                },
+                "icon": "fa-times",
+                "class": "btn btn-default",
+                "id": "schedule-close-button"
+            },{
+                "label": "Save",
+                "onClick": function() {
+                    setTimeout(function(){
+                        scope.$apply(function(){
+                            scope.saveSchedule();
                         });
-                    }
-                },
-                modal: true,
-                width: x,
-                height: y,
-                autoOpen: false,
-                closeOnEscape: false,
-                create: function () {
-                    $('.ui-dialog[aria-describedby="scheduler-modal-dialog"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
-                    $('.ui-dialog[aria-describedby="scheduler-modal-dialog"]').find('.ui-dialog-buttonset button').each(function () {
-                        var c, h, i, l;
-                        l = $(this).text();
-                        if (l === 'Cancel') {
-                            h = "fa-times";
-                            c = "btn btn-default";
-                            i = "schedule-close-button";
-                            $(this).attr({
-                                'class': c,
-                                'id': i
-                            }).html("<i class=\"fa " + h + "\"></i> Cancel");
-                        } else if (l === 'Save') {
-                            h = "fa-check";
-                            c = "btn btn-primary";
-                            i = "schedule-save-button";
-                            $(this).attr({
-                                'class': c,
-                                'id': i
-                            }).html("<i class=\"fa " + h + "\"></i> Save");
-                        }
                     });
-                    $('#scheduler-tabs a:first').tab('show');
                 },
-                resizeStop: function () {
-                    // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
-                    var dialog = $('.ui-dialog[aria-describedby="scheduler-modal-dialog"]'),
-                        titleHeight = dialog.find('.ui-dialog-titlebar').outerHeight(),
-                        buttonHeight = dialog.find('.ui-dialog-buttonpane').outerHeight(),
-                        content = dialog.find('#scheduler-modal-dialog');
-                    content.width(dialog.width() - 28);
-                    content.css({ height: (dialog.height() - titleHeight - buttonHeight - 10) });
-                },
-                close: function () {
-                    // Destroy on close
-                    $('.tooltip').each(function () {
-                        // Remove any lingering tooltip <div> elements
-                        $(this).remove();
-                    });
-                    $('.popover').each(function () {
-                        // remove lingering popover <div> elements
-                        $(this).remove();
-                    });
-                    $('#scheduler-modal-dialog').dialog('destroy');
+                "icon": "fa-check",
+                "class": "btn btn-primary",
+                "id": "schedule-save-button"
+            }];
+
+            CreateDialog({
+                id: 'scheduler-modal-dialog',
+                scope: scope,
+                buttons: buttons,
+                width: 700,
+                height: 725,
+                minWidth: 400,
+                onClose: function() {
                     $('#scheduler-modal-dialog #form-container').empty();
                 },
-                open: function () {
+                onOpen: function() {
                     Wait('stop');
+                    $('#scheduler-tabs a:first').tab('show');
                     $('#schedulerName').focus();
                     $('#rrule_nlp_description').dblclick(function() {
                         setTimeout(function() { scope.$apply(function() { scope.showRRule = (scope.showRRule) ? false : true; }); }, 100);
                     });
-                }
+                },
+                callback: callback
             });
         };
     }])
@@ -119,6 +72,20 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
                 schedule, scheduler,
                 url = GetBasePath('schedules') + id + '/';
                 
+            if (scope.removeDialogReady) {
+                scope.removeDialogReady();
+            }
+            scope.removeDialogReady = scope.$on('DialogReady', function() {
+                $('#scheduler-modal-dialog').dialog('open');
+                $('#schedulerName').focus();
+                setTimeout(function() {
+                    scope.$apply(function() {
+                        scheduler.setRRule(schedule.rrule);
+                        scheduler.setName(schedule.name);
+                    });
+                }, 300);
+            });
+
             if (scope.removeScheduleFound) {
                 scope.removeScheduleFound();
             }
@@ -128,7 +95,7 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
                 scheduler.inject('form-container', false);
                 scheduler.injectDetail('occurrences', false);
 
-                ShowSchedulerModal({ scope: scope });
+                ShowSchedulerModal({ scope: scope, callback: 'DialogReady' });
                 scope.showRRuleDetail = false;
 
                 if (!/DTSTART/.test(schedule.rrule)) {
@@ -136,17 +103,6 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
                 }
                 schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
                 schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
-                
-                setTimeout(function(){
-                    Wait('stop');
-                    $('#scheduler-modal-dialog').dialog('open');
-                    scope.$apply(function() {
-                        scheduler.setRRule(schedule.rrule);
-                        scheduler.setName(schedule.name);
-                    });
-                    $('#schedulerName').focus();
-                }, 500);
-
             });
 
             scope.saveSchedule = function() {
@@ -207,18 +163,22 @@ angular.module('SchedulesHelper', ['Utilities', 'RestServices', 'SchedulesHelper
 
             url += (!Empty($routeParams.id)) ? $routeParams.id + '/schedules/' : '';
 
+            if (scope.removeDialogReady) {
+                scope.removeDialogReady();
+            }
+            scope.removeDialogReady = scope.$on('DialogReady', function() {
+                $('#scheduler-modal-dialog').dialog('open');
+                $('#schedulerName').focus();
+            });
+
             Wait('start');
             $('#form-container').empty();
             scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
             scheduler.inject('form-container', false);
             scheduler.injectDetail('occurrences', false);
             scheduler.clear();
-            ShowSchedulerModal({ scope: scope });
+            ShowSchedulerModal({ scope: scope, callback: 'DialogReady' });
             scope.showRRuleDetail = false;
-
-            setTimeout(function(){
-                $('#scheduler-modal-dialog').dialog('open');
-            }, 300);
 
             scope.saveSchedule = function() {
                 var newSchedule, rrule, schedule = {};

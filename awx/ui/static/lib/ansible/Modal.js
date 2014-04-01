@@ -16,6 +16,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
     /**
      *
      * CreateDialog({
+     *     id:          - id attribute value of the target DOM element
      *     scope:       - Required, $scope associated with the #id DOM element
      *     buttons:     - Required, Array of button objects. See example below.
      *     width:       - Desired width of modal dialog on open. Defaults to 500.
