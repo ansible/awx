@@ -12,6 +12,7 @@ Django>=1.4
   #boto
   #django-auth-ldap
   #django-celery
+  #django-crum
   #django-extensions
   #django-jsonfield
   #django-split-settings

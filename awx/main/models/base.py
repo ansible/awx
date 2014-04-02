@@ -27,6 +27,9 @@ from taggit.managers import TaggableManager
 # Django-Celery
 from djcelery.models import TaskMeta
 
+# Django-CRUM
+from crum import get_current_user
+
 # Ansible Tower
 from awx.main.utils import encrypt_field
 
@@ -283,6 +286,20 @@ class PrimordialModel(CreatedModifiedModel):
             if save:
                 self.save(update_fields=update_fields)
         return update_fields
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get('update_fields', [])
+        user = get_current_user()
+        if user and not user.pk:
+            user = None
+        if not self.pk:
+            self.created_by = user
+            if 'created_by' not in update_fields:
+                update_fields.append('created_by')
+        self.modified_by = user
+        if 'modified_by' not in update_fields:
+            update_fields.append('modified_by')
+        super(PrimordialModel, self).save(*args, **kwargs)
 
     def clean_description(self):
         # Description should always be empty string, never null.

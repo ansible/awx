@@ -112,7 +112,8 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 MIDDLEWARE_CLASSES += (
     'django.middleware.transaction.TransactionMiddleware',
     # Middleware loaded after this point will be subject to transactions.
-    'awx.main.middleware.ActivityStreamMiddleware'
+    'awx.main.middleware.ActivityStreamMiddleware',
+    'crum.CurrentRequestUserMiddleware',
 )
 
 TEMPLATE_DIRS = (

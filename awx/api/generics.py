@@ -253,11 +253,7 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
 
 class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
     # Base class for a list view that allows creating new objects.
-
-    def pre_save(self, obj):
-        super(ListCreateAPIView, self).pre_save(obj)
-        if isinstance(obj, PrimordialModel):
-            obj.created_by = self.request.user
+    pass
 
 class SubListAPIView(ListAPIView):
     # Base class for a read-only sublist view.

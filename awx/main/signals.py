@@ -12,6 +12,10 @@ from django.conf import settings
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 
+# Django-CRUM
+from crum import get_current_request
+from crum.signals import current_user_getter
+
 # AWX
 from awx.main.models import *
 from awx.api.serializers import *
@@ -361,3 +365,15 @@ def activity_stream_associate(sender, instance, **kwargs):
             activity_entry.save()
             getattr(activity_entry, object1).add(obj1)
             getattr(activity_entry, object2).add(obj2_actual)
+
+
+@receiver(current_user_getter)
+def get_current_user_from_drf_request(sender, **kwargs):
+    '''
+    Provider a signal handler to return the current user from the current
+    request when using Django REST Framework. Requires that the APIView set
+    drf_request on the underlying Django Request object.
+    '''
+    request = get_current_request()
+    drf_request = getattr(request, 'drf_request', None)
+    return (getattr(drf_request, 'user', False), 0)
