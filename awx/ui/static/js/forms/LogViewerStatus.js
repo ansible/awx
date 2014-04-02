@@ -30,12 +30,14 @@ angular.module('LogViewerStatusDefinition', [])
             },
             "started": {
                 label: "Started",
-                type: "text",
+                type: "date",
+                "filter": "date:'MM/dd/yy HH:mm:ss'",
                 readonly: true
             },
             "finished": {
                 label: "Finished",
-                type: "text",
+                type: "date",
+                "filter": "date:'MM/dd/yy HH:mm:ss'",
                 readonly: true
             },
             "elapsed": {

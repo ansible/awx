@@ -493,14 +493,14 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                         itm = scope[list.name][item_idx];
                     itm.enabled = (itm.enabled) ? true : false;
                     if (itm.enabled) {
-                        itm.play_tip = 'Schedule is Active. Click to temporarily stop.';
+                        itm.play_tip = 'Schedule is active. Click to stop.';
                         itm.status = 'active';
-                        itm.status_tip = 'Schedule is Active. Click to temporarily stop.';
+                        itm.status_tip = 'Schedule is active. Click to stop.';
                     }
                     else {
-                        itm.play_tip = 'Schedule is temporarily stopped. Click to activate.';
+                        itm.play_tip = 'Schedule is stopped. Click to activate.';
                         itm.status = 'stopped';
-                        itm.status_tip = 'Schedule is temporarily stopped. Click to activate.';
+                        itm.status_tip = 'Schedule is stopped. Click to activate.';
                     }
 
                     itm.nameTip = item.name + " schedule. Click to edit.";

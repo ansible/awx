@@ -278,7 +278,9 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         }
                     }
                     else {
-                        html += "{{ " + fld + " }}";
+                        html += "{{ " + fld ;
+                        html += (form.fields[fld].filter) ? " | " + form.fields[fld].filter  : "" ;
+                        html += " }}";
                     }
                     html += "</td></tr>\n";
                 }
