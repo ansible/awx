@@ -403,7 +403,9 @@ class RunJob(BaseTask):
                     value = kwargs.get(field, decrypt_field(creds, 'password'))
                 else:
                     value = kwargs.get(field, decrypt_field(creds, field))
-                if value not in ('', 'ASK'):
+                if field == 'ssh_key_unlock' and value != 'ASK':
+                    passwords[field] = value
+                elif value not in ('', 'ASK'):
                     passwords[field] = value
         return passwords
 
@@ -487,7 +489,8 @@ class RunJob(BaseTask):
 
         # If private key isn't encrypted, pass the path on the command line.
         ssh_key_path = kwargs.get('private_data_file', '')
-        use_ssh_agent = bool(kwargs.get('passwords', {}).get('ssh_key_unlock', ''))
+        ssh_key_unlock = kwargs.get('passwords', {}).get('ssh_key_unlock', None)
+        use_ssh_agent = bool(ssh_key_unlock is not None)
         if ssh_key_path and not use_ssh_agent:
             args.append('--private-key=%s' % ssh_key_path)
 
