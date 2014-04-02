@@ -8,6 +8,7 @@ Django>=1.4
 
 # The following packages and their dependencies are bundled with AWX
 # (in awx/lib/site-packages):
+  #ansi2html
   #boto
   #django-auth-ldap
   #django-celery

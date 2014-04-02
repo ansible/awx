@@ -16,3 +16,18 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
              return
         if method in ('DELETE', 'OPTIONS'):
              return True  # Don't actually need to return a form
+
+class PlainTextRenderer(renderers.BaseRenderer):
+
+    media_type = 'text/plain'
+    format = 'txt'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        if not isinstance(data, basestring):
+            data = unicode(data)
+        return data.encode(self.charset)
+
+class AnsiTextRenderer(PlainTextRenderer):
+
+    media_type = 'text/plain'
+    format = 'ansi'

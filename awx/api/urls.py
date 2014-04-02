@@ -47,6 +47,7 @@ project_urls = patterns('awx.api.views',
 project_update_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'project_update_detail'),
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'project_update_cancel'),
+    url(r'^(?P<pk>[0-9]+)/stdout/$',                    'project_update_stdout'),
 )
 
 team_urls = patterns('awx.api.views',
@@ -112,6 +113,7 @@ inventory_source_urls = patterns('awx.api.views',
 inventory_update_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'inventory_update_detail'),
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'inventory_update_cancel'),
+    url(r'^(?P<pk>[0-9]+)/stdout/$',                    'inventory_update_stdout'),
 )
 
 credential_urls = patterns('awx.api.views',
@@ -142,6 +144,7 @@ job_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'job_job_host_summaries_list'),
     url(r'^(?P<pk>[0-9]+)/job_events/$',                'job_job_events_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'job_activity_stream_list'),
+    url(r'^(?P<pk>[0-9]+)/stdout/$',                    'job_stdout'),
 )
 
 job_host_summary_urls = patterns('awx.api.views',

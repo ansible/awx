@@ -4,6 +4,7 @@
 # Python
 import json
 import logging
+import re
 import shlex
 import os
 import os.path
@@ -492,15 +493,19 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         super(UnifiedJob, self).delete()
 
     @property
-    def result_stdout(self):
+    def result_stdout_raw(self):
         if self.result_stdout_file != "":
             if not os.path.exists(self.result_stdout_file):
                 return "stdout capture is missing"
-            stdout_fd = open(self.result_stdout_file, "r")
-            output = stdout_fd.read()
-            stdout_fd.close()
-            return output
-        return self.result_stdout_text
+            with open(self.result_stdout_file, "r") as stdout_fd:
+                return stdout_fd.read()
+        else:
+            return self.result_stdout_text
+
+    @property
+    def result_stdout(self):
+        ansi_escape = re.compile(r'\x1b[^m]*m')
+        return ansi_escape.sub('', self.result_stdout_raw)
 
     @property
     def celery_task(self):

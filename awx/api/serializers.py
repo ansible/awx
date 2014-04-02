@@ -393,6 +393,12 @@ class UnifiedJobSerializer(BaseSerializer):
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
         if obj.schedule and obj.schedule.active:
             res['schedule'] = obj.schedule.get_absolute_url()
+        if isinstance(obj, ProjectUpdate):
+            res['stdout'] = reverse('api:project_update_stdout', args=(obj.pk,))
+        elif isinstance(obj, InventoryUpdate):
+            res['stdout'] = reverse('api:inventory_update_stdout', args=(obj.pk,))
+        elif isinstance(obj, Job):
+            res['stdout'] = reverse('api:job_stdout', args=(obj.pk,))
         return res
 
     def to_native(self, obj):
@@ -445,15 +451,20 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
         return ret
 
 
-class BaseTaskSerializer(BaseSerializer):
+class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
-    job_env = serializers.SerializerMethodField('get_job_env')
+    class Meta:
+        fields = ('result_stdout',)
 
-    def get_job_env(self, obj):
-        job_env_d = obj.job_env
-        if 'BROKER_URL' in job_env_d:
-            job_env_d.pop('BROKER_URL')
-        return job_env_d
+    def get_types(self):
+        if type(self) is UnifiedJobSerializer:
+            return ['project_update', 'inventory_update', 'job']
+        else:
+            return super(UnifiedJobSerializer, self).get_types()
+
+    def to_native(self, obj):
+        ret = super(UnifiedJobStdoutSerializer, self).to_native(obj)
+        return ret.get('result_stdout', '')
 
 
 class UserSerializer(BaseSerializer):

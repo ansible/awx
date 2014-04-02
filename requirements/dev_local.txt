@@ -58,6 +58,7 @@ Django-1.5.5.tar.gz
   #python-swiftclient-2.0.3.tar.gz
   #rackspace-novaclient-1.4.tar.gz
   # Remaining dev/prod packages:
+  #ansi2html-1.0.6.tar.gz
   #boto-2.27.0.tar.gz
   #django-auth-ldap-1.1.8.tar.gz
   #django-celery-3.1.10.tar.gz

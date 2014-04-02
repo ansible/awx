@@ -29,6 +29,10 @@ from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
 from rest_framework import status
 
+# Ansi2HTML
+from ansi2html import Ansi2HTMLConverter
+from ansi2html.style import SCHEME
+
 # AWX
 from awx.main.licenses import LicenseReader
 from awx.main.models import *
@@ -37,8 +41,10 @@ from awx.main.access import get_user_queryset
 from awx.main.signals import ignore_inventory_computed_fields, ignore_inventory_group_removal
 from awx.api.authentication import JobTaskAuthentication
 from awx.api.permissions import *
+from awx.api.renderers import *
 from awx.api.serializers import *
 from awx.api.generics import *
+from awx.api.generics import get_view_name
 
 
 def api_exception_handler(exc):
@@ -1406,6 +1412,54 @@ class UnifiedJobList(ListAPIView):
     model = UnifiedJob
     serializer_class = UnifiedJobListSerializer
     new_in_148 = True
+
+class UnifiedJobStdout(RetrieveAPIView):
+    
+    serializer_class = UnifiedJobStdoutSerializer
+    renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
+                        PlainTextRenderer, AnsiTextRenderer]
+    filter_backends = ()
+    new_in_148 = True
+
+    def retrieve(self, request, *args, **kwargs):
+        unified_job = self.get_object()
+        if request.accepted_renderer.format in ('html', 'api'):
+            scheme = request.QUERY_PARAMS.get('scheme', None)
+            if scheme not in SCHEME:
+                scheme = 'ansi2html'
+            dark_val = request.QUERY_PARAMS.get('dark', '')
+            dark = bool(dark_val and dark_val[0].lower() in ('1', 't', 'y'))
+            content_only = bool(request.accepted_renderer.format == 'api')
+            dark_bg = (content_only and dark) or (not content_only and (dark or not dark_val))
+            conv = Ansi2HTMLConverter(scheme=scheme, dark_bg=dark_bg,
+                                      title=get_view_name(self.__class__))
+            if content_only:
+                headers = conv.produce_headers()
+                body = conv.convert(unified_job.result_stdout_raw, full=False)
+                data = '\n'.join([headers, body])
+                data = '<div class="nocode body_foreground body_background">%s</div>' % data
+            else:
+                data = conv.convert(unified_job.result_stdout_raw)
+            # Fix ugly grey background used by default.
+            data = data.replace('.body_background { background-color: #AAAAAA; }',
+                                '.body_background { background-color: #f5f5f5; }')
+            return Response(data)
+        elif request.accepted_renderer.format == 'ansi':
+            return Response(unified_job.result_stdout_raw)
+        else:
+            return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
+
+class ProjectUpdateStdout(UnifiedJobStdout):
+
+    model = ProjectUpdate
+
+class InventoryUpdateStdout(UnifiedJobStdout):
+
+    model = InventoryUpdate
+
+class JobStdout(UnifiedJobStdout):
+
+    model = Job
 
 class ActivityStreamList(SimpleListAPIView):
 

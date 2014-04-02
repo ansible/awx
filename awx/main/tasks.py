@@ -201,7 +201,6 @@ class BaseTask(Task):
             env[key] = str(value)
         # Set environment variables needed for inventory and job event
         # callbacks to work.
-        env['ANSIBLE_NOCOLOR'] = '1' # Prevent output of escape sequences.
         # Update PYTHONPATH to use local site-packages.
         python_paths = env.get('PYTHONPATH', '').split(os.pathsep)
         local_site_packages = self.get_path_to('..', 'lib', 'site-packages')
