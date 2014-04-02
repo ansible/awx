@@ -10,9 +10,9 @@
 angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 'VariablesHelper'])
 
     .factory('LogViewer', ['$compile', 'CreateDialog', 'GetJob', 'Wait', 'GenerateForm', 'LogViewerStatusForm', 'AddTable', 'AddTextarea',
-    'LogViewerOptionsForm', 'EnvTable', 'GetBasePath', 'LookUpName', 'Empty', 'AddPreFormattedText', 'ParseVariableString',
+    'LogViewerOptionsForm', 'EnvTable', 'GetBasePath', 'LookUpName', 'Empty', 'AddPreFormattedText', 'ParseVariableString', 'GetChoices',
     function($compile, CreateDialog, GetJob, Wait, GenerateForm, LogViewerStatusForm, AddTable, AddTextarea, LogViewerOptionsForm, EnvTable,
-    GetBasePath, LookUpName, Empty, AddPreFormattedText, ParseVariableString) {
+    GetBasePath, LookUpName, Empty, AddPreFormattedText, ParseVariableString, GetChoices) {
         return function(params) {
             var parent_scope = params.scope,
                 url = params.url,
@@ -70,6 +70,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 }*/
                 
                 if (data.extra_vars) {
+                    $('#logview-tabs li:eq(4)').show();
                     AddTextarea({
                         container_id: 'variables-container',
                         fld_id: 'variables',
@@ -81,6 +82,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 }
 
                 if (data.source_vars) {
+                    $('#logview-tabs li:eq(5)').show();
                     AddTextarea({
                         container_id: 'source-container',
                         fld_id: 'source-variables',
@@ -89,6 +91,29 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 }
                 else {
                     $('#logview-tabs li:eq(5)').hide();
+                }
+
+                if (!Empty(scope.source)) {
+                    if (scope.removeChoicesReady) {
+                        scope.removeChoicesReady();
+                    }
+                    scope.removeChoicesReady = scope.$on('ChoicesReady', function() {
+                        scope.source_choices.every(function(e) {
+                            if (e.value === scope.source) {
+                                scope.source = e.label;
+                                return false;
+                            }
+                            return true;
+                        });
+                    });
+                    GetChoices({
+                        scope: scope,
+                        url: GetBasePath('inventory_sources'),
+                        field: 'source',
+                        variable: 'source_choices',
+                        choice_name: 'choices',
+                        callback: 'ChoicesReady'
+                    });
                 }
 
                 if (!Empty(scope.credential)) {
@@ -194,7 +219,10 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    if (!Empty(data.name)) {
+                    if (scope_var === 'inventory_source') {
+                        scope[scope_var + '_name'] = data.summary_fields.group.name;
+                    }
+                    else if (!Empty(data.name)) {
                         scope[scope_var + '_name'] = data.name;
                     }
                     if (!Empty(data.group)) {
@@ -209,13 +237,13 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
         };
     }])
 
-    .factory('AddTable', ['Empty', 'Find', function(Empty, Find) {
+    .factory('AddTable', ['$compile', 'Empty', 'Find', function($compile, Empty, Find) {
         return function(params) {
             var form = params.form,
                 id = params.id,
                 scope = params.scope,
                 getIcon = params.getIcon,
-                fld, html, url,
+                fld, html, url, e,
                 urls = [
                     { "variable": "credential", "url": "/#/credentials/" },
                     { "variable": "project", "url": "/#/projects/" },
@@ -250,13 +278,15 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         }
                     }
                     else {
-                        html += scope[fld];
+                        html += "{{ " + fld + " }}";
                     }
                     html += "</td></tr>\n";
                 }
             }
             html += "</table>\n";
-            $('#' + id).empty().html(html);
+            e = angular.element(document.getElementById(id));
+            e.empty().html(html);
+            $compile(e)(scope);
         };
     }])
 

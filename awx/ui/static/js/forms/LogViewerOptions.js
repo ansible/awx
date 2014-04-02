@@ -63,6 +63,11 @@ angular.module('LogViewerOptionsDefinition', [])
                 type: "text",
                 readonly: true
             },
+            "inventory_source": {
+                label: "Group",
+                type: "text",
+                readonly: true
+            },
             "source": {
                 label: "Source",
                 type: "text",
@@ -79,12 +84,12 @@ angular.module('LogViewerOptionsDefinition', [])
                 readonly: true
             },
             "overwrite": {
-                label: "Overwrite Vars",
+                label: "Overwrite",
                 type: "text",
                 readonly: true
             },
-            "inventory_source": {
-                label: "Inv Source",
+            "overwrite_vars": {
+                label: "Overwrite Vars",
                 type: "text",
                 readonly: true
             }
