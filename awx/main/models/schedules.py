@@ -1,7 +1,9 @@
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+import re
 import logging
+import datetime
 import dateutil.rrule
 
 # Django
@@ -92,13 +94,15 @@ class Schedule(CommonModel):
 
         self.next_run = next_run_actual
         self.dtstart = future_rs[0]
-        if "until" in self.rrule.lower() or 'count' in self.rrule.lower():
+        self.dtend = None
+        if 'until' in self.rrule.lower():
+            match_until = re.match(".*?(UNTIL\=[0-9]+T[0-9]+Z)", self.rrule)
+            until_date = match_until.groups()[0].split("=")[1]
+            self.dtend = make_aware(datetime.datetime.strptime(until_date, "%Y%m%dT%H%M%SZ"), get_default_timezone())
+        if 'count' in self.rrule.lower():
             self.dtend = future_rs[-1]
-        else:
-            self.dtend = None
         self.unified_job_template.update_computed_fields()
 
     def save(self, *args, **kwargs):
-        # TODO: Check if new rrule, if so set dtstart and dtend to null
         self.update_computed_fields()
         super(Schedule, self).save(*args, **kwargs)
