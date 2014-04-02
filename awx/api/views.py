@@ -1417,7 +1417,8 @@ class UnifiedJobStdout(RetrieveAPIView):
     
     serializer_class = UnifiedJobStdoutSerializer
     renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
-                        PlainTextRenderer, AnsiTextRenderer]
+                        PlainTextRenderer, AnsiTextRenderer,
+                        renderers.JSONRenderer]
     filter_backends = ()
     new_in_148 = True
 

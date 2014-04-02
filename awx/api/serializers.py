@@ -457,10 +457,10 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
         fields = ('result_stdout',)
 
     def get_types(self):
-        if type(self) is UnifiedJobSerializer:
+        if type(self) is UnifiedJobStdoutSerializer:
             return ['project_update', 'inventory_update', 'job']
         else:
-            return super(UnifiedJobSerializer, self).get_types()
+            return super(UnifiedJobStdoutSerializer, self).get_types()
 
     def to_native(self, obj):
         ret = super(UnifiedJobStdoutSerializer, self).to_native(obj)

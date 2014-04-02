@@ -9,6 +9,13 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
     Customizations to the default browsable API renderer.
     '''
 
+    def get_default_renderer(self, view):
+        renderer = super(BrowsableAPIRenderer, self).get_default_renderer(view)
+        # Always use JSON renderer for browsable OPTIONS response.
+        if view.request.method == 'OPTIONS' and not isinstance(renderer, renderers.JSONRenderer):
+            return renderers.JSONRenderer()
+        return renderer
+
     def get_rendered_html_form(self, view, method, request):
         '''Never show auto-generated form (only raw form).'''
         obj = getattr(view, 'object', None)
