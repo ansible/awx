@@ -478,14 +478,14 @@ class ProjectsTest(BaseTest):
         # can add credentials to a user (if user or org admin or super user)
         self.post(other_creds, data=new_credentials, expect=401)
         self.post(other_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
-        self.post(other_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
+        result = self.post(other_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
+        cred_user = result['id']
         new_credentials['name'] = 'credential2'
         self.post(other_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
         new_credentials['name'] = 'credential3'
         result = self.post(other_creds, data=new_credentials, expect=201, auth=self.get_other_credentials())
         new_credentials['name'] = 'credential4'
         self.post(other_creds, data=new_credentials, expect=403, auth=self.get_nobody_credentials())
-        cred_user = result['id']
 
         # can add credentials to a team
         new_credentials['name'] = 'credential'

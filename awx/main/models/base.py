@@ -292,7 +292,7 @@ class PrimordialModel(CreatedModifiedModel):
         user = get_current_user()
         if user and not user.pk:
             user = None
-        if not self.pk:
+        if not self.pk and not self.created_by:
             self.created_by = user
             if 'created_by' not in update_fields:
                 update_fields.append('created_by')
