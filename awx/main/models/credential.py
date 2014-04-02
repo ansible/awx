@@ -118,14 +118,18 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         return self.kind == 'ssh' and self.password == 'ASK'
 
     @property
-    def needs_ssh_key_unlock(self):
-        ssh_key_data = ''
-        if self.kind == 'ssh' and self.ssh_key_unlock == 'ASK':
-            if self.pk:
-                ssh_key_data = decrypt_field(self, 'ssh_key_data')
-            else:
-                ssh_key_data = self.ssh_key_data
+    def has_encrypted_ssh_key_data(self):
+        if self.pk:
+            ssh_key_data = decrypt_field(self, 'ssh_key_data')
+        else:
+            ssh_key_data = self.ssh_key_data
         return 'ENCRYPTED' in ssh_key_data
+
+    @property
+    def needs_ssh_key_unlock(self):
+        if self.kind == 'ssh' and self.ssh_key_unlock in ('ASK', ''):
+            return self.has_encrypted_ssh_key_data
+        return False
 
     @property
     def needs_sudo_password(self):
@@ -211,11 +215,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         return self.ssh_key_data # No need to return decrypted version here.
 
     def clean_ssh_key_unlock(self):
-        if self.pk:
-            ssh_key_data = decrypt_field(self, 'ssh_key_data')
-        else:
-            ssh_key_data = self.ssh_key_data
-        if 'ENCRYPTED' in ssh_key_data and not self.ssh_key_unlock:
+        if self.has_encrypted_ssh_key_data and not self.ssh_key_unlock:
             raise ValidationError('SSH key unlock must be set when SSH key '
                                   'is encrypted')
         return self.ssh_key_unlock
