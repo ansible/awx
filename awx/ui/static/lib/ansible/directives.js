@@ -273,13 +273,13 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     })
      
-    /*  
+    /*
      *  Enable TB pop-overs. To add a pop-over to an element, include the following directive in
      *  the element's attributes:
      *
      *     aw-pop-over="<< pop-over html here >>"
      *
-     *  Include the standard TB data-XXX attributes to controll the pop-over's appearance.  We will 
+     *  Include the standard TB data-XXX attributes to controll the pop-over's appearance.  We will
      *  default placement to the left, delay to 0 seconds, content type to HTML, and title to 'Help'.
      */
     .directive('awPopOver', ['$compile', function($compile) {
@@ -308,24 +308,23 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         }
                     }
                 });
-                /*
                 $('.popover').each(function() {
                     // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                     $(this).remove();
-                });*/
-                /*$('.tooltip').each( function() {
+                });
+                $('.tooltip').each( function() {
                     // close any lingering tool tipss
                     $(this).hide();
-                });*/
+                });
                 $(this).popover('toggle');
-                /*$('.popover').each(function() {
+                $('.popover').each(function() {
                     $compile($(this))(scope);  //make nested directives work!
-                });*/
+                });
                 $('.popover-content, .popover-title').click(function() {
                     $(self).popover('hide');
                 });
             });
-            
+
             $(document).bind('keydown', function(e) {
                 if (e.keyCode === 27) {
                     $(element).popover('hide');
