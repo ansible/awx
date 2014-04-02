@@ -41,12 +41,12 @@
                         <label>Start Time <span class="fmt-help">HH24:MM:SS</span><span class="fmt-help" ng-show="!schedulerShowTimeZone">UTC</span></label>
                         <div class="input-group">
                             <input name="schedulerStartHour" id="schedulerStartHour" sch-spinner="scheduler_form" class="scheduler-time-spinner"
-                                ng-model="schedulerStartHour" data-zero-pad="2" placeholder="HH24" min="0" max="23" required ng-change="scheduleTimeChange" >
-                            <span>:</span><input name="schedulerStartMinute" id="schedulerStartMinute" sch-spinner="scheduler_form" class="scheduler-time-spinner"
-                                data-zero-pad="2" ng-model="schedulerStartMinute" placeholder="MM" min="0" max="59" required ng-change="scheduleTimeChange" >
-                            <span>:</span><input name="schedulerStartSecond" id="schedulerStartSecond" sch-spinner="scheduler_form" class="scheduler-time-spinner"
-                                data-zero-pad="2" ng-model="schedulerStartSecond" placeholder="SS" min="0" max="23" required ng-change="scheduleTimeChange" >
+                                ng-model="schedulerStartHour" placeholder="HH24" min="0" max="23" data-zero-pad="2" required 
+                                ng-change="scheduleTimeChange" >
+                            <span>:</span><input name="schedulerStartMinute" id="schedulerStartMinute" sch-spinner="scheduler_form" class="scheduler-time-spinner" ng-model="schedulerStartMinute" placeholder="MM" min="0" max="59" data-zero-pad="2" required ng-change="scheduleTimeChange" >
+                            <span>:</span><input name="schedulerStartSecond" id="schedulerStartSecond" sch-spinner="scheduler_form" class="scheduler-time-spinner" ng-model="schedulerStartSecond" placeholder="SS" min="0" max="59" data-zero-pad="2" required ng-change="scheduleTimeChange" >
                         </div>
+                        <div class="error" ng-show="scheduler_startTime_error">Time must be in HH24:MM:SS format</div>
                     </div>
                 </div>
             </div>
@@ -81,13 +81,15 @@
                             ng-options="f.name for f in frequencyOptions" required class="form-control input-sm"
                             ng-change="scheduleRepeatChange()"></select>
                     </div>
+                    <div class="error" ng-show="sheduler_frequency_error"></div>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-4">
                     <div class="form-group no-label" ng-show="schedulerShowInterval">
                         <label>Every</label>
                         <input name="schedulerInterval" id="schedulerInterval" sch-spinner="scheduler_form" class="scheduler-spinner"
                             ng-model="schedulerInterval" min="1" max="999" >
                         <label class="inline-label" ng-bind="schedulerIntervalLabel"></label>
+                    <div class="error" ng-show="scheduler_interval_error">Provide a value between 1 and 999</div>
                     </div>
                 </div>
             </div>
@@ -187,8 +189,7 @@
                     <div class="form-group" ng-show="schedulerShowInterval">
                         <label>End</label>
                         <div>
-                            <select id="schedulerEnd" name="schedulerEnd" ng-model="schedulerEnd" ng-options="e.name for e in endOptions" required
-                                class="form-control input-sm" ng-change="scheduleRepeatChange()"></select>
+                            <select id="schedulerEnd" name="schedulerEnd" ng-model="schedulerEnd" ng-options="e.name for e in endOptions" required class="form-control input-sm" ng-change="schedulerEndChange()"></select>
                         </div>
                     </div>
                 </div>
@@ -198,7 +199,8 @@
                             <input ng-name="schedulerOccurrenceCount" ng-id="schedulerOccurrenceCount" sch-spinner="scheduler_form" class="scheduler-spinner"
                                 ng-model="schedulerOccurrenceCount" min="1" max="999" >
                             <label class="inline-label">Occurrence(s)</label> 
-                        </div>  
+                        </div>
+                        <div class="error" ng-show="scheduler_occurrenceCount_error">Provide a value between 1 and 999</div>
                     </div>
                 </div>
                 <div class="col-md-4" ng-show="schedulerEnd && schedulerEnd.value == 'on'">
