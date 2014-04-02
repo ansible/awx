@@ -91,10 +91,10 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
                     html += "<thead>\n";
                     html += "<tr>\n";
-                    html += "<th>ID</td>\n";
-                    html += "<th class=\"text-center\">Status</td>\n";
+                    html += "<th>ID</th>\n";
+                    html += "<th class=\"text-center\">Status</th>\n";
                     html += "<th>View</th>\n";
-                    html += "<th>Name</td>\n";
+                    html += "<th>Name</th>\n";
                     html += "</tr>\n";
                     html += "</thead>\n";
                     html += "<tbody>\n";

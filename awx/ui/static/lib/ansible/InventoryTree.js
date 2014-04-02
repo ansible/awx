@@ -76,13 +76,16 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
 
             function buildGroups(tree_data, parent, level) {
                 
-                var i, j, children, stat, hosts_status, group,
+                var children, stat, hosts_status, group,
                     sorted = SortNodes(tree_data);
                 
-                for (i = 0; i < sorted.length; i++) {
+                sorted.forEach( function(row, i) {
                     id++;
+                    
                     stat = GetSyncStatusMsg({
-                        status: sorted[i].summary_fields.inventory_source.status
+                        status: sorted[i].summary_fields.inventory_source.status,
+                        has_inventory_sources: sorted[i].has_inventory_sources,
+                        source: ( (sorted[i].summary_fields.inventory_source) ? sorted[i].summary_fields.inventory_source.source : null )
                     }); // from helpers/Groups.js
 
                     hosts_status = GetHostsStatusMsg({
@@ -93,9 +96,9 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                     }); // from helpers/Groups.js
 
                     children = [];
-                    for (j = 0; j < sorted[i].children.length; j++) {
+                    sorted[i].children.forEach( function(child, j) {
                         children.push(sorted[i].children[j].id);
-                    }
+                    });
 
                     group = {
                         name: sorted[i].name,
@@ -140,7 +143,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                     if (sorted[i].children.length > 0) {
                         buildGroups(sorted[i].children, id, level + 1);
                     }
-                }
+                });
             }
 
             // Build the HTML for our tree
@@ -221,7 +224,9 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                                 }
                                 // Update date sync status links/icons
                                 stat = GetSyncStatusMsg({
-                                    status: scope.groups[i].status
+                                    status: scope.groups[i].status,
+                                    has_inventory_sources: scope.groups[i].has_inventory_sources,
+                                    source: scope.groups[i].source
                                 });
                                 scope.groups[i].status_class = stat['class'];
                                 scope.groups[i].status_tooltip = stat.tooltip;

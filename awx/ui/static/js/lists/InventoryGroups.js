@@ -76,7 +76,8 @@ angular.module('InventoryGroupsDefinition', [])
                 ngShow: "group.id > 1", // hide for all hosts
                 awToolTip: "{{ group.status_tooltip }}",
                 dataTipWatch: "group.launch_tooltip",
-                ngClass: "group.status_class",
+                iconClass: "{{ 'fa icon-cloud-' + group.status_class }}",
+                ngClass: "group.launch_class",
                 dataPlacement: "top"
             },
             failed_hosts: {
@@ -85,7 +86,7 @@ angular.module('InventoryGroupsDefinition', [])
                 ngShow: "group.id > 1", // hide for all hosts
                 dataPlacement: "top",
                 ngClick: "showHosts(group.id, group.group_id, group.show_failures)",
-                iconClass: "{{ 'fa icon-failures-' + group.hosts_status_class }}"
+                iconClass: "{{ 'fa icon-job-' + group.hosts_status_class }}"
             },
             group_update: {
                 //label: 'Sync',

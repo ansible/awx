@@ -308,18 +308,19 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         }
                     }
                 });
+                /*
                 $('.popover').each(function() {
                     // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                     $(this).remove();
-                });
-                $('.tooltip').each( function() {
+                });*/
+                /*$('.tooltip').each( function() {
                     // close any lingering tool tipss
                     $(this).hide();
-                });
+                });*/
                 $(this).popover('toggle');
-                $('.popover').each(function() {
+                /*$('.popover').each(function() {
                     $compile($(this))(scope);  //make nested directives work!
-                });
+                });*/
                 $('.popover-content, .popover-title').click(function() {
                     $(self).popover('hide');
                 });

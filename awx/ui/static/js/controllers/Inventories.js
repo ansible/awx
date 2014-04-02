@@ -12,9 +12,9 @@
 
 function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, InventoryList, GenerateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
-    EditInventoryProperties) {
+    EditInventoryProperties, Find) {
     
-    ClearScope();
+    //ClearScope();
   
     var list = InventoryList,
         defaultUrl = GetBasePath('inventory'),
@@ -82,64 +82,74 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
 
     LoadBreadCrumbs();
 
+    if ($scope.removeBuildPopover) {
+        $scope.removeBuildPopover();
+    }
+    $scope.removeBuildPopover = $scope.$on('BuildPopover', function(e, data) {
+        var inventory, html = '';
+        if (data.count) {
+            inventory = Find({ list: $scope.inventories, key: 'id', val: data.results[0].inventory });
+            html += "<table class=\"table table-condensed flyout\" style=\"width: 100%\">" +
+                "<thead>" +
+                "<tr><th>Group</th><th>Source</th><th>Last Run</th><th>Status</th></tr>" +
+                "</thead>" +
+                "<tbody>";
+            data.results.forEach(function(row) {
+                html += "<tr><td>" + row.summary_fields.group.name + "</td>" +
+                    "<td>" + row.source + "</td>" +
+                    "<td>" + row.last_update + "</td>" +
+                    "<td><i class=\"fa icon-job-" + row.status + "</i></td></tr>";
+            });
+            html += "</tbody></table>\n";
+            html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+            inventory.syncPopOver = "bob was here!"; //html;
+        }
+    });
+
     if ($scope.removePostRefresh) {
         $scope.removePostRefresh();
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         //If we got here by deleting an inventory, stop the spinner and cleanup events
         Wait('stop');
-        $('#prompt-modal').modal('hide');
-
-        for (var i = 0; i < $scope.inventories.length; i++) {
-
-            // Set values for Failed Hosts column
-            // $scope.inventories[i].failed_hosts =  $scope.inventories[i].hosts_with_active_failures + ' / ' +  $scope.inventories[i].total_hosts;
-
-            if ($scope.inventories[i].hosts_with_active_failures > 0) {
-                $scope.inventories[i].failed_hosts_tip = $scope.inventories[i].hosts_with_active_failures +
-                    (( $scope.inventories[i].hosts_with_active_failures === 1) ? ' host' : ' hosts') + ' with job failures. Click to view details.';
-                $scope.inventories[i].failed_hosts_link = '/#/inventories/' +  $scope.inventories[i].id + '/';
-                $scope.inventories[i].failed_hosts_class = 'true';
-            } else {
-                if ($scope.inventories[i].total_hosts === 0) {
-                    // no hosts
-                    $scope.inventories[i].failed_hosts_tip = "No hosts defined. Click to add.";
-                    $scope.inventories[i].failed_hosts_link = '/#/inventories/' +  $scope.inventories[i].id + '/';
-                    $scope.inventories[i].failed_hosts_class = 'na';
-                } else {
-                    // many hosts with 0 failures
-                    $scope.inventories[i].failed_hosts_tip = $scope.inventories[i].total_hosts +
-                        (($scope.inventories[i].total_hosts > 1) ? ' hosts' : ' host') + " with no job failures. Click to view details.";
-                    $scope.inventories[i].failed_hosts_link = '/#/inventories/' +  $scope.inventories[i].id + '/';
-                    $scope.inventories[i].failed_hosts_class = 'false';
-                }
-            }
-
-            // Set values for Status column
-            $scope.inventories[i].status = $scope.inventories[i].inventory_sources_with_failures + ' / ' +  $scope.inventories[i].total_inventory_sources;
-            if ($scope.inventories[i].inventory_sources_with_failures > 0) {
-                $scope.inventories[i].status_tip = $scope.inventories[i].inventory_sources_with_failures + ' cloud ' +
-                    (($scope.inventories[i].inventory_sources_with_failures === 1) ? 'source' : 'sources') +
-                    ' with failures. Click to view details.';
-                $scope.inventories[i].status_link = '/#/inventories/' +  $scope.inventories[i].id + '/';
-                $scope.inventories[i].status_class = 'failed';
-            } else {
-                if ($scope.inventories[i].total_inventory_sources === 0) {
-                    // no groups are reporting a source
-                    $scope.inventories[i].status_tip = "Not synced with a cloud source. Click to edit.";
-                    $scope.inventories[i].status_link = '/#/inventories/' +  $scope.inventories[i].id + '/';
-                    $scope.inventories[i].status_class = 'na';
-                } else {
-                    // many hosts with 0 failures
-                    $scope.inventories[i].status_tip =  $scope.inventories[i].total_inventory_sources +
-                        ' cloud ' + (( $scope.inventories[i].total_inventory_sources > 1) ? 'sources' : 'source') +
-                        ' with no failures. Click to view details.';
-                    $scope.inventories[i].status_link = '/#/inventories/' +  $scope.inventories[i].id + '/';
-                    $scope.inventories[i].status_class = 'successful';
-                }
-            }
-
+        try {
+            $('#prompt-modal').modal('hide');
         }
+        catch(e) {
+            // ignore
+        }
+        $scope.inventories.forEach(function(inventory, idx) {
+            if (inventory.has_inventory_sources) {
+                if (inventory.inventory_sources_with_failures > 0) {
+                    $scope.inventories[idx].syncStatus = 'error';
+                    $scope.inventories[idx].syncTip = inventory.groups_with_active_failures + ' groups with sync failures. Click for details';
+                }
+                else {
+                    $scope.inventories[idx].syncStatus = 'successful';
+                    $scope.inventories[idx].syncTip = 'No inventory sync failures. Click for details.';
+                }
+            }
+            else {
+                $scope.inventories[idx].syncStatus = 'na';
+                $scope.inventories[idx].syncTip = 'Not configured for inventory sync.';
+            }
+            if (inventory.has_active_failures) {
+                $scope.inventories[idx].hostsStatus = 'error';
+                $scope.inventories[idx].hostsTip = inventory.hosts_with_active_failures + ' hosts with failures. Click for details.';
+            }
+            else {
+                $scope.inventories[idx].hostsStatus = 'successful';
+                $scope.inventories[idx].hostsTip = 'No hosts with failures. Click for details.';
+            }
+
+            if (inventory.has_inventory_sources) {
+                Rest.setUrl(inventory.related.inventory_sources + '?or__source=ec2&or__source=rax&order_by=-last_job_run&page_size=5');
+                Rest.get()
+                    .success( function(data) {
+                        $scope.$emit('BuildPopover', data);
+                    });
+            }
+        });
     });
 
     if ($scope.removeRefreshInventories) {
@@ -215,7 +225,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
 
 InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties'
+    'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties', 'Find'
 ];
 
 

@@ -67,8 +67,7 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
 
             if (group) {
                 if (Empty(group.source)) {
-                    Alert('Missing Configuration', 'The selected group is not configured for inventory sync. ' +
-                        'You must first edit the group, provide Source settings, and then run the sync process.', 'alert-info');
+                    // do nothing
                 } else if (Empty(group.status) || group.status === "never updated") {
                     Alert('No Status Available', 'An inventory sync has not been performed for the selected group. Start the process by ' +
                         'clicking the <i class="fa fa-exchange"></i> button.', 'alert-info');
@@ -104,18 +103,18 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
 
             if (active_failures > 0) {
                 tip = total_hosts + ((total_hosts === 1) ? ' host' : ' hosts') + '. ' + active_failures + ' with failed jobs.';
-                html_class = 'true';
+                html_class = 'error';
                 failures = true;
             } else {
                 failures = false;
                 if (total_hosts === 0) {
                     // no hosts
                     tip = "Group contains 0 hosts.";
-                    html_class = 'na';
+                    html_class = 'none';
                 } else {
                     // many hosts with 0 failures
                     tip = total_hosts + ((total_hosts === 1) ? ' host' : ' hosts') + '. No job failures';
-                    html_class = 'false';
+                    html_class = 'success';
                 }
             }
 
@@ -128,49 +127,59 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
     }
 ])
 
-.factory('GetSyncStatusMsg', [
-    function () {
+.factory('GetSyncStatusMsg', [ 'Empty',
+    function (Empty) {
         return function (params) {
 
             var status = params.status,
+                source = params.source,
+                has_inventory_sources = params.has_inventory_sources,
                 launch_class = '',
                 launch_tip = 'Start sync process',
+
                 stat, stat_class, status_tip;
             
             stat = status;
-            stat_class = 'icon-cloud-' + stat;
+            stat_class = stat;
 
             switch (status) {
-            case 'never updated':
-                stat = 'never';
-                stat_class = 'icon-cloud-na disabled';
-                status_tip = 'Sync not performed. Click <i class="fa fa-exchange"></i> to start it now.';
-                break;
-            case 'none':
-            case '':
-                launch_class = 'btn-disabled';
-                stat = 'n/a';
-                stat_class = 'icon-cloud-na disabled';
-                status_tip = 'Cloud source not configured. Click <i class="fa fa-pencil"></i> to update.';
-                launch_tip = status_tip;
-                break;
-            case 'failed':
-                status_tip = 'Sync failed. Click to view log.';
-                break;
-            case 'successful':
-                status_tip = 'Sync completed. Click to view log.';
-                break;
-            case 'updating':
-                status_tip = 'Sync running';
-                break;
+                case 'never updated':
+                    stat = 'never';
+                    stat_class = 'na';
+                    status_tip = 'Sync not performed. Click <i class="fa fa-exchange"></i> to start it now.';
+                    break;
+                case 'none':
+                case '':
+                    launch_class = 'btn-disabled';
+                    stat = 'n/a';
+                    stat_class = 'na';
+                    status_tip = 'Cloud source not configured. Click <i class="fa fa-pencil"></i> to update.';
+                    launch_tip = 'Cloud source not configured.';
+                    break;
+                case 'failed':
+                    status_tip = 'Sync failed. Click to view log.';
+                    break;
+                case 'successful':
+                    status_tip = 'Sync completed. Click to view log.';
+                    break;
+                case 'updating':
+                    status_tip = 'Sync running';
+                    break;
+            }
+
+            if (has_inventory_sources && Empty(source)) {
+                // parent has a source, therefore this group should not have a source
+                launch_class = "btn-disabled";
+                status_tip = 'Managed by an external cloud source.';
+                launch_tip = 'Can only be updated by running a sync on the parent group.';
             }
 
             return {
-                'class': stat_class,
-                tooltip: status_tip,
-                status: stat,
-                'launch_class': launch_class,
-                'launch_tip': launch_tip
+                "class": stat_class,
+                "tooltip": status_tip,
+                "status": stat,
+                "launch_class": launch_class,
+                "launch_tip": launch_tip
             };
         };
     }

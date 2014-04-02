@@ -21,6 +21,27 @@ angular.module('InventoriesListDefinition', [])
         hover: true,
 
         fields: {
+            status: {
+                label: 'Status',
+                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                searchable: false,
+                nosort: true,
+                ngClick: "null",
+                dataTitle: "Sync Status",
+                icons: [{
+                    icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
+                    awToolTip: "{{ inventory.syncTip }}",
+                    awTipPlacement: "top",
+                    awPopOver: "{{ inventory.syncPopOver }}",
+                    dataPlacement: "right"
+                },{
+                    icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
+                    awToolTip: "{{ inventory.hostsTip }}",
+                    awTipPlacement: "top",
+                    awPopOver: "{{ inventory.hostsPopOver }}",
+                    dataPlacement: "right"
+                }]
+            },
             name: {
                 key: true,
                 label: 'Name'
@@ -70,13 +91,6 @@ angular.module('InventoriesListDefinition', [])
         },
 
         fieldActions: {
-            status: {
-                //label: 'Status', 
-                ngHref: "{{ inventory.status_link }}",
-                iconClass: "{{ 'fa fa-cloud icon-cloud-' + inventory.status_class }}",
-                awToolTip: "{{ inventory.status_tip }}",
-                dataPlacement: "top"
-            },
             failed_hosts: {
                 //label: 'Failures',
                 ngHref: "{{ inventory.failed_hosts_link }}",

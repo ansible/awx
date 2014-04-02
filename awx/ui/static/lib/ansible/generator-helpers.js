@@ -441,15 +441,90 @@ angular.module('GeneratorHelpers', [])
     }
 ])
 
-.factory('Column', ['Attr', 'Icon', 'DropDown', 'Badge', 'BadgeCount',
-    function (Attr, Icon, DropDown, Badge, BadgeCount) {
+// List field with multiple icons
+.factory('BuildLink', ['Attr', 'Icon', function(Attr, Icon){
+    return function(params) {
+        var html = '',
+            field = params.field,
+            list = params.list,
+            base = params.base,
+            fld = params.fld;
+        
+        if (field.linkTo) {
+            html += "<a href=\"" + field.linkTo + "\" ";
+        } else if (field.ngClick) {
+            html += "<a hef=\"\" " + Attr(field, 'ngClick') + " ";
+        } else if (field.ngHref) {
+            html += "<a ng-href=\"" + field.ngHref + "\" ";
+        } else if (field.link || (field.key && (field.link === undefined || field.link))) {
+            html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
+        } else {
+            html += "<a href=\"\">";
+        }
+        if (field.awDroppable) {
+            html += Attr(field, 'awDroppable');
+            html += (field.dataAccept) ? Attr(field, 'dataAccept') : '';
+        }
+        if (field.awDraggable) {
+            html += Attr(field, 'awDraggable');
+            html += (field.dataContainment) ? Attr(field, 'dataContainment') : '';
+            html += (field.dataTreeId) ? Attr(field, 'dataTreeId') : '';
+            html += (field.dataGroupId) ? Attr(field, 'dataGroupId') : '';
+            html += (field.dataHostId) ? Attr(field, 'dataHostId') : '';
+            html += (field.dataType) ? Attr(field, 'dataType') : '';
+        }
+        if (field.awToolTip) {
+            html += Attr(field, 'awToolTip');
+            html += (field.dataPlacement && !field.awPopOver) ? Attr(field, 'dataPlacement') : "";
+            html += (field.dataTipWatch) ? Attr(field, 'dataTipWatch') : "";
+            html += (field.awTipPlacement) ? Attr(field, 'awTipPlacement') : "";
+        }
+        if (field.awPopOver) {
+            html += "aw-pop-over=\"" + field.awPopOver + "\" ";
+            html += (field.dataPlacement) ? "data-placement=\"" + field.dataPlacement + "\" " : "";
+        }
+        html += ">";
+
+        // Add icon:
+        if (field.ngShowIcon) {
+            html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
+        } else if (field.icon) {
+            html += Icon(field.icon) + " ";
+        }
+
+        // Add data binds 
+        if (!field.ngBindHtml && !field.iconOnly && (field.showValue === undefined || field.showValue === true)) {
+            if (field.ngBind) {
+                html += "{{ " + field.ngBind;
+            } else {
+                html += "{{" + list.iterator + "." + fld;
+            }
+            if (field.filter) {
+                html += " | " + field.filter + " }}";
+            }
+            else {
+                html += " }}";
+            }
+        }
+
+        // Add additional text:
+        if (field.text) {
+            html += field.text;
+        }
+        html += "</a>";
+        return html;
+    };
+}])
+
+.factory('Column', ['Attr', 'Icon', 'DropDown', 'Badge', 'BadgeCount', 'BuildLink',
+    function (Attr, Icon, DropDown, Badge, BadgeCount, BuildLink) {
         return function (params) {
             var list = params.list,
                 fld = params.fld,
                 options = params.options,
                 base = params.base,
                 field = list.fields[fld],
-                cap, html = '';
+                html = '';
 
             if (field.type !== undefined && field.type === 'DropDown') {
                 html = DropDown(params);
@@ -483,7 +558,6 @@ angular.module('GeneratorHelpers', [])
                     html += "<div class=\"level level-{{ " + list.iterator + ".event_level }}\"><a href=\"\" ng-click=\"toggle(" +
                         list.iterator + ".id)\"> " +
                         "<i class=\"{{ " + list.iterator + ".ngicon }}\"></i></a></div>";
-                    //ng-show=\"'\{\{ " + list.iterator + ".related.children \}\}' !== ''\"
                 }
 
                 if (list.name === 'groups') {
@@ -496,84 +570,54 @@ angular.module('GeneratorHelpers', [])
                 // Start the Link
                 if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref || field.awToolTip || field.awPopOver) &&
                     options.mode !== 'lookup' && options.mode !== 'select' && !field.noLink && !field.ngBindHtml) {
-                    cap = false;
-                    if (field.linkTo) {
-                        html += "<a href=\"" + field.linkTo + "\" ";
-                        cap = true;
-                    } else if (field.ngClick) {
-                        html += "<a href=\"\"" + Attr(field, 'ngClick') + " ";
-                        cap = true;
-                    } else if (field.ngHref) {
-                        html += "<a ng-href=\"" + field.ngHref + "\" ";
-                        cap = true;
-                    } else if (field.link || (field.key && (field.link === undefined || field.link))) {
-                        html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
-                        cap = true;
-                    }
-                    if (field.awDroppable) {
-                        html += Attr(field, 'awDroppable');
-                        html += (field.dataAccept) ? Attr(field, 'dataAccept') : '';
-                    }
-                    if (field.awDraggable) {
-                        html += Attr(field, 'awDraggable');
-                        html += (field.dataContainment) ? Attr(field, 'dataContainment') : '';
-                        html += (field.dataTreeId) ? Attr(field, 'dataTreeId') : '';
-                        html += (field.dataGroupId) ? Attr(field, 'dataGroupId') : '';
-                        html += (field.dataHostId) ? Attr(field, 'dataHostId') : '';
-                        html += (field.dataType) ? Attr(field, 'dataType') : '';
-                    }
-                    if (field.awToolTip) {
-                        html += Attr(field, 'awToolTip');
-                        html += (field.dataPlacement && !field.awPopOver) ? Attr(field, 'dataPlacement') : "";
-                        html += (field.dataTipWatch) ? Attr(field, 'dataTipWatch') : "";
-                        html += (field.awTipPlacement) ? Attr(field, 'awTipPlacement') : "";
-                    }
-                    if (field.awPopOver) {
-                        html += "aw-pop-over=\"" + field.awPopOver + "\" ";
-                        html += (field.dataPlacement) ? "data-placement=\"" + field.dataPlacement + "\" " : "";
-                    }
-                    if (cap) {
-                        html += ">";
-                    }
-                }
-
-                // Add icon:
-                if (field.ngShowIcon) {
-                    html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
-                } else {
-                    if (field.icon) {
-                        html += Icon(field.icon) + " ";
-                    }
-                }
-
-                // Add data binds 
-                if (!field.ngBindHtml && !field.iconOnly && (field.showValue === undefined || field.showValue === true)) {
-                    if (field.ngBind) {
-                        html += "{{ " + field.ngBind;
-                    } else {
-                        html += "{{" + list.iterator + "." + fld;
-                    }
-                    if (field.filter) {
-                        html += " | " + field.filter + " }}";
+                    if (field.icons) {
+                        field.icons.forEach(function(icon, idx) {
+                            var key, i = field.icons[idx];
+                            for (key in i) {
+                                field[key] = i[key];
+                            }
+                            html += BuildLink({
+                                list: list,
+                                field: field,
+                                fld: fld,
+                                base: base
+                            }) + ' ';
+                        });
                     }
                     else {
-                        html += " }}";
+                        html += BuildLink({
+                            list: list,
+                            field: field,
+                            fld: fld,
+                            base: base
+                        });
                     }
                 }
-
-                // Add additional text:
-                if (field.text) {
-                    html += field.text;
-                }
-
-                //if (list['hasChildren'] && field.hasChildren) {
-                //   html += "</span>";
-                //}
-
-                // close the link
-                if ((field.key || field.link || field.linkTo || field.ngClick || field.ngHref || field.awToolTip || field.awPopOver) &&
-                    options.mode !== 'lookup' && options.mode !== 'select' && !field.noLink && !field.ngBindHtml) {
-                    html += "</a>";
+                else {
+                    // Add icon:
+                    if (field.ngShowIcon) {
+                        html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
+                    } else if (field.icon) {
+                        html += Icon(field.icon) + " ";
+                    }
+                    // Add data binds 
+                    if (!field.ngBindHtml && !field.iconOnly && (field.showValue === undefined || field.showValue === true)) {
+                        if (field.ngBind) {
+                            html += "{{ " + field.ngBind;
+                        } else {
+                            html += "{{" + list.iterator + "." + fld;
+                        }
+                        if (field.filter) {
+                            html += " | " + field.filter + " }}";
+                        }
+                        else {
+                            html += " }}";
+                        }
+                    }
+                    // Add additional text:
+                    if (field.text) {
+                        html += field.text;
+                    }
                 }
 
                 if (list.name === 'hosts' || list.name === 'groups') {

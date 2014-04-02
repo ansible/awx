@@ -1078,18 +1078,20 @@ input[type="checkbox"].checkbox-no-label {
 
 /* Cloud inventory status. i.e. inventory_source.status values */
   
-  /*
   .icon-cloud-na:before,
   .icon-cloud-never:before,
   .icon-cloud-updating:before,
-  .icon-cloud-successful:before {
-    content: "\f111";
+  .icon-cloud-running:before,
+  .icon-cloud-successful:before,
+  .icon-cloud-failed:before,
+  .icon-cloud-error:before {
+    content: "\f0c2";
   }
 
-  .icon-cloud-failed:before {
+  /*.icon-cloud-failed:before,
+  .icon-cloud-error:before {
     content: "\f06a";
-  }
-  */
+  }*/
 
   .icon-cloud-na,
   .icon-cloud-never, 
@@ -1099,6 +1101,7 @@ input[type="checkbox"].checkbox-no-label {
   }
 
   .icon-cloud-updating,
+  .icon-cloud-running,
   .icon-cloud-successful,
   a.icon-cloud-updating:hover,
   a.icon-cloud-successful:hover {
@@ -1106,11 +1109,13 @@ input[type="checkbox"].checkbox-no-label {
   }
 
   .icon-cloud-failed,
+  .icon-cloud-error,
   a.icon-cloud-failed:hover {
     color: @red;
   }
 
-  .icon-cloud-updating {
+  .icon-cloud-updating,
+  .icon-cloud-running {
     .pulsate();
   }
 
@@ -1243,6 +1248,10 @@ input[type="checkbox"].checkbox-no-label {
 
 
 /* Inventory Edit */
+
+  #inventories_table i[class*="icon-job-"] {
+      margin-left: 8px;
+  }
 
   .selected {
     font-weight: bold;
