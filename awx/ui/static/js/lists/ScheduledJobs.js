@@ -33,7 +33,7 @@ angular.module('ScheduledJobsDefinition', [])
             },
             next_run: {
                 label: 'Next Run',
-                link: false,
+                noLink: true,
                 searchable: false,
                 columnClass: "col-md-2 hidden-xs",
                 filter: "date:'MM/dd/yy HH:mm:ss'",
@@ -42,7 +42,7 @@ angular.module('ScheduledJobsDefinition', [])
             },
             type: {
                 label: 'Type',
-                link: false,
+                noLink: true,
                 columnClass: "col-md-2 hidden-sm hidden-xs",
                 sourceModel: 'unified_job_template',
                 sourceField: 'job_type',

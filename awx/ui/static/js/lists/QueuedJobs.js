@@ -45,7 +45,7 @@ angular.module('QueuedJobsDefinition', [])
             },
             created: {
                 label: 'Created On',
-                link: false,
+                noLink: true,
                 searchable: false,
                 filter: "date:'MM/dd/yy HH:mm:ss'",
                 columnClass: 'col-md-2 hidden-xs'

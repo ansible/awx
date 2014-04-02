@@ -453,7 +453,7 @@ angular.module('GeneratorHelpers', [])
         if (field.linkTo) {
             html += "<a href=\"" + field.linkTo + "\" ";
         } else if (field.ngClick) {
-            html += "<a hef=\"\" " + Attr(field, 'ngClick') + " ";
+            html += "<a href=\"\" " + Attr(field, 'ngClick') + " ";
         } else if (field.ngHref) {
             html += "<a ng-href=\"" + field.ngHref + "\" ";
         } else if (field.link || (field.key && (field.link === undefined || field.link))) {
