@@ -16,6 +16,13 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
             return renderers.JSONRenderer()
         return renderer
 
+    def get_raw_data_form(self, view, method, request):
+        try:
+            setattr(view, '_raw_data_form_marker', True)
+            return super(BrowsableAPIRenderer, self).get_raw_data_form(view, method, request)
+        finally:
+            delattr(view, '_raw_data_form_marker')
+
     def get_rendered_html_form(self, view, method, request):
         '''Never show auto-generated form (only raw form).'''
         obj = getattr(view, 'object', None)

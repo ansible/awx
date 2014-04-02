@@ -139,6 +139,16 @@ class GenericAPIView(generics.GenericAPIView, APIView):
     #   model = ModelClass
     #   serializer_class = SerializerClass
 
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(GenericAPIView, self).get_serializer(*args, **kwargs)
+        # Override when called from browsable API to generate raw data form;
+        # always remove read only fields from sample raw data.
+        if hasattr(self, '_raw_data_form_marker'):
+             for name, field in serializer.fields.items():
+                if getattr(field, 'read_only', None):
+                    del serializer.fields[name]
+        return serializer
+
     def get_queryset(self):
         #if hasattr(self.request.user, 'get_queryset'):
         #    return self.request.user.get_queryset(self.model)
