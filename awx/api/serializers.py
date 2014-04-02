@@ -8,6 +8,7 @@ import socket
 import urlparse
 import logging
 import os.path
+import datetime
 from dateutil import rrule
 
 # PyYAML
@@ -1376,19 +1377,20 @@ class ScheduleSerializer(BaseSerializer):
     # - INTERVAL is not included
     # - SECONDLY is used
     # - TZID is used
-    # - multiple BYDAY (except WEEKLY and YEARLY (see below)), BYMONTHDAY, BYMONTH
-    # - multiple BYDAY yearly unless it lists all weekdays OR weekend days
     # - BYDAY prefixed with a number (MO is good but not 20MO)
     # - BYYEARDAY
     # - BYWEEKNO
+    # - Multiple DTSTART or RRULE elements
+    # - COUNT > 999
     def validate_rrule(self, attrs, source):
         rrule_value = attrs[source]
-        multi_by_day = ".*?BYDAY[\:\=][a-zA-Z]{2},[a-zA-Z]{2}"
         multi_by_month_day = ".*?BYMONTHDAY[\:\=][0-9]+,-*[0-9]+"
         multi_by_month = ".*?BYMONTH[\:\=][0-9]+,[0-9]+"
         by_day_with_numeric_prefix = ".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
-        if not re.match("DTSTART[\:\=][0-9]+T[0-9]+Z", rrule_value):
-            raise serializers.ValidationError('DTSTART required in rrule, value should match: DTSTART:YYYYMMDDTHHMMSSZ')
+        match_dtstart = re.match("DTSTART\:[0-9]+T[0-9]+Z", rrule_value)
+        match_count = re.match(".*?(COUNT\=[0-9]+)", rrule_value)
+        if not match_dtstart:
+            raise serializers.ValidationError('DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ')
         if not 'interval' in rrule_value.lower():
             raise serializers.ValidationError('INTERVAL required in rrule')
         if 'tzid' in rrule_value.lower():
@@ -1405,9 +1407,14 @@ class ScheduleSerializer(BaseSerializer):
             raise serializers.ValidationError("BYYEARDAY not supported")
         if 'byweekno' in rrule_value.lower():
             raise serializers.ValidationError("BYWEEKNO not supported")
-        if re.match(multi_by_day, rrule_value) and not re.match(".*?FREQ[\:\=](WEEKLY|YEARLY)", rrule_value):
-            raise serializers.ValidationError("Multiple BYDAY elements only supported with WEEKLY and YEARLY frequency")
+        if match_count:
+            count_val = match_count.groups()[0].strip().split("=")
+            if int(count_val[1]) > 999:
+                raise serializers.ValidationError("COUNT > 999 is unsupported")
         try:
+            # dtstart_group = match_dtstart.group()
+            # rrule_value = (rrule_value[0:match_dtstart.start()] + rrule_value[match_dtstart.end():]).strip()
+            # dtstart_actual = datetime.datetime.strptime(dtstart_group.split(":")[1], "%Y%m%dT%H%M%SZ")
             sched_rule = rrule.rrulestr(rrule_value)
         except Exception, e:
             raise serializers.ValidationError("rrule parsing failed validation")

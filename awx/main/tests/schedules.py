@@ -20,21 +20,30 @@ from awx.main.tests.base import BaseTest, BaseTransactionTest
 
 __all__ = ['ScheduleTest']
 
+UNTIL_SCHEDULE = "DTSTART:20140331T075000Z RRULE:FREQ=MINUTELY;INTERVAL=1;UNTIL=30230401T075000Z"
 EXPIRED_SCHEDULES = ["DTSTART:19340331T055000Z RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5"]
 INFINITE_SCHEDULES = ["DTSTART:30340331T055000Z RRULE:FREQ=MINUTELY;INTERVAL=10"]
-GOOD_SCHEDULES = ["DTSTART:30340331T055000Z RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5",
-                  # TODO: DTSTART DOESN'T WORK WITH DAILY?!?!
-                  #"DTSTART=20240331T075000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1",
-                  # TODO: UNTIL IS BROKEN!!
-                  # "DTSTART=20140331T075000Z RRULE:FREQ=MINUTELY;INTERVAL=1 UNTIL=20230401T075000Z",
+GOOD_SCHEDULES = ["DTSTART:20500331T055000Z RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5",
+                  "DTSTART:20240331T075000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=MINUTELY;INTERVAL=1;UNTIL=20230401T075000Z",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,WE,FR",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=WEEKLY;INTERVAL=5;BYDAY=MO",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=6",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=MONTHLY;INTERVAL=1;BYSETPOS=4;BYDAY=SU",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=MONTHLY;INTERVAL=1;BYSETPOS=-1;BYDAY=MO,TU,WE,TH,FR",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=MONTHLY;INTERVAL=1;BYSETPOS=-1;BYDAY=MO,TU,WE,TH,FR,SA,SU",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=4;BYMONTHDAY=1",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYSETPOS=-1;BYMONTH=8;BYDAY=SU",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=WEEKLY;INTERVAL=1;UNTIL=20230401T075000Z;BYDAY=MO,WE,FR",
+                  "DTSTART:20140331T075000Z RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL=20230610T075000Z"
               ]
 BAD_SCHEDULES = ["", "DTSTART:20140331T055000 RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5",
                  "RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5",
                  "FREQ=MINUTELY;INTERVAL=10;COUNT=5",
+                  "DTSTART:20240331T075000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=10000000",
                  "DTSTART;TZID=US-Eastern:19961105T090000 RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5",
                  "DTSTART:20140331T055000Z RRULE:FREQ=SECONDLY;INTERVAL=1",
                  "DTSTART:20140331T055000Z RRULE:FREQ=SECONDLY",
-                 "DTSTART:20140331T055000Z RRULE:FREQ=MONTHLY;BYDAY=SU,MO;INTERVAL=1",
                  "DTSTART:20140331T055000Z RRULE:FREQ=YEARLY;BYDAY=20MO;INTERVAL=1",
                  "DTSTART:20140331T055000Z RRULE:FREQ=MONTHLY;BYMONTHDAY=10,15;INTERVAL=1",
                  "DTSTART:20140331T055000Z RRULE:FREQ=YEARLY;BYMONTH=1,2;INTERVAL=1",
@@ -151,20 +160,25 @@ class ScheduleTest(BaseTest):
         with self.current_user(self.normal_django_user):
             data = self.post(first_url, new_schedule, expect=201)
         self.assertEquals(data['dtend'], None)
+
+        long_schedule = dict(name='long_schedule', description='going for a long time', enabled=True, rrule=UNTIL_SCHEDULE)
+        with self.current_user(self.normal_django_user):
+            data = self.post(first_url, long_schedule, expect=201)
+        self.assertNotEquals(data['dtend'], None)
         
     def test_schedule_filtering(self):
         first_url = reverse('api:inventory_source_schedules_list', args=(self.first_inventory_source.pk,))
 
         start_time = now() + datetime.timedelta(minutes=5)
         dtstart_str = start_time.strftime("%Y%m%dT%H%M%SZ")
-        new_schedule = dict(name="filter_schedule_1", enabled=True, rrule="DTSTART:%s RRULE:RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5" % dtstart_str)
+        new_schedule = dict(name="filter_schedule_1", enabled=True, rrule="DTSTART:%s RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5" % dtstart_str)
         with self.current_user(self.normal_django_user):
             data = self.post(first_url, new_schedule, expect=201)
         self.assertTrue(Schedule.objects.enabled().between(now(), now() + datetime.timedelta(minutes=10)).count(), 1)
 
         start_time = now()
         dtstart_str = start_time.strftime("%Y%m%dT%H%M%SZ")
-        new_schedule_middle = dict(name="runnable_schedule", enabled=True, rrule="DTSTART:%s RRULE:RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5" % dtstart_str)
+        new_schedule_middle = dict(name="runnable_schedule", enabled=True, rrule="DTSTART:%s RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5" % dtstart_str)
         with self.current_user(self.normal_django_user):
             data = self.post(first_url, new_schedule_middle, expect=201)
         self.assertTrue(Schedule.objects.enabled().between(now() - datetime.timedelta(minutes=10), now() + datetime.timedelta(minutes=10)).count(), 1)
