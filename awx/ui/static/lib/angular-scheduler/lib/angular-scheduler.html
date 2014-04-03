@@ -174,13 +174,13 @@
                 <label><span class="red-text">*</span> On Days</label>
                 <div class="input-group">
                     <div class="btn-group" data-toggle="buttons-checkbox" id="weekdaySelect">
-                        <button type="button" ng-class="weekDaySUClass" class="btn btn-default" data-value="SU" ng-click="setWeekday('su')">Sun</button>
-                        <button type="button" ng-class="weekDayMOClass" class="btn btn-default" data-value="MO" ng-click="setWeekday('mo')">Mon</button>
-                        <button type="button" ng-class="weekDayTUClass" class="btn btn-default" data-value="TU" ng-click="setWeekday('tu')">Tue</button>
-                        <button type="button" ng-class="weekDayWEClass" class="btn btn-default" data-value="WE" ng-click="setWeekday('we')">Wed</button>
-                        <button type="button" ng-class="weekDayTHClass" class="btn btn-default" data-value="TH" ng-click="setWeekday('th')">Thu</button>
-                        <button type="button" ng-class="weekDayFRClass" class="btn btn-default" data-value="FR" ng-click="setWeekday('fr')">Fri</button>
-                        <button type="button" ng-class="weekDaySAClass" class="btn btn-default" data-value="SA" ng-click="setWeekday('sa')">Sat</button>
+                        <button type="button" ng-class="weekDaySUClass" class="btn btn-default" data-value="SU" ng-click="setWeekday($event,'su')">Sun</button>
+                        <button type="button" ng-class="weekDayMOClass" class="btn btn-default" data-value="MO" ng-click="setWeekday($event,'mo')">Mon</button>
+                        <button type="button" ng-class="weekDayTUClass" class="btn btn-default" data-value="TU" ng-click="setWeekday($event,'tu')">Tue</button>
+                        <button type="button" ng-class="weekDayWEClass" class="btn btn-default" data-value="WE" ng-click="setWeekday($event,'we')">Wed</button>
+                        <button type="button" ng-class="weekDayTHClass" class="btn btn-default" data-value="TH" ng-click="setWeekday($event,'th')">Thu</button>
+                        <button type="button" ng-class="weekDayFRClass" class="btn btn-default" data-value="FR" ng-click="setWeekday($event,'fr')">Fri</button>
+                        <button type="button" ng-class="weekDaySAClass" class="btn btn-default" data-value="SA" ng-click="setWeekday($event,'sa')">Sat</button>
                     </div>
                 </div>
                 <div class="error" ng-show="scheduler_weekDays_error">Select one or more days</div>

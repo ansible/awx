@@ -131,3 +131,14 @@ select {
 #date-choice .radio-inline:nth-child(2) {
     margin-left: 10px;
 }
+
+#weekdaySelect .btn-default:hover,
+#weekdaySelect .btn-default:focus {
+    background-color: #fff;
+    -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+}
+
+#weekdaySelect .btn-default.active:hover {
+    background-color: #e0e0e0;
+}

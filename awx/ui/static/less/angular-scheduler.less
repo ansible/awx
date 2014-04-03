@@ -176,10 +176,6 @@
     .red-text {
         color: #dd1b16;
     }
-    input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid, textarea.ng-dirty.ng-invalid {
-        border: 1px solid red;
-        outline: none;
-    }
     .help-text {
         font-size: 12px;
         font-weight: normal;
@@ -188,6 +184,10 @@
     }
     .inline-label {
         margin-left: 10px;
+    }
+    .radio-inline input[type="radio"]{
+        margin-top: 2px;
+        margin-left: -15px;
     }
     #scheduler-buttons {
         margin-top: 20px;
@@ -220,5 +220,16 @@
         background-color: @well;
         list-style: none;
         margin-bottom: 5px;
+    }
+    
+    #weekdaySelect .btn-default:hover,
+    #weekdaySelect .btn-default:focus {
+        background-color: #fff;
+        -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+    }
+
+    #weekdaySelect .btn-default.active:hover {
+        background-color: #e0e0e0;
     }
 }

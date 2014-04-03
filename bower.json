@@ -15,7 +15,7 @@
     "angular-md5": "~0.1.7",
     "angular-resource": "~1.2.12",
     "angular-sanitize": "~1.2.12",
-    "angular-scheduler": "~0.0.9",
+    "angular-scheduler": "~0.0.12",
     "bootstrap": "~3.1.1",
     "components-font-awesome": "~4.0.3",
     "less.js": "~1.6.3",
