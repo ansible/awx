@@ -34,7 +34,7 @@ from ansi2html import Ansi2HTMLConverter
 from ansi2html.style import SCHEME
 
 # AWX
-from awx.main.licenses import LicenseReader
+from awx.main.task_engine import TaskSerializer
 from awx.main.models import *
 from awx.main.utils import *
 from awx.main.access import get_user_queryset
@@ -112,7 +112,7 @@ class ApiV1ConfigView(APIView):
     def get(self, request, format=None):
         '''Return various sitewide configuration settings.'''
 
-        license_reader = LicenseReader()
+        license_reader = TaskSerializer()
         license_data   = license_reader.from_file()
 
         data = dict(
