@@ -21,7 +21,7 @@ from django.utils.timezone import now
 from django.test.utils import override_settings
 
 # AWX
-from awx.main.licenses import LicenseWriter
+from awx.main.task_engine import TaskEngager as LicenseWriter
 from awx.main.models import *
 from awx.main.tests.base import BaseTest, BaseLiveServerTest
 
