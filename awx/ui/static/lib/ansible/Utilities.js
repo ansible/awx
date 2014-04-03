@@ -107,7 +107,6 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             scope.alertHeader = hdr;
             scope.alertBody = msg;
             scope.alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
-            //console.log('msg: ' + msg + ' cls: ' + cls);
             e = angular.element(document.getElementById('alert-modal'));
             $compile(e)(scope);
             $('#alert-modal').modal({
@@ -137,7 +136,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 .factory('ProcessErrors', ['$rootScope', '$cookieStore', '$log', '$location', 'Alert', 'Wait',
     function ($rootScope, $cookieStore, $log, $location, Alert, Wait) {
         return function (scope, data, status, form, defaultMsg) {
-            var field, fieldErrors, msg;
+            var field, fieldErrors, msg, keys;
             Wait('stop');
             if ($AnsibleConfig.debug_mode) {
                 $log.debug('Debug status: ' + status);
@@ -200,6 +199,15 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 if ((!fieldErrors) && defaultMsg) {
                     Alert(defaultMsg.hdr, defaultMsg.msg);
                 }
+            } else if (Object.keys(data).length > 0) {
+                keys = Object.keys(data);
+                if (Array.isArray(data[keys[0]])) {
+                    msg = data[keys[0]][0];
+                }
+                else {
+                    msg = data[keys[0]];
+                }
+                Alert(defaultMsg.hdr, msg);
             } else {
                 Alert(defaultMsg.hdr, defaultMsg.msg);
             }

@@ -49,7 +49,8 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
             scope: $scope,
             list: SchedulesList,
             id: 'schedule-list-target',
-            url: url
+            url: url,
+            pageSize: 20
         });
     });
 

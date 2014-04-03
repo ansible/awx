@@ -419,7 +419,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 });
             };
 
-            scope.refreshSchedule = function() {
+            scope.refreshSchedules = function() {
                 if (base === 'jobs') {
                     parent_scope.refreshJobs();
                 }
@@ -432,7 +432,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 scope.removeSchedulesRefresh();
             }
             scope.$on('SchedulesRefresh', function() {
-                scope.refreshJobs();
+                scope.search(iterator);
             });
         };
     }])
