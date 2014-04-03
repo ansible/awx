@@ -79,7 +79,11 @@ def tower_periodic_scheduler(self):
         template = schedule.unified_job_template
         schedule.save() # To update next_run timestamp.
         new_unified_job = template.create_unified_job(launch_type='scheduled', schedule=schedule)
-        new_unified_job.signal_start()
+        can_start = new_unified_job.signal_start()
+        if not can_start:
+            new_unified_job.status = 'failed'
+            new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
+            new_unified_job.save(update_fields=['job_status', 'job_explanation'])
 
 @task()
 def notify_task_runner(metadata_dict):

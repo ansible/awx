@@ -102,7 +102,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     #    max_length=32,
     #    choices=[],
     #)
-    next_job_run = models.DateTimeField( # FIXME: Calculate from schedules.
+    next_job_run = models.DateTimeField(
         null=True,
         default=None,
         editable=False,
