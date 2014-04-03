@@ -11,7 +11,7 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 from awx.main.models import Host, Inventory, Organization
 from awx.main.tests.base import BaseTest
-from awx.main.licenses import *
+from awx.main.task_engine import *
 
 class LicenseTests(BaseTest):
 
@@ -36,7 +36,7 @@ class LicenseTests(BaseTest):
 
     def test_license_writer(self):
 
-        writer = LicenseWriter( 
+        writer = TaskEngager( 
            company_name='acmecorp',
            contact_name='Michael DeHaan',
            contact_email='michael@ansibleworks.com',
@@ -56,7 +56,7 @@ class LicenseTests(BaseTest):
         strdata_loaded = json.loads(strdata)
         assert strdata_loaded == data
 
-        reader = LicenseReader()
+        reader = TaskSerializer()
         
         vdata = reader.from_string(strdata)
 

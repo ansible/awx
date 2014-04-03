@@ -15,7 +15,7 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # AWX
 from awx.main.utils import *
 from awx.main.models import *
-from awx.main.licenses import LicenseReader
+from awx.main.task_engine import TaskSerializer
 
 __all__ = ['get_user_queryset', 'check_user_access']
 
@@ -351,7 +351,7 @@ class HostAccess(BaseAccess):
            return False
 
         # Check to see if we have enough licenses
-        reader = LicenseReader()
+        reader = TaskSerializer()
         validation_info = reader.from_file()
 
         if 'test' in sys.argv:
