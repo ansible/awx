@@ -1387,10 +1387,17 @@ class ScheduleSerializer(BaseSerializer):
         multi_by_month_day = ".*?BYMONTHDAY[\:\=][0-9]+,-*[0-9]+"
         multi_by_month = ".*?BYMONTH[\:\=][0-9]+,[0-9]+"
         by_day_with_numeric_prefix = ".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
-        match_dtstart = re.match("DTSTART\:[0-9]+T[0-9]+Z", rrule_value)
         match_count = re.match(".*?(COUNT\=[0-9]+)", rrule_value)
-        if not match_dtstart:
+        match_multiple_dtstart = re.findall(".*?(DTSTART\:[0-9]+T[0-9]+Z)", rrule_value)
+        match_multiple_rrule = re.findall(".*?(RRULE\:)", rrule_value)
+        if not len(match_multiple_dtstart):
             raise serializers.ValidationError('DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ')
+        if len(match_multiple_dtstart) > 1:
+            raise serializers.ValidationError('Multiple DTSTART is not supported')
+        if not len(match_multiple_rrule):
+            raise serializers.ValidationError('RRULE require in rrule')
+        if len(match_multiple_rrule) > 1:
+            raise serializers.ValidationError('Multiple RRULE is not supported')
         if not 'interval' in rrule_value.lower():
             raise serializers.ValidationError('INTERVAL required in rrule')
         if 'tzid' in rrule_value.lower():
@@ -1412,9 +1419,6 @@ class ScheduleSerializer(BaseSerializer):
             if int(count_val[1]) > 999:
                 raise serializers.ValidationError("COUNT > 999 is unsupported")
         try:
-            # dtstart_group = match_dtstart.group()
-            # rrule_value = (rrule_value[0:match_dtstart.start()] + rrule_value[match_dtstart.end():]).strip()
-            # dtstart_actual = datetime.datetime.strptime(dtstart_group.split(":")[1], "%Y%m%dT%H%M%SZ")
             sched_rule = rrule.rrulestr(rrule_value)
         except Exception, e:
             raise serializers.ValidationError("rrule parsing failed validation")
