@@ -9,10 +9,11 @@
  
 'use strict';
 
-angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition', 'SearchHelper',
+angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition', 'SearchHelper',
     'PaginationHelpers', 'ListGenerator', 'AuthService', 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
     'JobSubmissionHelper', 'RefreshHelper', 'PromptDialog', 'CredentialsListDefinition', 'InventoryTree',
-    'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition', 'LogViewerHelper'])
+    'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition', 'LogViewerHelper',
+    'SchedulesHelper' ])
 
 .factory('GetSourceTypeOptions', ['Rest', 'ProcessErrors', 'GetBasePath',
     function (Rest, ProcessErrors, GetBasePath) {
@@ -335,13 +336,14 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
  *
  */
 .factory('ScheduleList', ['ScheduleEdit', 'SchedulesList', 'GenerateList', 'SearchInit', 'PaginateInit', 'Rest', 'PageRangeSetup',
-'Wait', 'ProcessErrors', 'Find', 'ToggleSchedule', 'DeleteSchedule',
+'Wait', 'ProcessErrors', 'Find', 'ToggleSchedule', 'DeleteSchedule', 'GetBasePath', 'SchedulesListInit',
 function(ScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Rest, PageRangeSetup, Wait, ProcessErrors, Find,
-ToggleSchedule, DeleteSchedule) {
+ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
     return function(params) {
         var parent_scope = params.scope,
+            url = params.url,
             schedule_scope = parent_scope.$new(),
-            url, list;
+            list;
 
         // Clean up
         $('#schedules-list').hide().empty();
@@ -369,8 +371,16 @@ ToggleSchedule, DeleteSchedule) {
 
         $('#schedules-list').show();
 
-        // Change later to use GetBasePath(base)
-        url = '/static/sample/data/schedules/inventory/data.json';
+        if (schedule_scope.removePostRefresh) {
+            schedule_scope.removePostRefresh();
+        }
+        schedule_scope.removePostRefresh = schedule_scope.$on('PostRefresh', function() {
+            SchedulesListInit({
+                scope: schedule_scope,
+                list: list,
+                choices: null
+            });
+        });
         SearchInit({
             scope: schedule_scope,
             set: 'schedules',
@@ -380,48 +390,28 @@ ToggleSchedule, DeleteSchedule) {
         PaginateInit({
             scope: schedule_scope,
             list: SchedulesList,
-            url: url
+            url: url,
+            pageSize: 5
         });
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                var i, modifier;
-                PageRangeSetup({
-                    scope: schedule_scope,
-                    count: data.count,
-                    next: data.next,
-                    previous: data.previous,
-                    iterator: SchedulesList.iterator
-                });
-                schedule_scope[SchedulesList.iterator + 'Loading'] = false;
-                for (i = 1; i <= 3; i++) {
-                    modifier = (i === 1) ? '' : i;
-                    schedule_scope[SchedulesList.iterator + 'HoldInput' + modifier] = false;
-                }
-                schedule_scope.schedules = data.results;
-                window.scrollTo(0, 0);
-                Wait('stop');
-                schedule_scope.schedules = data.results;
-            })
-            .error(function(data, status) {
-                ProcessErrors(schedule_scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-            });
+        schedule_scope.search(list.iterator);
+        
+        parent_scope.refreshSchedule = function() {
+            schedule_scope.search(list.iterator);
+        };
 
         schedule_scope.editSchedule = function(id) {
-            var schedule = Find({ list: schedule_scope[SchedulesList.name], key: 'id', val: id });
-            ScheduleEdit({ scope: parent_scope, schedule: schedule, mode: 'edit' });
+            ScheduleEdit({ scope: parent_scope, mode: 'edit', url: GetBasePath('schedules') + id + '/' });
         };
 
         schedule_scope.addSchedule = function() {
-            ScheduleEdit({ scope: parent_scope, schedule: {}, mode: 'add'});
+            ScheduleEdit({ scope: parent_scope, mode: 'add', url: url });
         };
 
         if (schedule_scope.removeSchedulesRefresh) {
             schedule_scope.removeSchedulesRefresh();
         }
         schedule_scope.removeSchedulesRefresh = schedule_scope.$on('SchedulesRefresh', function() {
-            schedule_scope.search(SchedulesList.iterator);
+            schedule_scope.search(list.iterator);
         });
 
         schedule_scope.toggleSchedule = function(id) {
@@ -458,13 +448,14 @@ ToggleSchedule, DeleteSchedule) {
  * Remove the schedule list, add the schedule widget and populate it with an rrule
  *
  */
-.factory('ScheduleEdit', ['SchedulerInit', 'Rest', 'Wait', 'SetSchedulesInnerDialogSize',
-function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
+.factory('ScheduleEdit', ['SchedulerInit', 'Rest', 'Wait', 'SetSchedulesInnerDialogSize', 'SchedulePost', 'ProcessErrors',
+function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, ProcessErrors) {
     return function(params) {
         var parent_scope = params.scope,
             mode = params.mode,  // 'create' or 'edit'
-            schedule = params.schedule,
+            url = params.url,
             scope = parent_scope.$new(),
+            schedule = {},
             scheduler,
             target,
             showForm,
@@ -489,47 +480,53 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
             $(this).remove();
         });
 
-        // Insert the scheduler widget into the hidden div
-        scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
-        scheduler.inject('schedules-form', false);
-        scheduler.injectDetail('schedules-detail', false);
-        scheduler.clear();
-        scope.showRRuleDetail = false;
-        parent_scope.schedulesTitle = 'Edit Schedule';
+        if (scope.removeScheduleReady) {
+            scope.removeScheduleReady();
+        }
+        scope.removeScheduleReady = scope.$on('ScheduleReady', function() {
+            // Insert the scheduler widget into the hidden div
+            scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
+            scheduler.inject('schedules-form', false);
+            scheduler.injectDetail('schedules-detail', false);
+            scheduler.clear();
+            scope.showRRuleDetail = false;
+            parent_scope.schedulesTitle = (mode === 'edit') ? 'Edit Schedule' : 'Create Schedule';
         
-        // display the scheduler widget
-        showForm = function() {
-            Wait('stop');
-            $('#schedules-overlay').width($('#schedules-tab')
-                .width()).height($('#schedules-tab').height()).show();
-            container.width($('#schedules-tab').width() - 18);
-            SetSchedulesInnerDialogSize();
-            container.show('slide', { direction: 'left' }, 300);
-            $('#group-save-button').prop('disabled', true);
-            target.show();
-            if (mode === 'edit') {
-                scope.$apply(function() {
-                    scheduler.setRRule(schedule.rrule);
-                    scheduler.setName(schedule.name);
-                });
-            }
-        };
-        setTimeout(function() { showForm(); }, 1000);
+            // display the scheduler widget
+            showForm = function() {
+                Wait('stop');
+                $('#schedules-overlay').width($('#schedules-tab')
+                    .width()).height($('#schedules-tab').height()).show();
+                container.width($('#schedules-tab').width() - 18);
+                SetSchedulesInnerDialogSize();
+                container.show('slide', { direction: 'left' }, 300);
+                $('#group-save-button').prop('disabled', true);
+                target.show();
+                if (mode === 'edit') {
+                    scope.$apply(function() {
+                        scheduler.setRRule(schedule.rrule);
+                        scheduler.setName(schedule.name);
+                    });
+                }
+            };
+            setTimeout(function() { showForm(); }, 1000);
+        });
 
         restoreList = function() {
             $('#group-save-button').prop('disabled', false);
             list.show('slide', { direction: 'right' }, 500);
             $('#schedules-overlay').width($('#schedules-tab').width()).height($('#schedules-tab').height()).hide();
-            //refresh the list
+            parent_scope.refreshSchedule();
         };
 
         parent_scope.showScheduleDetail = function() {
             if (parent_scope.formShowing) {
-                scheduler.isValid();
-                detail.width($('#schedules-form').width()).height($('#schedules-form').height());
-                target.hide();
-                detail.show();
-                parent_scope.formShowing = false;
+                if (scheduler.isValid()) {
+                    detail.width($('#schedules-form').width()).height($('#schedules-form').height());
+                    target.hide();
+                    detail.show();
+                    parent_scope.formShowing = false;
+                }
             }
             else {
                 detail.hide();
@@ -538,38 +535,25 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
             }
         };
 
+        if (scope.removeScheduleSaved) {
+            scope.removeScheduleSaved();
+        }
+        scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
+            Wait('stop');
+            container.hide('slide', { direction: 'right' }, 500, restoreList);
+        });
+        
         parent_scope.saveScheduleForm = function() {
-            var newSchedule,
-                url = '/static/sample/data/schedules/inventory/data.json';
             if (scheduler.isValid()) {
                 scope.schedulerIsValid = true;
-                Wait('start');
-                newSchedule = scheduler.getValue();
-                schedule.name = newSchedule.name;
-                schedule.rrule = newSchedule.rrule;
-                Rest.setUrl(url);
-                if (mode === 'edit') {
-                    Rest.put(schedule)
-                        .success(function(){
-                            Wait('stop');
-                            container.hide('slide', { direction: 'right' }, 500, restoreList);
-                        })
-                        .error(function(){
-                            Wait('stop');
-                            container.hide('slide', { direction: 'right' }, 500, restoreList);
-                        });
-                }
-                else {
-                    Rest.post(schedule)
-                        .success(function(){
-                            Wait('stop');
-                            container.hide('slide', { direction: 'right' }, 500, restoreList);
-                        })
-                        .error(function(){
-                            Wait('stop');
-                            container.hide('slide', { direction: 'right' }, 500, restoreList);
-                        });
-                }
+                SchedulePost({
+                    scope: scope,
+                    url: url,
+                    scheduler: scheduler,
+                    callback: 'ScheduleSaved',
+                    mode: mode,
+                    schedule: schedule
+                });
             }
             else {
                 scope.schedulerIsValid = false;
@@ -579,6 +563,28 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
         parent_scope.cancelScheduleForm = function() {
             container.hide('slide', { direction: 'right' }, 500, restoreList);
         };
+
+        if (mode === 'edit') {
+            // Get the existing record
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    schedule = data;
+                    if (!/DTSTART/.test(schedule.rrule)) {
+                        schedule.rrule += ";DTSTART=" + schedule.dtstart.replace(/\.\d+Z$/,'Z');
+                    }
+                    schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
+                    schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
+                    scope.$emit('ScheduleReady');
+                })
+                .error(function(data,status){
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Failed to get: ' + url + ' GET returned: ' + status });
+                });
+        }
+        else {
+            scope.$emit('ScheduleReady');
+        }
     };
 }])
 
@@ -606,7 +612,8 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                 modal_scope = parent_scope.$new(),
                 properties_scope = parent_scope.$new(),
                 sources_scope = parent_scope.$new(),
-                x, y, ww, wh, maxrows;
+                x, y, ww, wh, maxrows,
+                schedules_url = '';
             
             if (mode === 'edit') {
                 defaultUrl = GetBasePath('groups') + group_id + '/';
@@ -778,7 +785,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                 else if ($(e.target).text() === 'Schedule') {
                     $('#schedules-overlay').hide();
                     parent_scope.formShowing = true;
-                    ScheduleList({ scope: parent_scope });
+                    ScheduleList({ scope: parent_scope, url: schedules_url });
                 }
             });
 
@@ -933,6 +940,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                                 master[fld] = properties_scope[fld];
                             }
                         }
+                        schedules_url = data.related.inventory_source + 'schedules/';
                         properties_scope.variable_url = data.related.variable_data;
                         sources_scope.source_url = data.related.inventory_source;
                         modal_scope.$emit('groupLoaded');

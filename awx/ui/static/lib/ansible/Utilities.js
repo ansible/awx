@@ -199,7 +199,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 if ((!fieldErrors) && defaultMsg) {
                     Alert(defaultMsg.hdr, defaultMsg.msg);
                 }
-            } else if (Object.keys(data).length > 0) {
+            } else if (typeof data === 'object' && Object.keys(data).length > 0) {
                 keys = Object.keys(data);
                 if (Array.isArray(data[keys[0]])) {
                     msg = data[keys[0]][0];
