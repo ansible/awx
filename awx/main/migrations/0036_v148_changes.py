@@ -25,11 +25,11 @@ class Migration(DataMigration):
         if hasattr(instance, 'name'):
             d['name'] = instance.name
         elif getattr(instance, 'inventory', None) and getattr(instance, 'group', None):
-            d['name'] = ': '.join([instance.inventory.name, instance.group.name])
+            d['name'] = '%s (%s)'.join([instance.group.name, instance.inventory.name])
         elif getattr(instance, 'inventory', None):
-            d['name'] = u'%s-%s' % (instance.inventory.name, instance.pk)
+            d['name'] = u'%s (%s)' % (instance.inventory.name, instance.pk)
         else:
-            d['name'] = u'%s-%s' % (instance._meta.verbose_name, instance.pk)
+            d['name'] = u'%s (%s)' % (instance._meta.verbose_name, instance.pk)
         return d
 
     def _get_dict_from_common_task_model(self, instance):

@@ -636,6 +636,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                 'credential', 'source_regions', 'overwrite', 'overwrite_vars']
 
     def save(self, *args, **kwargs):
+        new_instance = bool(self.pk)
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
@@ -645,12 +646,27 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             if 'inventory' not in update_fields:
                 update_fields.append('inventory')
         # Set name automatically.
-        if not self.name:
-            self.name = 'inventory_source %s' % now()
+        replace_text = '__replace_%s__' % now()
+        old_name_re = re.compile(r'^inventory_source \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.*?$')
+        if not self.name or old_name_re.match(self.name):
+            if self.inventory and self.group:
+                self.name = '%s (%s)' % (self.group.name, self.inventory.name)
+            elif self.inventory and self.pk:
+                self.name = '%s (%s)' % (self.inventory.name, self.pk)
+            elif self.inventory:
+                self.name = '%s (%s)' % (self.inventory.name, replace_text)
+            elif self.pk:
+                self.name = 'inventory source (%s)' % self.pk
+            else:
+                self.name = 'inventory source (%s)' % replace_text
             if 'name' not in update_fields:
                 update_fields.append('name')
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
+        # Add the PK to the name if only attached to an inventory (no group).
+        if new_instance and self.inventory and replace_text in self.name:
+            self.name = self.name.replace(replace_text, str(self.pk))
+            self.save(update_fields=['name'])
 
     def _get_current_status(self):
         if self.source:
