@@ -26,11 +26,9 @@
         <div class="form-group">
             <label id="occurrences-label">Occurrences <span class="sublabel">(limited to first 10)</label>
             <div id="date-choice">
-                <div class="label-inline"><strong>Date format</strong></div>
-                <input type="radio" ng-model="dateChoice" id="date-choice-utc" value="utc" >
-                <div class="label-inline"> UTC</div>
-                <input type="radio" ng-model="dateChoice" id="date-choice-local" value="local" >
-                <div class="label-inline"> Local time</div>
+                <label class="label-inline">Date format</label>
+                <label class="radio-inline"><input type="radio" ng-model="dateChoice" id="date-choice-local" value="local" >Local time</label>
+                <label class="radio-inline"><input type="radio" ng-model="dateChoice" id="date-choice-utc" value="utc" >UTC</label>
             </div>
             <ul class="occurrence-list mono-space" ng-show="dateChoice == 'utc'">
                 <li ng-repeat="occurrence in occurrence_list">{{ occurrence.utc }}</li>

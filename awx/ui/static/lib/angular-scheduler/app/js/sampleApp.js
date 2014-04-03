@@ -28,8 +28,8 @@ angular.module('sampleApp', ['ngRoute', 'AngularScheduler', 'Timezones'])
     }])
 
     .constant('AngularScheduler.partial', '/lib/')
-    .constant('AngularScheduler.useTimezone', false)
-    .constant('AngularScheduler.showUTCField', false)
+    .constant('AngularScheduler.useTimezone', true)
+    .constant('AngularScheduler.showUTCField', true)
     .constant('$timezones.definitions.location', '/bower_components/angular-tz-extensions/tz/data')
 
     .controller('sampleController', ['$scope', '$filter', 'SchedulerInit', function($scope, $filter, SchedulerInit) {

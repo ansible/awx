@@ -31,8 +31,8 @@ angular.module('AngularScheduler', ['underscore'])
     // Initialize supporting scope variables and functions. Returns a scheduler object with getString(),
     // setString() and inject() methods.
     .factory('SchedulerInit', ['$log', '$filter', '$timezones', 'LoadLookupValues', 'SetDefaults', 'CreateObject', '_',
-    'AngularScheduler.useTimezone', 'AngularScheduler.showUTCField',
-    function($log, $filter, $timezones, LoadLookupValues, SetDefaults, CreateObject, _, useTimezone, showUTCField) {
+    'AngularScheduler.useTimezone', 'AngularScheduler.showUTCField', 'InRange',
+    function($log, $filter, $timezones, LoadLookupValues, SetDefaults, CreateObject, _, useTimezone, showUTCField, InRange) {
         return function(params) {
 
             var scope = params.scope,
@@ -60,30 +60,41 @@ angular.module('AngularScheduler', ['underscore'])
             };
 
             scope.scheduleTimeChange = function() {
-                if (scope.schedulerStartDt) {
+                if (scope.schedulerStartDt === "" || scope.schedulerStartDt === null || scope.schedulerStartDt === undefined) {
+                    scope.startDateError("Provide a valid start date and time");
+                    scope.schedulerUTCTime = '';
+                }
+                else if ( !(InRange(scope.schedulerStartHour, 0, 23, 2) && InRange(scope.schedulerStartMinute, 0, 59, 2) && InRange(scope.schedulerStartSecond, 0, 59, 2)) ) {
+                    scope.scheduler_startTime_error = true;
+                }
+                else {
                     if (useTimezone) {
                         scope.resetStartDate();
                         try {
-                            var dateStr = scope.schedulerStartDt + 'T' +
-                                $filter('schZeroPad')(scope.schedulerStartHour, 2) + ':' +
-                                $filter('schZeroPad')(scope.schedulerStartMinute, 2) + ':' +
+                            var dateStr = scope.schedulerStartDt.replace(/(\d{2})\/(\d{2})\/(\d{4})/, function(match, p1, p2, p3) {
+                                    return p3 + '-' + p1 + '-' + p2;
+                                });
+                            dateStr += 'T' + $filter('schZeroPad')(scope.schedulerStartHour, 2) + ':' + $filter('schZeroPad')(scope.schedulerStartMinute, 2) + ':' +
                                 $filter('schZeroPad')(scope.schedulerStartSecond, 2) + '.000Z';
-                            scope.schedulerUTCTime = $timezones.toUTC(dateStr, scope.schedulerTimeZone.name).toISOString();
+                            scope.schedulerUTCTime = $filter('schDateStrFix')($timezones.toUTC(dateStr, scope.schedulerTimeZone.name).toISOString());
+                            scope.scheduler_form_schedulerStartDt_error = false;
+                            scope.scheduler_startTime_error = false;
                         }
                         catch(e) {
                             scope.startDateError("Provide a valid start date and time");
                         }
                     }
                     else {
-                        scope.schedulerUTCTime = scope.schedulerStartDt + 'T' + scope.schedulerStartHour + ':' + scope.schedulerStartMinute +
-                            ':' + scope.schedulerStartSecond + '.000Z';
+                        scope.scheduler_startTime_error = false;
+                        scope.scheduler_form_schedulerStartDt_error = false;
+                        scope.schedulerUTCTime = $filter('schDateStrFix')(scope.schedulerStartDt + 'T' + scope.schedulerStartHour + ':' + scope.schedulerStartMinute +
+                            ':' + scope.schedulerStartSecond + '.000Z');
                     }
-                    // Push possible end date values to start date + 1
+                }
+            };
 
-                }
-                else {
-                    scope.schedulerUTCTime = '';
-                }
+            scope.resetError = function(variable) {
+                scope[variable] = false;
             };
 
             scope.scheduleRepeatChange = function() {
@@ -96,6 +107,7 @@ angular.module('AngularScheduler', ['underscore'])
                     scope.schedulerShowInterval = false;
                     scope.schedulerEnd = scope.endOptions[0];
                 }
+                scope.sheduler_frequency_error = false;
             };
 
             scope.showCalendar = function(fld) {
@@ -129,6 +141,7 @@ angular.module('AngularScheduler', ['underscore'])
                 else {
                     scope.weekDays.push(day);
                 }
+                scope.scheduler_weekDays_error = false;
             };
 
             scope.startDateError = function(msg) {
@@ -157,7 +170,7 @@ angular.module('AngularScheduler', ['underscore'])
                 var dt = new Date(), // date adjusted to local zone automatically
                     month = $filter('schZeroPad')(dt.getMonth() + 1, 2),
                     day = $filter('schZeroPad')(dt.getDate(), 2);
-                scope.schedulerEndDt = dt.getFullYear() + '-' + month + '-' + day;
+                scope.schedulerEndDt = month + '/' + day + '/' + dt.getFullYear();
                 scope.schedulerOccurrenceCount = 1;
             };
 
@@ -188,8 +201,8 @@ angular.module('AngularScheduler', ['underscore'])
        user input is valid, reset the form, etc. All the things we need to access and manipulate the 
        scheduler widget 
      */
-    .factory('CreateObject', ['AngularScheduler.useTimezone', '$filter', 'GetRule', 'Inject', 'InjectDetail', 'SetDefaults', '$timezones', 'SetRule',
-    function(useTimezone, $filter, GetRule, Inject, InjectDetail, SetDefaults, $timezones, SetRule) {
+    .factory('CreateObject', ['AngularScheduler.useTimezone', '$filter', 'GetRule', 'Inject', 'InjectDetail', 'SetDefaults', '$timezones', 'SetRule', 'InRange',
+    function(useTimezone, $filter, GetRule, Inject, InjectDetail, SetDefaults, $timezones, SetRule, InRange) {
         return function(scope, requireFutureST) {
             var fn = function() {
                 
@@ -243,7 +256,9 @@ angular.module('AngularScheduler', ['underscore'])
                     this.scope.scheduler_endDt_error = false;
                     this.scope.scheduler_interval_error = false;
                     this.scope.scheduler_occurrenceCount_error = false;
-
+                    this.scope.scheduler_monthDay_error = false;
+                    this.scope.scheduler_yearlyMonthDay_error = false;
+                    
                     if (this.scope.scheduler_form && this.scope.scheduler_form.schedulerEndDt) {
                         this.scope.scheduler_form.schedulerEndDt.$setValidity('custom-error', true);
                         this.scope.scheduler_form.schedulerEndDt.$setPristine();
@@ -253,14 +268,28 @@ angular.module('AngularScheduler', ['underscore'])
 
                 // Set values for detail page
                 this.setDetails = function() {
-                    var rrule = this.getRRule();
+                    var rrule = this.getRRule(),
+                        scope = this.scope;
                     if (rrule) {
                         scope.rrule_nlp_description = rrule.toText();
-                        scope.dateChoice = 'utc';
+                        scope.dateChoice = 'local';
                         scope.occurrence_list = [];
                         rrule.all(function(date, i){
+                            var local, dt;
                             if (i < 10) {
-                                scope.occurrence_list.push({ utc: date.toUTCString(), local: date.toString() });
+                                if (useTimezone) {
+                                    dt = $timezones.align(date, scope.schedulerTimeZone.name);
+                                    local = $filter('schZeroPad')(dt.getMonth(),2) + '/' +
+                                        $filter('schZeroPad')(dt.getDay(),2) + '/' + dt.getFullYear() + ' ' +
+                                        $filter('schZeroPad')(dt.getHours(),2) + ':' +
+                                        $filter('schZeroPad')(dt.getMinutes(),2) + ':' +
+                                        $filter('schZeroPad')(dt.getSeconds(),2) + ' ' +
+                                        dt.getTimezoneAbbreviation();
+                                }
+                                else {
+                                    local = $filter('date')(date, 'MM/dd/yyyy HH:mm:ss Z');
+                                }
+                                scope.occurrence_list.push({ utc: $filter('schDateStrFix')(date.toISOString()), local: local });
                                 return true;
                             }
                             return false;
@@ -275,23 +304,31 @@ angular.module('AngularScheduler', ['underscore'])
                     var startDt, now, dateStr, adjNow, timeNow, timeFuture, validity = true;
                     this.clearErrors();
 
-
-                    if (this.scope.schedulerFrequency.value !== 'none' && (this.scope.schedulerInterval < 1 || this.scope.schedulerInterval > 999)) {
+                    if (this.scope.schedulerFrequency.value !== 'none' && !InRange(this.scope.schedulerInterval, 1, 999, 3)) {
                         this.scope.scheduler_interval_error = true;
                         validity = false;
                     }
 
-                    if (this.scope.schedulerEnd.value === 'after' && (this.scope.schedulerOccurrenceCount < 0 || this.scope.schedulerOccurrenceCount > 999)) {
+                    if (this.scope.schedulerEnd.value === 'after' && !InRange(this.scope.schedulerOccurrenceCount, 1, 999, 3)) {
                         this.scope.scheduler_occurrenceCount_error = true;
                         validity = false;
                     }
                     
-                    if (this.scope.schedulerFrequency.value === 'weekly' && scope.weekDays.length === 0) {
+                    if (this.scope.schedulerFrequency.value === 'weekly' && this.scope.weekDays.length === 0) {
                         this.scope.scheduler_weekDays_error = true;
                         validity = false;
                     }
-                    if (this.scope.schedulerStartHour < 0 || this.scope.schedulerStartMinute < 0 || scope.schedulerStartSecond < 0 ||
-                        this.scope.schedulerStartHour > 23 || this.scope.schedulerStartMinute > 59 || scope.schedulerStartSecond > 59) {
+
+                    if (this.scope.schedulerFrequency.value === 'monthly' && this.scope.monthlyRepeatOption === 'day' && !InRange(this.scope.monthDay, 1, 31, 99)) {
+                        this.scope.scheduler_monthDay_error = true;
+                        validity = false;
+                    }
+
+                    if (this.scope.schedulerFrequency.value === 'yearly' && this.scope.yearlyRepeatOption === 'month' && !InRange(this.scope.yearlyMonthDay, 1, 31, 99)) {
+                        this.scope.scheduler_yearlyMonthDay_error = true;
+                        validity = false;
+                    }
+                    if ( !(InRange(scope.schedulerStartHour, 0, 23, 2) && InRange(scope.schedulerStartMinute, 0, 59, 2) && InRange(scope.schedulerStartSecond, 0, 59, 2)) ) {
                         this.scope.scheduler_startTime_error = true;
                         validity = false;
                     }
@@ -302,7 +339,7 @@ angular.module('AngularScheduler', ['underscore'])
                         validity = false;
                     }
                     if (this.scope.schedulerEnd.value === 'on') {
-                        if (!/^\d{4}-\d{2}-\d{2}$/.test(this.scope.schedulerEndDt)) {
+                        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(this.scope.schedulerEndDt)) {
                             this.scope.scheduler_form.schedulerEndDt.$pristine = false;
                             this.scope.scheduler_form.schedulerEndDt.$dirty = true;
                             $('#schedulerEndDt').removeClass('ng-pristine').removeClass('ng-valid').removeClass('ng-valid-custom-error')
@@ -424,6 +461,19 @@ angular.module('AngularScheduler', ['underscore'])
                 };
             };
             return new fn();
+        };
+    }])
+
+    .factory('InRange', [ function() {
+        return function(x, min, max, length) {
+            var rx = new RegExp("\\d{1," + length + "}");
+            if (!rx.test(x)) {
+                return false;
+            }
+            if (x < min || x > max) {
+                return false;
+            }
+            return true;
         };
     }])
 
@@ -679,15 +729,18 @@ angular.module('AngularScheduler', ['underscore'])
                         dt = new Date(value); // date adjusted to local zone automatically
                         month = $filter('schZeroPad')(dt.getMonth() + 1, 2);
                         day = $filter('schZeroPad')(dt.getDate(), 2);
-                        scope.schedulerStartDt = dt.getFullYear() + '-' + month + '-' + day;
+                        scope.schedulerStartDt = month + '/' + day + '/' + dt.getFullYear();
                         scope.schedulerStartHour = dt.getHours();     //$filter('schZeroPad')(dt.getHours(),2);
                         scope.schedulerStartMinute = dt.getMinutes(); // $filter('schZeroPad')(dt.getMinutes(),2);
                         scope.schedulerStartSecond = dt.getSeconds(); // $filter('schZeroPad')(dt.getSeconds(),2);
                         scope.scheduleTimeChange();  // calc UTC
                     }
                     else {
+                        // expects inbound dates to be in ISO format: 2014-04-02T00:00:00.000Z
+                        scope.schedulerStartDt = value.replace(/T.*$/,'').replace(/(\d{4})-(\d{2})-(\d{2})/, function(match, p1, p2, p3) {
+                                return p2 + '/' + p3 + '/' + p1;
+                            });
                         timeString = value.replace(/^.*T/,'');
-                        scope.schedulerStartDt = value.replace(/T.*$/,'');
                         scope.schedulerStartHour = timeString.substr(0,2);
                         scope.schedulerStartMinute = timeString.substr(3,2);
                         scope.schedulerStartSecond  = timeString.substr(6,2);
@@ -737,10 +790,12 @@ angular.module('AngularScheduler', ['underscore'])
                         dt = new Date(value); // date adjusted to local zone automatically
                         month = $filter('schZeroPad')(dt.getMonth() + 1, 2);
                         day = $filter('schZeroPad')(dt.getDate(), 2);
-                        scope.schedulerEndDt = dt.getFullYear() + '-' + month + '-' + day;
+                        scope.schedulerEndDt = month + '/' + day + '/' + dt.getFullYear();
                     }
                     else {
-                        scope.schedulerEndDt = value.replace(/T.*$/,'');
+                        scope.schedulerEndDt = value.replace(/T.*$/,'').replace(/(\d{4})-(\d{2})-(\d{2})/, function(match, p1, p2, p3) {
+                            return p2 + '/' + p3 + '/' + p1;
+                        });
                     }
                 }
 
@@ -819,7 +874,7 @@ angular.module('AngularScheduler', ['underscore'])
             var defaultDate = new Date(),
                 defaultMonth = $filter('schZeroPad')(defaultDate.getMonth() + 1, 2),
                 defaultDay = $filter('schZeroPad')(defaultDate.getDate(), 2),
-                defaultDateStr = defaultDate.getFullYear() + '-' + defaultMonth + '-' + defaultDay;
+                defaultDateStr = defaultMonth + '/' + defaultDay + '/' + defaultDate.getFullYear();
             scope.schedulerName = '';
             scope.weekDays = [];
             scope.schedulerStartHour = '00';
@@ -916,11 +971,20 @@ angular.module('AngularScheduler', ['underscore'])
         };
     }])
    
-    // $filter('afZeroPad')(n, pad) -- or -- {{ n | afZeroPad:pad }}
+    // $filter('schZeroPad')(n, pad) -- or -- {{ n | afZeroPad:pad }}
     .filter('schZeroPad', [ function() {
         return function (n, pad) {
             var str = (Math.pow(10,pad) + '').replace(/^1/,'') + (n + '').trim();
             return str.substr(str.length - pad);
+        };
+    }])
+
+    // $filter('schdateStrFix')(s)  where s is a date string in ISO format: yyyy-mm-ddTHH:MM:SS.sssZ. Returns string in format: mm/dd/yyyy HH:MM:SS UTC
+    .filter('schDateStrFix', [ function() {
+        return function(dateStr) {
+            return dateStr.replace(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}).*Z/, function(match, yy, mm, dd, hh, mi, ss) {
+                return mm + '/' + dd + '/' + yy + ' ' + hh + ':' + mi + ':' + ss + ' UTC';
+            });
         };
     }])
 
@@ -946,7 +1010,7 @@ angular.module('AngularScheduler', ['underscore'])
                     var options = {},
                         variable = attrs.ngModel,
                         defaultDate = new Date();
-                    options.dateFormat = attrs.dateFormat || 'yy-mm-dd';
+                    options.dateFormat = attrs.dateFormat || 'mm/dd/yy';
                     options.defaultDate = scope[variable];
                     options.minDate = (attrs.minToday) ? defaultDate : null;
                     options.maxDate = (attrs.maxDate) ? new Date(attrs('maxDate')) : null;
@@ -976,16 +1040,23 @@ angular.module('AngularScheduler', ['underscore'])
                     min: min,
                     max: max,
                     change: function() {
-                        if (zeroPad) {
-                            scope[attr.ngModel] = $filter('schZeroPad')($(this).val(),zeroPad);
-                            $(this).val(scope[attr.ngModel]);
-                        }
-                        else {
-                            scope[attr.ngModel] = $(this).spinner('value');
-                        }
-                        if (attr.ngChange) {
-                            scope.$apply(scope[attr.ngChange]);
-                        }
+                        setTimeout(function() {
+                            scope.$apply(function() {
+                                if (zeroPad) {
+                                    scope[attr.ngModel] = $filter('schZeroPad')($(element).spinner('value'),zeroPad);
+                                    $(element).val(scope[attr.ngModel]);
+                                    if (attr.ngChange) {
+                                        scope.$eval(attr.ngChange);
+                                    }
+                                }
+                                else {
+                                    scope[attr.ngModel] = $(element).spinner('value');
+                                    if (attr.ngChange) {
+                                        scope.$eval(attr.ngChange);
+                                    }
+                                }
+                            });
+                        },100);
                     },
                     spin: function() {
                         scope[form].$setDirty();
@@ -995,6 +1066,10 @@ angular.module('AngularScheduler', ['underscore'])
                             scope.$digest();
                         }
                     }
+                });
+                
+                $(element).on("click", function () {
+                    $(element).select();
                 });
             }
         };

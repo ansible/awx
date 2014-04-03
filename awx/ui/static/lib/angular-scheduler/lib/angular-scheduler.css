@@ -55,10 +55,10 @@
 .red-text {
     color: #dd1b16;
 }
-input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid, textarea.ng-dirty.ng-invalid {
+/*input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid, textarea.ng-dirty.ng-invalid {
     border: 1px solid red;
     outline: none;
-}
+}*/
 .help-text {
     font-size: 12px;
     font-weight: normal;
@@ -73,6 +73,13 @@ input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid, textarea.ng-dirty.ng-inva
 }
 .no-label {
     padding-top: 25px;
+}
+.radio-inline input[type="radio"]{
+    margin-top: 2px;
+    margin-left: -15px;
+}
+.radio-inline {
+    margin-left: 15px;
 }
 .padding-top-slim {
     padding-top: 5px;
@@ -115,22 +122,12 @@ select {
     font-size: 12px;
 }
 
-#date-choice .label-inline {
-        display: inline-block;
-        vertical-align: middle;
-}
-
 #date-choice input {
     margin-bottom: 2px;
     height: 11px;
     width: 10px;
 }
 
-#date-choice .label-inline:first-child {
-    padding-bottom: 2px;
-    margin-right: 10px;
-}
-
-#date-choice .label-inline:nth-child(3) {
-    margin-right: 10px;
+#date-choice .radio-inline:nth-child(2) {
+    margin-left: 10px;
 }
