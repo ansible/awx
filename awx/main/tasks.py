@@ -17,6 +17,8 @@ import traceback
 import urlparse
 import uuid
 
+import dateutil.parser
+
 # Pexpect
 import pexpect
 
@@ -47,24 +49,37 @@ logger = logging.getLogger('awx.main.tasks')
 
 @task(bind=True)
 def tower_periodic_scheduler(self):
+    def get_last_run():
+        if not os.path.exists('/tmp/.tower_cycle'):
+            return None
+        fd = open('/tmp/.tower_cycle')
+        try:
+            last_run = dateutil.parser.parse(fd.read())
+            return last_run
+        except Exception, e:
+            return None
+    def write_last_run(last_run):
+        fd = open('/tmp/.tower_cycle', 'w')
+        fd.write(last_run.isoformat())
+        fd.close()
+
     run_now = now()
-    try:
-        periodic_task = PeriodicTask.objects.filter(task='awx.main.tasks.tower_periodic_scheduler')[0]
-    except IndexError:
-        logger.warning('No PeriodicTask found for tower_periodic_scheduler')
+    last_run = get_last_run()
+    if not last_run:
+        logger.debug("First run time")
+        write_last_run(run_now)
         return
-    logger.debug("Last run was: %s", periodic_task.last_run_at)
-    old_schedules = Schedule.objects.enabled().before(periodic_task.last_run_at)
+    logger.debug("Last run was: %s", last_run)
+    write_last_run(run_now)
+    old_schedules = Schedule.objects.enabled().before(last_run)
     for schedule in old_schedules:
         schedule.save()
-    schedules = Schedule.objects.enabled().between(periodic_task.last_run_at, run_now)
+    schedules = Schedule.objects.enabled().between(last_run, run_now)
     for schedule in schedules:
         template = schedule.unified_job_template
         schedule.save() # To update next_run timestamp.
         new_unified_job = template.create_unified_job(launch_type='scheduled', schedule=schedule)
         new_unified_job.signal_start()
-    periodic_task.last_run_at = run_now
-    periodic_task.save()
 
 @task()
 def notify_task_runner(metadata_dict):
