@@ -44,7 +44,7 @@ angular.module('ScheduledJobsDefinition', [])
                 noLink: true,
                 columnClass: "col-md-2 hidden-sm hidden-xs",
                 sourceModel: 'unified_job_template',
-                sourceField: 'job_type',
+                sourceField: 'unified_job_type',
                 ngBind: 'schedule.type_label',
                 searchable: false,
                 nosort: true

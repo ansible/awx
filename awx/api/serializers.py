@@ -72,7 +72,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
-    'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('job_type',),
+    'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('unified_job_type',),
     'last_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
@@ -279,7 +279,7 @@ class BaseSerializer(serializers.ModelSerializer):
                         if isinstance(fkval, PolymorphicModel):
                             fkval = fkval.get_real_instance()
                         fval = get_type_for_model(fkval)
-                    elif fval is None and field == 'job_type' and isinstance(fkval, UnifiedJobTemplate):
+                    elif fval is None and field == 'unified_job_type' and isinstance(fkval, UnifiedJobTemplate):
                         fkval = fkval.get_real_instance()
                         fval = get_type_for_model(fkval._get_unified_job_class())
                     if fval is not None:
