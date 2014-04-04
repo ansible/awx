@@ -22,6 +22,17 @@ angular.module('HomeHostListDefinition', [])
         well: true,
 
         fields: {
+            status: {
+                label: "Status",
+                iconOnly: true,
+                icon: "{{ 'icon-job-' + host.active_failures }}",
+                awToolTip: "{{ host.badgeToolTip }}",
+                awTipPlacement: "top",
+                ngClick:"bob",
+                columnClass: "col-md-1 col-sm-2 col-xs-3",
+                searchable: false,
+                nosort: true
+            },
             name: {
                 key: true,
                 label: 'Name',
@@ -71,7 +82,7 @@ angular.module('HomeHostListDefinition', [])
                 dataTipWatch: "host.enabledToolTip",
                 ngClick: "toggleHostEnabled(host.id, host.has_inventory_sources)"
             },
-            active_failures: {
+            /*active_failures: {
                 //label: 'Job Status',
                 //ngHref: "\{\{'/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + inventory_id \}\}",
                 awPopOver: "{{ host.job_status_html }}",
@@ -80,7 +91,7 @@ angular.module('HomeHostListDefinition', [])
                 awTipPlacement: 'top',
                 dataPlacement: 'left',
                 iconClass: "{{ 'fa icon-failures-' + host.has_active_failures }}"
-            },
+            }*/
             edit: {
                 label: 'Edit',
                 ngClick: "editHost(host.id)",

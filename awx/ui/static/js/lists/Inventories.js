@@ -32,12 +32,14 @@ angular.module('InventoriesListDefinition', [])
                     icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
                     awToolTip: "{{ inventory.syncTip }}",
                     awTipPlacement: "top",
-                    ngClick: "showGroupSummary($event, inventory.id)"
+                    ngClick: "showGroupSummary($event, inventory.id)",
+                    ngClass: "inventory.launch_class"
                 },{
                     icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
                     awToolTip: "{{ inventory.hostsTip }}",
                     awTipPlacement: "top",
-                    ngClick: "showHostSummary($event, inventory.id)"
+                    ngClick: "showHostSummary($event, inventory.id)",
+                    ngClass: ""
                 }]
             },
             name: {

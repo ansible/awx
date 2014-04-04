@@ -617,6 +617,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                 mode = params.mode,  // 'add' or 'edit'
                 inventory_id = params.inventory_id,
                 groups_reload = params.groups_reload,
+                callback = params.callback,
                 generator = GenerateForm,
                 defaultUrl,
                 master = {},
@@ -1044,29 +1045,26 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                                 source: (sources_scope.source && sources_scope.source.value) ? sources_scope.source.value : ''
                             }
                         });
-                    } else if (parent_scope.home_groups) {
-                        // When home.groups controller is calling, update the groups array
-                        var g = Find({
-                            list: parent_scope.home_groups,
-                            key: 'id',
-                            val: group_id
-                        });
-                        if (g) {
-                            g.name = properties_scope.name;
-                            g.description = properties_scope.description;
+                    } else if (callback) {
+                        try {
+                            $('#group-modal-dialog').dialog('close');
                         }
-                    }
-
-                    if (mode === 'add') {
-                        BuildTree({
-                            scope: parent_scope,
-                            inventory_id: inventory_id,
-                            refresh: true,
-                            new_group_id: group_id
-                        });
-                    }
-                    else {
-                        parent_scope.$emit('GroupTreeRefreshed');
+                        catch(err) {
+                            //ignore
+                        }
+                        parent_scope.$emit(callback);
+                    } else {
+                        if (mode === 'add') {
+                            BuildTree({
+                                scope: parent_scope,
+                                inventory_id: inventory_id,
+                                refresh: true,
+                                new_group_id: group_id
+                            });
+                        }
+                        else {
+                            parent_scope.$emit('GroupTreeRefreshed');
+                        }
                     }
                 }
             });
@@ -1142,10 +1140,15 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                 catch(e) {
                     //ignore
                 }
-                if (modal_scope.searchCleanup) {
-                    modal_scope.searchCleanup();
+                if (callback) {
+                    parent_scope.$emit(callback);
                 }
-                WatchInventoryWindowResize();
+                else {
+                    if (modal_scope.searchCleanup) {
+                        modal_scope.searchCleanup();
+                    }
+                    WatchInventoryWindowResize();
+                }
             };
 
             // Save

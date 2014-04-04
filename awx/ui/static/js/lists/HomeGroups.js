@@ -141,7 +141,7 @@ angular.module('HomeGroupListDefinition', [])
             edit: {
                 label: 'Edit',
                 mode: 'all',
-                ngClick: "editGroup(group.id)",
+                ngClick: "editGroup(group.id, group.inventory)",
                 awToolTip: 'Edit group',
                 dataPlacement: "top"
             }

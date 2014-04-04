@@ -125,6 +125,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
             // ignore
         }
         $scope.inventories.forEach(function(inventory, idx) {
+            $scope.inventories[idx].launch_class = "";
             if (inventory.has_inventory_sources) {
                 if (inventory.inventory_sources_with_failures > 0) {
                     $scope.inventories[idx].syncStatus = 'error';
@@ -138,14 +139,19 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
             else {
                 $scope.inventories[idx].syncStatus = 'na';
                 $scope.inventories[idx].syncTip = 'Not configured for inventory sync.';
+                $scope.inventories[idx].launch_class = "btn-disabled";
             }
             if (inventory.has_active_failures) {
                 $scope.inventories[idx].hostsStatus = 'error';
                 $scope.inventories[idx].hostsTip = inventory.hosts_with_active_failures + ' hosts with failures. Click for details.';
             }
-            else {
+            else if (inventory.total_hosts) {
                 $scope.inventories[idx].hostsStatus = 'successful';
                 $scope.inventories[idx].hostsTip = 'No hosts with failures. Click for details.';
+            }
+            else {
+                $scope.inventories[idx].hostsStatus = 'none';
+                $scope.inventories[idx].hostsTip = 'Inventory contains 0 hosts.';
             }
         });
     });
@@ -252,20 +258,25 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
     };
 
     $scope.showHostSummary = function(event, id) {
-        var url;
+        var url, inventory;
         if (!Empty(id)) {
-            Wait('start');
-            url = GetBasePath('jobs') + "?type=job&inventory=" + id + "&order_by=-finished&page_size=5";
-            Rest.setUrl(url);
-            Rest.get()
-                .success( function(data) {
-                    $scope.$emit('HostSummaryReady', event, data);
-                })
-                .error( function(data, status) {
-                    ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + ' failed. GET returned: ' + status
+            inventory = Find({ list: $scope.inventories, key: 'id', val: id });
+            if (inventory.total_hosts > 0) {
+                Wait('start');
+                url = GetBasePath('jobs') + "?type=job&inventory=" + id + "&failed=";
+                url += (inventory.has_active_failures) ? 'true' : "false";
+                url += "&order_by=-finished&page_size=5";
+                Rest.setUrl(url);
+                Rest.get()
+                    .success( function(data) {
+                        $scope.$emit('HostSummaryReady', event, data);
+                    })
+                    .error( function(data, status) {
+                        ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + ' failed. GET returned: ' + status
+                        });
                     });
-                });
+            }
         }
     };
 
