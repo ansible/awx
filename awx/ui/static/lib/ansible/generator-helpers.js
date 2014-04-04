@@ -483,6 +483,7 @@ angular.module('GeneratorHelpers', [])
             html += "aw-pop-over=\"" + field.awPopOver + "\" ";
             html += (field.dataPlacement) ? "data-placement=\"" + field.dataPlacement + "\" " : "";
         }
+        html += (field.ngClass) ? Attr(field, 'ngClass') : '';
         html += ">";
 
         // Add icon:

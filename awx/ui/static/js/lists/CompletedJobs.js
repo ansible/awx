@@ -45,11 +45,6 @@ angular.module('CompletedJobsDefinition', [])
                     { name: "Canceled", value: "canceled" }
                 ]
             },
-            inventory: {
-                label: 'Inventory ID',
-                searchType: 'int',
-                searchOnly: true
-            },
             finished: {
                 label: 'Finished On',
                 noLink: true,

@@ -175,6 +175,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 launch_tip = 'Can only be updated by running a sync on the parent group.';
             }
 
+            if (has_inventory_sources === false && Empty(source)) {
+                launch_class = 'btn-disabled';
+                status_tip = 'Cloud source not configured. Click <i class="fa fa-pencil"></i> to update.';
+                launch_tip = 'Cloud source not configured.';
+            }
+            
             return {
                 "class": stat_class,
                 "tooltip": status_tip,

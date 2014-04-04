@@ -36,12 +36,8 @@ angular.module('QueuedJobsDefinition', [])
                 dataTitle: "{{ queued_job.status_popover_title }}",
                 icon: 'icon-job-{{ queued_job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobLog(queued_job.id)"
-            },
-            inventory: {
-                label: 'Inventory ID',
-                searchType: 'int',
-                searchOnly: true
+                ngClick:"viewJobLog(queued_job.id)",
+                searchable: false
             },
             created: {
                 label: 'Created On',

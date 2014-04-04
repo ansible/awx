@@ -122,7 +122,7 @@ Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location',
 ];
 
 
-function HomeGroups($location, $routeParams, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+function HomeGroups($filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
     Alert, Rest, Empty, InventoryUpdate, Find) {
 
@@ -135,6 +135,35 @@ function HomeGroups($location, $routeParams, HomeGroupList, GenerateList, Proces
         scope = generator.inject(list, { mode: 'edit' }),
         opt;
 
+    function ellipsis(a) {
+        if (a.length > 20) {
+            return a.substr(0,20) + '...';
+        }
+        return a;
+    }
+
+    function attachElem(event, html, title) {
+        var elem = $(event.target).parent();
+        try {
+            elem.tooltip('hide');
+            elem.popover('destroy');
+        }
+        catch(err) {
+            //ignore
+        }
+        elem.attr({ "aw-pop-over": html, "data-title": title, "data-placement": "right" });
+        $compile(elem)(scope);
+        elem.on('shown.bs.popover', function() {
+            $('.popover').each(function() {
+                $compile($(this))(scope);  //make nested directives work!
+            });
+            $('.popover-content, .popover-title').click(function() {
+                elem.popover('hide');
+            });
+        });
+        elem.popover('show');
+    }
+
     if (scope.removePostRefresh) {
         scope.removePostRefresh();
     }
@@ -145,7 +174,9 @@ function HomeGroups($location, $routeParams, HomeGroupList, GenerateList, Proces
             scope.home_groups[i].inventory_name = scope.home_groups[i].summary_fields.inventory.name;
 
             stat = GetSyncStatusMsg({
-                status: scope.home_groups[i].summary_fields.inventory_source.status
+                status: scope.home_groups[i].summary_fields.inventory_source.status,
+                source: scope.home_groups[i].summary_fields.inventory_source.source,
+                has_inventory_sources: scope.home_groups[i].has_inventory_sources
             }); // from helpers/Groups.js
 
             hosts_status = GetHostsStatusMsg({
@@ -174,6 +205,7 @@ function HomeGroups($location, $routeParams, HomeGroupList, GenerateList, Proces
         list: list,
         url: defaultUrl
     });
+
     PaginateInit({
         scope: scope,
         list: list,
@@ -258,7 +290,8 @@ function HomeGroups($location, $routeParams, HomeGroupList, GenerateList, Proces
             scope: scope,
             group_id: group_id,
             inventory_id: inventory_id,
-            groups_reload: false
+            groups_reload: false,
+            mode: 'edit'
         });
     };
 
@@ -306,9 +339,136 @@ function HomeGroups($location, $routeParams, HomeGroupList, GenerateList, Proces
         scope.search(list.iterator, null, false, true);
     };
 
+
+    if (scope.removeHostSummaryReady) {
+        scope.removeHostSummaryReady();
+    }
+    scope.removeHostSummaryReady = scope.$on('HostSummaryReady', function(e, event, data) {
+        var html, title = "Recent Jobs", url = GetBasePath('jobs');
+        Wait('stop');
+        if (data.length > 0) {
+            html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
+            html += "<thead>\n";
+            html += "<tr>";
+            html += "<th>Status</th>";
+            html += "<th>View</th>";
+            html += "<th>Name</th>";
+            html += "</tr>\n";
+            html += "</thead>\n";
+            html += "<tbody>\n";
+            data.forEach(function(row) {
+                html += "<tr>\n";
+                html += "<td><a ng-click=\"viewJob('" + url + row.id + "/')\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                    ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" +
+                    row.status + "\"></i></a></td>\n";
+                //html += "<td>" + ($filter('date')(row.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
+                html += "<td><a href=\"/#/jobs/" + row.id + "/job_events\">Events</a><br />" +
+                    "<a href=\"/#/jobs/" + row.id + "/job_host_summaries\">Hosts</a></td>";
+                html += "<td><a href=\"\" ng-click=\"viewJob('" + url + row.id + "/')\" >" + ellipsis(row.name) + "</a></td>";
+                html += "</tr>\n";
+            });
+            html += "</tbody>\n";
+            html += "</table>\n";
+            html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+        }
+        else {
+            html = "<p>No recent job data available for this inventory.</p>\n" +
+                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+        }
+        attachElem(event, html, title);
+    });
+
+    if (scope.removeGroupSummaryReady) {
+        scope.removeGroupSummaryReady();
+    }
+    scope.removeGroupSummaryReady = scope.$on('GroupSummaryReady', function(e, event, inventory, data) {
+        var html, title;
+        
+        Wait('stop');
+
+        // Build the html for our popover
+        html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
+        html += "<thead>\n";
+        html += "<tr>";
+        html += "<th>Status</th>";
+        html += "<th>Last Sync</th>";
+        html += "<th>Group</th>";
+        html += "</tr>";
+        html += "</thead>\n";
+        html += "<tbody>\n";
+        data.results.forEach( function(row) {
+            html += "<tr>";
+            html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) + ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>";
+            html += "<td>" + ($filter('date')(row.last_updated,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
+            html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\">" + ellipsis(row.summary_fields.group.name) + "</a></td>";
+            html += "</tr>\n";
+        });
+        html += "</tbody>\n";
+        html += "</table>\n";
+        html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+        title = "Sync Status";
+        attachElem(event, html, title);
+    });
+
+    scope.showGroupSummary = function(event, id) {
+        var group, status;
+        if (!Empty(id)) {
+            group = Find({ list: scope.home_groups, key: 'id', val: id });
+            status = group.summary_fields.inventory_source.status;
+            if (status === 'failed' || status === 'error' || status === 'successful') {
+                Wait('start');
+                Rest.setUrl(group.related.inventory_sources + '?or__source=ec2&or__source=rax&order_by=-last_job_run&page_size=5');
+                Rest.get()
+                    .success(function(data) {
+                        scope.$emit('GroupSummaryReady', event, group, data);
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors( scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + group.related.inventory_sources + ' failed. GET returned status: ' + status
+                        });
+                    });
+            }
+        }
+    };
+
+    scope.showHostSummary = function(event, id) {
+        var url, jobs = [];
+        if (!Empty(id)) {
+            Wait('start');
+            url = GetBasePath('hosts') + "?groups__id=" + id + "&last_job__isnull=false&order_by=-last_job&page_size=5";
+            Rest.setUrl(url);
+            Rest.get()
+                .success( function(data) {
+                    data.results.forEach(function(host) {
+                        host.summary_fields.recent_jobs.every(function(job) {
+                            if (job.id === host.last_job) {
+                                jobs.push(job);
+                                return false;
+                            }
+                            return true;
+                        });
+                    });
+                    scope.$emit('HostSummaryReady', event, jobs);
+                })
+                .error( function(data, status) {
+                    ProcessErrors( scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. GET returned: ' + status
+                    });
+                });
+        }
+    };
+
+    scope.viewJob = function(url) {
+        LogViewer({
+            scope: scope,
+            url: url
+        });
+    };
+
+
 }
 
-HomeGroups.$inject = ['$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
+HomeGroups.$inject = ['$filter', '$compile', '$location', '$routeParams', 'LogViewer', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
     'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find'
 ];

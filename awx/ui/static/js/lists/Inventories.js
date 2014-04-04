@@ -27,7 +27,7 @@ angular.module('InventoriesListDefinition', [])
                 searchable: false,
                 nosort: true,
                 ngClick: "null",
-                dataTitle: "Sync Status",
+                iconOnly: true,
                 icons: [{
                     icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
                     awToolTip: "{{ inventory.syncTip }}",

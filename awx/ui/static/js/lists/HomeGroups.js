@@ -21,6 +21,28 @@ angular.module('HomeGroupListDefinition', [])
         well: true,
 
         fields: {
+            status: {
+                label: 'Status',
+                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                searchable: false,
+                nosort: true,
+                ngClick: "null",
+                iconOnly: true,
+                icons: [{
+                    icon: "{{ 'icon-cloud-' + group.status_class }}",
+                    awToolTip: "{{ group.status_tooltip }}",
+                    dataTipWatch: "group.launch_tooltip",
+                    awTipPlacement: "top",
+                    ngClick: "showGroupSummary($event, group.id)",
+                    ngClass: "group.launch_class"
+                },{
+                    icon: "{{ 'icon-job-' + group.hosts_status_class }}",
+                    awToolTip: "{{ group.hosts_status_tip }}",
+                    awTipPlacement: "top",
+                    ngClick: "showHostSummary($event, group.id)",
+                    ngClass: ""
+                }]
+            },
             name: {
                 key: true,
                 label: 'Group',
@@ -82,6 +104,7 @@ angular.module('HomeGroupListDefinition', [])
         },
 
         fieldActions: {
+            /*
             sync_status: {
                 mode: 'all',
                 ngClick: "viewUpdateStatus(group.id, group.group_id)",
@@ -96,6 +119,7 @@ angular.module('HomeGroupListDefinition', [])
                 ngHref: "/#/inventories/{{ group.inventory }}/",
                 iconClass: "{{ 'fa icon-failures-' + group.hosts_status_class }}"
             },
+            */
             group_update: {
                 //label: 'Sync',
                 mode: 'all',

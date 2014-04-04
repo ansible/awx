@@ -36,12 +36,8 @@ angular.module('RunningJobsDefinition', [])
                 dataTitle: "{{ running_job.status_popover_title }}",
                 icon: 'icon-job-{{ running_job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobLog(running_job.id)"
-            },
-            inventory: {
-                label: 'Inventory ID',
-                searchType: 'int',
-                searchOnly: true
+                ngClick:"viewJobLog(running_job.id)",
+                searchable: false
             },
             started: {
                 label: 'Started On',
