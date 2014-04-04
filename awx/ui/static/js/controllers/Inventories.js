@@ -22,6 +22,35 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
         paths = $location.path().replace(/^\//, '').split('/'),
         mode = (paths[0] === 'inventories') ? 'edit' : 'select';
 
+    function ellipsis(a) {
+        if (a.length > 20) {
+            return a.substr(0,20) + '...';
+        }
+        return a;
+    }
+
+    function attachElem(event, html, title) {
+        var elem = $(event.target).parent();
+        try {
+            elem.tooltip('hide');
+            elem.popover('destroy');
+        }
+        catch(err) {
+            //ignore
+        }
+        elem.attr({ "aw-pop-over": html, "data-title": title, "data-placement": "right" });
+        $compile(elem)($scope);
+        elem.on('shown.bs.popover', function() {
+            $('.popover').each(function() {
+                $compile($(this))($scope);  //make nested directives work!
+            });
+            $('.popover-content, .popover-title').click(function() {
+                elem.popover('hide');
+            });
+        });
+        elem.popover('show');
+    }
+
     view.inject(InventoryList, { mode: mode, scope: $scope });
     $rootScope.flashMessage = null;
 
@@ -31,6 +60,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
         list: list,
         url: defaultUrl
     });
+    
     PaginateInit({
         scope: $scope,
         list: list,
@@ -128,63 +158,77 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
         $scope.search(list.iterator);
     });
 
+    if ($scope.removeHostSummaryReady) {
+        $scope.removeHostSummaryReady();
+    }
+    $scope.removeHostSummaryReady = $scope.$on('HostSummaryReady', function(e, event, data) {
+        
+        var html, title = "Recent Jobs";
+        Wait('stop');
+        if (data.count > 0) {
+            html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
+            html += "<thead>\n";
+            html += "<tr>";
+            html += "<th>Status</th>";
+            html += "<th>Finished</th>";
+            html += "<th>View</th>";
+            html += "<th>Name</th>";
+            html += "</tr>\n";
+            html += "</thead>\n";
+            html += "<tbody>\n";
+            
+            data.results.forEach(function(row) {
+                html += "<tr>\n";
+                html += "<td><a ng-click=\"showJobSummary('" + row.url + "')\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                    ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" +
+                    row.status + "\"></i></a></td>\n";
+                html += "<td>" + ($filter('date')(row.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
+                html += "<td><a href=\"/#/jobs/" + row.id + "/job_events\">Events</a><br />" +
+                    "<a href=\"/#/jobs/" + row.id + "/job_host_summaries\">Hosts</a></td>";
+                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.url + "')\" >" + ellipsis(row.name) + "</a></td>";
+                html += "</tr>\n";
+            });
+            html += "</tbody>\n";
+            html += "</table>\n";
+            html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+        }
+        else {
+            html = "<p>No recent job data available for this inventory.</p>\n" +
+                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+        }
+        attachElem(event, html, title);
+    });
 
     if ($scope.removeGroupSummaryReady) {
         $scope.removeGroupSummaryReady();
     }
     $scope.removeGroupSummaryReady = $scope.$on('GroupSummaryReady', function(e, event, inventory, data) {
-        var j, elem, html, title, row;
+        var html, title;
         
-        function ellipsis(a) {
-            if (a.length > 20) {
-                return a.substr(0,20) + '...';
-            }
-            return a;
-        }
+        Wait('stop');
 
-        if (data.count) {
-            html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
-            html += "<thead>\n";
-            html += "<tr>\n";
-            html += "<th>Status</th>\n";
-            html += "<th>Group</th>\n";
-            html += "<th>Last Sync</th>\n";
+        // Build the html for our popover
+        html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
+        html += "<thead>\n";
+        html += "<tr>";
+        html += "<th>Status</th>";
+        html += "<th>Last Sync</th>";
+        html += "<th>Group</th>";
+        html += "</tr>";
+        html += "</thead>\n";
+        html += "<tbody>\n";
+        data.results.forEach( function(row) {
+            html += "<tr>";
+            html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) + ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>";
+            html += "<td>" + ($filter('date')(row.last_updated,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
+            html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\">" + ellipsis(row.summary_fields.group.name) + "</a></td>";
             html += "</tr>\n";
-            html += "</thead>\n";
-            html += "<tbody>\n";
-            for (j=0; j < data.results.length; j++) {
-                row = data.results[j];
-                html += "<tr>";
-                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"Click to view details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>";
-                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"Click to view details\" aw-tip-placement=\"top\">" + ellipsis(row.summary_fields.group.name) + "</a></td>";
-                html += "<td>" + $filter('date')(row.last_updated,'MM/dd HH:mm:ss') + "</td>";
-                html += "</tr>\n";
-            }
-            html += "</tbody>\n";
-            html += "</table>\n";
-            html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
-            title = "Sync Status";
-            elem = $(event.target).parent();
-            try {
-                elem.tooltip('hide');
-                elem.popover('destroy');
-            }
-            catch(err) {
-                //ignore
-            }
-            elem.attr({ "aw-pop-over": html, "data-title": title, "data-placement": "right" });
-            Wait('stop');
-            $compile(elem)($scope);
-            elem.on('shown.bs.popover', function() {
-                $('.popover').each(function() {
-                    $compile($(this))($scope);  //make nested directives work!
-                });
-                $('.popover-content, .popover-title').click(function() {
-                    elem.popover('hide');
-                });
-            });
-            elem.popover('show');
-        }
+        });
+        html += "</tbody>\n";
+        html += "</table>\n";
+        html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+        title = "Sync Status";
+        attachElem(event, html, title);
     });
 
     $scope.showGroupSummary = function(event, id) {
@@ -204,6 +248,24 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
                         });
                     });
             }
+        }
+    };
+
+    $scope.showHostSummary = function(event, id) {
+        var url;
+        if (!Empty(id)) {
+            Wait('start');
+            url = GetBasePath('jobs') + "?type=job&inventory=" + id + "&order_by=-finished&page_size=5";
+            Rest.setUrl(url);
+            Rest.get()
+                .success( function(data) {
+                    $scope.$emit('HostSummaryReady', event, data);
+                })
+                .error( function(data, status) {
+                    ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. GET returned: ' + status
+                    });
+                });
         }
     };
 
