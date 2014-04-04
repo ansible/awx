@@ -404,13 +404,27 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
         },
+        'rotating_file': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(BASE_DIR, 'tower_warnings.log'),
+            'maxBytes': 1024*1024*5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
         },
         'django.request': {
-            'handlers': ['mail_admins', 'console', 'file', 'syslog'],
+            'handlers': ['mail_admins', 'console', 'file', 'syslog', 'rotating_file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'rest_framework.request': {
+            'handlers': ['mail_admins', 'console', 'file', 'syslog', 'rotating_file'],
             'level': 'WARNING',
             'propagate': False,
         },
@@ -418,7 +432,7 @@ LOGGING = {
             'handlers': ['console'],
         },
         'awx': {
-            'handlers': ['console', 'file', 'syslog'],
+            'handlers': ['console', 'file', 'syslog', 'rotating_file'],
             'level': 'DEBUG',
         },
         'awx.main.access': {

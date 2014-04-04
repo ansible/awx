@@ -142,7 +142,7 @@ class JobTemplateCallbackPermission(ModelAccessPermission):
         # True to fall through to the next permission class.
         if (request.user or request.auth) and request.method.lower() != 'post':
             return super(JobTemplateCallbackPermission, self).has_permission(request, view, obj)
-        
+
         # Require method to be POST, host_config_key to be specified and match
         # the requested job template, and require the job template to be
         # active in order to proceed.

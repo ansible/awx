@@ -3,6 +3,7 @@
 
 # Python
 import inspect
+import logging
 import json
 
 # Django
@@ -30,6 +31,8 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
            'RetrieveAPIView', 'RetrieveUpdateAPIView',
            'RetrieveDestroyAPIView', 'RetrieveUpdateDestroyAPIView']
+
+logger = logging.getLogger('awx.api.generics')
 
 def get_view_name(cls, suffix=None):
     '''
@@ -130,6 +133,11 @@ class APIView(views.APIView):
                 break
         ret['added_in_version'] = added_in_version
         return ret
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        if response.status_code >= 400:
+            logger.warn("status %s received by user %s attempting to access %s" % (response.status_code, request.user, request.path))
+        return super(APIView, self).finalize_response(request, response, *args, **kwargs)
 
 
 class GenericAPIView(generics.GenericAPIView, APIView):
