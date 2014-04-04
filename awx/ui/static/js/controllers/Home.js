@@ -494,7 +494,7 @@ HomeGroups.$inject = ['$scope', '$filter', '$compile', '$location', '$routeParam
 
 
 function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-    GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Stream, Find, ShowJobSummary) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Stream, Find, ShowJobSummary, ViewJob) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //scope.
@@ -502,8 +502,6 @@ function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, 
     var generator = GenerateList,
         list = HomeHostList,
         defaultUrl = GetBasePath('hosts');
-
-    generator.inject(list, { mode: 'edit', scope: $scope });
 
     if ($scope.removePostRefresh) {
         $scope.removePostRefresh();
@@ -517,6 +515,9 @@ function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, 
                 host: $scope.hosts[i]
             });
         }
+
+        generator.inject(list, { mode: 'edit', scope: $scope });
+
     });
 
     SearchInit({
@@ -560,6 +561,10 @@ function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, 
 
     LoadBreadCrumbs();
 
+    $scope.viewJob = function(id) {
+        ViewJob({ scope: $scope, id: id });
+    };
+
     $scope.showActivity = function () {
         Stream({
             scope: $scope
@@ -602,5 +607,5 @@ function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, 
 
 HomeHosts.$inject = ['$scope', '$location', '$routeParams', 'HomeHostList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream',
-    'Find', 'ShowJobSummary'
+    'Find', 'ShowJobSummary', 'ViewJob'
 ];

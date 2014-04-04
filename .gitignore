@@ -7,6 +7,8 @@ awx/public/media
 awx/public/static
 awx/ui/static/js/awx.min.js
 awx/ui/static/css/awx.min.css
+awx/tower_warnings.log
+celerybeat-schedule
 env/*
 node_modules/**
 build

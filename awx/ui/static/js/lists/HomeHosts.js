@@ -27,7 +27,10 @@ angular.module('HomeHostListDefinition', [])
                 iconOnly: true,
                 icon: "{{ 'icon-job-' + host.active_failures }}",
                 awToolTip: "{{ host.badgeToolTip }}",
+                dataTitle: "{{ host.job_status_title }}",
                 awTipPlacement: "top",
+                dataPlacement: "right",
+                awPopOver: "{{ host.job_status_html }}",
                 ngClick:"bob",
                 columnClass: "col-md-1 col-sm-2 col-xs-3",
                 searchable: false,
@@ -37,7 +40,7 @@ angular.module('HomeHostListDefinition', [])
                 key: true,
                 label: 'Name',
                 columnClass: 'col-lg-4 col-md3 col-sm-3 col-xs-7 ellipsis',
-                ngClick: "editHost(host.id, host.name)"
+                ngClick: "editHost(host.id)"
             },
             inventory_name: {
                 label: 'Inventory',
