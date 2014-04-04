@@ -32,14 +32,12 @@ angular.module('InventoriesListDefinition', [])
                     icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
                     awToolTip: "{{ inventory.syncTip }}",
                     awTipPlacement: "top",
-                    awPopOver: "{{ inventory.syncPopOver }}",
-                    dataPlacement: "right"
+                    ngClick: "showGroupSummary($event, inventory.id)"
                 },{
                     icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
                     awToolTip: "{{ inventory.hostsTip }}",
                     awTipPlacement: "top",
-                    awPopOver: "{{ inventory.hostsPopOver }}",
-                    dataPlacement: "right"
+                    ngClick: "showHostSummary($event, inventory.id)"
                 }]
             },
             name: {
@@ -106,7 +104,7 @@ angular.module('InventoriesListDefinition', [])
             },
             "delete": {
                 label: 'Delete',
-                ngClick: "deleteInventory(inventory.id, inventory.names)",
+                ngClick: "deleteInventory(inventory.id, inventory.name)",
                 awToolTip: 'Delete inventory',
                 dataPlacement: 'top'
             }

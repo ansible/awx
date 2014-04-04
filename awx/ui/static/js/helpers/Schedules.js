@@ -342,12 +342,12 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                scope.$emit('ScheduleFound', data);
-            })
-            .error(function(data,status){
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Failed to retrieve schedule ' + id + ' GET returned: ' + status });
-            });
+                    scope.$emit('ScheduleFound', data);
+                })
+                .error(function(data,status){
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Failed to retrieve schedule ' + id + ' GET returned: ' + status });
+                });
         };
     }])
 
@@ -390,7 +390,12 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                         scope.$emit(callback, id);
                     })
                     .error(function (data, status) {
-                        $('#prompt-modal').modal('hide');
+                        try {
+                            $('#prompt-modal').modal('hide');
+                        }
+                        catch(e) {
+                            // ignore
+                        }
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
                             ' failed. DELETE returned: ' + status });
                     });

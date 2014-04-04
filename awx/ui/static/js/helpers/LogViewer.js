@@ -33,6 +33,25 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
             scope.removeJobReady = scope.$on('JobReady', function(e, data) {
                 var key, resizeText, elem;
                 
+                $('#status-form-container').empty();
+                $('#options-form-container').empty();
+                $('#stdout-form-container').empty();
+                $('#traceback-form-container').empty();
+                $('#variables-container').empty();
+                $('#source-container').empty();
+                $('#logview-tabs li:eq(1)').hide();
+                $('#logview-tabs li:eq(2)').hide();
+                $('#logview-tabs li:eq(4)').hide();
+                $('#logview-tabs li:eq(5)').hide();
+                
+                // Make sure subsequenct scope references don't bubble up to the parent
+                for (key in LogViewerStatusForm.fields) {
+                    scope[key] = '';
+                }
+                for (key in LogViewerOptionsForm.fields) {
+                    scope[key] = '';
+                }
+
                 for (key in data) {
                     scope[key] = data[key];
                 }
@@ -47,10 +66,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         val: data.result_stdout
                     });
                 }
-                else {
-                    $('#logview-tabs li:eq(1)').hide();
-                }
-
+                
                 if (data.result_traceback) {
                     $('#logview-tabs li:eq(2)').show();
                     AddPreFormattedText({
@@ -58,10 +74,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         val: data.result_traceback
                     });
                 }
-                else {
-                    $('#logview-tabs li:eq(2)').hide();
-                }
-
+                
                 /*if (data.job_env) {
                     EnvTable({
                         id: 'env-form-container',
@@ -77,10 +90,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         val: ParseVariableString(data.extra_vars)
                     });
                 }
-                else {
-                    $('#logview-tabs li:eq(4)').hide();
-                }
-
+                
                 if (data.source_vars) {
                     $('#logview-tabs li:eq(5)').show();
                     AddTextarea({
@@ -89,10 +99,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         val: ParseVariableString(data.source_vars)
                     });
                 }
-                else {
-                    $('#logview-tabs li:eq(5)').hide();
-                }
-
+               
                 if (!Empty(scope.source)) {
                     if (scope.removeChoicesReady) {
                         scope.removeChoicesReady();
@@ -179,6 +186,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     onResizeStop: resizeText,
                     onOpen: function() {
                         $('#logview-tabs a:first').tab('show');
+                        $('#dialog-ok-button').focus();
                         resizeText();
                     }
                 });

@@ -63,7 +63,7 @@ angular.module('InventoryHostsDefinition', [])
                 awToolTip: "{{ host.badgeToolTip }}",
                 awTipPlacement: 'top',
                 dataPlacement: 'left',
-                iconClass: "{{ 'fa icon-failures-' + host.has_active_failures }}",
+                iconClass: "{{ 'fa icon-job-' + host.active_failures }}",
                 id: 'active-failutes-action'
             },
             edit: {

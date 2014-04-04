@@ -14,7 +14,7 @@
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
                                 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'AuthService', 'HostsHelper',
                                 'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
-                                'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog'
+                                'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'LogViewerHelper'
                                 ])
   
 .factory('SetEnabledMsg', [ function() {
@@ -68,17 +68,24 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             }
             return a;
         }
-  
+        
+        function noRecentJobs() {
+            title = 'No job data';
+            html = "<p>No recent job data available for this host.</p>\n" +
+                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+        }
+
         function setMsg(host) {
             var j, job, jobs;
+                
             if (host.has_active_failures === true || (host.has_active_failures === false && host.last_job !== null)) {
                 if (host.has_active_failures === true) {
                     host.badgeToolTip = 'Most recent job failed. Click to view jobs.';
-                    host.active_failures = 'failed';
+                    host.active_failures = 'error';
                 }
                 else {
                     host.badgeToolTip = "Most recent job successful. Click to view jobs.";
-                    host.active_failures = 'success';
+                    host.active_failures = 'successful';
                 }
                 if (host.summary_fields.recent_jobs.length > 0) {
                     // build html table of job status info
@@ -101,7 +108,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     for (j=0; j < jobs.length; j++) {
                         job = jobs[j];
                         html += "<tr>\n";
-                        html += "<td><a href=\"/#/jobs/" + job.id + "\">" + job.id + "</a></td>\n";
+                        html += "<td><a href=\"\" ng-click=\"viewJob(" + job.id + ")\">" + job.id + "</a></td>\n";
                         html += "<td class=\"text-center\"><a ng-click=\"showJobSummary(" + job.id + ")\" " +
                             "aw-tool-tip=\"" + job.status.charAt(0).toUpperCase() + job.status.slice(1) +
                             ". Click for details\" data-placement=\"top\"><i class=\"fa icon-job-" +
@@ -116,15 +123,13 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
                 }
                 else {
-                    title = 'No job data';
-                    html = '<p>No recent job data available for this host.</p>';
-                    html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+                    noRecentJobs();
                 }
             }
             else if (host.has_active_failures === false && host.last_job === null) {
-                host.has_active_failures = 'none';
                 host.badgeToolTip = "No job data available.";
-                host.active_failures = 'n/a';
+                host.active_failures = 'none';
+                noRecentJobs();
             }
             host.job_status_html = html;
             host.job_status_title = title;
@@ -145,7 +150,18 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
     };
 }])
-    
+
+.factory('ViewJob', ['LogViewer', 'GetBasePath', function(LogViewer, GetBasePath) {
+    return function(params) {
+        var scope = params.scope,
+            id = params.id;
+        LogViewer({
+            scope: scope,
+            url: GetBasePath('jobs') + id + '/'
+        });
+    };
+}])
+
 .factory('HostsReload', [ '$routeParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait',
     'SetHostStatus', 'SetStatus', 'ApplyEllipsis',
 function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus, SetStatus,
@@ -252,9 +268,8 @@ function(GetBasePath, Rest, Wait, ProcessErrors, Alert, Find, SetEnabledMsg) {
                 });
         }
         else {
-            Alert('Action Not Allowed', 'This host is part of a cloud inventory. It can only be disabled in the cloud.' +
-                ' After disabling it, run an inventory sync to see the new status reflected here.',
-                'alert-info');
+            Alert('Action Not Allowed', 'This host is managed by an external cloud source. Disable it at the external source, ' +
+                'and then run an inventory sync to update Tower with the new status.', 'alert-info');
         }
     };
 }])

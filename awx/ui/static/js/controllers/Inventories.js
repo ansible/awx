@@ -10,9 +10,9 @@
  
 'use strict';
 
-function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, InventoryList, GenerateList,
+function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $compile, $filter, Rest, Alert, InventoryList, GenerateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
-    EditInventoryProperties, Find) {
+    EditInventoryProperties, Find, Empty, LogViewer) {
     
     //ClearScope();
   
@@ -22,7 +22,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
         paths = $location.path().replace(/^\//, '').split('/'),
         mode = (paths[0] === 'inventories') ? 'edit' : 'select';
 
-    view.inject(InventoryList, { mode: mode,  $scope: $scope });
+    view.inject(InventoryList, { mode: mode, scope: $scope });
     $rootScope.flashMessage = null;
 
     SearchInit({
@@ -82,30 +82,6 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
 
     LoadBreadCrumbs();
 
-    if ($scope.removeBuildPopover) {
-        $scope.removeBuildPopover();
-    }
-    $scope.removeBuildPopover = $scope.$on('BuildPopover', function(e, data) {
-        var inventory, html = '';
-        if (data.count) {
-            inventory = Find({ list: $scope.inventories, key: 'id', val: data.results[0].inventory });
-            html += "<table class=\"table table-condensed flyout\" style=\"width: 100%\">" +
-                "<thead>" +
-                "<tr><th>Group</th><th>Source</th><th>Last Run</th><th>Status</th></tr>" +
-                "</thead>" +
-                "<tbody>";
-            data.results.forEach(function(row) {
-                html += "<tr><td>" + row.summary_fields.group.name + "</td>" +
-                    "<td>" + row.source + "</td>" +
-                    "<td>" + row.last_update + "</td>" +
-                    "<td><i class=\"fa icon-job-" + row.status + "</i></td></tr>";
-            });
-            html += "</tbody></table>\n";
-            html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
-            inventory.syncPopOver = "bob was here!"; //html;
-        }
-    });
-
     if ($scope.removePostRefresh) {
         $scope.removePostRefresh();
     }
@@ -141,14 +117,6 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
                 $scope.inventories[idx].hostsStatus = 'successful';
                 $scope.inventories[idx].hostsTip = 'No hosts with failures. Click for details.';
             }
-
-            if (inventory.has_inventory_sources) {
-                Rest.setUrl(inventory.related.inventory_sources + '?or__source=ec2&or__source=rax&order_by=-last_job_run&page_size=5');
-                Rest.get()
-                    .success( function(data) {
-                        $scope.$emit('BuildPopover', data);
-                    });
-            }
         });
     });
 
@@ -159,6 +127,92 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
         // Reflect changes after inventory properties edit completes
         $scope.search(list.iterator);
     });
+
+
+    if ($scope.removeGroupSummaryReady) {
+        $scope.removeGroupSummaryReady();
+    }
+    $scope.removeGroupSummaryReady = $scope.$on('GroupSummaryReady', function(e, event, inventory, data) {
+        var j, elem, html, title, row;
+        
+        function ellipsis(a) {
+            if (a.length > 20) {
+                return a.substr(0,20) + '...';
+            }
+            return a;
+        }
+
+        if (data.count) {
+            html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
+            html += "<thead>\n";
+            html += "<tr>\n";
+            html += "<th>Status</th>\n";
+            html += "<th>Group</th>\n";
+            html += "<th>Last Sync</th>\n";
+            html += "</tr>\n";
+            html += "</thead>\n";
+            html += "<tbody>\n";
+            for (j=0; j < data.results.length; j++) {
+                row = data.results[j];
+                html += "<tr>";
+                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"Click to view details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>";
+                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"Click to view details\" aw-tip-placement=\"top\">" + ellipsis(row.summary_fields.group.name) + "</a></td>";
+                html += "<td>" + $filter('date')(row.last_updated,'MM/dd HH:mm:ss') + "</td>";
+                html += "</tr>\n";
+            }
+            html += "</tbody>\n";
+            html += "</table>\n";
+            html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+            title = "Sync Status";
+            elem = $(event.target).parent();
+            try {
+                elem.tooltip('hide');
+                elem.popover('destroy');
+            }
+            catch(err) {
+                //ignore
+            }
+            elem.attr({ "aw-pop-over": html, "data-title": title, "data-placement": "right" });
+            Wait('stop');
+            $compile(elem)($scope);
+            elem.on('shown.bs.popover', function() {
+                $('.popover').each(function() {
+                    $compile($(this))($scope);  //make nested directives work!
+                });
+                $('.popover-content, .popover-title').click(function() {
+                    elem.popover('hide');
+                });
+            });
+            elem.popover('show');
+        }
+    });
+
+    $scope.showGroupSummary = function(event, id) {
+        var inventory;
+        if (!Empty(id)) {
+            inventory = Find({ list: $scope.inventories, key: 'id', val: id });
+            if (inventory.syncStatus !== 'na') {
+                Wait('start');
+                Rest.setUrl(inventory.related.inventory_sources + '?or__source=ec2&or__source=rax&order_by=-last_job_run&page_size=5');
+                Rest.get()
+                    .success(function(data) {
+                        $scope.$emit('GroupSummaryReady', event, inventory, data);
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + inventory.related.inventory_sources + ' failed. GET returned status: ' + status
+                        });
+                    });
+            }
+        }
+    };
+
+    $scope.viewJob = function(url) {
+        LogViewer({
+            scope: $scope,
+            url: url
+        });
+    };
 
     $scope.showActivity = function () {
         Stream({ scope:  $scope });
@@ -190,7 +244,6 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
                     $scope.search(list.iterator);
                 })
                 .error(function (data, status) {
-                    Wait('stop');
                     ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status
                     });
@@ -199,7 +252,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class=\"alert alert-info\">Are you sure you want to delete ' + name + '?</div>',
+            body: '<div class=\"alert alert-info\">Delete inventory ' + name + '?</div>',
             action: action
         });
     };
@@ -223,9 +276,9 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
     };
 }
 
-InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList',
+InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', '$compile', '$filter', 'Rest', 'Alert', 'InventoryList', 'GenerateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties', 'Find'
+    'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties', 'Find', 'Empty', 'LogViewer'
 ];
 
 
@@ -340,7 +393,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, GenerateList
     GetSyncStatusMsg, InjectHosts, HostsReload, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, Rest, ProcessErrors,
     InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find, EditInventoryProperties, HostsEdit,
     HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost, Stream, GetBasePath, ShowJobSummary, ApplyEllipsis, WatchInventoryWindowResize,
-    HelpDialog, InventoryGroupsHelp, Store) {
+    HelpDialog, InventoryGroupsHelp, Store, ViewJob) {
     
     ClearScope();
 
@@ -665,6 +718,10 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, GenerateList
         HelpDialog(opts);
     };
 
+    $scope.viewJob = function(id) {
+        ViewJob({ scope: $scope, id: id });
+    };
+
     //Load tree data for the first time
     BuildTree({
         scope: $scope,
@@ -678,5 +735,6 @@ InventoriesEdit.$inject = ['$scope', '$location', '$routeParams', '$compile', 'G
     'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsEdit', 'GroupsDelete', 'Breadcrumbs',
     'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren', 'ViewUpdateStatus', 'GroupsCancelUpdate',
     'Find', 'EditInventoryProperties', 'HostsEdit', 'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost',
-    'Stream', 'GetBasePath', 'ShowJobSummary', 'ApplyEllipsis', 'WatchInventoryWindowResize', 'HelpDialog', 'InventoryGroupsHelp', 'Store'
+    'Stream', 'GetBasePath', 'ShowJobSummary', 'ApplyEllipsis', 'WatchInventoryWindowResize', 'HelpDialog', 'InventoryGroupsHelp', 'Store',
+    'ViewJob'
 ];

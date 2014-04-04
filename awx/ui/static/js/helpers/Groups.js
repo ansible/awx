@@ -414,7 +414,13 @@ ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
             schedule_scope.search(list.iterator);
         });
 
-        schedule_scope.toggleSchedule = function(id) {
+        schedule_scope.toggleSchedule = function(event, id) {
+            try {
+                $(event.target).tooltip('hide');
+            }
+            catch(e) {
+                // ignore
+            }
             ToggleSchedule({
                 scope: schedule_scope,
                 id: id,

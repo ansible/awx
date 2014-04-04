@@ -137,6 +137,14 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                     }
                 },
                 open: function () {
+                    $('.tooltip').each(function () {
+                        // Remove any lingering tooltip <div> elements
+                        $(this).remove();
+                    });
+                    $('.popover').each(function () {
+                        // remove lingering popover <div> elements
+                        $(this).remove();
+                    });
                     if (onOpen) {
                         onOpen();
                     }
