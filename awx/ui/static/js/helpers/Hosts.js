@@ -98,8 +98,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
                     html += "<thead>\n";
                     html += "<tr>\n";
-                    html += "<th>ID</th>\n";
-                    html += "<th class=\"text-center\">Status</th>\n";
+                    html += "<th>Status</th>\n";
                     html += "<th>View</th>\n";
                     html += "<th>Name</th>\n";
                     html += "</tr>\n";
@@ -108,8 +107,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     for (j=0; j < jobs.length; j++) {
                         job = jobs[j];
                         html += "<tr>\n";
-                        html += "<td><a href=\"\" ng-click=\"viewJob(" + job.id + ")\">" + job.id + "</a></td>\n";
-                        html += "<td class=\"text-center\"><a ng-click=\"showJobSummary(" + job.id + ")\" " +
+                        html += "<td><a ng-click=\"viewJob(" + job.id + ")\" " +
                             "aw-tool-tip=\"" + job.status.charAt(0).toUpperCase() + job.status.slice(1) +
                             ". Click for details\" data-placement=\"top\"><i class=\"fa icon-job-" +
                             job.status + "\"></i></a></td>\n";

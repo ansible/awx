@@ -179,7 +179,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
             
             data.results.forEach(function(row) {
                 html += "<tr>\n";
-                html += "<td><a ng-click=\"showJobSummary('" + row.url + "')\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                html += "<td><a ng-click=\"viewJob('" + row.url + "')\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                     ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" +
                     row.status + "\"></i></a></td>\n";
                 html += "<td>" + ($filter('date')(row.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
