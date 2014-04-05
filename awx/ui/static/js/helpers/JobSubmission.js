@@ -214,7 +214,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
             scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function() {
                 var base = $location.path().replace(/^\//, '').split('/')[0];
                 if (base === 'jobs') {
-                    scope.refresh();
+                    scope.refreshJobs();
                 } else {
                     $location.path('/jobs');
                 }
@@ -279,7 +279,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
 ])
 
 
-// Sumbit SCM Update request
+// Submit SCM Update request
 .factory('ProjectUpdate', ['PromptForPasswords', 'LaunchJob', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',
     'ProjectsForm', 'Wait',
     function (PromptForPasswords, LaunchJob, Rest, $location, GetBasePath, ProcessErrors, Alert, ProjectsForm, Wait) {
@@ -357,6 +357,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                 url = params.url,
                 group_id = params.group_id,
                 tree_id = params.tree_id,
+                base = $location.path().replace(/^\//, '').split('/')[0],
                 inventory_source;
 
             if (scope.removeHostReloadComplete) {
@@ -376,7 +377,10 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
             }
             scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function () {
                 setTimeout(function() {
-                    if (scope.refreshGroups) {
+                    if (base === 'jobs') {
+                        scope.refreshJobs();
+                    }
+                    else if (scope.refreshGroups) {
                         scope.selected_tree_id = tree_id;
                         scope.selected_group_id = group_id;
                         scope.refreshGroups();
@@ -384,7 +388,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                         scope.refresh();
                     }
                     scope.$emit('HostReloadComplete');
-                }, 2000);
+                }, 300);
             });
 
             if (scope.removePromptForPasswords) {

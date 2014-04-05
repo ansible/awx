@@ -384,8 +384,8 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
     };
 }])
 
-.factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Prompt',
-function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt){
+.factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Alert',
+function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
     return function(params) {
         
         var scope = params.scope,
@@ -441,11 +441,44 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt){
             }
         };
 
-        Prompt({
-            hdr: hdr,
-            body: "<div class=\"alert alert-info\">Are you sure you want to " + action_label + " job " + id + " <em>" + job.name  + "</em>?</div>",
-            action: action
+        if (scope.removeCancelNotAllowed) {
+            scope.removeCancelNotAllowed();
+        }
+        scope.removeCancelNotAllowed = scope.$on('CancelNotAllowed', function() {
+            Alert('Job Completed', 'The job completed. Click the <i class="fa fa-refresh fa-lg"></i> button to view ' +
+                'the latest status.', 'alert-info');
         });
+
+        if (scope.removeCancelJob) {
+            scope.removeCancelJob();
+        }
+        scope.removeCancelJob = scope.$on('CancelJob', function() {
+            Prompt({
+                hdr: hdr,
+                body: "<div class=\"alert alert-info\">Submit the request to " + action_label + " job #" + id + " " + job.name  + "?</div>",
+                action: action
+            });
+        });
+
+        if (action_label === 'cancel') {
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    if (data.can_cancel) {
+                        scope.$emit('CancelJob');
+                    }
+                    else {
+                        scope.$emit('CancelNotAllowed');
+                    }
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
+                        ' failed. GET returned: ' + status });
+                });
+        }
+        else {
+            scope.$emit('CancelJob');
+        }
 
     };
 }])

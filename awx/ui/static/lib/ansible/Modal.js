@@ -89,18 +89,20 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                     // Fix the close button
                     $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
                     
-                    // Make buttons bootstrapy
-                    $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-buttonset button').each(function () {
-                        var txt = $(this).text(), self = $(this);
-                        buttonSet.forEach(function(btn) {
-                            if (txt === btn.label) {
-                                self.attr({ "class": btn['class'], "id": btn.id });
-                                if (btn.icon) {
-                                    self.empty().html('<i class="fa ' + btn.icon + '"></i> ' + btn.label);
+                    setTimeout(function() {
+                        // Make buttons bootstrapy
+                        $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-buttonset button').each(function () {
+                            var txt = $(this).text(), self = $(this);
+                            buttonSet.forEach(function(btn) {
+                                if (txt === btn.label) {
+                                    self.attr({ "class": btn['class'], "id": btn.id });
+                                    if (btn.icon) {
+                                        self.empty().html('<i class="fa ' + btn.icon + '"></i> ' + btn.label);
+                                    }
                                 }
-                            }
+                            });
                         });
-                    });
+                    }, 300);
 
                     setTimeout(function() {
                         scope.$apply(function() {

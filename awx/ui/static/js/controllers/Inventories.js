@@ -687,7 +687,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, GenerateList
     };
 
     $scope.cancelUpdate = function (tree_id) {
-        GroupsCancelUpdate({ scope: $scope, tree_id: tree_id });
+        GroupsCancelUpdate({ scope: $scope, id: tree_id });
     };
 
     $scope.toggle = function (tree_id) {

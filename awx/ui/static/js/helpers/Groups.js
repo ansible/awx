@@ -251,13 +251,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
 // Cancel a pending or running inventory sync
-.factory('GroupsCancelUpdate', ['Rest', 'ProcessErrors', 'Alert', 'Wait', 'Find',
-    function (Rest, ProcessErrors, Alert, Wait, Find) {
+.factory('GroupsCancelUpdate', ['Empty', 'Rest', 'ProcessErrors', 'Alert', 'Wait', 'Find',
+    function (Empty, Rest, ProcessErrors, Alert, Wait, Find) {
         return function (params) {
 
             var scope = params.scope,
-                id = params.tree_id,
-                group;
+                id = params.id,
+                group = params.group;
 
             if (scope.removeCancelUpdate) {
                 scope.removeCancelUpdate();
@@ -268,7 +268,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 Rest.post()
                     .success(function () {
                         Wait('stop');
-                        Alert('Inventory Sync Cancelled', 'Your request to cancel the sync process was submitted to the task manger. ' +
+                        Alert('Inventory Sync Cancelled', 'Request to cancel the sync process was submitted to the task manger. ' +
                             'Click the <i class="fa fa-refresh fa-lg"></i> button to monitor the status.', 'alert-info');
                     })
                     .error(function (data, status) {
@@ -294,8 +294,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                             scope.$emit('CancelUpdate', url);
                         } else {
                             Wait('stop');
-                            Alert('Cancel Inventory Sync', 'Either you do not have access or the sync process completed.<br /> ' +
-                                'Click the <i class="fa fa-refresh fa-lg"></i> button to view the latest status.', 'alert-info');
+                            Alert('Cancel Inventory Sync', 'The sync process completed. Click the <i class="fa fa-refresh fa-lg"></i> button to view ' +
+                                'the latest status.', 'alert-info');
                         }
                     })
                     .error(function (data, status) {
@@ -308,11 +308,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             });
 
             // Cancel the update process
-            group = Find({ list: scope.groups, key: 'id', val: id });
-            scope.selected_tree_id = group.id;
-            scope.selected_group_id = group.group_id;
+            if (Empty(group)) {
+                group = Find({ list: scope.groups, key: 'id', val: id });
+                scope.selected_tree_id = group.id;
+                scope.selected_group_id = group.group_id;
+            }
 
-            if (group && (group.status === 'updating' || group.status === 'pending')) {
+            if (group && (group.status === 'running' || group.status === 'pending')) {
                 // We found the group, and there is a running update
                 Wait('start');
                 Rest.setUrl(group.related.inventory_source);

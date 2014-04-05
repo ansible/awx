@@ -184,6 +184,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     callback: 'ModalReady',
                     id: 'logviewer-modal-dialog',
                     onResizeStop: resizeText,
+                    title: 'Job Results',
                     onOpen: function() {
                         $('#logview-tabs a:first').tab('show');
                         $('#dialog-ok-button').focus();

@@ -124,7 +124,7 @@ Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location',
 
 function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
-    Alert, Rest, Empty, InventoryUpdate, Find) {
+    Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //scope.
@@ -347,7 +347,7 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
     };
 
     scope.refresh = function () {
-        scope.search(list.iterator, null, false, true);
+        scope.search(list.iterator);
     };
 
 
@@ -426,7 +426,7 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
         if (!Empty(id)) {
             group = Find({ list: scope.home_groups, key: 'id', val: id });
             status = group.summary_fields.inventory_source.status;
-            if (status === 'failed' || status === 'error' || status === 'successful') {
+            if (status === 'running' || status === 'failed' || status === 'error' || status === 'successful') {
                 Wait('start');
                 Rest.setUrl(group.related.inventory_sources + '?or__source=ec2&or__source=rax&order_by=-last_job_run&page_size=5');
                 Rest.get()
@@ -479,9 +479,14 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
 
     scope.viewJob = function(url) {
         LogViewer({
-            scope: scope,
+            scope: modal_scope,
             url: url
         });
+    };
+
+    scope.cancelUpdate = function(id) {
+        var group = Find({ list: scope.home_groups, key: 'id', val: id });
+        GroupsCancelUpdate({ scope: scope, group: group });
     };
 
 
@@ -489,7 +494,7 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
 
 HomeGroups.$inject = ['$scope', '$filter', '$compile', '$location', '$routeParams', 'LogViewer', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
-    'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find'
+    'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate'
 ];
 
 
