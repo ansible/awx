@@ -129,6 +129,14 @@ angular.module('StreamListDefinition', [])
                 searchWidget: 2,
                 searchField: 'object1'
             },
+            schedule_search: {
+                label: 'Schedule',
+                searchOnly: true,
+                searchObject: 'schedule',
+                searchPlaceholder: 'Schedule name',
+                searchWidget: 2,
+                searchField: 'object1'
+            },
             user_search: {
                 label: 'User',
                 searchOnly: true,
@@ -212,6 +220,14 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Related project name',
                 searchWidget: 3,
                 searchField: 'object2'
+            },
+            schedule_search3: {
+                label: 'Schedule',
+                searchOnly: true,
+                searchObject: 'schedule',
+                searchPlaceholder: 'Schedule name',
+                searchWidget: 3,
+                searchField: 'object1'
             },
             user_search3: {
                 label: 'User',

@@ -11,7 +11,7 @@
 'use strict';
 
 function ScheduleEditController($scope, $compile, $location, $routeParams, SchedulesList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices) {
+GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices, Stream) {
     
     ClearScope();
 
@@ -78,6 +78,10 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
         $scope.search(SchedulesList.iterator);
     };
 
+    $scope.showActivity = function () {
+        Stream({ scope: $scope });
+    };
+
     Wait('start');
     
     GetChoices({
@@ -90,4 +94,4 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
 }
 
 ScheduleEditController.$inject = [ '$scope', '$compile', '$location', '$routeParams', 'SchedulesList', 'Rest', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
-    'GetBasePath', 'Wait', 'Breadcrumbs', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices' ];
+    'GetBasePath', 'Wait', 'Breadcrumbs', 'Find', 'LoadDialogPartial', 'LoadSchedulesScope', 'GetChoices', 'Stream' ];
