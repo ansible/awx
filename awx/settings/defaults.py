@@ -408,7 +408,7 @@ LOGGING = {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
-            'filename': '/var/log/awx/tower_warnings.log',
+            'filename': os.path.join(BASE_DIR, 'tower_warnings.log'),
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
