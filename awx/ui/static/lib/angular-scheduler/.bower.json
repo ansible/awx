@@ -1,6 +1,6 @@
 {
   "name": "angular-scheduler",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "authors": [
     "Chris Houseknecht <chouse@ansible.com>"
   ],
@@ -36,13 +36,13 @@
     "rrule",
     "calendar"
   ],
-  "_release": "0.0.12",
+  "_release": "0.0.13",
   "_resolution": {
     "type": "version",
-    "tag": "v0.0.12",
-    "commit": "8b555ae8a4cdf6df0fe5e1767d6704e29d40d429"
+    "tag": "v0.0.13",
+    "commit": "b1ffbc8058dc668f5b8baf5f3baca39a77445e61"
   },
   "_source": "git://github.com/chouseknecht/angular-scheduler.git",
-  "_target": "~0.0.12",
+  "_target": "~0.0.13",
   "_originalSource": "angular-scheduler"
 }

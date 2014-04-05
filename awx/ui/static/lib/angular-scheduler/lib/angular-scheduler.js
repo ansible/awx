@@ -282,8 +282,8 @@ angular.module('AngularScheduler', ['underscore'])
                             if (i < 10) {
                                 if (useTimezone) {
                                     dt = $timezones.align(date, scope.schedulerTimeZone.name);
-                                    local = $filter('schZeroPad')(dt.getMonth(),2) + '/' +
-                                        $filter('schZeroPad')(dt.getDay(),2) + '/' + dt.getFullYear() + ' ' +
+                                    local = $filter('schZeroPad')(dt.getMonth() + 1,2) + '/' +
+                                        $filter('schZeroPad')(dt.getDate(),2) + '/' + dt.getFullYear() + ' ' +
                                         $filter('schZeroPad')(dt.getHours(),2) + ':' +
                                         $filter('schZeroPad')(dt.getMinutes(),2) + ':' +
                                         $filter('schZeroPad')(dt.getSeconds(),2) + ' ' +
