@@ -343,14 +343,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
  * Add the list of schedules to the Group Edit modal
  *
  */
-.factory('GroupsScheduleList', ['GroupsScheduleEdit', 'SchedulesList', 'GenerateList', 'SearchInit', 'PaginateInit', 'Rest', 'PageRangeSetup',
+.factory('GroupsScheduleListInit', ['GroupsScheduleEdit', 'SchedulesList', 'GenerateList', 'SearchInit', 'PaginateInit', 'Rest', 'PageRangeSetup',
 'Wait', 'ProcessErrors', 'Find', 'ToggleSchedule', 'DeleteSchedule', 'GetBasePath', 'SchedulesListInit',
 function(GroupsScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Rest, PageRangeSetup, Wait, ProcessErrors, Find,
 ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
     return function(params) {
-        var parent_scope = params.scope,
+        var schedule_scope = params.scope,
             url = params.url,
-            schedule_scope = parent_scope.$new(),
             list;
 
         // Clean up
@@ -561,6 +560,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
         scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
             Wait('stop');
             container.hide('slide', { direction: 'right' }, 500, restoreList);
+            scope.$destroy();
         });
         
         scope.saveScheduleForm = function() {
@@ -582,6 +582,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
         scope.cancelScheduleForm = function() {
             container.hide('slide', { direction: 'right' }, 500, restoreList);
+            scope.$destroy();
         };
 
         if (mode === 'edit') {
@@ -612,10 +613,10 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
     'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find','WatchInventoryWindowResize',
-    'ParseVariableString', 'ToJSON', 'GroupsScheduleList', 'SourceForm', 'SetSchedulesInnerDialogSize', 'BuildTree',
+    'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize', 'BuildTree',
     function ($rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
-        GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, GroupsScheduleList,
+        GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, GroupsScheduleListInit,
         SourceForm, SetSchedulesInnerDialogSize, BuildTree) {
         return function (params) {
 
@@ -811,7 +812,6 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 }
                 else if ($(e.target).text() === 'Schedule') {
                     $('#schedules-overlay').hide();
-                    GroupsScheduleList({ scope: modal_scope, url: schedules_url });
                 }
             });
 
@@ -820,6 +820,11 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             }
             modal_scope.groupVariablesLoadedRemove = modal_scope.$on('groupVariablesLoaded', function () {
                 modal_scope.showSourceTab = (mode === 'edit' && group.has_inventory_sources && Empty(group.summary_fields.inventory_source.source)) ? false :  true;
+                modal_scope.showSchedulesTab = (mode === 'edit' && sources_scope.source && sources_scope.source.value) ? true : false;
+                if (mode === 'edit' && modal_scope.showSourceTab) {
+                    // the use has access to the source tab, so they may create a schedule
+                    GroupsScheduleListInit({ scope: modal_scope, url: schedules_url });
+                }
                 $('#group_tabs a:first').tab('show');
                 Wait('start');
                 $('#group-modal-dialog').dialog('open');

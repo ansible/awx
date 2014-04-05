@@ -1042,24 +1042,21 @@ angular.module('AngularScheduler', ['underscore'])
                 $(element).spinner({
                     min: min,
                     max: max,
-                    change: function() {
+                    stop: function() {
+                        //update the model immediately
                         setTimeout(function() {
                             scope.$apply(function() {
                                 if (zeroPad) {
                                     scope[attr.ngModel] = $filter('schZeroPad')($(element).spinner('value'),zeroPad);
-                                    $(element).val(scope[attr.ngModel]);
-                                    if (attr.ngChange) {
-                                        scope.$eval(attr.ngChange);
-                                    }
                                 }
                                 else {
                                     scope[attr.ngModel] = $(element).spinner('value');
-                                    if (attr.ngChange) {
-                                        scope.$eval(attr.ngChange);
-                                    }
+                                }
+                                if (attr.ngChange) {
+                                    scope.$eval(attr.ngChange);
                                 }
                             });
-                        },100);
+                        }, 100);
                     },
                     spin: function() {
                         scope[form].$setDirty();

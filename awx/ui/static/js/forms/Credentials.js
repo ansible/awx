@@ -254,6 +254,27 @@ angular.module('CredentialFormDefinition', [])
                 awPassMatch: true,
                 associated: 'sudo_password',
                 autocomplete: false
+            },
+            "vault_password": {
+                label: "Vault Password",
+                type: 'password',
+                ngShow: "kind.value == 'ssh'",
+                addRequired: false,
+                editRequired: false,
+                ngChange: "clearPWConfirm('vault_password_confirm')",
+                ask: true,
+                clear: true,
+                associated: 'vault_password_confirm',
+                autocomplete: false
+            },
+            "vault_password_confirm": {
+                label: "Confirm Vault Password",
+                type: 'password',
+                addRequired: false,
+                editRequired: false,
+                awPassMatch: true,
+                associated: 'vault_password',
+                autocomplete: false
             }
         },
 
