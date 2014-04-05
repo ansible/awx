@@ -28,13 +28,13 @@ angular.module('JobEventsListDefinition', [])
             //    ngShow: 'job_id !== null'
             //},
             events: {
-                href: '/#/jobs/{{ job_id }}/job_events',
+                href: '/#/job_events/{{ job_id }}',
                 label: 'Events',
                 active: true,
                 icon: 'icon-list-ul'
             },
             hosts: {
-                href: '/#/jobs/{{ job_id }}/job_host_summaries',
+                href: '/#/job_host_summaries/{{ job_id }}',
                 label: 'Host Summary',
                 icon: 'icon-laptop'
             }
@@ -47,7 +47,7 @@ angular.module('JobEventsListDefinition', [])
                 key: true,
                 nosort: true,
                 searchable: false,
-                link: false
+                noLink: true
             },
             status: {
                 label: 'Status',

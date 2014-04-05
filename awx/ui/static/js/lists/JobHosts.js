@@ -27,12 +27,12 @@ angular.module('JobHostDefinition', [])
             //    ngShow: "job_id !== null"
             //},
             events: {
-                href: "/#/jobs/{{ job_id }}/job_events",
+                href: "/#/job_events/{{ job_id }}",
                 label: 'Events',
                 icon: 'icon-list-ul'
             },
             hosts: {
-                href: "/#/jobs/{{ job_id }}/job_host_summaries",
+                href: "/#/job_host_summariess/{{ job_id }}",
                 label: 'Host Summary',
                 active: true,
                 icon: 'icon-laptop'
@@ -67,6 +67,7 @@ angular.module('JobHostDefinition', [])
                 dataPlacement: 'top',
                 searchField: 'failed',
                 searchType: 'boolean',
+                showValue: false,
                 searchOptions: [{
                     name: "success",
                     value: 0
@@ -132,8 +133,8 @@ angular.module('JobHostDefinition', [])
                 ngClick: "refresh()",
                 ngShow: "host_id == null" //don't show when viewing from inventory->hosts
             }
-        },
+        }
 
-        fieldActions: {}
+        //fieldActions: {}
 
     });

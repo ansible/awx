@@ -112,18 +112,13 @@ angular.module('ansible', [
                 templateUrl: urlPrefix + 'partials/jobs.html',
                 controller: 'JobsListController'
             }).
-
-           /* when('/jobs/:id', {
-                templateUrl: urlPrefix + 'partials/jobs.html',
-                controller: 'JobsEdit'
-            }). */
-
-            when('/jobs/:id/job_events', {
+            
+            when('/job_events/:id', {
                 templateUrl: urlPrefix + 'partials/job_events.html',
                 controller: 'JobEventsList'
             }).
 
-            when('/jobs/:id/job_host_summaries', {
+            when('/job_host_summaries/:id', {
                 templateUrl: urlPrefix + 'partials/job_host_summaries.html',
                 controller: 'JobHostSummaryList'
             }).
@@ -445,6 +440,7 @@ angular.module('ansible', [
                     base = 'home';
                 } else {
                     base.replace(/\_/g, ' ');
+                    base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
                 }
                 $('.nav-tabs a[href="#' + base + '"]').tab('show');
             });
@@ -466,6 +462,9 @@ angular.module('ansible', [
                 $location.path('/home');
             } else {
                 base.replace(/\_/g, ' ');
+                if (base === 'jobevents' || base === 'jobhostsummaries') {
+                    base = 'jobs';
+                }
             }
             $('.nav-tabs a[href="#' + base + '"]').tab('show');
 

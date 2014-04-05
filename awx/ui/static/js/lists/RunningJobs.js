@@ -91,8 +91,8 @@ angular.module('RunningJobsDefinition', [])
                 'class': 'btn-default btn-xs',
                 options: [
                     //{ ngHref: '/#/jobs/{{ running_job.id }}', label: 'Status' },
-                    { ngHref: '/#/jobs/{{ running_job.id }}/job_events', label: 'Events' },
-                    { ngHref: '/#/jobs/{{ running_job.id }}/job_host_summaries', label: 'Host Summary' }
+                    { ngHref: '/#/job_events/{{ running_job.id }}', label: 'Events' },
+                    { ngHref: '/#/job_host_summaries/{{ running_job.id }}', label: 'Host Summary' }
                 ]
             }
         }

@@ -372,8 +372,8 @@ angular.module('GeneratorHelpers', [])
     }
 ])
 
-.factory('Breadcrumbs', ['Attr',
-    function (Attr) {
+.factory('Breadcrumbs', ['$rootScope', 'Attr',
+    function ($rootScope, Attr) {
         return function (params) {
 
             // Generate breadcrumbs using the list-generator.js method.

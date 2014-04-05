@@ -373,8 +373,8 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
                     ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" +
                     row.status + "\"></i></a></td>\n";
                 //html += "<td>" + ($filter('date')(row.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
-                html += "<td><a href=\"/#/jobs/" + row.id + "/job_events\">Events</a><br />" +
-                    "<a href=\"/#/jobs/" + row.id + "/job_host_summaries\">Hosts</a></td>";
+                html += "<td><a href=\"/#/job_events/" + row.id + "\">Events</a><br />" +
+                    "<a href=\"/#/job_host_summaries/" + row.id + "\">Hosts</a></td>";
                 html += "<td><a href=\"\" ng-click=\"viewJob('" + url + row.id + "/')\" >" + ellipsis(row.name) + "</a></td>";
                 html += "</tr>\n";
             });

@@ -108,8 +108,8 @@ angular.module('CompletedJobsDefinition', [])
                 'class': 'btn-default btn-xs',
                 options: [
                     //{ ngHref: '/#/jobs/{{ completed_job.id }}', label: 'Status' },
-                    { ngHref: '/#/jobs/{{ completed_job.id }}/job_events', label: 'Events', ngHide: "completed_job.status == 'new'" },
-                    { ngHref: '/#/jobs/{{ completed_job.id }}/job_host_summaries', label: 'Host Summary' }
+                    { ngHref: '/#/job_events/{{ completed_job.id }}', label: 'Events', ngHide: "completed_job.status == 'new'" },
+                    { ngHref: '/#/job_host_summaries/{{ completed_job.id }}', label: 'Host Summary' }
                 ]
             }
         }

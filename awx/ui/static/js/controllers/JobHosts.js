@@ -17,28 +17,27 @@ function JobHostSummaryList($scope, $rootScope, $location, $log, $routeParams, R
     ClearScope();
     
     var list = JobHostList,
-        base = $location.path().replace(/^\//, '').split('/')[0],
-        defaultUrl = GetBasePath(base) + $routeParams.id + '/job_host_summaries/',
-        view = GenerateList,
-        scope = view.inject(list, { mode: 'edit' });
-
+        defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_host_summaries/',
+        view = GenerateList;
+        
     // When viewing all summaries for a particular host, show job ID, otherwise row ID.
-    if (base === 'hosts') {
-        list.index = false;
-    } else {
-        list.index = true;
-    }
+    //if (base === 'hosts') {
+    //    list.index = false;
+    //} else {
+    //    list.index = true;
+    //}
 
     $scope.selected = [];
 
     // control enable/disable/show of job specific view elements
-    if (base === 'hosts') {
-        $scope.job_id = null;
-        $scope.host_id = $routeParams.id;
-    } else {
-        $scope.job_id = $routeParams.id;
-        $scope.host_id = null;
-    }
+    //if (base === 'hosts') {
+        //$scope.job_id = null;
+        //$scope.host_id = $routeParams.id;
+    //} else {  
+    //}
+
+    $scope.job_id = $routeParams.id;
+    $scope.host_id = null;
 
     if ($scope.RemoveSetHostLink) {
         $scope.RemoveSetHostLink();
@@ -56,6 +55,8 @@ function JobHostSummaryList($scope, $rootScope, $location, $log, $routeParams, R
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
 
+        view.inject(list, { mode: 'edit', scope: $scope });
+
         // Set status, tooltips, badges icons, etc.
         $scope.jobhosts.forEach(function(element, i) {
             $scope.jobhosts[i].host_name = ($scope.jobhosts[i].summary_fields.host) ? $scope.jobhosts[i].summary_fields.host.name : '';
@@ -63,67 +64,71 @@ function JobHostSummaryList($scope, $rootScope, $location, $log, $routeParams, R
             $scope.jobhosts[i].statusBadgeToolTip = JobStatusToolTip($scope.jobhosts[i].status) +
                 " Click to view details.";
             if ($scope.jobhosts[i].summary_fields.host) {
-                $scope.jobhosts[i].statusLinkTo = '/#/jobs/' + $scope.jobhosts[i].job + '/job_events/?host=' +
+                $scope.jobhosts[i].statusLinkTo = '/#/job_events/' + $scope.jobhosts[i].job + '/?host=' +
                     encodeURI($scope.jobhosts[i].summary_fields.host.name);
             }
             else {
-                $scope.jobhosts[i].statusLinkTo = '/#/jobs/' + $scope.jobhosts[i].job + '/job_events';
+                $scope.jobhosts[i].statusLinkTo = '/#/job_events/' + $scope.jobhosts[i].job;
             }
         });
 
-        if ($scope.job_id !== null && $scope.job_id !== undefined && $scope.job_id !== '') {
+        //if ($scope.job_id !== null && $scope.job_id !== undefined && $scope.job_id !== '') {
             // need job_status so we can show/hide refresh button
-            Rest.setUrl(GetBasePath('jobs') + $scope.job_id);
-            Rest.get()
-                .success(function (data) {
-                    LoadBreadCrumbs({
-                        path: '/jobs/' + data.id,
-                        title: data.id + ' - ' +
-                            data.summary_fields.job_template.name
-                    });
-                    $scope.job_status = data.status;
-                    if (!(data.status === 'pending' || data.status === 'waiting' || data.status === 'running')) {
-                        if ($rootScope.timer) {
-                            clearInterval($rootScope.timer);
-                        }
-                    }
-                    $scope.$emit('setHostLink', data.inventory);
-                })
-                .error(function (data, status) {
-                    ProcessErrors(scope, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get job status for job: ' + $scope.job_id + '. GET status: ' + status
-                    });
+        Rest.setUrl(GetBasePath('jobs') + $scope.job_id + '/');
+        Rest.get()
+            .success(function (data) {
+                LoadBreadCrumbs({
+                    path: '/job_host_summaries/' + $scope.job_id,
+                    title: $scope.job_id + ' - ' + data.summary_fields.job_template.name,
+                    altPath: '/jobs'
                 });
-        } else {
-            // Make the host name appear in breadcrumbs
-            LoadBreadCrumbs({
-                path: '/hosts/' + $scope.host_id,
-                title: (($scope.jobhosts.length > 0) ? $scope.jobhosts[0].summary_fields.host.name : 'Host')
+                $rootScope.breadcrumbs = [{
+                    path: '/jobs',
+                    title: $scope.job_id + ' - ' + data.summary_fields.job_template.name,
+                }];
+                $scope.job_status = data.status;
+                if (!(data.status === 'pending' || data.status === 'waiting' || data.status === 'running')) {
+                    if ($rootScope.timer) {
+                        clearInterval($rootScope.timer);
+                    }
+                }
+                $scope.$emit('setHostLink', data.inventory);
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Failed to get job status for job: ' + $scope.job_id + '. GET status: ' + status
+                });
             });
-            if ($routeParams.inventory) {
-                $scope.$emit('setHostLink', $routeParams.inventory);
-            }
-        }
+        //} else {
+            // Make the host name appear in breadcrumbs
+        //    LoadBreadCrumbs({
+        //        path: '/hosts/' + $scope.host_id,
+        //        title: (($scope.jobhosts.length > 0) ? $scope.jobhosts[0].summary_fields.host.name : 'Host')
+        //    });
+        //    if ($routeParams.inventory) {
+        //        $scope.$emit('setHostLink', $routeParams.inventory);
+        //    }
+        //}
     });
 
     SearchInit({
-        scope: scope,
+        scope: $scope,
         set: 'jobhosts',
         list: list,
         url: defaultUrl
     });
+
     PaginateInit({
-        scope: scope,
+        scope: $scope,
         list: list,
         url: defaultUrl
     });
 
     // Called from Inventories tab, host failed events link:
     if ($routeParams.host_name) {
-        scope[list.iterator + 'SearchField'] = 'host';
-        scope[list.iterator + 'SearchValue'] = $routeParams.host_name;
-        scope[list.iterator + 'SearchFieldLabel'] = list.fields.host.label;
+        $scope[list.iterator + 'SearchField'] = 'host';
+        $scope[list.iterator + 'SearchValue'] = $routeParams.host_name;
+        $scope[list.iterator + 'SearchFieldLabel'] = list.fields.host.label;
     }
 
     $scope.search(list.iterator);
@@ -141,7 +146,7 @@ function JobHostSummaryList($scope, $rootScope, $location, $log, $routeParams, R
                 $location.url('/jobs/' + data.id + '/job_events/?host=' + encodeURI(host_name));
             })
             .error(function (data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to lookup last job: ' + last_job +
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to lookup last job: ' + last_job +
                     '. GET status: ' + status });
             });
     };
@@ -156,7 +161,7 @@ function JobHostSummaryList($scope, $rootScope, $location, $log, $routeParams, R
             $scope.jobLoading = true;
             Wait('start');
             Refresh({
-                scope: scope,
+                scope: $scope,
                 set: 'jobhosts',
                 iterator: 'jobhost',
                 url: $scope.current_url

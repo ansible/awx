@@ -409,9 +409,10 @@
   <script>
       // When user clicks on main tab, fire the matching Angular route
       $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-          var url = $(e.target).text();
-          var regx = new RegExp('/\#\/' + url.toLowerCase().replace(/ /g,'_') + '/');
-          var loc = window.location.toString();
+          var url, regx, loc;
+          url = ($(e.target).text() === 'Jobs') ? 'job' : $(e.target).text().toLowerCase().replace(/ /g,'_');
+          regx = new RegExp('/\#\/' + url);
+          loc = window.location.toString();
           if (! regx.test(loc)) {
              window.location = '#/' + url.toLowerCase().replace(/ /g,'_');
           }

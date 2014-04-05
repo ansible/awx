@@ -20,9 +20,7 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
         defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_events/', //?parent__isnull=1';
         generator = GenerateList,
         page;
-    
-    generator.inject(list, { mode: 'edit', scope: $scope });
-    
+
     list.base = $location.path();
     $scope.job_id = $routeParams.id;
     $rootScope.flashMessage = null;
@@ -125,6 +123,7 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         // Initialize the parent levels
+        generator.inject(list, { mode: 'edit', scope: $scope });
         var set = $scope[list.name], i;
         for (i = 0; i < set.length; i++) {
             set[i].event_display = set[i].event_display.replace(/^\u00a0*/g, '');
@@ -179,9 +178,14 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
                 $scope.job_status = data.status;
                 $scope.job_name = data.summary_fields.job_template.name;
                 LoadBreadCrumbs({
-                    path: '/jobs/' + $scope.job_id,
-                    title: $scope.job_id + ' - ' + data.summary_fields.job_template.name
+                    path: '/job_events/' + $scope.job_id,
+                    title: $scope.job_id + ' - ' + data.summary_fields.job_template.name,
+                    altPath: '/jobs'
                 });
+                $rootScope.breadcrumbs = [{
+                    path: '/jobs',
+                    title: $scope.job_id + ' - ' + data.summary_fields.job_template.name,
+                }];
                 $scope.$emit('SetHostLinks', data.inventory);
             })
             .error(function (data, status) {
@@ -199,6 +203,7 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
     });
 
     page = ($routeParams.page) ? parseInt($routeParams.page,10) - 1 : null;
+    
     PaginateInit({
         scope: $scope,
         list: list,

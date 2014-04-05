@@ -246,7 +246,6 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     $rootScope.crumbCache.push(crumb);
                 }
             }
-
             paths = $location.path().replace(/^\//, '').split('/');
             ppath = '';
             $rootScope.breadcrumbs = [];
