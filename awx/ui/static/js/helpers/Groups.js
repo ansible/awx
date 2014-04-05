@@ -343,9 +343,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
  * Add the list of schedules to the Group Edit modal
  *
  */
-.factory('ScheduleList', ['ScheduleEdit', 'SchedulesList', 'GenerateList', 'SearchInit', 'PaginateInit', 'Rest', 'PageRangeSetup',
+.factory('GroupsScheduleList', ['GroupsScheduleEdit', 'SchedulesList', 'GenerateList', 'SearchInit', 'PaginateInit', 'Rest', 'PageRangeSetup',
 'Wait', 'ProcessErrors', 'Find', 'ToggleSchedule', 'DeleteSchedule', 'GetBasePath', 'SchedulesListInit',
-function(ScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Rest, PageRangeSetup, Wait, ProcessErrors, Find,
+function(GroupsScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Rest, PageRangeSetup, Wait, ProcessErrors, Find,
 ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
     return function(params) {
         var parent_scope = params.scope,
@@ -363,7 +363,7 @@ ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
         $('.popover').each(function () {
             $(this).remove();
         });
-        
+
         // Add schedules list
         list = angular.copy(SchedulesList);
         delete list.fields.dtend;
@@ -379,9 +379,10 @@ ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
 
         $('#schedules-list').show();
 
-        if (schedule_scope.removePostRefresh) {
-            schedule_scope.removePostRefresh();
-        }
+        // Removing screws up /home/groups page
+        // if (schedule_scope.removePostRefresh) {
+        //    schedule_scope.removePostRefresh();
+        //}
         schedule_scope.removePostRefresh = schedule_scope.$on('PostRefresh', function() {
             SchedulesListInit({
                 scope: schedule_scope,
@@ -403,16 +404,16 @@ ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
         });
         schedule_scope.search(list.iterator);
         
-        parent_scope.refreshSchedule = function() {
+        schedule_scope.refreshSchedules = function() {
             schedule_scope.search(list.iterator);
         };
 
         schedule_scope.editSchedule = function(id) {
-            ScheduleEdit({ scope: parent_scope, mode: 'edit', url: GetBasePath('schedules') + id + '/' });
+            GroupsScheduleEdit({ scope: schedule_scope, mode: 'edit', url: GetBasePath('schedules') + id + '/' });
         };
 
         schedule_scope.addSchedule = function() {
-            ScheduleEdit({ scope: parent_scope, mode: 'add', url: url });
+            GroupsScheduleEdit({ scope: schedule_scope, mode: 'add', url: url });
         };
 
         if (schedule_scope.removeSchedulesRefresh) {
@@ -462,11 +463,11 @@ ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
  * Remove the schedule list, add the schedule widget and populate it with an rrule
  *
  */
-.factory('ScheduleEdit', ['SchedulerInit', 'Rest', 'Wait', 'SetSchedulesInnerDialogSize', 'SchedulePost', 'ProcessErrors',
-function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, ProcessErrors) {
+.factory('GroupsScheduleEdit', ['$compile','SchedulerInit', 'Rest', 'Wait', 'SetSchedulesInnerDialogSize', 'SchedulePost', 'ProcessErrors',
+function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, ProcessErrors) {
     return function(params) {
         var parent_scope = params.scope,
-            mode = params.mode,  // 'create' or 'edit'
+            mode = params.mode,  // 'add' or 'edit'
             url = params.url,
             scope = parent_scope.$new(),
             schedule = {},
@@ -476,7 +477,8 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
             list,
             detail,
             restoreList,
-            container;
+            container,
+            elem;
 
         Wait('start');
         detail = $('#schedules-detail').hide();
@@ -494,6 +496,9 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
             $(this).remove();
         });
 
+        elem = angular.element(document.getElementById('schedules-form-container'));
+        $compile(elem)(scope);
+
         if (scope.removeScheduleReady) {
             scope.removeScheduleReady();
         }
@@ -503,8 +508,9 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
             scheduler.inject('schedules-form', false);
             scheduler.injectDetail('schedules-detail', false);
             scheduler.clear();
+            scope.formShowing = true;
             scope.showRRuleDetail = false;
-            parent_scope.schedulesTitle = (mode === 'edit') ? 'Edit Schedule' : 'Create Schedule';
+            scope.schedulesTitle = (mode === 'edit') ? 'Edit Schedule' : 'Create Schedule';
         
             // display the scheduler widget
             showForm = function() {
@@ -530,22 +536,22 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
             $('#group-save-button').prop('disabled', false);
             list.show('slide', { direction: 'right' }, 500);
             $('#schedules-overlay').width($('#schedules-tab').width()).height($('#schedules-tab').height()).hide();
-            parent_scope.refreshSchedule();
+            parent_scope.refreshSchedules();
         };
 
-        parent_scope.showScheduleDetail = function() {
-            if (parent_scope.formShowing) {
+        scope.showScheduleDetail = function() {
+            if (scope.formShowing) {
                 if (scheduler.isValid()) {
                     detail.width($('#schedules-form').width()).height($('#schedules-form').height());
                     target.hide();
                     detail.show();
-                    parent_scope.formShowing = false;
+                    scope.formShowing = false;
                 }
             }
             else {
                 detail.hide();
                 target.show();
-                parent_scope.formShowing = true;
+                scope.formShowing = true;
             }
         };
 
@@ -557,7 +563,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
             container.hide('slide', { direction: 'right' }, 500, restoreList);
         });
         
-        parent_scope.saveScheduleForm = function() {
+        scope.saveScheduleForm = function() {
             if (scheduler.isValid()) {
                 scope.schedulerIsValid = true;
                 SchedulePost({
@@ -574,7 +580,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
             }
         };
 
-        parent_scope.cancelScheduleForm = function() {
+        scope.cancelScheduleForm = function() {
             container.hide('slide', { direction: 'right' }, 500, restoreList);
         };
 
@@ -603,13 +609,13 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
 }])
 
 
-.factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
+.factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
     'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find','WatchInventoryWindowResize',
-    'ParseVariableString', 'ToJSON', 'ScheduleList', 'SourceForm', 'SetSchedulesInnerDialogSize', 'BuildTree',
-    function ($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
+    'ParseVariableString', 'ToJSON', 'GroupsScheduleList', 'SourceForm', 'SetSchedulesInnerDialogSize', 'BuildTree',
+    function ($rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
-        GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, ScheduleList,
+        GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, GroupsScheduleList,
         SourceForm, SetSchedulesInnerDialogSize, BuildTree) {
         return function (params) {
 
@@ -619,15 +625,16 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                 mode = params.mode,  // 'add' or 'edit'
                 inventory_id = params.inventory_id,
                 groups_reload = params.groups_reload,
-                callback = params.callback,
                 generator = GenerateForm,
                 defaultUrl,
                 master = {},
                 choicesReady,
+                base = $location.path().replace(/^\//, '').split('/')[0],
                 modal_scope = parent_scope.$new(),
                 properties_scope = parent_scope.$new(),
                 sources_scope = parent_scope.$new(),
-                x, y, ww, wh, maxrows,
+                elem, x, y, ww, wh, maxrows,
+                group,
                 schedules_url = '';
             
             if (mode === 'edit') {
@@ -637,6 +644,15 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                 defaultUrl = (group_id !== null) ? GetBasePath('groups') + group_id + '/children/' :
                     GetBasePath('inventory') + inventory_id + '/groups/';
             }
+            
+            $('#properties-tab').empty();
+            $('#sources-tab').empty();
+            $('#schedules-list').empty();
+            $('#schedules-form').empty();
+            $('#schedules-detail').empty();
+                    
+            elem = document.getElementById('group-modal-dialog');
+            $compile(elem)(modal_scope);
 
             generator.inject(GroupForm, { mode: 'edit', id: 'properties-tab', breadCrumbs: false, related: false, scope: properties_scope });
             generator.inject(SourceForm, { mode: 'edit', id: 'sources-tab', breadCrumbs: false, related: false, scope: sources_scope });
@@ -647,6 +663,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
             sources_scope.source = SourceForm.fields.source['default'];
             sources_scope.sourcePathRequired = false;
             sources_scope[SourceForm.fields.source_vars.parseTypeName] = 'yaml';
+            sources_scope.update_cache_timeout = 0;
             properties_scope.parseType = 'yaml';
 
             function waitStop() { Wait('stop'); }
@@ -772,11 +789,6 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                     }
                     $('#group-modal-dialog').hide();
                     $('#group-modal-dialog').dialog('destroy');
-                    $('#properties-tab').empty();
-                    $('#sources-tab').empty();
-                    $('#schedules-list').empty();
-                    $('#schedules-form').empty();
-                    $('#schedules-detail').empty();
                     modal_scope.cancelModal();
                 },
                 open: function () {
@@ -799,8 +811,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                 }
                 else if ($(e.target).text() === 'Schedule') {
                     $('#schedules-overlay').hide();
-                    parent_scope.formShowing = true;
-                    ScheduleList({ scope: parent_scope, url: schedules_url });
+                    GroupsScheduleList({ scope: modal_scope, url: schedules_url });
                 }
             });
 
@@ -808,6 +819,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                 modal_scope.groupVariablesLoadedRemove();
             }
             modal_scope.groupVariablesLoadedRemove = modal_scope.$on('groupVariablesLoaded', function () {
+                modal_scope.showSourceTab = (mode === 'edit' && group.has_inventory_sources && Empty(group.summary_fields.inventory_source.source)) ? false :  true;
                 $('#group_tabs a:first').tab('show');
                 Wait('start');
                 $('#group-modal-dialog').dialog('open');
@@ -937,7 +949,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                         key: 'value',
                         val: ''
                     });
-                    parent_scope.showSourceTab = false;
+                    modal_scope.showSchedulesTab = false;
                 }
             });
 
@@ -949,6 +961,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                 Rest.setUrl(defaultUrl);
                 Rest.get()
                     .success(function (data) {
+                        group = data;
                         for (var fld in GroupForm.fields) {
                             if (data[fld]) {
                                 properties_scope[fld] = data[fld];
@@ -1011,6 +1024,14 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
             }
             parent_scope.removeAddTreeRefreshed = parent_scope.$on('GroupTreeRefreshed', function() {
                 //Clean up
+                // Change the selected group
+                if (groups_reload && parent_scope.selected_tree_id !== tree_id) {
+                    parent_scope.showHosts(tree_id, group_id, false);
+                } else {
+                    Wait('stop');
+                }
+                WatchInventoryWindowResize();
+                parent_scope.removeAddTreeRefreshed();
                 if (modal_scope.searchCleanUp) {
                     modal_scope.searchCleanup();
                 }
@@ -1020,14 +1041,6 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                 catch(e) {
                     // ignore
                 }
-                // Change the selected group
-                if (groups_reload && parent_scope.selected_tree_id !== tree_id) {
-                    parent_scope.showHosts(tree_id, group_id, false);
-                } else {
-                    Wait('stop');
-                }
-                WatchInventoryWindowResize();
-                parent_scope.removeAddTreeRefreshed();
             });
 
             if (modal_scope.removeSaveComplete) {
@@ -1035,7 +1048,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
             }
             modal_scope.removeSaveComplete = modal_scope.$on('SaveComplete', function (e, error) {
                 if (!error) {
-                    // Update the view with any changes
+                    // Update the parent view with any changes
                     if (groups_reload) {
                         UpdateGroup({
                             scope: parent_scope,
@@ -1047,15 +1060,8 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                                 source: (sources_scope.source && sources_scope.source.value) ? sources_scope.source.value : ''
                             }
                         });
-                    } else if (callback) {
-                        try {
-                            $('#group-modal-dialog').dialog('close');
-                        }
-                        catch(err) {
-                            //ignore
-                        }
-                        parent_scope.$emit(callback);
-                    } else {
+                        parent_scope.$emit('GroupTreeRefreshed');
+                    } else if (base === 'inventories') {
                         if (mode === 'add') {
                             BuildTree({
                                 scope: parent_scope,
@@ -1066,6 +1072,14 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                         }
                         else {
                             parent_scope.$emit('GroupTreeRefreshed');
+                        }
+                    } else if (base === 'home') {
+                        parent_scope.restoreSearch();
+                        try {
+                            $('#group-modal-dialog').dialog('close');
+                        }
+                        catch(err) {
+                            // ignore
                         }
                     }
                 }
@@ -1112,7 +1126,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                             modal_scope.$emit('SaveComplete', false);
                         })
                         .error(function (data, status) {
-                            modal_scope.$emit('SaveComplete', true);
+                            $('#group_tabs a:eq(1)').tab('show');
                             ProcessErrors(sources_scope, data, status, SourceForm, { hdr: 'Error!',
                                 msg: 'Failed to update group inventory source. PUT status: ' + status });
                         });
@@ -1129,6 +1143,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                         modal_scope.$emit('formSaveSuccess');
                     })
                     .error(function (data, status) {
+                        $('#group_tabs a:eq(0)').tab('show');
                         ProcessErrors(modal_scope, data, status, null, { hdr: 'Error!',
                             msg: 'Failed to update group variables. PUT status: ' + status });
                     });
@@ -1136,19 +1151,18 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
             
             // Cancel
             modal_scope.cancelModal = function () {
+                Wait('stop');
                 try {
                     $('#group-modal-dialog').dialog('close');
                 }
                 catch(e) {
                     //ignore
                 }
-                if (callback) {
-                    parent_scope.$emit(callback);
-                }
-                else {
-                    if (modal_scope.searchCleanup) {
-                        modal_scope.searchCleanup();
-                    }
+
+                //if (modal_scope.searchCleanup) {
+                //    modal_scope.searchCleanup();
+                //}
+                if (base === 'inventories') {
                     WatchInventoryWindowResize();
                 }
             };
@@ -1183,7 +1197,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                                 }
                             })
                             .error(function (data, status) {
-                                Wait('stop');
+                                $('#group_tabs a:eq(0)').tab('show');
                                 ProcessErrors(properties_scope, data, status, GroupForm, { hdr: 'Error!',
                                     msg: 'Failed to update group: ' + group_id + '. PUT status: ' + status
                                 });
@@ -1192,6 +1206,8 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                     else {
                         Rest.post(data)
                             .success(function (data) {
+                                mode = 'edit';   // Once the group is saved, we're in edit mode. We may end up re-saving 
+                                                 // the group, if there is an error on the source
                                 if (properties_scope.variables) {
                                     sources_scope.source_url = data.related.inventory_source;
                                     modal_scope.$emit('updateVariables', json_data, data.related.variable_data);
@@ -1201,6 +1217,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
                                 }
                             })
                             .error(function (data, status) {
+                                $('#group_tabs a:eq(0)').tab('show');
                                 ProcessErrors(properties_scope, data, status, GroupForm, { hdr: 'Error!',
                                     msg: 'Failed to create group: ' + group_id + '. POST status: ' + status
                                 });
@@ -1233,7 +1250,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, P
 
             // Change the lookup and regions when the source changes
             sources_scope.sourceChange = function () {
-                parent_scope.showSourceTab = (sources_scope.source && sources_scope.source.value) ? true : false;
+                parent_scope.showSchedulesTab = (mode === 'edit' && sources_scope.source && sources_scope.source.value) ? true : false;
                 SourceChange({ scope: sources_scope, form: SourceForm });
             };
 

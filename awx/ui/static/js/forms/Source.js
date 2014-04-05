@@ -130,14 +130,14 @@ angular.module('SourceFormDefinition', [])
                 }]
             },
             update_cache_timeout: {
-                label: 'Cache Timeout',
+                label: "Cache Timeout <span class=\"small-text\"> (seconds)</span>",
                 id: 'source-cache-timeout',
                 type: 'number',
                 integer: true,
                 min: 0,
-                ngShow: "update_on_launch",
+                ngShow: "source && source.value !== '' && update_on_launch",
                 spinner: true,
-                "default": '0',
+                "default": 0,
                 addRequired: false,
                 editRequired: false,
                 awPopOver: '<p>Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will ' +

@@ -282,27 +282,7 @@ angular.module('UserFormDefinition', [])
                         label: 'Description'
                     }
                 }
-            },
-
-            projects: {
-                type: 'collection',
-                title: 'Projects',
-                iterator: 'project',
-                open: false,
-
-                actions: {},
-
-                fields: {
-                    name: {
-                        key: true,
-                        label: 'Name'
-                    },
-                    description: {
-                        label: 'Description'
-                    }
-                }
             }
-
         }
 
     }); //UserForm

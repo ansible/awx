@@ -224,11 +224,20 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
         html += "</thead>\n";
         html += "<tbody>\n";
         data.results.forEach( function(row) {
-            html += "<tr>";
-            html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) + ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>";
-            html += "<td>" + ($filter('date')(row.last_updated,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
-            html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\">" + ellipsis(row.summary_fields.group.name) + "</a></td>";
-            html += "</tr>\n";
+            if (row.related.last_update) {
+                html += "<tr>";
+                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\" aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) + ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>";
+                html += "<td>" + ($filter('date')(row.last_updated,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
+                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.related.last_update + "')\">" + ellipsis(row.summary_fields.group.name) + "</a></td>";
+                html += "</tr>\n";
+            }
+            else {
+                html += "<tr>";
+                html += "<td><a href=\"\" aw-tool-tip=\"No sync data\" aw-tip-placement=\"top\"><i class=\"fa icon-job-none\"></i></a></td>";
+                html += "<td>NA</td>";
+                html += "<td><a href=\"\">" + ellipsis(row.summary_fields.group.name) + "</a></td>";
+                html += "</tr>\n";
+            }
         });
         html += "</tbody>\n";
         html += "</table>\n";

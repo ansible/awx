@@ -55,7 +55,7 @@ angular.module('SchedulesListDefinition', [])
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refreshSchedule()"
+                ngClick: "refreshSchedules()"
             },
             stream: {
                 ngClick: "showActivity()",

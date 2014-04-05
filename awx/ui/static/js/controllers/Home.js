@@ -124,7 +124,7 @@ Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location',
 
 function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
-    Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate) {
+    Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //scope.
@@ -134,7 +134,7 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
         defaultUrl = GetBasePath('groups'),
         scope = $scope,
         modal_scope = $scope.$new(),
-        opt;
+        opt, PreviousSearchParams;
 
     generator.inject(list, { mode: 'edit', scope: scope });
         
@@ -173,7 +173,6 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
     scope.removePostRefresh = scope.$on('PostRefresh', function () {
         var i, hosts_status, stat;
         for (i = 0; i < scope.home_groups.length; i++) {
-
             scope.home_groups[i].inventory_name = scope.home_groups[i].summary_fields.inventory.name;
 
             stat = GetSyncStatusMsg({
@@ -288,22 +287,28 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
         });
     };
 
-    if (modal_scope.removeHomeGroupsRefresh) {
-        modal_scope.removeHomeGroupsRefresh();
-    }
-    modal_scope.removeHomeGroupsRefresh = scope.$on('HomeGroupsRefresh', function() {
-        scope.search(list.iterator);
-    });
-
     scope.editGroup = function (group_id, inventory_id) {
+        PreviousSearchParams = Store('CurrentSearchParams');
         GroupsEdit({
-            scope: modal_scope,
+            scope: scope,
             group_id: group_id,
             inventory_id: inventory_id,
             groups_reload: false,
-            mode: 'edit',
-            callback: 'HomeGroupsRefresh'
+            mode: 'edit'
         });
+    };
+
+    scope.restoreSearch = function() {
+        SearchInit({
+            scope: scope,
+            set: PreviousSearchParams.set,
+            list: PreviousSearchParams.list,
+            url: PreviousSearchParams.defaultUrl,
+            iterator: PreviousSearchParams.iterator,
+            sort_order: PreviousSearchParams.sort_order,
+            setWidgets: false
+        });
+        scope.refresh();
     };
 
     scope.viewUpdateStatus = function (id) {
@@ -494,7 +499,7 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
 
 HomeGroups.$inject = ['$scope', '$filter', '$compile', '$location', '$routeParams', 'LogViewer', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
-    'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate'
+    'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store'
 ];
 
 

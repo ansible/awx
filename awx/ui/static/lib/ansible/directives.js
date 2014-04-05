@@ -426,7 +426,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         ctrl.$setValidity('max', true);
                         ctrl.$dirty = true;
                         ctrl.$render();
-                        scope.job_templates_form.$dirty = true;
+                        if (scope.job_templates_form) {
+                            // need a way to find the parent form and mark it dirty
+                            scope.job_templates_form.$dirty = true;
+                        }
                         if (!scope.$$phase) {
                             scope.$digest();
                         }
@@ -436,6 +439,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     opts.disabled = true;
                 }
                 $(elm).spinner(opts);
+                $(elm).on("click", function () {
+                    $(elm).select();
+                });
             }
         };
     }])
