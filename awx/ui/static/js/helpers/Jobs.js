@@ -273,12 +273,16 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
 .factory('JobsListUpdate', ['Rest', function(Rest) {
     return function(params) {
         var scope = params.scope,
-            parent_scope = params.scope,
+            parent_scope = params.parent_scope,
             list = params.list;
 
         scope[list.name].forEach(function(item, item_idx) {
             var fld, field,
                 itm = scope[list.name][item_idx];
+
+            //if (item.type === 'inventory_update') {
+            //    itm.name = itm.name.replace(/^.*?:/,'').replace(/^: /,'');
+            //}
 
             // Set the item type label
             if (list.fields.type) {

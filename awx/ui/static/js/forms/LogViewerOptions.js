@@ -13,8 +13,8 @@ angular.module('LogViewerOptionsDefinition', [])
         well: false,
         
         fields: {
-            "job_type": {
-                label: "Job Type",
+            "job_template": {
+                label: "Job Template",
                 type: "text",
                 readonly: true
             },

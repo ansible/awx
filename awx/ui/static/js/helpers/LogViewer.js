@@ -9,15 +9,16 @@
 
 angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 'VariablesHelper'])
 
-    .factory('LogViewer', ['$compile', 'CreateDialog', 'GetJob', 'Wait', 'GenerateForm', 'LogViewerStatusForm', 'AddTable', 'AddTextarea',
+    .factory('LogViewer', ['$location', '$compile', 'CreateDialog', 'GetJob', 'Wait', 'GenerateForm', 'LogViewerStatusForm', 'AddTable', 'AddTextarea',
     'LogViewerOptionsForm', 'EnvTable', 'GetBasePath', 'LookUpName', 'Empty', 'AddPreFormattedText', 'ParseVariableString', 'GetChoices',
-    function($compile, CreateDialog, GetJob, Wait, GenerateForm, LogViewerStatusForm, AddTable, AddTextarea, LogViewerOptionsForm, EnvTable,
+    function($location, $compile, CreateDialog, GetJob, Wait, GenerateForm, LogViewerStatusForm, AddTable, AddTextarea, LogViewerOptionsForm, EnvTable,
     GetBasePath, LookUpName, Empty, AddPreFormattedText, ParseVariableString, GetChoices) {
         return function(params) {
             var parent_scope = params.scope,
                 url = params.url,
                 getIcon = params.getIcon,
-                scope = parent_scope.$new();
+                scope = parent_scope.$new(true),
+                base = $location.path().replace(/^\//, '').split('/')[0];
             
             if (scope.removeModalReady) {
                 scope.removeModalReady();
@@ -56,6 +57,26 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     scope[key] = data[key];
                 }
                 
+                scope.job_template = '';
+                
+                // For jobs link the name to the job parent
+                if (base === 'jobs') {
+                    if (data.type === 'job') {
+                        scope.name_link = "job_template";
+                        scope.job_template = data.unified_job_template;
+                        scope.job_template_name = data.summary_fields.job_template.name;
+                        scope.name_id = data.unified_job_template;
+                    }
+                    if (data.type === 'project_update') {
+                        scope.name_link = "project";
+                        scope.name_id = data.unified_job_template;
+                    }
+                    if (data.type === 'inventory_update') {
+                        scope.name_link = "inventory_source";
+                        scope.name_id = scope.group;
+                    }
+                }
+
                 AddTable({ scope: scope, form: LogViewerStatusForm, id: 'status-form-container', getIcon: getIcon });
                 AddTable({ scope: scope, form: LogViewerOptionsForm, id: 'options-form-container', getIcon: getIcon });
                 
@@ -200,6 +221,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
 
             scope.modalOK = function() {
                 $('#logviewer-modal-dialog').dialog('close');
+                scope.$destroy();
             };
         };
     }])
@@ -258,7 +280,8 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     { "variable": "project", "url": "/#/projects/" },
                     { "variable": "inventory", "url": "/#/inventories/" },
                     { "variable": "cloud_credential", "url": "/#/credentials/" },
-                    { "variable": "inventory_source", "url": "/#/home/groups/?id=" }
+                    { "variable": "inventory_source", "url": "/#/home/groups/?id={{ group }}" },
+                    { "variable": "job_template", "url": "/#/job_templates/" }
                 ];
 
             html = "<table class=\"table logviewer-status\">\n";
@@ -269,8 +292,13 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     url = Find({ list: urls, key: "variable", val: fld });
                     if (url) {
                         html += "<a href=\"" + url.url;
-                        html += (fld === "inventory_source") ? "{{ group }}" : scope[fld];
+                        html += (fld === "inventory_source") ? "" : scope[fld];
                         html += "\" ng-click=\"modalOK()\">{{ " + fld + '_name' + " }}</a>";
+                    }
+                    else if (fld === 'name' && scope.name_link) {
+                        url = Find({ list: urls, key: "variable", val: scope.name_link });
+                        html += "<a href=\"" + url.url + ( (scope.name_link === 'inventory_source') ? '' : scope.name_id ) + "\" ng-click=\"modalOK()\">{{ " +
+                             ( (scope.name_link === 'inventory_source') ? 'inventory_source_name' : fld ) + " }}</a>";
                     }
                     else if (fld === 'elapsed') {
                         html += scope[fld] + " <span class=\"small-text\">seconds</span>";
