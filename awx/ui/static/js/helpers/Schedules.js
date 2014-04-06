@@ -536,8 +536,8 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
      *  Called from a controller to setup the scope for a schedules list
      *
      */
-    .factory('LoadSchedulesScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'SchedulesControllerInit', 'SchedulesListInit',
-        function(SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit) {
+    .factory('LoadSchedulesScope', ['$routeParams','SearchInit', 'PaginateInit', 'GenerateList', 'SchedulesControllerInit', 'SchedulesListInit',
+        function($routeParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit) {
         return function(params) {
             var parent_scope = params.parent_scope,
                 scope = params.scope,
@@ -587,72 +587,13 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 });
                 parent_scope.$emit('listLoaded');
             });
+
+            if ($routeParams.id__int) {
+                scope[list.iterator + 'SearchField'] = 'id';
+                scope[list.iterator + 'SearchValue'] = $routeParams.id__int;
+                scope[list.iterator + 'SearchFieldLabel'] = 'ID';
+            }
+
             scope.search(list.iterator);
         };
     }]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

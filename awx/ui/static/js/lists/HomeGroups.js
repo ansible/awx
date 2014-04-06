@@ -100,6 +100,11 @@ angular.module('HomeGroupListDefinition', [])
             id: {
                 label: 'ID',
                 searchOnly: true
+            },
+            inventory_source: {
+                label: 'Source ID',
+                searchType: 'int',
+                searchOnly: true
             }
         },
 

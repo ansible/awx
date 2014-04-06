@@ -277,6 +277,12 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
         scope[list.iterator + 'SearchFieldLabel'] = list.fields.has_external_source.label;
     }
 
+    if ($routeParams.inventory_source__id) {
+        scope[list.iterator + 'SearchField'] = 'inventory_source';
+        scope[list.iterator + 'SearchValue'] = $routeParams.inventory_source__id;
+        scope[list.iterator + 'SearchFieldLabel'] = 'Source ID';
+    }
+
     scope.search(list.iterator);
 
     LoadBreadCrumbs();

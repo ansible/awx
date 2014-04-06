@@ -150,18 +150,21 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         return function (obj) {
             var url = '/#/';
             switch (obj.base) {
-            case 'group':
-            case 'host':
-                url += 'home/' + obj.base + 's/?id=' + obj.id;
-                break;
-            case 'job':
-                url += 'jobs/?id__int=' + obj.id;
-                break;
-            case 'inventory':
-                url += 'inventories/' + obj.id + '/';
-                break;
-            default:
-                url += obj.base + 's/' + obj.id + '/';
+                case 'group':
+                case 'host':
+                    url += 'home/' + obj.base + 's/?id=' + obj.id;
+                    break;
+                case 'job':
+                    url += 'jobs/?id__int=' + obj.id;
+                    break;
+                case 'inventory':
+                    url += 'inventories/' + obj.id + '/';
+                    break;
+                case 'schedule':
+                    url = (obj.url) ? '/#' + obj.url : '';
+                    break;
+                default:
+                    url += obj.base + 's/' + obj.id + '/';
             }
             return url;
         };
@@ -185,7 +188,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             // labels
             obj1 = activity.object1;
             obj2 = activity.object2;
-
+            
             // objects
             obj1_obj = (activity.summary_fields[obj1]) ? activity.summary_fields[obj1][0] : null;
             if (obj1 === obj2) {
@@ -417,14 +420,13 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 scope.removeStreamPostRefresh();
             }
             scope.removeStreamPostRefresh = scope.$on('PostRefresh', function () {
-                var i, href, deleted, obj1, obj2;
-                for (i = 0; i < scope.activities.length; i++) {
-                    // Convert event_time date to local time zone
-                    //cDate = new Date(scope.activities[i].timestamp);
-                    //scope.activities[i].timestamp = FormatDate(cDate);
-
+                var href, deleted, obj1, obj2;
+                scope.activities.forEach(function(activity, i) {
+                    var row = scope.activities[i],
+                        type, url;
+                    
                     if (scope.activities[i].summary_fields.actor) {
-                        scope.activities[i].user = "<a href=\"\" ng-click=\"closeStream('/#/users/" + scope.activities[i].summary_fields.actor.id  + "')\">" +
+                        scope.activities[i].user = "<a href=\"/#/users/" + scope.activities[i].summary_fields.actor.id  + "\">" +
                             scope.activities[i].summary_fields.actor.username + "</a>";
                     } else {
                         scope.activities[i].user = 'system';
@@ -434,9 +436,37 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     deleted = /^\_delete/;
                     obj1 = scope.activities[i].object1;
                     obj2 = scope.activities[i].object2;
+                    
+                    if ((obj1 === "schedule" || obj2 === "schedule") && activity.summary_fields.schedule) {
+                        if (activity.summary_fields.inventory_source) {
+                            type = 'inventory_source';
+                            url = '/home/groups/?inventory_source__id=' + row.summary_fields.inventory_source.id;
+                        }
+                        else if (activity.summary_fields.project) {
+                            type = 'project';
+                            url = '/projects/' + activity.summary_fields[type].id + '/schedules/?id__int=';
+                        }
+                        else if (activity.summary_fields.job_template) {
+                            type = 'job_template';
+                            url = '/job_templates/' + activity.summary_fields[type].id + '/schedules/?id__int=';
+                        }
+                        if (obj1 === 'schedule') {
+                            row.summary_fields.schedule[0].url = url + ((type === 'inventory_source') ? '' : row.summary_fields.schedule[0].id);
+                            row.summary_fields.schedule[0].type = type;
+                            row.summary_fields.schedule[0].type_id = activity.summary_fields[type].id;
+                            row.summary_fields.schedule[0].base = 'schedule';
+                        }
+                        if (obj2 === 'schedule') {
+                            row.summary_fields.schedule[1].url = url + ((type === 'inventory_source') ? '' : row.summary_fields.schedule[1].id);
+                            row.summary_fields.schedule[1].type = type;
+                            row.summary_fields.schedule[1].type_id = activity.summary_fields[type].id;
+                            row.summary_fields.schedule[1].base = 'schedule';
+                        }
+                    }
+
                     if (obj1 && scope.activities[i].summary_fields[obj1] && scope.activities[i].summary_fields[obj1].name) {
                         if (!deleted.test(scope.activities[i].summary_fields[obj1].name)) {
-                            href = BuildUrl(scope.activities[i].summary_fields.object1);
+                            href = BuildUrl(scope.activities[i].summary_fields[obj1]);
                             scope.activities[i].objects = "<a href=\"" + href + "\">" + scope.activities[i].summary_fields[obj1].name + "</a>";
                         } else {
                             scope.activities[i].objects = scope.activities[i].summary_fields[obj1].name;
@@ -445,8 +475,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                         scope.activities[i].objects = scope.activities[i].object1;
                     }
                     if (obj2 && scope.activities[i].summary_fields[obj2] && scope.activities[i].summary_fields[obj2].name) {
-                        if (!deleted.test(scope.activities[i].summary_fields.object2.name)) {
-                            href = BuildUrl(scope.activities[i].summary_fields.object2);
+                        if (!deleted.test(scope.activities[i].summary_fields[obj2].name)) {
+                            href = BuildUrl(scope.activities[i].summary_fields[obj2]);
                             scope.activities[i].objects += ", <a href=\"" + href + "\">" + scope.activities[i].summary_fields[obj2].name + "</a>";
                         } else {
                             scope.activities[i].objects += "," + scope.activities[i].summary_fields[obj2].name;
@@ -457,7 +487,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
                     BuildDescription(scope.activities[i]);
 
-                }
+                });
                 // Give ng-repeate a chance to show the data before adjusting the page size.
                 setTimeout(function () {
                     setStreamHeight();
