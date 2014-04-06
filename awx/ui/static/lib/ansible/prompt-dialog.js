@@ -17,22 +17,23 @@
 'use strict';
 
 angular.module('PromptDialog', ['Utilities'])
-    .factory('Prompt', [
-        function () {
+    .factory('Prompt', ['$sce',
+        function ($sce) {
             return function (params) {
 
                 var dialog = angular.element(document.getElementById('prompt-modal')),
                     scope = dialog.scope(), cls;
 
                 scope.promptHeader = params.hdr;
-                scope.promptBody = params.body;
+                scope.promptBody = $sce.trustAsHtml(params.body);
                 scope.promptAction = params.action;
 
                 cls = (params['class'] === null || params['class'] === undefined) ? 'btn-danger' : params['class'];
 
                 $('#prompt_action_btn').removeClass(cls).addClass(cls);
 
-                $(dialog).modal({
+                $('#prompt-modal').off('hidden.bs.modal');
+                $('#prompt-modal').modal({
                     backdrop: 'static',
                     keyboard: true,
                     show: true

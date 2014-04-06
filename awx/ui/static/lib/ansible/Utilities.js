@@ -75,14 +75,14 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  * alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
  * clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
  */
-.factory('Alert', ['$rootScope', '$compile', function ($rootScope, $compile) {
+.factory('Alert', ['$rootScope', '$compile', '$sce', function ($rootScope, $compile, $sce) {
     return function (hdr, msg, cls, action, secondAlert, disableButtons) {
         var scope = $rootScope.$new(), alertClass, e;
         if (secondAlert) {
             e = angular.element(document.getElementById('alert-modal2'));
             $compile(e)(scope);
             scope.alertHeader2 = hdr;
-            scope.alertBody2 = msg;
+            scope.alertBody2 = $sce.trustAsHtml(msg);
             alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
             $('#alert2-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal2').modal({
@@ -106,7 +106,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             e = angular.element(document.getElementById('alert-modal'));
             $compile(e)(scope);
             scope.alertHeader = hdr;
-            scope.alertBody = msg;
+            scope.alertBody = $sce.trustAsHtml(msg);
             alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
             $('#alert-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal').modal({

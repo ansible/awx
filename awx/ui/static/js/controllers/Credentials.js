@@ -101,7 +101,6 @@ function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest
     };
 
     $scope.deleteCredential = function (id, name) {
-
         var action = function () {
             $('#prompt-modal').on('hidden.bs.modal', function () {
                 Wait('start');
@@ -121,7 +120,7 @@ function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest
 
         Prompt({
             hdr: 'Delete',
-            body: 'Are you sure you want to delete ' + name + '?',
+            body: "<div class=\"alert alert-info\">Delete credential " + name + "?</div>",
             action: action
         });
     };

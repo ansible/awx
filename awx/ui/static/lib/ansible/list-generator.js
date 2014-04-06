@@ -282,7 +282,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     // table header row
                     html += "<div class=\"list-table-container\">\n";
                     html += "<table id=\"" + list.name + "_table\" ";
-                    html += "class=\"table";
+                    html += "class=\"table table-condensed";
                     html += (list['class']) ? " " + list['class'] : "";
                     html += (options.mode !== 'summary' && options.mode !== 'edit' && (options.mode === 'lookup' || options.id)) ?
                         ' table-hover-inverse' : '';

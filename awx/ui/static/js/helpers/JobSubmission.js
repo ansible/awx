@@ -30,8 +30,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
     };
 }])
 
-.factory('PromptForCredential', ['Wait', 'GetBasePath', 'LookUpInit', 'JobTemplateForm', 'CredentialList',
-function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
+.factory('PromptForCredential', ['$location', 'Wait', 'GetBasePath', 'LookUpInit', 'JobTemplateForm', 'CredentialList', 'Rest', 'Prompt', 'ProcessErrors',
+function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Rest, Prompt, ProcessErrors) {
     return function(params) {
         
         var scope = params.scope,
@@ -41,22 +41,59 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
         Wait('stop');
         scope.credential = '';
 
-        selectionMade = function () {
-            scope.$emit(callback, scope.credential);
-        };
-        
-        LookUpInit({
-            url: GetBasePath('credentials') + '?kind=ssh',
-            scope: scope,
-            form: JobTemplateForm(),
-            current_item: null,
-            list: CredentialList,
-            field: 'credential',
-            hdr: 'Credential Required',
-            instructions: "Launching this job requires a machine credential. Please select your machine credential now or Cancel to quit.",
-            postAction: selectionMade
+        if (scope.removeShowLookupDialog) {
+            scope.removeShowLookupDialog();
+        }
+        scope.removeShowLookupDialog = scope.$on('ShowLookupDialog', function() {
+            selectionMade = function () {
+                scope.$emit(callback, scope.credential);
+            };
+            
+            LookUpInit({
+                url: GetBasePath('credentials') + '?kind=ssh',
+                scope: scope,
+                form: JobTemplateForm(),
+                current_item: null,
+                list: CredentialList,
+                field: 'credential',
+                hdr: 'Credential Required',
+                instructions: "Launching this job requires a machine credential. Please select your machine credential now or Cancel to quit.",
+                postAction: selectionMade
+            });
+            scope.lookUpCredential();
         });
-        scope.lookUpCredential();
+
+        if (scope.removeAlertNoCredentials) {
+            scope.removeAlertNoCredentials();
+        }
+        scope.removeAlertNoCredentials = scope.$on('AlertNoCredentials', function() {
+            var action = function () {
+                $('#prompt-modal').modal('hide');
+                $location.url('/credentials/add');
+            };
+
+            Prompt({
+                hdr: 'Machine Credential Required',
+                body: "<div class=\"alert alert-info\">There are no machine credentials defined in Tower. Launching this job requires a machine credential. " +
+                    "Create one now?",
+                action: action
+            });
+        });
+
+        Rest.setUrl(GetBasePath('credentials') + '?kind=ssh');
+        Rest.get()
+            .success(function(data) {
+                if (data.results.length > 0) {
+                    scope.$emit('ShowLookupDialog');
+                }
+                else {
+                    scope.$emit('AlertNoCredentials');
+                }
+            })
+            .error(function(data,status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Checking for machine credentials failed. GET returned: ' + status });
+            });
     };
 }])
 
@@ -76,10 +113,11 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
             
             function promptPassword() {
                 var e, fld, field;
-
+                console.log(passwords);
                 password = passwords.pop();
                 
                 // Prompt for password
+                html = "";
                 html += "<form name=\"password_form\" novalidate>\n";
                 field = form.fields[password];
                 fld = password;
@@ -123,7 +161,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                     html += "</div>\n";
                 }
                 html += "</form>\n";
-                $('#password-body').empty().html(html);
+                $('#password-body').html(html);
                 e = angular.element(document.getElementById('password-modal'));
                 $compile(e)(scope);
                 $('#password-modal').modal();
@@ -134,9 +172,13 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
 
             scope.passwordAccept = function() {
                 $('#password-modal').modal('hide');
+                $('#password-modal').off('shown.bs.modal');
+                $('#password-body').empty();
                 acceptedPasswords[password] = scope[password];
                 if (passwords.length > 0) {
-                    promptPassword();
+                    setTimeout(function() {
+                        promptPassword();
+                    }, 500);
                 }
                 else {
                     parent_scope.$emit(callback, acceptedPasswords);
@@ -146,11 +188,12 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
 
             scope.passwordCancel = function() {
                 $('#password-modal').modal('hide');
+                $('#password-modal').off('shown.bs.modal');
+                $('#password-body').empty();
                 Alert('Missing Password', 'Required password(s) not provided. Your request will not be submitted.', 'alert-info');
                 parent_scope.$emit('PasswordsCanceled');
                 scope.$destroy();
             };
-
             promptPassword();
         };
     }])
