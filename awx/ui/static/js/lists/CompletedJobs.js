@@ -60,12 +60,15 @@ angular.module('CompletedJobsDefinition', [])
                 link: false,
                 columnClass: "col-md-2 hidden-sm hidden-xs",
                 columnShow: "showJobType",
-                searchable: false
+                searchable: true,
+                searchType: 'select',
+                searchOptions: []    // populated via GetChoices() in controller
             },
             name: {
                 label: 'Name',
                 columnClass: 'col-md-3 col-xs-5',
-                ngClick: "viewJobLog(completed_job.id, completed_job.nameHref)"
+                ngClick: "viewJobLog(completed_job.id, completed_job.nameHref)",
+                defaultSearchField: true
             },
             failed: {
                 label: 'Job failed?',

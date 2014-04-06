@@ -56,7 +56,8 @@ angular.module('ScheduledJobsDefinition', [])
                 sourceField: 'name',
                 ngClick: "editSchedule(schedule.id)",
                 awToolTip: "{{ schedule.nameTip }}",
-                dataPlacement: "top"
+                dataPlacement: "top",
+                defaultSearchField: true
             }
         },
 

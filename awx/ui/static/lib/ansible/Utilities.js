@@ -77,14 +77,14 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  */
 .factory('Alert', ['$rootScope', '$compile', function ($rootScope, $compile) {
     return function (hdr, msg, cls, action, secondAlert, disableButtons) {
-        var scope = $rootScope.$new(), e;
+        var scope = $rootScope.$new(), alertClass, e;
         if (secondAlert) {
-            $('#alert2-modal-msg').attr({ "class": "alert" });
-            scope.alertHeader2 = hdr;
-            scope.alertBody2 = msg;
-            scope.alertClass2 = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
             e = angular.element(document.getElementById('alert-modal2'));
             $compile(e)(scope);
+            scope.alertHeader2 = hdr;
+            scope.alertBody2 = msg;
+            alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
+            $('#alert2-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal2').modal({
                 show: true,
                 keyboard: true,
@@ -103,12 +103,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 }
             });
         } else {
-            $('#alert-modal-msg').attr({ "class": "alert" });
-            scope.alertHeader = hdr;
-            scope.alertBody = msg;
-            scope.alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
             e = angular.element(document.getElementById('alert-modal'));
             $compile(e)(scope);
+            scope.alertHeader = hdr;
+            scope.alertBody = msg;
+            alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
+            $('#alert-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal').modal({
                 show: true,
                 keyboard: true,

@@ -140,6 +140,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                 }
                 else {
                     parent_scope.$emit(callback, acceptedPasswords);
+                    scope.$destroy();
                 }
             };
 
@@ -147,6 +148,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
                 $('#password-modal').modal('hide');
                 Alert('Missing Password', 'Required password(s) not provided. Your request will not be submitted.', 'alert-info');
                 parent_scope.$emit('PasswordsCanceled');
+                scope.$destroy();
             };
 
             promptPassword();
@@ -223,7 +225,7 @@ function(Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList) {
             if (scope.removeStartPlaybookRun) {
                 scope.removeStartPlaybookRun();
             }
-            scope.removeStartJob = scope.$on('StartPlaybookRun', function(e, passwords) {
+            scope.removeStartPlaybookRun = scope.$on('StartPlaybookRun', function(e, passwords) {
                 LaunchJob({
                     scope: scope,
                     url: launch_url,

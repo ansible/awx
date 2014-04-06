@@ -687,10 +687,31 @@ angular.module('GeneratorHelpers', [])
             form = params.template,
             size = params.size,
             includeSize = (params.includeSize === undefined) ? true : params.includeSize,
-            fld,
             i, html = '',
             modifier,
-            searchWidgets = (params.searchWidgets) ? params.searchWidgets : 1;
+            searchWidgets = (params.searchWidgets) ? params.searchWidgets : 1,
+            sortedKeys;
+        
+        function addSearchFields(idx) {
+            var html = '';
+            sortedKeys = Object.keys(form.fields).sort();
+            sortedKeys.forEach(function(fld) {
+                if ((form.fields[fld].searchable === undefined || form.fields[fld].searchable === true) &&
+                    (((form.fields[fld].searchWidget === undefined || form.fields[fld].searchWidget === 1) && idx === 1) ||
+                    (form.fields[fld].searchWidget === idx))) {
+                    html += "<li><a href=\"\" ng-click=\"setSearchField('" + iterator + "','";
+                    html += fld + "','";
+                    if (form.fields[fld].searchLabel) {
+                        html += form.fields[fld].searchLabel + "', " + idx + ")\">" +
+                            form.fields[fld].searchLabel + "</a></li>\n";
+                    } else {
+                        html += form.fields[fld].label.replace(/<br \/>/g, ' ') + "', " + idx + ")\">" +
+                            form.fields[fld].label.replace(/<br \/>/g, ' ') + "</a></li>\n";
+                    }
+                }
+            });
+            return html;
+        }
 
         for (i = 1; i <= searchWidgets; i++) {
             modifier = (i === 1) ? '' : i;
@@ -713,21 +734,7 @@ angular.module('GeneratorHelpers', [])
             html += "<span class=\"caret\"></span>\n";
             html += "</button>\n";
             html += "<ul class=\"dropdown-menu\" id=\"" + iterator + "SearchDropdown" + modifier + "\">\n";
-            for (fld in form.fields) {
-                if ((form.fields[fld].searchable === undefined || form.fields[fld].searchable === true) &&
-                    (((form.fields[fld].searchWidget === undefined || form.fields[fld].searchWidget === 1) && i === 1) ||
-                    (form.fields[fld].searchWidget === i))) {
-                    html += "<li><a href=\"\" ng-click=\"setSearchField('" + iterator + "','";
-                    html += fld + "','";
-                    if (form.fields[fld].searchLabel) {
-                        html += form.fields[fld].searchLabel + "', " + i + ")\">" +
-                            form.fields[fld].searchLabel + "</a></li>\n";
-                    } else {
-                        html += form.fields[fld].label.replace(/<br \/>/g, ' ') + "', " + i + ")\">" +
-                            form.fields[fld].label.replace(/<br \/>/g, ' ') + "</a></li>\n";
-                    }
-                }
-            }
+            html += addSearchFields(i);
             html += "</ul>\n";
             html += "</div><!-- input-group-btn -->\n";
 

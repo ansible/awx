@@ -51,12 +51,15 @@ angular.module('QueuedJobsDefinition', [])
                 ngBind: 'queued_job.type_label',
                 link: false,
                 columnClass: "col-md-2 hidden-sm hidden-xs",
-                searchable: false
+                searchable: true,
+                searchType: 'select',
+                searchOptions: []    // populated via GetChoices() in controller
             },
             name: {
                 label: 'Name',
                 columnClass: 'col-sm-3 col-xs-5',
-                ngClick: "viewJobLog(queued_job.id, queued_job.nameHref)"
+                ngClick: "viewJobLog(queued_job.id, queued_job.nameHref)",
+                defaultSearchField: true
             }
         },
 

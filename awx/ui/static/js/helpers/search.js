@@ -57,8 +57,20 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     }
                 }
 
+                // Default the search field to 'defaultSearchField', if one exists
+                for (fld in list.fields) {
+                    if (list.fields[fld].searchWidget === undefined && widget === 1 ||
+                        list.fields[fld].searchWidget === widget) {
+                        if (list.fields[fld].defaultSearchField) {
+                            scope[iterator + 'SearchField' + modifier] = fld;
+                            scope[iterator + 'SearchFieldLabel' + modifier] = list.fields[fld].label;
+                        }
+                    }
+                }
+
+                // A field marked as key may not be 'searchable', and there might not be a 'defaultSearchField',
+                // so find the first searchable field.    
                 if (Empty(scope[iterator + 'SearchField' + modifier])) {
-                    // A field marked as key may not be 'searchable'. Find the first searchable field.
                     for (fld in list.fields) {
                         if (list.fields[fld].searchWidget === undefined && widget === 1 ||
                             list.fields[fld].searchWidget === widget) {
@@ -203,6 +215,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     list.fields[fld].searchType === 'select' || list.fields[fld].searchType === 'select_or')) {
                     scope[iterator + 'SelectShow' + modifier] = true;
                     scope[iterator + 'SearchSelectOpts' + modifier] = list.fields[fld].searchOptions;
+                    scope[iterator + 'SearchType' + modifier] = '';
                 } else if (list.fields[fld].searchType && list.fields[fld].searchType === 'int') {
                     //scope[iterator + 'HideSearchType' + modifier] = true;
                     scope[iterator + 'SearchType' + modifier] = 'int';
@@ -366,10 +379,12 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                 // handle fields whose source is a related model e.g. inventories.organization
                                 scope[iterator + 'SearchParams'] += '&' + list.fields[scope[iterator + 'SearchField' + modifier]].sourceModel + '__' +
                                     list.fields[scope[iterator + 'SearchField' + modifier]].sourceField + '__';
-                            } else if ((list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'select') &&
-                                (scope[iterator + 'SearchSelectValue' + modifier].value === '' ||
-                                    scope[iterator + 'SearchSelectValue' + modifier].value === null)) {
+                            } else if ( list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'select' &&
+                                Empty(scope[iterator + 'SearchSelectValue' + modifier].value) ) {
                                 scope[iterator + 'SearchParams'] += '&' + scope[iterator + 'SearchField' + modifier] + '__';
+                            } else if ( list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'select' &&
+                                !Empty(scope[iterator + 'SearchSelectValue' + modifier].value) ) {
+                                scope[iterator + 'SearchParams'] += '&' + scope[iterator + 'SearchField' + modifier];
                             } else {
                                 scope[iterator + 'SearchParams'] += '&' + scope[iterator + 'SearchField' + modifier] + '__';
                             }
@@ -381,10 +396,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                             } else if (list.fields[scope[iterator + 'SearchField' + modifier]].searchType &&
                                 list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'gtzero') {
                                 scope[iterator + 'SearchParams'] += 'gt=0';
-                            } else if ((list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'select') &&
-                                (scope[iterator + 'SearchSelectValue' + modifier].value === '' ||
-                                    scope[iterator + 'SearchSelectValue' + modifier].value === null)) {
-                                scope[iterator + 'SearchParams'] += 'iexact=';
+                            } else if ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'select') &&
+                                Empty(scope[iterator + 'SearchSelectValue' + modifier].value) ) {
+                                scope[iterator + 'SearchParams'] += '=iexact=';
                             } else {
                                 scope[iterator + 'SearchParams'] += scope[iterator + 'SearchType' + modifier] + '=';
                             }

@@ -51,12 +51,15 @@ angular.module('RunningJobsDefinition', [])
                 ngBind: 'running_job.type_label',
                 link: false,
                 columnClass: "col-md-2 hidden-sm hidden-xs",
-                searchable: false
+                searchable: true,
+                searchType: 'select',
+                searchOptions: []    // populated via GetChoices() in controller
             },
             name: {
                 label: 'Name',
                 columnClass: 'col-md-3 col-xs-5',
-                ngClick: "viewJobLog(running_job.id, running_job.nameHref)"
+                ngClick: "viewJobLog(running_job.id, running_job.nameHref)",
+                defaultSearchField: true
             }
         },
 

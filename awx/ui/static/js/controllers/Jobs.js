@@ -34,7 +34,16 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         $scope.removeBuildJobsList();
     }
     $scope.removeBuildJobsList = $scope.$on('buildJobsList', function() {
-        completed_scope = $scope.$new();
+        if (CompletedJobsList.fields.type) {
+            CompletedJobsList.fields.type.searchOptions = $scope.type_choices;
+        }
+        if (RunningJobsList.fields.type) {
+            RunningJobsList.fields.type.searchOptions = $scope.type_choices;
+        }
+        if (QueuedJobsList.fields.type) {
+            QueuedJobsList.fields.type.searchOptions = $scope.type_choices;
+        }
+        completed_scope = $scope.$new(true);
         LoadJobsScope({
             parent_scope: $scope,
             scope: completed_scope,
@@ -42,7 +51,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             id: 'completed-jobs',
             url: GetBasePath('unified_jobs') + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled'
         });
-        running_scope = $scope.$new();
+        running_scope = $scope.$new(true);
         LoadJobsScope({
             parent_scope: $scope,
             scope: running_scope,
@@ -50,7 +59,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             id: 'active-jobs',
             url: GetBasePath('unified_jobs') + '?status=running'
         });
-        queued_scope = $scope.$new();
+        queued_scope = $scope.$new(true);
         LoadJobsScope({
             parent_scope: $scope,
             scope: queued_scope,
@@ -58,7 +67,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             id: 'queued-jobs',
             url: GetBasePath('unified_jobs') + '?or__status=pending&or__status=waiting&or__status=new'
         });
-        scheduled_scope = $scope.$new();
+        scheduled_scope = $scope.$new(true);
         LoadSchedulesScope({
             parent_scope: $scope,
             scope: scheduled_scope,
