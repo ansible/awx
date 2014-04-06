@@ -230,9 +230,13 @@ def process_graph(graph, task_capacity):
         node_obj = task_node['node_object']
         node_args = task_node['metadata']
         impact = node_obj.task_impact
+        node_is_job = graph.get_node_type(node_obj) == 'job'
         if impact <= remaining_volume or running_impact == 0:
+            node_dependencies = graph.get_dependents(node_obj)
+            if graph.get_node_type(node_obj) == 'job': # Allow other tasks to continue if a job fails, even if they are other jobs
+                node_dependencies = []
             dependent_nodes = [{'type': graph.get_node_type(node_obj), 'id': node_obj.id}] + \
-                              [{'type': graph.get_node_type(n['node_object']), 'id': n['node_object'].id} for n in graph.get_dependents(node_obj)]
+                              [{'type': graph.get_node_type(n['node_object']), 'id': n['node_object'].id} for n in node_dependencies]
             error_handler = handle_work_error.s(subtasks=dependent_nodes)
             start_status = node_obj.start(error_callback=error_handler)
             if not start_status:
