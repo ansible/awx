@@ -49,7 +49,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             scope: completed_scope,
             list: CompletedJobsList,
             id: 'completed-jobs',
-            url: GetBasePath('unified_jobs') + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled'
+            url: GetBasePath('unified_jobs') + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled',
         });
         running_scope = $scope.$new(true);
         LoadJobsScope({

@@ -282,7 +282,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 if (calcOnly) {
                     scope.$emit('searchParamsReady', url);
                 }
-                else if (defaultUrl) {
+                else if (defaultUrl && !/undefined/.test(url)) {
                     Refresh({
                         scope: scope,
                         set: set,

@@ -342,14 +342,15 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
  *  Called from JobsList controller to load each section or list on the page
  *
  */
-.factory('LoadJobsScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'JobsControllerInit', 'JobsListUpdate',
-    function(SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate) {
+.factory('LoadJobsScope', ['$routeParams', '$location', 'SearchInit', 'PaginateInit', 'GenerateList', 'JobsControllerInit', 'JobsListUpdate',
+    function($routeParams, $location, SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate) {
     return function(params) {
         var parent_scope = params.parent_scope,
             scope = params.scope,
             list = params.list,
             id = params.id,
-            url = params.url;
+            url = params.url,
+            base = $location.path().replace(/^\//, '').split('/')[0];
 
         GenerateList.inject(list, {
             mode: 'edit',
@@ -384,6 +385,14 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             JobsListUpdate({ scope: scope, parent_scope: parent_scope, list: list });
             parent_scope.$emit('listLoaded');
         });
+
+        if (base === 'jobs' && list.name === 'completed_jobs') {
+            if ($routeParams.id__int) {
+                scope[list.iterator + 'SearchField'] = 'id';
+                scope[list.iterator + 'SearchValue'] = $routeParams.id__int;
+                scope[list.iterator + 'SearchFieldLabel'] = 'Job ID';
+            }
+        }
         scope.search(list.iterator);
     };
 }])

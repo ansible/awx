@@ -155,7 +155,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 url += 'home/' + obj.base + 's/?id=' + obj.id;
                 break;
             case 'job':
-                url += 'jobs/?id=' + obj.id;
+                url += 'jobs/?id__int=' + obj.id;
                 break;
             case 'inventory':
                 url += 'inventories/' + obj.id + '/';
@@ -202,7 +202,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
             if (obj2_obj && obj2_obj.name && !/^_delete/.test(obj2_obj.name)) {
                 obj2_obj.base = obj2;
-                descr += obj2 + ' <a href=\"' + BuildUrl(obj2_obj) + '\">' + obj2_obj.name + '</a>' + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
+                descr += obj2 + " <a href=\"" + BuildUrl(obj2_obj) + "\">" + obj2_obj.name + '</a>' + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
                 descr_nolink += obj2 + ' ' + obj2_obj.name + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
             } else if (obj2) {
                 name = '';
@@ -214,7 +214,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             }
             if (obj1_obj && obj1_obj.name && !/^\_delete/.test(obj1_obj.name)) {
                 obj1_obj.base = obj1;
-                descr += obj1 + ' <a href=\"' + BuildUrl(obj1_obj) + '\">' + obj1_obj.name + '</a>';
+                descr += obj1 + " <a href=\"" + BuildUrl(obj1_obj) + "\" >" + obj1_obj.name + '</a>';
                 descr_nolink += obj1 + ' ' + obj1_obj.name;
             } else if (obj1) {
                 name = '';
@@ -229,7 +229,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                             name = ' ' + activity.changes.name[0];
                             name_nolink = name;
                         }
-                    } else if (obj1 === 'job' && obj1_obj && activity.changes && activity.changes.job_template) {
+                    /*} else if (obj1 === 'job' && obj1_obj && activity.changes && activity.changes.job_template) {
                         // Hack for job activity where the template name is known
                         if (activity.operation !== 'delete') {
                             obj1_obj.base = obj1;
@@ -248,7 +248,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                         } else {
                             name = ' ' + obj1_obj.id;
                             name_nolink = name;
-                        }
+                        }*/
                     }
                 } else if (obj1_obj && obj1_obj.name) {
                     name = ' ' + stripDeleted(obj1_obj.name);
@@ -263,9 +263,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     }
 ])
 
-.factory('ShowDetail', ['$rootScope', 'Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate',
+.factory('ShowDetail', ['$filter', '$rootScope', 'Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate',
     'ActivityDetailForm', 'Empty', 'Find',
-    function ($rootScope, Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm, Empty, Find) {
+    function ($filter, $rootScope, Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm, Empty, Find) {
         return function (params) {
 
             var activity_id = params.activity_id,
@@ -287,7 +287,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 scope = generator.inject(form, { mode: 'edit', modal: true, related: false });
                 scope.changes = activity.changes_stringified;
                 scope.user = ((activity.summary_fields.actor) ? activity.summary_fields.actor.username : 'system') +
-                    ' on ' + FormatDate(new Date(activity.timestamps));
+                    ' on ' + $filter('date')(activity.timestamp, "MM/dd/yy HH:mm:ss");
                 scope.operation = activity.description_nolink;
 
                 scope.formModalAction = function () {
@@ -399,6 +399,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 if (inUrl) {
                     $location.path(inUrl);
                 }
+                scope.$destroy();
             };
 
             scope.refreshStream = function () {
@@ -416,14 +417,14 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 scope.removeStreamPostRefresh();
             }
             scope.removeStreamPostRefresh = scope.$on('PostRefresh', function () {
-                var i, cDate, href, deleted, obj1, obj2;
+                var i, href, deleted, obj1, obj2;
                 for (i = 0; i < scope.activities.length; i++) {
                     // Convert event_time date to local time zone
-                    cDate = new Date(scope.activities[i].timestamp);
-                    scope.activities[i].timestamp = FormatDate(cDate);
+                    //cDate = new Date(scope.activities[i].timestamp);
+                    //scope.activities[i].timestamp = FormatDate(cDate);
 
                     if (scope.activities[i].summary_fields.actor) {
-                        scope.activities[i].user = "<a href=\"/#/users/" + scope.activities[i].summary_fields.actor.id + "\">" +
+                        scope.activities[i].user = "<a href=\"\" ng-click=\"closeStream('/#/users/" + scope.activities[i].summary_fields.actor.id  + "')\">" +
                             scope.activities[i].summary_fields.actor.username + "</a>";
                     } else {
                         scope.activities[i].user = 'system';

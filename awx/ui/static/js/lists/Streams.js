@@ -27,7 +27,8 @@ angular.module('StreamListDefinition', [])
                 key: true,
                 desc: true,
                 noLink: true,
-                searchable: false
+                searchable: false,
+                filter: "date:'MM/dd/yy HH:mm:ss'"
             },
             user: {
                 label: 'Initiated by',
@@ -109,7 +110,7 @@ angular.module('StreamListDefinition', [])
                 searchOnly: true,
                 searchObject: 'job',
                 searchPlaceholder: 'Job name',
-                searchOnID: true,
+                //searchOnID: true,
                 searchWidget: 2,
                 searchField: 'object1'
             },
@@ -193,7 +194,7 @@ angular.module('StreamListDefinition', [])
                 searchOnly: true,
                 searchObject: 'job',
                 searchPlaceholder: 'Related job name',
-                searchOnID: true,
+                //searchOnID: true,
                 searchWidget: 3,
                 searchField: 'object2'
             },

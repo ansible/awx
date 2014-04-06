@@ -113,7 +113,6 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             
             function promptPassword() {
                 var e, fld, field;
-                console.log(passwords);
                 password = passwords.pop();
                 
                 // Prompt for password
