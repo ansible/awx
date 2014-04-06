@@ -1470,6 +1470,8 @@ class ActivityStreamSerializer(BaseSerializer):
                 rel[fk] = []
                 for thisItem in allm2m:
                     rel[fk].append(reverse('api:' + fk + '_detail', args=(thisItem.id,)))
+                    if fk == 'schedule':
+                        rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url()
         return rel
 
     def get_summary_fields(self, obj):
@@ -1481,9 +1483,9 @@ class ActivityStreamSerializer(BaseSerializer):
                 allm2m = getattr(obj, fk).all()
                 if allm2m.count() > 0:
                     summary_fields[fk] = []
-                    summary_fields['job_template'] = []
                     for thisItem in allm2m:
                         if fk == 'job':
+                            summary_fields['job_template'] = []
                             job_template_item = {}
                             job_template_fields = SUMMARIZABLE_FK_FIELDS['job_template']
                             job_template = getattr(thisItem, 'job_template', None)
@@ -1493,6 +1495,11 @@ class ActivityStreamSerializer(BaseSerializer):
                                     if fval is not None:
                                         job_template_item[field] = fval
                                 summary_fields['job_template'].append(job_template_item)
+                        if fk == 'schedule':
+                            unified_job_template = getattr(thisItem, 'unified_job_template', None)
+                            if unified_job_template is not None:
+                                summary_fields[get_type_for_model(unified_job_template)] = {'id': unified_job_template.id,
+                                                                                            'name': unified_job_template.name}
                         thisItemDict = {}
                         if 'id' not in related_fields:
                             related_fields = related_fields + ('id',)
