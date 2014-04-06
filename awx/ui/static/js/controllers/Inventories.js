@@ -129,7 +129,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
             if (inventory.has_inventory_sources) {
                 if (inventory.inventory_sources_with_failures > 0) {
                     $scope.inventories[idx].syncStatus = 'error';
-                    $scope.inventories[idx].syncTip = inventory.groups_with_active_failures + ' groups with sync failures. Click for details';
+                    $scope.inventories[idx].syncTip = inventory.inventory_sources_with_failures + ' groups with sync failures. Click for details';
                 }
                 else {
                     $scope.inventories[idx].syncStatus = 'successful';

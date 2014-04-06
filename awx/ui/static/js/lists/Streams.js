@@ -108,7 +108,7 @@ angular.module('StreamListDefinition', [])
                 label: 'Job',
                 searchOnly: true,
                 searchObject: 'job',
-                searchPlaceholder: 'Job id',
+                searchPlaceholder: 'Job name',
                 searchOnID: true,
                 searchWidget: 2,
                 searchField: 'object1'
@@ -192,7 +192,7 @@ angular.module('StreamListDefinition', [])
                 label: 'Job',
                 searchOnly: true,
                 searchObject: 'job',
-                searchPlaceholder: 'Job id',
+                searchPlaceholder: 'Related job name',
                 searchOnID: true,
                 searchWidget: 3,
                 searchField: 'object2'

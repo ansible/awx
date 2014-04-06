@@ -154,6 +154,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             case 'host':
                 url += 'home/' + obj.base + 's/?id=' + obj.id;
                 break;
+            case 'job':
+                url += 'jobs/?id=' + obj.id;
+                break;
             case 'inventory':
                 url += 'inventories/' + obj.id + '/';
                 break;
