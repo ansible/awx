@@ -15,6 +15,7 @@ angular.module('JobHostDefinition', [])
         name: 'jobhosts',
         iterator: 'jobhost',
         editTitle: 'All summaries',
+        "class": "table-condensed",
         index: true,
         hover: true,
 
@@ -40,13 +41,6 @@ angular.module('JobHostDefinition', [])
         },
 
         fields: {
-            job: {
-                label: 'Job ID',
-                ngClick: "showJob(jobhost.job)",
-                columnShow: 'host_id !== null',
-                key: true,
-                desc: true
-            },
             host: {
                 label: 'Host',
                 key: true,

@@ -17,6 +17,7 @@ angular.module('JobEventsListDefinition', [])
         editTitle: 'Job Events',
         index: false,
         hover: true,
+        "class": "condensed",
         hasChildren: true,
         filterBy: '{ show: true }',
 
