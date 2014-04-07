@@ -21,8 +21,6 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
 
     LoadBreadCrumbs();
 
-    $scope.showJobType = true;
-    
     // Add breadcrumbs
     e = angular.element(document.getElementById('breadcrumbs'));
     e.html(Breadcrumbs({ list: { editTitle: 'Jobs' } , mode: 'edit' }));
@@ -44,6 +42,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             QueuedJobsList.fields.type.searchOptions = $scope.type_choices;
         }
         completed_scope = $scope.$new(true);
+        completed_scope.showJobType = true;
         LoadJobsScope({
             parent_scope: $scope,
             scope: completed_scope,

@@ -8,7 +8,7 @@
 'use strict';
 
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-    'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition' ])
+    'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog'])
 
 .factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors', function(Rest, Wait, ProcessErrors) {
     return function(params) {
@@ -97,103 +97,147 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
     };
 }])
 
-.factory('PromptForPasswords', ['$compile', 'Wait', 'Alert', 'CredentialForm',
-    function($compile, Wait, Alert, CredentialForm) {
+.factory('PromptForPasswords', ['$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateDialog',
+    function($compile, Wait, Alert, CredentialForm, CreateDialog) {
         return function(params) {
             var parent_scope = params.scope,
                 passwords = params.passwords,
                 callback = params.callback || 'PasswordsAccepted',
-                password,
                 form = CredentialForm,
-                html = "",
                 acceptedPasswords = {},
-                scope = parent_scope.$new();
-
+                scope = parent_scope.$new(),
+                e, buttons;
+                
             Wait('stop');
             
-            function promptPassword() {
-                var e, fld, field;
-                password = passwords.pop();
-                
-                // Prompt for password
+            function buildHtml() {
+                var fld, field, html;
                 html = "";
+                html += "<div class=\"alert alert-info\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
                 html += "<form name=\"password_form\" novalidate>\n";
-                field = form.fields[password];
-                fld = password;
-                scope[fld] = '';
-                html += "<div class=\"form-group\">\n";
-                html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
-                html += "<input type=\"password\" ";
-                html += "ng-model=\"" + fld + '" ';
-                html += 'name="' + fld + '" ';
-                html += "class=\"password-field form-control\" ";
-                html += "required ";
-                html += "/>";
-                html += "<br />\n";
-                // Add error messages
-                html += "<span class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
-                    "password_form." + fld + ".$error.required\">A value is required!</span>\n";
-                html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-                html += "</div>\n";
-
-                // Add the related confirm field
-                if (field.associated) {
-                    fld = field.associated;
-                    field = form.fields[field.associated];
+                
+                passwords.forEach(function(password) {
+                    // Prompt for password
+                    field = form.fields[password];
+                    fld = password;
                     scope[fld] = '';
                     html += "<div class=\"form-group\">\n";
                     html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
                     html += "<input type=\"password\" ";
                     html += "ng-model=\"" + fld + '" ';
                     html += 'name="' + fld + '" ';
-                    html += "class=\"form-control\" ";
+                    html += "class=\"password-field form-control input-sm\" ";
+                    html += (field.associated) ? "ng-change=\"clearPWConfirm('" + field.associated + "')\" " : "";
                     html += "required ";
-                    html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
-                    html += "/>";
-                    html += "<br />\n";
+                    html += " >";
                     // Add error messages
-                    html += "<span class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
-                        "password_form." + fld + ".$error.required\">A value is required!</span>\n";
-                    html += (field.awPassMatch) ? "<span class=\"error\" ng-show=\"password_form." + fld +
-                        ".$error.awpassmatch\">Must match Password value</span>\n" : "";
-                    html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
+                    html += "<div class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
+                        "password_form." + fld + ".$error.required\">A value is required!</div>\n";
+                    html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
                     html += "</div>\n";
-                }
-                html += "</form>\n";
-                $('#password-body').html(html);
-                e = angular.element(document.getElementById('password-modal'));
-                $compile(e)(scope);
-                $('#password-modal').modal();
-                $('#password-modal').on('shown.bs.modal', function () {
-                    $('#password-body').find('input[type="password"]:first').focus();
+
+                    // Add the related confirm field
+                    if (field.associated) {
+                        fld = field.associated;
+                        field = form.fields[field.associated];
+                        scope[fld] = '';
+                        html += "<div class=\"form-group\">\n";
+                        html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
+                        html += "<input type=\"password\" ";
+                        html += "ng-model=\"" + fld + '" ';
+                        html += 'name="' + fld + '" ';
+                        html += "class=\"form-control input-sm\" ";
+                        html += "ng-change=\"checkStatus()\" ";
+                        html += "required ";
+                        html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
+                        html += "/>";
+                        // Add error messages
+                        html += "<div class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
+                            "password_form." + fld + ".$error.required\">A value is required!</span>\n";
+                        html += (field.awPassMatch) ? "<span class=\"error\" ng-show=\"password_form." + fld +
+                            ".$error.awpassmatch\">Must match Password value</div>\n" : "";
+                        html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+                        html += "</div>\n";
+                    }
                 });
+                html += "</form>\n";
+                return html;
             }
 
+            $('#password-modal').empty().html(buildHtml);
+            e = angular.element(document.getElementById('password-modal'));
+            $compile(e)(scope);
+
+            buttons = [{
+                label: "Cancel",
+                onClick: function() {
+                    scope.passwordCancel();
+                },
+                icon: "fa-times",
+                "class": "btn btn-default",
+                "id": "password-cancel-button"
+            },{
+                label: "Continue",
+                onClick: function() {
+                    scope.passwordAccept();
+                },
+                icon: "fa-check",
+                "class": "btn btn-primary",
+                "id": "password-accept-button"
+            }];
+
+            CreateDialog({
+                id: 'password-modal',
+                scope: scope,
+                buttons: buttons,
+                width: 600,
+                height: (passwords.length > 1) ? 700 : 500,
+                minWidth: 500,
+                title: 'Passwords Required',
+                callback: 'DialogReady'
+            });
+
+            if (scope.removeDialogReady) {
+                scope.removeDialogReady();
+            }
+            scope.removeDialogReady = scope.$on('DialogReady', function() {
+                $('#password-modal').dialog('open');
+                $('#password-accept-button').attr({ "disabled": "disabled" });
+            });
+            
             scope.passwordAccept = function() {
-                $('#password-modal').modal('hide');
-                $('#password-modal').off('shown.bs.modal');
-                $('#password-body').empty();
-                acceptedPasswords[password] = scope[password];
-                if (passwords.length > 0) {
-                    setTimeout(function() {
-                        promptPassword();
-                    }, 500);
-                }
-                else {
+                if (!scope.password_form.$invalid) {
+                    passwords.forEach(function(password) {
+                        acceptedPasswords[password] = scope[password];
+                    });
+                    $('#password-modal').dialog('close');
                     parent_scope.$emit(callback, acceptedPasswords);
-                    scope.$destroy();
                 }
             };
 
             scope.passwordCancel = function() {
-                $('#password-modal').modal('hide');
-                $('#password-modal').off('shown.bs.modal');
-                $('#password-body').empty();
+                $('#password-modal').dialog('close');
                 Alert('Missing Password', 'Required password(s) not provided. Your request will not be submitted.', 'alert-info');
                 parent_scope.$emit('PasswordsCanceled');
                 scope.$destroy();
             };
-            promptPassword();
+
+            // Password change
+            scope.clearPWConfirm = function (fld) {
+                // If password value changes, make sure password_confirm must be re-entered
+                scope[fld] = '';
+                scope.password_form[fld].$setValidity('awpassmatch', false);
+                scope.checkStatus();
+            };
+
+            scope.checkStatus = function() {
+                if (!scope.password_form.$invalid) {
+                    $('#password-accept-button').removeAttr('disabled');
+                }
+                else {
+                    $('#password-accept-button').attr({ "disabled": "disabled" });
+                }
+            };
         };
     }])
 
@@ -238,7 +282,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             if (scope.removePasswordsCanceled) {
                 scope.removePasswordsCanceled();
             }
-            scope.removePasswordCanceled = scope.$on('PasswordCanceled', function() {
+            scope.removePasswordsCanceled = scope.$on('PasswordsCanceled', function() {
                 // Delete the job
                 Wait('start');
                 Rest.setUrl(GetBasePath('jobs') + new_job_id + '/');

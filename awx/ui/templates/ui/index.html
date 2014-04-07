@@ -246,21 +246,7 @@
     </div><!-- modal -->
 
     <!-- Password Dialog -->
-    <div id="password-modal" class="modal fade">
-       <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" ng-click="cancelJob()" aria-hidden="true">&times;</button>
-                <h3>Authentication Required</h3>
-              </div>
-              <div class="modal-body" id="password-body"></div>
-              <div class="modal-footer">
-                <a href="" ng-click="passwordCancel()" class="btn btn-default" id="password_cancel_btn">Cancel</a>
-                <a href="" ng-click="passwordAccept()" class="btn btn-primary" id="password_continue_btn" ng-disabled="password_form.$pristine || password_form.$invalid">Continue</a>
-              </div>
-          </div><!-- modal-content -->
-       </div><!-- modal-dialog -->
-    </div><!-- modal -->
+    <div id="password-modal" style="display: none;"></div>
 
     <!-- Generic Form dialog -->
     <div id="form-modal" class="modal fade">
