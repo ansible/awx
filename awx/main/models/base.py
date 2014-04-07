@@ -14,6 +14,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
+from django.contrib.auth.models import AnonymousUser
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -290,7 +291,7 @@ class PrimordialModel(CreatedModifiedModel):
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
         user = get_current_user()
-        if user and not user.pk:
+        if user and (user == AnonymousUser or not user.pk):
             user = None
         if not self.pk and not self.created_by:
             self.created_by = user
