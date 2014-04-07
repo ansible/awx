@@ -64,7 +64,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     if (data.type === 'job') {
                         scope.name_link = "job_template";
                         scope.job_template = data.unified_job_template;
-                        scope.job_template_name = data.summary_fields.job_template.name;
+                        scope.job_template_name = (data.summary_fields.job_template) ? data.summary_fields.job_template.name : data.name;
                         scope.name_id = data.unified_job_template;
                     }
                     if (data.type === 'project_update') {
