@@ -70,7 +70,7 @@ angular.module('JobEventsFormDefinition', [])
                 rows: 10
             },
             stdout: {
-                label: 'Std Out',
+                label: 'Standard Out',
                 type: 'textarea',
                 readonly: true,
                 section: 'Results',
@@ -79,7 +79,7 @@ angular.module('JobEventsFormDefinition', [])
                 rows: 10
             },
             stderr: {
-                label: 'Std Err',
+                label: 'Standard Err',
                 type: 'textarea',
                 readonly: true,
                 section: 'Results',

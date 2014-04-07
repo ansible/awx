@@ -630,7 +630,7 @@ angular.module('GeneratorHelpers', [])
 
                 // Specific to Job Events page -showing event detail/results
                 html += (field.appendHTML) ? "<div ng-show=\"" + field.appendHTML + " !== null\" " +
-                    "ng-bind-html-unsafe=\"" + field.appendHTML + "\" " +
+                    "ng-bind-html=\"" + field.appendHTML + "\" " +
                     "class=\"level-{{ " + list.iterator + ".event_level }}-detail\" " +
                     "></div>\n" : "";
 

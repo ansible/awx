@@ -236,6 +236,9 @@ textarea.allowresize {
       min-width: 200px;
       max-width: 325px;
   }
+  .popover pre {
+      white-space: pre-wrap;
+  }
   .popover-footer {
       font-size: 12px;
       margin-top: 10px;
@@ -1063,6 +1066,17 @@ input[type="checkbox"].checkbox-no-label {
   }
   #completed_jobs_table i[class*="icon-job-"] {
       font-size: 13px;
+  }
+
+  #jobevents_table {
+      div.return-code {
+          display: inline-block;
+          margin-left: 10px;
+      }
+      textarea {
+          white-space: pre-wrap;
+          resize: vertical;
+      }
   }
   
 /* Inventory job status badge */

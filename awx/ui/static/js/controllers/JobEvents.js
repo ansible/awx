@@ -10,7 +10,7 @@
 
 'use strict';
 
-function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList, GenerateList,
+function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList, GenerateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
     FormatDate, EventView, Refresh, Wait) {
     
@@ -79,11 +79,11 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
                         rows = (n) ? n.length : 1;
                         rows = (rows > 10) ? 10 : rows;
                         html += "<textarea readonly class=\"form-control nowrap\" rows=\"" + rows + "\">" + eventData.res[fld] + "</textarea>\n";
+                        //html += "<pre>" + eventData.res[fld] + "</pre>\n";
                         html += "</div>\n";
                         found = true;
                     }
                     if (fld === "results" && Array.isArray(eventData.res[fld]) && eventData.res[fld].length > 0) {
-                        //html += "<textarea readonly class="
                         txt = '';
                         for (i = 0; i < eventData.res[fld].length; i++) {
                             txt += eventData.res[fld][i];
@@ -95,14 +95,16 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
                             html += "<div class=\"form-group\">\n";
                             html += "<label>Results:</label>\n";
                             html += "<textarea readonly class=\"form-control nowrap mono-space\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
+                            //html += "<pre>" + txt + "</pre>\n";
                             html += "</div>\n";
                             found = true;
                         }
                     }
                     if (fld === "rc" && eventData.res[fld] !== '') {
+
                         html += "<div class=\"form-group\">\n";
-                        html += "<label>Return Code:</label>\n";
-                        html += "<input type=\"text\" class=\"form-control nowrap mono-space\" value=\"" + eventData.res[fld] + "\" readonly >\n";
+                        html += "<label>Return Code:</label><div class=\"return-code\">" + eventData.res[fld] + "</div>\n";
+                        //html += "<input type=\"text\" class=\"form-control nowrap mono-space\" value=\"" + eventData.res[fld] + "\" readonly >\n";
                         html += "</div>\n";
                         found = true;
                     }
@@ -123,7 +125,9 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         // Initialize the parent levels
+        
         generator.inject(list, { mode: 'edit', scope: $scope });
+        
         var set = $scope[list.name], i;
         for (i = 0; i < set.length; i++) {
             set[i].event_display = set[i].event_display.replace(/^\u00a0*/g, '');
@@ -133,7 +137,7 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
             } else {
                 set[i].ngicon = 'fa fa-square-o node-no-toggle';
                 set[i]['class'] = 'childNode';
-                set[i].event_detail = formatJSON(set[i].event_data);
+                set[i].event_detail =  $sce.trustAsHtml(formatJSON(set[i].event_data));
             }
             set[i].show = true;
             set[i].spaces = set[i].event_level * 24;
@@ -247,7 +251,7 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
     };
 }
 
-JobEventsList.$inject = ['$filter', '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
+JobEventsList.$inject = ['$sce', '$filter', '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
     'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Refresh', 'Wait'
 ];
