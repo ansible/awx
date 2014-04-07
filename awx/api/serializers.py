@@ -1372,6 +1372,12 @@ class ScheduleSerializer(BaseSerializer):
             res['unified_job_template'] = ujt.get_absolute_url() #obj.unified_job_template.get_absolute_url()
         return res
 
+    def validate_unified_job_template(self, attrs, source):
+        ujt = attrs[source]
+        if type(ujt) == InventorySource and ujt.source not in ('rax', 'ec2',):
+            raise serializers.ValidationError('Inventory Source must be a cloud resource')
+        return attrs
+
     # We reject rrules if:
     # - DTSTART is not include
     # - INTERVAL is not included
