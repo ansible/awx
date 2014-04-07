@@ -627,6 +627,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 inventory_id = params.inventory_id,
                 groups_reload = params.groups_reload,
                 generator = GenerateForm,
+                group_created = false,
                 defaultUrl,
                 master = {},
                 choicesReady,
@@ -1028,7 +1029,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 parent_scope.removeAddTreeRefreshed();
             }
             parent_scope.removeAddTreeRefreshed = parent_scope.$on('GroupTreeRefreshed', function() {
-                //Clean up
+                // Clean up
                 // Change the selected group
                 if (groups_reload && parent_scope.selected_tree_id !== tree_id) {
                     parent_scope.showHosts(tree_id, group_id, false);
@@ -1191,7 +1192,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     data.inventory = inventory_id;
 
                     Rest.setUrl(defaultUrl);
-                    if (mode === 'edit') {
+                    if (mode === 'edit' || (mode === 'add' && group_created)) {
                         Rest.put(data)
                             .success(function () {
                                 if (properties_scope.variables) {
@@ -1211,8 +1212,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     else {
                         Rest.post(data)
                             .success(function (data) {
-                                mode = 'edit';   // Once the group is saved, we're in edit mode. We may end up re-saving 
-                                                 // the group, if there is an error on the source
+                                group_created = true;
                                 if (properties_scope.variables) {
                                     sources_scope.source_url = data.related.inventory_source;
                                     modal_scope.$emit('updateVariables', json_data, data.related.variable_data);

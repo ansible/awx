@@ -270,6 +270,7 @@ angular.module('CredentialFormDefinition', [])
             "vault_password_confirm": {
                 label: "Confirm Vault Password",
                 type: 'password',
+                ngShow: "kind.value == 'ssh'",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
