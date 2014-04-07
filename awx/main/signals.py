@@ -60,6 +60,7 @@ def update_inventory_computed_fields(sender, **kwargs):
     Signal handler and wrapper around inventory.update_computed_fields to
     prevent unnecessary recursive calls.
     '''
+    logger.debug("In update inventory computed fields")
     if getattr(_inventory_updates, 'is_updating', False):
         return
     instance = kwargs['instance']

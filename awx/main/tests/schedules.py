@@ -65,10 +65,15 @@ class ScheduleTest(BaseTest):
         self.diff_org_user = self.make_user('fred')
         self.organizations[1].users.add(self.diff_org_user)
 
+        self.cloud_source = Credential.objects.create(kind='awx', user=self.super_django_user,
+                                                      username='Dummy', password='Dummy')
+
         self.first_inventory = Inventory.objects.create(name='test_inventory', description='for org 0', organization=self.organizations[0])
         self.first_inventory.hosts.create(name='host_1')
         self.first_inventory_group = self.first_inventory.groups.create(name='group_1')
         self.first_inventory_source = self.first_inventory_group.inventory_source
+        self.first_inventory_source.source = 'ec2'
+        self.first_inventory_source.save()
 
         inv_read = Permission.objects.create(
             inventory       = self.first_inventory,
@@ -80,11 +85,18 @@ class ScheduleTest(BaseTest):
         self.second_inventory.hosts.create(name='host_2')
         self.second_inventory_group = self.second_inventory.groups.create(name='group_2')
         self.second_inventory_source = self.second_inventory_group.inventory_source
+        self.second_inventory_source.source = 'ec2'
+        self.second_inventory_source.save()
 
         self.first_schedule = Schedule.objects.create(name='test_schedule_1', unified_job_template=self.first_inventory_source,
                                                       enabled=True, rrule=GOOD_SCHEDULES[0])
         self.second_schedule = Schedule.objects.create(name='test_schedule_2', unified_job_template=self.second_inventory_source,
                                                        enabled=True, rrule=GOOD_SCHEDULES[0])
+
+        self.without_valid_source_inventory = Inventory.objects.create(name='without valid source', description='for org 0', organization=self.organizations[0])
+        self.without_valid_source_inventory.hosts.create(name='host_3')
+        self.without_valid_source_inventory_group = self.without_valid_source_inventory.groups.create(name='not valid source')
+        self.without_valid_source_inventory_source = self.without_valid_source_inventory_group.inventory_source
 
     def test_schedules_list(self):
         url = reverse('api:schedule_list')
@@ -140,6 +152,13 @@ class ScheduleTest(BaseTest):
         diff_user_schedule = dict(name='newsched_4', description='newsched', enabled=True, rrule=GOOD_SCHEDULES[0])
         with self.current_user(self.diff_org_user):
             data = self.post(first_url, data=diff_user_schedule, expect=403)
+
+    def test_post_schedule_to_non_cloud_source(self):
+        invalid_inv_url = reverse('api:inventory_source_schedules_list', args=(self.without_valid_source_inventory_source.pk,))
+        new_schedule = dict(name='newsched_1', description='newsched', enabled=True, rrule=GOOD_SCHEDULES[0])
+
+        with self.current_user(self.super_django_user):
+            self.post(invalid_inv_url, data=new_schedule, expect=400)
 
     def test_update_existing_schedule(self):
         first_url = reverse('api:inventory_source_schedules_list', args=(self.first_inventory_source.pk,))

@@ -37,6 +37,7 @@ from awx.main.utils import encrypt_field
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate']
 
+logger = logging.getLogger('awx.main.models.inventory')
 
 class Inventory(CommonModel):
     '''
@@ -123,6 +124,7 @@ class Inventory(CommonModel):
         '''
         Update model fields that are computed from database relationships.
         '''
+        logger.debug("Going to update inventory computed fields")
         if update_hosts:
             for host in self.hosts.filter(active=True):
                 host.update_computed_fields(update_inventory=False,
@@ -154,6 +156,7 @@ class Inventory(CommonModel):
                 computed_fields.pop(field)
         if computed_fields:
             self.save(update_fields=computed_fields.keys())
+        logger.debug("Finished updating inventory computed fields")
 
     @property
     def root_groups(self):
