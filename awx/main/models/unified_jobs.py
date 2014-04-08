@@ -254,6 +254,12 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         '''
         raise NotImplementedError # Implement in subclass.
 
+    def _update_unified_job_kwargs(self, **kwargs):
+        '''
+        Hook for subclasses to update kwargs.
+        '''
+        return kwargs   # Override if needed in subclass.
+
     def create_unified_job(self, **kwargs):
         '''
         Create a new unified job based on this unified job template.
@@ -270,6 +276,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
             if hasattr(self, '%s_id' % field_name) and ('%s_id' % field_name) in kwargs:
                 continue
             kwargs[field_name] = getattr(self, field_name)
+        kwargs = self._update_unified_job_kwargs(**kwargs)
         unified_job = unified_job_class(**kwargs)
         if save_unified_job:
             unified_job.save()

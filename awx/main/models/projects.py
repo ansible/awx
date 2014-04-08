@@ -292,9 +292,12 @@ class Project(UnifiedJobTemplate, ProjectOptions):
     def _can_update(self):
         return bool(self.scm_type)
 
-    def create_project_update(self, **kwargs):
+    def _update_unified_job_kwargs(self, **kwargs):
         if self.scm_delete_on_next_update:
             kwargs['scm_delete_on_update'] = True
+        return kwargs
+
+    def create_project_update(self, **kwargs):
         return self.create_unified_job(**kwargs)
 
     @property
