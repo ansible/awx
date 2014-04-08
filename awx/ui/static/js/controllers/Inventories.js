@@ -188,7 +188,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
                 html += "<td><a ng-click=\"viewJob('" + row.url + "')\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                     ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" +
                     row.status + "\"></i></a></td>\n";
-                html += "<td>" + ($filter('date')(row.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
+                html += "<td>" + ((row.finished) ? ( ($filter('date')(row.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') ) : '') + "</td>";
                 html += "<td><a href=\"/#/jobs/" + row.id + "/job_events\">Events</a><br />" +
                     "<a href=\"/#/jobs/" + row.id + "/job_host_summaries\">Hosts</a></td>";
                 html += "<td><a href=\"\" ng-click=\"viewJob('" + row.url + "')\" >" + ellipsis(row.name) + "</a></td>";
