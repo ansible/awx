@@ -33,3 +33,12 @@ Upon successful completion, jenkins will publish build artifacts to the followin
 * http://releases.ansible.com/ansible-tower/rpm
 * http://releases.ansible.com/ansible-tower/deb
 * http://releases.ansible.com/ansible-tower/setup
+* http://releases.ansible.com/ansible-tower/docs
+
+Publishing AMI's
+----------------------
+While OFFICIAL Tower AMI's are created by jenkins, the process for blessing AMI's is manual.  Please contact <dave@ansible.com> to initiate the process.
+
+Publishing Documentation
+------------------------
+PDF documentation is not currently automated.  The [Build_Tower_Docs](http://50.116.42.103/view/Tower/) job generates HTML documentation, which is not currently published.  Please contact <dave@ansible.com> to request updated PDF documentation.
