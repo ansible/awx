@@ -789,6 +789,11 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     if (sources_scope.codeMirror) {
                         sources_scope.codeMirror.destroy();
                     }
+                    $('#properties-tab').empty();
+                    $('#sources-tab').empty();
+                    $('#schedules-list').empty();
+                    $('#schedules-form').empty();
+                    $('#schedules-detail').empty();
                     $('#group-modal-dialog').hide();
                     $('#group-modal-dialog').dialog('destroy');
                     modal_scope.cancelModal();
@@ -1265,45 +1270,149 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
 
 .factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
-    'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'BuildTree', 'Find',
+    'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'BuildTree', 'Find', 'CreateDialog',
     function ($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, Wait, BuildTree, Find) {
+        GetBasePath, Wait, BuildTree, Find, CreateDialog) {
         return function (params) {
             // Delete the selected group node. Disassociates it from its parent.
 
             var scope = params.scope,
                 tree_id = params.tree_id,
-                inventory_id = params.inventory_id,
                 node = Find({ list: scope.groups, key: 'id', val: tree_id }),
-                url = GetBasePath('inventory') + inventory_id + '/groups/',
-                action_to_take;
+                hosts = [],
+                groups = [],
+                childCount = 0,
+                buttonSet;
 
-            action_to_take = function () {
-                $('#prompt-modal').on('hidden.bs.modal', function () {
-                    Wait('start');
+            // action_to_take = function () {
+            //     $('#prompt-modal').on('hidden.bs.modal', function () {
+            //         Wait('start');
+            //     });
+            //     $('#prompt-modal').modal('hide');
+            //     Rest.setUrl(url);
+            //     Rest.post({ id: node.group_id, disassociate: 1 })
+            //         .success(function () {
+            //             $('#prompt-modal').modal('hide');
+            //             scope.$emit('GroupDeleteCompleted'); // Signal a group refresh to start
+            //         })
+            //         .error(function (data, status) {
+            //             Wait('stop');
+            //             ProcessErrors(scope, data, status, null, {
+            //                 hdr: 'Error!',
+            //                 msg: 'Call to ' + url + ' failed. POST returned status: ' + status
+            //             });
+            //         });
+            // };
+
+            scope.deleteOption = "preserve-all";
+
+            buttonSet = [{
+                label: "Cancel",
+                onClick: function() {
+                    scope.cancel();
+                },
+                icon: "fa-times",
+                "class": "btn btn-default",
+                "id": "group-delete-cancel-button"
+            },{
+                label: "Continue",
+                onClick: function() {
+                    scope.performDelete();
+                },
+                icon: "fa-check",
+                "class": "btn btn-primary",
+                "id": "group-delete-ok-button"
+            }];
+
+            if (scope.removeDeleteDialogReady) {
+                scope.removeDeleteDialogReady();
+            }
+            scope.removeDeleteDialogReady = scope.$on('DeleteDialogReady', function() {
+                Wait('stop');
+                $('#group-delete-dialog').dialog('open');
+            });
+
+            if (scope.removeShowDeleteDialog) {
+                scope.removeShowDeleteDialog();
+            }
+            scope.removeShowDeleteDialog = scope.$on('ShowDeleteDialog', function() {
+                scope.group_name = node.name;
+                scope.groupsCount = groups.length;
+                scope.hostsCount = hosts.length;
+                CreateDialog({
+                    id: 'group-delete-dialog',
+                    scope: scope,
+                    buttons: buttonSet,
+                    width: 650,
+                    height: 350,
+                    minWidth: 500,
+                    title: 'Delete Group',
+                    callback: 'DeleteDialogReady'
                 });
-                $('#prompt-modal').modal('hide');
-                Rest.setUrl(url);
-                Rest.post({ id: node.group_id, disassociate: 1 })
-                    .success(function () {
-                        $('#prompt-modal').modal('hide');
-                        scope.$emit('GroupDeleteCompleted'); // Signal a group refresh to start
+            });
+
+            if (scope.removeChildrenReady) {
+                scope.removeChildrenReady();
+            }
+            scope.removeChildrenReady = scope.$on('ChildrenReady', function() {
+                childCount++;
+                if (childCount === 2) {
+                    scope.$emit('ShowDeleteDialog');
+                }
+            });
+
+            Wait('start');
+
+            if (node.related.children) {
+                Rest.setUrl(node.related.children);
+                Rest.get()
+                    .success(function(data) {
+                        if (data.count) {
+                            data.results.forEach(function(group) {
+                                groups.push(group);
+                            });
+                        }
+                        scope.$emit('ChildrenReady');
                     })
-                    .error(function (data, status) {
-                        Wait('stop');
-                        ProcessErrors(scope, data, status, null, {
-                            hdr: 'Error!',
-                            msg: 'Call to ' + url + ' failed. POST returned status: ' + status
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to retrieve related groups. GET returned: ' + status
                         });
                     });
+            }
+            else {
+                scope.$emit('ChildrenReady');
+            }
+
+            if (node.related.all_hosts) {
+                Rest.setUrl(node.related.all_hosts);
+                Rest.get()
+                    .success( function(data) {
+                        if (data.count) {
+                            data.results.forEach(function(host) {
+                                hosts.push(host);
+                            });
+                        }
+                        scope.$emit('ChildrenReady');
+                    })
+                    .error( function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to retrieve related hosts. GET returned: ' + status
+                        });
+                    });
+            }
+            else {
+                scope.$emit('ChildrenReady');
+            }
+
+            scope.cancel = function() {
+                $('#group-delete-dialog').dialog('close');
             };
 
-            Prompt({
-                hdr: 'Delete Group',
-                body: '<div class=\"alert alert-info\">Are you sure you want to delete group <em>' + node.name + '?</div>',
-                action: action_to_take,
-                'class': 'btn-danger'
-            });
+            scope.performDelete = function() {
+                $('#group-delete-dialog').dialog('close');
+            };
+
         };
     }
 ])

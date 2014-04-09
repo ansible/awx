@@ -498,28 +498,35 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                     formId: 'host_form'
                 });
             },
+            beforeDestroy: function() {
+                if (scope.codeMirror) {
+                    scope.codeMirror.destroy();
+                }
+                $('#host-modal-dialog').empty();
+            },
             onOpen: function() {
                 $('#host_name').focus();
-                setTimeout(function() {
-                    TextareaResize({
-                        scope: scope,
-                        textareaId: 'host_variables',
-                        modalId: 'host-modal-dialog',
-                        formId: 'host_form'
-                    });
-                }, 300);
-            }
+            },
+            callback: 'HostEditDialogReady'
         });
         
         scope.parseType = 'yaml';
-        
+
         if (scope.hostVariablesLoadedRemove) {
             scope.hostVariablesLoadedRemove();
         }
         scope.hostVariablesLoadedRemove = scope.$on('hostVariablesLoaded', function() {
-            var callback = function() { Wait('stop'); };
             $('#host-modal-dialog').dialog('open');
-            ParseTypeChange({ scope: scope, field_id: 'host_variables', onReady: callback });
+            setTimeout(function() {
+                TextareaResize({
+                    scope: scope,
+                    textareaId: 'host_variables',
+                    modalId: 'host-modal-dialog',
+                    formId: 'host_form',
+                    parse: true
+                });
+            }, 300);
+            //ParseTypeChange({ scope: scope, field_id: 'host_variables', onReady: callback });
         });
 
         if (scope.hostLoadedRemove) {

@@ -26,6 +26,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
      *     onResizeStop: - Function to call when user stops resizing the dialog, optional
      *     onClose:      - Function to call after window closes, optional
      *     onOpen:       - Function to call after window opens, optional
+     *     beforeDestroy: - Function to call during onClose and prior to destroying the window
      *     callback:     - String to pass to scope.$emit() after dialog is created, optional
      * })
      *
@@ -46,6 +47,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 onClose = params.onClose,
                 onOpen = params.onOpen,
                 callback = params.callback,
+                beforeDestroy = params.beforeDestroy,
                 closeOnEscape = (params.closeOnEscape === undefined) ? false : params.closeOnEscape,
                 buttons,
                 id = params.id,
@@ -132,6 +134,9 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                         // remove lingering popover <div> elements
                         $(this).remove();
                     });
+                    if (beforeDestroy) {
+                        beforeDestroy();
+                    }
                     $('#' + id).dialog('destroy');
                     $('#' + id).hide();
                     if (onClose) {
@@ -161,6 +166,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
      *     textareaId:      - id attribute value of the textarea
      *     modalId:         - id attribute of the <div> element used to create the modal
      *     formId:          - id attribute of the textarea's parent form
+     *     parse:           - if true, call ParseTypeChange and replace textarea with codemirror editor
      *  })
      *
      *  Use to resize a textarea field contained on a modal. Has only been tested where the 

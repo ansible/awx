@@ -116,10 +116,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         event_level: level,
                         children: children,
                         ngicon: (sorted[i].children.length > 0) ? 'fa fa-minus-square-o node-toggle' : 'fa fa-square-o node-no-toggle',
-                        related: {
-                            children: (sorted[i].children.length > 0) ? sorted[i].related.children : '',
-                            inventory_source: sorted[i].related.inventory_source
-                        },
+                        related: sorted[i].related,
                         status: sorted[i].summary_fields.inventory_source.status,
                         status_class: stat['class'],
                         status_tooltip: stat.tooltip,
