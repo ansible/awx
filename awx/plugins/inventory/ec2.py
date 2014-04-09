@@ -254,8 +254,7 @@ class Ec2Inventory(object):
 
         for region in self.regions:
             self.get_instances_by_region(region)
-            # Don't return RDS instances for Ansible Tower!
-            #self.get_rds_instances_by_region(region)
+            self.get_rds_instances_by_region(region)
 
         self.write_to_cache(self.inventory, self.cache_path_cache)
         self.write_to_cache(self.index, self.cache_path_index)
@@ -344,9 +343,8 @@ class Ec2Inventory(object):
         # Add to index
         self.index[dest] = [region, instance.id]
 
-        # Do not output group based on instance ID for Ansible Tower!
         # Inventory: Group by instance ID (always a group of 1)
-        #self.inventory[instance.id] = [dest]
+        self.inventory[instance.id] = [dest]
 
         # Inventory: Group by region
         self.push(self.inventory, region, dest)

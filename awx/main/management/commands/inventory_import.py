@@ -46,8 +46,8 @@ class MemObject(object):
     '''
     
     def __init__(self, name, source_dir):
-        assert name
-        assert source_dir
+        assert name, 'no name'
+        assert source_dir, 'no source dir'
         self.name = name
         self.source_dir = source_dir
     
@@ -95,17 +95,18 @@ class MemGroup(MemObject):
         logger.debug('Looking for %s as child group of %s', name, self.name)
         # slight hack here, passing in 'self' for all_group but child=True won't use it
         group = loader.get_group(name, self, child=True)
-        # don't add to child groups if already there
-        for g in self.children:
-            if g.name == name:
-                 return g
-        logger.debug('Adding child group %s to group %s', group.name, self.name)
-        self.children.append(group)
+        if group:
+            # don't add to child groups if already there
+            for g in self.children:
+                if g.name == name:
+                     return g
+            logger.debug('Adding child group %s to group %s', group.name, self.name)
+            self.children.append(group)
         return group
 
     def add_child_group(self, group):
-        assert group.name is not 'all'
-        assert isinstance(group, MemGroup)
+        assert group.name is not 'all', 'group name is all'
+        assert isinstance(group, MemGroup), 'not MemGroup instance'
         logger.debug('Adding child group %s to parent %s', group.name, self.name)
         if group not in self.children:
             self.children.append(group)
@@ -113,7 +114,7 @@ class MemGroup(MemObject):
             group.parents.append(self)
 
     def add_host(self, host):
-        assert isinstance(host, MemHost)
+        assert isinstance(host, MemHost), 'not MemHost instance'
         logger.debug('Adding host %s to group %s', host.name, self.name)
         if host not in self.hosts:
             self.hosts.append(host)
@@ -156,10 +157,12 @@ class BaseLoader(object):
     Common functions for an inventory loader from a given source.
     '''
 
-    def __init__(self, source, all_group=None):
+    def __init__(self, source, all_group=None, group_filter_re=None, host_filter_re=None):
         self.source = source
         self.source_dir = os.path.dirname(self.source)
         self.all_group = all_group or MemGroup('all', self.source_dir)
+        self.group_filter_re = group_filter_re
+        self.host_filter_re = host_filter_re
 
     def get_host(self, name):
         '''
@@ -168,6 +171,9 @@ class BaseLoader(object):
         if '[' in name or ']' in name:
             raise ValueError('host ranges like %s are not supported by this importer' % name)
         host_name = name.split(':')[0]
+        if self.host_filter_re and not self.host_filter_re.match(host_name):
+            logger.debug('Filtering host %s', host_name)
+            return None
         host = None
         if not host_name in self.all_group.all_hosts:
             host = MemHost(name, self.source_dir)
@@ -219,6 +225,9 @@ class BaseLoader(object):
         all_group = all_group or self.all_group
         if name == 'all':
             return all_group
+        if self.group_filter_re and not self.group_filter_re.match(name):
+            logger.debug('Filtering group %s', name)
+            return None
         if not name in self.all_group.all_groups:
             group = MemGroup(name, self.source_dir) 
             if not child:
@@ -244,34 +253,38 @@ class IniLoader(BaseLoader):
             if not line:
                 continue
             elif line.startswith('[') and line.endswith(']'):
-                 # Mode change, possible new group name
-                 line = line[1:-1].strip()
-                 if line.endswith(':vars'):
-                     input_mode = 'vars'
-                     line = line[:-5]
-                 elif line.endswith(':children'):
-                     input_mode = 'children'
-                     line = line[:-9]
-                 else:
-                     input_mode = 'host'
-                 group = self.get_group(line)
-            else:
-                 # Add hosts with inline variables, or variables/children to
-                 # an existing group.
-                 tokens = shlex.split(line)
-                 if input_mode == 'host':
-                     for host in self.get_hosts(tokens[0]):
-                         if len(tokens) > 1:
-                             for t in tokens[1:]:
-                                 k,v = t.split('=', 1)
-                                 host.variables[k] = v
-                         group.add_host(host) 
-                 elif input_mode == 'children':
-                     group.child_group_by_name(line, self)
-                 elif input_mode == 'vars':
-                     for t in tokens:
-                         k, v = t.split('=', 1)
-                         group.variables[k] = v
+                # Mode change, possible new group name
+                line = line[1:-1].strip()
+                if line.endswith(':vars'):
+                    input_mode = 'vars'
+                    line = line[:-5]
+                elif line.endswith(':children'):
+                    input_mode = 'children'
+                    line = line[:-9]
+                else:
+                    input_mode = 'host'
+                group = self.get_group(line)
+            elif group:
+                # If group is None, we are skipping this group and shouldn't
+                # capture any children/variables/hosts under it.
+                # Add hosts with inline variables, or variables/children to
+                # an existing group.
+                tokens = shlex.split(line)
+                if input_mode == 'host':
+                    for host in self.get_hosts(tokens[0]):
+                        if not host:
+                            continue
+                        if len(tokens) > 1:
+                            for t in tokens[1:]:
+                                k,v = t.split('=', 1)
+                                host.variables[k] = v
+                        group.add_host(host) 
+                elif input_mode == 'children':
+                    group.child_group_by_name(line, self)
+                elif input_mode == 'vars':
+                    for t in tokens:
+                        k, v = t.split('=', 1)
+                        group.variables[k] = v
             # TODO: expansion patterns are probably not going to be supported.  YES THEY ARE!
 
 
@@ -326,6 +339,8 @@ class ExecutableJsonLoader(BaseLoader):
 
         for k,v in data.iteritems():
             group = self.get_group(k)
+            if not group:
+                continue
 
             # Load group hosts/vars/children from a dictionary.
             if isinstance(v, dict):
@@ -334,6 +349,8 @@ class ExecutableJsonLoader(BaseLoader):
                 if isinstance(hosts, dict):
                     for hk, hv in hosts.iteritems():
                         host = self.get_host(hk)
+                        if not host:
+                            continue
                         if isinstance(hv, dict):
                             host.variables.update(hv)
                         else:
@@ -344,6 +361,8 @@ class ExecutableJsonLoader(BaseLoader):
                 elif isinstance(hosts, (list, tuple)):
                     for hk in hosts:
                         host = self.get_host(hk)
+                        if not host:
+                            continue
                         group.add_host(host)
                 else:
                     logger.warning('Expected dict or list of "hosts" for '
@@ -362,7 +381,8 @@ class ExecutableJsonLoader(BaseLoader):
                 if isinstance(children, (list, tuple)):
                     for c in children:
                         child = self.get_group(c, self.all_group, child=True)
-                        group.add_child_group(child)
+                        if child:
+                            group.add_child_group(child)
                 else:
                     self.logger.warning('Expected list of children for '
                                         'group "%s", got %s instead',
@@ -372,6 +392,8 @@ class ExecutableJsonLoader(BaseLoader):
             elif isinstance(v, (list, tuple)):
                 for h in v:
                     host = self.get_host(h)
+                    if not host:
+                        continue
                     group.add_host(host)
             else:
                 logger.warning('')
@@ -396,7 +418,8 @@ class ExecutableJsonLoader(BaseLoader):
                                     k, str(type(data)))
 
 
-def load_inventory_source(source, all_group=None):
+def load_inventory_source(source, all_group=None, group_filter_re=None,
+                          host_filter_re=None, exclude_empty_groups=False):
     '''
     Load inventory from given source directory or file.
     '''
@@ -409,15 +432,25 @@ def load_inventory_source(source, all_group=None):
         for filename in glob.glob(os.path.join(source, '*')):
             if filename.endswith(".ini") or os.path.isdir(filename):
                 continue
-            load_inventory_source(filename, all_group)
+            load_inventory_source(filename, all_group, group_filter_re,
+                                  host_filter_re)
     else:
         all_group = all_group or MemGroup('all', os.path.dirname(source))
         if os.access(source, os.X_OK):
-            ExecutableJsonLoader(source, all_group).load()
+            ExecutableJsonLoader(source, all_group, group_filter_re, host_filter_re).load()
         else:
-            IniLoader(source, all_group).load()
+            IniLoader(source, all_group, group_filter_re, host_filter_re).load()
 
     logger.debug('Finished loading from source: %s', source)
+    # Exclude groups that are completely empty.
+    if original_all_group is None and exclude_empty_groups:
+        for name, group in all_group.all_groups.items():
+            if not group.children and not group.hosts and not group.variables:
+                logger.debug('Removing empty group %s', name)
+                for parent in group.parents:
+                    if group in parent.children:
+                        parent.children.remove(group)
+                del all_group.all_groups[name]
     if original_all_group is None:
         logger.info('Loaded %d groups, %d hosts', len(all_group.all_groups),
                     len(all_group.all_hosts))
@@ -457,6 +490,16 @@ class Command(NoArgsCommand):
                     default=None, metavar='v', help='value of host variable '
                     'specified by --enabled-var that indicates host is '
                     'enabled/online.'),
+        make_option('--group-filter', dest='group_filter', type='str',
+                    default=None, metavar='regex', help='regular expression '
+                    'to filter group name(s); only matches are imported.'),
+        make_option('--host-filter', dest='host_filter', type='str',
+                    default=None, metavar='regex', help='regular expression '
+                    'to filter host name(s); only matches are imported.'),
+        make_option('--exclude-empty-groups', dest='exclude_empty_groups',
+                    action='store_true', default=False, help='when set, '
+                    'exclude all groups that have no child groups, hosts, or '
+                    'variables.'),
     )
 
     def init_logging(self):
@@ -768,6 +811,9 @@ class Command(NoArgsCommand):
         self.source = options.get('source', None)
         self.enabled_var = options.get('enabled_var', None)
         self.enabled_value = options.get('enabled_value', None)
+        self.group_filter = options.get('group_filter', None) or r'^.+$'
+        self.host_filter = options.get('host_filter', None) or r'^.+$'
+        self.exclude_empty_groups = bool(options.get('exclude_empty_groups', False))
 
         # Load inventory and related objects from database.
         if self.inventory_name and self.inventory_id:
@@ -778,6 +824,14 @@ class Command(NoArgsCommand):
             raise CommandError('--overwrite/--overwrite-vars and --keep-vars are mutually exclusive')
         if not self.source:
             raise CommandError('--source is required')
+        try:
+            self.group_filter_re = re.compile(self.group_filter)
+        except re.error:
+            raise CommandError('invalid regular expression for --group-filter')
+        try:
+            self.host_filter_re = re.compile(self.host_filter)
+        except re.error:
+            raise CommandError('invalid regular expression for --host-filter')
 
         self.check_license()
         begin = time.time()
@@ -793,7 +847,10 @@ class Command(NoArgsCommand):
                     transaction.commit()
 
             # Load inventory from source.
-            self.all_group = load_inventory_source(self.source)
+            self.all_group = load_inventory_source(self.source, None,
+                                                   self.group_filter_re,
+                                                   self.host_filter_re,
+                                                   self.exclude_empty_groups)
             self.all_group.debug_tree()
 
             # Merge/overwrite inventory into database.

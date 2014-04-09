@@ -823,15 +823,23 @@ class RunInventoryUpdate(BaseTask):
         if inventory_update.source == 'ec2':
             ec2_path = self.get_path_to('..', 'plugins', 'inventory', 'ec2.py')
             args.append(ec2_path)
-            args.extend(['--enabled-var', 'ec2_state'])
-            args.extend(['--enabled-value', 'running'])
-            #args.extend(['--instance-id', 'ec2_id'])
+            args.extend(['--enabled-var', settings.EC2_ENABLED_VAR])
+            args.extend(['--enabled-value', settings.EC2_ENABLED_VALUE])
+            args.extend(['--group-filter', settings.EC2_GROUP_FILTER])
+            args.extend(['--host-filter', settings.EC2_HOST_FILTER])
+            if settings.EC2_EXCLUDE_EMPTY_GROUPS:
+                args.append('--exclude-empty-groups')
+            #args.extend(['--instance-id', settings.EC2_INSTANCE_ID_VAR])
         elif inventory_update.source == 'rax':
             rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
             args.append(rax_path)
-            args.extend(['--enabled-var', 'rax_status'])
-            args.extend(['--enabled-value', 'ACTIVE'])
-            #args.extend(['--instance-id', 'rax_id'])
+            args.extend(['--enabled-var', settings.RAX_ENABLED_VAR])
+            args.extend(['--enabled-value', settings.RAX_ENABLED_VALUE])
+            args.extend(['--group-filter', settings.RAX_GROUP_FILTER])
+            args.extend(['--host-filter', settings.RAX_HOST_FILTER])
+            if settings.RAX_EXCLUDE_EMPTY_GROUPS:
+                args.append('--exclude-empty-groups')
+            #args.extend(['--instance-id', settings.RAX_INSTANCE_ID_VAR])
         elif inventory_update.source == 'file':
             args.append(inventory_update.source_path)
         verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)

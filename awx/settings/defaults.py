@@ -323,6 +323,20 @@ RAX_REGION_CHOICES = [
     ('HKG', 'Hong Kong'),
 ]
 
+# Inventory variable name/values for determining if host is active/enabled.
+RAX_ENABLED_VAR = 'rax_status'
+RAX_ENABLED_VALUE = 'ACTIVE'
+
+# Inventory variable name containing unique instance ID.
+RAX_INSTANCE_ID_VAR = 'rax_id'
+
+# Filter for allowed group/host names when importing inventory from Rackspace.
+# By default, filter group of one created for each instance and exclude all
+# groups without children, hosts and variables.
+RAX_GROUP_FILTER = r'^(?!instance-.+).+$'
+RAX_HOST_FILTER = r'^.+$'
+RAX_EXCLUDE_EMPTY_GROUPS = True
+
 # AWS does not appear to provide pretty region names via any API, so store the
 # list of names here.  The available region IDs will be pulled from boto.
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
@@ -342,6 +356,20 @@ EC2_REGIONS_BLACKLIST = [
     'us-gov-west-1',
     'cn-north-1',
 ]
+
+# Inventory variable name/values for determining if host is active/enabled.
+EC2_ENABLED_VAR = 'ec2_state'
+EC2_ENABLED_VALUE = 'running'
+
+# Inventory variable name containing unique instance ID.
+EC2_INSTANCE_ID_VAR = 'ec2_id'
+
+# Filter for allowed group/host names when importing inventory from EC2.
+# By default, filter group of one created for each instance, filter all RDS
+# hosts, and exclude all groups without children, hosts and variables.
+EC2_GROUP_FILTER = r'^(?!i-[a-f0-9]{8,}).+$'
+EC2_HOST_FILTER = r'^.+(?<!rds\.amazonaws\.com)$'
+EC2_EXCLUDE_EMPTY_GROUPS = True
 
 # Defaults for enabling/disabling activity stream.
 ACTIVITY_STREAM_ENABLED = True

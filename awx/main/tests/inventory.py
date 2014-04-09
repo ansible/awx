@@ -1066,6 +1066,10 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(host.has_inventory_sources)
             self.assertTrue(host.enabled)
+            # Make sure EC2 RDS hosts are excluded.
+            if inventory_source.source == 'ec2':
+                self.assertFalse(re.match(r'^.+\.rds\.amazonaws\.com$', host.name, re.I),
+                                 host.name)
             with self.current_user(self.super_django_user):
                 url = reverse('api:host_inventory_sources_list', args=(host.pk,))
                 response = self.get(url, expect=200)
@@ -1074,9 +1078,18 @@ class InventoryUpdatesTest(BaseTransactionTest):
             source_pks = group.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(group.has_inventory_sources)
-            # Make sure EC2 instance ID groups are excluded.
-            self.assertFalse(re.match(r'^i-[0-9a-f]{8}$', group.name, re.I),
-                             group.name)
+            self.assertTrue(group.children.filter(active=True).exists() or
+                            group.hosts.filter(active=True).exists())
+            # Make sure EC2 instance ID groups and RDS groups are excluded.
+            if inventory_source.source == 'ec2':
+                self.assertFalse(re.match(r'^i-[0-9a-f]{8}$', group.name, re.I),
+                                 group.name)
+                self.assertFalse(re.match(r'^rds|rds_.+|type_db_.+$', group.name, re.I),
+                                 group.name)
+            # Make sure Rackspace instance ID groups are excluded.
+            if inventory_source.source == 'rax':
+                self.assertFalse(re.match(r'^instance-.+$', group.name, re.I),
+                                 group.name)
             with self.current_user(self.super_django_user):
                 url = reverse('api:group_inventory_sources_list', args=(group.pk,))
                 response = self.get(url, expect=200)
