@@ -5,7 +5,7 @@ Formerly known as awx, ansible-commander and AnsibleWorks, ansible-tower
 provides a web-based user interface, REST API and task engine built on top of
 Ansible.
 
-The current version under development is 1.4.8, and uses the master branch.
+The current version under development is 2.0.0, and uses the master branch.
 
 1.2.2 was the initial version released on July 31, 2013.
 
@@ -16,6 +16,8 @@ The current version under development is 1.4.8, and uses the master branch.
 1.4.0 was released on November 25, 2013.
 
 1.4.5 was released on February 10, 2014.
+
+1.4.8 was released on April 7, 2014.
 
 Hotfixes should go on the appropriate release branch and be cherry-picked to
 master.
