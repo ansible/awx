@@ -110,7 +110,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 failures = false;
                 if (total_hosts === 0) {
                     // no hosts
-                    tip = "Group contains 0 hosts.";
+                    tip = "Contains 0 hosts.";
                     html_class = 'none';
                 } else {
                     // many hosts with 0 failures
