@@ -35,8 +35,6 @@ angular.module('CompletedJobsDefinition', [])
                 icon: 'icon-job-{{ completed_job.status }}',
                 iconOnly: true,
                 ngClick:"viewJobLog(completed_job.id)",
-                /*awPopOver: "{{ completed_job.status_popover }}",
-                dataPlacement: 'right',*/
                 searchType: 'select',
                 searchOptions: [
                     { name: "Success", value: "successful" },
