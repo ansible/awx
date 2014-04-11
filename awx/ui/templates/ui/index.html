@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="ansible">
+<html lang="en" ng-app="Tower">
 <head>
   <meta charset="utf-8">
   <title>Ansible Tower</title>
@@ -74,6 +74,7 @@
   <script src="{{ STATIC_URL }}js/controllers/JobTemplates.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Projects.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Jobs.js"></script>
+  <script src="{{ STATIC_URL }}js/controllers/JobDetail.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/JobEvents.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/JobHosts.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Permissions.js"></script>
@@ -150,6 +151,7 @@
   <script src="{{ STATIC_URL }}js/helpers/Variables.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Schedules.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/LogViewer.js"></script>
+  <script src="{{ STATIC_URL }}js/helpers/JobDetail.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/JobStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/InventorySyncStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/SCMSyncStatus.js"></script>
@@ -355,7 +357,7 @@
   <div id="push"></div>
 </div>
 
-<div class="navbar navbar-inverse site-footer">
+<div class="navbar navbar-inverse site-footer fade-in">
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-3 text-left help">

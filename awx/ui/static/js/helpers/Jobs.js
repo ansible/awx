@@ -86,10 +86,15 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                         list = scope.queued_jobs;
                     }
                     job = Find({ list: list, key: 'id', val: id });
-                    LogViewer({
-                        scope: scope,
-                        url: job.url
-                    });
+                    if (job.type === 'job') {
+                        $location.url('/jobs/' + job.id);
+                    }
+                    else {
+                        LogViewer({
+                            scope: scope,
+                            url: job.url
+                        });
+                    }
                 }
             };
         };

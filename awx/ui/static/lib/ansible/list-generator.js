@@ -82,6 +82,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     // Reset the scope to prevent displaying old data from our last visit to this list 
                     //this.scope[list.name] = null;
                     this.scope[list.iterator] = [];
+                    this.scope[list.iterator + "HidePaginator"] = true;
 
                     // Remove any lingering tooltip and popover <div> elements
                     $('.tooltip').each(function() {

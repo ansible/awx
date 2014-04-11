@@ -6,7 +6,7 @@
  */
 var urlPrefix = $basePath;
 
-angular.module('ansible', [
+angular.module('Tower', [
     'ngRoute',
     'ngSanitize',
     'ngCookies',
@@ -97,7 +97,8 @@ angular.module('ansible', [
     'JobsListDefinition',
     'LogViewerStatusDefinition',
     'LogViewerHelper',
-    'LogViewerOptionsDefinition'
+    'LogViewerOptionsDefinition',
+    'JobDetailHelper'
 ])
     
     .constant('AngularScheduler.partials', $basePath + 'lib/angular-scheduler/lib/')
@@ -107,10 +108,17 @@ angular.module('ansible', [
 
     .config(['$routeProvider',
         function ($routeProvider) {
+            
             $routeProvider.
+
             when('/jobs', {
                 templateUrl: urlPrefix + 'partials/jobs.html',
                 controller: 'JobsListController'
+            }).
+
+            when('/jobs/:id', {
+                templateUrl: urlPrefix + 'partials/job_detail.html',
+                controller: 'JobDetailController'
             }).
             
             when('/job_events/:id', {
@@ -405,7 +413,6 @@ angular.module('ansible', [
             $rootScope.sessionTimer = Timer.init();
 
             $rootScope.$on("$routeChangeStart", function (event, next) {
-
                 // Before navigating away from current tab, make sure the primary view is visible
                 if ($('#stream-container').is(':visible')) {
                     HideStream();

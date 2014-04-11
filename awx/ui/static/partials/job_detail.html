@@ -1,0 +1,143 @@
+<div class="tab-pane" id="jobs">
+    <div ng-cloak id="htmlTemplate">
+        <div class="row">
+            <div class="col-md-12" id="breadcrumbs"></div>
+        </div> 
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Job Options</h4>
+                <div class="job_options">
+                    <table class="table table-condensed">
+                        <tbody>       
+                            <tr ng-show="job_template_url">
+                                <td class="col-md-3 col-sm-2">Job Template</td>
+                                <td><a ng-href="{{ job_template_url }}">{{ job_template_name }}</a></td>
+                            </tr>
+                            <tr ng-show="project_url">
+                                <td class="col-md-3 col-sm-2">Project</td>
+                                <td><a ng-href="{{ project_url }}">{{ project_name }}</a></td>
+                            </tr>  
+                            <tr ng-show="inventory_url">
+                                <td class="col-md-3 col-sm-2">Inventory</td>
+                                <td><a ng-href="{{ inventory_url }}">{{ inventory_name }}</a></td>
+                            </tr> 
+                            <tr ng-show="playbook">
+                                <td class="col-md-3 col-sm-2">Playbook</td>
+                                <td>{{ playbook }}</td>
+                            </tr>
+                            <tr ng-show="job_type">
+                                <td class="col-md-3 col-sm-2">Run Type</td>
+                                <td>{{ job_type }}</td>
+                            </tr>
+                            <tr ng-show="credential">
+                                <td class="col-md-3 col-sm-2">Machine Credential</td>
+                                <td>{{ credential }}</td>
+                            </tr>
+                            <tr ng-show="forks">
+                                <td class="col-md-3 col-sm-2">Forks</td>
+                                <td>{{ forks }}</td>
+                            </tr>
+                            <tr ng-show="limit">
+                                <td class="col-md-3 col-sm-2">Limit</td>
+                                <td>{{ limit }}</td>
+                            </tr>
+                            <tr ng-show="verbosity !== undefined">
+                                <td class="col-md-3 col-sm-2">Verbosity</td>
+                                <td>{{ verbosity }}</td>
+                            </tr>
+                            <tr ng-show="job_tags">
+                                <td class="col-md-3 col-sm-2">Job Tags</td>
+                                <td>{{ job_tags }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!-- row -->
+
+        <div class="row">
+            <div class="col-md-6 job-detail-tables">
+                
+                <h4>Plays</h4>
+                <div class="job_plays">
+                     <table class="table table-condensed job-detail-table">
+                        <thead>
+                            <tr>
+                                <th class="col-md-1">Status</th>
+                                <th>Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="play in plays">
+                                <td><i class="fa icon-job-{{ play.status }}"></i></td>
+                                <td>{{ play.name }}</td>
+                                <td>{{ play.state }}</td>
+                            </tr>
+                        </tbody>
+                     </table>
+                </div>
+
+                <h4>Tasks</h4>
+                <div class="job_tasks">
+                    <table class="table table-condensed job-detail-table">
+                        <thead>
+                            <tr>
+                                <th class="col-md-1">Status</th>
+                                <th>Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="task in tasks">
+                                <td><i class="fa icon-job-{{ task.status }}"></i></td>
+                                <td>{{ task.name }}</td>
+                                <td>{{ task.state }}</td>
+                            </tr>
+                        </tbody>
+                    </table>            
+                </div>
+
+                <h4>Hosts</h4>
+                <div class="job_hosts">
+                    <table class="table table-condensed job-detail-table">
+                        <thead>
+                            <tr>
+                                <th class="col-md-1">Status</th>
+                                <th>Name</th>
+                                <th>OK</th>
+                                <th>Changed</th>
+                                <th>Unreachable</th>
+                                <th>Failed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="host in hosts">
+                                <td><i class="fa icon-job-{{ task.status }}"></i></td>
+                                <td>{{ host.name }}</td>
+                                <td>{{ host.ok }}</td>
+                                <td>{{ host.changed }}</td>
+                                <td>{{ host.unreachable }}</td>
+                                <td>{{ host.failed }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

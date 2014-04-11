@@ -209,7 +209,7 @@ function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateI
             scope[list.iterator + 'SearchFieldLabel'] = list.fields.has_active_failures.label;
             scope[list.iterator + 'SearchSelectValue'] = { value: 1 };
         }
-        scope.search(list.iterator);
+        scope.search(list.iterator, null, true);
     };
 }])
 

@@ -23,7 +23,7 @@ function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest
         base = $location.path().replace(/^\//, '').split('/')[0],
         mode = (base === 'credentials') ? 'edit' : 'select',
         url;
-    
+
     view.inject(list, { mode: mode, scope: $scope });
 
     $scope.selected = [];

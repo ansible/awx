@@ -26,7 +26,7 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities', 'PaginationHelpers
                     iterator = params.iterator,
                     url = params.url;
                 
-                scope[iterator + 'Loading'] = true;
+                //scope[iterator + 'Loading'] = true;
                 scope.current_url = url;
                 Rest.setUrl(url);
                 Rest.get()
@@ -45,6 +45,7 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities', 'PaginationHelpers
                         }
                         scope[set] = data.results;
                         scope[iterator + 'Loading'] = false;
+                        scope[iterator + "HidePaginator"] = false;
                         Wait('stop');
                         scope.$emit('PostRefresh');
                     })
