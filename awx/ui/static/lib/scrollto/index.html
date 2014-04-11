@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Standard Meta -->
+	<meta charset="utf-8"/>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+	<!-- Include DocPad Meta -->
+	<meta http-equiv="X-Powered-By" content="DocPad v6.38.0"/>
+
+	<!-- Website Title -->
+	<title>jQuery ScrollTo - Smooth scroll to any jQuery/DOM element</title>
+
+	<!-- Include DocPad Styles + Our Own -->
+	
+
+
+	<!-- ============================== -->
+	<!-- Demo Requirements -->
+
+	<link rel="stylesheet" media="screen" href="./vendor/highlight.css" />
+	<link rel="stylesheet" media="screen" href="./styles/style.css" />
+</head>
+<body>
+	<!-- ============================== -->
+	<!-- Project Requirements -->
+
+	<!-- Include jQuery (Dependency of jQuery ScrollTo) -->
+	<script src="./vendor/jquery.js"></script>
+
+	<!-- Include jQuery ScrollTo -->
+	<script src="./lib/jquery-scrollto.js"></script>
+
+
+	<!-- ============================== -->
+	<!-- Demo -->
+
+	<div class="section links" id="links">
+		<h1>jQuery ScrollTo - Smooth scroll to any jQuery/DOM element</h1>
+		<h2><a href="https://github.com/balupton/jquery-scrollto/zipball/gh-pages" title="Download" id="download">Download</a></h2>
+		<h2><a href="http://balupton.github.com/jquery-scrollto" title="Demo Page">Demo Page</a></h2>
+		<h2><a href="https://github.com/balupton/jquery-scrollto" title="Project Page">Project Page</a></h2>
+		<h2><a href="https://github.com/balupton/jquery-scrollto/issues" title="Bug Tracker">Bug Tracker</a></h2>
+		<div class="social-buttons">
+			<div class="google-plus-one-button social-button">
+	<div class="g-plusone" data-size="medium" data-href="http%3A//balupton.github.com/jquery-scrollto"></div>
+	<script>
+		(function() {
+			var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+			po.src = 'https://apis.google.com/js/plusone.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+		})();
+	</script>
+</div><div class="reddit-submit-button social-button">
+	<script type="text/javascript" src="http://en.reddit.com/static/button/button1.js"></script>
+</div><div class="hacker-news-submit-button social-button">
+	<a href="http://news.ycombinator.com/submit" class="hn-share-button" data-url="http://balupton.github.com/jquery-scrollto">Vote on HN</a>
+	<script>
+		(function(d, t) {
+			var g = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+				g.src = '//hnbutton.appspot.com/static/hn.min.js';
+			s.parentNode.insertBefore(g, s);
+		}(document, 'script'));
+	</script>
+</div><div class="facebook-like-button social-button">
+	<iframe src="//www.facebook.com/plugins/like.php?href=http%3A//balupton.github.com/jquery-scrollto&amp;send=false&amp;layout=button_count&amp;width=450&amp;show_faces=false&amp;font&amp;colorscheme=light&amp;action=like&amp;height=21&amp;appId=266367676718271" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:21px;" allowTransparency="true"></iframe>
+</div><div class="twitter-tweet-button social-button">
+	<a href="https://twitter.com/share" class="twitter-share-button" data-via="balupton" data-related="balupton">Tweet</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div><div class="twitter-follow-button social-button">
+	<a href="https://twitter.com/balupton" class="twitter-follow-button" data-show-count="false">Follow @balupton</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div><div class="github-follow-button social-button">
+	<iframe src="//ghbtns.com/github-btn.html?user=balupton&type=follow&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="165" height="20"></iframe>
+</div>
+		</div>
+	</div>
+
+	<div class="section about" id="about">
+		<h2>About</h2>
+
+		<p>
+			<strong>jQuery ScrollTo</strong> is a great way to smooth scroll to any jQuery/DOM element
+		</p>
+
+		<ul class="features">
+			<li><strong>Extremely simple to use:</strong> just call <code>$('#element).ScrollTo()</code> and your user will be smoothly scrolled to that element!</li>
+			<li><strong>Only 1KB in size!</strong> Making it the smallest ScrollTo plugin and won't slow you down.</li>
+			<li><strong>Supports all the elements you can throw at it!</strong> Even those ones in modals and scrollable areas! So you can now feel at ease knowing your user will always be scrolled to that correct place which you intended.</li>
+			<li><strong>It's even easy customise and work with!</strong> You can specify such options as <code>duration</code>, <code>easing</code>, and <code>callback</code> on your ScrollTo call.</li>
+		</ul>
+
+		<p>Enough talk, let's see it in action!</p>
+	</div>
+
+	<div class="section using" id="using">
+	<h2>Using</h2>
+
+	<div class="demo">
+		<div class="demo-links">Loading... please wait</div>
+		<div class="demo-pieces">
+			<div id="scrollto1" title="Scroll to #scrollto1">
+				#scrollto1:
+				<pre class="highlighted"><code class="javascript">$(<span class="string">'#scrollto1'</span>).ScrollTo();</code></pre>
+			</div>
+			<div id="scrollto2" title="Scroll to #scrollto2 with a 2 second duration and `linear` easing">
+				#scrollto2
+				<pre class="highlighted"><code class="javascript">$(<span class="string">'#scrollto2'</span>).ScrollTo({
+    duration: <span class="number">2000</span>,
+    easing: <span class="string">'linear'</span>
+});</code></pre>
+			</div>
+			<div id="scrollto3" title="Scroll to #scrollto3 with a 2 second duration and durationMode set to `all`">
+				#scrollto3
+				<pre class="highlighted"><code class="javascript">$(<span class="string">'#scrollto3'</span>).ScrollTo({
+    duration: <span class="number">2000</span>,
+    durationMode: <span class="string">'all'</span>
+});</code></pre>
+			</div>
+			<div id="scrollto4" title="Scroll to #scrollto4 with a 2 second duration and a callback on scroll completion">
+				#scrollto4
+				<pre class="highlighted"><code class="javascript">$(<span class="string">'#scrollto4'</span>).ScrollTo({
+    duration: <span class="number">2000</span>,
+    callback: <span class="keyword">function</span>(){
+        alert(<span class="string">'Scrolling has now completed.'</span>);
+    }
+});</code></pre>
+			</div>
+			<div id="scrollto5" style="margin-left:600px;" title="Scroll to #scrollto5 with a horizontal scroll">
+				#scrollto5
+				<pre class="highlighted"><code class="javascript">$(<span class="string">'#scrollto5'</span>).ScrollTo();</code></pre>
+			</div>
+			<div id="scrollto6" style="margin-left:600px;" title="Scroll to #scrollto6 only if it is outside the visible area">
+				#scrollto6
+				<pre class="highlighted"><code class="javascript">$(<span class="string">'#scrollto6'</span>).ScrollTo({
+    onlyIfOutside: <span class="literal">true</span>
+});</code></pre>
+			</div>
+		</div>
+		<script>
+			/* Generate the links automatically from the pieces */
+			$(function(){
+				var $links = $('.demo-links').empty();
+				var $pieces = $('.demo-pieces').children();
+				$pieces.each(function(){
+					var $piece = $(this);
+					var $link = $('<a>',{
+						text: $piece.attr('title')
+					}).on('click',function(){
+						eval($piece.find('code').text());
+					}).appendTo($links)
+				});
+			});
+		</script>
+	</div>
+</div>
+
+	<div class="section install" id="install">
+		<h2>Installation</h2>
+
+		<h3>Step 1. <a href="https://github.com/balupton/jquery-scrollto/zipball/gh-pages" title="Download">Download</a> jQuery ScrollTo, and extract it to your hard drive</h3>
+		<div>
+			As everyones extraction process is a little bit different be sure of the following:
+			<ul class="install">
+				<li>If the archive was extracted and you have a whole bunch of files and directories (folders), then you must create a new directory called <code>jquery-scrollto</code> and move all the files and directories into that to continue.</li>
+				<li>If the archive was extracted and you have only one directory called <code>jquery-scrollto</code> which has a whole bunch of stuff in it, then that is fine and you can continue onto the next step.</li>
+				<li>If the archive was extracted and you have only one directory and it is not called <code>jquery-scrollto</code> then you must rename it to <code>jquery-scrollto</code> to continue.</li>
+			</ul>
+		</div>
+
+		<h3>Step 2. Move the <code>jquery-scrollto</code> directory to somewhere on your webserver</h3>
+		<p>Be sure to always keep the entire <code>jquery-scrollto</code> directory intact; this means if you were to only move some of the files instead of moving the entire directory, then you would run into problems due to the cross directory references would no longer be working.</p>
+
+		<h3>Step 3. Include jQuery (insert into your page's head tag)</h3>
+		<p>If your page already has jQuery included then you can skip this step.</p>
+		<pre class="highlighted"><code class="xml"><span class="comment">&lt;!-- Include jQuery (Dependency of jQuery ScrollTo) --&gt;</span>
+<span class="tag">&lt;<span class="title">script</span> <span class="attribute">src</span>=<span class="value">"http://www.yoursite.com/somewhere/on/your/webserver/jquery-scrollto/vendor/jquery.js"</span>&gt;</span><span class="javascript"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></code></pre>
+
+		<h3>Step 4. Include jQuery ScrollTo (insert into your page's head tag)</h3>
+		<pre class="highlighted"><code class="xml"><span class="comment">&lt;!-- Include jQuery ScrollTo --&gt;</span>
+<span class="tag">&lt;<span class="title">script</span> <span class="attribute">src</span>=<span class="value">"http://www.yoursite.com/somewhere/on/your/webserver/jquery-scrollto/lib/jquery-scrollto.js"</span>&gt;</span><span class="javascript"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></code></pre>
+	</div>
+
+	<div class="section">
+		<h2>Enjoy!!!</h2>
+		<p>
+			If anything isn't working the way you want it to, or if you would like to request a feature or provide praise or general feedback then be sure to click the feedback button to the right, or the "Get Support" link up the top of this page.
+		</p>
+		<p>
+			This work is powered by coffee and distributed for free. Donations are how we afford our coffee. Coffee is how we stay awake after our day job hours to work on things like this free open-source project which you're looking at. So go ahead, and get that warm fuzzy feeling knowing you just helped some poor fellow working after hours for free to buy his coffee. You only need to spare a few dollars, or as much as you feel this piece of work is worth. Thanks so much. Alternatively; if you are not in a donating mood, then spreading the word about this project on twitter, your blog, or whatever is just as good. You can also give praise by clicking the feedback button or visiting our "Get Support" link. Thanks a bunch, we appreciate the help deeply.
+		</p>
+		<a href="https://www.paypal.com/au/cgi-bin/webscr?cmd=_flow&SESSION=IHj3DG3oy_N9A9ZDIUnPksOi59v0i-EWDTunfmDrmU38Tuohg_xQTx0xcjq&dispatch=5885d80a13c0db1f8e263663d3faee8d14f86393d55a810282b64afed84968ec" title="Donate once-off to this project via Paypal">
+			<img src="//www.paypalobjects.com/en_AU/i/btn/btn_donate_SM.gif" alt="Paypal donation button"/>
+		</a>
+		<p>
+			Licensed under the <a rel="license" href="http://creativecommons.org/licenses/MIT/">MIT License</a>.
+		</p>
+		<br />
+	</div>
+
+
+	<!-- ============================== -->
+	<!-- Demo Requirements -->
+
+	<!-- Include DocPad Scripts -->
+	<script >var _gauges = _gauges || [];
+(function(){
+	var t = document.createElement('script');
+	t.type = 'text/javascript';
+	t.async = true;
+	t.id = 'gauges-tracker';
+	t.setAttribute('data-site-id', '51a70cd2f5a1f52bb100000a');
+	t.src = '//secure.gaug.es/track.js';
+	var s = document.getElementsByTagName('script')[0];
+	s.parentNode.insertBefore(t, s);
+})();</script><script >var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-4446117-1']);
+_gaq.push(['_trackPageview']);
+(function(){
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();</script>
+</body>
+</html>

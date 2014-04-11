@@ -176,6 +176,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                             scope[field + '_api_error'] = data[form.fields[field]][0];
                             //scope[form.name + '_form'][form.fields[field].realName].$setValidity('apiError', false);
                             $('[name="' + form.fields[field].realName + '"]').addClass('ng-invalid');
+                            $('[name="' + form.fields[field].realName + '"]').ScrollTo({ "onlyIfOutside": true, "offsetTop": 100 });
                             fieldErrors = true;
                         }
                     }
@@ -185,6 +186,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                                 data[field][0];
                             //scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField].$setValidity('apiError', false);
                             $('[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').addClass('ng-invalid');
+                            $('[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').ScrollTo({ "onlyIfOutside": true, "offsetTop": 100 });
                             fieldErrors = true;
                         }
                     } else {
@@ -192,6 +194,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                             scope[field + '_api_error'] = data[field][0];
                             //scope[form.name + '_form'][field].$setValidity('apiError', false);
                             $('[name="' + field + '"]').addClass('ng-invalid');
+                            $('[name="' + field + '"]').ScrollTo({ "onlyIfOutside": true, "offsetTop": 100 });
                             fieldErrors = true;
                         }
                     }
