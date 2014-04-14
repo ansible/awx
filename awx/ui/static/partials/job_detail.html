@@ -62,11 +62,11 @@
 
                 <h5>Plays</h5>
                 <div class="job_plays job_well">
-                     <ul>
+                     <ul class="job-list">
                         <li ng-repeat="play in plays">
                             <i class="fa icon-job-{{ play.status }}"></i> {{play.name }}
                             <ul ng-show="play.children.length > 0">
-                                <li ng-repeat="child in play.children">
+                                <li ng-class="playActiveClass" ng-click="selectPlay(play.id)" ng-repeat="child in play.children">
                                     <i class="fa icon-job-{{ child.status }}"></i> {{child.name }}
                                 </li>
                             </ul>

@@ -13,13 +13,13 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/lib/codemirror.css" >
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/theme/elegant.css" >
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.css" >
-  
-  {% if settings.USE_MINIFIED_JS %} 
+
+  {% if settings.USE_MINIFIED_JS %}
   <link rel="stylesheet" href="{{ STATIC_URL }}css/awx.min.css" />
   {% else %}
   <link rel="stylesheet/less" type="text/css" href="{{ STATIC_URL }}less/ansible-ui.less" />
   {% endif %}
-  
+
   <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" />
   <script>
       var $basePath = "{{ STATIC_URL }}";
@@ -42,8 +42,8 @@
   <script src="{{ STATIC_URL }}lib/rrule/lib/nlp.js"></script>
   <script src="{{ STATIC_URL }}lib/angular-tz-extensions/lib/angular-tz-extensions.js"></script>
   <script src="{{ STATIC_URL }}lib/angular-scheduler/lib/angular-scheduler.min.js"></script>
-  
-  {% if settings.USE_MINIFIED_JS %} 
+
+  {% if settings.USE_MINIFIED_JS %}
   <script src="{{ STATIC_URL }}js/awx.min.js"></script>
   {% else %}
   <script src="{{ STATIC_URL }}lib/less.js/dist/less-1.6.2.min.js"></script>
@@ -63,6 +63,7 @@
   <script src="{{ STATIC_URL }}lib/ansible/InventoryTree.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/Timer.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/Modal.js"></script>
+  <script src="{{ STATIC_URL }}lib/ansible/Socket.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Authentication.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Users.js"></script>
@@ -79,6 +80,7 @@
   <script src="{{ STATIC_URL }}js/controllers/JobHosts.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Permissions.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Schedules.js"></script>
+  <script src="{{ STATIC_URL }}js/controllers/Sockets.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Users.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Inventories.js"></script>
@@ -159,7 +161,7 @@
   <script src="{{ STATIC_URL }}js/widgets/Stream.js"></script>
   <script src="{{ STATIC_URL }}js/help/InventoryGroups.js"></script>
   {% endif %}
-  
+
 </head>
 <body>
 <div id="wrap">
@@ -186,7 +188,7 @@
              </div><!-- nav-collapse -->
            </div>
         </div><!-- navbar -->
-    </div>  
+    </div>
     <div class="container-fluid main-container" id="main">
 
     <div class="row">
@@ -201,8 +203,9 @@
           <li><a href="#inventories" id="main_inventories_tab" data-toggle="tab" class="main-tab-link">Inventories</a></li>
           <li><a href="#job_templates" id="main_job_templates_tab" data-toggle="tab" class="main-tab-link">Job Templates</a></li>
           <li><a href="#jobs" id="main_jobs_tab" data-toggle="tab" class="main-tab-link">Jobs</a></li>
+          <li><a href="#sockets" id="main_sockets_tab" data-toggle="tab" class="main-tab-link">Sockets</a></li>
         </ul>
-     
+
         <div class="tab-content" id="tab-content-container">
           <div ng-view id="main-view"></div>
         </div>
@@ -255,13 +258,13 @@
        <div class="modal-dialog">
           <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-target="#form-modal" 
+                <button type="button" class="close" data-target="#form-modal"
                                 data-dismiss="modal" aria-hidden="true" ng-click="cancelModal()">&times;</button>
                 <h3 ng-bind-html="formModalHeader"></h3>
               </div>
               <div class="modal-body" id="form-modal-body"></div>
               <div class="modal-footer">
-                <button ng-show="formModalInfo !== undefined && formModalInfo != ''" ng-click="formModalInfoAction()" 
+                <button ng-show="formModalInfo !== undefined && formModalInfo != ''" ng-click="formModalInfoAction()"
                     class="btn btn-sm pull-left"><i class="fa fa-search-plus"></i> <span ng-bind="formModalInfo"></span></button>
                 <a href="#" ng-show="formModalCancelShow" data-target="#form-modal" ng-click="cancelModal()" data-dismiss="modal" id="form_cancel_btn" class="btn btn-default">Cancel</a>
                 <a href="" ng-bind="formModalActionLabel" ng-click="formModalAction()" ng-disabled="formModalActionDisabled" id="form_ok_btn" class="btn btn-primary"></a>
@@ -274,13 +277,13 @@
        <div class="modal-dialog">
           <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-target="#form-modal2" 
+                <button type="button" class="close" data-target="#form-modal2"
                                 data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h3 ng-bind-html="formModal2Header"></h3>
               </div>
               <div class="modal-body" id="form-modal2-body"></div>
               <div class="modal-footer">
-                <a href="" ng-bind="formModal2Info" ng-show="formModal2Info !== undefined && formModal2Info != ''" ng-click="formModal2InfoAction()" 
+                <a href="" ng-bind="formModal2Info" ng-show="formModal2Info !== undefined && formModal2Info != ''" ng-click="formModal2InfoAction()"
                     class="btn btn-default btn-sm pull-left"><i class="fa fa-search-plus"></i> <span ng-bind="formModal2Info"></span></a>
                 <a href="#" ng-show="formModal2CancelShow" data-target="#form-modal2" data-dismiss="modal" id="form2_cancel_btn"
                     class="btn btn-default">Cancel</a>
@@ -295,7 +298,7 @@
        <div class="modal-dialog">
           <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-target="#prompt-modal" 
+                <button type="button" class="close" data-target="#prompt-modal"
                                 data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h3 ng-bind="promptHeader" id="prompt-header"></h3>
               </div>
@@ -307,14 +310,14 @@
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
-    </div><!-- modal -->     
+    </div><!-- modal -->
 
     <!-- Alerts/error handling dialogs -->
     <div id="alert-modal" class="modal fade">
        <div class="modal-dialog">
           <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" ng-hide="disableButtons" data-target="#alert-modal" 
+                <button type="button" class="close" ng-hide="disableButtons" data-target="#alert-modal"
                     data-dismiss="modal" class="modal" aria-hidden="true">&times;</button>
                 <h3 ng-bind="alertHeader"></h3>
               </div>
@@ -332,7 +335,7 @@
        <div class="modal-dialog">
           <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-target="#alert-modal2" 
+                <button type="button" class="close" data-target="#alert-modal2"
                                 data-dismiss="modal" ng-hide="disableButtons2" aria-hidden="true">&times;</button>
                 <h3 ng-bind="alertHeader2"></h3>
               </div>
@@ -350,7 +353,7 @@
     <div id="help-modal"></div>
 
   </div><!-- container -->
-  
+
   <div class="overlay"></div>
   <div class="spinny"><i class="fa fa-cog fa-spin fa-2x"></i> <p>working...</p></div>
 
@@ -361,7 +364,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-3 text-left help">
-                <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" 
+                <a href="https://ansibleworks.zendesk.com/anonymous_requests/new"
                     target="_blank"><i class="fa fa-question-circle"></i> Contact Support</a>
             </div>
             <div class="col-sm-6 text-center copyright">
@@ -380,7 +383,7 @@
   <script src="{{ STATIC_URL }}lib/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src="{{ STATIC_URL }}lib/js-yaml/js-yaml.min.js"></script>
   <script src="{{ STATIC_URL }}lib/select2/select2.min.js"></script>
-  
+
   <!-- Codemirror bits to make variable editing possible -->
   <script src="{{ STATIC_URL }}lib/js-yaml/js-yaml.min.js"></script>
   <script src="{{ STATIC_URL }}lib/jsonlint/lib/jsonlint.js"></script>
@@ -394,6 +397,7 @@
   <script src="{{ STATIC_URL }}lib/codemirror/addon/edit/matchbrackets.js"></script>
   <script src="{{ STATIC_URL }}lib/codemirror/addon/selection/active-line.js"></script>
   <script src="{{ STATIC_URL }}lib/scrollto/lib/jquery-scrollto.js"></script>
+  <script src="{{ STATIC_URL }}lib/socket.io-client/dist/socket.io.min.js"></script>
 
   <script>
       // When user clicks on main tab, fire the matching Angular route

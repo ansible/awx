@@ -12,10 +12,11 @@
 
 'use strict';
 
-function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
+function Authenticate($cookieStore, $compile, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
     Timer, Empty) {
-    
-    var setLoginFocus, lastPath, sessionExpired, scope;
+
+    var setLoginFocus, lastPath, sessionExpired,
+        e, scope = $rootScope.$new();
 
     setLoginFocus = function () {
         $('#login-username').focus();
@@ -54,7 +55,8 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
         setLoginFocus();
     });
 
-    scope = angular.element(document.getElementById('login-modal')).scope();
+    e = angular.element(document.getElementById('login-modal'));
+    $compile(e)(scope);
 
     // Reset the login form
     scope.login_username = null;
@@ -83,7 +85,44 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
         });
     };
 
-    // Call the API to get an auth token
+    if (scope.removeAuthorizationGetLicense) {
+        scope.removeAuthorizationGetLicense();
+    }
+    scope.removeAuthorizationGetLicense = scope.$on('AuthorizationGetLicense', function() {
+        Authorization.getLicense()
+            .success(function (data) {
+                Authorization.setLicense(data);
+                if (lastPath()) {
+                    // Go back to most recent navigation path
+                    $location.path(lastPath());
+                } else {
+                    $location.url('/home?login=true');
+                }
+            })
+            .error(function () {
+                Wait('stop');
+                Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
+            });
+        });
+
+    if (scope.removeAuthorizationGetUser) {
+        scope.removeAuthorizationGetUser();
+    }
+    scope.removeAuthorizationGetUser = scope.$on('AuthorizationGetUser', function() {
+        // Get all the profile/access info regarding the logged in user
+        Authorization.getUser()
+            .success(function (data) {
+                Authorization.setUserInfo(data);
+                $rootScope.user_is_superuser = data.results[0].is_superuser;
+                scope.$emit('AuthorizationGetLicense');
+            })
+            .error(function (data, status) {
+                Wait('stop');
+                Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
+            });
+    });
+
+    // Call the API to get an cauth token
     scope.systemLogin = function (username, password) {
         $('.api-error').empty();
         var token;
@@ -97,30 +136,7 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
                     token = data.token;
                     Authorization.setToken(data.token, data.expires);
                     $rootScope.sessionTimer = Timer.init();
-                    // Get all the profile/access info regarding the logged in user
-                    Authorization.getUser()
-                        .success(function (data) {
-                            Authorization.setUserInfo(data);
-                            $rootScope.user_is_superuser = data.results[0].is_superuser;
-                            Authorization.getLicense()
-                                .success(function (data) {
-                                    Authorization.setLicense(data);
-                                    if (lastPath()) {
-                                        // Go back to most recent navigation path
-                                        $location.path(lastPath());
-                                    } else {
-                                        $location.url('/home?login=true');
-                                    }
-                                })
-                                .error(function () {
-                                    Wait('stop');
-                                    Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
-                                });
-                        })
-                        .error(function (data, status) {
-                            Wait('stop');
-                            Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
-                        });
+                    scope.$emit('AuthorizationGetUser');
                 })
                 .error(function (data, status) {
                     var hdr, msg, key;
@@ -146,7 +162,6 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
     };
 }
 
-Authenticate.$inject = ['$cookieStore', '$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
+Authenticate.$inject = ['$cookieStore', '$compile', '$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
     'Timer', 'Empty'
 ];
-

@@ -98,9 +98,10 @@ angular.module('Tower', [
     'LogViewerStatusDefinition',
     'LogViewerHelper',
     'LogViewerOptionsDefinition',
-    'JobDetailHelper'
+    'JobDetailHelper',
+    'SocketIO'
 ])
-    
+
     .constant('AngularScheduler.partials', $basePath + 'lib/angular-scheduler/lib/')
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
@@ -108,7 +109,7 @@ angular.module('Tower', [
 
     .config(['$routeProvider',
         function ($routeProvider) {
-            
+
             $routeProvider.
 
             when('/jobs', {
@@ -120,7 +121,7 @@ angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/job_detail.html',
                 controller: 'JobDetailController'
             }).
-            
+
             when('/job_events/:id', {
                 templateUrl: urlPrefix + 'partials/job_events.html',
                 controller: 'JobEventsList'
@@ -170,7 +171,7 @@ angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: 'ProjectsEdit'
             }).
-            
+
             when('/projects/:id/schedules', {
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
                 controller: 'ScheduleEditController'
@@ -396,6 +397,11 @@ angular.module('Tower', [
                 controller: 'HomeHosts'
             }).
 
+            when('/sockets', {
+                templateUrl: urlPrefix + 'partials/sockets.html',
+                controller: 'SocketsController'
+            }).
+
             otherwise({
                 redirectTo: '/home'
             });
@@ -436,7 +442,7 @@ angular.module('Tower', [
                     }
                 } else {
                     if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
-                        Authorization.restoreUserInfo(); //user must have hit browser refresh 
+                        Authorization.restoreUserInfo(); //user must have hit browser refresh
                     }
                     CheckLicense();
                 }

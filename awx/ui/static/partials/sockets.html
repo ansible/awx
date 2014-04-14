@@ -1,0 +1,11 @@
+<div class="tab-pane" id="sockets">
+    <div ng-cloak id="htmlTemplate">
+        <div class="alert alert-info"><strong>Socket url</strong>: {{ socket_url }} &nbsp;<strong>Status:</strong> {{ socket_status }} {{ socket_reason }}</div>
+        <div class="well">
+            <h5>Received Messages:</h5>
+            <ul>
+                <li ng-repeat="message in messages">{{ message }} </li>
+            </ul>
+        </div>
+    </div>
+</div>

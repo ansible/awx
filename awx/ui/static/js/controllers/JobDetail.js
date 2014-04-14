@@ -4,11 +4,12 @@
  *  JobDetail.js
  *
  */
- 
+
 'use strict';
 
-function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors, DigestEvents) {
-    
+function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors, DigestEvents,
+    SelectPlay) {
+
     ClearScope();
 
     var job_id = $routeParams.id,
@@ -36,7 +37,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             events: events
         });
     });
-    
+
     // Get events, page size 50
     if ($scope.removeJobReady) {
         $scope.removeJobReady();
@@ -83,8 +84,15 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                 msg: 'Failed to retrieve job: ' + $routeParams.id + '. GET returned: ' + status });
         });
+
+    $scope.selectPlay = function(id) {
+        SelectPlay({
+            scope: $scope,
+            id: id
+        });
+    };
 }
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',
-    'Rest', 'ProcessErrors', 'DigestEvents'
+    'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay'
 ];

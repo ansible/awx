@@ -264,7 +264,15 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             rc: rc
         });
     };
-}]);
+}])
 
-
-
+.factory('SelectPlay', [ function() {
+    return function(params) {
+        var scope = params.scope,
+            id = params.id;
+        scope.plays.forEach(function(play, idx) {
+            scope.plays[idx].playActiveClass = (play.id === id) ? 'active' : '';
+        });
+        scope.selectedPlay = id;
+    };
+}])
