@@ -1,7 +1,7 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- * Custom directives for form validation 
+ * Custom directives for form validation
  *
  */
 
@@ -10,7 +10,7 @@
 /* global chkPass:false */
 
 angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'JobsHelper'])
-    
+
     // awpassmatch:  Add to password_confirm field. Will test if value
     //               matches that of 'input[name="password"]'
     .directive('awpassmatch', function() {
@@ -32,11 +32,11 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             }
         };
     })
-    
+
     // caplitalize  Add to any input field where the first letter of each
     //              word should be capitalized. Use in place of css test-transform.
     //              For some reason "text-transform: capitalize" in breadcrumbs
-    //              causes a break at each blank space. And of course, 
+    //              causes a break at each blank space. And of course,
     //              "autocapitalize='word'" only works in iOS. Use this as a fix.
     .directive('capitalize', function() {
         return {
@@ -93,18 +93,18 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             }
         };
     })
-  
+
     //
     // awRequiredWhen: { variable: "<variable to watch for true|false>", init:"true|false" }
     //
     // Make a field required conditionally using a scope variable. If the scope variable is true, the
-    // field will be required. Otherwise, the required attribute will be removed. 
-    //  
+    // field will be required. Otherwise, the required attribute will be removed.
+    //
     .directive('awRequiredWhen', function() {
         return {
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
-                
+
                 function checkIt () {
                     var viewValue = elm.val(), label, validity = true;
                     if ( scope[attrs.awRequiredWhen] && (elm.attr('required') === null || elm.attr('required') === undefined) ) {
@@ -131,12 +131,12 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     }
                     ctrl.$setValidity('required', validity);
                 }
-                
+
                 if (attrs.awrequiredInit !== undefined && attrs.awrequiredInit !== null) {
                     scope[attrs.awRequiredWhen] = attrs.awrequiredInit;
                     checkIt();
                 }
-                
+
                 scope.$watch(attrs.awRequiredWhen, function() {
                     // watch for the aw-required-when expression to change value
                     checkIt();
@@ -149,7 +149,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             }
         };
     })
-    
+
     // awPlaceholder: Dynamic placeholder set to a scope variable you want watched.
     //                Value will be place in field placeholder attribute.
     .directive('awPlaceholder', [ function() {
@@ -165,7 +165,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     }])
 
     // lookup   Validate lookup value against API
-    //           
+    //
     .directive('awlookup', ['Rest', function(Rest) {
         return {
             require: 'ngModel',
@@ -198,10 +198,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             }
         };
     }])
-    
+
     //
     // awValidUrl
-    //           
+    //
     .directive('awValidUrl', [ function() {
         return {
             require: 'ngModel',
@@ -222,13 +222,13 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
-    /*  
+    /*
      *  Enable TB tooltips. To add a tooltip to an element, include the following directive in
      *  the element's attributes:
      *
      *     aw-tool-tip="<< tooltip text here >>"
      *
-     *  Include the standard TB data-XXX attributes to controll a tooltip's appearance.  We will 
+     *  Include the standard TB data-XXX attributes to controll a tooltip's appearance.  We will
      *  default placement to the left and delay to 2 seconds.
      */
     .directive('awToolTip', function() {
@@ -241,11 +241,11 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             else {
                 placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left';
             }
-            
+
             $(element).on('hidden.bs.tooltip', function( ) {
                 // TB3RC1 is leaving behind tooltip <div> elements. This will remove them
-                // after a tooltip fades away. If not, they lay overtop of other elements and 
-                // honk up the page. 
+                // after a tooltip fades away. If not, they lay overtop of other elements and
+                // honk up the page.
                 $('.tooltip').each(function() {
                     $(this).remove();
                 });
@@ -272,7 +272,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             }
         };
     })
-     
+
     /*
      *  Enable TB pop-overs. To add a pop-over to an element, include the following directive in
      *  the element's attributes:
@@ -470,7 +470,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             }
         };
     }])
-    
+
     //
     // awRefresh
     //
@@ -507,8 +507,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
-    
-    /*  
+
+    /*
        awMultiSelect
        Relies on select2.js to create a multi-select with tags.
     */
@@ -543,8 +543,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
-    
-    /*  
+
+    /*
      *  Make an element draggable. Used on inventory groups tree.
      *
      *  awDraggable: boolean || {{ expression }}
@@ -552,7 +552,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
      */
     .directive('awDraggable', [ function() {
         return function(scope, element, attrs) {
-    
+
             if (attrs.awDraggable === "true") {
                 var containment = attrs.containment;  //provide dataContainment:"#id"
                 $(element).draggable({
@@ -569,8 +569,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             }
         };
     }])
-    
-    /*  
+
+    /*
      *  Make an element droppable- it can receive draggable elements
      *
      *  awDroppable: boolean || {{ expression }}
@@ -581,7 +581,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             var node;
             if (attrs.awDroppable === "true") {
                 $(element).droppable({
-                    // the following is inventory specific accept checking and 
+                    // the following is inventory specific accept checking and
                     // drop processing.
                     accept: function(draggable) {
                         if (draggable.attr('data-type') === 'group') {
@@ -643,7 +643,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             var active,
                 list = Store('accordions'),
                 id, base;
-            
+
             if (!Empty(attrs.openFirst)) {
                 active = 0;
             }
@@ -695,6 +695,51 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     Store('accordions', list);
                 }
             });
+        };
+    }])
+
+    .directive('awScrollDown', [ function() {
+        return function(scope, element, attrs) {
+            var element_to_scroll = attrs.awScrollDown, elem;
+            $(element).on('click', function() {
+                var height = document.getElementById(element_to_scroll).scrollHeight;
+                $(element).hide();
+                $('#' + element_to_scroll).animate({scrollTop:height}, 800);
+            });
+            elem = document.getElementById(element_to_scroll);
+            $('#' + element_to_scroll).on('scroll', function() {
+                if (elem.scrollTop > 0 && $(element).is(':visible')) {
+                    $(element).hide();
+                }
+                else if (elem.scrollTop === 0 && !$(element).is(':visible')) {
+                    $(element).fadeIn(2500);
+                }
+            });
+            if (elem.scrollTop > 0 && $(element).is(':visible')) {
+                $(element).hide();
+            }
+        };
+    }])
+
+    .directive('awScrollUp', [ function() {
+        return function(scope, element, attrs) {
+            var element_to_scroll = attrs.awScrollUp, elem;
+            $(element).on('click', function() {
+                $(element).hide();
+                $('#' + element_to_scroll).animate({scrollTop:0}, 'slow');
+            });
+            elem = document.getElementById(element_to_scroll);
+            $('#' + element_to_scroll).on('scroll', function() {
+                if (elem.scrollTop === 0 && $(element).is(':visible')) {
+                    $(element).hide();
+                }
+                else if (elem.scrollTop > 0 && !$(element).is(':visible')) {
+                    $(element).fadeIn(2500);
+                }
+            });
+            if (elem.scrollTop === 0) {
+                $(element).hide();
+            }
         };
     }]);
 

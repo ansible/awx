@@ -1,8 +1,8 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *  
+ *
  *  ansible-ui.css
- *  
+ *
  *  custom styles for ansible-ui
  *
  */
@@ -120,7 +120,7 @@ a:focus {
 }
 
 .btn-disabled {
-   cursor: not-allowed; 
+   cursor: not-allowed;
 }
 
 /* Bring primary (blue) buttons in line with link colors */
@@ -151,12 +151,12 @@ a:focus {
 
 #home_groups_table .actions .cancel { padding-right: 3px; }
 
-.success-badge { 
+.success-badge {
   color: #ffffff;
   background-color: #5cb85c;
 }
 
-.bold-text .checkbox-inline { 
+.bold-text .checkbox-inline {
   font-weight: bold;
 }
 
@@ -176,9 +176,9 @@ textarea.allowresize {
   z-index: 2000;
   width: 75px;
   height: 75px;
-  text-align:center; 
+  text-align:center;
   color: #eee;
-  background-color: @black; 
+  background-color: @black;
   border: 1px solid @grey;
   border-radius: 6px;
   padding-top: 10px;
@@ -199,7 +199,7 @@ textarea.allowresize {
 }
 
 .license-version {
-  font-size: 18px; 
+  font-size: 18px;
   color: @grey-txt;
 }
 
@@ -212,9 +212,9 @@ textarea.allowresize {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1999; 
+  z-index: 1999;
   background-color: @black;
-  opacity: 0;  
+  opacity: 0;
 }
 
 /* TB tooltip overrides */
@@ -225,7 +225,7 @@ textarea.allowresize {
       font-size: 12px;
   }
   .flyout thead> tr> th, .flyout tbody> tr> td, .flyout tbody> tr> td> a {
-      font-size: 12px; 
+      font-size: 12px;
   }
   .popover-title {
       padding-top: 5px;
@@ -272,7 +272,7 @@ hr {
 .help-auto-off {
   margin-top: 15px;
   margin-bottom: 15px;
-  margin-left: 10px; 
+  margin-left: 10px;
   label {
     font-weight: normal;
   }
@@ -284,7 +284,7 @@ hr {
   }
 
   .panel-heading:hover {
-    cursor: pointer;  
+    cursor: pointer;
   }
 
   .panel-default>.panel-heading .collapse-help-icon {
@@ -296,10 +296,10 @@ hr {
       margin-bottom: 20px;
       dl {
          margin-left: 15px;
-      }   
+      }
       dt {
          margin-top: 15px;
-      }  
+      }
   }
 
 th.actions-column,
@@ -341,7 +341,7 @@ td.actions {
 }
 
 .ssh-key-field, .mono-space {
-  font-family: Fixed, monospace;  
+  font-family: Fixed, monospace;
 }
 
 dd {
@@ -423,7 +423,7 @@ dd {
 }
 
 .navbar-collapse {
-  padding-right: 0;  
+  padding-right: 0;
 }
 
 .main-menu .nav >li >a:last-child {
@@ -437,7 +437,7 @@ dd {
   margin-top: 11px;
 }
 
-/* Using inline-block rather than block keeps 
+/* Using inline-block rather than block keeps
     brand img from right aligning into the collapse button
     on mobile screens */
 .main-menu .navbar-brand {
@@ -480,7 +480,7 @@ dd {
     padding-top: 10px;
     padding-bottom: 10px;
     font-size: 12px;
-    
+
     a,
     a:active,
     a:visited {
@@ -501,7 +501,7 @@ dd {
     }
 
     .logo img {
-        max-width: 46px; 
+        max-width: 46px;
     }
 
     .copyright {
@@ -526,7 +526,7 @@ dd {
   width: 327px;
 }
 
-.form-title { 
+.form-title {
   display: inline-block;
   width: 100%;
   vertical-align: middle;
@@ -536,7 +536,7 @@ dd {
 }
 
 .form-group {
-   margin-bottom: 25px; 
+   margin-bottom: 25px;
 }
 
 .form-cancel {
@@ -549,7 +549,7 @@ dd {
 }
 
 .form-horizontal .buttons {
-  margin-top: 25px;  
+  margin-top: 25px;
 }
 
 .label-text {
@@ -615,7 +615,7 @@ legend {
 }
 
 /* Pagination */
-  .page-label { 
+  .page-label {
     font-size: 12px;
     margin-top: 0;
     text-align: right;
@@ -630,7 +630,7 @@ legend {
     padding: 3px 6px;
   }
 
-  .modal-body { 
+  .modal-body {
       .pagination {
           margin-top: 15px;
           margin-bottom: 0;
@@ -658,9 +658,12 @@ legend {
 
 }
 
-#lookup-modal-dialog .instructions {
-   margin-top: 0;
-   margin-bottom: 20px;
+#lookup-modal-dialog
+    overflow-x: hidden;
+    .instructions {
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
 }
 
 .related-footer {
@@ -701,27 +704,27 @@ select.page-size {
 }
 
 /* Search Widget */
-  
+
   .search-widget label {
     display: inline-block;
     padding-right: 15px;
-    vertical-align: middle; 
+    vertical-align: middle;
   }
-  
-  #search_value_input { 
+
+  #search_value_input {
     padding-right: 25px;
   }
 
   .search-reset-start {
     color: @grey;
     float: right;
-    position: relative; 
+    position: relative;
     top: -25px;
     left: -10px;
     z-index: 10;
   }
 
-  .search-reset-start:hover { 
+  .search-reset-start:hover {
     cursor: pointer;
     color: @black;
   }
@@ -777,9 +780,9 @@ select.page-size {
 }
 
 /* Display drop-down menus on hover. Remove margin between toggle link
-   and menu, allowing smooth mouse movement between toggle and menu 
-   
-   http://stackoverflow.com/questions/8878033/how-to-make-twitter-bootstrap-menu-dropdown-on-hover-rather-than-click 
+   and menu, allowing smooth mouse movement between toggle and menu
+
+   http://stackoverflow.com/questions/8878033/how-to-make-twitter-bootstrap-menu-dropdown-on-hover-rather-than-click
  */
   .dropdown-toggle:hover .dropdown-menu, .dropdown:hover .dropdown-menu {
      display: block;
@@ -787,7 +790,7 @@ select.page-size {
 
   .dropdown-menu li:hover {
      visibility: visible;
-  } 
+  }
 
   .dropdown-menu {
      margin-top: 0;
@@ -866,15 +869,15 @@ input[type="checkbox"].checkbox-no-label {
     }
     /*.list-wrapper {
         background-color: @well;
-        padding: 10px; 
+        padding: 10px;
         border-radius: 4px;
         border: 1px solid @well-border;
     }*/
     .ui-accordion-content {
-        padding-left: 15px; 
+        padding-left: 15px;
         padding-right: 15px;
     }
-    .page-label { 
+    .page-label {
         margin-top: 5px;
     }
 }
@@ -891,7 +894,7 @@ input[type="checkbox"].checkbox-no-label {
 .table-hover tbody tr:hover > td,
 .table-hover tbody tr:hover > th {
   background-color: #fff;
-  border-top: 1px solid #ddd; 
+  border-top: 1px solid #ddd;
 }
 
 .table-hover-inverse tbody tr:hover > td,
@@ -947,7 +950,7 @@ input[type="checkbox"].checkbox-no-label {
 /* Table info rows */
 
 .loading-info {
-    color: @grey-txt; 
+    color: @grey-txt;
     font-weight: normal;
     padding: 15px 0;
 }
@@ -978,7 +981,7 @@ input[type="checkbox"].checkbox-no-label {
     padding-top: 5px;
   }
 
-  
+
   .job-new,
   .license-valid,
   .job-success,
@@ -1014,11 +1017,11 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-successful {
       color: @green;
   }
-  
+
   .icon-job-running {
     .pulsate();
   }
-  
+
   .icon-job-changed,
   .job-changed {
       color: @warning;
@@ -1053,7 +1056,7 @@ input[type="checkbox"].checkbox-no-label {
     font-weight: normal;
     line-height: 1;
   }
-  
+
   .job-list.ui-accordion-content {
       padding: 25px 15px 25px 15px;
   }
@@ -1088,7 +1091,7 @@ input[type="checkbox"].checkbox-no-label {
       margin-top: 0;
       margin-bottom: 25px;
   }
-  
+
 /* Inventory job status badge */
   .failures-true {
     background-color: @red;
@@ -1101,7 +1104,7 @@ input[type="checkbox"].checkbox-no-label {
   }
 
 /* Cloud inventory status. i.e. inventory_source.status values */
-  
+
   .icon-cloud-na:before,
   .icon-cloud-never:before,
   .icon-cloud-updating:before,
@@ -1118,7 +1121,7 @@ input[type="checkbox"].checkbox-no-label {
   }*/
 
   .icon-cloud-na,
-  .icon-cloud-never, 
+  .icon-cloud-never,
   a.icon-cloud-na:hover,
   a.icon-cloud-never:hover {
     color: @grey;
@@ -1160,14 +1163,14 @@ input[type="checkbox"].checkbox-no-label {
     color: @red;
     width: 14px;
   }
-  
+
 /* Inventory cloud sourced? indicator */
   .icon-cloud-true:before {
     content: "\f111";
   }
 
   .icon-cloud-false:before {
-    content: "\f111"; 
+    content: "\f111";
   }
 
   .icon-cloud-true {
@@ -1176,7 +1179,7 @@ input[type="checkbox"].checkbox-no-label {
 
   .icon-cloud-false {
     color: @grey;
-  } 
+  }
 /* end */
 
   .field-success {
@@ -1255,13 +1258,13 @@ input[type="checkbox"].checkbox-no-label {
      overflow: hidden;
   }
 
-/* Inventory nav links */ 
+/* Inventory nav links */
   .navigation-links {
-    
+
     padding: 0;
     margin-top: -10px;
 
-    a { 
+    a {
       margin-right: 15px;
     }
 
@@ -1280,12 +1283,12 @@ input[type="checkbox"].checkbox-no-label {
 
   .selected {
     font-weight: bold;
-    color: @blue-dark;  
+    color: @blue-dark;
   }
 
   .inventory-title {
-    font-size: 16px; 
-    font-weight: bold;  
+    font-size: 16px;
+    font-weight: bold;
   }
 
   .active-row {
@@ -1339,11 +1342,11 @@ input[type="checkbox"].checkbox-no-label {
 }
 
 a.disabled:hover {
-  color: @grey; 
-  cursor: not-allowed;  
+  color: @grey;
+  cursor: not-allowed;
 }
 a.btn-disabled:hover {
-  cursor: not-allowed;  
+  cursor: not-allowed;
 }
 
 /* Variable Editing */
@@ -1366,7 +1369,7 @@ a.btn-disabled:hover {
       display: inline-block;
       margin-left: 20px;
   }
-  
+
 .slider {
   display: inline-block;
   width: 100px;
@@ -1497,7 +1500,7 @@ tr td button i {
   li {
     line-height: normal;
     margin-bottom: 10px;
-  } 
+  }
   ul:last-child {
     margin-top: 10px;
   }
@@ -1526,7 +1529,7 @@ tr td button i {
   overflow: hidden;
   padding: 10px;
 
-  img { 
+  img {
     max-width: 450px;
     margin-top: 15px;
     margin-bottom: 15px;
@@ -1550,7 +1553,7 @@ tr td button i {
     }
 
 
-/* Activity Stream Widget */ 
+/* Activity Stream Widget */
 
   #stream-container {
     display: none;
@@ -1573,18 +1576,74 @@ tr td button i {
         margin-bottom: 20px;
     }
   }
-  
+
 /* New job detail page */
 
-.job-detail-tables {
+.relative-position {
+    position: relative;
+}
+
+.job-detail-tables, .job_options {
+    .table {
+        margin-bottom: 0;
+    }
     .table>tbody>tr>td {
         border-top-color: #fff;
+        padding: 0;
     }
     .table>thead>tr>th {
         border-bottom-color: #fff;
+        padding: 0;
+    }
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+    li ul {
+        margin-left: 20px;
     }
 }
 
+.job_well {
+    padding: 8px;
+    background-color: @well;
+    border: 1px solid @well-border;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+}
+
+.job_options {
+    height: 100px;
+    overflow-y: auto;
+    overflow-x: none;
+}
+
+.scroll-up-indicator {
+    position: absolute;
+    right: 18px;
+    font-size: 14px;
+    bottom: -2px;
+    padding: 0;
+}
+
+.scroll-down-indicator {
+    position: absolute;
+    right: 18px;
+    bottom: -2px;
+    font-size: 14px;
+    padding: 0;
+}
+
+.scroll-up-indicator,
+.scroll-up-indicator:hover,
+.scroll-up-indicator:visited,
+.scroll-down-indicator,
+.scroll-down-indicator:hover,
+.scroll-down-indicator:visited {
+    color: @grey;
+}
 
 /* ng-cloak directive */
 
@@ -1621,7 +1680,7 @@ tr td button i {
 }*/
 
 @media (min-width: 768px) and (max-width: 1199px) {
-  
+
   .level-1,
   .level-2,
   .level-3,
@@ -1637,7 +1696,7 @@ tr td button i {
   }
 
   .list-actions button, .list-actions .checkbox-inline {
-      margin-top: 10px;    
+      margin-top: 10px;
   }
 
   .label-text {
@@ -1647,16 +1706,16 @@ tr td button i {
   .group-name {
       width: 80%;
   }
- 
+
 }
 
 
 /* Landscape phone to portrait tablet */
 
 @media (max-width: 767px) {
- 
+
   /* Job events */
-  
+
   .level-1,
   .level-2,
   .level-3,
@@ -1687,7 +1746,7 @@ tr td button i {
   }
 
   .list-actions button, .list-actions .checkbox-inline {
-      margin-top: 10px;    
+      margin-top: 10px;
   }
 
   .group-name {

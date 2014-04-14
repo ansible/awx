@@ -23,6 +23,8 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
 
     $scope.plays = [];
     $scope.tasks = [];
+    $scope.hosts = [];
+    $scope.hostResults = [];
 
     // Apply each event to the view
     if ($scope.removeEventsReady) {
