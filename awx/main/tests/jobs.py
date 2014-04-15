@@ -1181,9 +1181,12 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         host_ip = self.get_test_ips_for_host(host.name)[0]
         jobs_qs = job_template.jobs.filter(launch_type='callback').order_by('-pk')
         self.assertEqual(jobs_qs.count(), 0)
-        self.post(url, data, expect=202, remote_addr=host_ip)
+        result = self.post(url, data, expect=202, remote_addr=host_ip)
+        self.assertTrue('Location' in result.response, result.response)
         self.assertEqual(jobs_qs.count(), 1)
         job = jobs_qs[0]
+        self.assertEqual(urlparse.urlsplit(result.response['Location']).path,
+                         job.get_absolute_url())
         self.assertEqual(job.launch_type, 'callback')
         self.assertEqual(job.limit, host.name)
         self.assertEqual(job.hosts.count(), 1)

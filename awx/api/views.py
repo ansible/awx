@@ -1231,7 +1231,8 @@ class JobTemplateCallback(GenericAPIView):
             data = dict(msg='Error starting job!')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(status=status.HTTP_202_ACCEPTED)
+            headers = {'Location': job.get_absolute_url()}
+            return Response(status=status.HTTP_202_ACCEPTED, headers=headers)
 
 class JobTemplateJobsList(SubListCreateAPIView):
 
