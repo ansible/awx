@@ -234,7 +234,7 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
 #   If True/False, all LDAP users will be added/removed as admins.
 #   If a string or list of strings, specifies the group DN(s). User will be
 #   added as an org admin if the user is a member of ANY of these groups.
-# - remove_admins: True/False. Defaults to False. If True, a user who is not an
+# - remove_admins: True/False. Defaults to False. If True, a user who is not a
 #   member of the given groups will be removed from the organization's admins.
 # - users: None, True/False, string or list/tuple of strings. Same rules apply
 #   as for admins.
@@ -249,6 +249,33 @@ AUTH_LDAP_ORGANIZATION_MAP = {
     #    'admins': ['CN=Administrators,CN=Builtin,DC=example,DC=com'],
     #    'users': True,
     #},
+}
+
+# Mapping between team members (users) and LDAP groups. Keys are team names
+# (will be created if not present). Values are dictionaries of options for
+# each team's membership, where each can contain the following parameters:
+# - organization: string. The name of the organization to which the team
+#   belongs.  The team will be created if the combination of organization and
+#   team name does not exist.  The organization will first be created if it
+#   does not exist.
+# - users: None, True/False, string or list/tuple of strings.
+#   If None, team members will not be updated.
+#   If True/False, all LDAP users will be added/removed as team members.
+#   If a string or list of strings, specifies the group DN(s). User will be
+#   added as a team member if the user is a member of ANY of these groups.
+# - remove: True/False. Defaults to False. If True, a user who is not a member
+#   of the given groups will be removed from the team.
+AUTH_LDAP_TEAM_MAP = {
+    'My Team': {
+        'organization': 'Test Org',
+        'users': ['CN=Domain Users,CN=Users,DC=example,DC=com'],
+        'remove': True,
+    },
+    'Other Team': {
+        'organization': 'Test Org 2',
+        'users': 'CN=Other Users,CN=Users,DC=example,DC=com',
+        'remove': False,
+    },
 }
 
 ###############################################################################
@@ -385,6 +412,57 @@ TEST_AUTH_LDAP_ORGANIZATION_MAP_2 = {
 TEST_AUTH_LDAP_ORGANIZATION_MAP_2_RESULT = {
     'Test Org': {'admins': False, 'users': True},
     'Test Org 2': {'admins': True, 'users': False},
+}
+
+# Test mapping between team users and LDAP groups.
+TEST_AUTH_LDAP_TEAM_MAP = {
+    'Domain Users Team': {
+        'organization': 'Test Org',
+        'users': ['CN=Domain Users,CN=Users,DC=example,DC=com'],
+        'remove': False,
+    },
+    'Admins Team': {
+        'organization': 'Admins Org',
+        'users': 'CN=Domain Admins,CN=Users,DC=example,DC=com',
+        'remove': True,
+    },
+    'Everyone Team': {
+        'organization': 'Test Org 2',
+        'users': True,
+    },
+}
+# Expected results from team mapping.  After login, should user be a member of
+# the given team?
+TEST_AUTH_LDAP_TEAM_MAP_RESULT = {
+    'Domain Users Team': {'users': False},
+    'Admins Team': {'users': True},
+    'Everyone Team': {'users': True},
+}
+
+# Second test mapping for teams to remove user.
+TEST_AUTH_LDAP_TEAM_MAP_2 = {
+    'Domain Users Team': {
+        'organization': 'Test Org',
+        'users': ['CN=Domain Users,CN=Users,DC=example,DC=com'],
+        'remove': False,
+    },
+    'Admins Team': {
+        'organization': 'Admins Org',
+        'users': 'CN=Administrators,CN=Builtin,DC=example,DC=com',
+        'remove': True,
+    },
+    'Everyone Team': {
+        'organization': 'Test Org 2',
+        'users': False,
+        'remove': False,
+    },
+}
+# Expected results from second team mapping.  After login, should user be a
+# member of the given team?
+TEST_AUTH_LDAP_TEAM_MAP_2_RESULT = {
+    'Domain Users Team': {'users': False},
+    'Admins Team': {'users': False},
+    'Everyone Team': {'users': True},
 }
 
 ###############################################################################

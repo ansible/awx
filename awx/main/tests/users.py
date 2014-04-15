@@ -854,6 +854,39 @@ class LdapTest(BaseTest):
             else:
                 self.assertFalse(user in org.users.all())
 
+    def test_ldap_team_mapping(self):
+        for name in ('USER_SEARCH', 'ALWAYS_UPDATE_USER', 'USER_ATTR_MAP',
+                     'GROUP_SEARCH', 'GROUP_TYPE', 'USER_FLAGS_BY_GROUP'):
+            self.use_test_setting(name)
+        self.assertEqual(User.objects.filter(username=self.ldap_username).count(), 0)
+        self.use_test_setting('TEAM_MAP', {})
+        self.use_test_setting('TEAM_MAP_RESULT', {})
+        for team_name, team_opts in settings.AUTH_LDAP_TEAM_MAP.items():
+            self.assertEqual(Team.objects.filter(name=team_name).count(), 0)
+            self.assertEqual(Organization.objects.filter(name=team_opts['organization']).count(), 0)
+        user = self.check_login()
+        for team_name, team_opts in settings.AUTH_LDAP_TEAM_MAP.items():
+            self.assertEqual(Team.objects.filter(name=team_name, organization__name=team_opts['organization']).count(), 1)
+        for team_name, team_result in settings.AUTH_LDAP_TEAM_MAP_RESULT.items():
+            team = Team.objects.get(name=team_name)
+            if team_result.get('users', False):
+                self.assertTrue(user in team.users.all())
+            else:
+                self.assertFalse(user in team.users.all())
+        # Try again with different test mapping.
+        self.use_test_setting('TEAM_MAP', {}, from_name='TEAM_MAP_2')
+        self.use_test_setting('TEAM_MAP_RESULT', {},
+                              from_name='TEAM_MAP_2_RESULT')
+        user = self.check_login()
+        for team_name, team_opts in settings.AUTH_LDAP_TEAM_MAP.items():
+            self.assertEqual(Team.objects.filter(name=team_name, organization__name=team_opts['organization']).count(), 1)
+        for team_name, team_result in settings.AUTH_LDAP_TEAM_MAP_RESULT.items():
+            team = Team.objects.get(name=team_name)
+            if team_result.get('users', False):
+                self.assertTrue(user in team.users.all())
+            else:
+                self.assertFalse(user in team.users.all())
+
     def test_prevent_changing_ldap_user_fields(self):
         for name in ('USER_SEARCH', 'ALWAYS_UPDATE_USER', 'USER_ATTR_MAP',
                      'GROUP_SEARCH', 'GROUP_TYPE', 'USER_FLAGS_BY_GROUP'):

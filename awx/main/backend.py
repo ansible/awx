@@ -13,6 +13,7 @@ class LDAPSettings(BaseLDAPSettings):
 
     defaults = dict(BaseLDAPSettings.defaults.items() + {
         'ORGANIZATION_MAP': {},
+        'TEAM_MAP': {},
     }.items())
 
 class LDAPBackend(BaseLDAPBackend):
@@ -83,10 +84,10 @@ def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=False):
 @receiver(populate_user)
 def on_populate_user(sender, **kwargs):
     '''
-    Handle signal from LDAP backend to populate the user object.  Update user's
-    organization membership according to their LDAP groups.
+    Handle signal from LDAP backend to populate the user object.  Update user
+    organization/team memberships according to their LDAP groups.
     '''
-    from awx.main.models import Organization
+    from awx.main.models import Organization, Team
     user = kwargs['user']
     ldap_user = kwargs['ldap_user']
     backend = ldap_user.backend
@@ -104,6 +105,18 @@ def on_populate_user(sender, **kwargs):
         remove_users = bool(org_opts.get('remove_users', remove))
         _update_m2m_from_groups(user, ldap_user, org.users, users_opts,
                                 remove_users)
+
+    # Update team membership based on group memberships.
+    team_map = getattr(backend.settings, 'TEAM_MAP', {})
+    for team_name, team_opts in team_map.items():
+        if 'organization' not in team_opts:
+            continue
+        org, created = Organization.objects.get_or_create(name=team_opts['organization'])
+        team, created = Team.objects.get_or_create(name=team_name, organization=org)
+        users_opts = team_opts.get('users', None)
+        remove = bool(team_opts.get('remove', False))
+        _update_m2m_from_groups(user, ldap_user, team.users, users_opts,
+                                remove)
 
     # Update user profile to store LDAP DN.
     profile = user.profile
