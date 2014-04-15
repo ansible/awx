@@ -93,7 +93,10 @@ class Schedule(CommonModel):
         next_run_actual = future_rs.after(now())
 
         self.next_run = next_run_actual
-        self.dtstart = future_rs[0]
+        try:
+            self.dtstart = future_rs[0]
+        except IndexError:
+            self.dtstart = None
         self.dtend = None
         if 'until' in self.rrule.lower():
             match_until = re.match(".*?(UNTIL\=[0-9]+T[0-9]+Z)", self.rrule)
