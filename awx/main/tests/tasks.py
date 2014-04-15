@@ -12,6 +12,9 @@ from django.conf import settings
 from django.test.utils import override_settings
 from django.utils.timezone import now
 
+# Django-CRUM
+from crum import impersonate
+
 # AWX
 from awx.main.models import *
 from awx.main.tests.base import BaseLiveServerTest
@@ -31,6 +34,20 @@ TEST_PLAYBOOK2 = '''- hosts: test-group
   tasks:
   - name: should fail
     command: test 1 = 0
+'''
+
+TEST_EXTRA_VARS_PLAYBOOK = '''- hosts: test-group
+  gather_facts: false
+  tasks:
+  - fail: msg="{{item}} is not defined"
+    when: "{{item}} is not defined"
+    with_items:
+    - tower_job_id
+    - tower_job_launch_type
+    - tower_job_template_id
+    - tower_job_template_name
+    - tower_user_id
+    - tower_user_name
 '''
 
 TEST_ENV_PLAYBOOK = '''- hosts: test-group
@@ -273,23 +290,24 @@ class RunJobTest(BaseCeleryTest):
         return self.job_template
 
     def create_test_job(self, **kwargs):
-        job_template = kwargs.pop('job_template', None)
-        if job_template:
-            self.job = job_template.create_job(**kwargs)
-        else:
-            opts = {
-                'inventory': self.inventory,
-                'project': self.project,
-                'credential': self.credential,
-                'cloud_credential': self.cloud_credential,
-                'job_type': 'run',
-            }
-            try:
-                opts['playbook'] = self.project.playbooks[0]
-            except (AttributeError, IndexError):
-                pass
-            opts.update(kwargs)
-            self.job = Job.objects.create(**opts)
+        with impersonate(self.super_django_user):
+            job_template = kwargs.pop('job_template', None)
+            if job_template:
+                self.job = job_template.create_job(**kwargs)
+            else:
+                opts = {
+                    'inventory': self.inventory,
+                    'project': self.project,
+                    'credential': self.credential,
+                    'cloud_credential': self.cloud_credential,
+                    'job_type': 'run',
+                }
+                try:
+                    opts['playbook'] = self.project.playbooks[0]
+                except (AttributeError, IndexError):
+                    pass
+                opts.update(kwargs)
+                self.job = Job.objects.create(**opts)
         return self.job
 
     def check_job_result(self, job, expected='successful', expect_stdout=True,
@@ -707,7 +725,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertFalse(job.signal_start())
 
     def test_extra_job_options(self):
-        self.create_test_project(TEST_PLAYBOOK)
+        self.create_test_project(TEST_EXTRA_VARS_PLAYBOOK)
         # Test with extra_vars containing misc whitespace.
         job_template = self.create_test_job_template(forks=3, verbosity=2,
                                                      extra_vars=u'{\n\t"abc": 1234\n}')
@@ -736,7 +754,7 @@ class RunJobTest(BaseCeleryTest):
         self.check_job_result(job3, 'successful')
 
     def test_lots_of_extra_vars(self):
-        self.create_test_project(TEST_PLAYBOOK)
+        self.create_test_project(TEST_EXTRA_VARS_PLAYBOOK)
         extra_vars = dict(('var_%d' % x, x) for x in xrange(200))
         job_template = self.create_test_job_template(extra_vars=extra_vars)
         job = self.create_test_job(job_template=job_template)

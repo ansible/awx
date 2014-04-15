@@ -516,11 +516,30 @@ class RunJob(BaseTask):
             args.extend(['-l', job.limit])
         if job.verbosity:
             args.append('-%s' % ('v' * min(3, job.verbosity)))
-        if job.extra_vars_dict:
-            args.extend(['-e', json.dumps(job.extra_vars_dict)])
         if job.job_tags:
             args.extend(['-t', job.job_tags])
-        args.append(job.playbook) # relative path to project.local_path
+
+        # Define special extra_vars for Tower, combine with job.extra_vars.
+        extra_vars = {
+            'tower_job_id': job.pk,
+            'tower_job_launch_type': job.launch_type,
+        }
+        if job.job_template and job.job_template.active:
+            extra_vars.update({
+                'tower_job_template_id': job.job_template.pk,
+                'tower_job_template_name': job.job_template.name,
+            })
+        if job.created_by and job.created_by.is_active:
+            extra_vars.update({
+                'tower_user_id': job.created_by.pk,
+                'tower_user_name': job.created_by.username,
+            })
+        if job.extra_vars_dict:
+            extra_vars.update(job.extra_vars_dict)
+        args.extend(['-e', json.dumps(extra_vars)])
+
+        # Add path to playbook (relative to project.local_path).
+        args.append(job.playbook)
 
         # If ssh unlock password is needed, run using ssh-agent.
         if ssh_key_path and use_ssh_agent:
