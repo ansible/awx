@@ -32,7 +32,7 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
     if ($scope.removeParentLoaded) {
         $scope.removeParentLoaded();
     }
-    $scope.removeScheduledLoaded = $scope.$on('ParentLoaded', function() {
+    $scope.removeParentLoaded = $scope.$on('ParentLoaded', function() {
         // Add breadcrumbs
         LoadBreadCrumbs({
             path: $location.path().replace(/\/schedules$/,''),

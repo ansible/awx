@@ -338,7 +338,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
-    GetChoices) {
+    GetChoices, SchedulesListInit, SchedulesList) {
     
     ClearScope();
 
@@ -444,6 +444,17 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         }
     };
 
+    if ($scope.removerelatedschedules) {
+        $scope.removerelatedschedules();
+    }
+    $scope.removerelatedschedules = $scope.$on('relatedschedules', function() {
+        SchedulesListInit({
+            scope: $scope,
+            list: SchedulesList,
+            choices: null,
+            related: true
+        });
+    });
 
     // Register a watcher on project_name. Refresh the playbook list on change.
     if ($scope.watchProjectUnregister) {
@@ -790,5 +801,6 @@ JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$l
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
-    'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices'
+    'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices',
+    'SchedulesListInit', 'SchedulesList'
 ];

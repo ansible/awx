@@ -485,7 +485,7 @@ ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', 
 function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit, GetChoices,
-    Empty, DebugForm, Wait, Stream, SchedulesControllerInit) {
+    Empty, DebugForm, Wait, Stream, SchedulesControllerInit, SchedulesListInit, SchedulesList) {
     
     ClearScope('htmlTemplate');
 
@@ -503,6 +503,18 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
 
     $scope.project_local_paths = [];
     $scope.base_dir = '';
+
+    if ($scope.removerelatedschedules) {
+        $scope.removerelatedschedules();
+    }
+    $scope.removerelatedschedules = $scope.$on('relatedschedules', function() {
+        SchedulesListInit({
+            scope: $scope,
+            list: SchedulesList,
+            choices: null,
+            related: true
+        });
+    });
 
     // After the project is loaded, retrieve each related set
     if ($scope.projectLoadedRemove) {
@@ -729,5 +741,5 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
 ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope',
     'GetBasePath', 'ReturnToCaller', 'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
-    'DebugForm', 'Wait', 'Stream', 'SchedulesControllerInit'
+    'DebugForm', 'Wait', 'Stream', 'SchedulesControllerInit', 'SchedulesListInit', 'SchedulesList'
 ];
