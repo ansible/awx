@@ -1328,7 +1328,7 @@ class JobEventSerializer(BaseSerializer):
         model = JobEvent
         fields = ('*', '-name', '-description', 'job', 'event',
                   'event_display', 'event_data', 'event_level', 'failed',
-                  'changed', 'host', 'parent', 'play', 'task')
+                  'changed', 'host', 'parent', 'play', 'task', 'role')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)

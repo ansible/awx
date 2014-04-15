@@ -167,12 +167,17 @@ class CallbackModule(object):
         response.raise_for_status()
 
     def _log_event(self, event, **event_data):
-        play = getattr(getattr(self, 'play', None), 'name', '')
-        if play and event not in self.EVENTS_WITHOUT_PLAY:
-            event_data['play'] = play
-        task = getattr(getattr(self, 'task', None), 'name', '')
-        if task and event not in self.EVENTS_WITHOUT_TASK:
-            event_data['task'] = task
+        play = getattr(self, 'play', None)
+        play_name = getattr(play, 'name', '')
+        if play_name and event not in self.EVENTS_WITHOUT_PLAY:
+            event_data['play'] = play_name
+        task = getattr(self, 'task', None)
+        task_name = getattr(task, 'name', '')
+        role_name = getattr(task, 'role_name', '')
+        if task_name and event not in self.EVENTS_WITHOUT_TASK:
+            event_data['task'] = task_name
+        if role_name and event not in self.EVENTS_WITHOUT_TASK:
+            event_data['role'] = role_name
         if self.callback_consumer_port:
             self._post_job_event_queue_msg(event, event_data)
         else:

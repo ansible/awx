@@ -126,7 +126,7 @@ class BaseTestMixin(object):
         return results
 
     def make_project(self, name, description='', created_by=None,
-                     playbook_content=''):
+                     playbook_content='', role_playbooks=None):
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.makedirs(settings.PROJECTS_ROOT)
         # Create temp project directory.
@@ -139,13 +139,24 @@ class BaseTestMixin(object):
             test_playbook_file = os.fdopen(handle, 'w')
             test_playbook_file.write(playbook_content)
             test_playbook_file.close()
+            # Role playbooks are specified as a dict of role name and the
+            # content of tasks/main.yml playbook.
+            role_playbooks = role_playbooks or {}
+            for role_name, role_playbook_content in role_playbooks.items():
+                role_tasks_dir = os.path.join(project_dir, 'roles', role_name, 'tasks')
+                if not os.path.exists(role_tasks_dir):
+                    os.makedirs(role_tasks_dir)
+                role_tasks_playbook_path = os.path.join(role_tasks_dir, 'main.yml')
+                with open(role_tasks_playbook_path, 'w') as f:
+                    f.write(role_playbook_content)
         return Project.objects.create(
             name=name, description=description,
             local_path=os.path.basename(project_dir), created_by=created_by,
             #scm_type='git',  default_playbook='foo.yml',
         )
 
-    def make_projects(self, created_by, count=1, playbook_content=''):
+    def make_projects(self, created_by, count=1, playbook_content='',
+                      role_playbooks=None):
         results = []
         for x in range(0, count):
             self.object_ctr = self.object_ctr + 1
@@ -154,6 +165,7 @@ class BaseTestMixin(object):
                 description="proj%s" % x,
                 created_by=created_by,
                 playbook_content=playbook_content,
+                role_playbooks=role_playbooks,
             ))
         return results
 

@@ -88,6 +88,26 @@ TEST_ASYNC_NOWAIT_PLAYBOOK = '''
     poll: 0
 '''
 
+TEST_PLAYBOOK_WITH_ROLES = '''
+- hosts: test-group
+  gather_facts: false
+  roles:
+  - some_stuff
+  - more_stuff
+  - {role: stuff, tags: stuff}
+'''
+
+TEST_ROLE_PLAYBOOK = '''
+- name: some task in a role
+  command: test 1 = 1
+'''
+
+TEST_ROLE_PLAYBOOKS = {
+    'some_stuff': TEST_ROLE_PLAYBOOK,
+    'more_stuff': TEST_ROLE_PLAYBOOK,
+    'stuff': TEST_ROLE_PLAYBOOK,
+}
+
 TEST_VAULT_PLAYBOOK = '''$ANSIBLE_VAULT;1.1;AES256
 35623233333035633365383330323835353564346534363762366465316263363463396162656432
 6562643539396330616265616532656466353639303338650a313466333663646431646663333739
@@ -230,8 +250,9 @@ class RunJobTest(BaseCeleryTest):
         self.cloud_credential = Credential.objects.create(**opts)
         return self.cloud_credential
 
-    def create_test_project(self, playbook_content):
-        self.project = self.make_projects(self.normal_django_user, 1, playbook_content)[0]
+    def create_test_project(self, playbook_content, role_playbooks=None):
+        self.project = self.make_projects(self.normal_django_user, 1,
+                                          playbook_content, role_playbooks)[0]
         self.organization.projects.add(self.project)
 
     def create_test_job_template(self, **kwargs):
@@ -299,7 +320,7 @@ class RunJobTest(BaseCeleryTest):
 
     def check_job_events(self, job, runner_status='ok', plays=1, tasks=1,
                          async=False, async_timeout=False, async_nowait=False,
-                         check_ignore_errors=False):
+                         check_ignore_errors=False, has_roles=False):
         job_events = job.job_events.all()
         if False and async:
             print
@@ -323,6 +344,7 @@ class RunJobTest(BaseCeleryTest):
             self.assertFalse(evt.host, evt)
             self.assertFalse(evt.play, evt)
             self.assertFalse(evt.task, evt)
+            self.assertFalse(evt.role, evt)
             self.assertEqual(evt.failed, should_be_failed)
             if not async:
                 self.assertEqual(evt.changed, should_be_changed)
@@ -335,6 +357,7 @@ class RunJobTest(BaseCeleryTest):
             self.assertFalse(evt.host, evt)
             self.assertTrue(evt.play, evt)
             self.assertFalse(evt.task, evt)
+            self.assertFalse(evt.role, evt)
             self.assertEqual(evt.failed, should_be_failed)
             if not async:
                 self.assertEqual(evt.changed, should_be_changed)
@@ -347,6 +370,10 @@ class RunJobTest(BaseCeleryTest):
             self.assertFalse(evt.host, evt)
             self.assertTrue(evt.play, evt)
             self.assertTrue(evt.task, evt)
+            if has_roles:
+                self.assertTrue(evt.role, evt)
+            else:
+                self.assertFalse(evt.role, evt)
             self.assertEqual(evt.failed, should_be_failed)
             if not async:
                 self.assertEqual(evt.changed, should_be_changed)
@@ -367,6 +394,10 @@ class RunJobTest(BaseCeleryTest):
             self.assertEqual(evt.host, self.host)
             self.assertTrue(evt.play, evt)
             self.assertTrue(evt.task, evt)
+            if has_roles:
+                self.assertTrue(evt.role, evt)
+            else:
+                self.assertFalse(evt.role, evt)
             self.assertEqual(evt.failed, should_be_failed)
             if not async:
                 self.assertEqual(evt.changed, should_be_changed)
@@ -1049,3 +1080,14 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.unreachable_hosts.count(), 0)
         self.assertEqual(job.skipped_hosts.count(), 0)
         self.assertEqual(job.processed_hosts.count(), 1)
+
+    def test_run_job_with_roles(self):
+        self.create_test_project(TEST_PLAYBOOK_WITH_ROLES, TEST_ROLE_PLAYBOOKS)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        job = Job.objects.get(pk=job.pk)
+        self.check_job_result(job, 'successful')
+        self.check_job_events(job, 'ok', 1, 3, has_roles=True)

@@ -512,7 +512,7 @@ class JobEvent(CreatedModifiedModel):
         return reverse('api:job_event_detail', args=(self.pk,))
 
     def __unicode__(self):
-        return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
+        return u'%s @ %s' % (self.get_event_display2(), self.created.isoformat())
 
     @property
     def event_level(self):
@@ -521,11 +521,14 @@ class JobEvent(CreatedModifiedModel):
     def get_event_display2(self):
         msg = self.get_event_display()
         if self.event == 'playbook_on_play_start':
-            if self.play is not None:
+            if self.play:
                 msg = "%s (%s)" % (msg, self.play)
         elif self.event == 'playbook_on_task_start':
-            if self.task is not None:
-                msg = "%s (%s)" % (msg, self.task)
+            if self.task:
+                if self.role:
+                    msg = '%s (%s | %s)' % (msg, self.role, self.task)
+                else:
+                    msg = "%s (%s)" % (msg, self.task)
 
         # Change display for runner events trigged by async polling.  Some of
         # these events may not show in most cases, due to filterting them out
@@ -637,6 +640,9 @@ class JobEvent(CreatedModifiedModel):
             self.task = self.event_data.get('task', '').strip()
             if 'task' not in update_fields:
                 update_fields.append('task')
+            self.role = self.event_data.get('role', '').strip()
+            if 'role' not in update_fields:
+                update_fields.append('role')
         # Only update job event hierarchy and related models during post
         # processing (after running job).
         post_process = kwargs.pop('post_process', False)
