@@ -39,7 +39,7 @@ class ActivityStreamMiddleware(threading.local):
             post_save.disconnect(dispatch_uid=self.disp_uid)
 
         for instance in ActivityStream.objects.filter(id__in=self.instance_ids):
-            if drf_user and drf_user != AnonymousUser and drf_user.pk:
+            if drf_user and drf_user.id:
                 instance.actor = drf_user
                 try:
                     instance.save(update_fields=['actor'])
