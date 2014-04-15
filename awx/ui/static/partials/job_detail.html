@@ -3,8 +3,9 @@
         <div class="row">
             <div class="col-md-12" id="breadcrumbs"></div>
         </div>
+        
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <h5>Options</h5>
                 <div class="job_options job_well" id="job_options">
                     <table class="table table-condensed">
@@ -52,57 +53,65 @@
                         </tbody>
                     </table>
                 </div>
-                <a id="job_options_scroll_down_indicator" href="" aw-scroll-down="job_options" class="scroll-down-indicator">more <i class="fa fa-chevron-circle-down"></i></a>
-                <a id="job_options_scroll_up_indicator" href="" aw-scroll-up="job_options" class="scroll-up-indicator">more <i class="fa fa-chevron-circle-up"></i></a>
-            </div>
-        </div><!-- row -->
+                <!-- <a id="job_options_scroll_down_indicator" href="" aw-scroll-down="job_options" class="scroll-down-indicator">more <i class="fa fa-chevron-circle-down"></i></a>
+                <a id="job_options_scroll_up_indicator" href="" aw-scroll-up="job_options" class="scroll-up-indicator">more <i class="fa fa-chevron-circle-up"></i></a> -->
+            
+                <div class="job-detail-tables">
 
-        <div class="row">
-            <div class="col-md-6 job-detail-tables">
+                    <h5>Plays</h5>
+                    <div class="job_plays job_well">
+                         <ul class="job-list">
+                            <li ng-repeat="play in plays"  ng-class="play.playActiveClass"  ng-click="selectPlay(play.id)" class="cursor-pointer">
+                                <i class="fa icon-job-{{ play.status }}"></i> {{play.name }}
+                                <ul ng-show="play.children.length > 0">
+                                    <li ng-repeat="child in play.children">
+                                        <i class="fa icon-job-{{ child.status }}"></i> {{child.name }}
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
 
-                <h5>Plays</h5>
-                <div class="job_plays job_well">
-                     <ul class="job-list">
-                        <li ng-repeat="play in plays">
-                            <i class="fa icon-job-{{ play.status }}"></i> {{play.name }}
-                            <ul ng-show="play.children.length > 0">
-                                <li ng-class="playActiveClass" ng-click="selectPlay(play.id)" ng-repeat="child in play.children">
-                                    <i class="fa icon-job-{{ child.status }}"></i> {{child.name }}
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+                    <h5>Tasks</h5>
+                    <div class="job_tasks job_well">
+                        <ul class="job-list">
+                            <li ng-repeat="task in tasks | filter:{ play_id: activePlay }" ng-class="task.taskActiveClass" ng-click="selectTask(task.id)"><i class="fa icon-job-{{ task.status }}"></i> {{ task.name }}</li>
+                        </ul>
+                    </div>
 
+
+                    <h5>Host Details</h5>
+                    <div class="host_details job_well">
+                            <p>{{ activeTaskName }}</p>
+                            <table class="table table-condensed job-detail-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-md-4">Host</th>
+                                    <th class="col-md-8">Results</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="result in hostResults | filter:{ task_id: activeTask }">
+                                    <td><i class="fa icon-job-{{ result.status }}"></i> {{ result.host_name }}</td>
+                                    <td><pre>{{ result.results }}</pre></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+            </div><!-- col-md-8 -->
 
-                <h4>Tasks</h4>
-                <div class="job_tasks">
+            <div class="col-md-4">
+                <h5>Hosts Summary</h5>
+                <div class="job_hosts job_well">
                     <table class="table table-condensed job-detail-table">
                         <thead>
                             <tr>
-                                <th class="col-md-1">Status</th>
-                                <th>Name</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="task in tasks">
-                                <td><i class="fa icon-job-{{ task.status }}"></i></td>
-                                <td>{{ task.name }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <h4>Hosts</h4>
-                <div class="job_hosts">
-                    <table class="table table-condensed job-detail-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th class="text-center">OK</th>
-                                <th class="text-center">Changed</th>
-                                <th class="text-center">Unreachable</th>
-                                <th class="text-center">Failed</th>
+                                <th class="col-md-8">Name</th>
+                                <th class="text-center col-md-1">OK</th>
+                                <th class="text-center col-md-1">Changed</th>
+                                <th class="text-center col-md-1">Unreachable</th>
+                                <th class="text-center col-md-1">Failed</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -116,7 +125,12 @@
                         </tbody>
                     </table>
                 </div>
-
+                <!--
+                <div class="job_well">
+                    <p>Active Play: {{ activePlay }}</p>
+                    <p>Active Task: {{ activeTask }}</p>
+                </div>
+                -->
             </div>
         </div>
 

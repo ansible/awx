@@ -7,22 +7,23 @@
  *
  */
 
-@black:       #171717;
-@white:       #FFF;
-@warning:     #FF9900;
-@red:         #da4f49;
-@red-hover:   #AE3F3A;
-@green:       #5bb75b;
-@blue:        #1778c3;   /* logo blue */
-@blue-link:   #1778c3;
-@blue-dark:   #2a6496;   /* link hover */
-@grey:        #A9A9A9;
-@grey-txt:    #707070;
-@well:        #f5f5f5;   /* well background color */
-@well-border: #e3e3e3;
-@info:        #d9edf7;   /* alert info background color */
-@info-border: #bce8f1;   /* alert info border color */
-@info-color:  #3a87ad;
+@active-color: #c6e5e5;
+@black:        #171717;
+@blue:         #1778c3;   /* logo blue */
+@blue-link:    #1778c3;
+@blue-dark:    #2a6496;   /* link hover */
+@green:        #5bb75b;
+@grey:         #A9A9A9;
+@grey-txt:     #707070;
+@info:         #d9edf7;   /* alert info background color */
+@info-border:  #bce8f1;   /* alert info border color */
+@info-color:   #3a87ad;
+@red:          #da4f49;
+@red-hover:    #AE3F3A;
+@warning:      #FF9900;
+@well:         #f5f5f5;   /* well background color */
+@well-border:  #e3e3e3;
+@white:        #FFF;
 
 @tip-background: #0088CC;
 @tip-color: #fff;
@@ -65,6 +66,7 @@ body.modal-open {
 .capitalize { text-transform: capitalize; }
 .grey-txt { color: @grey; }
 .text-center { text-align: center !important; }
+.cursor-pointer { cursor: pointer }
 
 .red-txt,
 a.red-txt:visited,
@@ -899,7 +901,7 @@ input[type="checkbox"].checkbox-no-label {
 
 .table-hover-inverse tbody tr:hover > td,
 .table-hover-inverse tbody tr:hover > th {
-  background-color: #c6e5e5;
+  background-color: @active-color;
 }
 
 .table > thead > tr > td.success,
@@ -914,13 +916,13 @@ input[type="checkbox"].checkbox-no-label {
 .table > thead > tr.success > th,
 .table > tbody > tr.success > th,
 .table > tfoot > tr.success > th {
-  background-color: #c6e5e5;
+  background-color: @active-color;
 }
 .table-hover > tbody > tr > td.success:hover,
 .table-hover > tbody > tr > th.success:hover,
 .table-hover > tbody > tr.success:hover > td,
 .table-hover > tbody > tr.success:hover > th {
-  background-color: #c6e5e5;
+  background-color: @active-color;
 }
 
 .table-summary thead > tr > th,
@@ -1588,11 +1590,11 @@ tr td button i {
         margin-bottom: 0;
     }
     .table>tbody>tr>td {
-        border-top-color: #fff;
+        border-top-color: @well;
         padding: 0;
     }
     .table>thead>tr>th {
-        border-bottom-color: #fff;
+        border-bottom-color: @well;
         padding: 0;
     }
     ul {
@@ -1621,7 +1623,23 @@ tr td button i {
 }
 
 .job-list li.active {
-    background-color: @white;
+    background-color: @active-color;
+}
+
+.job_plays, .job_tasks, .job_hosts {
+    height: 150px;
+    overflow-y: auto;
+    overflow-x: none;
+}
+
+.host_details {
+    pre {
+        border: none; 
+        max-height: 100px;
+        overflow: auto;
+        margin: 0;
+        padding: 0;
+    }
 }
 
 .scroll-up-indicator {

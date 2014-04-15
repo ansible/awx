@@ -39,8 +39,8 @@
 
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
-.factory('DigestEvents', ['UpdatePlayStatus', 'UpdatePlayNoHostsMatched', 'UpdateHostStatus', 'UpdatePlayChild', 'AddHostResult',
-function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePlayChild, AddHostResult) {
+.factory('DigestEvents', ['UpdatePlayStatus', 'UpdatePlayNoHostsMatched', 'UpdateHostStatus', 'UpdatePlayChild', 'AddHostResult', 'MakeLastRowActive',
+function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePlayChild, AddHostResult, MakeLastRowActive) {
     return function(params) {
         var scope = params.scope,
             events = params.events;
@@ -49,9 +49,11 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                 scope.plays.push({
                     id: event.id,
                     name: event.play,
-                    status: (event.failed) ? 'failed' : 'successful',
+                    status: (event.changed) ? 'changed' : (event.failed) ? 'failed' : 'none',
                     children: []
                 });
+                scope.activePlay = event.id;
+                MakeLastRowActive({ scope: scope, list: scope.plays, field: 'playActiveClass', set: 'activePlay' });
             }
             if (event.event === 'playbook_on_setup') {
                 scope.tasks.push({
@@ -63,7 +65,8 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                 UpdatePlayStatus({
                     scope: scope,
                     play_id: event.parent,
-                    failed: event.failed
+                    failed: event.failed,
+                    changed: event.changed
                 });
             }
             if (event.event === 'playbook_on_task_start') {
@@ -71,17 +74,19 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     id: event.id,
                     name: event.task,
                     play_id: event.parent,
-                    status: (event.failed) ? 'failed' : 'successful'
+                    status: (event.changed) ? 'changed' : (event.failed) ? 'failed' : 'successful'
                 });
                 UpdatePlayStatus({
                     scope: scope,
                     play_id: event.parent,
-                    failed: event.failed
+                    failed: event.failed,
+                    changed: event.changed
                 });
+                MakeLastRowActive({ scope: scope, list: scope.tasks, field: 'taskActiveClass', set: 'activeTask' });
             }
-            if (event.event === 'playbook_on_no_hosts_matched') {
+            /*if (event.event === 'playbook_on_no_hosts_matched') {
                 UpdatePlayNoHostsMatched({ scope: scope, play_id: event.parent });
-            }
+            }*/
             if (event.event === 'runner_on_failed') {
 
             }
@@ -103,6 +108,22 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
 
             }
         });
+    };
+}])
+
+.factory('MakeLastRowActive', [ function() {
+    return function(params) {
+        var scope = params.scope,
+            list = params.list,
+            field = params.field,
+            set = params.set;
+        list.forEach(function(row, idx) {
+            list[idx][field] = '';
+        });
+        if (list.length > 0) {
+            list[list.length - 1][field] = 'active';
+            scope[set] = list[list.length - 1].id;
+        }
     };
 }])
 
@@ -144,10 +165,11 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
     return function(params) {
         var scope = params.scope,
             failed = params.failed,
+            changed = params.changed,
             id = params.play_id;
         scope.plays.every(function(play,idx) {
             if (play.id === id) {
-                scope.plays[idx].status = (failed) ? 'failed' : 'successful';
+                scope.plays[idx].status = (changed) ? 'changed' : (failed) ? 'failed' : 'none';
                 return false;
             }
             return true;
@@ -155,14 +177,21 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
     };
 }])
 
-.factory('UpdateTaskStatus', [ function() {
+.factory('UpdateTaskStatus', ['UpdatePlayStatus', function(UpdatePlayStatus) {
     return function(params) {
         var scope = params.scope,
-            task_id = params.task_id,
-            failed = params.failed;
+            failed = params.failed,
+            changed = params.changed,
+            id = params.task_id;
         scope.tasks.every(function (task, i) {
-            if (task.id === task_id) {
-                scope.tasks[i].status = (failed) ? 'failed' : 'successful';
+            if (task.id === id) {
+                scope.tasks[i].status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+                UpdatePlayStatus({
+                    scope: scope,
+                    failed: failed,
+                    changed: changed,
+                    play_id: task.parent
+                });
             }
         });
     };
@@ -212,15 +241,12 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                 failed: (status === 'failed') ? 1 : 0
             });
         }
-
-        // Mark task failed
-        if (status === 'failed') {
-            UpdateTaskStatus({
-                scope: scope,
-                task_id: task_id,
-                failed: true
-            });
-        }
+        UpdateTaskStatus({
+            scope: scope,
+            task_id: task_id,
+            failed: (status === 'failed' || status === 'unreachable') ? true :false,
+            changed: (status === 'changed') ? true : false
+        });
     };
 }])
 
@@ -256,8 +282,9 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             id: id,
             status: status,
             host_id: host_id,
-            play_name: play_name,
-            task_name : task_name,
+            task_id: event.parent,
+            task_name: task_name,
+            host_name: event.event_data.host,
             module_name: module_name,
             module_args: module_args,
             results: results,
@@ -271,8 +298,29 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
         var scope = params.scope,
             id = params.id;
         scope.plays.forEach(function(play, idx) {
-            scope.plays[idx].playActiveClass = (play.id === id) ? 'active' : '';
+            if (play.id === id) {
+                scope.plays[idx].playActiveClass = 'active';
+            }
+            else {
+                scope.plays[idx].playActiveClass = '';
+            }
         });
-        scope.selectedPlay = id;
+        scope.activePlay = id;
     };
 }])
+
+.factory('SelectTask', [ function() {
+    return function(params) {
+        var scope = params.scope,
+            id = params.id;
+        scope.tasks.forEach(function(task, idx) {
+            if (task.id === id) {
+                scope.tasks[idx].taskActiveClass = 'active';
+            }
+            else {
+                scope.tasks[idx].taskActiveClass = '';
+            }
+        });
+        scope.activeTask = id;
+    };
+}]);

@@ -8,7 +8,7 @@
 'use strict';
 
 function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors, DigestEvents,
-    SelectPlay) {
+    SelectPlay, SelectTask) {
 
     ClearScope();
 
@@ -91,8 +91,15 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             id: id
         });
     };
+
+    $scope.selectTask = function(id) {
+        SelectTask({
+            scope: $scope,
+            id: id
+        });
+    };
 }
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',
-    'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay'
+    'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay', 'SelectTask'
 ];

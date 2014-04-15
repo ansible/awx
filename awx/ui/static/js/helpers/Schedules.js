@@ -164,7 +164,12 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 url =  GetBasePath(base),
                 scheduler;
 
-            url += (!Empty($routeParams.id)) ? $routeParams.id + '/schedules/' : '';
+            if (!Empty($routeParams.template_id)) {
+                url += $routeParams.template_id + '/schedules/';
+            }
+            else if (!Empty($routeParams.id)) {
+                url += $routeParams.id + '/schedules/';
+            }
 
             if (scope.removeDialogReady) {
                 scope.removeDialogReady();
