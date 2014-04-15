@@ -1272,6 +1272,11 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         self.assertEqual(job.hosts.count(), 1)
         self.assertEqual(job.hosts.all()[0], host)
 
+        # Set a limit on the job template to verify the callback job limit is
+        # set to the intersection of this limit and the host name.
+        job_template.limit = 'bakers:slicers:packagers'
+        job_template.save(update_fields=['limit'])
+
         # Try when hostname is also an IP address, even if a different one is
         # specified via ansible_ssh_host.
         host_qs = job_template.inventory.hosts.order_by('pk')
@@ -1295,7 +1300,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         self.assertEqual(jobs_qs.count(), 5)
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
-        self.assertEqual(job.limit, host.name)
+        self.assertEqual(job.limit, ':&'.join([job_template.limit, host.name]))
         self.assertEqual(job.hosts.count(), 1)
         self.assertEqual(job.hosts.all()[0], host)
 

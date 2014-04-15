@@ -1224,7 +1224,7 @@ class JobTemplateCallback(GenericAPIView):
             data = dict(msg='Cannot start automatically, user input required!')
             # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        limit = ':'.join(filter(None, [job_template.limit, host.name]))
+        limit = ':&'.join(filter(None, [job_template.limit, host.name]))
         job = job_template.create_job(limit=limit, launch_type='callback')
         result = job.signal_start()
         if not result:
