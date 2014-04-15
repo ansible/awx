@@ -16,6 +16,7 @@ build_timestamp = os.getenv("BUILD",datetime.datetime.now().strftime('-%Y%m%d%H%
 # Paths we'll use later
 etcpath = "/etc/awx"
 homedir = "/var/lib/awx"
+sharedir = "/usr/share/awx"
 if os.path.exists("/etc/debian_version"):
     webconfig  = "/etc/apache2/conf.d"
 else:
@@ -50,7 +51,7 @@ def proc_data_files(data_files):
     # system paths (mainly useful for running tests via tox).
     if hasattr(sys, 'real_prefix'):
         return result
-    
+
     for dir,files in data_files:
         includes = []
         for item in files:
@@ -146,6 +147,7 @@ setup(
             ("%s" % webconfig,      ["config/awx-httpd-80.conf",
                                      "config/awx-httpd-443.conf",
                                     ]),
+            ("%s" % sharedir,       ["tools/scripts/callback_retry.sh"]),
         ]
     ),
     options = {
