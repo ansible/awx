@@ -627,7 +627,6 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         jt = self.jt_eng_run
         url = reverse('api:job_template_jobs_list', args=(jt.pk,))
         data = dict(
-            name='new job from template',
             credential=self.cred_bob.pk,
         )
 

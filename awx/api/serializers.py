@@ -1262,7 +1262,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             except JobTemplate.DoesNotExist:
                 self._errors = {'job_template': 'Invalid job template'}
                 return
-            # Don't auto-populate name or description.
+            data.setdefault('name', job_template.name)
+            data.setdefault('description', job_template.description)
             data.setdefault('job_type', job_template.job_type)
             if job_template.inventory:
                 data.setdefault('inventory', job_template.inventory.pk)
