@@ -108,7 +108,8 @@ JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$route
 
 function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath,
-    InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty, ToJSON) {
+    InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty, ToJSON,
+    CallbackHelpInit) {
     
     ClearScope();
 
@@ -121,6 +122,8 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         selectPlaybook, checkSCMStatus,
         callback;
     
+    CallbackHelpInit({ scope: $scope });
+
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     
     callback = function() {
@@ -274,8 +277,9 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
     $scope.removeTemplateSaveSuccess = $scope.$on('templateSaveSuccess', function(e, data) {
         Wait('stop');
         if (data.related && data.related.callback) {
-            Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is: <strong>' + data.related.callback +
-                '</strong></p><p>The host configuration key is: <strong>' + data.host_config_key + '</strong></p>', 'alert-info', saveCompleted);
+            Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is:</p>'+
+                '<p style="padding: 10px 0;"><strong>' + $scope.callback_server_path + data.related.callback + '</strong></p>'+
+                '<p>The host configuration key is: <strong>' + data.host_config_key + '</strong></p>', 'alert-info', saveCompleted);
         }
         else {
             saveCompleted();
@@ -330,7 +334,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 JobTemplatesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
-    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON'
+    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit'
 ];
 
 
@@ -338,7 +342,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
-    GetChoices, SchedulesListInit, SchedulesList) {
+    GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit) {
     
     ClearScope();
 
@@ -353,6 +357,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         checkSCMStatus, getPlaybooks, callback,
         choicesCount = 0;
 
+    CallbackHelpInit({ scope: $scope });
+    
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
 
     $scope.parseType = 'yaml';
@@ -610,7 +616,14 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 
                 relatedSets = form.relatedSets(data.related);
                 
-                $scope.callback_url = data.related.callback;
+                if (data.host_config_key) {
+                    $scope.example_config_key = data.host_config_key;
+                }
+                $scope.example_template_id = id;
+                $scope.setCallbackHelp();
+                
+                $scope.callback_url = $scope.callback_server_path + ((data.related.callback) ? data.related.callback :
+                    GetBasePath('job_templates') + id + '/callback/');
                 master.callback_url = $scope.callback_url;
 
                 LookUpInit({
@@ -695,9 +708,10 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     }
     $scope.removeTemplateSaveSuccess = $scope.$on('templateSaveSuccess', function(e, data) {
         Wait('stop');
-        if (Empty(master.callback_url) && data.related && data.related.callback) {
-            Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is: <strong>' + data.related.callback +
-                '</strong></p><p>The host configuration key is: <strong>' + data.host_config_key + '</strong></p>', 'alert-info', saveCompleted);
+        if (data.related && data.related.callback) {
+            Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is:</p>'+
+                '<p style="padding: 10px 0;"><strong>' + $scope.callback_server_path + data.related.callback + '</strong></p>'+
+                '<p>The host configuration key is: <strong>' + data.host_config_key + '</strong></p>', 'alert-info', saveCompleted);
         }
         else {
             saveCompleted();
@@ -802,5 +816,5 @@ JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$l
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
     'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices',
-    'SchedulesListInit', 'SchedulesList'
+    'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit'
 ];

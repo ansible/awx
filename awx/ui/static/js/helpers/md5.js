@@ -25,6 +25,7 @@ angular.module('md5Helper', ['RestServices', 'Utilities', 'angular-md5'])
             scope.genMD5 = function (fld) {
                 var now = new Date();
                 scope[fld] = md5.createHash('AnsibleWorks' + now.getTime());
+                scope.$emit('NewMD5Generated');
             };
 
             scope.toggleCallback = function (fld) {

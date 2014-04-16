@@ -6,6 +6,8 @@
  *  Wrapper for lib/socket.io-client/dist/socket.io.js.
  */
 
+/* global io */
+
 'use strict';
 
 angular.module('SocketIO', ['AuthService', 'Utilities'])
@@ -13,7 +15,6 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
     .factory('Socket', ['$rootScope', '$location', '$log', 'Authorization', 'Alert', function ($rootScope, $location, $log, Authorization, Alert) {
         return function(params) {
             var scope = params.scope,
-                debug = params.debug,
                 host = $location.host(),
                 protocol = $location.protocol(),
                 url = protocol + '://' + host + ':8080';
@@ -102,7 +103,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                     }
                 },
                 on: function (eventName, callback) {
-                    self = this;
+                    var self = this;
                     self.socket.on(eventName, function () {
                         var args = arguments;
                         self.scope.$apply(function () {
@@ -119,7 +120,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                                 callback.apply(self.socket, args);
                             }
                         });
-                    })
+                    });
                 }
             };
         };

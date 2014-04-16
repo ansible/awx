@@ -48,6 +48,7 @@ angular.module('Tower', [
     'LookUpHelper',
     'JobTemplatesListDefinition',
     'JobTemplateFormDefinition',
+    'JobTemplatesHelper',
     'JobSubmissionHelper',
     'ProjectsListDefinition',
     'ProjectFormDefinition',

@@ -103,7 +103,7 @@ function Authenticate($cookieStore, $compile, $window, $scope, $rootScope, $loca
                 Wait('stop');
                 Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
             });
-        });
+    });
 
     if (scope.removeAuthorizationGetUser) {
         scope.removeAuthorizationGetUser();
@@ -131,7 +131,7 @@ function Authenticate($cookieStore, $compile, $window, $scope, $rootScope, $loca
         } else {
             Wait('start');
             Authorization.retrieveToken(username, password)
-                .success(function (data, status) {
+                .success(function (data) {
                     $('#login-modal').modal('hide');
                     token = data.token;
                     Authorization.setToken(data.token, data.expires);

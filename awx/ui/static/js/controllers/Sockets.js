@@ -1,26 +1,26 @@
 /************************************
- * Copyright (c) 2014 AnsibleWorks, Inc.
- *
- *  Sockets.js
- *  SocketsController- simple test of socket connection
- *
- */
+* Copyright (c) 2014 AnsibleWorks, Inc.
+*
+*  Sockets.js
+*  SocketsController- simple test of socket connection
+*
+*/
 
- 'use strict';
+'use strict';
 
- function SocketsController ($scope, ClearScope, Socket) {
+function SocketsController ($scope, ClearScope, Socket) {
 
-     ClearScope();
+    ClearScope();
 
-     var socket = Socket({ scope: $scope });
-     socket.init(); //make the connection
+    var socket = Socket({ scope: $scope });
+    socket.init(); //make the connection
 
-     $scope.messages = ['Stuff happened', 'message received', 'blah blah bob blah'];
+    $scope.messages = ['Stuff happened', 'message received', 'blah blah bob blah'];
 
-     socket.on('anything', function(data) {
+    socket.on('anything', function(data) {
         $scope.messages.push(data);
-     });
+    });
 
- }
+}
 
- SocketsController.$inject = [ '$scope', 'ClearScope', 'Socket'];
+SocketsController.$inject = [ '$scope', 'ClearScope', 'Socket'];

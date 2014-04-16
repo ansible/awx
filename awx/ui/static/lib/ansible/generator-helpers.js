@@ -43,6 +43,7 @@ angular.module('GeneratorHelpers', [])
                 result += (obj.dataContainer) ? "data-container=\"" + obj.dataContainer + "\" " : "";
                 result += (obj.dataTitle) ? "data-title=\"" + obj.dataTitle + "\" " : "";
                 result += (obj.dataTrigger) ? "data-trigger=\"" + obj.dataTrigger + "\" " : "";
+                result += (obj.awPopOverWatch) ? "aw-pop-over-watch=\"" + obj.awPopOverWatch + "\" " : "";
                 result += "class=\"help-link\" ";
                 result += "><i class=\"fa fa-question-circle\"></i></a> ";
                 break;

@@ -288,8 +288,30 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 title = (attrs.title !== undefined && attrs.title !== null) ? attrs.title : 'Help',
                 container = (attrs.container !== undefined) ? attrs.container : false,
                 trigger = (attrs.trigger !== undefined) ? attrs.trigger : 'manual';
-            $(element).popover({ placement: placement, delay: 0, title: title,
-                content: attrs.awPopOver, trigger: trigger, html: true, container: container });
+            if (attrs.awPopOverWatch) {
+                $(element).popover({
+                    placement: placement,
+                    delay: 0,
+                    title: title,
+                    content: function() {
+                        return scope[attrs.awPopOverWatch];
+                    },
+                    trigger: trigger,
+                    html: true,
+                    container: container
+                });
+            }
+            else {
+                $(element).popover({
+                    placement: placement,
+                    delay: 0,
+                    title: title,
+                    content: attrs.awPopOver,
+                    trigger: trigger,
+                    html: true,
+                    container: container
+                });
+            }
             $(element).click(function() {
                 var self = $(this);
                 try {
