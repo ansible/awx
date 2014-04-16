@@ -16,7 +16,7 @@ recursive-exclude awx/ui/static/lib/ansible *
 recursive-exclude awx/settings local_settings.py*
 include awx/ui/static/js/awx.min.js
 include awx/ui/static/js/config.js
-include tools/scripts/callback_retry.sh
+include tools/scripts/request_tower_configuration.sh
 include COPYING
 prune awx/public
 prune awx/projects

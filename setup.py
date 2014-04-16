@@ -147,7 +147,7 @@ setup(
             ("%s" % webconfig,      ["config/awx-httpd-80.conf",
                                      "config/awx-httpd-443.conf",
                                     ]),
-            ("%s" % sharedir,       ["tools/scripts/callback_retry.sh"]),
+            ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh"]),
         ]
     ),
     options = {
