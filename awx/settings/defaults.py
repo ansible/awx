@@ -387,6 +387,9 @@ CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver.ipc"
 
 TASK_COMMAND_PORT = "tcp://127.0.0.1:6556"
 
+SOCKETIO_NOTIFICATION_PORT = "tcp://127.0.0.1:6557"
+SOCKETIO_LISTEN_PORT = 8080
+
 # Logging configuration.
 LOGGING = {
     'version': 1,

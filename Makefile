@@ -117,6 +117,7 @@ server:
 	tmux rename-window 'Tower'
 	tmux select-window -t tower:0
 	tmux split-window -v 'exec make celeryd'
+	tmux split-window -h 'exec make socketservice'
 	tmux split-window -v 'exec make receiver'
 	tmux split-window -h 'exec make taskmanager'
 	tmux -2 attach-session -t tower
@@ -135,6 +136,9 @@ receiver:
 
 taskmanager:
 	$(PYTHON) manage.py run_task_system
+
+socketservice:
+	$(PYTHON) manage.py run_socketio_service
 
 # Run all API unit tests.
 test:

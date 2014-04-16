@@ -104,7 +104,9 @@ class Schedule(CommonModel):
             self.dtend = make_aware(datetime.datetime.strptime(until_date, "%Y%m%dT%H%M%SZ"), get_default_timezone())
         if 'count' in self.rrule.lower():
             self.dtend = future_rs[-1]
-        self.unified_job_template.update_computed_fields()
+        from awx.main.signals import ignore_inventory_computed_fields
+        with ignore_inventory_computed_fields():
+            self.unified_job_template.update_computed_fields()
 
     def save(self, *args, **kwargs):
         self.update_computed_fields()
