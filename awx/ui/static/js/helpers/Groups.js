@@ -1268,13 +1268,11 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
     }
 ])
 
-
 .factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'BuildTree', 'Find', 'CreateDialog',
     function ($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, Wait, BuildTree, Find, CreateDialog) {
         return function (params) {
-            // Delete the selected group node. Disassociates it from its parent.
 
             var scope = params.scope,
                 tree_id = params.tree_id,
@@ -1283,26 +1281,6 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 groups = [],
                 childCount = 0,
                 buttonSet;
-
-            // action_to_take = function () {
-            //     $('#prompt-modal').on('hidden.bs.modal', function () {
-            //         Wait('start');
-            //     });
-            //     $('#prompt-modal').modal('hide');
-            //     Rest.setUrl(url);
-            //     Rest.post({ id: node.group_id, disassociate: 1 })
-            //         .success(function () {
-            //             $('#prompt-modal').modal('hide');
-            //             scope.$emit('GroupDeleteCompleted'); // Signal a group refresh to start
-            //         })
-            //         .error(function (data, status) {
-            //             Wait('stop');
-            //             ProcessErrors(scope, data, status, null, {
-            //                 hdr: 'Error!',
-            //                 msg: 'Call to ' + url + ' failed. POST returned status: ' + status
-            //             });
-            //         });
-            // };
 
             scope.deleteOption = "preserve-all";
 
@@ -1409,14 +1387,81 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 $('#group-delete-dialog').dialog('close');
             };
 
+            if (scope.removeChildDeleteFinished) {
+                scope.removeChildDeleteFinished();
+            }
+            scope.removeChildDeleteFinished = scope.$on('ChildDeleteFinished', function() {
+                var url = GetBasePath('inventory') + scope.inventory_id + '/groups/';
+                Rest.setUrl(url);
+                Rest.post({ id: node.group_id, disassociate: 1 })
+                    .success(function () {
+                        scope.$emit('GroupDeleteCompleted'); // Signal a group refresh to start
+                    })
+                .error(function (data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. POST returned: ' + status
+                    });
+                });
+            });
+
+            if (scope.removeDeleteNextGroup) {
+                scope.removeDeleteNextGroup();
+            }
+            scope.removeDeleteNextGroup = scope.$on('DeleteNextGroup', function() {
+                var group;
+                if (groups && groups.length > 0) {
+                    group = groups.pop();
+                    Rest.setUrl(GetBasePath('group') + group.group_id + '/');
+                    Rest.destroy()
+                        .success(function() {
+                            scope.$emit('DeleteNextGroup');
+                        })
+                        .error( function(data, status) {
+                            $log.error('Failed to delete group ' + group.group_id + '. Status: ' + status);
+                            scope.$emit('DeleteNextGroup');
+                        });
+                }
+                else {
+                    scope.$emit('ChildDeleteFinished');
+                }
+            });
+
+            if (scope.removeDeleteNextHost) {
+                scope.removeDeleteNextHost();
+            }
+            scope.removeDeleteNextHost = scope.$on('DeleteNextHost', function() {
+                var host;
+                if (hosts && hosts.length > 0) {
+                    host = hosts.pop();
+                    Rest.setUrl(GetBasePath('hosts') + host.id + '/');
+                    Rest.destroy()
+                        .success(function() {
+                            scope.$emit('DeleteNextHost');
+                        })
+                        .error( function(data, status) {
+                            $log.error('Failed to delete host ' + host.id + '. Status: ' + status);
+                            scope.$emit('DeleteNextHost');
+                        });
+                }
+                else {
+                    scope.$emit('DeleteNextGroup');
+                }
+            });
+
             scope.performDelete = function() {
                 $('#group-delete-dialog').dialog('close');
+                Wait('start');
+                if (scope.deleteOption === 'delete-all') {
+                    scope.$emit('DeleteNextHost');
+                }
+                else {
+                    scope.$emit('ChildDeleteFinished');
+                }
             };
 
         };
     }
 ])
-
 
 .factory('ShowUpdateStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait', 'Empty', 'WatchInventoryWindowResize',

@@ -451,7 +451,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
              */
             scope.search = function (iterator, page, load, calcOnly) {
                 page = page || null;
-                load = (load || !scope.set || scope.set.length === 0) ? true : false;
+                load = (load || !scope[set] || scope[set].length === 0) ? true : false;
                 calcOnly = (calcOnly) ? true : false;
                 if (load) {
                     scope[set] = [];  //clear the list array to make sure 'Loading' is the only thing visible on the list
