@@ -118,6 +118,7 @@ server:
 	tmux select-window -t tower:0
 	tmux split-window -v 'exec make celeryd'
 	tmux split-window -h 'exec make socketservice'
+	tmux select-pane -U
 	tmux split-window -v 'exec make receiver'
 	tmux split-window -h 'exec make taskmanager'
 	tmux -2 attach-session -t tower
