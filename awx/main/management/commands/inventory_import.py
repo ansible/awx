@@ -22,6 +22,7 @@ import yaml
 from django.conf import settings
 from django.core.management.base import NoArgsCommand, CommandError
 from django.db import connection, transaction
+from django.db.models import Q
 from django.contrib.auth.models import User
 
 # AWX
@@ -143,6 +144,7 @@ class MemHost(MemObject):
     def __init__(self, name, source_dir):
         super(MemHost, self).__init__(name, source_dir)
         self.variables = {}
+        self.instance_id = None
         if ':' in name:
             tokens = name.split(':')
             self.name = tokens[0]
@@ -500,6 +502,9 @@ class Command(NoArgsCommand):
                     action='store_true', default=False, help='when set, '
                     'exclude all groups that have no child groups, hosts, or '
                     'variables.'),
+        make_option('--instance-id-var', dest='instance_id_var', type='str',
+                    default=None, metavar='v', help='host variable that '
+                    'specifies the unique, immutable instance ID'),
     )
 
     def init_logging(self):
@@ -575,6 +580,36 @@ class Command(NoArgsCommand):
         merging as appropriate.
         '''
 
+        # Find any hosts in the database without an instance_id set that may
+        # still have one available via host variables.
+        db_instance_id_map = {}
+        if self.instance_id_var:
+            if self.inventory_source.group:
+                host_qs = self.inventory_source.group.all_hosts
+            else:
+                host_qs = self.inventory.hosts.all()
+            host_qs = host_qs.filter(active=True, instance_id='',
+                                     variables__contains=self.instance_id_var)
+            for host in host_qs:
+                instance_id = host.variables_dict.get(self.instance_id_var, '')
+                if not instance_id:
+                    continue
+                db_instance_id_map[instance_id] = host.pk
+
+        # Update instance ID for each imported host and define a mapping of
+        # instance IDs to MemHost instances.
+        mem_instance_id_map = {}
+        if self.instance_id_var:
+            for mem_host in self.all_group.all_hosts.values():
+                instance_id = mem_host.variables.get(self.instance_id_var, '')
+                if not instance_id:
+                    self.logger.warning('Host "%s" has no "%s" variable',
+                                        mem_host.name, self.instance_id_var)
+                    continue
+                mem_host.instance_id = instance_id
+                mem_instance_id_map[instance_id] = mem_host.name
+            #self.logger.warning('%r', instance_id_map)
+
         # If overwrite is set, for each host in the database that is NOT in
         # the local list, delete it. When importing from a cloud inventory
         # source attached to a specific group, only delete hosts beneath that
@@ -585,7 +620,10 @@ class Command(NoArgsCommand):
                 # FIXME: Also include hosts from inventory_source.managed_hosts?
             else:
                 del_hosts = self.inventory.hosts.filter(active=True)
-            del_hosts = del_hosts.exclude(name__in=self.all_group.all_hosts.keys())
+            instance_ids = set(mem_instance_id_map.keys())
+            host_pks = set([v for k,v in db_instance_id_map.items() if k in instance_ids])
+            host_names = set(mem_instance_id_map.values()) - set(self.all_group.all_hosts.keys())
+            del_hosts = del_hosts.exclude(Q(name__in=host_names) | Q(instance_id__in=instance_ids) | Q(pk__in=host_pks))
             for host in del_hosts:
                 host_name = host.name
                 host.mark_inactive()
@@ -601,7 +639,8 @@ class Command(NoArgsCommand):
                 # FIXME: Also include groups from inventory_source.managed_groups?
             else:
                 del_groups = self.inventory.groups.filter(active=True)
-            del_groups = del_groups.exclude(name__in=self.all_group.all_groups.keys())
+            group_names = set(self.all_group.all_groups.keys())
+            del_groups = del_groups.exclude(name__in=group_names)
             for group in del_groups:
                 group_name = group.name
                 group.mark_inactive(recompute=False)
@@ -629,8 +668,10 @@ class Command(NoArgsCommand):
                                      db_child.name, db_group.name)
                 db_hosts = db_group.hosts.filter(active=True)
                 mem_hosts = self.all_group.all_groups[db_group.name].hosts
-                mem_host_names = [h.name for h in mem_hosts]
-                for db_host in db_hosts.exclude(name__in=mem_host_names):
+                mem_host_names = set([h.name for h in mem_hosts if not h.instance_id])
+                mem_instance_ids = set([h.instance_id for h in mem_hosts if h.instance_id])
+                db_host_pks = set([v for k,v in db_instance_id_map.items() if k in mem_instance_ids])
+                for db_host in db_hosts.exclude(Q(name__in=mem_host_names) | Q(instance_id__in=mem_instance_ids) | Q(pk__in=db_host_pks)):
                     if db_host not in db_group.hosts.filter(active=True):
                         continue
                     db_group.hosts.remove(db_host)
@@ -702,7 +743,7 @@ class Command(NoArgsCommand):
         # importing from cloud inventory source.
         for k,v in self.all_group.all_hosts.iteritems():
             variables = json.dumps(v.variables)
-            defaults = dict(variables=variables, description='imported')
+            defaults = dict(variables=variables, name=k, description='imported')
             enabled = None
             if self.enabled_var and self.enabled_var in v.variables:
                 value = v.variables[self.enabled_var]
@@ -711,8 +752,20 @@ class Command(NoArgsCommand):
                 else:
                     enabled = bool(value)
                 defaults['enabled'] = enabled
-            host, created = self.inventory.hosts.get_or_create(name=k,
-                                                               defaults=defaults)
+            instance_id = ''
+            if self.instance_id_var:
+                instance_id = v.variables.get(self.instance_id_var, '')
+                defaults['instance_id'] = instance_id
+            if instance_id in db_instance_id_map:
+                attrs = {'pk': db_instance_id_map[instance_id]}
+            elif instance_id:
+                attrs = {'instance_id': instance_id}
+                defaults.pop('instance_id')
+            else:
+                attrs = {'name': k}
+                defaults.pop('name')
+            attrs['defaults'] = defaults
+            host, created = self.inventory.hosts.get_or_create(**attrs)
             if created:
                 if enabled is False:
                     self.logger.info('Host "%s" added (disabled)', k)
@@ -732,8 +785,23 @@ class Command(NoArgsCommand):
                 if enabled is not None and host.enabled != enabled:
                     host.enabled = enabled
                     update_fields.append('enabled')
+                if k != host.name:
+                    old_name = host.name
+                    host.name = k
+                    update_fields.append('name')
+                if instance_id != host.instance_id:
+                    old_instance_id = host.instance_id
+                    host.instance_id = instance_id
+                    update_fields.append('instance_id')
                 if update_fields:
                     host.save(update_fields=update_fields)
+                if 'name' in update_fields:
+                    self.logger.info('Host renamed from "%s" to "%s"', old_name, k)
+                if 'instance_id' in update_fields:
+                    if old_instance_id:
+                        self.logger.info('Host "%s" instance_id updated', k)
+                    else:
+                        self.logger.info('Host "%s" instance_id added', k)
                 if 'variables' in update_fields:
                     if self.overwrite_vars or self.overwrite:
                         self.logger.info('Host "%s" variables replaced', k)
@@ -758,7 +826,10 @@ class Command(NoArgsCommand):
                 continue
             db_group = self.inventory.groups.get(name=k)
             for h in v.hosts:
-                db_host = self.inventory.hosts.get(name=h.name)
+                if h.instance_id:
+                    db_host = self.inventory.hosts.get(instance_id=h.instance_id)
+                else:
+                    db_host = self.inventory.hosts.get(name=h.name)
                 if db_host not in db_group.hosts.all():
                     db_group.hosts.add(db_host)
                     self.logger.info('Host "%s" added to group "%s"', h.name, k)
@@ -814,6 +885,7 @@ class Command(NoArgsCommand):
         self.group_filter = options.get('group_filter', None) or r'^.+$'
         self.host_filter = options.get('host_filter', None) or r'^.+$'
         self.exclude_empty_groups = bool(options.get('exclude_empty_groups', False))
+        self.instance_id_var = options.get('instance_id_var', None)
 
         # Load inventory and related objects from database.
         if self.inventory_name and self.inventory_id:

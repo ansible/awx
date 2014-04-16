@@ -848,7 +848,8 @@ class RunInventoryUpdate(BaseTask):
             args.extend(['--host-filter', settings.EC2_HOST_FILTER])
             if settings.EC2_EXCLUDE_EMPTY_GROUPS:
                 args.append('--exclude-empty-groups')
-            #args.extend(['--instance-id', settings.EC2_INSTANCE_ID_VAR])
+            if settings.EC2_INSTANCE_ID_VAR:
+                args.extend(['--instance-id-var', settings.EC2_INSTANCE_ID_VAR])
         elif inventory_update.source == 'rax':
             rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
             args.append(rax_path)
@@ -858,7 +859,8 @@ class RunInventoryUpdate(BaseTask):
             args.extend(['--host-filter', settings.RAX_HOST_FILTER])
             if settings.RAX_EXCLUDE_EMPTY_GROUPS:
                 args.append('--exclude-empty-groups')
-            #args.extend(['--instance-id', settings.RAX_INSTANCE_ID_VAR])
+            if settings.RAX_INSTANCE_ID_VAR:
+                args.extend(['--instance-id-var', settings.RAX_INSTANCE_ID_VAR])
         elif inventory_update.source == 'file':
             args.append(inventory_update.source_path)
         verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)

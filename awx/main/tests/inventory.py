@@ -1329,12 +1329,30 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inventory_source = self.update_inventory_source(self.group,
             source='ec2', credential=credential, source_regions=source_regions,
             source_vars='---')
-        self.check_inventory_source(inventory_source)
+        # Check first without instance_id set (to import by name only).
+        with self.settings(EC2_INSTANCE_ID_VAR=''):
+            self.check_inventory_source(inventory_source)
+        # Rename hosts and verify the import picks up the instance_id present
+        # in host variables.
+        for host in self.inventory.hosts.all():
+            self.assertFalse(host.instance_id, host.instance_id)
+            host.name = 'updated-%s' % host.name
+            host.save()
+        old_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.check_inventory_source(inventory_source, initial=False)
+        new_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.assertEqual(old_host_pks, new_host_pks)
         # Manually disable all hosts, verify a new update re-enables them.
+        # Also change the host name, and verify it is not deleted, but instead
+        # updated because the instance ID matches.
         for host in self.inventory.hosts.all():
             host.enabled = False
+            host.name = 'changed-%s' % host.name
             host.save()
+        old_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
         self.check_inventory_source(inventory_source, initial=False)
+        new_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.assertEqual(old_host_pks, new_host_pks)
         # Verify that main group is in top level groups (hasn't been added as
         # its own child).
         self.assertTrue(self.group in self.inventory.root_groups)
@@ -1356,12 +1374,30 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.group = group
         inventory_source = self.update_inventory_source(self.group,
             source='rax', credential=credential, source_regions=source_regions)
-        self.check_inventory_source(inventory_source)
+        # Check first without instance_id set (to import by name only).
+        with self.settings(RAX_INSTANCE_ID_VAR=''):
+            self.check_inventory_source(inventory_source)
+        # Rename hosts and verify the import picks up the instance_id present
+        # in host variables.
+        for host in self.inventory.hosts.all():
+            self.assertFalse(host.instance_id, host.instance_id)
+            host.name = 'updated-%s' % host.name
+            host.save()
+        old_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.check_inventory_source(inventory_source, initial=False)
+        new_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.assertEqual(old_host_pks, new_host_pks)
         # Manually disable all hosts, verify a new update re-enables them.
+        # Also change the host name, and verify it is not deleted, but instead
+        # updated because the instance ID matches.
         for host in self.inventory.hosts.all():
             host.enabled = False
+            host.name = 'changed-%s' % host.name
             host.save()
+        old_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
         self.check_inventory_source(inventory_source, initial=False)
+        new_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.assertEqual(old_host_pks, new_host_pks)
         # If test source regions is given, test again with empty string.
         if source_regions:
             inventory_source2 = self.update_inventory_source(self.group2,
