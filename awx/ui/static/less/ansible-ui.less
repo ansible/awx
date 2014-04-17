@@ -34,6 +34,7 @@
 @import "codemirror.less";
 @import "angular-scheduler.less";
 @import "log-viewer.less";
+@import "job-details.less";
 
 
 html, body { height: 100%; }
@@ -854,7 +855,7 @@ input[type="checkbox"].checkbox-no-label {
 /* Display list actions next to search widget */
 .list-actions {
   text-align: right;
-  margin-bottom: 25px;
+  margin-bottom: 10px;
 
   button {
     margin-left: 4px;
@@ -1278,9 +1279,14 @@ input[type="checkbox"].checkbox-no-label {
 
 /* Inventory Edit */
 
+  #groups-container .well,
+  #hosts-container .well {
+      padding: 8px;
+  }
+
   #inventories_table i[class*="icon-job-"],
   #home_groups_table i[class*="icon-job-"] {
-      margin-left: 8px;
+      margin-left: 10px;
   }
 
   .selected {
@@ -1579,93 +1585,7 @@ tr td button i {
     }
   }
 
-/* New job detail page */
 
-.relative-position {
-    position: relative;
-}
-
-.job-detail-tables, .job_options {
-    .table {
-        margin-bottom: 0;
-    }
-    .table>tbody>tr>td {
-        border-top-color: @well;
-        padding: 0;
-    }
-    .table>thead>tr>th {
-        border-bottom-color: @well;
-        padding: 0;
-    }
-    ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-    }
-    li ul {
-        margin-left: 20px;
-    }
-}
-
-.job_well {
-    padding: 8px;
-    background-color: @well;
-    border: 1px solid @well-border;
-    border-radius: 4px;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
-            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
-}
-
-.job_options {
-    height: 100px;
-    overflow-y: auto;
-    overflow-x: none;
-}
-
-.job-list li.active {
-    background-color: @active-color;
-}
-
-.job_plays, .job_tasks, .job_hosts {
-    height: 150px;
-    overflow-y: auto;
-    overflow-x: none;
-}
-
-.host_details {
-    pre {
-        border: none; 
-        max-height: 100px;
-        overflow: auto;
-        margin: 0;
-        padding: 0;
-    }
-}
-
-.scroll-up-indicator {
-    position: absolute;
-    right: 18px;
-    font-size: 14px;
-    bottom: -2px;
-    padding: 0;
-}
-
-.scroll-down-indicator {
-    position: absolute;
-    right: 18px;
-    bottom: -2px;
-    font-size: 14px;
-    padding: 0;
-}
-
-.scroll-up-indicator,
-.scroll-up-indicator:hover,
-.scroll-up-indicator:visited,
-.scroll-down-indicator,
-.scroll-down-indicator:hover,
-.scroll-down-indicator:visited {
-    color: @grey;
-}
 
 /* ng-cloak directive */
 

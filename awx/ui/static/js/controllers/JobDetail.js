@@ -59,6 +59,39 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         }
     });
 
+    if ($scope.removeGetCredentialNames) {
+        $scope.removeGetCredentialNames();
+    }
+    $scope.removeGetCredentialNames = $scope.$on('GetCredentialNames', function(e, data) {
+        var url;
+        if (data.credential) {
+            url = GetBasePath('credentials') + data.credential + '/';
+            Rest.setUrl(url);
+            Rest.get()
+                .success( function(data) {
+                    $scope.credential_name = data.name;
+                })
+                .error( function(data, status) {
+                    $scope.credential_name = '';
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
+        }
+        if (data.cloud_credential) {
+            url = GetBasePath('credentials') + data.credential + '/';
+            Rest.setUrl(url);
+            Rest.get()
+                .success( function(data) {
+                    $scope.cloud_credential_name = data.name;
+                })
+                .error( function(data, status) {
+                    $scope.credential_name = '';
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
+        }
+    });
+
     // Load the job record
     Rest.setUrl(GetBasePath('jobs') + job_id + '/');
     Rest.get()
@@ -78,7 +111,12 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             $scope.limit = data.limit;
             $scope.verbosity = data.verbosity;
             $scope.job_tags = data.job_tags;
+            $scope.started = data.started;
+            $scope.finished = data.finished;
+            $scope.elapsed = data.elapsed;
+            $scope.job_status = data.status;
             $scope.$emit('JobReady', data.related.job_events + '?page_size=50&order_by=id');
+            $scope.$emit('GetCredentialNames', data);
         })
         .error(function(data, status) {
             ProcessErrors($scope, data, status, null, { hdr: 'Error!',

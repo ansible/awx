@@ -39,11 +39,13 @@
 
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
-.factory('DigestEvents', ['UpdatePlayStatus', 'UpdatePlayNoHostsMatched', 'UpdateHostStatus', 'UpdatePlayChild', 'AddHostResult', 'MakeLastRowActive',
-function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePlayChild, AddHostResult, MakeLastRowActive) {
+.factory('DigestEvents', ['UpdatePlayStatus', 'UpdatePlayNoHostsMatched', 'UpdateHostStatus', 'UpdatePlayChild', 'AddHostResult', 'SelectPlay', 'SelectTask',
+function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePlayChild, AddHostResult, SelectPlay, SelectTask) {
     return function(params) {
+        
         var scope = params.scope,
             events = params.events;
+        
         events.forEach(function(event) {
             if (event.event === 'playbook_on_play_start') {
                 scope.plays.push({
@@ -52,8 +54,10 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     status: (event.changed) ? 'changed' : (event.failed) ? 'failed' : 'none',
                     children: []
                 });
-                scope.activePlay = event.id;
-                MakeLastRowActive({ scope: scope, list: scope.plays, field: 'playActiveClass', set: 'activePlay' });
+                SelectPlay({
+                    scope: scope,
+                    id: event.id
+                });
             }
             if (event.event === 'playbook_on_setup') {
                 scope.tasks.push({
@@ -82,7 +86,10 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     failed: event.failed,
                     changed: event.changed
                 });
-                MakeLastRowActive({ scope: scope, list: scope.tasks, field: 'taskActiveClass', set: 'activeTask' });
+                SelectTask({ 
+                    scope: scope,
+                    id: event.id
+                });
             }
             /*if (event.event === 'playbook_on_no_hosts_matched') {
                 UpdatePlayNoHostsMatched({ scope: scope, play_id: event.parent });
@@ -94,7 +101,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                 UpdateHostStatus({
                     scope: scope,
                     name: event.event_data.host,
-                    host_id: event.host_id,
+                    host_id: event.host,
                     task_id: event.parent,
                     status: (event.changed) ? 'changed' : 'ok',
                     results: (event.res && event.res.results) ? event.res.results : ''
@@ -169,7 +176,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             id = params.play_id;
         scope.plays.every(function(play,idx) {
             if (play.id === id) {
-                scope.plays[idx].status = (changed) ? 'changed' : (failed) ? 'failed' : 'none';
+                scope.plays[idx].status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
                 return false;
             }
             return true;
@@ -190,7 +197,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     scope: scope,
                     failed: failed,
                     changed: changed,
-                    play_id: task.parent
+                    play_id: task.play_id
                 });
             }
         });
@@ -293,34 +300,80 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
     };
 }])
 
-.factory('SelectPlay', [ function() {
+.factory('SelectPlay', ['SelectTask', function(SelectTask) {
     return function(params) {
         var scope = params.scope,
-            id = params.id;
+            id = params.id,
+            max_task_id = 0;
         scope.plays.forEach(function(play, idx) {
             if (play.id === id) {
                 scope.plays[idx].playActiveClass = 'active';
+                scope.activePlay = id;
+                scope.activePlayName = play.name;
             }
             else {
                 scope.plays[idx].playActiveClass = '';
             }
         });
-        scope.activePlay = id;
+        
+        // Select the last task
+        scope.tasks.forEach(function(task) {
+            if (task.play_id === scope.activePlay && task.id > max_task_id) {
+                max_task_id = task.id;
+            }
+        });
+        scope.activeTask = max_task_id;
+        SelectTask({
+            scope: scope,
+            id: max_task_id,
+            callback: function() {
+                setTimeout(function() {
+                    var inner_height = $('#job_tasks .job-detail-table').height();
+                    $('#job_tasks').scrollTop(inner_height);
+                }, 100);
+            }
+        });
     };
 }])
 
-.factory('SelectTask', [ function() {
+.factory('SelectTask', ['SelectHost', function(SelectHost) {
     return function(params) {
         var scope = params.scope,
-            id = params.id;
+            id = params.id,
+            callback = params.callback;
         scope.tasks.forEach(function(task, idx) {
             if (task.id === id) {
                 scope.tasks[idx].taskActiveClass = 'active';
+                scope.activeTask = id;
+                scope.activeTaskName = task.name;
             }
             else {
                 scope.tasks[idx].taskActiveClass = '';
             }
         });
-        scope.activeTask = id;
+        if (callback) {
+            callback();
+        }
+        SelectHost();
+    };
+}])
+
+.factory('SelectHost', [ function() {
+    return function() {
+        setTimeout(function() {
+            var inner_height = $('#host_details .job-detail-table').height();
+            $('#host_details').scrollTop(inner_height);
+        }, 100);
     };
 }]);
+
+
+
+
+
+
+
+
+
+
+

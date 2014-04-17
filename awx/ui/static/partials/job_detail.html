@@ -5,132 +5,148 @@
         </div>
         
         <div class="row">
-            <div class="col-md-8">
-                <h5>Options</h5>
-                <div class="job_options job_well" id="job_options">
-                    <table class="table table-condensed">
-                        <tbody>
-                            <tr ng-show="job_template_url">
-                                <td class="col-md-3 col-sm-2">Job Template</td>
-                                <td><a ng-href="{{ job_template_url }}">{{ job_template_name }}</a></td>
-                            </tr>
-                            <tr ng-show="project_url">
-                                <td class="col-md-3 col-sm-2">Project</td>
-                                <td><a ng-href="{{ project_url }}">{{ project_name }}</a></td>
-                            </tr>
-                            <tr ng-show="inventory_url">
-                                <td class="col-md-3 col-sm-2">Inventory</td>
-                                <td><a ng-href="{{ inventory_url }}">{{ inventory_name }}</a></td>
-                            </tr>
-                            <tr ng-show="playbook">
-                                <td class="col-md-3 col-sm-2">Playbook</td>
-                                <td>{{ playbook }}</td>
-                            </tr>
-                            <tr ng-show="job_type">
-                                <td class="col-md-3 col-sm-2">Run Type</td>
-                                <td>{{ job_type }}</td>
-                            </tr>
-                            <tr ng-show="credential">
-                                <td class="col-md-3 col-sm-2">Machine Credential</td>
-                                <td>{{ credential }}</td>
-                            </tr>
-                            <tr ng-show="forks">
-                                <td class="col-md-3 col-sm-2">Forks</td>
-                                <td>{{ forks }}</td>
-                            </tr>
-                            <tr ng-show="limit">
-                                <td class="col-md-3 col-sm-2">Limit</td>
-                                <td>{{ limit }}</td>
-                            </tr>
-                            <tr ng-show="verbosity !== undefined">
-                                <td class="col-md-3 col-sm-2">Verbosity</td>
-                                <td>{{ verbosity }}</td>
-                            </tr>
-                            <tr ng-show="job_tags">
-                                <td class="col-md-3 col-sm-2">Job Tags</td>
-                                <td>{{ job_tags }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <!-- <a id="job_options_scroll_down_indicator" href="" aw-scroll-down="job_options" class="scroll-down-indicator">more <i class="fa fa-chevron-circle-down"></i></a>
-                <a id="job_options_scroll_up_indicator" href="" aw-scroll-up="job_options" class="scroll-up-indicator">more <i class="fa fa-chevron-circle-up"></i></a> -->
-            
-                <div class="job-detail-tables">
+            <div class="col-md-7">
 
-                    <h5>Plays</h5>
-                    <div class="job_plays job_well">
-                         <ul class="job-list">
-                            <li ng-repeat="play in plays"  ng-class="play.playActiveClass"  ng-click="selectPlay(play.id)" class="cursor-pointer">
-                                <i class="fa icon-job-{{ play.status }}"></i> {{play.name }}
-                                <ul ng-show="play.children.length > 0">
-                                    <li ng-repeat="child in play.children">
-                                        <i class="fa icon-job-{{ child.status }}"></i> {{child.name }}
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <h5>Tasks</h5>
-                    <div class="job_tasks job_well">
-                        <ul class="job-list">
-                            <li ng-repeat="task in tasks | filter:{ play_id: activePlay }" ng-class="task.taskActiveClass" ng-click="selectTask(task.id)"><i class="fa icon-job-{{ task.status }}"></i> {{ task.name }}</li>
-                        </ul>
-                    </div>
-
-
-                    <h5>Host Details</h5>
-                    <div class="host_details job_well">
-                            <p>{{ activeTaskName }}</p>
+                <div class="job-detail-tables">       
+                    <div class="section">
+                        <h5>Job</h5>
+                        <div id="job_options" class="job_well">
                             <table class="table table-condensed job-detail-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-md-4">Host</th>
-                                    <th class="col-md-8">Results</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="result in hostResults | filter:{ task_id: activeTask }">
-                                    <td><i class="fa icon-job-{{ result.status }}"></i> {{ result.host_name }}</td>
-                                    <td><pre>{{ result.results }}</pre></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                <tbody>
+                                    <tr ng-show="job_template_url">
+                                        <td class="col-md-3 col-sm-2">Job Template</td>
+                                        <td><a ng-href="{{ job_template_url }}">{{ job_template_name }}</a></td>
+                                    </tr>
+                                    <tr ng-show="project_url">
+                                        <td class="col-md-3 col-sm-2">Project</td>
+                                        <td><a ng-href="{{ project_url }}">{{ project_name }}</a></td>
+                                    </tr>
+                                    <tr ng-show="inventory_url">
+                                        <td class="col-md-3 col-sm-2">Inventory</td>
+                                        <td><a ng-href="{{ inventory_url }}">{{ inventory_name }}</a></td>
+                                    </tr>
+                                    <tr ng-show="playbook">
+                                        <td class="col-md-3 col-sm-2">Playbook</td>
+                                        <td>{{ playbook }}</td>
+                                    </tr>
+                                    <tr ng-show="job_type">
+                                        <td class="col-md-3 col-sm-2">Run Type</td>
+                                        <td>{{ job_type }}</td>
+                                    </tr>
+                                    <tr ng-show="credential">
+                                        <td class="col-md-3 col-sm-2">Machine Credential</td>
+                                        <td><a href="/#/credentials/{{ credential }}">{{ credential_name }}</a></td>
+                                    </tr>
+                                    <tr ng-show="cloud_credential">
+                                        <td class="col-md-3 col-sm-2">Cloud Credential</td>
+                                        <td><a href="/#/credentials/{{ credential }}">{{ cloud_credential_name }}</a></td>
+                                    </tr>
+                                    <tr ng-show="forks">
+                                        <td class="col-md-3 col-sm-2">Forks</td>
+                                        <td>{{ forks }}</td>
+                                    </tr>
+                                    <tr ng-show="limit">
+                                        <td class="col-md-3 col-sm-2">Limit</td>
+                                        <td>{{ limit }}</td>
+                                    </tr>
+                                    <tr ng-show="verbosity !== undefined">
+                                        <td class="col-md-3 col-sm-2">Verbosity</td>
+                                        <td>{{ verbosity }}</td>
+                                    </tr>
+                                    <tr ng-show="job_tags">
+                                        <td class="col-md-3 col-sm-2">Job Tags</td>
+                                        <td>{{ job_tags }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div><!-- section -->
                     </div>
-                </div>
+
+                    <div class="section">
+                        <h5>Plays</h5>
+                        <div id="job_plays" class="job_well">
+                            <table class="table table-condensed job-detail-table">
+                                <tbody>
+                                    <tr ng-repeat="play in plays"  ng-class="play.playActiveClass" ng-click="selectPlay(play.id)" class="cursor-pointer">
+                                        <td class="status-column"><i class="fa icon-job-{{ play.status }}"></i></td>
+                                        <td><span aw-tool-tip="Event: {{ play.id }}" data-placement="top">{{ play.name }}</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div><!-- section -->
+
+                    <div class="section">
+                        <h5>Tasks for play: <span class="small-title">{{ activePlayName }}</span></h5>
+                        <div id="job_tasks" class="job_well">
+                            <table class="table table-condensed job-detail-table">
+                                <tbody>
+                                    <tr ng-repeat="task in tasks | filter:{ play_id: activePlay }" ng-class="task.taskActiveClass" ng-click="selectTask(task.id)" class="cursor-pointer">
+                                        <td class="status-column"><i class="fa icon-job-{{ task.status }}"></i></td>
+                                        <td><span aw-tool-tip="Event: {{ task.id }}" data-placement="top">{{ task.name }}</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div><!-- section -->
+
+                    <div class="section">
+                        <h5>Hosts in task: <span class="small-title">{{ activeTaskName }}</span></h5>
+                        <div id="host_details" class="job_well">
+                            <table class="table table-condensed job-detail-table">
+                                <tbody>
+                                    <tr ng-repeat="result in hostResults | filter:{ task_id: activeTask }">
+                                        <td class="status-column"><i class="fa icon-job-{{ result.status }}"></i></td>
+                                        <td><a href="" ng-click="doSomething()" aw-tool-tip="Click to view results" data-placement="top">{{ result.host_name }} <i class="fa fa-external-link"></i></a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div><!-- section -->
+                </div><!-- job-detail-tables -->
             </div><!-- col-md-8 -->
 
-            <div class="col-md-4">
-                <h5>Hosts Summary</h5>
-                <div class="job_hosts job_well">
-                    <table class="table table-condensed job-detail-table">
-                        <thead>
-                            <tr>
-                                <th class="col-md-8">Name</th>
-                                <th class="text-center col-md-1">OK</th>
-                                <th class="text-center col-md-1">Changed</th>
-                                <th class="text-center col-md-1">Unreachable</th>
-                                <th class="text-center col-md-1">Failed</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="host in hosts">
-                                <td>{{ host.name }}</td>
-                                <td class="text-center">{{ host.ok }}</td>
-                                <td class="text-center">{{ host.changed }}</td>
-                                <td class="text-center">{{ host.unreachable }}</td>
-                                <td class="text-center">{{ host.failed }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <!--
-                <div class="job_well">
-                    <p>Active Play: {{ activePlay }}</p>
-                    <p>Active Task: {{ activeTask }}</p>
-                </div>
-                -->
+            <div class="col-md-5">
+                <div class="section">
+                    <h5>Summary</h5>
+                    <div class="job_well">
+                        
+                        <div class="job_status">
+                            <table class="table table-condensed job-detail-table">
+                                <tbody>
+                                    <tr><td class="label_column">Status</td><td class="status-column"><i class="fa icon-job-{{ job_status }}"></i> {{ job_status }}</td></tr>
+                                    <tr><td class="label_column">Started</td><td>{{ started | date:'MM/dd/yy HH:mm:ss' }}</td></tr>
+                                    <tr><td class="label_column">Finished</td><td>{{ finished | date:'MM/dd/yy HH:mm:ss' }}</td></tr>
+                                    <tr><td class="label_column">Elapsed</td><td>{{ elapsed }} seconds</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="job_summary">
+                            <table class="table table-condensed job-detail-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-md-8">Host</th>
+                                        <th class="text-center col-md-1">OK</th>
+                                        <th class="text-center col-md-1">Changed</th>
+                                        <th class="text-center col-md-1">Unreachable</th>
+                                        <th class="text-center col-md-1">Failed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="host in hosts">
+                                        <td><a href="/#/home/hosts/?id={{ host.id }}">{{ host.name }}</a></td>
+                                        <td class="text-center">{{ host.ok }}</td>
+                                        <td class="text-center">{{ host.changed }}</td>
+                                        <td class="text-center">{{ host.unreachable }}</td>
+                                        <td class="text-center">{{ host.failed }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div><!-- section -->
             </div>
         </div>
 
