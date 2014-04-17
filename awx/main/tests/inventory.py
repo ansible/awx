@@ -281,21 +281,23 @@ class InventoryTest(BaseTest):
             organization = self.organizations[0]
         )
         invalid      = dict(name='asdf0.example.com')
-        new_host_a   = dict(name='asdf0.example.com:1022', inventory=inv.pk)
+        new_host_a   = dict(name=u'asdf\u0162.example.com:1022', inventory=inv.pk)
         new_host_b   = dict(name='asdf1.example.com', inventory=inv.pk)
         new_host_c   = dict(name='127.1.2.3:2022', inventory=inv.pk,
                             variables=json.dumps({'who': 'what?'}))
         new_host_d   = dict(name='asdf3.example.com', inventory=inv.pk)
-        new_host_e   = dict(name='asdf4.example.com', inventory=inv.pk)
+        new_host_e   = dict(name=u'asdf4.example.com:\u0162', inventory=inv.pk)
         host_data0 = self.post(hosts, data=invalid, expect=400, auth=self.get_super_credentials())
         host_data0 = self.post(hosts, data=new_host_a, expect=201, auth=self.get_super_credentials())
     
         # Port should be split out into host variables.
         host_a = Host.objects.get(pk=host_data0['id'])
-        self.assertEqual(host_a.name, 'asdf0.example.com')
+        self.assertEqual(host_a.name, u'asdf\u0162.example.com')
         self.assertEqual(host_a.variables_dict, {'ansible_ssh_port': 1022})
  
-        # an org admin can add hosts
+        # an org admin can add hosts (try first with invalid port #).
+        host_data1 = self.post(hosts, data=new_host_e, expect=400, auth=self.get_normal_credentials())
+        new_host_e['name'] = u'asdf4.example.com'
         host_data1 = self.post(hosts, data=new_host_e, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot add hosts

@@ -771,7 +771,7 @@ class HostSerializer(BaseSerializerWithVariables):
                 if port < 1 or port > 65535:
                     raise ValueError
             except ValueError:
-                raise serializers.ValidationError('Invalid port specification: %s' % str(port))
+                raise serializers.ValidationError(u'Invalid port specification: %s' % unicode(port))
         return name, port
 
     def validate_name(self, attrs, source):
