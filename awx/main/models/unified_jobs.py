@@ -190,6 +190,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         '''
         for schedule in self.schedules.filter(active=True):
             schedule.mark_inactive()
+            schedule.enabled = False
+            schedule.save()
         super(UnifiedJobTemplate, self).mark_inactive(save=save)
 
     def save(self, *args, **kwargs):
@@ -423,7 +425,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     @classmethod
     def _get_task_class(cls):
         raise NotImplementedError # Implement in subclasses.
-    
+
     @classmethod
     def _get_parent_field_name(cls):
         return 'unified_job_template' # Override in subclasses.
