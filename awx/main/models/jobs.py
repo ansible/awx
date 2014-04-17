@@ -525,6 +525,8 @@ class JobEvent(CreatedModifiedModel):
                 msg = "%s (%s)" % (msg, self.play)
         elif self.event == 'playbook_on_task_start':
             if self.task:
+                if self.event_data.get('is_conditional', False):
+                    msg = 'Handler Notified'
                 if self.role:
                     msg = '%s (%s | %s)' % (msg, self.role, self.task)
                 else:
