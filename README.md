@@ -19,6 +19,8 @@ The current version under development is 2.0.0, and uses the master branch.
 
 1.4.8 was released on April 7, 2014.
 
+1.4.9 was released on April 17, 2014.
+
 Hotfixes should go on the appropriate release branch and be cherry-picked to
 master.
 
