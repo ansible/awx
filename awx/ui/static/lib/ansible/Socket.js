@@ -16,8 +16,9 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
         return function(params) {
             var scope = params.scope,
                 host = $location.host(),
+                endpoint = params.endpoint,
                 protocol = $location.protocol(),
-                url = protocol + '://' + host + ':8080';
+                url = protocol + '://' + host + ':8080/socket.io/' + endpoint;
 
             if (scope.removeSocketErrorEncountered) {
                 scope.removeSocketErrorEncountered();

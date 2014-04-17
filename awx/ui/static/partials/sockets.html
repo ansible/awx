@@ -1,11 +1,34 @@
 <div class="tab-pane" id="sockets">
     <div ng-cloak id="htmlTemplate">
-        <div class="alert alert-info"><strong>Socket url</strong>: {{ socket_url }} &nbsp;<strong>Status:</strong> {{ socket_status }} {{ socket_reason }}</div>
-        <div class="well">
-            <h5>Received Messages:</h5>
-            <ul>
-                <li ng-repeat="message in messages">{{ message }} </li>
-            </ul>
+        <div id="test_url">
+            <div class="alert alert-info"><strong>Socket url</strong>: {{ socket_url }} &nbsp;<strong>Status:</strong> {{ socket_status }} {{ socket_reason }}</div>
+            <div class="well">
+                <h5>Received Test Messages:</h5>
+                <ul>
+                    <li>{{messages}}</li>
+                    <li ng-repeat="message in messages">{{ message }} </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="jobs_url">
+            <div class="alert alert-info"><strong>Socket url</strong>: {{ socket_url }} &nbsp;<strong>Status:</strong> {{ socket_status }} {{ socket_reason }}</div>
+            <div class="well">
+                <h5>Received Jobs Messages:</h5>
+                <ul>
+                    <li ng-repeat="message in messages">{{ message }} </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="job_events_url">
+            <div class="alert alert-info"><strong>Socket url</strong>: {{ socket_url }} &nbsp;<strong>Status:</strong> {{ socket_status }} {{ socket_reason }}</div>
+            <div class="well">
+                <h5>Received Job Event Messages:</h5>
+                <ul>
+                    <li ng-repeat="message in messages">{{ message }} </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>

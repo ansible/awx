@@ -9,7 +9,7 @@ import json
 import signal
 import time
 from optparse import make_option
-from multiprocessing import Process
+from threading import Thread
 
 # Django
 from django.conf import settings
@@ -27,6 +27,7 @@ from awx.main.models import *
 import zmq
 
 # gevent & socketio
+import gevent
 from socketio import socketio_manage
 from socketio.server import SocketIOServer
 from socketio.namespace import BaseNamespace
@@ -35,19 +36,17 @@ class TestNamespace(BaseNamespace):
 
     def recv_connect(self):
         print("Received client connect for test namespace from %s" % str(self.environ['REMOTE_ADDR']))
-        self.emit('connect', True)
+        self.emit('test', "If you see this then you are connected to the test socket endpoint")
 
 class JobNamespace(BaseNamespace):
 
     def recv_connect(self):
         print("Received client connect for job namespace from %s" % str(self.environ['REMOTE_ADDR']))
-        self.emit('connect', True)
 
 class JobEventNamespace(BaseNamespace):
 
     def recv_connect(self):
         print("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
-        self.emit('connect', True)
 
 class TowerSocket(object):
 
@@ -55,9 +54,9 @@ class TowerSocket(object):
         path = environ['PATH_INFO'].strip('/') or 'index.html'
         print path
         if path.startswith('socket.io'):
-            socketio_manage(environ, {'/socket.io/test': TestNamespace})
-            socketio_manage(environ, {'/socket.io/jobs': JobNamespace})
-            socketio_manage(environ, {'/socket.io/job_events': JobEventNamespace})
+            socketio_manage(environ, {'/socket.io/test': TestNamespace,
+                                      '/socket.io/jobs': JobNamespace,
+                                      '/socket.io/job_events': JobEventNamespace})
         else:
             start_response('404 Not Found', [])
             return ['<h1>Not Found</h1>']
@@ -111,7 +110,12 @@ class Command(NoArgsCommand):
             else:
                 print 'Listening on port http://0.0.0.0:' + str(socketio_listen_port)
                 server = SocketIOServer(('0.0.0.0', socketio_listen_port), TowerSocket(), resource='socket.io')
-            gevent.spawn(notification_handler, socketio_notification_port, server)
+
+            #gevent.spawn(notification_handler, socketio_notification_port, server)
+            handler_thread = Thread(target=notification_handler, args = (socketio_notification_port, server,))
+            handler_thread.daemon = True
+            handler_thread.start()
+
             server.serve_forever()
         except KeyboardInterrupt:
             pass
