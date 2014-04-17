@@ -35,7 +35,18 @@ class TestNamespace(BaseNamespace):
 
     def recv_connect(self):
         print("Received client connect for test namespace from %s" % str(self.environ['REMOTE_ADDR']))
-        #print("Env: " + str(self.environ))
+        self.emit('connect', True)
+
+class JobNamespace(BaseNamespace):
+
+    def recv_connect(self):
+        print("Received client connect for job namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        self.emit('connect', True)
+
+class JobEventNamespace(BaseNamespace):
+
+    def recv_connect(self):
+        print("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
         self.emit('connect', True)
 
 class TowerSocket(object):
@@ -50,6 +61,17 @@ class TowerSocket(object):
         else:
             start_response('404 Not Found', [])
             return ['<h1>Not Found</h1>']
+
+def notification_handler(bind_port, server):
+    handler_context = zmq.Context()
+    handler_socket = handler_context.socket(zmq.PULL)
+    handler_socket.bind(bind_port)
+
+    while True:
+        message = handler_socket.recv_json()
+        packet = dict(type='event', name=message['event'], endpoint=message['endpoint'], args=message)
+        for session_id, socket in server.sockets.iteritems():
+            socket.send_packet(packet)
 
 class Command(NoArgsCommand):
     '''
@@ -80,9 +102,16 @@ class Command(NoArgsCommand):
         self.init_logging()
         socketio_listen_port = settings.SOCKETIO_LISTEN_PORT
         socketio_notification_port = settings.SOCKETIO_NOTIFICATION_PORT
+
         try:
-            print 'Listening on port http://0.0.0.0:' + str(socketio_listen_port)
-            server = SocketIOServer(('0.0.0.0', socketio_listen_port), TowerSocket(), resource='socket.io')
+            if os.path.exists('/etc/awx/awx.cert') and os.path.exists('/etc/awx/awx.key'):
+                print 'Listening on port https://0.0.0.0:' + str(socketio_listen_port)
+                server = SocketIOServer(('0.0.0.0', socketio_listen_port), TowerSocket(), resource='socket.io',
+                                        keyfiles='/etc/awx/awx.key', certfile='/etc/awx/awx.cert')
+            else:
+                print 'Listening on port http://0.0.0.0:' + str(socketio_listen_port)
+                server = SocketIOServer(('0.0.0.0', socketio_listen_port), TowerSocket(), resource='socket.io')
+            gevent.spawn(notification_handler, socketio_notification_port, server)
             server.serve_forever()
         except KeyboardInterrupt:
             pass
