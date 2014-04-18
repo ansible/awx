@@ -23,7 +23,7 @@ from django.utils.tzinfo import FixedOffset
 # AWX
 from awx.main.models import *
 from awx.main.tasks import handle_work_error
-from awx.main.utils import get_system_task_capacity, decrypt_field
+from awx.main.utils import get_system_task_capacity, decrypt_field, emit_websocket_notification
 
 # ZeroMQ
 import zmq
@@ -175,6 +175,7 @@ def rebuild_graph(message):
             task.status = 'failed'
             task.job_explanation += "Task was marked as running in Tower but was not present in Celery so it has been marked as failed"
             task.save()
+            emit_websocket_notification('/socket.io/jobs', 'job_canceled', dict(unified_job_id=task.id))
             running_tasks.pop(running_tasks.index(task))
             print("Task %s appears orphaned... marking as failed" % task)
 

@@ -37,7 +37,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import * # Job, JobEvent, ProjectUpdate, InventoryUpdate, Schedule, UnifiedJobTemplate
-from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url
+from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url, emit_websocket_notification
 
 __all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate', 'handle_work_error']
 
@@ -123,9 +123,10 @@ def handle_work_error(self, task_id, subtasks=None):
                 instance.job_explanation = "Previous Task Failed: %s for %s with celery task id: %s" % \
                     (first_task_type, first_task_name, task_id)
                 instance.save()
+                emit_websocket_notification('/socket.io/jobs', 'job_error', dict(unified_job_id=instance.id))
 
 class BaseTask(Task):
-    
+
     name = None
     model = None
     abstract = True
@@ -333,6 +334,7 @@ class BaseTask(Task):
         '''
         Run the job/task and capture its output.
         '''
+        emit_websocket_notification('/socket.io/jobs', 'job_running', dict(unified_job_id=pk))
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
         status, tb = 'error', ''
         output_replacements = []
@@ -381,6 +383,7 @@ class BaseTask(Task):
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements)
         self.post_run_hook(instance, **kwargs)
+        emit_websocket_notification('/socket.io/jobs', 'job_finished', dict(unified_job_id=pk))
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
@@ -581,7 +584,7 @@ class RunJob(BaseTask):
 
 
 class RunProjectUpdate(BaseTask):
-    
+
     name = 'awx.main.tasks.run_project_update'
     model = ProjectUpdate
 

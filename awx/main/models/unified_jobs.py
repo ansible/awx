@@ -33,7 +33,7 @@ from djcelery.models import TaskMeta
 # AWX
 from awx.main.models.base import *
 from awx.main.models.schedules import Schedule
-from awx.main.utils import decrypt_field, get_type_for_model
+from awx.main.utils import decrypt_field, get_type_for_model, emit_websocket_notification
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 
@@ -583,6 +583,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if not all(opts.values()):
             return False
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
+        emit_websocket_notification('/socket.io/jobs', 'job_started', dict(unified_job_id=self.id))
         task_type = get_type_for_model(self)
         # notify_task_runner.delay(dict(task_type=task_type, id=self.id, metadata=kwargs))
         return True
@@ -631,6 +632,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if not self.cancel_flag:
                 self.cancel_flag = True
                 self.save(update_fields=['cancel_flag'])
+                emit_websocket_notification('/socket.io/jobs', 'job_canceled', dict(unified_job_id=self.id))
             if settings.BROKER_URL.startswith('amqp://'):
                 self._force_cancel()
         return self.cancel_flag

@@ -16,6 +16,9 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # PyCrypto
 from Crypto.Cipher import AES
 
+# ZeroMQ
+import zmq
+
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type']
@@ -162,7 +165,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
         elif scm_type == 'git' and ':' in url:
             if url.count(':') > 1:
                 raise ValueError('Invalid %s URL' % scm_type)
-                
+
             modified_url = '/'.join(url.split(':', 1))
             parts = urlparse.urlsplit('ssh://%s' % modified_url)
         # Handle local paths specified without file scheme (e.g. /path/to/foo).
@@ -325,6 +328,9 @@ def get_model_for_type(type):
             return ct_model
 
 def get_system_task_capacity():
+    '''
+    Measure system memory and use it as a baseline for determining the system's capacity
+    '''
     from django.conf import settings
     if hasattr(settings, 'SYSTEM_TASK_CAPACITY'):
         return settings.SYSTEM_TASK_CAPACITY
@@ -334,3 +340,11 @@ def get_system_task_capacity():
     if int(total_mem_value) <= 2048:
         return 50
     return 50 + ((int(total_mem_value) / 1024) - 2) * 75
+
+def emit_websocket_notification(endpoint, event, payload):
+    emit_context = zmq.Context()
+    emit_socket = emit_context.socket(zmq.PUSH)
+    emit_socket.connect(settings.SOCKETIO_NOTIFICATION_PORT)
+    payload['event'] = event
+    payload['endpoint'] = endpoint
+    emit_socket.send_json(payload);
