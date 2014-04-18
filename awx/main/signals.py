@@ -105,11 +105,10 @@ def emit_job_event_detail(sender, **kwargs):
                                 event_data=instance.event_data,
                                 failed=instance.failed,
                                 changed=instance.changed,
-                                host=instance.host,
+                                host=instance.host.id,
                                 play=instance.play,
                                 role=instance.role,
-                                task=instance.task,
-                                parent=instance.parent.id)
+                                task=instance.task)
         emit_websocket_notification('/socket.io/job_events', 'job_events-' + str(instance.id), event_serialized)
 
 post_save.connect(update_inventory_computed_fields, sender=Host)

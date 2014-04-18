@@ -38,7 +38,7 @@ function SocketsController ($scope, $compile, ClearScope, Socket) {
     e = angular.element(document.getElementById('jobs-container'));
     e.append(html);
     $compile(e)(jobs_scope);
-    
+
     html = "<div class=\"alert alert-info\"><strong>Socket url</strong>: {{ socket_url }} &nbsp;<strong>Status:</strong> {{ socket_status }} {{ socket_reason }}</div>\n" +
             "<form class=\"form-inline\">\n" +
                 "<div class=\"form-group\">\n" +
@@ -78,7 +78,7 @@ function SocketsController ($scope, $compile, ClearScope, Socket) {
     job_events_scope.subscribeToJobEvent = function() {
         job_events_scope.jobs_list.push(job_events_scope.job_id);
         job_events_socket.on("job_events-" + job_events_scope.job_id, function(data) {
-            jobs_scope.messages.push(data);
+            job_events_scope.messages.push(data);
         });
     };
 }
