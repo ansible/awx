@@ -77,21 +77,35 @@
                     </div><!-- section -->
 
                     <div class="section">
-                        <h5>Tasks for play: <span class="small-title">{{ activePlayName }}</span></h5>
-                        <div id="job_tasks" class="job_well">
-                            <table class="table table-condensed job-detail-table">
-                                <tbody>
-                                    <tr ng-repeat="task in tasks | filter:{ play_id: activePlay }" ng-class="task.taskActiveClass" ng-click="selectTask(task.id)" class="cursor-pointer">
-                                        <td class="status-column"><i class="fa icon-job-{{ task.status }}"></i></td>
-                                        <td><span aw-tool-tip="Event: {{ task.id }}" data-placement="top">{{ task.name }}</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <h5>Tasks</h5>
+                        <table class="table table-condensed table-striped job-detail-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-md-1 col-sm-1 col-xs-3">Started</th>
+                                    <th class="col-md-2 col-sm-2 hidden-xs" ng-show="hasRoles">Role</th>
+                                    <th class="col-md-5 col-sm-5 col-xs-5">Name</th>
+                                    <th class="col-md-4 col-sm-4 col-xs-5">Status</td>
+                                </tr>
+                            </thead>
+                            <tbody id="task-table-body">
+                                <tr ng-repeat="task in tasks | filter:{ play_id: activePlay }" ng-class="task.taskActiveClass" ng-click="selectTask(task.id)" class="cursor-pointer">
+                                    <td class="col-md-1 col-sm-1 col-xs-3">{{ task.created | date: 'HH:mm:ss' }}</td>
+                                    <td class="col-md-2 col-sm-2 hidden-xs" ng-show="hasRoles">{{ task.role }}</td>
+                                    <td class="col-md-5 col-sm-5 col-xs-5">{{ task.name }}</td>
+                                    <td class="col-md-4 col-sm-4 col-xs-5">
+                                        <div class="successful-hosts status-bar" style="width:{{ task.successfulPct || 0 }}%">
+                                            <div class="changed-hosts status-bar" style="width:{{ task.changedPct || 0 }}%"></div>
+                                        </div>
+                                        <div class="skipped-hosts status-bar" style="width:{{ task.skippedPct || 0 }}%"></div> 
+                                        <div class="failed-hosts status-bar" style="width:{{ task.failedPct || 0 }}%"></div> 
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div><!-- section -->
 
                     <div class="section">
-                        <h5>Hosts in task: <span class="small-title">{{ activeTaskName }}</span></h5>
+                        <h5>Hosts</h5>
                         <div id="host_details" class="job_well">
                             <table class="table table-condensed job-detail-table">
                                 <tbody>

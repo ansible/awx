@@ -49,7 +49,11 @@ angular.module('PaginationHelpers', ['Utilities', 'RefreshHelper', 'RefreshRelat
             for (i = first; i <= last; i++) {
                 scope[iterator + '_page_range'].push(i);
             }
-
+            console.log('first: ' + first);
+            console.log('last: ' + last);
+            console.log('range: ');
+            console.log(scope[iterator + '_page_range']);
+            console.log('num_pages: ' + scope[iterator + '_num_pages']);
         };
     }
 ])

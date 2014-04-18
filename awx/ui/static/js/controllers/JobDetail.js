@@ -51,6 +51,9 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                     if (data.next) {
                         $scope.$emit('JobReady', data.next);
                     }
+                    else {
+                        Wait('stop');
+                    }
                 })
                 .error(function(data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -91,7 +94,9 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 });
         }
     });
-
+    
+    Wait('start');
+    
     // Load the job record
     Rest.setUrl(GetBasePath('jobs') + job_id + '/');
     Rest.get()

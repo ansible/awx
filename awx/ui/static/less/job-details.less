@@ -7,35 +7,52 @@
  *
  */
 
-.job-detail-tables {
-    .table {
-        margin-bottom: 0;
+.job-detail-table {
+    margin-bottom: 0;
+    border: 1px solid @well;   
+   
+   /** 
+       The thing that makes the table body scrollable:
+       http://kamlekar.wordpress.com/2013/06/17/table-tbody-scroll-cross-browser/comment-page-1/ 
+    **/
+    thead {
+        display: table;
+        float: left;
+        width: 100%;
     }
-    .table>tbody>tr>td {
+    thead tr {
+        display: table-row;
+        width: 100%;
+    }
+    tbody {
+        display: block;
+        height: 122px;
+        width: 100%;
+        overflow-y: scroll;
+        float: left;
+    }
+    tbody tr {
+        display: table;
+        width: 100%;
+    }
+    tbody>tr>td {
         border-top-color: @well;
-        padding: 0;
+        padding-top: 0;
+        padding-bottom: 0;
     }
-    .table>thead>tr>th {
-        border-bottom-color: @well;
-        padding: 0;
+    thead>tr>th {
+        padding-top: 0;
+        padding-bottom: 0;
+        font-size: 14px;
     }
-    ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-    }
-    li ul {
-        margin-left: 20px;
-    }
-    .status-column {
-        width: 25px;
-        font-size: 12px;
+    td.status-column {
         text-align: center;
+        font-size: 12px;
         i {
             margin-top: 4px;
         }
     }
-    .table>tbody>tr.active>td {
+    tbody>tr.active>td {
         background-color: @active-color;
     }
 }
@@ -75,6 +92,23 @@
     .status-column i {
         font-size: 12px;
     }   
+}
+
+.status-bar {
+    display: inline-block;
+    height: 15px;
+}
+.failed-hosts {
+    background-color: @red;
+}
+.successful-hosts {
+    background-color: @green;
+}
+.changed-hosts {
+    background-color: @warning;
+}
+.skipped-hosts {
+    background-color: @grey;
 }
 
 .job_well {
