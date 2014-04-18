@@ -99,17 +99,25 @@ def emit_job_event_detail(sender, **kwargs):
     instance = kwargs['instance']
     created = kwargs['created']
     if created:
-        #event_serialized = JobEventSerializer(instance).data
+        if instance.host is not None:
+            host_id = instance.host.id
+        else:
+            host_id = None
+        if instance.parent is not None:
+            parent_id = instance.parent.id
+        else:
+            parent_id = None
         event_serialized = dict(job_id=instance.job.id,
                                 event=instance.event,
                                 event_data=instance.event_data,
                                 failed=instance.failed,
                                 changed=instance.changed,
-                                host=instance.host.id,
                                 play=instance.play,
                                 role=instance.role,
-                                task=instance.task)
-        emit_websocket_notification('/socket.io/job_events', 'job_events-' + str(instance.id), event_serialized)
+                                task=instance.task,
+                                host = host_id,
+                                parent = parent_id)
+        emit_websocket_notification('/socket.io/job_events', 'job_events-' + str(instance.job.id), event_serialized)
 
 post_save.connect(update_inventory_computed_fields, sender=Host)
 post_delete.connect(update_inventory_computed_fields, sender=Host)
