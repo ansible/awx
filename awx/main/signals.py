@@ -19,7 +19,7 @@ from crum.signals import current_user_getter
 # AWX
 from awx.main.models import *
 from awx.api.serializers import *
-from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
+from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, emit_websocket_notification
 
 __all__ = []
 
@@ -95,6 +95,13 @@ def update_inventory_computed_fields(sender, **kwargs):
             update_hosts = issubclass(sender, Job)
             inventory.update_computed_fields(update_hosts=update_hosts)
 
+def emit_job_event_detail(sender, **kwargs):
+    instance = kwargs['instance']
+    created = kwargs['created']
+    if created:
+        event_serialized = JobEventSerializer(instance).data
+        emit_websocket_notification('/socket.io/job_events', 'job_events-' + str(instance.id), event_serialized)
+
 post_save.connect(update_inventory_computed_fields, sender=Host)
 post_delete.connect(update_inventory_computed_fields, sender=Host)
 post_save.connect(update_inventory_computed_fields, sender=Group)
@@ -107,6 +114,7 @@ post_save.connect(update_inventory_computed_fields, sender=Job)
 post_delete.connect(update_inventory_computed_fields, sender=Job)
 post_save.connect(update_inventory_computed_fields, sender=InventorySource)
 post_delete.connect(update_inventory_computed_fields, sender=InventorySource)
+post_save.connect(emit_job_event_detail, sender=JobEvent)
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or
 # marked as inactive.
