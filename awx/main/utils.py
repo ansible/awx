@@ -19,6 +19,9 @@ from Crypto.Cipher import AES
 # ZeroMQ
 import zmq
 
+# Django
+from django.conf import settings
+
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type']

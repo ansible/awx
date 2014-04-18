@@ -41,7 +41,7 @@ function SocketsController ($scope, $compile, ClearScope, Socket) {
     e = angular.element(document.getElementById('job-events-container'));
     e.append(html);
     $compile(e)(job_events_scope);
-    
+
     test_socket.init();
     jobs_socket.init();
     job_events_socket.init();
@@ -50,6 +50,10 @@ function SocketsController ($scope, $compile, ClearScope, Socket) {
 
     test_socket.on('test', function(data) {
         test_scope.messages.push(data);
+    });
+
+    jobs_socket.on("status_changed", function(data) {
+        jobs_scope.messages.push(data);
     });
 }
 
