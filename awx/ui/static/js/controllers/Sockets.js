@@ -38,6 +38,23 @@ function SocketsController ($scope, $compile, ClearScope, Socket) {
     e = angular.element(document.getElementById('jobs-container'));
     e.append(html);
     $compile(e)(jobs_scope);
+    
+    html = "<div class=\"alert alert-info\"><strong>Socket url</strong>: {{ socket_url }} &nbsp;<strong>Status:</strong> {{ socket_status }} {{ socket_reason }}</div>\n" +
+            "<form class=\"form-inline\">\n" +
+                "<div class=\"form-group\">\n" +
+                   "<label for=\"job_id\">Job Id</label>\n" +
+                   "<input type=\"text\" name=\"job_id\" id=\"job_id\" ng-model=\"job_id\" class=\"input-sm form-control\">\n" +
+                "</div>\n" +
+                "<button type=\"submit\" ng-disabled=\"!job_id\" ng-click=\"subscribeToJobEvent()\" class=\"btn btn-sm btn-primary\"><i class=\"fa fa-check\"></i> Subscribe</button>\n" +
+            "</form>\n" +
+            "<div style=\"margin-top: 15px;\" class=\"well\">\n" +
+               "<p>Subscribed to events for job: {{ jobs_list }}</p>\n" +
+               "<h5>Received Messages:</h5>\n" +
+               "<ul>\n" +
+                  "<li ng-repeat=\"message in messages\">{{ message }} </li>\n" +
+               "</ul>\n" +
+            "</div>\n";
+
     e = angular.element(document.getElementById('job-events-container'));
     e.append(html);
     $compile(e)(job_events_scope);
@@ -55,6 +72,15 @@ function SocketsController ($scope, $compile, ClearScope, Socket) {
     jobs_socket.on("status_changed", function(data) {
         jobs_scope.messages.push(data);
     });
+
+    job_events_scope.jobs_list = [];
+
+    job_events_scope.subscribeToJobEvent = function() {
+        job_events_scope.jobs_list.push(job_events_scope.job_id);
+        job_events_socket.on("job_events-" + job_events_scope.job_id, function(data) {
+            jobs_scope.messages.push(data);
+        });
+    };
 }
 
 SocketsController.$inject = [ '$scope', '$compile', 'ClearScope', 'Socket'];
