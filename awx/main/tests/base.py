@@ -66,6 +66,8 @@ class BaseTestMixin(object):
             self._temp_paths.append(callback_queue_path)
             settings.CALLBACK_QUEUE_PORT = 'ipc://%s' % callback_queue_path
             settings.TASK_COMMAND_PORT = 'ipc:///tmp/task_command_receiver_%d.ipc' % callback_port
+        # Disable socket notifications for unit tests.
+        settings.SOCKETIO_NOTIFICATION_PORT = None
         # Make temp job status directory for unit tests.
         job_status_dir = tempfile.mkdtemp()
         self._temp_paths.append(job_status_dir)

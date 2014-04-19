@@ -19,9 +19,6 @@ from Crypto.Cipher import AES
 # ZeroMQ
 import zmq
 
-# Django
-from django.conf import settings
-
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type']
@@ -345,9 +342,11 @@ def get_system_task_capacity():
     return 50 + ((int(total_mem_value) / 1024) - 2) * 75
 
 def emit_websocket_notification(endpoint, event, payload):
-    emit_context = zmq.Context()
-    emit_socket = emit_context.socket(zmq.PUSH)
-    emit_socket.connect(settings.SOCKETIO_NOTIFICATION_PORT)
-    payload['event'] = event
-    payload['endpoint'] = endpoint
-    emit_socket.send_json(payload);
+    from django.conf import settings
+    if getattr(settings, 'SOCKETIO_NOTIFICATION_PORT', None):
+        emit_context = zmq.Context()
+        emit_socket = emit_context.socket(zmq.PUSH)
+        emit_socket.connect(settings.SOCKETIO_NOTIFICATION_PORT)
+        payload['event'] = event
+        payload['endpoint'] = endpoint
+        emit_socket.send_json(payload);
