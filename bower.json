@@ -20,7 +20,8 @@
     "components-font-awesome": "~4.0.3",
     "less.js": "~1.6.3",
     "select2": "~3.4.5",
-    "sizzle": "1.10.16"
+    "sizzle": "1.10.16",
+    "d3js": "*"
   },
   "resolutions": {
     "angular": "1.2.15-build.2398+sha.4bab3d8"

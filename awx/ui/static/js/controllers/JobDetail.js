@@ -26,7 +26,9 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     $scope.tasks = [];
     $scope.hosts = [];
     $scope.hostResults = [];
-
+    $scope.job_status = {};
+    $scope.job_id = job_id;
+            
     // Apply each event to the view
     if ($scope.removeEventsReady) {
         $scope.removeEventsReady();
@@ -116,10 +118,10 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             $scope.limit = data.limit;
             $scope.verbosity = data.verbosity;
             $scope.job_tags = data.job_tags;
-            $scope.started = data.started;
-            $scope.finished = data.finished;
-            $scope.elapsed = data.elapsed;
-            $scope.job_status = data.status;
+            //$scope.started = data.started;
+            //$scope.finished = data.finished;
+            //$scope.elapsed = data.elapsed;
+            //$scope.job_status = data.status;
             $scope.$emit('JobReady', data.related.job_events + '?page_size=50&order_by=id');
             $scope.$emit('GetCredentialNames', data);
         })
@@ -141,6 +143,17 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             id: id
         });
     };
+
+    $( "#hosts-slider-vertical" ).slider({
+        orientation: "vertical",
+        range: "min",
+        min: 0,
+        max: 100,
+        value: 60,
+        slide: function( event, ui ) {
+            $( "#amount" ).val( ui.value );
+        }
+    });
 }
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',

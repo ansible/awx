@@ -40,7 +40,8 @@
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
 .factory('DigestEvents', ['UpdatePlayStatus', 'UpdatePlayNoHostsMatched', 'UpdateHostStatus', 'UpdatePlayChild', 'AddHostResult', 'SelectPlay', 'SelectTask',
-function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePlayChild, AddHostResult, SelectPlay, SelectTask) {
+'GetHostCount', 'GetElapsed',
+function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePlayChild, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed) {
     return function(params) {
         
         var scope = params.scope,
@@ -48,10 +49,17 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
         
         events.forEach(function(event) {
             var hostCount;
+            
+            if (event.event === 'playbook_on_start') {
+                scope.job_status.started = event.created;
+                scope.job_status.status = 'running';
+            }
+
             if (event.event === 'playbook_on_play_start') {
                 scope.plays.push({
                     id: event.id,
                     name: event.play,
+                    created: event.created,
                     status: (event.changed) ? 'changed' : (event.failed) ? 'failed' : 'none',
                     children: []
                 });
@@ -61,24 +69,30 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                 });
             }
             if (event.event === 'playbook_on_setup') {
-                hostCount = (scope.tasks.length > 0) ? scope.tasks[scope.tasks.length - 1].hostCount : 0;
+                hostCount = GetHostCount({
+                    scope: scope,
+                    play_id: event.parent
+                });
                 scope.tasks.push({
                     id: event.id,
                     name: event.event_display,
                     play_id: event.parent,
                     status: (event.failed) ? 'failed' : 'successful',
                     created: event.created,
+                    modified: event.modified,
                     hostCount: hostCount,
                     failedCount: 0,
                     changedCount: 0,
                     successfulCount: 0,
-                    skippedCount: 0
+                    skippedCount: 0,
+                    reportedHosts: 0
                 });
                 UpdatePlayStatus({
                     scope: scope,
                     play_id: event.parent,
                     failed: event.failed,
-                    changed: event.changed
+                    changed: event.changed,
+                    modified: event.modified
                 });
                 SelectTask({
                     scope: scope,
@@ -86,7 +100,10 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                 });
             }
             if (event.event === 'playbook_on_task_start') {
-                hostCount = (scope.tasks.length > 0) ? scope.tasks[scope.tasks.length - 1].hostCount : 0;
+                hostCount = GetHostCount({
+                    scope: scope,
+                    play_id: event.parent
+                });
                 scope.tasks.push({
                     id: event.id,
                     name: event.task,
@@ -94,11 +111,13 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     status: ( (event.changed) ? 'changed' : (event.failed) ? 'failed' : 'successful' ),
                     role: event.role,
                     created: event.created,
+                    modified: event.modified,
                     hostCount: hostCount,
                     failedCount: 0,
                     changedCount: 0,
                     successfulCount: 0,
-                    skippedCount: 0
+                    skippedCount: 0,
+                    reportedHosts: 0
                 });
                 if (event.role) {
                     scope.hasRoles = true;
@@ -107,7 +126,8 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     scope: scope,
                     play_id: event.parent,
                     failed: event.failed,
-                    changed: event.changed
+                    changed: event.changed,
+                    modified: event.modified
                 });
                 SelectTask({
                     scope: scope,
@@ -125,7 +145,9 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     host_id: event.host,
                     task_id: event.parent,
                     status: 'unreachable',
-                    event_id: event.id
+                    event_id: event.id,
+                    created: event.created,
+                    modified: event.modified
                 });
 
             }
@@ -136,7 +158,9 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     host_id: event.host,
                     task_id: event.parent,
                     status: 'failed',
-                    event_id: event.id
+                    event_id: event.id,
+                    created: event.created,
+                    modified: event.modified
                 });
             }
             if (event.event === 'runner_on_skipped') {
@@ -146,7 +170,9 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     host_id: event.host,
                     task_id: event.parent,
                     status: 'skipped',
-                    event_id: event.id
+                    event_id: event.id,
+                    created: event.created,
+                    modified: event.modified
                 });
             }
             if (event.event === 'runner_on_ok') {
@@ -155,16 +181,71 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     name: event.event_data.host,
                     host_id: event.host,
                     task_id: event.parent,
-                    status: (event.changed) ? 'changed' : 'ok',
-                    event_id: event.id
+                    status: ( (event.changed) ? 'changed' : (event.failed) ? 'failed' : 'successful' ),
+                    event_id: event.id,
+                    created: event.created,
+                    modified: event.modified
                 });
             }
             if (event.event === 'playbook_on_stats') {
-
+                scope.job_status.finished = event.modified;
+                scope.job_status.elapsed = GetElapsed({
+                    start: scope.job_status.started,
+                    end: scope.job_status.finished
+                });
+                scope.job_status.status = (event.failed) ? 'error' : 'successful';
             }
         });
     };
 }])
+
+.factory('GetHostCount', function() {
+    return function(params) {
+        var scope = params.scope,
+            play_id = params.play_id,
+            tasks = [];
+        // Get the known set of tasks for a given play
+        if (scope.tasks.length > 0) {
+            scope.tasks.forEach(function(task) {
+                if (task.play_id === play_id) {
+                    tasks.push(task);
+                }
+            });
+            // sort by ascending event.id
+            if (tasks.length > 0) {
+                tasks.sort(function(a, b) {
+                    return a.id - b.id;
+                });
+                return tasks[0].hostCount;
+            }
+        }
+        return 0;
+    };
+})
+
+.factory('FindFirstTaskofPlay', function() {
+    return function(params) {
+        var scope = params.scope,
+            play_id = params.play_id,
+            tasks = [];
+        // Get the known set of tasks for a given play
+        if (scope.tasks.length > 0) {
+            scope.tasks.forEach(function(task) {
+                if (task.play_id === play_id) {
+                    tasks.push(task);
+                }
+            });
+            // sort by ascending event.id
+            if (tasks.length > 0) {
+                tasks.sort(function(a, b) {
+                    return a.id - b.id;
+                });
+                return tasks[0].id;
+            }
+        }
+        return 0;
+    };
+})
 
 .factory('MakeLastRowActive', [ function() {
     return function(params) {
@@ -215,16 +296,51 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
     };
 }])
 
+.factory('GetElapsed', [ function() {
+    return function(params) {
+        var start = params.start,
+            end = params.end,
+            dt1, dt2, sec, hours, min;
+        dt1 = new Date(start);
+        dt2 = new Date(end);
+        if ( dt2.getTime() !== dt1.getTime() ) {
+            sec = Math.floor( (dt2.getTime() - dt1.getTime()) / 1000 );
+            hours = Math.floor(sec / 3600);
+            sec = sec - (hours * 3600);
+            if (('' + hours).length < 2) {
+                hours = ('00' + hours).substr(-2, 2);
+            }
+            min = Math.floor(sec / 60);
+            sec = sec - (min * 60);
+            min = ('00' + min).substr(-2,2);
+            sec = ('00' + sec).substr(-2,2);
+            return hours + ':' + min + ':' + sec;
+        }
+        else {
+            return '00:00:00';
+        }
+    };
+}])
+
 // Update the status of a play
-.factory('UpdatePlayStatus', [ function() {
+.factory('UpdatePlayStatus', ['GetElapsed', function(GetElapsed) {
     return function(params) {
         var scope = params.scope,
             failed = params.failed,
             changed = params.changed,
-            id = params.play_id;
+            id = params.play_id,
+            modified = params.modified;
         scope.plays.every(function(play,idx) {
             if (play.id === id) {
-                scope.plays[idx].status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+                if (play.status !== 'changed' && play.status !== 'failed') {
+                    // once the status becomes 'changed' or 'failed' don't modify it
+                    scope.plays[idx].status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+                }
+                scope.plays[idx].finished = modified;
+                scope.plays[idx].elapsed = GetElapsed({
+                    start: play.created,
+                    end: modified
+                });
                 return false;
             }
             return true;
@@ -232,22 +348,34 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
     };
 }])
 
-.factory('UpdateTaskStatus', ['UpdatePlayStatus', function(UpdatePlayStatus) {
+.factory('UpdateTaskStatus', ['UpdatePlayStatus', 'GetElapsed', function(UpdatePlayStatus, GetElapsed) {
     return function(params) {
         var scope = params.scope,
             failed = params.failed,
             changed = params.changed,
-            id = params.task_id;
+            id = params.task_id,
+            modified = params.modified;
         scope.tasks.every(function (task, i) {
             if (task.id === id) {
-                scope.tasks[i].status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+                if (task.status !== 'changed' && task.status !== 'failed') {
+                    // once the status becomes 'changed' or 'failed' don't modify it
+                    scope.tasks[i].status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+                }
+                scope.tasks[i].finished = params.modified;
+                scope.tasks[i].elapsed = GetElapsed({
+                    start: task.created,
+                    end: modified
+                });
                 UpdatePlayStatus({
                     scope: scope,
                     failed: failed,
                     changed: changed,
-                    play_id: task.play_id
+                    play_id: task.play_id,
+                    modified: modified
                 });
+                return false;
             }
+            return true;
         });
     };
 }])
@@ -270,16 +398,18 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
 .factory('UpdateHostStatus', ['UpdateTaskStatus', 'AddHostResult', function(UpdateTaskStatus, AddHostResult) {
     return function(params) {
         var scope = params.scope,
-            status = params.status,  // ok, changed, unreachable, failed
+            status = params.status,  // successful, changed, unreachable, failed, skipped
             name = params.name,
             event_id = params.event_id,
             host_id = params.host_id,
             task_id = params.task_id,
+            modified = params.modified,
+            created = params.created,
             host_found = false;
 
         scope.hosts.every(function(host, i) {
             if (host.id === host_id) {
-                scope.hosts[i].ok += (status === 'ok' || status === 'changed') ? 1 : 0;
+                scope.hosts[i].ok += (status === 'successful') ? 1 : 0;
                 scope.hosts[i].changed += (status === 'changed') ? 1 : 0;
                 scope.hosts[i].unreachable += (status === 'unreachable') ? 1 : 0;
                 scope.hosts[i].failed += (status === 'failed') ? 1 : 0;
@@ -293,7 +423,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             scope.hosts.push({
                 id: host_id,
                 name: name,
-                ok: (status === 'ok' || status === 'changed') ? 1 : 0,
+                ok: (status === 'successful') ? 1 : 0,
                 changed: (status === 'changed') ? 1 : 0,
                 unreachable: (status === 'unreachable') ? 1 : 0,
                 failed: (status === 'failed') ? 1 : 0
@@ -304,49 +434,78 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             scope: scope,
             task_id: task_id,
             failed: (status === 'failed' || status === 'unreachable') ? true :false,
-            changed: (status === 'changed') ? true : false
+            changed: (status === 'changed') ? true : false,
+            modified: modified
         });
 
         AddHostResult({
             scope: scope,
             task_id: task_id,
             host_id: host_id,
-            event_id: event_id
+            event_id: event_id,
+            status: status,
+            name: name,
+            created: created
         });
     };
 }])
 
 // Add a new host result
-.factory('AddHostResult', [ function() {
+.factory('AddHostResult', ['FindFirstTaskofPlay', function(FindFirstTaskofPlay) {
     return function(params) {
         var scope = params.scope,
             task_id = params.task_id,
             host_id = params.host_id,
             event_id = params.event_id,
-            status = params.status;
-
-        status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
-        host_id = event.host;
+            status = params.status,
+            created = params.created,
+            name = params.name,
+            play_id, first;
 
         scope.hostResults.push({
             id: event_id,
             status: status,
             host_id: host_id,
-            task_id: event.parent
+            task_id: task_id,
+            name: name,
+            created: created
         });
 
-        scope.tasks.forEach(function(task, idx) {
+        scope.tasks.every(function(task) {
             if (task.id === task_id) {
-                scope.tasks[idx].hostCount += (idx === 0) ? 1 : 0;  // we only need to count hosts for the first task in a play
+                play_id = task.play_id;
+                return false;
+            }
+            return true;
+        });
+
+        first = FindFirstTaskofPlay({
+            scope: scope,
+            play_id: play_id
+        });
+        
+        scope.tasks.every(function(task, idx) {
+            if (task.id === task_id) {
+                scope.tasks[idx].hostCount += (task.id === first) ? 1 : 0;  // we only need to count hosts for the first task in a play
+                scope.tasks[idx].reportedHosts++;
                 scope.tasks[idx].failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
                 scope.tasks[idx].changedCount += (status === 'changed') ? 1 : 0;
-                scope.tasks[idx].successfulCount += (status === 'successful' || status === 'changed') ? 1 : 0;
+                scope.tasks[idx].successfulCount += (status === 'successful') ? 1 : 0;
                 scope.tasks[idx].skippedCount += (status === 'skipped') ? 1 : 0;
-                scope.tasks[idx].failedPct = 100 * Math.round(scope.tasks[idx].failedCount / scope.tasks[idx].hostCount);
-                scope.tasks[idx].changedPct = 100 * (scope.tasks[idx].successfulCount) ? Math.round(scope.tasks[idx].changedCount / scope.tasks[idx].successfulCount) : 0;
-                scope.tasks[idx].skippedPct = 100 * Math.round(scope.tasks[idx].skippedCount / scope.tasks[idx].hostCount);
-                scope.tasks[idx].successfulPct = 100 * Math.round(scope.tasks[idx].successfulCount / scope.tasks[idx].hostCount);
+
+                scope.tasks[idx].failedPct = (scope.tasks[idx].hostCount > 0) ? 100 * Math.round(scope.tasks[idx].failedCount / scope.tasks[idx].hostCount) : 0;
+                scope.tasks[idx].changedPct = (scope.tasks[idx].hostCount > 0) ? 100 * Math.round(scope.tasks[idx].changedCount / scope.tasks[idx].hostCount) : 0;
+                scope.tasks[idx].skippedPct = (scope.tasks[idx].hostCount > 0) ? 100 * Math.round(scope.tasks[idx].skippedCount / scope.tasks[idx].hostCount) : 0;
+                scope.tasks[idx].successfulPct = (scope.tasks[idx].hostCount > 0) ? 100 * Math.round(scope.tasks[idx].successfulCount / scope.tasks[idx].hostCount) : 0;
+                
+                scope.tasks[idx].successfulStyle = (scope.tasks[idx].successfulPct > 0) ? { width: scope.tasks[idx].successfulPct + '%' } : { display: 'none' };
+                scope.tasks[idx].changedStyle = (scope.tasks[idx].changedPct > 0) ? { width: scope.tasks[idx].changedPct + '%' } : { display: 'none' };
+                scope.tasks[idx].skippedStyle = (scope.tasks[idx].skippedPct > 0) ? { width: scope.tasks[idx].skippedPct + '%' } : { display: 'none' };
+                scope.tasks[idx].failedStyle = (scope.tasks[idx].failedPct > 0) ? { width: scope.tasks[idx].failedPct + '%' } : { display: 'none' };
+
+                return false;
             }
+            return true;
         });
     };
 }])

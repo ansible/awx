@@ -7,34 +7,68 @@
  *
  */
 
+#jobs-detail {
+    .nav-path {
+        margin-bottom: 20px;
+    }
+}
+
+.inline-block {
+    display: inline-block;
+    vertical-align: top;
+}
+
+#job-status {
+    margin: 8px 0 15px 0;
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    li {
+        display: inline-block;
+        margin-right: 15px;
+    }
+    i {
+        font-size: 12px;
+    }
+    .label {
+        font-size: 12px;
+        color: @black;
+        padding-left: 0;
+    }
+}
+
 .job-detail-table {
     margin-bottom: 0;
-    border: 1px solid @well;   
-   
-   /** 
-       The thing that makes the table body scrollable:
-       http://kamlekar.wordpress.com/2013/06/17/table-tbody-scroll-cross-browser/comment-page-1/ 
-    **/
-    thead {
-        display: table;
-        float: left;
-        width: 100%;
-    }
-    thead tr {
-        display: table-row;
-        width: 100%;
+    border: 1px solid @grey;
+    background-color: @white;
+    
+    /* http://stackoverflow.com/questions/21168521/scrollable-table-with-fixed-header-in-bootstrap */
+    width: 100%;
+    thead, tbody, tr, td, th { display: block; }
+    tr:after {
+        content: ' ';
+        display: block;
+        visibility: hidden;
+        clear: both;
     }
     tbody {
-        display: block;
-        height: 122px;
-        width: 100%;
-        overflow-y: scroll;
+        overflow-y: auto;
+        height: 150px;
+    }
+    thead {
+        /* fallback */
+    }
+    thead>tr>th {
+        height: 22px;
+    }
+    tbody td, thead th {
+        height: auto;
         float: left;
     }
-    tbody tr {
-        display: table;
-        width: 100%;
-    }
+    
     tbody>tr>td {
         border-top-color: @well;
         padding-top: 0;
@@ -45,70 +79,75 @@
         padding-bottom: 0;
         font-size: 14px;
     }
-    td.status-column {
-        text-align: center;
-        font-size: 12px;
-        i {
-            margin-top: 4px;
-        }
+    tbody>tr.active, tbody>tr.active>td {
+        background-color: #EDF2F2;
     }
-    tbody>tr.active>td {
-        background-color: @active-color;
+    
+    .status-column i {
+        font-size: 12px;
     }
 }
 
 .section {
-    margin-top: 20px;
+    margin-bottom: 20px;
     h5 {
         margin-top: 0;
-        margin-bottom: 5px;
-    }
-    .small-title {
-        font-weight: normal;
+        margin-bottom: 12px;
     }
 }
 
-.job_summary, .job_status {
+.section:last-child {
+    margin-bottom: 0;
+}
+
+.job_summary {
     .table {
         margin-bottom: 0;
+        border: 1px solid @grey;
+        background-color: @white;
     }
     .table>tbody>tr>td {
         border-top-color: @well;
+        padding-bottom: 0;
     }
     .table>thead>tr>th {
         border-bottom-color: @well;
+        padding-bottom: 0;
+        height: 22px;
     }
-}
-
-.job_status {
-    margin-bottom: 25px;
-
-    .label_column { 
-        width: 80px;
-    }
-    .table>tbody>tr>td {
-        padding-bottom: 3px;
-    }
-    .status-column i {
-        font-size: 12px;
-    }   
 }
 
 .status-bar {
-    display: inline-block;
-    height: 15px;
+    height: 16px;
+    overflow: hidden;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+    width: 98%;
+    margin-top: 2px;
 }
+
+.inner-bar {
+    display: inline-block;
+    overflow: hidden;
+    height: 16px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: normal;
+}
+
 .failed-hosts {
-    background-color: @red;
+    background-color: #DA4D49;
 }
 .successful-hosts {
-    background-color: @green;
+    background-color: #9ED89E;
 }
 .changed-hosts {
-    background-color: @warning;
+    background-color: #FFC773;
 }
 .skipped-hosts {
-    background-color: @grey;
+    background-color: #D4D4D4;
 }
 
 .job_well {
@@ -126,8 +165,34 @@
     overflow-x: none;
 }
 
-#job_plays, #job_tasks, #host_details {
+#job_plays, #job_tasks {
     height: 150px;
     overflow-y: auto;
     overflow-x: none;
+}
+
+#hosts-section {
+    border: 1px solid @grey;
+    border-top: 2px solid #ddd;
+    padding: 5px;
+    height: 150px;
+    background-color: @white;
+}
+
+#host-details {
+    ul {
+        list-style: none; 
+        margin: 0;
+        padding: 0;
+        i {
+            font-size: 12px;
+        }
+    }
+    li {
+        border-bottom: 1px solid @well;
+        padding-bottom: 2px;
+        padding-top: 0;
+        margin: 0;
+        line-height: normal;
+    }
 }
