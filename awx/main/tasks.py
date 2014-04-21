@@ -335,7 +335,7 @@ class BaseTask(Task):
         '''
         Run the job/task and capture its output.
         '''
-        emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=pk))
+        emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=pk, status='running'))
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
         status, tb = 'error', ''
         output_replacements = []
@@ -384,7 +384,7 @@ class BaseTask(Task):
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements)
         self.post_run_hook(instance, **kwargs)
-        emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=pk))
+        emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=pk, status=status))
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
