@@ -106,7 +106,7 @@ class Command(NoArgsCommand):
             if os.path.exists('/etc/awx/awx.cert') and os.path.exists('/etc/awx/awx.key'):
                 print 'Listening on port https://0.0.0.0:' + str(socketio_listen_port)
                 server = SocketIOServer(('0.0.0.0', socketio_listen_port), TowerSocket(), resource='socket.io',
-                                        keyfiles='/etc/awx/awx.key', certfile='/etc/awx/awx.cert')
+                                        keyfile='/etc/awx/awx.key', certfile='/etc/awx/awx.cert')
             else:
                 print 'Listening on port http://0.0.0.0:' + str(socketio_listen_port)
                 server = SocketIOServer(('0.0.0.0', socketio_listen_port), TowerSocket(), resource='socket.io')
