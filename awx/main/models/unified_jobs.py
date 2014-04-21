@@ -583,7 +583,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if not all(opts.values()):
             return False
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
-        emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=self.id))
+        emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=self.id, status='pending'))
         task_type = get_type_for_model(self)
         # notify_task_runner.delay(dict(task_type=task_type, id=self.id, metadata=kwargs))
         return True
@@ -623,7 +623,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     instance.job_explanation = 'Forced cancel'
                     update_fields.append('job_explanation')
                 instance.save(update_fields=update_fields)
-                emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=instance.id))
+                emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=instance.id, status='canceled'))
         except: # FIXME: Log this exception!
             if settings.DEBUG:
                 raise
@@ -633,7 +633,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if not self.cancel_flag:
                 self.cancel_flag = True
                 self.save(update_fields=['cancel_flag'])
-                emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=self.id))
+                emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=self.id, status='canceled'))
             if settings.BROKER_URL.startswith('amqp://'):
                 self._force_cancel()
         return self.cancel_flag

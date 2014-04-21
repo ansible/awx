@@ -175,7 +175,7 @@ def rebuild_graph(message):
             task.status = 'failed'
             task.job_explanation += "Task was marked as running in Tower but was not present in Celery so it has been marked as failed"
             task.save()
-            emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=task.id))
+            emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=task.id, status='failed'))
             running_tasks.pop(running_tasks.index(task))
             print("Task %s appears orphaned... marking as failed" % task)
 

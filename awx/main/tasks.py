@@ -84,7 +84,7 @@ def tower_periodic_scheduler(self):
             new_unified_job.status = 'failed'
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
             new_unified_job.save(update_fields=['job_status', 'job_explanation'])
-            emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=new_unified_job.id))
+            emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=new_unified_job.id, status='failed'))
 
 @task()
 def notify_task_runner(metadata_dict):
@@ -124,7 +124,7 @@ def handle_work_error(self, task_id, subtasks=None):
                 instance.job_explanation = "Previous Task Failed: %s for %s with celery task id: %s" % \
                     (first_task_type, first_task_name, task_id)
                 instance.save()
-                emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=instance.id))
+                emit_websocket_notification('/socket.io/jobs', 'status_changed', dict(unified_job_id=instance.id, status='failed'))
 
 class BaseTask(Task):
 
