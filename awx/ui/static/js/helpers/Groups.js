@@ -137,9 +137,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 has_inventory_sources = params.has_inventory_sources,
                 launch_class = '',
                 launch_tip = 'Start sync process',
-
                 stat, stat_class, status_tip;
-            
+
             stat = status;
             stat_class = stat;
 
@@ -157,14 +156,25 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     status_tip = 'Cloud source not configured. Click <i class="fa fa-pencil"></i> to update.';
                     launch_tip = 'Cloud source not configured.';
                     break;
+                case 'canceled':
+                    status_tip = 'Sync canceled. Click to view log.';
+                    break;
                 case 'failed':
                     status_tip = 'Sync failed. Click to view log.';
                     break;
                 case 'successful':
                     status_tip = 'Sync completed. Click to view log.';
                     break;
+                case 'pending':
+                    status_tip = 'Sync pending.';
+                    launch_class = "btn-disabled";
+                    launch_tip = "Sync pending";
+                    break;
                 case 'updating':
-                    status_tip = 'Sync running';
+                case 'running':
+                    launch_class = "btn-disabled";
+                    launch_tip = "Sync running";
+                    status_tip = "Sync running. Click to view log.";
                     break;
             }
 
@@ -268,13 +278,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 Rest.post()
                     .success(function () {
                         Wait('stop');
-                        Alert('Inventory Sync Cancelled', 'Request to cancel the sync process was submitted to the task manger. ' +
-                            'Click the <i class="fa fa-refresh fa-lg"></i> button to monitor the status.', 'alert-info');
+                        //Alert('Inventory Sync Cancelled', 'Request to cancel the sync process was submitted to the task manger. ' +
+                        //    'Click the <i class="fa fa-refresh fa-lg"></i> button to monitor the status.', 'alert-info');
                     })
                     .error(function (data, status) {
-                        Wait('stop');
-                        ProcessErrors(scope, data, status, null, {
-                            hdr: 'Error!',
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                             msg: 'Call to ' + url + ' failed. POST status: ' + status
                         });
                     });
@@ -292,16 +300,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     .success(function (data) {
                         if (data.can_cancel) {
                             scope.$emit('CancelUpdate', url);
-                        } else {
+                        //} else {
+                        //    Wait('stop');
+                        //    Alert('Cancel Inventory Sync', 'The sync process completed. Click the <i class="fa fa-refresh fa-lg"></i> button to view ' +
+                        //        'the latest status.', 'alert-info');
+                        }
+                        else {
                             Wait('stop');
-                            Alert('Cancel Inventory Sync', 'The sync process completed. Click the <i class="fa fa-refresh fa-lg"></i> button to view ' +
-                                'the latest status.', 'alert-info');
                         }
                     })
                     .error(function (data, status) {
-                        Wait('stop');
-                        ProcessErrors(scope, data, status, null, {
-                            hdr: 'Error!',
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                             msg: 'Call to ' + url + ' failed. GET status: ' + status
                         });
                     });
@@ -323,17 +332,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         scope.$emit('CheckCancel', data.related.last_update, data.related.current_update);
                     })
                     .error(function (data, status) {
-                        Wait('stop');
-                        ProcessErrors(scope, data, status, null, {
-                            hdr: 'Error!',
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                             msg: 'Call to ' + group.related.inventory_source + ' failed. GET status: ' + status
                         });
                     });
-            } else {
-                Alert('Cancel Inventory Sync', 'The sync process completed. Click the <i class="fa fa-refresh fa-lg"></i> to' +
-                    ' view the latest status.', 'alert-info');
             }
-
         };
     }
 ])

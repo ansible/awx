@@ -1126,7 +1126,9 @@ input[type="checkbox"].checkbox-no-label {
   .icon-cloud-updating:before,
   .icon-cloud-running:before,
   .icon-cloud-successful:before,
+  .icon-cloud-pending:before,
   .icon-cloud-failed:before,
+  .icon-cloud-canceled:before,
   .icon-cloud-error:before {
     content: "\f0c2";
   }
@@ -1146,6 +1148,7 @@ input[type="checkbox"].checkbox-no-label {
   .icon-cloud-updating,
   .icon-cloud-running,
   .icon-cloud-successful,
+  .icon-cloud-pending,
   a.icon-cloud-updating:hover,
   a.icon-cloud-successful:hover {
     color: @green;
@@ -1153,12 +1156,14 @@ input[type="checkbox"].checkbox-no-label {
 
   .icon-cloud-failed,
   .icon-cloud-error,
+  .icon-cloud-canceled,
   a.icon-cloud-failed:hover {
     color: @red;
   }
 
   .icon-cloud-updating,
-  .icon-cloud-running {
+  .icon-cloud-running,
+  .icon-cloud-pending {
     .pulsate();
   }
 

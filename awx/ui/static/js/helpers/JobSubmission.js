@@ -20,8 +20,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         Wait('start');
         Rest.setUrl(url);
         Rest.post(passwords)
-            .success(function () {
-                scope.$emit(callback);
+            .success(function(data) {
+                scope.$emit(callback, data);
             })
             .error(function (data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -445,10 +445,10 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 url = params.url,
                 group_id = params.group_id,
                 tree_id = params.tree_id,
-                base = $location.path().replace(/^\//, '').split('/')[0],
+                //base = $location.path().replace(/^\//, '').split('/')[0],
                 inventory_source;
 
-            if (scope.removeHostReloadComplete) {
+            /*if (scope.removeHostReloadComplete) {
                 scope.removeHostReloadComplete();
             }
             scope.removeHostReloadComplete = scope.$on('HostReloadComplete', function () {
@@ -458,13 +458,44 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 if (scope.removeHostReloadComplete) {
                     scope.removeHostReloadComplete();
                 }
-            });
+            });*/
+
+            function getJobID(url) {
+                var result='';
+                url.split(/\//).every(function(path) {
+                    if (/^\d+$/.test(path)) {
+                        result = path;
+                        return false;
+                    }
+                    return true;
+                });
+                return result;
+            }
 
             if (scope.removeUpdateSubmitted) {
                 scope.removeUpdateSubmitted();
             }
             scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function () {
-                setTimeout(function() {
+                // Get the current job
+                var path = url.replace(/update\/$/,'');
+                Rest.setUrl(path);
+                Rest.get()
+                    .success(function(data) {
+                        if (data.related.current_job) {
+                            scope.$emit('WatchUpdateStatus', getJobID(data.related.current_job), group_id, tree_id);
+                        }
+                        else {
+                            Wait('stop');
+                        }
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to get inventory source ' + url + ' GET returned: ' + status });
+                    });
+
+                //console.log('job submitted. callback returned: ');
+                //console.log(data);
+                /*setTimeout(function() {
                     if (base === 'jobs') {
                         scope.refreshJobs();
                     }
@@ -476,7 +507,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                         scope.refresh();
                     }
                     scope.$emit('HostReloadComplete');
-                }, 300);
+                }, 300);*/
             });
 
             if (scope.removePromptForPasswords) {

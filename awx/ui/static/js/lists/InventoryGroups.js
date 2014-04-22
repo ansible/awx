@@ -51,11 +51,11 @@ angular.module('InventoryGroupsDefinition', [])
                 awToolTip: "Edit inventory properties",
                 ngClick: 'editInventoryProperties()'
             },
-            refresh: {
+            /*refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
                 ngClick: "refreshGroups()"
-            },
+            },*/
             stream: {
                 ngClick: "showGroupActivity()",
                 awToolTip: "View Activity Stream",
@@ -75,9 +75,9 @@ angular.module('InventoryGroupsDefinition', [])
                 ngClick: "viewUpdateStatus(group.id, group.group_id)",
                 ngShow: "group.id > 1", // hide for all hosts
                 awToolTip: "{{ group.status_tooltip }}",
-                dataTipWatch: "group.launch_tooltip",
+                dataTipWatch: "group.status_tooltip",
                 iconClass: "{{ 'fa icon-cloud-' + group.status_class }}",
-                ngClass: "group.launch_class",
+                ngClass: "group.status_class",
                 dataPlacement: "top"
             },
             failed_hosts: {

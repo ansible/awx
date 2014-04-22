@@ -40,9 +40,8 @@
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
 .factory('DigestEvents', ['UpdatePlayStatus', 'UpdatePlayNoHostsMatched', 'UpdateHostStatus', 'UpdatePlayChild', 'AddHostResult', 'SelectPlay', 'SelectTask',
-    'GetHostCount', 'GetElapsed', 'UpdateJobStatus',
-function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePlayChild, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed,
-    UpdateJobStatus) {
+    'GetHostCount', 'GetElapsed',
+function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePlayChild, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed) {
     return function(params) {
         
         var scope = params.scope,
@@ -89,7 +88,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     failedCount: 0,
                     changedCount: 0,
                     skippedCount: 0,
-                    successfulStyle: { display: 'none'}, 
+                    successfulStyle: { display: 'none'},
                     failedStyle: { display: 'none' },
                     changedStyle: { display: 'none' },
                     skippedStyle: { display: 'none' }
@@ -125,7 +124,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     failedCount: 0,
                     changedCount: 0,
                     skippedCount: 0,
-                    successfulStyle: { display: 'none'}, 
+                    successfulStyle: { display: 'none'},
                     failedStyle: { display: 'none' },
                     changedStyle: { display: 'none' },
                     skippedStyle: { display: 'none' }
@@ -338,27 +337,24 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
     return function(params) {
         var scope = params.scope,
             failed = params.failed,
-            modified = params.modified;
+            modified = params.modified,
             started =  params.started;
 
-        if (failed && scope.job_status.status !== 'failed' && scope.job_status.status !== 'error'
-            && scope.job_status.status !== 'canceled') {
+        if (failed && scope.job_status.status !== 'failed' && scope.job_status.status !== 'error' &&
+            scope.job_status.status !== 'canceled') {
             scope.job_status.status = 'error';
         }
         if (!Empty(modified)) {
             scope.job_status.finished = modified;
         }
         if (!Empty(started) && Empty(scope.job_status.started)) {
-            scope.job_status.started = started; 
-        } 
+            scope.job_status.started = started;
+        }
         if (!Empty(scope.job_status.finished) && !Empty(scope.job_status.started)) {
-            console.log('scope.job_status.started: ' + scope.job_status.started);
-            console.log('scope.job_status.finished: ' + scope.job_status.finished);
             scope.job_status.elapsed = GetElapsed({
                 start: scope.job_status.started,
                 end: scope.job_status.finished
             });
-            console.log('elapsed: ' + scope.job_status.elapsed);
         }
     };
 }])
@@ -385,11 +381,11 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     start: play.created,
                     end: modified
                 });
-                /*UpdateJobStatus({
+                UpdateJobStatus({
                     scope: scope,
                     failed: failed,
                     modified: modified
-                });*/
+                });
                 return false;
             }
             return true;
@@ -407,7 +403,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
         scope.tasks.every(function (task, i) {
             if (task.id === id) {
                 if (failed) {
-                    scope.tasks[i].status = 'failed'; 
+                    scope.tasks[i].status = 'failed';
                 }
                 else if (task.status !== 'changed' && task.status !== 'failed') {
                     // once the status becomes 'changed' or 'failed' don't modify it

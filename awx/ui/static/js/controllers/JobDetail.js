@@ -46,7 +46,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             }
         });
         return results;
-    }
+    };
 
     // Reduce an array of objects down to just the bits we want from each object by
     // passing in a function that returns just those parts.
@@ -59,7 +59,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             results.push(parameterFunction(row));
         });
         return results;
-    }
+    };
 
 
     // Apply each event to the view
@@ -67,8 +67,6 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         scope.removeEventsReady();
     }
     scope.removeEventsReady = scope.$on('EventsReady', function(e, events) {
-        console.log('Inside EventsReady!');
-        console.log(events);
         DigestEvents({
             scope: scope,
             events: events
@@ -78,17 +76,14 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     event_socket.on("job_events-" + job_id, function(data) {
         var matches;
         data.id = data.event_id;
-        console.log(data);
         if (api_complete) {
-            matches = processed_events.find(function(x) { return x === data.id });
+            matches = processed_events.find(function(x) { return x === data.id; });
             if (matches.length === 0) {
                 // event not processed
-                console.log('process event: ' + data.id);
                 scope.$emit('EventsReady', [ data ]);
             }
         }
         else {
-            console.log('queue event: ' + data.id);
             event_queue.push(data);
         }
     });
@@ -113,8 +108,6 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 });
                 return (!matched);  //return true when event.id not in the list of processed_events
             });
-            console.log('processing queued events: ');
-            console.log(events.reduce(function(x) { return x.id }));
             if (events.length > 0) {
                 scope.$emit('EventsReady', events);
                 api_complete = true;
@@ -133,7 +126,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         Rest.setUrl(next);
         Rest.get()
             .success(function(data) {
-                processed_events = processed_events.concat( data.results.reduce(function(x) { return x.id }) );
+                processed_events = processed_events.concat( data.results.reduce(function(x) { return x.id; }) );
                 scope.$emit('EventsReady', data.results);
                 if (data.next) {
                     scope.$emit('JobReady', data.next);
@@ -206,7 +199,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
 
             // In the case that the job is already completed, or an error already happened,
             // populate scope.job_status info
-            scope.job_status.status = data.status; 
+            scope.job_status.status = data.status;
             scope.job_status.started = data.started;
             scope.job_status.status_class = ((data.status === 'error' || data.status === 'failed') && data.job_explanation) ? "alert alert-danger" : "";
             scope.job_status.finished = data.finished;
