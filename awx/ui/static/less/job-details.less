@@ -28,12 +28,15 @@
     }
     li {
         display: inline-block;
-        margin-right: 15px;
+        margin-right: 20px;
     }
     i {
         font-size: 12px;
     }
     .label {
+        display: inline-block;
+        text-align: left;
+        width: 50px;
         font-size: 12px;
         color: @black;
         padding-left: 0;
@@ -177,6 +180,8 @@
     padding: 5px;
     height: 150px;
     background-color: @white;
+    overflow-y: hide; 
+    overflow-x: auto;
 }
 
 #host-details {

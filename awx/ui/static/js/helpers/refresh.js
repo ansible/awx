@@ -26,7 +26,7 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities', 'PaginationHelpers
                     iterator = params.iterator,
                     url = params.url;
                 
-                scope[iterator + "HidePaginator"] = true;
+                //scope[iterator + "HidePaginator"] = true;
 
                 //scope[iterator + 'Loading'] = true;
                 scope.current_url = url;

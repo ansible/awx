@@ -5,9 +5,8 @@
             <div class="col-md-12">
                 <div class="nav-path">
                     <ul class="breadcrumb" id="breadcrumb-list">
-                        <li><strong>{{ job_id }}</strong> - <a href="{{ job_template_url }}">{{ job_template_name }}</a></li>
-                        <li><a href="{{ project_url }}">{{ project_name }}</a></li> 
-                        <li><a href="{{ inventory_url }}">{{ inventory_name }}</a></li>
+                        <li><a href="/#/jobs">Jobs</a></li>
+                        <li><strong>{{ job_id }}</strong> - <a href="{{ job_template_url }}">{{ job_template_name }}</a> - <a href="{{ project_url }}">{{ project_name }}</a> - <a href="{{ inventory_url }}">{{ inventory_name }}</a></li>
                     </ul>
                 </div>
             </div>
@@ -21,11 +20,14 @@
                     
                     <div id="job-status">
                         <ul>
-                            <li><span class="label">Status</span> <i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</li>
-                            <li><span class="label">Start</span> {{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</li>
-                            <li><span class="label">Finish</span> {{ job_status.finished | date:'MM/dd/yy HH:mm:ss' }}<li>
-                            <li><span class="label">Elapsed</span> {{ job_status.elapsed }}</li>
+                            <li ng-show="job_status.explanation" style="display: block; margin-bottom: 10px;"><div ng-class="job_status.status_class"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }} &nbsp;-{{ job_status.explanation }}</div></li>
+                            <li ng-show="!job_status.explanation"><div class="label">Status</div> <i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</li>
+                            <li ng-show="job_status.started"><div class="label">Start</div> {{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</li>
+                            <li ng-show="!job_status.started"><div class="label">Start</div> Not Started</li>
+                            <li ng-show="job_status.finished"><div class="label">Finish</div> {{ job_status.finished | date:'MM/dd/yy HH:mm:ss' }}<li>
+                            <li><div class="label">Elapsed</div> {{ job_status.elapsed }}</li>
                         </ul>
+
                     </div>
                  
                     <div class="job-detail-tables">
@@ -34,17 +36,17 @@
                             <table class="table job-detail-table">
                                 <thead>
                                     <tr>
-                                        <th class="col-lg-1 col-md-1 col-sm-1 hidden-xs">Started</th>
+                                        <th class="col-lg-1 col-md-1 col-sm-2 hidden-xs">Started</th>
                                         <th class="col-lg-10 col-md-10 col-sm-10 col-xs-12">Name</th>
-                                        <th class="col-lg-1 col-md-1 col-sm-1 hidden-xs">Elapsed</th>
+                                        <th class="col-lg-1 col-md-1 hidden-sm hidden-xs">Elapsed</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr ng-repeat="play in plays"  ng-class="play.playActiveClass" ng-click="selectPlay(play.id)" class="cursor-pointer">
-                                        <td class="col-lg-1 col-md-1 col-sm-1 hidden-xs">{{ play.created | date: 'HH:mm:ss' }}</td>
+                                        <td class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ play.created | date: 'HH:mm:ss' }}</td>
                                         <td class="col-lg-10 col-md-9 col-sm-10 col-xs-12 status-column">
                                             <i class="fa icon-job-{{ play.status }}"></i> {{ play.name }}</span></td>
-                                        <td class="col-lg-1 col-md-1 col-sm-1 hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
+                                        <td class="col-lg-1 col-md-1 col-hidden-sm hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
                                             data-placement="top">{{ play.elapsed }}</td>
                                     </tr>
                                 </tbody>
@@ -56,15 +58,15 @@
                             <table class="table job-detail-table">
                                 <thead>
                                     <tr>
-                                        <th class="col-lg-1 col-md-1 col-sm-1 hidden-xs">Started</th>
+                                        <th class="col-lg-1 col-md-1 col-sm-2 hidden-xs">Started</th>
                                         <th class="col-lg-6 col-md-6 col-sm-6 col-xs-7">Name</th>
                                         <th class="col-lg-4 col-md-4 col-sm-4 col-xs-5">Host Status</th>
-                                        <th class="col-lg-1 col-md-1 col-sm-1 hidden-xs">Elapsed</th>
+                                        <th class="col-lg-1 col-md-1 hidden-sm hidden-xs">Elapsed</th>
                                     </tr>
                                 </thead>
                                 <tbody id="task-table-body">
                                     <tr ng-repeat="task in tasks | filter:{ play_id: activePlay }" ng-class="task.taskActiveClass" ng-click="selectTask(task.id)" class="cursor-pointer">
-                                        <td class="col-lg-1 col-md-1 col-sm-1 hidden-xs">{{ task.created | date: 'HH:mm:ss' }}</td>
+                                        <td class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ task.created | date: 'HH:mm:ss' }}</td>
                                         <td class="col-lg-6 col-md-6 col-sm-6 col-xs-7 status-column">
                                             <i class="fa icon-job-{{  task.status }}"></i><span ng-show="hasRoles"> {{ task.role }} </span>{{ task.name }}
                                         </td>
@@ -76,7 +78,7 @@
                                                 <div class="failed-hosts inner-bar" aw-tool-tip="{{ task.failedCount}} hosts failed" aw-tip-watch="task.failedCount" data-placement="top" ng-style="{{ task.failedStyle }}">{{ task.failedCount }}</div>
                                             </div>
                                         </td>
-                                        <td class="col-lg-1 col-md-1 col-sm-1 hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
+                                        <td class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
                                             data-placement="top">{{ task.elapsed }}</td>
                                     </tr>
                                 </tbody>
