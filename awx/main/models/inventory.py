@@ -731,7 +731,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
         default=False,
         editable=False,
     )
-    
+
     @classmethod
     def _get_parent_field_name(cls):
         return 'inventory_source'
@@ -740,6 +740,9 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     def _get_task_class(cls):
         from awx.main.tasks import RunInventoryUpdate
         return RunInventoryUpdate
+
+    def socketio_emit_data(self):
+        return dict(group_id=self.inventory_source.group.id)
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])

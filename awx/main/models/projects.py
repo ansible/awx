@@ -48,7 +48,7 @@ class ProjectOptions(models.Model):
         ('hg', _('Mercurial')),
         ('svn', _('Subversion')),
     ]
-    
+
     class Meta:
         abstract = True
 
@@ -345,6 +345,9 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
             if self.project == obj.project:
                 return True
         return False
+
+    def socketio_emit_data(self):
+        return dict(project_id=self.project.id)
 
     @property
     def task_impact(self):
