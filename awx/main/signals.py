@@ -108,6 +108,7 @@ def emit_job_event_detail(sender, **kwargs):
         else:
             parent_id = None
         event_serialized = dict(job_id=instance.job.id,
+                                event_id=instance.id,
                                 event=instance.event,
                                 event_data=instance.event_data,
                                 failed=instance.failed,
