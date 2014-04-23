@@ -382,15 +382,15 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
                 // Refresh the project list after update request submitted
-                Wait('stop');
-                Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
-                    'To monitor the update status, refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info');
                 if (scope.refreshJobs) {
+                    Wait('stop');
+                    Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
+                    'To monitor the update status, refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info');
                     scope.refreshJobs();
                 }
-                else if (scope.refresh) {
-                    scope.refresh();
-                }
+                //else if (scope.refresh) {
+                //    scope.refresh();
+                //}
             });
 
             if (scope.removePromptForPasswords) {
@@ -413,9 +413,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             Rest.get()
                 .success(function (data) {
                     project = data;
-                    Wait('stop');
                     if (project.can_update) {
                         if (project.passwords_needed_to_updated) {
+                            Wait('stop');
                             scope.$emit('PromptForPasswords');
                         }
                         else {
@@ -443,8 +443,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
             var scope = params.scope,
                 url = params.url,
-                group_id = params.group_id,
-                tree_id = params.tree_id,
+                //group_id = params.group_id,
+                //tree_id = params.tree_id,
                 //base = $location.path().replace(/^\//, '').split('/')[0],
                 inventory_source;
 
@@ -460,7 +460,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 }
             });*/
 
-            function getJobID(url) {
+            /*function getJobID(url) {
                 var result='';
                 url.split(/\//).every(function(path) {
                     if (/^\d+$/.test(path)) {
@@ -470,14 +470,14 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     return true;
                 });
                 return result;
-            }
+            }*/
 
             if (scope.removeUpdateSubmitted) {
                 scope.removeUpdateSubmitted();
             }
             scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function () {
                 // Get the current job
-                var path = url.replace(/update\/$/,'');
+                /*var path = url.replace(/update\/$/,'');
                 Rest.setUrl(path);
                 Rest.get()
                     .success(function(data) {
@@ -492,7 +492,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                             msg: 'Failed to get inventory source ' + url + ' GET returned: ' + status });
                     });
-
+                */
                 //console.log('job submitted. callback returned: ');
                 //console.log(data);
                 /*setTimeout(function() {
@@ -532,6 +532,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     inventory_source = data;
                     if (data.can_update) {
                         if (data.passwords_needed_to_update) {
+                            Wait('stop');
                             scope.$emit('PromptForPasswords');
                         }
                         else {

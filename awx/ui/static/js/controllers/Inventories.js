@@ -495,6 +495,8 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
     }
     $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
         var group, stat;
+        Wait('stop');
+        $log.debug(data);
         if ($scope.groups) {
             // Assuming we have a list of groups available
             group = Find({ list: $scope.groups, key: 'group_id', val: data.group_id });

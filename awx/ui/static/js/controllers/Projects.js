@@ -76,6 +76,36 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         }
     });
 
+    // Handle project update status changes
+    if ($rootScope.rmoveJobStatusChange) {
+        $rootScope.removeJobStatusChange();
+    }
+    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
+        var project;
+        Wait('stop');
+        $log.debug(data);
+        if ($scope.projects) {
+            // Assuming we have a list of projects available
+            project = Find({ list: $scope.projects, key: 'id', val: data.project_id });
+            if (project) {
+                // And we found the affected project
+                $log.debug('Received event for project: ' + project.name);
+                $log.debug('Status changed to: ' + data.status);
+                if (data.status === 'successful' || data.status === 'failed') {
+                    project.scm_update_tooltip = "Start an SCM update";
+                    project.scm_type_class = "";
+                }
+                else {
+                    project.scm_update_tooltip = "SCM update currently running";
+                    project.scm_type_class = "btn-disabled";
+                }
+                project.status = data.status;
+                project.statusIcon = GetProjectIcon(data.status);
+                project.statusTip = GetProjectToolTip(data.status);
+            }
+        }
+    });
+
     if ($scope.removeChoicesHere) {
         $scope.removeChoicesHere();
     }
@@ -312,8 +342,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                     // Do not respond. Button appears greyed out as if it is disabled. Not disabled though, because we need mouse over event
                     // to work. So user can click, but we just won't do anything.
                     //Alert('Missing SCM Setup', 'Before running an SCM update, edit the project and provide the SCM access information.', 'alert-info');
-                } else if (project.status === 'updating' || project.status === 'running') {
-                    Alert('Update in Progress', 'The SCM update process is running. Use the Refresh button to monitor the status.', 'alert-info');
+                } else if (project.status === 'updating' || project.status === 'running' || project.status === 'pending') {
+                    // Alert('Update in Progress', 'The SCM update process is running. Use the Refresh button to monitor the status.', 'alert-info');
                 } else {
                     ProjectUpdate({ scope: $scope, project_id: project.id });
                 }

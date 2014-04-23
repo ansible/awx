@@ -27,6 +27,7 @@ angular.module('ProjectsListDefinition', [])
                 iconOnly: true,
                 ngClick: 'showSCMStatus(project.id)',
                 awToolTip: '{{ project.statusTip }}',
+                dataTipWatch: 'project.statusTip',
                 dataPlacement: 'top',
                 icon: "icon-job-{{ project.statusIcon }}",
                 columnClass: "col-md-1 col-sm-2 col-xs-3",
@@ -75,10 +76,17 @@ angular.module('ProjectsListDefinition', [])
                 awToolTip: 'Click for help',
                 awTipPlacement: 'top'
             },*/
-            refresh: {
+            /*refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()"
+            },*/
+            socket: {
+                mode: 'all',
+                iconClass: "{{ 'fa fa-power-off fa-lg socket-' + socketStatus }}",
+                awToolTip: "{{ socketTip }}",
+                dataTipWatch: "socketTip",
+                ngClick: "socketToggle()",
             },
             stream: {
                 ngClick: "showActivity()",
@@ -91,6 +99,7 @@ angular.module('ProjectsListDefinition', [])
             scm_update: {
                 ngClick: 'SCMUpdate(project.id, $event)',
                 awToolTip: "{{ project.scm_update_tooltip }}",
+                dataTipWatch: "project.scm_update_tooltip",
                 ngClass: "project.scm_type_class",
                 dataPlacement: 'top'
             },
@@ -109,13 +118,13 @@ angular.module('ProjectsListDefinition', [])
             "delete": {
                 ngClick: "deleteProject(project.id, project.name)",
                 awToolTip: 'Delete the project',
-                ngShow: "project.status !== 'updating' && project.status !== 'running'",
+                ngShow: "project.status !== 'updating' && project.status !== 'running' && project.status !== 'pending'",
                 dataPlacement: 'top'
             },
             cancel: {
                 ngClick: "cancelUpdate(project.id, project.name)",
                 awToolTip: 'Cancel the SCM update',
-                ngShow: "project.status == 'updating' || project.status == 'running'",
+                ngShow: "project.status == 'updating' || project.status == 'running' || project.status == 'pending'",
                 dataPlacement: 'top'
             }
         }
