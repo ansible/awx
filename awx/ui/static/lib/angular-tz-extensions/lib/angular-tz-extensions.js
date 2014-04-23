@@ -91,8 +91,8 @@
                 name: name,
                 abbreviation: reference.getTimezoneAbbreviation(),
                 offset: reference.getTimezoneOffset(),
-                region: name.split('/')[0],
-                locality: name.split('/')[1].replace('_', ' ')
+                region: ( (name) ? name.split('/')[0] : '' ),
+                locality: ( (name) ? name.split('/')[1].replace('_', ' ') : '' )
             };
 
             return result;
@@ -174,6 +174,7 @@
                 }
 
                 name = jstz.determine().name();
+                name = (name === null || name === '' || name === undefined) ? 'America/New_York' : name;
                 now = new Date();
                 return resolve(name, now);
             },

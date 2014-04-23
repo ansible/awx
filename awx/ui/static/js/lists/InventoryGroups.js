@@ -56,6 +56,13 @@ angular.module('InventoryGroupsDefinition', [])
                 awToolTip: "Refresh the page",
                 ngClick: "refreshGroups()"
             },*/
+            socket: {
+                mode: 'all',
+                iconClass: "{{ 'fa fa-power-off fa-lg socket-' + socketStatus }}",
+                awToolTip: "{{ socketTip }}",
+                dataTipWatch: "socketTip",
+                ngClick: "socketToggle()",
+            },
             stream: {
                 ngClick: "showGroupActivity()",
                 awToolTip: "View Activity Stream",

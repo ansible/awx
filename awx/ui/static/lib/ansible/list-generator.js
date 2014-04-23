@@ -395,7 +395,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                                     html += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : "";
                                     for (itm in fAction) {
                                         if (itm !== 'ngHref' && itm !== 'href' && itm !== 'label' && itm !== 'icon' && itm !== 'class' &&
-                                            itm !== 'iconClass' && itm !== "dataPlacement" && itm !== "awPopOver" && itm !== "dataTitle") {
+                                            itm !== 'iconClass' && itm !== "dataPlacement" && itm !== "awPopOver" &&
+                                            itm !== "dataTitle") {
                                             html += Attr(fAction, itm);
                                         }
                                     }

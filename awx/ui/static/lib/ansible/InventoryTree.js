@@ -33,8 +33,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
     }
 ])
 
-.factory('BuildTree', ['Rest', 'GetBasePath', 'ProcessErrors', 'SortNodes', 'Wait', 'GetSyncStatusMsg', 'GetHostsStatusMsg',
-    function (Rest, GetBasePath, ProcessErrors, SortNodes, Wait, GetSyncStatusMsg, GetHostsStatusMsg) {
+.factory('BuildTree', ['$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'SortNodes', 'Wait', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Store',
+    function ($location, Rest, GetBasePath, ProcessErrors, SortNodes, Wait, GetSyncStatusMsg, GetHostsStatusMsg, Store) {
         return function (params) {
 
             var inventory_id = params.inventory_id,
@@ -43,7 +43,9 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 emit = params.emit,
                 new_group_id = params.new_group_id,
                 groups = [],
-                id = 1;
+                id = 1,
+                local_child_store,
+                path = $location.path();
 
             function buildAllHosts(tree_data) {
                 // Start our tree object with All Hosts
@@ -74,10 +76,35 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 groups.push(all_hosts);
             }
 
+            function getExpandState(key) {
+                var result = true;
+                local_child_store.every(function(child) {
+                    if (child.key === key) {
+                        result = child.expand;
+                        return false;
+                    }
+                    return true;
+                });
+                return result;
+            }
+
+            function getShowState(key) {
+                var result = true;
+                local_child_store.every(function(child) {
+                    if (child.key === key) {
+                        result = (child.show !== undefined) ? child.show : true;
+                        return false;
+                    }
+                    return true;
+                });
+                return result;
+            }
+
             function buildGroups(tree_data, parent, level) {
                 
                 var children, stat, hosts_status, group,
-                    sorted = SortNodes(tree_data);
+                    sorted = SortNodes(tree_data),
+                    expand, show;
                 
                 sorted.forEach( function(row, i) {
                     id++;
@@ -100,6 +127,9 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         children.push(sorted[i].children[j].id);
                     });
 
+                    expand = (sorted[i].children.length > 0) ? getExpandState(sorted[i].id) : false;
+                    show = getShowState(sorted[i].id);
+
                     group = {
                         name: sorted[i].name,
                         has_active_failures: sorted[i].has_active_failures,
@@ -112,10 +142,11 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         has_inventory_sources: sorted[i].has_inventory_sources,
                         id: id,
                         source: sorted[i].summary_fields.inventory_source.source,
+                        key: sorted[i].id,
                         group_id: sorted[i].id,
                         event_level: level,
                         children: children,
-                        ngicon: (sorted[i].children.length > 0) ? 'fa fa-minus-square-o node-toggle' : 'fa fa-square-o node-no-toggle',
+                        show: show,
                         related: sorted[i].related,
                         status: sorted[i].summary_fields.inventory_source.status,
                         status_class: stat['class'],
@@ -127,16 +158,37 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         hosts_status_class: hosts_status['class'],
                         inventory_id: inventory_id,
                         selected_class: '',
-                        show: true,
                         isDraggable: true,
                         isDroppable: true
                     };
-                    groups.push(group);
+                    if (sorted[i].children.length > 0)  {
+                        if (expand) {
+                            group.ngicon = 'fa fa-minus-square-o node-toggle';
+                        }
+                        else {
+                            group.ngicon = 'fa fa-plus-square-o node-toggle';
+                        }
+                    }
+                    else {
+                        group.ngicon = 'fa fa-square-o node-no-toggle';
+                    }
                     if (new_group_id && group.group_id === new_group_id) {
                         // For new group
+                        // Find parent's expand state and set the show property accordingly.
+                        // If parent is not expanded, then child should be hidden. 
+                        if (parent > 0) {
+                            scope.groups.every(function(g) {
+                                if (g.id === group.parent) {
+                                    group.show = getExpandState(g.key);
+                                    return false;
+                                }
+                                return true;
+                            });
+                        }
                         scope.selected_tree_id = id;
                         scope.selected_group_id = group.group_id;
                     }
+                    groups.push(group);
                     if (sorted[i].children.length > 0) {
                         buildGroups(sorted[i].children, id, level + 1);
                     }
@@ -185,7 +237,10 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         });
                     });
             }
-
+            local_child_store = Store(path + '_children');
+            if (!local_child_store) {
+                local_child_store = [];
+            }
             loadTreeData();
         };
     }
@@ -222,8 +277,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                                 // Update date sync status links/icons
                                 stat = GetSyncStatusMsg({
                                     status: scope.groups[i].status,
-                                    has_inventory_sources: scope.groups[i].has_inventory_sources,
-                                    source: scope.groups[i].source
+                                    has_inventory_sources: properties.has_inventory_sources,
+                                    source: properties.source
                                 });
                                 scope.groups[i].status_class = stat['class'];
                                 scope.groups[i].status_tooltip = stat.tooltip;

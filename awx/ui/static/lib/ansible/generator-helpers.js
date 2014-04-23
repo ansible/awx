@@ -117,6 +117,9 @@ angular.module('GeneratorHelpers', [])
             case 'stream':
                 icon = 'fa-clock-o';
                 break;
+            case 'socket':
+                icon = 'fa-power-off';
+                break;
             case 'refresh':
                 icon = 'fa-refresh';
                 break;
@@ -191,6 +194,7 @@ angular.module('GeneratorHelpers', [])
             html += (btn.ngHide) ? Attr(btn, 'ngHide') : "";
             html += (btn.awToolTip) ? Attr(btn, 'awToolTip') : "";
             html += (btn.awToolTip && btn.dataPlacement === undefined) ? "data-placement=\"top\" " : "";
+            html += (btn.dataTipWatch) ? "data-tip-watch=\"" + btn.dataTipWatch + "\" " : "";
             html += (btn.awPopOver) ? "aw-pop-over=\"" +
                 btn.awPopOver.replace(/[\'\"]/g, '&quot;') + "\" " : "";
             html += (btn.dataPlacement) ? Attr(btn, 'dataPlacement') : "";
@@ -204,10 +208,15 @@ angular.module('GeneratorHelpers', [])
             html += " >";
             html += (btn.img) ? "<img src=\"" + $basePath + "img/" + btn.img + "\" style=\"width: 12px; height: 12px;\" >" : "";
 
-            html += SelectIcon({
-                action: action,
-                size: btn.iconSize
-            });
+            if (btn.iconClass) {
+                html += "<i class=\"" + btn.iconClass + "\"></i>";
+            }
+            else {
+                html += SelectIcon({
+                    action: action,
+                    size: btn.iconSize
+                });
+            }
 
             html += (btn.label) ? " " + btn.label : "";
             html += "</button> ";

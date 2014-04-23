@@ -29,9 +29,10 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                     $rootScope.sessionTimer.expireSession();
                     $location.url('/login');
                 }
-                else {
-                    Alert("Socket Error", "Attempt to refresh page failed with: " + reason, "alert-danger");
-                    // should we do something more here?
+                else if (scope.socketStatus === 'error') {
+                    Alert("Connection Error", "Error encountered while attempting to connect to the websocket server. Confirm the server " +
+                        "is up. Use the <i class=\"fa fa-power-off\"></i> button found on the Inventories, Projects and Jobs pages to reconnect.",
+                        "alert-danger");
                 }
             });
 
@@ -49,59 +50,101 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                         self.socket = io.connect(url, { headers:
                             {
                                 'Authorization': 'Token ' + token,
-                                "X-Auth-Token": 'Token ' + token
+                                'X-Auth-Token': 'Token ' + token
                             },
                             'connect timeout': 3000,
                             'try multiple transports': false,
                             'max reconneciton attemps': 3,
                             'reconnection limit': 3000,
-
                         });
                         self.socket.on('connection', function() {
                             $log.debug('Socket connecting...');
-                            self.scope.socket_status = 'connecting';
+                            self.scope.$apply(function () {
+                                self.scope.socketStatus = 'connecting';
+                                self.scope.socketTip = 'Connecting. Click to cancel.';
+                            });
                         });
                         self.socket.on('connect', function() {
                             $log.debug('Socket connection established');
-                            self.scope.socket_status = 'ok';
+                            self.scope.$apply(function () {
+                                self.scope.socketStatus = 'ok';
+                                self.scope.socketTip = 'Connected. Click to close.';
+                            });
                         });
                         self.socket.on('connect_failed', function(reason) {
                             var r = reason || 'connection refused by host';
                             $log.error('Socket connection failed: ' + r);
-                            self.scope.socket_status = 'error';
-                            self.scope.socket_reason = r;
-                            self.scope.$emit('SocketErrorEncountered', 'Connection failed: ' + r);
+                            self.scope.$apply(function () {
+                                self.scope.socketStatus = 'error';
+                                self.scope.socketTip = 'Connection failed. Click to retry.';
+                                self.scope.$emit('SocketErrorEncountered');
+                            });
+
                         });
                         self.socket.on('diconnect', function() {
                             $log.debug('Socket disconnected');
-                            self.scope.socket_status = 'disconnected';
+                            self.scope.$apply(function() {
+                                self.socketStatus = 'error';
+                                self.socketTip = 'Disconnected. Click to connect.';
+                                self.scope.$emit('SocketErrorEncountered');
+                            });
                         });
                         self.socket.on('error', function(reason) {
                             var r = reason || 'connection refused by host';
-                            $log.error('Socket error encountered: ' + r);
-                            self.scope.socket_status = 'error';
-                            self.scope.socket_reason = r;
-                            self.scope.$emit('SocketErrorEncountered', r);
+                            $log.debug('Socket error: ' + r);
+                            self.scope.$apply(function() {
+                                self.scope.socketStatus = 'error';
+                                self.scope.socketTip = 'Connection error encountered. Click to retry.';
+                                self.scope.$emit('SocketErrorEncountered');
+                            });
                         });
                         self.socket.on('reconnecting', function() {
                             $log.debug('Socket attempting reconnect...');
-                            self.scope.socket_status = 'connecting';
+                            self.scope.$apply(function() {
+                                self.scope.socketStatus = 'connecting';
+                                self.scope.socketTip = 'Connecting. Click to cancel.';
+                            });
                         });
                         self.socket.on('reconnect', function() {
                             $log.debug('Socket reconnected');
-                            self.scope.socket_status = 'ok';
+                            self.scope.$apply(function() {
+                                self.scope.socketStatus = 'ok';
+                                self.scope.socketTip = 'Connected. Click to close.';
+                            });
                         });
                         self.socket.on('reconnect_failed', function(reason) {
                             $log.error('Socket reconnect failed: ' + reason);
-                            self.scope.socket_status = 'error';
-                            self.scope.socket_reason = reason;
-                            self.scope.$emit('SocketErrorEncountered', 'Connection failed: ' + reason);
+                            self.scope.$apply(function() {
+                                self.scope.socketStatus = 'error';
+                                self.scope.socketTip = 'Connection failed. Click to retry.';
+                                self.scope.$emit('SocketErrorEncountered');
+                            });
                         });
                     }
                     else {
                         // Encountered expired token
                         self.scope.$emit('SocketErrorEncountered', 'Session expired');
                     }
+                },
+                checkStatus: function() {
+                    // Check connection status
+                    var self = this;
+                    if (self.socket.socket.connected) {
+                        $log.debug('Socket connected');
+                        self.scope.socketStatus = 'ok';
+                        self.scope.socketTip = 'Connected. Click to close.';
+                    }
+                    else if (self.socket.socket.connecting || self.socket.socket.reconnecting) {
+                        $log.debug('Socket connecting...');
+                        self.scope.socketStatus = 'connecting';
+                        self.scope.socketTip = 'Connecting. Click to cancel.';
+                    }
+                    else {
+                        $log.debug('Socket error: connection refused');
+                        self.scope.socketStatus = 'error';
+                        self.scope.socketTip = 'Connection failed. Click to retry';
+                    }
+                    return self.scope.socketStatus;
                 },
                 on: function (eventName, callback) {
                     var self = this;

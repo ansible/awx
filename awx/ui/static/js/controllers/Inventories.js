@@ -471,11 +471,11 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 
 
 
-function InventoriesEdit($scope, $location, $routeParams, $compile, $log, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait,
+function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootScope, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait,
     GetSyncStatusMsg, InjectHosts, HostsReload, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, Rest, ProcessErrors,
     InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find, EditInventoryProperties, HostsEdit,
     HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost, Stream, GetBasePath, ShowJobSummary, ApplyEllipsis, WatchInventoryWindowResize,
-    HelpDialog, InventoryGroupsHelp, Store, ViewJob, Socket) {
+    HelpDialog, InventoryGroupsHelp, Store, ViewJob) {
     
     ClearScope();
 
@@ -487,6 +487,40 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, Genera
     LoadBreadCrumbs({
         path: $location.path(),
         title: '{{ inventory_name }}'
+    });
+
+    // Handle inventory sync status changes
+    if ($rootScope.rmoveJobStatusChange) {
+        $rootScope.removeJobStatusChange();
+    }
+    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
+        var group, stat;
+        if ($scope.groups) {
+            // Assuming we have a list of groups available
+            group = Find({ list: $scope.groups, key: 'group_id', val: data.group_id });
+            if (group) {
+                // And we found the affected group
+                $log.debug('Received event for group: ' + group.name);
+                if (data.status === 'failed' || data.status === 'successful') {
+                    $log.debug('Update completed. Refreshing the tree.');
+                    $scope.refreshGroups(group.id, group.group_id);
+                }
+                else {
+                    $log.debug('Status changed to: ' + data.status);
+                    stat = GetSyncStatusMsg({
+                        status: data.status,
+                        has_inventory_sources: group.has_inventory_sources,
+                        source: group.source
+                    });
+                    $log.debug('Changing tooltip to: ' + stat.tooltip);
+                    group.status = data.status;
+                    group.status_class = stat['class'];
+                    group.status_tooltip = stat.tooltip;
+                    group.launch_tooltip = stat.launch_tip;
+                    group.launch_class = stat.launch_class;
+                }
+            }
+        }
     });
 
     // After the tree data loads for the first time, generate the groups and hosts lists
@@ -642,38 +676,6 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, Genera
             Wait('stop');
         }
     };
-
-    if ($scope.removeWatchUpdateStatus) {
-        $scope.removeWatchUpdateStatus();
-    }
-    $scope.removeWatchUpdateStatus = $scope.$on('WatchUpdateStatus', function(e, job_id, group_id, tree_id) {
-        var io = Socket({ scope: $scope, endpoint: "jobs" }),
-            group = Find({ list: $scope.groups, key: 'id', val: tree_id }),
-            stat;
-        $log.debug('Watching for updates to job: ' + job_id + ' for group: ' + group_id + ' ' + group.name);
-        io.init();
-        io.on("status_changed", function(data) {
-            Wait('stop');
-            if (data.status === "failed" || data.status === "successful") {
-                $log.debug('Update completed. Refreshing the tree.');
-                $scope.refreshGroups(tree_id, group_id);
-            }
-            else {
-                $log.debug('Status changed to: ' + data.status);
-                stat = GetSyncStatusMsg({
-                    status: data.status,
-                    has_inventory_sources: group.has_inventory_sources,
-                    source: group.source
-                });
-                $log.debug('changing tooltip to: ' + stat.tooltip);
-                group.status = data.status;
-                group.status_class = stat['class'];
-                group.status_tooltip = stat.tooltip;
-                group.launch_tooltip = stat.launch_tip;
-                group.launch_class = stat.launch_class;
-            }
-        });
-    });
 
     $scope.createGroup = function () {
         GroupsEdit({
@@ -845,10 +847,10 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, Genera
 
 }
 
-InventoriesEdit.$inject = ['$scope', '$location', '$routeParams', '$compile', '$log', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts',
+InventoriesEdit.$inject = ['$scope', '$location', '$routeParams', '$compile', '$log', '$rootScope', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts',
     'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsEdit', 'GroupsDelete', 'Breadcrumbs',
     'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren', 'ViewUpdateStatus', 'GroupsCancelUpdate',
     'Find', 'EditInventoryProperties', 'HostsEdit', 'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost',
     'Stream', 'GetBasePath', 'ShowJobSummary', 'ApplyEllipsis', 'WatchInventoryWindowResize', 'HelpDialog', 'InventoryGroupsHelp', 'Store',
-    'ViewJob', 'Socket'
+    'ViewJob'
 ];

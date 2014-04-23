@@ -1064,6 +1064,8 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 if (!error) {
                     // Update the parent view with any changes
                     if (groups_reload) {
+                        $log.debug('calling UpdateGroup group_id: ' + group_id + ' name: ' + properties_scope.name + ' description: ' + properties_scope.description +
+                            'has_inventory_sources: ' + ((sources_scope.source && sources_scope.source.value) ? 'true' : 'false') + ' source: ' + sources_scope.source.value );
                         UpdateGroup({
                             scope: parent_scope,
                             group_id: group_id,
@@ -1221,8 +1223,9 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                         Rest.post(data)
                             .success(function (data) {
                                 group_created = true;
+                                group_id = data.id;
+                                sources_scope.source_url = data.related.inventory_source;
                                 if (properties_scope.variables) {
-                                    sources_scope.source_url = data.related.inventory_source;
                                     modal_scope.$emit('updateVariables', json_data, data.related.variable_data);
                                 }
                                 else {
@@ -1414,7 +1417,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 var group;
                 if (groups && groups.length > 0) {
                     group = groups.pop();
-                    Rest.setUrl(GetBasePath('group') + group.group_id + '/');
+                    Rest.setUrl(GetBasePath('groups') + group.group_id + '/');
                     Rest.destroy()
                         .success(function() {
                             scope.$emit('DeleteNextGroup');

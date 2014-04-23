@@ -1,6 +1,6 @@
 {
   "name": "angular-tz-extensions",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "main": "js/angular-timezones.js",
   "ignore": [
     ".bowerrc",
@@ -34,13 +34,14 @@
     "Chris Houseknecht"
   ],
   "license": "MIT",
-  "_release": "0.3.9",
+  "_release": "0.3.10",
   "_resolution": {
     "type": "version",
-    "tag": "0.3.9",
-    "commit": "dded062e72274e2fc5379bb251c476d152ecc1a1"
+    "tag": "0.3.10",
+    "commit": "244ac659f0a15fe389f4cb1222ecafdc890e39ef"
   },
   "_source": "git://github.com/chouseknecht/angular-tz-extensions.git",
-  "_target": "*",
-  "_originalSource": "angular-tz-extensions"
+  "_target": "~0.3.10",
+  "_originalSource": "angular-tz-extensions",
+  "_direct": true
 }

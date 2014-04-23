@@ -409,9 +409,11 @@ angular.module('Tower', [
         }
     ])
     .run(['$cookieStore', '$rootScope', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'ViewLicense',
-        'Timer', 'ClearScope', 'HideStream',
+        'Timer', 'ClearScope', 'HideStream', 'Socket',
         function ($cookieStore, $rootScope, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
-            Timer, ClearScope, HideStream) {
+            Timer, ClearScope, HideStream, Socket) {
+
+            var base, sock;
 
             LoadBasePaths();
 
@@ -470,7 +472,7 @@ angular.module('Tower', [
             }
 
             // If browser refresh, activate the correct tab
-            var base = ($location.path().replace(/^\//, '').split('/')[0]);
+            base = ($location.path().replace(/^\//, '').split('/')[0]);
             if (base === '') {
                 base = 'home';
                 $location.path('/home');
@@ -492,6 +494,39 @@ angular.module('Tower', [
             $rootScope.toggleTab = function(e, tab, tabs) {
                 e.preventDefault();
                 $('#' + tabs + ' #' + tab).tab('show');
+            };
+
+            // Listen for job changes and issue callbacks to initiate
+            // DOM updates
+            function openSocket() {
+                sock = Socket({ scope: $rootScope, endpoint: "jobs" });
+                sock.init();
+                setTimeout(function() {
+                    $rootScope.$apply(function() {
+                        sock.checkStatus();
+                        $rootScope.$emit('SocketErrorEncountered');
+                    });
+                });
+                sock.on("status_changed", function(data) {
+                    $rootScope.$emit('JobStatusChange', data);
+                });
+            }
+            openSocket();
+
+            $rootScope.socketToggle = function() {
+                switch($rootScope.socketStatus) {
+                    case 'ok':
+                    case 'connecting':
+                        sock = null;
+                        $rootScope.socketStatus = 'error';
+                        $rootScope.socketTip = 'Disconnected. Click to connect.';
+                        break;
+                    case 'error':
+                        sock = null;
+                        $rootScope.socketStatus = '';
+                        $rootScope.socketTip = '';
+                        setTimeout(openSocket, 500);
+                }
             };
         }
     ]);
