@@ -198,7 +198,7 @@ release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
 
-sdist: clean minjs
+sdist: clean
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
 	   $(PYTHON) setup.py release_build; \
 	else \
@@ -206,24 +206,38 @@ sdist: clean minjs
 	fi
 
 rpmtar: sdist
+	mkdir -p rpm-build
+	cp packaging/rpm/$(NAME).te rpm-build/
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	   (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
 	   (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
 	   (cd dist/ && tar czf $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)) ; \
 	fi
+	cp dist/$(NAME)-$(VERSION).tar.gz rpm-build/
+
+srpm: rpmtar
+	@rpmbuild \
+        --define "_pkgrelease $(RPM_PKG_RELEASE)" \
+        --define "_topdir %(pwd)/rpm-build" \
+        --define "_builddir %{_topdir}" \
+        --define "_rpmdir %{_topdir}" \
+        --define "_srcrpmdir %{_topdir}" \
+        --define "_specdir %{_topdir}" \
+        --define "_sourcedir  %{_topdir}" \
+        --define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
+        -bs packaging/rpm/$(NAME).spec
 
 rpm: rpmtar
-	@mkdir -p rpm-build
-	@cp dist/$(NAME)-$(VERSION).tar.gz rpm-build/
-	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
-	--define "_builddir %{_topdir}" \
-	--define "_rpmdir %{_topdir}" \
-	--define "_srcrpmdir %{_topdir}" \
-	--define "_specdir %{_topdir}" \
-	--define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
-	--define "_sourcedir  %{_topdir}" \
-	--define "_pkgrelease  $(RPM_PKG_RELEASE)" \
-	-ba packaging/rpm/$(NAME).spec
+	@rpmbuild \
+        --define "_pkgrelease $(RPM_PKG_RELEASE)" \
+        --define "_topdir %(pwd)/rpm-build" \
+        --define "_builddir %{_topdir}" \
+        --define "_rpmdir %{_topdir}" \
+        --define "_srcrpmdir %{_topdir}" \
+        --define "_specdir %{_topdir}" \
+        --define "_sourcedir  %{_topdir}" \
+        --define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
+        -ba packaging/rpm/$(NAME).spec
 
 deb: sdist
 	@mkdir -p deb-build
