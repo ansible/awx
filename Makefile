@@ -141,6 +141,12 @@ taskmanager:
 socketservice:
 	$(PYTHON) manage.py run_socketio_service
 
+pep8:
+	pep8 -r --ignore=E501,E221,W291,W391,E302,E251,E203,W293,E231,E303,E201,E225,E261,E241 awx/
+
+pyflakes:
+	pyflakes awx/
+
 # Run all API unit tests.
 test:
 	$(PYTHON) manage.py test -v2 main
