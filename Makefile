@@ -204,7 +204,7 @@ release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
 
-sdist: clean
+sdist: clean minjs
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
 	   $(PYTHON) setup.py release_build; \
 	else \
