@@ -490,7 +490,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
     });
 
     // Handle inventory sync status changes
-    if ($rootScope.rmoveJobStatusChange) {
+    if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
     }
     $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {

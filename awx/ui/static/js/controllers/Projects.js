@@ -77,7 +77,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     });
 
     // Handle project update status changes
-    if ($rootScope.rmoveJobStatusChange) {
+    if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
     }
     $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
