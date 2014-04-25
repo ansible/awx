@@ -120,7 +120,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             self.scope.$apply(function() {
                                 self.scope.socketStatus = 'error';
                                 self.scope.$emit('socketStatusChange');
-                          });
+                            });
                         });
                     }
                     else {

@@ -738,55 +738,54 @@ select.page-size {
 
 /* breadcrumbs */
 .nav-path {
-  padding: 5px 0 10px 0;
-  margin-right: 5px;
-  margin-bottom: 20px;
-  font-size: 14px;
-  font-weight: bold;
-  background-color: #f5f5f5;
-  border: 1px solid #d8d8d8;
-  border-radius: 6px;
-  box-shadow: 3px 3px 4px 0 #808080;
+    padding: 5px 0 10px 0;
+    margin-right: 5px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #f5f5f5;
+    border: 1px solid #d8d8d8;
+    border-radius: 6px;
+    box-shadow: 3px 3px 4px 0 #808080;
 
-  .breadcrumb {
-    display: inline-block;
-    padding-bottom: 0;
-    padding-left: 0;
-    padding-right: 0;
-    margin-bottom: 0;
-    margin-left: 10px;
-  }
-
-  .dropdown {
-    display: inline-block;
-    margin-right: 0;
-    paddding-right: 0;
-
-    .toggle, .toggle:visited, .toggle:hover, .toggle:active {
-      color: @black;
+    .breadcrumb {
+      display: inline-block;
+      padding-bottom: 0;
+      padding-left: 0;
+      padding-right: 0;
+      margin-bottom: 0;
+      margin-left: 10px;
     }
 
-    li a.active {
-       color: @grey;
+    .dropdown {
+        display: inline-block;
+        margin-right: 0;
+        paddding-right: 0;
+
+        .toggle, .toggle:visited, .toggle:hover, .toggle:active {
+          color: @black;
+        }
+
+        li a.active {
+           color: @grey;
+        }
+
+        .crumb-icon {
+           font-size: 12px;
+        }
     }
-
-    .crumb-icon {
-       font-size: 12px;
-    }
-
-  }
-
 }
 
 .actions .dropdown {
-  display: inline-block;
+    display: inline-block;
 }
 
 /* Display drop-down menus on hover. Remove margin between toggle link
    and menu, allowing smooth mouse movement between toggle and menu
 
    http://stackoverflow.com/questions/8878033/how-to-make-twitter-bootstrap-menu-dropdown-on-hover-rather-than-click
- */
+*/
+
   .dropdown-toggle:hover .dropdown-menu, .dropdown:hover .dropdown-menu {
      display: block;
   }
@@ -797,6 +796,7 @@ select.page-size {
 
   .dropdown-menu {
      margin-top: 0;
+     z-index: 200;
   }
 
 /* end */

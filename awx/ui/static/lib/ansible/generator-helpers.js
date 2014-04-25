@@ -728,7 +728,7 @@ angular.module('GeneratorHelpers', [])
     
             if (includeSize) {
                 html += "<div class=\"";
-                html += (size) ? size : "col-lg-4 col-md-6 col-sm-12 col-xs-12";
+                html += (size) ? size : "col-lg-4 col-md-6";
                 html += "\" id=\"search-widget-container" + modifier + "\">\n";
             }
 
@@ -737,8 +737,7 @@ angular.module('GeneratorHelpers', [])
             html += "<div class=\"input-group-btn dropdown\">\n";
             html += "<button type=\"button\" ";
             html += "id=\"search_field_ddown\" ";
-            html += "class=\"btn btn-default ";
-            html += "dropdown-toggle\" data-toggle=\"dropdown\"";
+            html += "class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\"";
             html += ">\n";
             html += "<span ng-bind=\"" + iterator + "SearchFieldLabel" + modifier + "\"></span>\n";
             html += "<span class=\"caret\"></span>\n";
@@ -772,14 +771,12 @@ angular.module('GeneratorHelpers', [])
             html += "<a class=\"search-reset-start\" ng-click=\"resetSearch('" + iterator + "')\"" +
                 "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +
                 iterator + "ShowStartBtn" + modifier + " || " +
-                iterator + "HoldInput" + modifier + " || " +
                 iterator + "HideAllStartBtn" + modifier + "\"" +
                 "><i class=\"fa fa-times\"></i></a>\n";
 
             html += "<a class=\"search-reset-start\" ng-click=\"search('" + iterator + "')\"" +
                 "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +
                 "!" + iterator + "ShowStartBtn" + modifier + " || " +
-                iterator + "HoldInput" + modifier + " || " +
                 iterator + "HideAllStartBtn" + modifier + "\"" +
                 "><i class=\"fa fa-search\"></i></a>\n";
             

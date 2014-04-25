@@ -30,18 +30,18 @@ angular.module('ProjectsListDefinition', [])
                 dataTipWatch: 'project.statusTip',
                 dataPlacement: 'top',
                 icon: "icon-job-{{ project.statusIcon }}",
-                columnClass: "col-md-1 col-sm-2 col-xs-3",
+                columnClass: "col-lg-1 col-md-1 col-sm-2 col-xs-2",
                 nosort: true
             },
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: "col-md-4 col-sm-3 col-xs-3"
+                columnClass: "col-lg-6 col-md-4 col-sm-6 col-xs-6"
             },
             last_updated: {
                 label: 'Last Updated',
                 filter: "date:'MM/dd/yy HH:mm:ss'",
-                columnClass: "col-md-2 hidden-sm hidden-xs",
+                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
                 excludeModal: true,
                 searchable: false,
                 nosort: true
