@@ -89,7 +89,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
             }
 
             function getShowState(key) {
-                var result = true;
+                var result = null;
                 local_child_store.every(function(child) {
                     if (child.key === key) {
                         result = (child.show !== undefined) ? child.show : true;
@@ -129,6 +129,20 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
 
                     expand = (sorted[i].children.length > 0) ? getExpandState(sorted[i].id) : false;
                     show = getShowState(sorted[i].id);
+                    if (show === null) {
+                        // this is a node we haven't seen before, so check the parent expand/collapse state
+                        // If parent is not expanded, then child should be hidden. 
+                        show = true;
+                        if (parent > 0) {
+                            groups.every(function(g) {
+                                if (g.id === parent) {
+                                    show = getExpandState(g.key);
+                                    return false;
+                                }
+                                return true;
+                            });
+                        }
+                    }
 
                     group = {
                         name: sorted[i].name,
@@ -173,18 +187,6 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         group.ngicon = 'fa fa-square-o node-no-toggle';
                     }
                     if (new_group_id && group.group_id === new_group_id) {
-                        // For new group
-                        // Find parent's expand state and set the show property accordingly.
-                        // If parent is not expanded, then child should be hidden. 
-                        if (parent > 0) {
-                            scope.groups.every(function(g) {
-                                if (g.id === group.parent) {
-                                    group.show = getExpandState(g.key);
-                                    return false;
-                                }
-                                return true;
-                            });
-                        }
                         scope.selected_tree_id = id;
                         scope.selected_group_id = group.group_id;
                     }

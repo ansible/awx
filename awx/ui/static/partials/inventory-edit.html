@@ -54,42 +54,42 @@
             <div ng-show="groupsCount > 0 || hostsCount > 0">
                 <div class="alert alert-info">
                     <p>Deleting group <em>{{ group_name }}</em>.
-                    <span ng-show="groupsCount > 0 && hostsCount > 0"> This group has {{ groupsCount }} child groups and {{ hostsCount }} child hosts. </span>
-                    <span ng-show="groupsCount == 0 && hostsCount > 0"> This group has {{ hostsCount }} child hosts. </span>
-                    <span ng-show="groupsCopunt > 0 && hostsCount == 0"> This group has {{ groupsCount }} child groups. </span>
+                    <span ng-show="groupsCount > 0 && hostsCount > 0"> This group contains {{ groupsCount }} groups and {{ hostsCount }} hosts. </span>
+                    <span ng-show="groupsCount == 0 && hostsCount > 0"> This group contains {{ hostsCount }} hosts. </span>
+                    <span ng-show="groupsCopunt > 0 && hostsCount == 0"> This group contains {{ groupsCount }} groups. </span>
                     Delete or preserve the group's children?</p>
                     <div style="width: 50%; margin: 15px auto;">
                         
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="preserve-all"> Preserve child groups and hosts
+                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="preserve-all"> Preserve groups and hosts
                             </label>
                         </div>
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="delete-all"> Delete child groups and hosts
+                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="delete-all"> Delete groups and hosts
                             </label>
                         </div>
 
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount == 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="preserve-all"> Preserve child groups
+                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="preserve-all"> Preserve groups
                             </label>
                         </div>
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount == 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="delete-all"> Delete child groups
+                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="delete-all"> Delete groups
                             </label>
                         </div>
 
                         <div class="radio" ng-show="groupsCount == 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="preserve-all"> Preserve child hosts
+                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="preserve-all"> Preserve hosts
                             </label>
                         </div>
                         <div class="radio" ng-show="groupsCount == 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="delete-all"> Delete child hosts
+                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="delete-all"> Delete hosts
                             </label>
                         </div>
 

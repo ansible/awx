@@ -179,6 +179,7 @@
              </div>
              <div class="collapse navbar-collapse navbar-responsive-collapse">
                 <ul class="nav navbar-nav pull-right">
+                  <li id="socket-beacon"></li>
                   <li ng-show="current_user.username != null && current_user.username != undefined">
                      <a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
                   <li ng-show="userLoggedIn == true"><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>

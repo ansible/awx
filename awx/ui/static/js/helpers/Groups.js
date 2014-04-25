@@ -1299,7 +1299,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 "class": "btn btn-default",
                 "id": "group-delete-cancel-button"
             },{
-                label: "Continue",
+                label: "Delete",
                 onClick: function() {
                     scope.performDelete();
                 },

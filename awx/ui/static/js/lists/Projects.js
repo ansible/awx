@@ -76,18 +76,19 @@ angular.module('ProjectsListDefinition', [])
                 awToolTip: 'Click for help',
                 awTipPlacement: 'top'
             },*/
-            /*refresh: {
+            refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()"
-            },*/
-            socket: {
+                ngClick: "refresh()",
+                ngShow: "socketStatus == 'error'"
+            },
+            /*socket: {
                 mode: 'all',
                 iconClass: "{{ 'fa fa-power-off fa-lg socket-' + socketStatus }}",
                 awToolTip: "{{ socketTip }}",
                 dataTipWatch: "socketTip",
                 ngClick: "socketToggle()",
-            },
+            },*/
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",

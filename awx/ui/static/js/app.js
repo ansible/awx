@@ -408,12 +408,12 @@ angular.module('Tower', [
             });
         }
     ])
-    .run(['$cookieStore', '$rootScope', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'ViewLicense',
+    .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'ViewLicense',
         'Timer', 'ClearScope', 'HideStream', 'Socket',
-        function ($cookieStore, $rootScope, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
+        function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
             Timer, ClearScope, HideStream, Socket) {
 
-            var base, sock;
+            var base, e, html, sock;
 
             LoadBasePaths();
 
@@ -496,6 +496,12 @@ angular.module('Tower', [
                 $('#' + tabs + ' #' + tab).tab('show');
             };
 
+            html = "<a href=\"\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
+                "data-popover-title=\"Live Updates\" data-container=\"body\" style=\"font-size: 10px;\"><i class=\"fa icon-socket-{{ socketStatus }}\"></i></a>";
+            e = angular.element(document.getElementById('socket-beacon'));
+            e.empty().append(html);
+            $compile(e)($rootScope);
+
             // Listen for job changes and issue callbacks to initiate
             // DOM updates
             function openSocket() {
@@ -505,6 +511,7 @@ angular.module('Tower', [
                     $rootScope.$apply(function() {
                         sock.checkStatus();
                         $rootScope.$emit('SocketErrorEncountered');
+                        $log.debug('socket status: ' + $rootScope.socketStatus);
                     });
                 });
                 sock.on("status_changed", function(data) {

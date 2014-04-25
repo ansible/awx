@@ -12,7 +12,7 @@
 
 angular.module('SocketIO', ['AuthService', 'Utilities'])
 
-    .factory('Socket', ['$rootScope', '$location', '$log', 'Authorization', 'Alert', function ($rootScope, $location, $log, Authorization, Alert) {
+    .factory('Socket', ['$rootScope', '$location', '$log', 'Authorization', function ($rootScope, $location, $log, Authorization) {
         return function(params) {
             var scope = params.scope,
                 host = $location.host(),
@@ -23,17 +23,23 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
             if (scope.removeSocketErrorEncountered) {
                 scope.removeSocketErrorEncountered();
             }
-            scope.removeSocketErrorEncountered = scope.$on('SocketErrorEncountered', function(e, reason) {
-                if (reason === 'Session expired') {
-                    // encountered expired token, ask user to log in again
-                    $rootScope.sessionTimer.expireSession();
-                    $location.url('/login');
+            scope.removeSocketErrorEncountered = scope.$on('socketStatusChange', function() {
+                switch(scope.socketStatus) {
+                    case 'error':
+                        scope.socketTip = "There was an error connecting to the websocket server. Click for troubleshooting help.";
+                        break;
+                    case 'connecting':
+                        scope.socketTip = "Attempting to connect to the websocket server. Click for troubleshooting help.";
+                        break;
+                    case "ok":
+                        scope.socketTip = "Connected to the websocket server. Pages containing job status information for playbook runs, SCM updates and inventory " +
+                            "sync processes will automatically update in real-time.";
                 }
-                else if (scope.socketStatus === 'error') {
+                /*else if (scope.socketStatus === 'error') {
                     Alert("Connection Error", "Error encountered while attempting to connect to the websocket server. Confirm the server " +
                         "is up. Use the <i class=\"fa fa-power-off\"></i> button found on the Inventories, Projects and Jobs pages to reconnect.",
                         "alert-danger");
-                }
+                }*/
             });
 
             return {
@@ -61,14 +67,14 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             $log.debug('Socket connecting...');
                             self.scope.$apply(function () {
                                 self.scope.socketStatus = 'connecting';
-                                self.scope.socketTip = 'Connecting. Click to cancel.';
+                                self.scope.$emit('socketStatusChange');
                             });
                         });
                         self.socket.on('connect', function() {
                             $log.debug('Socket connection established');
                             self.scope.$apply(function () {
                                 self.scope.socketStatus = 'ok';
-                                self.scope.socketTip = 'Connected. Click to close.';
+                                self.scope.$emit('socketStatusChange');
                             });
                         });
                         self.socket.on('connect_failed', function(reason) {
@@ -76,8 +82,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             $log.error('Socket connection failed: ' + r);
                             self.scope.$apply(function () {
                                 self.scope.socketStatus = 'error';
-                                self.scope.socketTip = 'Connection failed. Click to retry.';
-                                self.scope.$emit('SocketErrorEncountered');
+                                self.scope.$emit('socketStatusChange');
                             });
 
                         });
@@ -85,8 +90,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             $log.debug('Socket disconnected');
                             self.scope.$apply(function() {
                                 self.socketStatus = 'error';
-                                self.socketTip = 'Disconnected. Click to connect.';
-                                self.scope.$emit('SocketErrorEncountered');
+                                self.scope.$emit('socketStatusChange');
                             });
                         });
                         self.socket.on('error', function(reason) {
@@ -94,36 +98,35 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             $log.debug('Socket error: ' + r);
                             self.scope.$apply(function() {
                                 self.scope.socketStatus = 'error';
-                                self.scope.socketTip = 'Connection error encountered. Click to retry.';
-                                self.scope.$emit('SocketErrorEncountered');
+                                self.scope.$emit('socketStatusChange');
                             });
                         });
                         self.socket.on('reconnecting', function() {
                             $log.debug('Socket attempting reconnect...');
                             self.scope.$apply(function() {
                                 self.scope.socketStatus = 'connecting';
-                                self.scope.socketTip = 'Connecting. Click to cancel.';
+                                self.scope.$emit('socketStatusChange');
                             });
                         });
                         self.socket.on('reconnect', function() {
                             $log.debug('Socket reconnected');
                             self.scope.$apply(function() {
                                 self.scope.socketStatus = 'ok';
-                                self.scope.socketTip = 'Connected. Click to close.';
+                                self.scope.$emit('socketStatusChange');
                             });
                         });
                         self.socket.on('reconnect_failed', function(reason) {
                             $log.error('Socket reconnect failed: ' + reason);
                             self.scope.$apply(function() {
                                 self.scope.socketStatus = 'error';
-                                self.scope.socketTip = 'Connection failed. Click to retry.';
-                                self.scope.$emit('SocketErrorEncountered');
-                            });
+                                self.scope.$emit('socketStatusChange');
+                          });
                         });
                     }
                     else {
-                        // Encountered expired token
-                        self.scope.$emit('SocketErrorEncountered', 'Session expired');
+                        // encountered expired token, redirect to login page
+                        $rootScope.sessionTimer.expireSession();
+                        $location.url('/login');
                     }
                 },
                 checkStatus: function() {
