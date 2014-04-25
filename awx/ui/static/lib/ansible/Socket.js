@@ -135,18 +135,16 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                     if (self.socket.socket.connected) {
                         $log.debug('Socket connected');
                         self.scope.socketStatus = 'ok';
-                        self.scope.socketTip = 'Connected. Click to close.';
                     }
                     else if (self.socket.socket.connecting || self.socket.socket.reconnecting) {
                         $log.debug('Socket connecting...');
                         self.scope.socketStatus = 'connecting';
-                        self.scope.socketTip = 'Connecting. Click to cancel.';
                     }
                     else {
                         $log.debug('Socket error: connection refused');
                         self.scope.socketStatus = 'error';
-                        self.scope.socketTip = 'Connection failed. Click to retry';
                     }
+                    self.scope.$emit('socketStatusChange');
                     return self.scope.socketStatus;
                 },
                 on: function (eventName, callback) {
