@@ -25,18 +25,21 @@ angular.module('CredentialsListDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name'
+                label: 'Name',
+                columnClass: 'col-md-3 col-sm-9 col-xs-9'
             },
             description: {
                 label: 'Description',
-                excludeModal: true
+                excludeModal: true,
+                columnClass: 'col-md-3 hidden-sm hidden-xs'
             },
             kind: {
                 label: 'Type',
                 searchType: 'select',
                 searchOptions: [], // will be set by Options call to credentials resource
                 excludeModal: true,
-                nosort: true
+                nosort: true,
+                columnClass: 'col-md-3 hidden-sm hidden-xs'
             }
         },
 

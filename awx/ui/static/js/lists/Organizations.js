@@ -22,7 +22,8 @@ angular.module('OrganizationListDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name'
+                label: 'Name',
+                columnClass: 'col-sm-8 col-xs-8'
             },
             description: {
                 label: 'Description',

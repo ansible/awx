@@ -44,7 +44,8 @@ angular.module('InventoriesListDefinition', [])
             },
             name: {
                 key: true,
-                label: 'Name'
+                label: 'Name',
+                columnClass: 'col-md-4 col-sm-6 col-xs-6'
             },
             organization: {
                 label: 'Organization',
@@ -52,7 +53,8 @@ angular.module('InventoriesListDefinition', [])
                 linkTo: '/#/organizations/{{ inventory.organization }}',
                 sourceModel: 'organization',
                 sourceField: 'name',
-                excludeModal: true
+                excludeModal: true,
+                columnClass: 'col-md-4 hidden-sm hidden-xs'
             },
             has_inventory_sources: {
                 label: 'Cloud sourced?',

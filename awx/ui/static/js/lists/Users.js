@@ -24,13 +24,16 @@ angular.module('UserListDefinition', [])
         fields: {
             username: {
                 key: true,
-                label: 'Username'
+                label: 'Username',
+                columnClass: 'col-md-3 col-sm-3 col-xs-9'
             },
             first_name: {
-                label: 'First Name'
+                label: 'First Name',
+                columnClass: 'col-md-3 col-sm-3 hidden-xs'
             },
             last_name: {
-                label: 'Last Name'
+                label: 'Last Name',
+                columnClass: 'col-md-3 col-sm-3 hidden-xs'
             }
         },
 

@@ -23,16 +23,19 @@ angular.module('TeamsListDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name'
+                label: 'Name',
+                columnClass: 'col-md-4 col-sm-9 col-xs-9'
             },
             description: {
-                label: 'Description'
+                label: 'Description',
+                columnClass: 'col-md-3 hidden-sm hidden-xs'
             },
             organization: {
                 label: 'Organization',
                 ngBind: 'team.organization_name',
                 sourceModel: 'organization',
-                sourceField: 'name'
+                sourceField: 'name',
+                columnClass: 'col-md-3 hidden-sm hidden-xs'
             }
         },
 
