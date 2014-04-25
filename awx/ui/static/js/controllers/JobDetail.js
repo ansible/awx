@@ -5,6 +5,8 @@
  *
  */
 
+/* global _ */
+
 'use strict';
 
 function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors, DigestEvents,
@@ -76,6 +78,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     event_socket.on("job_events-" + job_id, function(data) {
         var matches;
         data.id = data.event_id;
+        data.event = data.event_name;
         if (api_complete) {
             matches = processed_events.find(function(x) { return x === data.id; });
             if (matches.length === 0) {
@@ -236,7 +239,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         });
     };
 
-    $( "#hosts-slider-vertical" ).slider({
+    $("#hosts-slider-vertical").slider({
         orientation: "vertical",
         range: "min",
         min: 0,
@@ -246,6 +249,27 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             $( "#amount" ).val( ui.value );
         }
     });
+
+    // Use debounce from the underscore library. We're including underscore
+    // for the timezone stuff, so might as well take advantage of it.
+    function adjustSize() {
+        var ww = $(window).width();
+        if (ww < 1240) {
+            $('#job-summary-container').hide();
+            $('#job-detail-container').css({ "width": "100%", "padding-right": "15px" });
+        }
+        else {
+            $('#job-detail-container').css({ "width": "58.33333333%", "padding-right": "7px" });
+            $('#job-summary-container').show();
+        }
+    }
+    $(document).ready(function() {
+        adjustSize();
+    });
+
+    $(window).resize(_.debounce(function(){
+        adjustSize();
+    }, 500));
 }
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',

@@ -157,7 +157,8 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     status: 'unreachable',
                     event_id: event.id,
                     created: event.created,
-                    modified: event.modified
+                    modified: event.modified,
+                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
                 });
 
             }
@@ -170,7 +171,8 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     status: 'failed',
                     event_id: event.id,
                     created: event.created,
-                    modified: event.modified
+                    modified: event.modified,
+                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
                 });
             }
             if (event.event === 'runner_on_skipped') {
@@ -182,7 +184,8 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     status: 'skipped',
                     event_id: event.id,
                     created: event.created,
-                    modified: event.modified
+                    modified: event.modified,
+                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
                 });
             }
             if (event.event === 'runner_on_ok') {
@@ -194,7 +197,8 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
                     event_id: event.id,
                     created: event.created,
-                    modified: event.modified
+                    modified: event.modified,
+                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
                 });
             }
             if (event.event === 'playbook_on_stats') {
@@ -453,6 +457,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             task_id = params.task_id,
             modified = params.modified,
             created = params.created,
+            msg = params.message,
             host_found = false;
 
         scope.hosts.every(function(host, i) {
@@ -493,7 +498,8 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             event_id: event_id,
             status: status,
             name: name,
-            created: created
+            created: created,
+            message: msg
         });
     };
 }])
@@ -508,6 +514,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             status = params.status,
             created = params.created,
             name = params.name,
+            msg = params.message,
             play_id, first;
 
         scope.hostResults.push({
@@ -516,7 +523,8 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             host_id: host_id,
             task_id: task_id,
             name: name,
-            created: created
+            created: created,
+            msg: msg
         });
 
         scope.tasks.every(function(task) {
@@ -587,12 +595,12 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             callback: function() {
                 // Scroll the task table all the way to the bottom, revealing the last row
                 setTimeout(function() {
-                    var original_height = $('#task-table-body').css('height'),
+                    var original_height = $('#tasks-table-detail').css('height'),
                         table_height;
-                    $('#task-table-body').css('height', 'auto');
-                    table_height = $('#task-table-body').height();
-                    $('#task-table-body').css('height', original_height);
-                    $('#task-table-body').scrollTop(table_height);
+                    $('#tasks-table-detail').css('height', 'auto');
+                    table_height = $('#tasks-table-detail').height();
+                    $('#tasks-table-detail').css('height', original_height);
+                    $('#tasks-table-detail').scrollTop(table_height);
                 }, 300);
             }
         });
@@ -624,8 +632,8 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
 .factory('SelectHost', [ function() {
     return function() {
         setTimeout(function() {
-            var inner_height = $('#host_details .job-detail-table').height();
-            $('#host_details').scrollTop(inner_height);
+            var inner_height = $('#hosts-table-details').height();
+            $('#hosts-table-details').scrollTop(inner_height);
         }, 100);
     };
 }]);

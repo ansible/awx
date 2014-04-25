@@ -19,58 +19,10 @@
 }
 
 #job-status {
-    margin: 8px 0 15px 0;
 
-    ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-    li {
-        display: inline-block;
-        margin-right: 20px;
-    }
-    i {
-        font-size: 12px;
-    }
-    .label {
-        display: inline-block;
-        text-align: left;
-        width: 50px;
-        font-size: 12px;
-        color: @black;
-        padding-left: 0;
-    }
 }
 
 .job-detail-table {
-    margin-bottom: 0;
-    border: 1px solid @grey;
-    background-color: @white;
-    
-    /* http://stackoverflow.com/questions/21168521/scrollable-table-with-fixed-header-in-bootstrap */
-    width: 100%;
-    thead, tbody, tr, td, th { display: block; }
-    tr:after {
-        content: ' ';
-        display: block;
-        visibility: hidden;
-        clear: both;
-    }
-    tbody {
-        overflow-y: auto;
-        height: 150px;
-    }
-    thead {
-        /* fallback */
-    }
-    thead>tr>th {
-        height: 22px;
-    }
-    tbody td, thead th {
-        height: auto;
-        float: left;
-    }
     
     tbody>tr>td {
         border-top-color: @well;
@@ -85,22 +37,6 @@
     tbody>tr.active, tbody>tr.active>td {
         background-color: #EDF2F2;
     }
-    
-    .status-column i {
-        font-size: 12px;
-    }
-}
-
-.section {
-    margin-bottom: 20px;
-    h5 {
-        margin-top: 0;
-        margin-bottom: 12px;
-    }
-}
-
-.section:last-child {
-    margin-bottom: 0;
 }
 
 .job_summary {
@@ -162,6 +98,33 @@
             box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
 }
 
+
+
+
+.section {
+    margin-bottom: 20px;
+    h5 {
+        margin-top: 0;
+        margin-bottom: 12px;
+    }
+}
+
+.section:last-child {
+    margin-bottom: 0;
+}
+
+#job-detail-tables {
+    margin-top: 20px;
+}
+
+.status-row {
+     margin-bottom: 10px;
+     .job-label {
+        font-weight: bold;   
+        font-size: 12px;
+     }   
+}
+
 #job_options {
     height: 100px;
     overflow-y: auto;
@@ -174,30 +137,96 @@
     overflow-x: none;
 }
 
-#hosts-section {
-    border: 1px solid @grey;
-    border-top: 2px solid #ddd;
-    padding: 5px;
-    height: 150px;
-    background-color: @white;
-    overflow-y: hide; 
-    overflow-x: auto;
+#breadcrumb-container {
+    padding-right: 10px;
 }
 
-#host-details {
-    ul {
-        list-style: none; 
-        margin: 0;
-        padding: 0;
-        i {
-            font-size: 12px;
-        }
-    }
-    li {
-        border-bottom: 1px solid @well;
-        padding-bottom: 2px;
+#job-detail-container {
+    position: relative;
+    padding-left: 15px;
+    padding-right: 7px;
+    width: 58.33333333%;
+}
+
+#job-summary-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding-right: 15px;
+    padding-left: 7px;
+    width: 41.66666667%;
+}
+
+.table-header {
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.table-detail { 
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid @black;
+    background-color: @white; 
+    .row {
+        border-top: 1px solid @grey;
+    } 
+    /*.row:nth-child(odd) {
+        background-color: @well;
         padding-top: 0;
-        margin: 0;
-        line-height: normal;
+        padding-bottom: 0;
+    }*/
+    .active {
+        background-color: #EDF2F2;
     }
 }
+
+.status-column i {
+    font-size: 12px;
+}
+
+#tasks-table-detail {
+    height: 150px;
+}
+
+#play-section {
+    .table-detail {
+        height: 150px;
+    }
+}
+
+#task-hosts-section {
+    position: relative; 
+    top: 0;
+    left: 0;
+    #hosts-table-detail {
+        padding: 3px;
+        border: 1px solid @grey;
+        border-top: 2px solid #ddd;
+        height: 150px;
+        background-color: @white;
+        .col-lg-1, .col-md-1, .col-sm-1, .col-xs-1 {
+            width: 3%;
+        }
+    }
+}
+
+#hosts-summary-section {
+    .col-lg-4, .col-md-4, .col-sm-4, .col-xs-4 {
+        width: 33%;
+    }
+    .col-lg-2, .col-md-2, .col-sm-2, .col-xs-2 {
+        width: 16.5%;
+    }
+    .table-header {
+        font-size: 12px;
+    }
+    .table-detail {
+        height: 200px;
+    }
+    .name {
+        word-break: break-all;
+    }
+}
+
+
+

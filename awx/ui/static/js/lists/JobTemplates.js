@@ -24,11 +24,12 @@ angular.module('JobTemplatesListDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name'
+                label: 'Name',
+                columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8'
             },
             description: {
                 label: 'Description',
-                columnClass: 'hidden-sm hidden-xs'
+                columnClass: 'col-lg-4 col-md-4 hidden-sm hidden-xs'
             }
         },
 
