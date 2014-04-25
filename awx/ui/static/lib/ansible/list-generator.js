@@ -214,11 +214,13 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                             html += "<div class=\"";
                             if (list.name === 'groups') {
                                 html += "col-lg-12";
-                            } else if (options.searchSize) {
+                            } else if (options.searchSize && !options.listSize) {
                                 // User supplied searchSize, calc the remaining
                                 size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g, ''));
                                 size = (list.searchWidgets) ? list.searchWidgets * size : size;
                                 html += 'col-lg-' + (12 - size);
+                            } else if (options.listSize) {
+                                html += options.listSize;
                             } else if (options.mode === 'summary') {
                                 html += 'col-lg-6';
                             } else if (options.id !== undefined) {

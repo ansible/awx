@@ -362,7 +362,8 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             id: id,
             breadCrumbs: false,
             scope: scope,
-            searchSize: 'col-lg-4 col-md-6 col-sm-12 col-xs-12',
+            searchSize: 'col-lg-4 col-md-6',
+            listSize: 'col-lg-8 col-md-6',
             showSearch: true
         });
 
