@@ -108,6 +108,7 @@ def emit_job_event_detail(sender, **kwargs):
         else:
             parent_id = None
         event_serialized = JobEventSerializer(instance).data
+        event_serialized['id'] = instance.id
         event_serialized["created"] = event_serialized["created"].isoformat()
         event_serialized["modified"] = event_serialized["modified"].isoformat()
         event_serialized["event_name"] = instance.event
