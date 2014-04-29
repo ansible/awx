@@ -1,5 +1,6 @@
 PYTHON=python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
+OFFICIAL ?= no
 PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 
@@ -12,7 +13,7 @@ VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.spl
 RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[1])")
 
 # Allow AMI license customization
-LICENSE_TIER ?= 10.json
+AWS_INSTANCE_COUNT ?= 10
 
 ifneq ($(OFFICIAL),yes)
 BUILD=dev$(DATE)
@@ -256,7 +257,7 @@ deb: sdist
 	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
 
 ami:
-	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(LICENSE_TIER)" $(NAME).json)
+	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" -var "official=$(OFFICIAL)" $(NAME).json)
 
 install:
 	$(PYTHON) setup.py install egg_info -b ""
