@@ -41,4 +41,4 @@ While OFFICIAL Tower AMI's are created by jenkins, the process for blessing AMI'
 
 Publishing Documentation
 ------------------------
-PDF documentation is not currently automated.  The [Build_Tower_Docs](http://50.116.42.103/view/Tower/) job generates HTML documentation, which is not currently published.  Please contact <dave@ansible.com> to request updated PDF documentation.
+Tower documentation is available in the [product-docs](https://github.com/ansible/product-docs) repository.  The [Build_Tower_Docs](http://50.116.42.103/view/Tower/) job builds and publishes PDF, and HTML, documentation.
