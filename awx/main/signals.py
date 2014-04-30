@@ -31,6 +31,24 @@ logger = logging.getLogger('awx.main.signals')
 # or marked inactive, when a Host-Group or Group-Group relationship is updated,
 # or when a Job is deleted or marked inactive.
 
+def emit_job_event_detail(sender, **kwargs):
+    instance = kwargs['instance']
+    created = kwargs['created']
+    if created:
+        if instance.host is not None:
+            host_id = instance.host.id
+        else:
+            host_id = None
+        if instance.parent is not None:
+            parent_id = instance.parent.id
+        else:
+            parent_id = None
+        event_serialized = JobEventSerializer(instance).data
+        event_serialized['id'] = instance.id
+        event_serialized["created"] = event_serialized["created"].isoformat()
+        event_serialized["modified"] = event_serialized["modified"].isoformat()
+        event_serialized["event_name"] = instance.event
+        emit_websocket_notification('/socket.io/job_events', 'job_events-' + str(instance.job.id), event_serialized)
 
 def emit_update_inventory_computed_fields(sender, **kwargs):
     logger.debug("In update inventory computed fields")
