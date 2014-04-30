@@ -44,7 +44,6 @@
     "commit": "179ced37ef972b2c44bb4b71d20a6310fa317867"
   },
   "_source": "git://github.com/malihu/malihu-custom-scrollbar-plugin.git",
-  "_target": "~2.8.3",
-  "_originalSource": "malihu-custom-scrollbar-plugin",
-  "_direct": true
+  "_target": "2.8.3",
+  "_originalSource": "malihu-custom-scrollbar-plugin"
 }
