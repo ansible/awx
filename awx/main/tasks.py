@@ -37,9 +37,9 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import * # Job, JobEvent, ProjectUpdate, InventoryUpdate, Schedule, UnifiedJobTemplate
-from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url
+from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url, ignore_inventory_computed_fields
 
-__all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate', 'handle_work_error']
+__all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate', 'handle_work_error', 'update_inventory_computed_fields']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -125,6 +125,18 @@ def handle_work_error(self, task_id, subtasks=None):
                     (first_task_type, first_task_name, task_id)
                 instance.save()
                 instance.socketio_emit_status("failed")
+
+@task()
+def update_inventory_computed_fields(inventory_id, should_update_hosts):
+    '''
+    Signal handler and wrapper around inventory.update_computed_fields to
+    prevent unnecessary recursive calls.
+    '''
+    i = Inventory.objects.filter(id=inventory_id)
+    if not i.exists():
+        logger.error("Update Inventory Computed Fields failed due to missing inventory: " + str(inventory_id))
+    i = i[0]
+    i.update_computed_fields(update_hosts=should_update_hosts)
 
 class BaseTask(Task):
 

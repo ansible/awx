@@ -9,6 +9,8 @@ import re
 import subprocess
 import sys
 import urlparse
+import threading
+import contextlib
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -21,7 +23,8 @@ import zmq
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version', 'update_scm_url',
-           'get_type_for_model', 'get_model_for_type']
+           'get_type_for_model', 'get_model_for_type', 'ignore_inventory_computed_fields',
+           'ignore_inventory_group_removal', '_inventory_updates']
 
 def get_object_or_400(klass, *args, **kwargs):
     '''
@@ -350,3 +353,29 @@ def emit_websocket_notification(endpoint, event, payload):
         payload['event'] = event
         payload['endpoint'] = endpoint
         emit_socket.send_json(payload);
+
+_inventory_updates = threading.local()
+
+@contextlib.contextmanager
+def ignore_inventory_computed_fields():
+    '''
+    Context manager to ignore updating inventory computed fields.
+    '''
+    try:
+        previous_value = getattr(_inventory_updates, 'is_updating', False)
+        _inventory_updates.is_updating = True
+        yield
+    finally:
+        _inventory_updates.is_updating = previous_value
+
+@contextlib.contextmanager
+def ignore_inventory_group_removal():
+    '''
+    Context manager to ignore moving groups/hosts when group is deleted.
+    '''
+    try:
+        previous_value = getattr(_inventory_updates, 'is_removing', False)
+        _inventory_updates.is_removing = True
+        yield
+    finally:
+        _inventory_updates.is_removing = previous_value

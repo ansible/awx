@@ -20,6 +20,8 @@ from crum.signals import current_user_getter
 from awx.main.models import *
 from awx.api.serializers import *
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, emit_websocket_notification
+from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
+from awx.main.tasks import update_inventory_computed_fields
 
 __all__ = []
 
@@ -29,37 +31,8 @@ logger = logging.getLogger('awx.main.signals')
 # or marked inactive, when a Host-Group or Group-Group relationship is updated,
 # or when a Job is deleted or marked inactive.
 
-_inventory_updates = threading.local()
 
-@contextlib.contextmanager
-def ignore_inventory_computed_fields():
-    '''
-    Context manager to ignore updating inventory computed fields.
-    '''
-    try:
-        previous_value = getattr(_inventory_updates, 'is_updating', False)
-        _inventory_updates.is_updating = True
-        yield
-    finally:
-        _inventory_updates.is_updating = previous_value
-
-@contextlib.contextmanager
-def ignore_inventory_group_removal():
-    '''
-    Context manager to ignore moving groups/hosts when group is deleted.
-    '''
-    try:
-        previous_value = getattr(_inventory_updates, 'is_removing', False)
-        _inventory_updates.is_removing = True
-        yield
-    finally:
-        _inventory_updates.is_removing = previous_value
-
-def update_inventory_computed_fields(sender, **kwargs):
-    '''
-    Signal handler and wrapper around inventory.update_computed_fields to
-    prevent unnecessary recursive calls.
-    '''
+def emit_update_inventory_computed_fields(sender, **kwargs):
     logger.debug("In update inventory computed fields")
     if getattr(_inventory_updates, 'is_updating', False):
         return
@@ -86,46 +59,25 @@ def update_inventory_computed_fields(sender, **kwargs):
         return
     logger.debug('%s %s, updating inventory computed fields: %r %r',
                  sender_name, sender_action, sender, kwargs)
-    with ignore_inventory_computed_fields():
-        try:
-            inventory = instance.inventory
-        except Inventory.DoesNotExist:
-            pass
-        else:
-            update_hosts = issubclass(sender, Job)
-            inventory.update_computed_fields(update_hosts=update_hosts)
+    try:
+        inventory = instance.inventory
+    except Inventory.DoesNotExist:
+        pass
+    else:
+        update_inventory_computed_fields.delay(inventory.id, issubclass(sender, Job))
 
-def emit_job_event_detail(sender, **kwargs):
-    instance = kwargs['instance']
-    created = kwargs['created']
-    if created:
-        if instance.host is not None:
-            host_id = instance.host.id
-        else:
-            host_id = None
-        if instance.parent is not None:
-            parent_id = instance.parent.id
-        else:
-            parent_id = None
-        event_serialized = JobEventSerializer(instance).data
-        event_serialized['id'] = instance.id
-        event_serialized["created"] = event_serialized["created"].isoformat()
-        event_serialized["modified"] = event_serialized["modified"].isoformat()
-        event_serialized["event_name"] = instance.event
-        emit_websocket_notification('/socket.io/job_events', 'job_events-' + str(instance.job.id), event_serialized)
-
-post_save.connect(update_inventory_computed_fields, sender=Host)
-post_delete.connect(update_inventory_computed_fields, sender=Host)
-post_save.connect(update_inventory_computed_fields, sender=Group)
-post_delete.connect(update_inventory_computed_fields, sender=Group)
-m2m_changed.connect(update_inventory_computed_fields, sender=Group.hosts.through)
-m2m_changed.connect(update_inventory_computed_fields, sender=Group.parents.through)
-m2m_changed.connect(update_inventory_computed_fields, sender=Host.inventory_sources.through)
-m2m_changed.connect(update_inventory_computed_fields, sender=Group.inventory_sources.through)
-post_save.connect(update_inventory_computed_fields, sender=Job)
-post_delete.connect(update_inventory_computed_fields, sender=Job)
-post_save.connect(update_inventory_computed_fields, sender=InventorySource)
-post_delete.connect(update_inventory_computed_fields, sender=InventorySource)
+post_save.connect(emit_update_inventory_computed_fields, sender=Host)
+post_delete.connect(emit_update_inventory_computed_fields, sender=Host)
+post_save.connect(emit_update_inventory_computed_fields, sender=Group)
+post_delete.connect(emit_update_inventory_computed_fields, sender=Group)
+m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
+m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
+m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
+m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
+post_save.connect(emit_update_inventory_computed_fields, sender=Job)
+post_delete.connect(emit_update_inventory_computed_fields, sender=Job)
+post_save.connect(emit_update_inventory_computed_fields, sender=InventorySource)
+post_delete.connect(emit_update_inventory_computed_fields, sender=InventorySource)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or

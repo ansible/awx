@@ -27,7 +27,8 @@ from django.contrib.auth.models import User
 
 # AWX
 from awx.main.models import *
-from awx.main.signals import ignore_inventory_computed_fields, disable_activity_stream
+from awx.main.utils import ignore_inventory_computed_fields
+from awx.main.signals import disable_activity_stream
 from awx.main.task_engine import TaskSerializer as LicenseReader
 
 logger = logging.getLogger('awx.main.commands.inventory_import')

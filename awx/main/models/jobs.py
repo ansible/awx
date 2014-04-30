@@ -38,7 +38,7 @@ from polymorphic import PolymorphicModel
 # AWX
 from awx.main.models.base import *
 from awx.main.models.unified_jobs import *
-from awx.main.utils import encrypt_field, decrypt_field
+from awx.main.utils import encrypt_field, decrypt_field, ignore_inventory_computed_fields
 
 # Celery
 from celery import chain
@@ -706,7 +706,6 @@ class JobEvent(CreatedModifiedModel):
 
     def update_host_summary_from_stats(self):
         from awx.main.models.inventory import Host
-        from awx.main.signals import ignore_inventory_computed_fields
         if self.event != 'playbook_on_stats':
             return
         hostnames = set()

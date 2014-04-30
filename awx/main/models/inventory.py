@@ -33,7 +33,7 @@ from awx.main.fields import AutoOneToOneField
 from awx.main.models.base import *
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import *
-from awx.main.utils import encrypt_field
+from awx.main.utils import encrypt_field, ignore_inventory_computed_fields
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate']
 
@@ -108,7 +108,6 @@ class Inventory(CommonModel):
         '''
         When marking inventory inactive, also mark hosts and groups inactive.
         '''
-        from awx.main.signals import ignore_inventory_computed_fields
         with ignore_inventory_computed_fields():
             for host in self.hosts.filter(active=True):
                 host.mark_inactive()
@@ -374,7 +373,6 @@ class Group(CommonModelNameNotUnique):
             self.parents.clear()
             self.children.clear()
             self.hosts.clear()
-        from awx.main.signals import ignore_inventory_computed_fields
         i = self.inventory
 
         if recompute:

@@ -755,6 +755,7 @@ class HostSerializer(BaseSerializerWithVariables):
             d['last_job']['job_template_name'] = obj.last_job.job_template.name
         except (KeyError, AttributeError):
             pass
+        # TODO: This is slow
         d['all_groups'] = [{'id': g.id, 'name': g.name} for g in obj.all_groups.all()]
         d['groups'] = [{'id': g.id, 'name': g.name} for g in obj.groups.all()]
         d['recent_jobs'] = [{'id': j.job.id, 'name': j.job.job_template.name, 'status': j.job.status, 'finished': j.job.finished} \

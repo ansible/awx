@@ -38,7 +38,6 @@ from awx.main.task_engine import TaskSerializer
 from awx.main.models import *
 from awx.main.utils import *
 from awx.main.access import get_user_queryset
-from awx.main.signals import ignore_inventory_computed_fields, ignore_inventory_group_removal
 from awx.api.authentication import JobTaskAuthentication
 from awx.api.permissions import *
 from awx.api.renderers import *
