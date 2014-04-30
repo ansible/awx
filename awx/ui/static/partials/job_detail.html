@@ -78,8 +78,8 @@
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
                                             data-placement="top">{{ task.elapsed }}
                                     </div>
-                                    <div class="col-lg-5 col-md-5 col-sm-10 col-xs-12 status-column">
-                                            <i class="fa icon-job-{{  task.status }}"></i><span ng-show="hasRoles"> {{ task.role }} </span>{{ task.name }}
+                                    <div class="col-lg-5 col-md-5 col-sm-10 col-xs-12 status-column" aw-tool-tip="Event Id: {{ task.id }} Status: {{ task.status }}" data-placement="top">
+                                            <i class="fa icon-job-{{  task.status }}"></i><span ng-show="hasRoles"> {{ task.role }} </span> {{ task.name }}
                                     </div>
                                     <div class="col-lg-5 col-md-5 hidden-sm hidden-xs">
                                         <div class="status-bar">
@@ -95,21 +95,19 @@
 
                         <div id="task-hosts-section" class="section">
                             <h5>Hosts</h5>
-                            <div id="hosts-table-detail" class="table-detail">
-                                <div class="row" ng-repeat="result in hostResults | filter:{ task_id: activeTask }">
-                                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 status-column">
-                                        <a href="" ng-click="doSomething()" aw-tool-tip="Status: {{ result.status }}. Click for details" data-placement="top">
-                                            <i class="fa icon-job-{{ result.status }}"></i></a>
-                                    </div>
-                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                        <a href="" ng-click="doSomething()" aw-tool-tip="Status: {{ result.status }}. Click for details" data-placement="top">{{ result.name }}</a>
-                                    </div>
-                                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
-                                        {{ result.msg }}
+                            <div id="hosts-table-detail" aw-custom-scroll data-on-total-scroll="HostDetailOnTotalScroll"
+                                data-on-total-scroll-back="HostDetailOnTotalScrollBack" class="table-detail">
+                                <div id="hosts-table-detail-inner">
+                                    <div class="row" ng-repeat="result in hostResults | filter:{ task_id: activeTask }">
+                                        <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7 status-column">
+                                            <a href="" ng-click="doSomething()" aw-tool-tip="Event Id: {{ result.id }} Status: {{ result.status }}. Click for details" data-placement="top"><i class="fa icon-job-{{ result.status }}"></i> {{ result.name }}</a>
+                                        </div>
+                                        <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                                            {{ result.msg }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div id="hosts-slider-vertical" style="position:absolute; top:27px; right: 0; width:9px; height:150px;"></div>
                         </div><!-- section -->
 
                     </div><!-- job-detail-tables -->
@@ -132,7 +130,7 @@
                             </div>
                         </div>
                         <div class="table-detail">
-                            <div class="row" ng-repeat="host in hosts">
+                            <div class="row" ng-repeat="host in hosts" id="{{ host.id }}">
                                 <div class="name col-lg-4 col-md-4 col-sm-4 col-xs-4"><a href="/#/home/hosts/?id={{ host.id }}"
                                     aw-tool-tip="View host" data-placement="top">{{ host.name }}</a></div>
                                 <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{ host.ok }}</div>

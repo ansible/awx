@@ -720,48 +720,26 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
-    .directive('awScrollDown', [ function() {
+    .directive('awCustomScroll', [ function() {
         return function(scope, element, attrs) {
-            var element_to_scroll = attrs.awScrollDown, elem;
-            $(element).on('click', function() {
-                var height = document.getElementById(element_to_scroll).scrollHeight;
-                $(element).hide();
-                $('#' + element_to_scroll).animate({scrollTop:height}, 800);
-            });
-            elem = document.getElementById(element_to_scroll);
-            $('#' + element_to_scroll).on('scroll', function() {
-                if (elem.scrollTop > 0 && $(element).is(':visible')) {
-                    $(element).hide();
-                }
-                else if (elem.scrollTop === 0 && !$(element).is(':visible')) {
-                    $(element).fadeIn(2500);
-                }
-            });
-            if (elem.scrollTop > 0 && $(element).is(':visible')) {
-                $(element).hide();
-            }
-        };
-    }])
-
-    .directive('awScrollUp', [ function() {
-        return function(scope, element, attrs) {
-            var element_to_scroll = attrs.awScrollUp, elem;
-            $(element).on('click', function() {
-                $(element).hide();
-                $('#' + element_to_scroll).animate({scrollTop:0}, 'slow');
-            });
-            elem = document.getElementById(element_to_scroll);
-            $('#' + element_to_scroll).on('scroll', function() {
-                if (elem.scrollTop === 0 && $(element).is(':visible')) {
-                    $(element).hide();
-                }
-                else if (elem.scrollTop > 0 && !$(element).is(':visible')) {
-                    $(element).fadeIn(2500);
+            $(element).mCustomScrollbar({
+                advanced:{
+                    updateOnContentResize: true
+                },
+                scrollButtons: {
+                    enable: true,
+                    scrollType: 'continuous'
+                },
+                theme: 'dark-thick',
+                mouseWheel: true,
+                scrollInertia: 0,
+                callbacks: {
+                    onTotalScroll: scope[attrs.onTotalScroll],
+                    //onTotalScrollOffset: 21,
+                    onTotalScrollBack: scope[attrs.onTotalScrollBack],
+                    //onTotalScrollBackOffset: 21
                 }
             });
-            if (elem.scrollTop === 0) {
-                $(element).hide();
-            }
         };
     }]);
 
