@@ -207,45 +207,27 @@ html body .dropdown-submenu:hover>a {
 $(function() {
   // Make links from relative URLs to resources.
   $('span.str').each(function() {
-    // Remove REST API links within data.
-    if ($(this).parent('a').size()) {
-      $(this).unwrap();
-    }
     var s = $(this).html();
     if (s.match(/^\"\/.+\/\"$/) || s.match(/^\"\/.+\/\?.*\"$/)) {
       $(this).html('"<a href=' + s + '>' + s.replace(/\"/g, '') + '</a>"');
     }
   });
   // Make links for all inventory script hosts.
-  $('.request-info .pln:contains("script")').each(function() {
-    $('.response-info span.str:contains("hosts")').each(function() {
-      if ($(this).text() != '"hosts"') {
-        return;
-      }
-      var hosts_state = 0;
-      $(this).find('~ span').each(function() {
-          if (hosts_state == 0) {
-            if ($(this).is('span.pun') && $(this).text() == '[') {
-              hosts_state = 1;
-            }
-          }
-          else if (hosts_state == 1) {
-            if ($(this).is('span.pun') && ($(this).text() == ']' || $(this).text() == '],')) {
-              hosts_state = 2;
-            }
-            else if ($(this).is('span.str')) {
-              if ($(this).text() == '"') {
-              }
-              else if ($(this).text().match(/^\".+\"$/)) {
-                var s = $(this).text().replace(/\"/g, '');
-                $(this).html('"<a href="' + '?host=' + s + '">' + s + '</a>"');
-              }
-              else {
-                var s = $(this).text();
-                $(this).html('<a href="' + '?host=' + s + '">' + s + '</a>');
-              }
-            }
-          }
+  $('.request-info .pln').filter(function() {
+    return $(this).text() === 'script';
+  }).each(function() {
+    $('.response-info span.str').filter(function() {
+      return $(this).text() === '"hosts"';
+    }).each(function() {
+      $(this).nextUntil('span.pun:contains("]")').filter('span.str').each(function() {
+        if ($(this).text().match(/^\".+\"$/)) {
+          var s = $(this).text().replace(/\"/g, '');
+          $(this).html('"<a href="' + '?host=' + s + '">' + s + '</a>"');
+        }
+        else if ($(this).text() !== '"') {
+          var s = $(this).text();
+          $(this).html('<a href="' + '?host=' + s + '">' + s + '</a>');
+        }
       });
     });
   });
