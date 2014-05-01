@@ -2,7 +2,7 @@
     <div ng-cloak id="htmlTemplate">
         
         <div class="row">
-            <div id="breadcrumb-container" class="col-md-12">
+            <div id="breadcrumb-container" class="col-md-12" style="position: relative;">
                 <div class="nav-path">
                     <ul class="breadcrumb" id="breadcrumb-list">
                         <li><a href="/#/jobs">Jobs</a></li>
@@ -15,7 +15,9 @@
         
         <div class="row" style="position: relative;">
             <div id="job-detail-container">
-
+                <div id="summary-button" style="display: hidden;">
+                    <a href="" class="btn btn-xs btn-default" ng-click="toggleSummary()" aw-tool-tip="View hosts summary" data-placement="top"><i class="fa fa-arrow-circle-left fa-lg"></i></a>
+                </div>
                 <div class="job_well">
                     <div class="row status-row">
                         <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 job-label">Status</div>
@@ -126,10 +128,13 @@
                 
                 </div><!-- well -->
 
-            </div><!-- col-md-7 -->
+            </div><!-- job-detail-container -->
 
             <div id="job-summary-container">
                 <div class="job_well">
+                    <div id="hide-summary-button" style="display: hidden;">
+                        <a href="" class="btn btn-xs btn-default" ng-click="toggleSummary('hide')" aw-tool-tip="Hide hosts summary" data-placement="top"><i class="fa fa-arrow-circle-right fa-lg"></i></a>
+                    </div>
                     <div id="hosts-summary-section" class="section job_summary">
                         <div class="header">
                             <div class="title">Host Summary</div>

@@ -258,10 +258,18 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         if (ww < 1240) {
             $('#job-summary-container').hide();
             $('#job-detail-container').css({ "width": "100%", "padding-right": "15px" });
+            $('#summary-button').show();
         }
         else {
+            $('.overlay').hide();
+            $('#summary-button').hide();
+            $('#hide-summary-button').hide();
             $('#job-detail-container').css({ "width": "58.33333333%", "padding-right": "7px" });
-            $('#job-summary-container').show();
+            $('#job-summary-container .job_well').css({
+                'box-shadow': 'none',
+                'height': 'auto'
+            });
+            $('#job-summary-container').css({ "width": "41.66666667%", "padding-right": "15px" }).show();
         }
     }
     $(document).ready(function() {
@@ -271,6 +279,35 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     $(window).resize(_.debounce(function(){
         adjustSize();
     }, 500));
+
+    $scope.toggleSummary = function(hide) {
+        var docw, doch, height = $('#job-detail-container').height();
+        if (!hide) {
+            docw = $(window).width();
+            doch = $(window).height();
+            $('#summary-button').hide();
+            $('.overlay').css({
+                width: $(document).width(),
+                height: $(document).height()
+            }).show();
+            $('#job-summary-container .job_well').height(height - 18).css({
+                'box-shadow': '-3px 3px 5px 0 #ccc'
+            });
+            $('#hide-summary-button').show();
+            $('#job-summary-container').css({
+                top: 0,
+                right: 0,
+                width: '75%',
+                'z-index': 2000,
+                'padding-right': '15px'
+            }).show('slide', {'direction': 'right'});
+        }
+        else {
+            $('.overlay').hide();
+            $('#summary-button').show();
+            $('#job-summary-container').hide('slide', {'direction': 'right'});
+        }
+    };
 
     $scope.HostDetailOnTotalScroll = function(mcs) {
         var url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask;
@@ -388,6 +425,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
         }
+        scope.auto_scroll = false;
     };
 
     $scope.HostSummaryOnTotalScrollBack = function(mcs) {

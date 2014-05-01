@@ -510,16 +510,16 @@ angular.module('Tower', [
                 setTimeout(function() {
                     $rootScope.$apply(function() {
                         sock.checkStatus();
-                        $rootScope.$emit('SocketErrorEncountered');
+                        //$rootScope.$emit('SocketErrorEncountered');
                         $log.debug('socket status: ' + $rootScope.socketStatus);
                     });
-                });
+                },2000);
                 sock.on("status_changed", function(data) {
                     $rootScope.$emit('JobStatusChange', data);
                 });
             }
             openSocket();
-
+            /*
             $rootScope.socketToggle = function() {
                 switch($rootScope.socketStatus) {
                     case 'ok':
@@ -534,6 +534,6 @@ angular.module('Tower', [
                         $rootScope.socketTip = '';
                         setTimeout(openSocket, 500);
                 }
-            };
+            };*/
         }
     ]);
