@@ -269,7 +269,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 'box-shadow': 'none',
                 'height': 'auto'
             });
-            $('#job-summary-container').css({ "width": "41.66666667%", "padding-right": "15px" }).show();
+            $('#job-summary-container').css({ "width": "41.66666667%", "padding-right": "15px", "z-index": 0 }).show();
         }
     }
     $(document).ready(function() {
