@@ -735,9 +735,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 scrollInertia: 0,
                 callbacks: {
                     onTotalScroll: scope[attrs.onTotalScroll],
-                    //onTotalScrollOffset: 21,
                     onTotalScrollBack: scope[attrs.onTotalScrollBack],
-                    //onTotalScrollBackOffset: 21
                 }
             });
         };

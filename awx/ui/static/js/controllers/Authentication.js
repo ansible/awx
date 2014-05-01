@@ -41,7 +41,9 @@ function Authenticate($cookieStore, $compile, $window, $scope, $rootScope, $loca
     });
 
     // Just in case, make sure the wait widget is not active
+    // and scroll the window to the top
     Wait('stop');
+    window.scrollTo(0,0);
 
     // Display the login dialog
     $('#login-modal').modal({

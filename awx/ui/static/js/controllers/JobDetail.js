@@ -10,7 +10,7 @@
 'use strict';
 
 function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors, DigestEvents,
-    SelectPlay, SelectTask, Socket, GetElapsed) {
+    SelectPlay, SelectTask, Socket, GetElapsed, SelectHost) {
 
     ClearScope();
 
@@ -27,6 +27,9 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     scope.hostResults = [];
     scope.job_status = {};
     scope.job_id = job_id;
+    scope.auto_scroll = false;
+    scope.searchTaskHostsEnabled = true;
+    scope.searchSummaryHostsEnabled = true;
     
     event_socket =  Socket({
         scope: scope,
@@ -272,39 +275,42 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     $scope.HostDetailOnTotalScroll = function(mcs) {
         var url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask;
         url += '&host__name__gt=' + scope.hostResults[scope.hostResults.length - 1].name + '&host__isnull=false&page_size=5&order_by=host__name';
-        Wait('start');
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                setTimeout(function() {
-                    scope.$apply(function() {
-                        data.results.forEach(function(row) {
-                            scope.hostResults.push({
-                                id: row.id,
-                                status: ( (row.failed) ? 'failed': (row.changed) ? 'changed' : 'successful' ),
-                                host_id: row.host,
-                                task_id: row.parent,
-                                name: row.event_data.host,
-                                created: row.created,
-                                msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
+        if (!scope.auto_scroll) {
+            Wait('start');
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    setTimeout(function() {
+                        scope.$apply(function() {
+                            data.results.forEach(function(row) {
+                                scope.hostResults.push({
+                                    id: row.id,
+                                    status: ( (row.failed) ? 'failed': (row.changed) ? 'changed' : 'successful' ),
+                                    host_id: row.host,
+                                    task_id: row.parent,
+                                    name: row.event_data.host,
+                                    created: row.created,
+                                    msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
+                                });
+                                if (scope.hostResults.length > 10) {
+                                    scope.hostResults.splice(0,1);
+                                }
                             });
-                            if (scope.hostResults.length > 10) {
-                                scope.hostResults.splice(0,1);
+                            //$('#hosts-table-detail').mCustomScrollbar("update");
+                            if (data.next) {
+                                // there are more rows. move dragger up, letting user know.
+                                setTimeout(function() { $('#hosts-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop - 10) + 'px'}); }, 700);
                             }
                         });
-                        $('#tasks-table-detail').mCustomScrollbar("update");
-                        if (data.next) {
-                            // there are more rows. move dragger up, letting user know.
-                            setTimeout(function() { $('.mCSB_dragger').css({ top: (mcs.draggerTop - 10) + 'px'}); }, 700);
-                        }
-                    });
-                }, 100);
-                Wait('stop');
-            })
-            .error(function(data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + '. GET returned: ' + status });
-            });
+                    }, 100);
+                    Wait('stop');
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
+        }
+        scope.auto_scroll = false;
     };
 
     $scope.HostDetailOnTotalScrollBack = function(mcs) {
@@ -330,10 +336,10 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                                 scope.hostResults.pop();
                             }
                         });
-                        $('#tasks-table-detail').mCustomScrollbar("update");
+                        //$('#hosts-table-detail').mCustomScrollbar("update");
                         if (data.next) {
                             // there are more rows. move dragger down, letting user know.
-                            setTimeout(function() { $('.mCSB_dragger').css({ top: (mcs.draggerTop + 10) + 'px' }); }, 700);
+                            setTimeout(function() { $('#hosts-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop + 10) + 'px' }); }, 700);
                         }
                     });
                 }, 100);
@@ -344,8 +350,170 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                     msg: 'Call to ' + url + '. GET returned: ' + status });
             });
     };
+
+    $scope.HostSummaryOnTotalScroll = function(mcs) {
+        var url = GetBasePath('jobs') + job_id + '/job_host_summaries/';
+        url += '?host__name__gt=' + scope.hosts[scope.hosts.length - 1].name + '&page_size=5&order_by=host__name';
+        if (!scope.auto_scroll) {
+            Wait('start');
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    setTimeout(function() {
+                        scope.$apply(function() {
+                            data.results.forEach(function(row) {
+                                scope.hosts.push({
+                                    id: row.host,
+                                    name: row.summary_fields.host.name,
+                                    ok: row.ok,
+                                    changed: row.changed,
+                                    unreachable: row.dark,
+                                    failed: row.failures
+                                });
+                                if (scope.hosts.length > 10) {
+                                    scope.hosts.splice(0,1);
+                                }
+                            });
+                            //$('#hosts-summary-table').mCustomScrollbar("update");
+                            if (data.next) {
+                                // there are more rows. move dragger up, letting user know.
+                                setTimeout(function() { $('#hosts-summary-table .mCSB_dragger').css({ top: (mcs.draggerTop - 10) + 'px'}); }, 700);
+                            }
+                        });
+                    }, 100);
+                    Wait('stop');
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
+        }
+    };
+
+    $scope.HostSummaryOnTotalScrollBack = function(mcs) {
+        var url = GetBasePath('jobs') + job_id + '/job_host_summaries/';
+        Wait('start');
+        url += '?host__name__lt=' + scope.hosts[0].name + '&page_size=5&order_by=-host__name';
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                setTimeout(function() {
+                    scope.$apply(function() {
+                        data.results.forEach(function(row) {
+                            scope.hosts.unshift({
+                                id: row.host,
+                                name: row.summary_fields.host.name,
+                                ok: row.ok,
+                                changed: row.changed,
+                                unreachable: row.dark,
+                                failed: row.failures
+                            });
+                            if (scope.hosts.length > 10) {
+                                scope.hosts.pop();
+                            }
+                        });
+                        $('#hosts-summary-table').mCustomScrollbar("update");
+                        if (data.next) {
+                            // there are more rows. move dragger down, letting user know.
+                            setTimeout(function() { $('#hosts-summary-table .mCSB_dragger').css({ top: (mcs.draggerTop + 10) + 'px' }); }, 700);
+                        }
+                    });
+                }, 100);
+                Wait('stop');
+            })
+            .error(function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+    };
+
+    $scope.searchTaskHosts = function() {
+        var url;
+        Wait('start');
+        scope.hostResults = [];
+        url = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent=' + scope.activeTask;
+        url += (scope.task_host_name) ? '&host__name__icontains=' + scope.task_host_name : '';
+        url += '&host__name__isnull=false&page_size=10&order_by=host__name';
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                var i;
+                for (i = 0;  i < data.results.length; i++) {
+                    scope.hostResults.push({
+                        id: data.results[i].id,
+                        status: ( (data.results[i].failed) ? 'failed' : (data.results[i].changed) ? 'changed' : 'successful' ),
+                        host_id: data.results[i].host,
+                        task_id: data.results[i].parent,
+                        name: data.results[i].summary_fields.host.name,
+                        created: data.results[i].created,
+                        msg: data.results[i].event_data.res.msg
+                    });
+                }
+                Wait('stop');
+                SelectHost({ scope: scope });
+            })
+            .error(function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+        if (scope.task_host_name) {
+            scope.searchTaskHostsEnabled = false;
+        }
+        else {
+            scope.searchTaskHostsEnabled = true;
+        }
+    };
+
+    $scope.taskHostNameKeyPress = function(e) {
+        if (e.keyCode === 13) {
+            $scope.searchTaskHosts();
+        }
+    };
+
+    $scope.searchSummaryHosts = function() {
+        var url;
+        Wait('start');
+        scope.hosts = [];
+        url = GetBasePath('jobs') + $routeParams.id + '/job_host_summaries/?';
+        url += (scope.summary_host_name) ? 'host__name__icontains=' + scope.summary_host_name + '&': '';
+        url += 'page_size=10&order_by=host__name';
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                data.results.forEach(function(row) {
+                    scope.hosts.push({
+                        id: row.host,
+                        name: row.summary_fields.host.name,
+                        ok: row.ok,
+                        changed: row.changed,
+                        unreachable: row.dark,
+                        failed: row.failures
+                    });
+                });
+                Wait('stop');
+                $('#hosts-summary-table').mCustomScrollbar("update");
+                scope.auto_scroll = true;
+                setTimeout( function() { $('#hosts-summary-table').mCustomScrollbar("scrollTo", "bottom"); }, 700);
+            })
+            .error(function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+        if (scope.summary_host_name) {
+            scope.searchSummaryHostsEnabled = false;
+        }
+        else {
+            scope.searchSummaryHostsEnabled = true;
+        }
+    };
+
+    $scope.summaryHostNameKeyPress = function(e) {
+        if (e.keyCode === 13) {
+            $scope.searchSummaryHosts();
+        }
+    };
 }
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',
-    'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed'
+    'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'SelectHost'
 ];

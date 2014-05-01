@@ -48,7 +48,7 @@
                                     <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12">Name</div>
                                 </div>
                             </div>
-                            <div id="plays-table-detail" class="table-detail">
+                            <div id="plays-table-detail" aw-custom-scroll class="table-detail">
                                 <div class="row cursor-pointer" ng-repeat="play in plays"  ng-class="play.playActiveClass" ng-click="selectPlay(play.id)">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ play.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
@@ -71,7 +71,7 @@
                                     <div class="col-lg-5 col-md-5 hidden-xs hidden-sm">Host Status</div>
                                 </div>
                             </div>
-                            <div id="tasks-table-detail" class="table-detail">
+                            <div id="tasks-table-detail" aw-custom-scroll class="table-detail">
                                 <div class="row cursor-pointer" ng-repeat="task in tasks | filter:{ play_id: activePlay }" ng-class="task.taskActiveClass"
                                     ng-click="selectTask(task.id)">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ task.created | date: 'HH:mm:ss' }}</div>
@@ -94,7 +94,14 @@
                         </div><!-- section -->
 
                         <div id="task-hosts-section" class="section">
-                            <h5>Hosts</h5>
+                            <div class="header">
+                                <div class="title">Hosts</div>
+                                <div class="search-field">
+                                    <input type="text" ng-model="task_host_name" placeholder="Search" ng-keypress="taskHostNameKeyPress($event)" />
+                                    <a class="search-icon" ng-show="searchTaskHostsEnabled" ng-click="searchTaskHosts()"><i class="fa fa-search"></i></a>
+                                    <a class="search-icon" ng-show="!searchTaskHostsEnabled" ng-click="task_host_name=''; searchTaskHosts()"><i class="fa fa-times"></i></a>
+                                </div>
+                            </div>
                             <div id="hosts-table-detail" aw-custom-scroll data-on-total-scroll="HostDetailOnTotalScroll"
                                 data-on-total-scroll-back="HostDetailOnTotalScrollBack" class="table-detail">
                                 <div id="hosts-table-detail-inner">
@@ -104,6 +111,11 @@
                                         </div>
                                         <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
                                             {{ result.msg }}
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-show="hostResults.length === 0">
+                                        <div class="col-lg-12">
+                                            <div class="loading-info">No records matched your search.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -119,7 +131,14 @@
             <div id="job-summary-container">
                 <div class="job_well">
                     <div id="hosts-summary-section" class="section job_summary">
-                        <h5>Host Summary</h5>
+                        <div class="header">
+                            <div class="title">Host Summary</div>
+                            <div class="search-field">
+                                <input type="text" ng-model="summary_host_name" placeholder="Search" ng-keypress="summaryHostNameKeyPress($event)" />
+                                <a class="search-icon" ng-show="searchSummaryHostsEnabled" ng-click="searchSummaryHosts()"><i class="fa fa-search"></i></a>
+                                <a class="search-icon" ng-show="!searchSummaryHostsEnabled" ng-click="summary_host_name=''; searchSummaryHosts()"><i class="fa fa-times"></i></a>
+                            </div>
+                        </div>
                         <div class="table-header">
                             <div class="row">
                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Host</div>
@@ -129,7 +148,8 @@
                                 <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Fail</div>
                             </div>
                         </div>
-                        <div class="table-detail">
+                        <div id="hosts-summary-table" class="table-detail" aw-custom-scroll data-on-total-scroll="HostSummaryOnTotalScroll"
+                                data-on-total-scroll-back="HostSummaryOnTotalScrollBack">
                             <div class="row" ng-repeat="host in hosts" id="{{ host.id }}">
                                 <div class="name col-lg-4 col-md-4 col-sm-4 col-xs-4"><a href="/#/home/hosts/?id={{ host.id }}"
                                     aw-tool-tip="View host" data-placement="top">{{ host.name }}</a></div>
@@ -137,6 +157,11 @@
                                 <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{ host.changed }}</div>
                                 <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{ host.unreachable }}</div>
                                 <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{ host.failed }}</div>
+                            </div>
+                            <div class="row" ng-show="hosts.length === 0">
+                                <div class="col-lg-12">
+                                    <div class="loading-info">No records matched your search.</div>
+                                </div>
                             </div>
                         </div>
                     </div><!-- section -->

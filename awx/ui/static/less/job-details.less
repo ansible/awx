@@ -194,6 +194,36 @@
     }
 }
 
+.header {
+    width: 100%;
+    height: 28px;
+    padding: bottom: 5px;
+
+    .title {
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .search-field {
+        display: inline-block;
+        position: relative;
+        float: right;
+        input {
+            width: 250px;
+        }
+        a {
+            position: absolute;
+            right: 3px;
+            top: 3px;
+            color: #a9a9a9;
+        }
+        a:hover {
+            color: @black;
+        }
+    }
+}
+
 #task-hosts-section {
     position: relative; 
     top: 0;

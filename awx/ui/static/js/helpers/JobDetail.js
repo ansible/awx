@@ -474,23 +474,33 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
         });
 
         if (!host_found) {
-            scope.hosts.push({
-                id: host_id,
-                name: name,
-                ok: (status === 'successful') ? 1 : 0,
-                changed: (status === 'changed') ? 1 : 0,
-                unreachable: (status === 'unreachable') ? 1 : 0,
-                failed: (status === 'failed') ? 1 : 0
-            });
-            scope.hosts.sort(function(a,b) {
-                if (a.name < b.name) {
-                    return -1;
+            if (scope.hosts.length < 10 || name > scope.hosts[0].name) {
+                // This is a new host we want added to the list 
+                scope.hosts.push({
+                    id: host_id,
+                    name: name,
+                    ok: (status === 'successful') ? 1 : 0,
+                    changed: (status === 'changed') ? 1 : 0,
+                    unreachable: (status === 'unreachable') ? 1 : 0,
+                    failed: (status === 'failed') ? 1 : 0
+                });
+                scope.hosts.sort(function(a,b) {
+                    if (a.name < b.name) {
+                        return -1;
+                    }
+                    if (a.name > b.name) {
+                        return 1;
+                    }
+                    return 0;
+                });
+                // Only keep 10 hosts
+                if (scope.hosts.length > 10) {
+                    scope.hosts.splice(0,1);
                 }
-                if (a.name > b.name) {
-                    return 1;
-                }
-                return 0;
-            });
+                scope.auto_scroll = true;
+                $('#tasks-table-detail').mCustomScrollbar("update");
+                setTimeout( function() { $('#hosts-summary-table').mCustomScrollbar("scrollTo", "bottom"); }, 700);
+            }
         }
 
         UpdateTaskStatus({
@@ -697,7 +707,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     });
                 }
                 Wait('stop');
-                SelectHost();
+                SelectHost({ scope: scope });
             })
             .error(function(data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -707,11 +717,12 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
 }])
 
 .factory('SelectHost', [ function() {
-    return function() {
+    return function(params) {
+        var scope = params.scope;
+        scope.auto_scroll = true;
         setTimeout(function() {
-            var inner_height = $('#hosts-table-detail').innerHeight();
-            $('#hosts-table-detail').scrollTop(inner_height);
             $('#tasks-table-detail').mCustomScrollbar("update");
+            setTimeout( function() { $('#hosts-table-detail').mCustomScrollbar("scrollTo", "bottom"); }, 700);
         }, 100);
     };
 }]);
