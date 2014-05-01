@@ -39,9 +39,10 @@
 
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
-.factory('DigestEvents', ['UpdatePlayStatus', 'UpdatePlayNoHostsMatched', 'UpdateHostStatus', 'UpdatePlayChild', 'AddHostResult', 'SelectPlay', 'SelectTask',
-    'GetHostCount', 'GetElapsed',
-function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePlayChild, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed) {
+.factory('DigestEvents', ['UpdatePlayStatus', 'UpdateHostStatus', 'UpdatePlayChild', 'AddHostResult', 'SelectPlay', 'SelectTask',
+    'GetHostCount', 'GetElapsed', 'UpdateTaskStatus',
+function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed,
+    UpdateTaskStatus) {
     return function(params) {
         
         var scope = params.scope,
@@ -145,10 +146,7 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     id: event.id
                 });
             }
-            /*if (event.event === 'playbook_on_no_hosts_matched') {
-                UpdatePlayNoHostsMatched({ scope: scope, play_id: event.parent });
-            }*/
-    
+            
             if (event.event === 'runner_on_unreachable') {
                 UpdateHostStatus({
                     scope: scope,
@@ -174,6 +172,16 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     created: event.created,
                     modified: event.modified,
                     message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
+                });
+            }
+            if (event.event === 'runner_on_no_hosts') {
+                UpdateTaskStatus({
+                    scope: scope,
+                    failed: event.failed,
+                    changed: event.changed,
+                    task_id: event.parent,
+                    modified: event.modified,
+                    no_hosts: true
                 });
             }
             if (event.event === 'runner_on_skipped') {
@@ -371,7 +379,8 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             failed = params.failed,
             changed = params.changed,
             id = params.play_id,
-            modified = params.modified;
+            modified = params.modified,
+            no_hosts = params.no_hosts;
         scope.plays.every(function(play,idx) {
             if (play.id === id) {
                 if (failed) {
@@ -379,7 +388,12 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                 }
                 else if (play.status !== 'changed' && play.status !== 'failed') {
                     // once the status becomes 'changed' or 'failed' don't modify it
-                    scope.plays[idx].status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+                    if (no_hosts) {
+                        scope.plays[idx].status = 'no-matching-hosts';
+                    }
+                    else {
+                        scope.plays[idx].status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+                    }
                 }
                 scope.plays[idx].finished = modified;
                 scope.plays[idx].elapsed = GetElapsed({
@@ -404,10 +418,14 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
             failed = params.failed,
             changed = params.changed,
             id = params.task_id,
-            modified = params.modified;
+            modified = params.modified,
+            no_hosts = params.no_hosts;
         scope.tasks.every(function (task, i) {
             if (task.id === id) {
-                if (failed) {
+                if (no_hosts){
+                    scope.tasks[i].status = 'no-matching-hosts';
+                }
+                else if (failed) {
                     scope.tasks[i].status = 'failed';
                 }
                 else if (task.status !== 'changed' && task.status !== 'failed') {
@@ -424,22 +442,9 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
                     failed: failed,
                     changed: changed,
                     play_id: task.play_id,
-                    modified: modified
+                    modified: modified,
+                    no_hosts: no_hosts
                 });
-                return false;
-            }
-            return true;
-        });
-    };
-}])
-
-.factory('UpdatePlayNoHostsMatched', [ function() {
-    return function(params) {
-        var scope = params.scope,
-            id = params.play_id;
-        scope.plays.every(function(play,idx) {
-            if (play.id === id) {
-                scope.plays[idx].status = 'none';
                 return false;
             }
             return true;

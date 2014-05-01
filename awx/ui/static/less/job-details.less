@@ -85,7 +85,7 @@
 .changed-hosts {
     background-color: #FFC773;
 }
-.skipped-hosts {
+.skipped-hosts, .no-matching-hosts {
     background-color: #D4D4D4;
 }
 
@@ -177,7 +177,8 @@
     overflow-x: hidden;
     overflow-y: auto;
     border: 1px solid @black;
-    background-color: @white; 
+    background-color: @white;
+    padding-left: 3px; 
     .row {
         border-top: 1px solid @grey;
     }

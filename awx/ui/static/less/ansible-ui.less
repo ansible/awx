@@ -1020,7 +1020,8 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-waiting:before,
   .icon-job-new:before,
   .icon-job-none:before,
-  .icon-job-skipped:before {
+  .icon-job-skipped:before,
+  .icon-job-no-matching-hosts:before {
       content: "\f10c";
   }
 
@@ -1053,7 +1054,8 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-pending,
   .icon-job-waiting,
   .icon-job-new,
-  .icon-job-skipped {
+  .icon-job-skipped,
+  .icon-job-no-matching-hosts {
       color: @grey;
       opacity: 0.45;
   }
@@ -1327,6 +1329,7 @@ input[type="checkbox"].checkbox-no-label {
 
   #hosts-container.col-lg-6 {
       padding-left: 7px;
+      padding-right: 17px;
   }
 
   #groups-container .well,
