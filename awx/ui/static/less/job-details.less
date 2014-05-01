@@ -180,7 +180,10 @@
     background-color: @white; 
     .row {
         border-top: 1px solid @grey;
-    } 
+    }
+    .row:first-child {
+        border: none;
+    }
     /*.row:nth-child(odd) {
         background-color: @well;
         padding-top: 0;
@@ -188,6 +191,11 @@
     }*/
     .active {
         background-color: #EDF2F2;
+    }
+
+    .loading-info {
+        padding-top: 5px;
+        padding-left: 3px;
     }
 }
 

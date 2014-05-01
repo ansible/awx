@@ -695,16 +695,18 @@ function(UpdatePlayStatus, UpdatePlayNoHostsMatched, UpdateHostStatus, UpdatePla
         Rest.get()
             .success(function(data) {
                 var i;
-                for (i = data.results.length - 1; i >=0; i--) {
-                    scope.hostResults.push({
-                        id: data.results[i].id,
-                        status: ( (data.results[i].failed) ? 'failed' : (data.results[i].changed) ? 'changed' : 'successful' ),
-                        host_id: data.results[i].host,
-                        task_id: data.results[i].parent,
-                        name: data.results[i].summary_fields.host.name,
-                        created: data.results[i].created,
-                        msg: data.results[i].event_data.res.msg
-                    });
+                if (data.results.length > 0) {
+                    for (i = data.results.length - 1; i >=0; i--) {
+                        scope.hostResults.push({
+                            id: data.results[i].id,
+                            status: ( (data.results[i].failed) ? 'failed' : (data.results[i].changed) ? 'changed' : 'successful' ),
+                            host_id: data.results[i].host,
+                            task_id: data.results[i].parent,
+                            name: data.results[i].event_data.host,
+                            created: data.results[i].created,
+                            msg: ( (data.results[i].event_data && data.results[i].event_data.res) ? data.results[i].event_data.res.msg : '' )
+                        });
+                    }
                 }
                 Wait('stop');
                 SelectHost({ scope: scope });

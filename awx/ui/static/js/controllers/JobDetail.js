@@ -254,7 +254,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     // Use debounce from the underscore library. We're including underscore
     // for the timezone stuff, so might as well take advantage of it.
     function adjustSize() {
-        var ww = $(window).width();
+        var height, ww = $(window).width();
         if (ww < 1240) {
             $('#job-summary-container').hide();
             $('#job-detail-container').css({ "width": "100%", "padding-right": "15px" });
@@ -271,6 +271,23 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             });
             $('#job-summary-container').css({ "width": "41.66666667%", "padding-right": "15px", "z-index": 0 }).show();
         }
+
+        // Adjust page height
+        $('#plays-table-detail').height(150);
+        $('#plays-table-detail').mCustomScrollbar("update");
+        $('#tasks-table-detail').height(150);
+        $('#tasks-table-detail').mCustomScrollbar("update");
+        $('#hosts-table-detail').height(150);
+        $('#hosts-table-detail').mCustomScrollbar("update");
+        height = ($('#wrap').height() - $('.site-footer').height()) - $('.main-container').height() - 22;
+        if (height > 15) {
+            $('#plays-table-detail').height(150 + (height / 3));
+            $('#plays-table-detail').mCustomScrollbar("update");
+            $('#tasks-table-detail').height(150 + (height / 3));
+            $('#tasks-table-detail').mCustomScrollbar("update");
+            $('#hosts-table-detail').height(150 + (height / 3));
+            $('#hosts-table-detail').mCustomScrollbar("update");
+        }
     }
     $(document).ready(function() {
         adjustSize();
@@ -281,10 +298,11 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     }, 500));
 
     $scope.toggleSummary = function(hide) {
-        var docw, doch, height = $('#job-detail-container').height();
+        var docw, doch, height = $('#job-detail-container').height(), slide_width;
         if (!hide) {
             docw = $(window).width();
             doch = $(window).height();
+            slide_width = (docw < 840) ? '100%' : '80%';
             $('#summary-button').hide();
             $('.overlay').css({
                 width: $(document).width(),
@@ -297,9 +315,10 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             $('#job-summary-container').css({
                 top: 0,
                 right: 0,
-                width: '75%',
+                width: slide_width,
                 'z-index': 2000,
-                'padding-right': '15px'
+                'padding-right': '15px',
+                'padding-left': '15px'
             }).show('slide', {'direction': 'right'});
         }
         else {
@@ -373,7 +392,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                                 scope.hostResults.pop();
                             }
                         });
-                        //$('#hosts-table-detail').mCustomScrollbar("update");
+                        $('#hosts-table-detail').mCustomScrollbar("update");
                         if (data.next) {
                             // there are more rows. move dragger down, letting user know.
                             setTimeout(function() { $('#hosts-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop + 10) + 'px' }); }, 700);
