@@ -479,6 +479,9 @@ class JobEvent(CreatedModifiedModel):
         on_delete=models.SET_NULL,
         editable=False,
     )
+    host_name = models.CharField(
+        max_length=1024,
+        default='')
     hosts = models.ManyToManyField(
         'Host',
         related_name='job_events',

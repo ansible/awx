@@ -262,14 +262,13 @@ def run_taskmanager(command_port):
     paused = False
     task_capacity = get_system_task_capacity()
     command_context = zmq.Context()
-    command_socket = command_context.socket(zmq.REP)
+    command_socket = command_context.socket(zmq.PULL)
     command_socket.bind(command_port)
     print("Listening on %s" % command_port)
     last_rebuild = datetime.datetime.fromtimestamp(0)
     while True:
         try:
             message = command_socket.recv_json(flags=zmq.NOBLOCK)
-            command_socket.send("1")
         except zmq.ZMQError,e:
             message = None
         if message is not None or (datetime.datetime.now() - last_rebuild).seconds > 10:
