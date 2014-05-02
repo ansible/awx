@@ -113,7 +113,7 @@ dbchange:
 dbshell:
 	sudo -u postgres psql -d awx-dev
 
-server:
+server_noattach:
 	tmux new-session -d -s tower 'exec make runserver'
 	tmux rename-window 'Tower'
 	tmux select-window -t tower:0
@@ -122,6 +122,8 @@ server:
 	tmux select-pane -U
 	tmux split-window -v 'exec make receiver'
 	tmux split-window -h 'exec make taskmanager'
+
+server: server_noattach
 	tmux -2 attach-session -t tower
 
 # Run the built-in development webserver (by default on http://localhost:8013).
