@@ -93,7 +93,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         };
 
         $(window).resize(_.debounce(function() {
-            resizeContainers(); 
+            resizeContainers();
         }, 500));
     });
 
@@ -162,7 +162,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             queued_scope[QueuedJobsList.iterator + '_page_size'] = rows;
             queued_scope.changePageSize(QueuedJobsList.name, QueuedJobsList.iterator);
         }
-    }   
+    }
 }
 
 JobsListController.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope', 'RunningJobsList', 'CompletedJobsList',

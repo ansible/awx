@@ -359,7 +359,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             e, html;
 
         // Add the search widget. We want it arranged differently, so we're injecting and compiling it separately
-        html = SearchWidget({ 
+        html = SearchWidget({
             iterator: list.iterator,
             template: params.list,
             includeSize: false
