@@ -61,14 +61,7 @@ angular.module('ScheduledJobsDefinition', [])
             }
         },
 
-        actions: {
-            columnClass: 'col-md-2 col-sm-3 col-xs-3',
-            refresh: {
-                mode: 'all',
-                awToolTip: "Refresh the page",
-                ngClick: "refreshSchedules()"
-            }
-        },
+        actions: { },
         
         fieldActions: {
             "play": {

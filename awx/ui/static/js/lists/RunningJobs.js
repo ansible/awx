@@ -63,14 +63,7 @@ angular.module('RunningJobsDefinition', [])
             }
         },
 
-        actions: {
-            columnClass: 'col-md-2 col-sm-3 col-xs-3',
-            refresh: {
-                mode: 'all',
-                awToolTip: "Refresh the page",
-                ngClick: "refreshJobs()"
-            }
-        },
+        actions: { },
        
         fieldActions: {
             submit: {

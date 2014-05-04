@@ -4,37 +4,57 @@
             <div class="col-md-12" id="breadcrumbs"></div>
         </div>    
         <div class="row">
-            <div class="col-md-12">
-                <div id="jobs-page ">
-                    <div id="job-page-accordion-0" aw-accordion>
-                        <h3>Completed</h3>
-                        <div class="job-list" id="completed-jobs-container">
-                            <div id="completed-jobs" class="job-list-target"></div>
-                        </div>
+            <div class="col-md-6 left-side">
+                <div class="jobs-list-container completed">
+                    <div class="row search-row">
+                        <div class="col-md-6"><div class="title">Completed</div></div>
+                        <div class="col-md-6" id="completed-jobs-search-container"></div>
                     </div>
-                    <div id="job-page-accordion-1" aw-accordion>
-                        <h3>Active</h3>
-                        <div class="job-list" id="active-jobs-container">
-                            <div id="active-jobs" class="job-list-target"></div>
-                        </div>
-                    </div>
-                    <div id="job-page-accordion-2" aw-accordion>
-                        <h3>Queued</h3>
-                        <div class="job-list" id="queued-jobs-container">
-                            <div id="queued-jobs" class="job-list-target"></div>
-                        </div>
-                    </div>
-                    <div id="job-page-accordion-3" aw-accordion>
-                        <h3>Scheduled</h3>
-                        <div class="job-list" id="scheduled-jobs-container">
-                            <div id="scheduled-jobs" class="job-list-target"></div>
-                        </div>
+                    <div class="job-list" id="completed-jobs-container">
+                        <div id="completed-jobs" class="job-list-target"></div>
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="col-md-6 right-side">
+                <div class="jobs-list-container">
+                    <div class="row search-row">
+                        <div class="col-md-6"><div class="title">Active</div></div>
+                        <div class="col-md-6" id="active-jobs-search-container"></div>
+                    </div>
+                    <div class="job-list" id="active-jobs-container">
+                        <div id="active-jobs" class="job-list-target"></div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- row -->
+        <div class="row bottom-row">
+            <div class="col-md-6 left-side">
+                <div class="jobs-list-container">
+                    <div class="row search-row">
+                        <div class="col-md-6"><div class="title">Queued</div></div>
+                        <div class="col-md-6" id="queued-jobs-search-container"></div>
+                    </div>
+                    <div class="job-list" id="queued-jobs-container">
+                        <div id="queued-jobs" class="job-list-target"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 right-side">
+                <div class="jobs-list-container">
+                    <div class="row search-row">
+                        <div class="col-md-6"><div class="title">Scheduled</div></div>
+                        <div class="col-md-6" id="scheduled-jobs-search-container"></div>
+                    </div>
+                    <div class="job-list" id="scheduled-jobs-container">
+                        <div id="scheduled-jobs" class="job-list-target"></div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- row -->
+       
         <div id="schedule-dialog-target"></div>
         <div ng-include="'/static/partials/logviewer.html'"></div>
         <div ng-include="'/static/partials/schedule_dialog.html'"></div>
+    
     </div>
 </div>

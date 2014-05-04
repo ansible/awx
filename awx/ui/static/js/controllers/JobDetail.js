@@ -5,8 +5,6 @@
  *
  */
 
-/* global _ */
-
 'use strict';
 
 function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors, DigestEvents,
@@ -251,8 +249,6 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         }
     });
 
-    // Use debounce from the underscore library. We're including underscore
-    // for the timezone stuff, so might as well take advantage of it.
     function adjustSize() {
         var height, ww = $(window).width();
         if (ww < 1240) {
@@ -293,6 +289,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         adjustSize();
     });
 
+    // Use debounce for the underscore library to adjust after user resizes window.
     $(window).resize(_.debounce(function(){
         adjustSize();
     }, 500));

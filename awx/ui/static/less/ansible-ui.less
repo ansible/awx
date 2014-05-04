@@ -35,6 +35,7 @@
 @import "angular-scheduler.less";
 @import "log-viewer.less";
 @import "job-details.less";
+@import "jobs.less";
 
 
 html, body { height: 100%; }
@@ -376,7 +377,7 @@ dd {
 
 /* The sticky footer: http://css-tricks.com/snippets/css/sticky-footer, with less variables */
   @footer-height: 68px;
-  @footer-margin: 40px;
+  @footer-margin: 22px;
   @push-height: (@footer-height + @footer-margin);
   #wrap {
       min-height: 100%;
@@ -965,7 +966,7 @@ input[type="checkbox"].checkbox-no-label {
     padding: 15px 0;
 }
 
-/* Jobs pages */
+/* Status Icons */
 
   .license-expired,
   .license-invalid,
@@ -1088,24 +1089,7 @@ input[type="checkbox"].checkbox-no-label {
     line-height: 1;
   }
 
-  .job-list.ui-accordion-content {
-      padding: 25px 15px 25px 15px;
-  }
-  .job-list {
-      thead >tr >th, .page-row {
-          font-size: 12px;
-          color: #666;
-      }
-      .pagination li a {
-          font-size: 13px;
-      }
-      i[class*="icon-job-"] {
-          font-size: 13px;
-      }
-  }
-  #completed_jobs_table i[class*="icon-job-"] {
-      font-size: 13px;
-  }
+/* job_events page */ 
 
   #jobevents_table {
       div.return-code {

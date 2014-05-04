@@ -1,0 +1,70 @@
+/*********************************************
+ *  Copyright (c) 2014 AnsibleWorks, Inc.
+ *
+ *  jobs.less
+ *
+ *  custom styles for the jobs pages
+ *
+ */
+
+
+#jobs { 
+
+    .jobs-list-container {
+        border: 1px solid @grey;
+        border-radius: 4px;
+        padding: 5px;
+    }
+
+    .job-list {
+        thead >tr >th, .page-row {
+            font-size: 12px;
+            color: #666;
+        }
+        .pagination li a {
+            font-size: 13px;
+        }
+        i[class*="icon-job-"] {
+            font-size: 13px;
+        }
+    }
+
+    #completed_jobs_table i[class*="icon-job-"] {
+        font-size: 13px;
+    }
+    
+    .title {
+        font-weight: bold;
+        margin-top: 5px;
+        margin-left: 3px;
+    }
+
+}
+
+@media (min-width: 1024px) {
+    #jobs {
+        .left-side {
+            padding-right: 7px;
+        }
+
+        .right-side {
+            padding-left: 7px;
+        }
+
+        .bottom-row {
+            margin-top: 15px;
+        }
+    }
+}
+
+@media (max-width: 1023px) {
+    #jobs .jobs-list-container { 
+        margin-top: 15px;
+    }
+    #jobs .jobs-list-container.completed {
+        margin-top: 0;
+    }
+    .title{
+        margin-bottom: 8px;
+    }
+}

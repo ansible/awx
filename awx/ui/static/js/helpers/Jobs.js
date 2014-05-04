@@ -347,24 +347,32 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
  *  Called from JobsList controller to load each section or list on the page
  *
  */
-.factory('LoadJobsScope', ['$routeParams', '$location', 'SearchInit', 'PaginateInit', 'GenerateList', 'JobsControllerInit', 'JobsListUpdate',
-    function($routeParams, $location, SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate) {
+.factory('LoadJobsScope', ['$routeParams', '$location', '$compile', 'SearchInit', 'PaginateInit', 'GenerateList', 'JobsControllerInit', 'JobsListUpdate', 'SearchWidget',
+    function($routeParams, $location, $compile, SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate, SearchWidget) {
     return function(params) {
         var parent_scope = params.parent_scope,
             scope = params.scope,
             list = params.list,
             id = params.id,
             url = params.url,
-            base = $location.path().replace(/^\//, '').split('/')[0];
+            base = $location.path().replace(/^\//, '').split('/')[0],
+            e, html;
+
+        // Add the search widget. We want it arranged differently, so we're injecting and compiling it separately
+        html = SearchWidget({ 
+            iterator: list.iterator,
+            template: params.list,
+            includeSize: false
+        });
+        e = angular.element(document.getElementById(id + '-search-container')).append(html);
+        $compile(e)(scope);
 
         GenerateList.inject(list, {
             mode: 'edit',
             id: id,
             breadCrumbs: false,
             scope: scope,
-            searchSize: 'col-lg-4 col-md-6',
-            listSize: 'col-lg-8 col-md-6',
-            showSearch: true
+            showSearch: false
         });
 
         SearchInit({

@@ -144,8 +144,7 @@ angular.module('PaginationHelpers', ['Utilities', 'RefreshHelper', 'RefreshRelat
 
             scope.changePageSize = function (set, iterator) {
                 // Called whenever a new page size is selected
-                // Using the session cookie, keep track of user rows per page selection
-                scope[iterator + '_page'] = 0;
+                scope[iterator + '_page'] = 1;
                 var new_url = scope[iterator + '_url'].replace(/\?page_size\=\d+/, ''),
                     connect = (/\/$/.test(new_url)) ? '?' : '&';
                 new_url += (scope[iterator + 'SearchParams']) ? connect + scope[iterator + 'SearchParams'] + '&page_size=' + scope[iterator + '_page_size'] :

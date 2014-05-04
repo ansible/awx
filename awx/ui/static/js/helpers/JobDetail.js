@@ -732,6 +732,14 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
             setTimeout( function() { $('#hosts-table-detail').mCustomScrollbar("scrollTo", "bottom"); }, 700);
         }, 100);
     };
+}])
+
+.factory('GetHostSummary', [ function() {
+
+}])
+
+.factory('DrawGraph', [ function() {
+
 }]);
 
 
