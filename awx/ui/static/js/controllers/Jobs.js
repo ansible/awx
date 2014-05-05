@@ -11,14 +11,105 @@
 'use strict';
 
 function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope, LoadJobsScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
-    ScheduledJobsList, GetChoices, GetBasePath, Wait) {
+    ScheduledJobsList, GetChoices, GetBasePath, Wait, Socket) {
     
     ClearScope();
 
     var e,
         completed_scope, running_scope, queued_scope, scheduled_scope,
         choicesCount = 0,
-        listCount = 0;
+        listCount = 0,
+        api_complete = false,
+        event_socket,
+        event_queue = [{"status":"pending","endpoint":"/socket.io/jobs","unified_job_id":4129,"event":"status_changed"}],
+        expecting = 0;
+
+    event_socket =  Socket({
+        scope: $scope,
+        endpoint: "jobs"
+    });
+    
+    event_socket.init();
+
+    event_socket.on("status_changed", function(data) {
+        if (api_complete) {
+            processEvent(data);
+        }
+        else {
+            event_queue.push(data);
+        }
+    });
+    
+    function processEvent(event) {
+        expecting = 0;
+        switch(event.status) {
+            case 'running':
+                if (!inList(running_scope[RunningJobsList.name], event.unified_job_id)) {
+                    expecting = 2;
+                    running_scope.search('running_job');
+                    queued_scope.search('queued_job');
+                }
+                break;
+            case 'new':
+            case 'pending':
+            case 'waiting':
+                if (!inList(queued_scope[QueuedJobsList.name], event.unified_job_id)) {
+                    expecting = 1;
+                    queued_scope.search('queued_job');
+                }
+                break;
+            case 'successful':
+            case 'failed':
+            case 'error':
+            case 'canceled':
+                if (!inList(completed_scope[CompletedJobsList.name], event.unified_job_id)) {
+                    expecting = 2;
+                    completed_scope.search('completed_job');
+                    running_scope.search('running_job');
+                }
+                break;
+        }
+    }
+
+    function inList(list, id) {
+        var found = false;
+        list.every( function(row) {
+            if (row.id === id) {
+                found = true;
+                return false;
+            }
+            return true;
+        });
+        return found;
+    }
+
+
+    if ($scope.removeProcessQueue) {
+        $scope.removeProcessQueue();
+    }
+    $scope.removeProcessQueue = $scope.$on('ProcessQueue', function() {
+        var event;
+        listCount=0;
+        if (event_queue.length > 0) {
+            //console.log('found queued events');
+            event = event_queue[0];
+            processEvent(event);
+            event_queue.splice(0,1);
+            if ($scope.removeListLoaded) {
+                $scope.removeListLoaded();
+            }
+            $scope.removeListLoaded = $scope.$on('listLoaded', function() {
+                listCount++;
+                if (listCount === expecting) {
+                    //console.log('checking for more events...');
+                    $scope.$emit('ProcessQueue');
+                }
+            });
+        }
+        //else {
+            //console.log('no more events');
+        //}
+    });
 
     LoadBreadCrumbs();
 
@@ -34,6 +125,8 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         listCount++;
         if (listCount === 4) {
             resizeContainers();
+            api_complete = true;
+            $scope.$emit('ProcessQueue');
         }
     });
 
@@ -58,7 +151,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             scope: completed_scope,
             list: CompletedJobsList,
             id: 'completed-jobs',
-            url: GetBasePath('unified_jobs') + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled',
+            url: GetBasePath('unified_jobs') + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled'
         });
         running_scope = $scope.$new(true);
         LoadJobsScope({
@@ -85,12 +178,12 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             url: GetBasePath('schedules') + '?next_run__isnull=false'
         });
 
-        $scope.refreshJobs = function() {
+        /*$scope.refreshJobs = function() {
             queued_scope.search('queued_job');
             running_scope.search('running_job');
             completed_scope.search('completed_job');
             scheduled_scope.search('schedule');
-        };
+        };*/
 
         $(window).resize(_.debounce(function() {
             resizeContainers();
@@ -125,6 +218,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         callback: 'choicesReady'
     });
 
+    // Set container height and return the number of allowed rows
     function resizeContainers() {
         var docw = $(document).width(),
             available_height,
@@ -160,8 +254,8 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
     }
 }
 
-JobsListController.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope', 'RunningJobsList', 'CompletedJobsList',
-    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait' ];
+JobsListController.$inject = [ '$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope', 'RunningJobsList', 'CompletedJobsList',
+    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'Socket' ];
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,

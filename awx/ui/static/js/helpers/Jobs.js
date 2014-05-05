@@ -355,6 +355,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             list = params.list,
             id = params.id,
             url = params.url,
+            pageSize = params.pageSize || 5,
             base = $location.path().replace(/^\//, '').split('/')[0],
             e, html;
 
@@ -386,7 +387,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             scope: scope,
             list: list,
             url: url,
-            pageSize: 5
+            pageSize: pageSize
         });
         
         scope.iterator = list.iterator;

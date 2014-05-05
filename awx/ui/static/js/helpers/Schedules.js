@@ -542,7 +542,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
      *  Called from a controller to setup the scope for a schedules list
      *
      */
-    .factory('LoadSchedulesScope', ['$compile', '$location', '$routeParams','SearchInit', 'PaginateInit', 'GenerateList', 'SchedulesControllerInit', 
+    .factory('LoadSchedulesScope', ['$compile', '$location', '$routeParams','SearchInit', 'PaginateInit', 'GenerateList', 'SchedulesControllerInit',
         'SchedulesListInit', 'SearchWidget',
         function($compile, $location, $routeParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit, SearchWidget) {
         return function(params) {

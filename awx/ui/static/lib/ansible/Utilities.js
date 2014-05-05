@@ -163,7 +163,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             } else if (data.detail) {
                 Alert(defaultMsg.hdr, defaultMsg.msg + ' ' + data.detail);
             } else if (data.__all__) {
-                Alert('Error!', data.__all__);
+                if (typeof data.__all__ === 'object' && Array.isArray(data.__all__)) {
+                    Alert('Error!', data.__all__[0]);
+                }
+                else {
+                    Alert('Error!', data.__all__);
+                }
             } else if (form) {
                 fieldErrors = false;
                 for (field in form.fields) {

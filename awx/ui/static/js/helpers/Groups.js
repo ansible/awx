@@ -1414,11 +1414,13 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 scope.removeDeleteNextGroup();
             }
             scope.removeDeleteNextGroup = scope.$on('DeleteNextGroup', function() {
-                var group;
+                var group,
+                    url = GetBasePath('inventory') + scope.inventory_id + '/groups/';
                 if (groups && groups.length > 0) {
                     group = groups.pop();
-                    Rest.setUrl(GetBasePath('groups') + group.group_id + '/');
-                    Rest.destroy()
+                    // GetBasePath('groups') + group.id + '/'
+                    Rest.setUrl(url);
+                    Rest.post({ id: group.id, disassociate: 1 })
                         .success(function() {
                             scope.$emit('DeleteNextGroup');
                         })
