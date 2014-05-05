@@ -528,6 +528,7 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
         id = $routeParams.id,
         relatedSets = {};
     
+    SchedulesList.well = false;
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
 
