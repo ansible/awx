@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
 from south.utils import datetime_utils as datetime
 from south.db import db
-from south.v2 import SchemaMigration
+from south.v2 import DataMigration
 from django.db import models
 
 
-class Migration(SchemaMigration):
+class Migration(DataMigration):
 
     def forwards(self, orm):
-        # Adding field 'JobEvent.host_name'
-        db.add_column(u'main_jobevent', 'host_name',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=1024),
-                      keep_default=False)
+        for je in orm.JobEvent.objects.all():
+            host_name = je.event_data.get('host', '')
+            je.host_name = host_name
+            je.save()
 
     def backwards(self, orm):
-        # Deleting field 'JobEvent.host_name'
-        db.delete_column(u'main_jobevent', 'host_name')
-
+        print("Not reversing job event host name assignemnt")
 
     models = {
         u'auth.group': {
