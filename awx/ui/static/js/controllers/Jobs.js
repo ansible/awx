@@ -129,25 +129,18 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         var docw = $(document).width(),
             available_height,
             search_row, page_row, height, header, row_height, rows;
-
         if (docw > 1240) {
             // customize the container height and # of rows based on available viewport height
-            available_height = $('#wrap').height() - $('#main_tabs').height() - $('#breadcrumbs').outerHeight() - $('.site-footer').outerHeight() - 15;
+            available_height = $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() - $('#breadcrumbs').outerHeight() - $('.site-footer').outerHeight() - 25;
             $('.jobs-list-container').each(function() {
                 $(this).height(Math.floor(available_height / 2));
             });
             search_row = $('.search-row:eq(0)').outerHeight();
             page_row = $('.page-row:eq(0)').outerHeight();
             header = $('#completed_jobs_table thead').height();
-            height = Math.floor(available_height / 2) - header - page_row - search_row;
+            height = Math.floor(available_height / 2) - header - page_row - search_row - 15;
             row_height = $('.jobs-list-container tbody tr:eq(0)').height();
             rows = Math.floor(height / row_height);
-            completed_scope[CompletedJobsList.iterator + '_page_size'] = rows;
-            completed_scope.changePageSize(CompletedJobsList.name, CompletedJobsList.iterator);
-            running_scope[RunningJobsList.iterator + '_page_size'] = rows;
-            running_scope.changePageSize(RunningJobsList.name, RunningJobsList.iterator);
-            queued_scope[QueuedJobsList.iterator + '_page_size'] = rows;
-            queued_scope.changePageSize(QueuedJobsList.name, QueuedJobsList.iterator);
         }
         else {
             // when width < 1240px put things back to their default state
@@ -155,13 +148,15 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
                 $(this).css({ 'height': 'auto' });
             });
             rows = 5;
-            completed_scope[CompletedJobsList.iterator + '_page_size'] = rows;
-            completed_scope.changePageSize(CompletedJobsList.name, CompletedJobsList.iterator);
-            running_scope[RunningJobsList.iterator + '_page_size'] = rows;
-            running_scope.changePageSize(RunningJobsList.name, RunningJobsList.iterator);
-            queued_scope[QueuedJobsList.iterator + '_page_size'] = rows;
-            queued_scope.changePageSize(QueuedJobsList.name, QueuedJobsList.iterator);
         }
+        completed_scope[CompletedJobsList.iterator + '_page_size'] = rows;
+        completed_scope.changePageSize(CompletedJobsList.name, CompletedJobsList.iterator);
+        running_scope[RunningJobsList.iterator + '_page_size'] = rows;
+        running_scope.changePageSize(RunningJobsList.name, RunningJobsList.iterator);
+        queued_scope[QueuedJobsList.iterator + '_page_size'] = rows;
+        queued_scope.changePageSize(QueuedJobsList.name, QueuedJobsList.iterator);
+        scheduled_scope[ScheduledJobsList.iterator + '_page_size'] = rows;
+        scheduled_scope.changePageSize(ScheduledJobsList.name, ScheduledJobsList.iterator);
     }
 }
 

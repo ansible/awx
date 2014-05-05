@@ -358,7 +358,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         choicesCount = 0;
 
     CallbackHelpInit({ scope: $scope });
-    
+
+    SchedulesList.well = false;
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
 
     $scope.parseType = 'yaml';

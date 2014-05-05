@@ -43,7 +43,7 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
         $compile(e)($scope);
 
         url += "schedules/";
-
+        SchedulesList.well = true;
         LoadSchedulesScope({
             parent_scope: $scope,
             scope: $scope,

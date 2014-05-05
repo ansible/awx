@@ -15,7 +15,7 @@ angular.module('SchedulesListDefinition', [])
         iterator: 'schedule',
         selectTitle: '',
         editTitle: 'Schedules',
-        well: true,
+        well: false,
         index: true,
         hover: true,
 
@@ -46,9 +46,8 @@ angular.module('SchedulesListDefinition', [])
             },
             id: {
                 label: 'ID',
-                key: true,
-                desc: true,
-                searchType: 'int'
+                searchType: 'int',
+                searchOnly: true
             }
         },
 

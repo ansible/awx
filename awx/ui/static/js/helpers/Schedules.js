@@ -9,7 +9,8 @@
 
 'use strict';
 
-angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog' ])
+angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
+    'GeneratorHelpers'])
   
     .factory('ShowSchedulerModal', ['Wait', 'CreateDialog', function(Wait, CreateDialog) {
         return function(params) {
@@ -541,24 +542,46 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
      *  Called from a controller to setup the scope for a schedules list
      *
      */
-    .factory('LoadSchedulesScope', ['$routeParams','SearchInit', 'PaginateInit', 'GenerateList', 'SchedulesControllerInit', 'SchedulesListInit',
-        function($routeParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit) {
+    .factory('LoadSchedulesScope', ['$compile', '$location', '$routeParams','SearchInit', 'PaginateInit', 'GenerateList', 'SchedulesControllerInit', 
+        'SchedulesListInit', 'SearchWidget',
+        function($compile, $location, $routeParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit, SearchWidget) {
         return function(params) {
             var parent_scope = params.parent_scope,
                 scope = params.scope,
                 list = params.list,
                 id = params.id,
                 url = params.url,
-                pageSize = params.pageSize || 5;
+                pageSize = params.pageSize || 5,
+                base = $location.path().replace(/^\//, '').split('/')[0],
+                e, html;
 
-            GenerateList.inject(list, {
-                mode: 'edit',
-                id: id,
-                breadCrumbs: false,
-                scope: scope,
-                searchSize: 'col-lg-4 col-md-6 col-sm-12 col-xs-12',
-                showSearch: true
-            });
+            if (base === 'jobs') {
+                // on jobs page the search widget appears on the right
+                html = SearchWidget({
+                    iterator: list.iterator,
+                    template: params.list,
+                    includeSize: false
+                });
+                e = angular.element(document.getElementById(id + '-search-container')).append(html);
+                $compile(e)(scope);
+                GenerateList.inject(list, {
+                    mode: 'edit',
+                    id: id,
+                    breadCrumbs: false,
+                    scope: scope,
+                    showSearch: false
+                });
+            }
+            else {
+                GenerateList.inject(list, {
+                    mode: 'edit',
+                    id: id,
+                    breadCrumbs: false,
+                    scope: scope,
+                    searchSize: 'col-lg-4 col-md-6 col-sm-12 col-xs-12',
+                    showSearch: true
+                });
+            }
 
             SearchInit({
                 scope: scope,
