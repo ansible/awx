@@ -740,7 +740,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
         return RunInventoryUpdate
 
     def socketio_emit_data(self):
-        return dict(group_id=self.inventory_source.group.id)
+        if self.inventory_source.group is not None:
+            return dict(group_id=self.inventory_source.group.id)
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
