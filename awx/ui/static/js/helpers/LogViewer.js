@@ -18,7 +18,8 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 url = params.url,
                 getIcon = params.getIcon,
                 scope = parent_scope.$new(true),
-                base = $location.path().replace(/^\//, '').split('/')[0];
+                base = $location.path().replace(/^\//, '').split('/')[0],
+                pieces;
             
             if (scope.removeModalReady) {
                 scope.removeModalReady();
