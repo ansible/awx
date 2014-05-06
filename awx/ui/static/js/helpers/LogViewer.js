@@ -56,8 +56,18 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 for (key in data) {
                     scope[key] = data[key];
                 }
-                
+                scope.created_by = '';
                 scope.job_template = '';
+                
+                if (data.related.created_by) {
+                    pieces = data.related.created_by.replace(/^\//,'').replace(/\/$/,'').split('/');
+                    scope.created_by = parseInt(pieces[pieces.length - 1],10);
+                    LookUpName({
+                        scope: scope,
+                        scope_var: 'created_by',
+                        url: GetBasePath('users') + scope.created_by + '/'
+                    });
+                }
                 
                 // For jobs link the name to the job parent
                 if (base === 'jobs') {
@@ -281,7 +291,8 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     { "variable": "inventory", "url": "/#/inventories/" },
                     { "variable": "cloud_credential", "url": "/#/credentials/" },
                     { "variable": "inventory_source", "url": "/#/home/groups/?id={{ group }}" },
-                    { "variable": "job_template", "url": "/#/job_templates/" }
+                    { "variable": "job_template", "url": "/#/job_templates/" },
+                    { "variable": "created_by", "url": "/#/users/" }
                 ];
 
             html = "<table class=\"table logviewer-status\">\n";

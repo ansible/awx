@@ -74,12 +74,7 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
                         }
 
                         if (scope.license_date) {
-                            dt = new Date(parseInt(scope.license_date));
-                            if (dt.getFullYear() === '1970') {
-                                // date was passed in seconds rather than milliseconds
-                                dt = new Date(parseInt(scope.license_date,10) * 1000);
-                                scope.time_remaining = scope.time_remaining + '000';
-                            }
+                            dt = new Date(parseInt(scope.license_date, 10) * 1000);
                             scope.license_date = FormatDate(dt);
 
                             days = parseInt(scope.time_remaining / 86400000, 10);

@@ -101,6 +101,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                     scope.removeModalReady();
                 }
                 scope.removeModalReady = scope.$on('ModalReady', function() {
+                    $('#lookup-save-button').attr('disabled','disabled');
                     $('#lookup-modal-dialog').dialog('open');
                 });
 
@@ -193,10 +194,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                             }
                         }
                     }
-                    if (found === false) {
-                        Alert('Missing Selection', 'Oops, you failed to make a selection. Click on a row to make your selection, ' +
-                            'and then click the Select button. Or, click Cancel to quit.');
-                    } else {
+                    if (found) {
                         // Selection made
                         $('#lookup-modal-dialog').dialog('close');
                         if (postAction) {
@@ -210,15 +208,33 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
 
 
                 scope['toggle_' + list.iterator] = function (id) {
-                    var i;
-                    for (i = 0; i < scope[list.name].length; i++) {
-                        if (scope[list.name][i].id === id) {
-                            scope[list.name][i].checked = '1';
-                            scope[list.name][i].success_class = 'success';
+                    var count = 0;
+                    scope[list.name].forEach( function(row, i) {
+                        if (row.id === id) {
+                            if (row.checked === '0') {
+                                scope[list.name][i].checked = '1';
+                                scope[list.name][i].success_class = 'success';
+                            }
+                            else {
+                                scope[list.name][i].checked = '0';
+                                scope[list.name][i].success_class = '';
+                            }
                         } else {
                             scope[list.name][i].checked = '0';
                             scope[list.name][i].success_class = '';
                         }
+                    });
+                    // Check if any rows are checked
+                    scope[list.name].forEach(function(row) {
+                        if (row.checked === '1') {
+                            count++;
+                        }
+                    });
+                    if (count === 0) {
+                        $('#lookup-save-button').attr('disabled','disabled');
+                    }
+                    else {
+                        $('#lookup-save-button').removeAttr('disabled');
                     }
                 };
             };

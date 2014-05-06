@@ -38,7 +38,7 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
                 var i, j, found;
                 for (i = 0; i < scope[list.name].length; i++) {
                     if (scope[list.name][i].id === id) {
-                        if ((scope[list.name][i].checked === "0" && !ischeckbox) || (scope[list.name][i].checked === "1" && ischeckbox)) {
+                        if ((scope[list.name][i].checked === "0" && !ischeckbox) || (scope[list.name][i].checked === "0" && ischeckbox)) {
                             // select the row
                             scope[list.name][i].checked = '1';
                             scope[list.name][i].success_class = 'success';
