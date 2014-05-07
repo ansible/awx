@@ -216,7 +216,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                     start: scope.job_status.started,
                     end: scope.job_status.finished
                 });
-                scope.job_status.status = (event.failed) ? 'error' : 'successful';
+                scope.job_status.status = (event.failed) ? 'failed' : 'successful';
                 scope.job_status.status_class = "";
             }
         });
@@ -740,7 +740,13 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
 }])
 
 .factory('DrawGraph', [ function() {
-
+    /*var salesData=[
+        {label:"OK", color:"#9ED89E"},
+        {label:"Changed", color:"#DC3912"},
+        {label:"Failed", color:"#DA4D49;"},
+        {label:"Skipped", color:"#D4D4D4"},
+        {label:"Unreachable", color:""}
+    ];*/
 }]);
 
 
