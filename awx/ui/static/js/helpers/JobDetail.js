@@ -53,7 +53,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
             
             if (event.event === 'playbook_on_start') {
                 if (scope.job_status.status!== 'failed' && scope.job_status.status !== 'canceled' &&
-                    scope.job_status.status !== 'error') {
+                    scope.job_status.status !== 'error' && scope.job_status !== 'successful') {
                     scope.job_status.started = event.created;
                     scope.job_status.status = 'running';
                 }
@@ -355,7 +355,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
 
         if (failed && scope.job_status.status !== 'failed' && scope.job_status.status !== 'error' &&
             scope.job_status.status !== 'canceled') {
-            scope.job_status.status = 'error';
+            scope.job_status.status = 'failed';
         }
         if (!Empty(modified)) {
             scope.job_status.finished = modified;
@@ -590,7 +590,6 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
             }
             return 0;
         });
-
         scope.tasks.every(function(task) {
             if (task.id === task_id) {
                 play_id = task.play_id;
@@ -603,20 +602,22 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
             scope: scope,
             play_id: play_id
         });
-        
+
         scope.tasks.every(function(task, idx) {
             if (task.id === task_id) {
-                scope.tasks[idx].hostCount += (task.id === first) ? 1 : 0;  // we only need to count hosts for the first task in a play
+                if (task.id === first) {
+                    scope.tasks[idx].hostCount += 1;
+                }
                 scope.tasks[idx].reportedHosts++;
                 scope.tasks[idx].failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
                 scope.tasks[idx].changedCount += (status === 'changed') ? 1 : 0;
                 scope.tasks[idx].successfulCount += (status === 'successful') ? 1 : 0;
                 scope.tasks[idx].skippedCount += (status === 'skipped') ? 1 : 0;
 
-                scope.tasks[idx].failedPct = (scope.tasks[idx].hostCount > 0) ? 100 * Math.round(scope.tasks[idx].failedCount / scope.tasks[idx].hostCount) : 0;
-                scope.tasks[idx].changedPct = (scope.tasks[idx].hostCount > 0) ? 100 * Math.round(scope.tasks[idx].changedCount / scope.tasks[idx].hostCount) : 0;
-                scope.tasks[idx].skippedPct = (scope.tasks[idx].hostCount > 0) ? 100 * Math.round(scope.tasks[idx].skippedCount / scope.tasks[idx].hostCount) : 0;
-                scope.tasks[idx].successfulPct = (scope.tasks[idx].hostCount > 0) ? 100 * Math.round(scope.tasks[idx].successfulCount / scope.tasks[idx].hostCount) : 0;
+                scope.tasks[idx].failedPct = (scope.tasks[idx].hostCount > 0) ? Math.ceil((100 * (scope.tasks[idx].failedCount / scope.tasks[idx].hostCount))) : 0;
+                scope.tasks[idx].changedPct = (scope.tasks[idx].hostCount > 0) ? Math.ceil((100 * (scope.tasks[idx].changedCount / scope.tasks[idx].hostCount))) : 0;
+                scope.tasks[idx].skippedPct = (scope.tasks[idx].hostCount > 0) ? Math.ceil((100 * (scope.tasks[idx].skippedCount / scope.tasks[idx].hostCount))) : 0;
+                scope.tasks[idx].successfulPct = (scope.tasks[idx].hostCount > 0) ? Math.ceil((100 * (scope.tasks[idx].successfulCount / scope.tasks[idx].hostCount))) : 0;
                 
                 scope.tasks[idx].successfulStyle = (scope.tasks[idx].successfulPct > 0) ? { width: scope.tasks[idx].successfulPct + '%' } : { display: 'none' };
                 scope.tasks[idx].changedStyle = (scope.tasks[idx].changedPct > 0) ? { width: scope.tasks[idx].changedPct + '%' } : { display: 'none' };
