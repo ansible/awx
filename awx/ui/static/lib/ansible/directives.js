@@ -727,15 +727,16 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     updateOnContentResize: true
                 },
                 scrollButtons: {
-                    enable: true,
-                    scrollType: 'continuous'
+                    enable: true
                 },
                 theme: 'dark-thick',
                 mouseWheel: true,
-                scrollInertia: 0,
+                scrollInertia: 300,
                 callbacks: {
                     onTotalScroll: scope[attrs.onTotalScroll],
+                    onTotalScrollOfset: attrs.onTotalScrollOffset,
                     onTotalScrollBack: scope[attrs.onTotalScrollBack],
+                    onTotalScrollBackOffset: attrs.onTotlaScrollBackOffset
                 }
             });
         };

@@ -499,7 +499,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                     return 0;
                 });
                 // Only keep 10 hosts
-                if (scope.hosts.length > 10) {
+                if (scope.hosts.length > scope.hostSummaryTableRows) {
                     scope.hosts.splice(0,1);
                 }
                 scope.auto_scroll = true;
@@ -564,8 +564,8 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
             return 0;
         });
 
-        // Keep the list pruned to 10 hosts
-        if (scope.hostResults.length === 10) {
+        // Keep the list pruned to a limited # of hosts
+        if (scope.hostResults.length === scope.hostTableRows) {
             scope.hostResults.splice(0,1);
         }
 
@@ -695,25 +695,23 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
         }
         Wait('start');
         scope.hostResults = [];
-        url = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent=' + id +
-            '&host__isnull=false&page_size=10&order_by=-host__name';
+        url = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent=' + id + '&';
+        url += (scope.task_host_name) ? 'host__name__icontains=' + scope.task_host_name + '&' : '';
+        url += 'host__isnull=false&page_size=' + scope.hostTableRows + '&order_by=host__name';
         Rest.setUrl(url);
         Rest.get()
             .success(function(data) {
-                var i;
-                if (data.results.length > 0) {
-                    for (i = data.results.length - 1; i >=0; i--) {
-                        scope.hostResults.push({
-                            id: data.results[i].id,
-                            status: ( (data.results[i].failed) ? 'failed' : (data.results[i].changed) ? 'changed' : 'successful' ),
-                            host_id: data.results[i].host,
-                            task_id: data.results[i].parent,
-                            name: data.results[i].event_data.host,
-                            created: data.results[i].created,
-                            msg: ( (data.results[i].event_data && data.results[i].event_data.res) ? data.results[i].event_data.res.msg : '' )
-                        });
-                    }
-                }
+                data.results.forEach(function(row) {
+                    scope.hostResults.push({
+                        id: row.id,
+                        status: ( (row.failed) ? 'failed' : (row.changed) ? 'changed' : 'successful' ),
+                        host_id: row.host,
+                        task_id: row.parent,
+                        name: row.event_data.host,
+                        created: row.created,
+                        msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
+                    });
+                });
                 Wait('stop');
                 SelectHost({ scope: scope });
             })
