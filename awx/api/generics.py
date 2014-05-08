@@ -30,7 +30,7 @@ from awx.main.utils import *
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
            'RetrieveAPIView', 'RetrieveUpdateAPIView',
-           'RetrieveDestroyAPIView', 'RetrieveUpdateDestroyAPIView']
+           'RetrieveDestroyAPIView', 'RetrieveUpdateDestroyAPIView', 'DestroyAPIView']
 
 logger = logging.getLogger('awx.api.generics')
 
@@ -465,4 +465,7 @@ class RetrieveDestroyAPIView(RetrieveAPIView, generics.RetrieveDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, RetrieveDestroyAPIView):
+    pass
+
+class DestroyAPIView(GenericAPIView, generics.DestroyAPIView):
     pass

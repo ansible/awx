@@ -361,6 +361,33 @@ class Group(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:group_detail', args=(self.pk,))
 
+    def mark_inactive_recursive(self, parent=None):
+        def mark_actual(parent=parent):
+            linked_children = [(parent, self)] + [(self, child) for child in self.children.all()]
+            marked_groups = []
+            marked_hosts = []
+            for subgroup in linked_children:
+                parent, group = subgroup
+                if parent is not None:
+                    group.parents.remove(parent)
+                if group.parents.count() > 0:
+                    continue
+                for host in group.hosts.all():
+                    host.groups.remove(group)
+                    # Remove inventory source
+                    if host.groups.count() < 1:
+                        marked_hosts.append(host)
+                for childgroup in group.children.all():
+                    linked_children.append((group, childgroup))
+                marked_groups.append(group)
+            for group in marked_groups:
+                group.mark_inactive()
+            for host in marked_hosts:
+                host.mark_inactive()
+        with ignore_inventory_computed_fields():
+            mark_actual()
+        self.inventory.update_computed_fields()
+
     def mark_inactive(self, save=True, recompute=True):
         '''
         When marking groups inactive, remove all associations to related

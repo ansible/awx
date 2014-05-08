@@ -788,6 +788,18 @@ class GroupChildrenList(SubListCreateAPIView):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class GroupChildrenRemove(DestroyAPIView):
+
+    model = Group
+    serializer_class = GroupSerializer
+    view_name = 'Remove a subgroup recursively'
+
+    def destroy(self, request, *args, **kwargs):
+        parent_group = self.get_object()
+        group = Group.objects.get(id=kwargs['subgroup_pk'])
+        group.mark_inactive_recursive(parent_group)
+        return Response()        
+
 class GroupPotentialChildrenList(SubListAPIView):
 
     model = Group
@@ -862,6 +874,17 @@ class InventoryGroupsList(SubListCreateAPIView):
     parent_model = Inventory
     relationship = 'groups'
     parent_key = 'inventory'
+
+class InventoryRootGroupRemove(DestroyAPIView):
+
+    model = Group
+    serializer_class = GroupSerializer
+    view_name = 'Inventory Group Subgroup'
+
+    def destroy(self, request, *args, **kwargs):
+        group = Group.objects.get(id=kwargs['group_pk'])
+        group.mark_inactive_recursive()
+        return Response()        
 
 class InventoryRootGroupsList(SubListCreateAPIView):
 
