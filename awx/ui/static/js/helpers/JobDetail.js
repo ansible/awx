@@ -404,7 +404,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                 });
                 UpdateJobStatus({
                     scope: scope,
-                    failed: failed,
+                    failed: null,
                     modified: modified
                 });
                 return false;
@@ -504,9 +504,11 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                 if (scope.hosts.length > scope.hostSummaryTableRows) {
                     scope.hosts.splice(0,1);
                 }
-                scope.auto_scroll = true;
                 $('#tasks-table-detail').mCustomScrollbar("update");
-                setTimeout( function() { $('#hosts-summary-table').mCustomScrollbar("scrollTo", "bottom"); }, 700);
+                setTimeout( function() {
+                    scope.auto_scroll = true;
+                    $('#hosts-summary-table').mCustomScrollbar("scrollTo", "bottom");
+                }, 700);
             }
         }
 
@@ -606,6 +608,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
         });
 
         scope.tasks.every(function(task, idx) {
+            var diff;
             if (task.id === task_id) {
                 if (task.id === first) {
                     scope.tasks[idx].hostCount += 1;
@@ -620,12 +623,30 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                 scope.tasks[idx].changedPct = (scope.tasks[idx].hostCount > 0) ? Math.ceil((100 * (scope.tasks[idx].changedCount / scope.tasks[idx].hostCount))) : 0;
                 scope.tasks[idx].skippedPct = (scope.tasks[idx].hostCount > 0) ? Math.ceil((100 * (scope.tasks[idx].skippedCount / scope.tasks[idx].hostCount))) : 0;
                 scope.tasks[idx].successfulPct = (scope.tasks[idx].hostCount > 0) ? Math.ceil((100 * (scope.tasks[idx].successfulCount / scope.tasks[idx].hostCount))) : 0;
-                
-                scope.tasks[idx].successfulStyle = (scope.tasks[idx].successfulPct > 0) ? { width: scope.tasks[idx].successfulPct + '%' } : { display: 'none' };
-                scope.tasks[idx].changedStyle = (scope.tasks[idx].changedPct > 0) ? { width: scope.tasks[idx].changedPct + '%' } : { display: 'none' };
-                scope.tasks[idx].skippedStyle = (scope.tasks[idx].skippedPct > 0) ? { width: scope.tasks[idx].skippedPct + '%' } : { display: 'none' };
-                scope.tasks[idx].failedStyle = (scope.tasks[idx].failedPct > 0) ? { width: scope.tasks[idx].failedPct + '%' } : { display: 'none' };
 
+                diff = (scope.tasks[idx].failedPct + scope.tasks[idx].changedPct + scope.tasks[idx].skippedPct + scope.tasks[idx].successfulPct) - 100;
+                if (diff > 0) {
+                    if (scope.tasks[idx].failedPct > diff) {
+                        scope.tasks[idx].failedPct  = scope.tasks[idx].failedPct - diff;
+                    }
+                    else if (scope.tasks[idx].changedPct > diff) {
+                        scope.tasks[idx].changedPct = scope.tasks[idx].changedPct - diff;
+                    }
+                    else if (scope.tasks[idx].skippedPct > diff) {
+                        scope.tasks[idx].skippedPct = scope.tasks[idx].skippedPct - diff;
+                    }
+                    else if (scope.tasks[idx].successfulPct > diff) {
+                        scope.tasks[idx].successfulPct = scope.tasks[idx].successfulPct - diff;
+                    }
+                }
+                scope.tasks[idx].successfulStyle = (scope.tasks[idx].successfulPct > 0) ? { display: 'inline-block', width: scope.tasks[idx].successfulPct + '%' } : { display: 'none' };
+                scope.tasks[idx].changedStyle = (scope.tasks[idx].changedPct > 0) ? { display: 'inline-block', width: scope.tasks[idx].changedPct + '%' } : { display: 'none' };
+                scope.tasks[idx].skippedStyle = (scope.tasks[idx].skippedPct > 0) ? { display: 'inline-block', width: scope.tasks[idx].skippedPct + '%' } : { display: 'none' };
+                scope.tasks[idx].failedStyle = (scope.tasks[idx].failedPct > 0) ? { display: 'inline-block', width: scope.tasks[idx].failedPct + '%' } : { display: 'none' };
+                $('#' + task.id + '-' + task.play_id + '-' + 'successful-bar').css(scope.tasks[idx].successfulStyle);
+                $('#' + task.id + '-' + task.play_id + '-' + 'changed-bar').css(scope.tasks[idx].changedStyle);
+                $('#' + task.id + '-' + task.play_id + '-' + 'skipped-bar').css(scope.tasks[idx].skippedStyle);
+                $('#' + task.id + '-' + task.play_id + '-' + 'failed-bar').css(scope.tasks[idx].failedStyle);
                 return false;
             }
             return true;
@@ -658,19 +679,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
         scope.activeTask = max_task_id;
         SelectTask({
             scope: scope,
-            id: max_task_id,
-            callback: function() {
-                // Scroll the task table all the way to the bottom, revealing the last row
-                setTimeout(function() {
-                    var original_height = $('#tasks-table-detail').css('height'),
-                        table_height;
-                    $('#tasks-table-detail').css('height', 'auto');
-                    table_height = $('#tasks-table-detail').height();
-                    $('#tasks-table-detail').css('height', original_height);
-                    $('#tasks-table-detail').scrollTop(table_height);
-                    $('#tasks-table-detail').mCustomScrollbar("update");
-                }, 300);
-            }
+            id: max_task_id
         });
     };
 }])
@@ -682,6 +691,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
             id = params.id,
             callback = params.callback,
             url;
+        
         scope.tasks.forEach(function(task, idx) {
             if (task.id === id) {
                 scope.tasks[idx].taskActiveClass = 'active';
@@ -692,9 +702,18 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                 scope.tasks[idx].taskActiveClass = '';
             }
         });
+        
         if (callback) {
             callback();
         }
+        
+        $('#tasks-table-detail').mCustomScrollbar("update");
+        setTimeout( function() {
+            scope.auto_scroll = true;
+            $('#tasks-table-detail').mCustomScrollbar("scrollTo", "bottom");
+        }, 700);
+        
+        // Get current list of hosts from the API
         Wait('start');
         scope.hostResults = [];
         url = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent=' + id + '&';
@@ -727,11 +746,11 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
 .factory('SelectHost', [ function() {
     return function(params) {
         var scope = params.scope;
-        scope.auto_scroll = true;
-        setTimeout(function() {
-            $('#tasks-table-detail').mCustomScrollbar("update");
-            setTimeout( function() { $('#hosts-table-detail').mCustomScrollbar("scrollTo", "bottom"); }, 700);
-        }, 100);
+        $('#tasks-table-detail').mCustomScrollbar("update");
+        setTimeout( function() {
+            scope.auto_scroll = true;
+            $('#hosts-table-detail').mCustomScrollbar("scrollTo", "bottom");
+        }, 700);
     };
 }])
 

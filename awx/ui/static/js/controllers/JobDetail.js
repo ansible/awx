@@ -285,9 +285,10 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         }
        
         // Summary table height adjusting.
-        height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .header').outerHeight() - $('#hosts-summary-section .table-header').outerHeight() - 
+        height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .header').outerHeight() - $('#hosts-summary-section .table-header').outerHeight() -
             $('#summary-search-section').outerHeight() - 20;
         $('#hosts-summary-table').height(height);
+        $('#hosts-summary-table').mCustomScrollbar("update");
         scope.$emit('RefreshCompleted');
     };
 
@@ -399,7 +400,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         }
         else {
             scope.search_all_label = 'Failures';
-            scope.searchAllDisabled = true; 
+            scope.searchAllDisabled = true;
             scope.search_all_placeholder = '';
         }
     };
@@ -577,7 +578,9 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
         }
-        scope.auto_scroll = false;
+        else {
+            scope.auto_scroll = false;
+        }
     };
 
     scope.HostSummaryOnTotalScrollBack = function(mcs) {
@@ -617,6 +620,9 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
+        }
+        else {
+            scope.auto_scroll = false;
         }
     };
 
@@ -685,8 +691,10 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 });
                 Wait('stop');
                 $('#hosts-summary-table').mCustomScrollbar("update");
-                scope.auto_scroll = true;
-                setTimeout( function() { $('#hosts-summary-table').mCustomScrollbar("scrollTo", "bottom"); }, 700);
+                setTimeout( function() {
+                    scope.auto_scroll = true;
+                    $('#hosts-summary-table').mCustomScrollbar("scrollTo", "bottom");
+                }, 700);
             })
             .error(function(data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
