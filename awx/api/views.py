@@ -947,12 +947,36 @@ class InventoryScriptView(RetrieveAPIView):
                 data['all'] = SortedDict()
                 data['all']['vars'] = self.object.variables_dict
 
+            # Build in-memory mapping of groups and their hosts.
+            group_hosts_kw = dict(group__inventory_id=self.object.id, group__active=True,
+                                  host__inventory_id=self.object.id, host__active=True)
+            if 'enabled' in hosts_q:
+                group_hosts_kw['host__enabled'] = hosts_q['enabled']
+            group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
+            group_hosts_qs = group_hosts_qs.order_by('host__name')
+            group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id', 'host__name')
+            group_hosts_map = {}
+            for group_id, host_id, host_name in group_hosts_qs:
+                group_hostnames = group_hosts_map.setdefault(group_id, [])
+                group_hostnames.append(host_name)
+        
+            # Build in-memory mapping of groups and their children.
+            group_parents_qs = Group.parents.through.objects.filter(
+                from_group__inventory_id=self.object.id, from_group__active=True,
+                to_group__inventory_id=self.object.id, to_group__active=True,
+            )
+            group_parents_qs = group_parents_qs.order_by('from_group__name')
+            group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
+            group_children_map = {}
+            for from_group_id, from_group_name, to_group_id in group_parents_qs:
+                group_children = group_children_map.setdefault(to_group_id, [])
+                group_children.append(from_group_name)
+
+            # Now use in-memory maps to build up group info.
             for group in self.object.groups.filter(active=True):
-                hosts = group.hosts.filter(**hosts_q)
-                children = group.children.filter(active=True)
                 group_info = SortedDict()
-                group_info['hosts'] = list(hosts.values_list('name', flat=True))
-                group_info['children'] = list(children.values_list('name', flat=True))
+                group_info['hosts'] = group_hosts_map.get(group.id, [])
+                group_info['children'] = group_children_map.get(group.id, [])
                 group_info['vars'] = group.variables_dict
                 data[group.name] = group_info
 

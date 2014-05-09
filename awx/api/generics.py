@@ -5,10 +5,13 @@
 import inspect
 import logging
 import json
+import time
 
 # Django
 from django.http import Http404
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import connection
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
@@ -75,11 +78,32 @@ class APIView(views.APIView):
     def initialize_request(self, request, *args, **kwargs):
         '''
         Store the Django REST Framework Request object as an attribute on the
-        normal Django request.
+        normal Django request, store time the request started.
         '''
+        self.time_started = time.time()
+        if getattr(settings, 'SQL_DEBUG', False):
+            self.queries_before = len(connection.queries)
         drf_request = super(APIView, self).initialize_request(request, *args, **kwargs)
         request.drf_request = drf_request
         return drf_request
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        '''
+        Log warning for 400 requests.  Add header with elapsed time.
+        '''
+        if response.status_code >= 400:
+            logger.warn("status %s received by user %s attempting to access %s" % (response.status_code, request.user, request.path))
+        response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
+        time_started = getattr(self, 'time_started', None)
+        if time_started:
+            time_elapsed = time.time() - self.time_started
+            response['X-API-Time'] = '%0.3fs' % time_elapsed
+        if getattr(settings, 'SQL_DEBUG', False):
+            queries_before = getattr(self, 'queries_before', 0)
+            q_times = [float(q['time']) for q in connection.queries[queries_before:]]
+            response['X-API-Query-Count'] = len(q_times)
+            response['X-API-Query-Time'] = '%0.3fs' % sum(q_times)
+        return response
 
     def get_authenticate_header(self, request):
         """
@@ -133,11 +157,6 @@ class APIView(views.APIView):
                 break
         ret['added_in_version'] = added_in_version
         return ret
-
-    def finalize_response(self, request, response, *args, **kwargs):
-        if response.status_code >= 400:
-            logger.warn("status %s received by user %s attempting to access %s" % (response.status_code, request.user, request.path))
-        return super(APIView, self).finalize_response(request, response, *args, **kwargs)
 
 
 class GenericAPIView(generics.GenericAPIView, APIView):
