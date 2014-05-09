@@ -374,7 +374,10 @@ class Group(CommonModelNameNotUnique):
                     continue
                 for host in group.hosts.all():
                     host.groups.remove(group)
-                    # Remove inventory source
+                    host_inv_sources = host.inventory_sources
+                    for inv_source in group.inventory_sources:
+                        if inv_source in host_inv_sources:
+                            host_inv_sources.remove(inv_source)
                     if host.groups.count() < 1:
                         marked_hosts.append(host)
                 for childgroup in group.children.all():
