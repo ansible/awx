@@ -33,6 +33,9 @@ DEB_PKG_RELEASE=$(VERSION)-$(RELEASE)
 PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-release.json
 endif
 
+MOCK_BIN ?= mock
+MOCK_CFG ?=
+
 .PHONY: clean rebase push requirements requirements_pypi develop refresh \
 	adduser syncdb migrate dbchange dbshell runserver celeryd receiver test \
 	test_coverage coverage_html test_ui test_jenkins dev_build \
@@ -217,12 +220,19 @@ sdist: clean minjs
 rpmtar: sdist
 	mkdir -p rpm-build
 	cp packaging/rpm/$(NAME).te rpm-build/
+	sed -e 's#^Version:.*#Version: $(VERSION)#' -e 's#^Release:.*#Release: $(RPM_PKG_RELEASE)%{?dist}#' packaging/rpm/$(NAME).spec >rpm-build/$(NAME).spec
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	   (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
 	   (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
 	   (cd dist/ && tar czf $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)) ; \
 	fi
 	cp dist/$(NAME)-$(VERSION).tar.gz rpm-build/
+
+mock-srpm: /etc/mock/$(MOCK_CFG).cfg rpmtar
+	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build
+
+mock-rpm: /etc/mock/$(MOCK_CFG).cfg mock-srpm
+	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(NAME)-*.src.rpm
 
 srpm: rpmtar
 	@rpmbuild \
@@ -234,7 +244,7 @@ srpm: rpmtar
         --define "_specdir %{_topdir}" \
         --define "_sourcedir  %{_topdir}" \
         --define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
-        -bs packaging/rpm/$(NAME).spec
+        -bs rpm-build/$(NAME).spec
 
 rpm: rpmtar
 	@rpmbuild \
@@ -246,7 +256,7 @@ rpm: rpmtar
         --define "_specdir %{_topdir}" \
         --define "_sourcedir  %{_topdir}" \
         --define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
-        -ba packaging/rpm/$(NAME).spec
+        -ba rpm-build/$(NAME).spec
 
 deb: sdist
 	@mkdir -p deb-build
