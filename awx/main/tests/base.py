@@ -72,6 +72,12 @@ class BaseTestMixin(object):
         job_status_dir = tempfile.mkdtemp()
         self._temp_paths.append(job_status_dir)
         settings.JOBOUTPUT_ROOT = os.path.abspath(job_status_dir)
+        settings.CACHES = {
+            'default': {
+                'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+                'LOCATION': 'unittests'
+            }
+        }
         self._start_time = time.time()
 
     def tearDown(self):
