@@ -27,6 +27,7 @@ from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils.timezone import now, make_aware, get_default_timezone
+from django.core.cache import cache
 
 # AWX
 from awx.main.fields import AutoOneToOneField
@@ -238,6 +239,7 @@ class Host(CommonModelNameNotUnique):
         '''
         super(Host, self).mark_inactive(save=save)
         self.inventory_sources.clear()
+        self.clear_cached_values()
 
     def update_computed_fields(self, update_inventory=True, update_groups=True):
         '''
@@ -267,7 +269,8 @@ class Host(CommonModelNameNotUnique):
         if update_inventory:
             self.inventory.update_computed_fields(update_groups=False,
                                                   update_hosts=False)
-
+        # Rebuild summary fields cache
+        self.update_cached_values()
     variables_dict = VarsDictProperty('variables')
 
     @property
@@ -280,6 +283,32 @@ class Host(CommonModelNameNotUnique):
         for group in self.groups.all():
             qs = qs | group.all_parents
         return qs
+
+    def update_cached_values(self):
+        cacheable_data = {"%s_all_groups" % self.id: [{'id': g.id, 'name': g.name} for g in self.all_groups.all()],
+                          "%s_groups" % self.id: [{'id': g.id, 'name': g.name} for g in self.groups.all()],
+                          "%s_recent_jobs" % self.id: [{'id': j.job.id, 'name': j.job.job_template.name, 'status': j.job.status, 'finished': j.job.finished} \
+                                                       for j in self.job_host_summaries.all().order_by('-created')[:5]]}
+        cache.set_many(cacheable_data)
+        return cacheable_data
+
+    def get_cached_summary_values(self):
+        summary_data = cache.get_many(['%s_all_groups' % self.id, '%s_groups' % self.id, '%s_recent_jobs' % self.id])
+
+        rebuild_cache = False
+        for key in summary_data:
+            if summary_data[key] is None:
+                rebuild_cache = True
+                break
+        if rebuild_cache:
+            summary_data = self.update_cached_values()
+        summary_data_actual = dict(all_groups=summary_data['%s_all_groups' % self.id],
+                                   groups=summary_data['%s_groups' % self.id],
+                                   recent_jobs=summary_data['%s_recent_jobs' % self.id])
+        return summary_data_actual
+
+    def clear_cached_values(self):
+        cache.delete_many(["%s_all_groups" % self.id, "%s_groups" % self.id, "%s_recent_jobs" % self.id])
 
     # Use .job_host_summaries.all() to get jobs affecting this host.
     # Use .job_events.all() to get events affecting this host.
@@ -374,10 +403,10 @@ class Group(CommonModelNameNotUnique):
                     continue
                 for host in group.hosts.all():
                     host.groups.remove(group)
-                    host_inv_sources = host.inventory_sources
-                    for inv_source in group.inventory_sources:
+                    host_inv_sources = host.inventory_sources.all()
+                    for inv_source in group.inventory_sources.all():
                         if inv_source in host_inv_sources:
-                            host_inv_sources.remove(inv_source)
+                            host.inventory_sources.remove(inv_source)
                     if host.groups.count() < 1:
                         marked_hosts.append(host)
                 for childgroup in group.children.all():

@@ -23,6 +23,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
+from django.core.cache import cache
 
 # Django REST Framework
 from rest_framework.compat import get_concrete_model
@@ -755,11 +756,7 @@ class HostSerializer(BaseSerializerWithVariables):
             d['last_job']['job_template_name'] = obj.last_job.job_template.name
         except (KeyError, AttributeError):
             pass
-        # TODO: This is slow
-        d['all_groups'] = [{'id': g.id, 'name': g.name} for g in obj.all_groups.all()]
-        d['groups'] = [{'id': g.id, 'name': g.name} for g in obj.groups.all()]
-        d['recent_jobs'] = [{'id': j.job.id, 'name': j.job.job_template.name, 'status': j.job.status, 'finished': j.job.finished} \
-                            for j in obj.job_host_summaries.all().order_by('-created')[:5]]
+        d.update(obj.get_cached_summary_values())
         return d
 
     def _get_host_port_from_name(self, name):
