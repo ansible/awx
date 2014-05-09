@@ -98,3 +98,4 @@ ipython-1.2.1.tar.gz
 # - python-ldap (via "yum install python-ldap")
 # - readline-6.2.4.1.tar.gz (for the ipython shell)
 # - python-zmq (for using the job callback receiver)
+# - python-memcached (for host details caching)
