@@ -218,6 +218,8 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                 });
                 scope.job_status.status = (event.failed) ? 'failed' : 'successful';
                 scope.job_status.status_class = "";
+                scope.liveEventsEnabled = true; // Show the stop button
+                scope.liveEventToggleDisabled = true;  //Disable clicking on the button, the job is over
             }
         });
     };

@@ -135,6 +135,31 @@
                     <div id="hide-summary-button" style="display: hidden;">
                         <a href="" class="btn btn-xs btn-default" ng-click="toggleSummary('hide')" aw-tool-tip="Hide hosts summary" data-placement="top"><i class="fa fa-arrow-circle-right fa-lg"></i></a>
                     </div>
+                    <div id="summary-search-section" class="section">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span ng-bind="search_all_label"></span> <span class="caret"></span></button>
+                                        <ul class="dropdown-menu">
+                                          <li><a href="" ng-click="setSearchAll('host')">Host</a></li>
+                                          <li><a href="" ng-click="setSearchAll('failures')">Failures</a></li>
+                                        </ul>
+                                    </div><!-- /btn-group -->
+                                    <input type="text" class="form-control" id="search_all_hosts_name" ng-model="search_all_hosts_name" placeholder="{{ search_all_placeholder }}" ng-disabled="searchAllDisabled"
+                                        ng-keypress="allHostNameKeyPress($event)" />
+                                    <div id="search-all-input-icons">
+                                        <a class="search-icon" ng-show="searchAllHostsEnabled" ng-click="searchAllHosts()"><i class="fa fa-search"></i></a>
+                                        <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllHosts()"><i class="fa fa-times"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <button type="button" class="btn btn-sm btn-default" aw-tool-top="Live updates enabled. Click to disable." ng-show="!liveEventsEnabled"><i class="fa fa-play"></i> Play</button>
+                                <button type="button" class="btn btn-sm btn-default" aw-tool-top="Live updates disabled. Click to Enable." ng-show="liveEventsEnabled" ng-disabled="liveEventToggleDisabled"><i class="fa fa-stop"></i> Stop</button>
+                            </div>
+                        </div>
+                    </div>
                     <div id="hosts-summary-section" class="section job_summary">
                         <div class="header">
                             <div class="title">Host Summary</div>

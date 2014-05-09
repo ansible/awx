@@ -29,9 +29,12 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     scope.auto_scroll = false;
     scope.searchTaskHostsEnabled = true;
     scope.searchSummaryHostsEnabled = true;
-    scope.hostTableRows = 120;
-    scope.hostSummaryTableRows = 120;
-    
+    scope.hostTableRows = 300;
+    scope.hostSummaryTableRows = 300;
+    scope.searchAllHostsEnabled = true;
+    scope.liveEventsEnabled = true;
+    scope.liveEventToggleDisabled = false;
+
     event_socket =  Socket({
         scope: scope,
         endpoint: "job_events"
@@ -223,6 +226,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                     scope.job_status.elapsed = '00:00:00';
                 }
 
+                scope.setSearchAll('host');
                 scope.$emit('JobReady', data.related.job_events + '?page_size=50&order_by=id');
                 scope.$emit('GetCredentialNames', data);
             })
@@ -237,7 +241,8 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     }
     scope.removeRefreshCompleted = scope.$on('RefreshCompleted', function() {
         refresh_count++;
-        if (refresh_count === 2) {
+        if (refresh_count === 1) {
+            // First time. User just loaded page.
             scope.$emit('LoadJob');
         }
     });
@@ -263,29 +268,30 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
 
         // Detail table height adjusting. First, put page height back to 'normal'.
         $('#plays-table-detail').height(150);
+        $('#plays-table-detail').mCustomScrollbar("update");
         $('#tasks-table-detail').height(150);
+        $('#tasks-table-detail').mCustomScrollbar("update");
         $('#hosts-table-detail').height(150);
-        scope.hostTableRows = 120;
+        $('#hosts-table-detail').mCustomScrollbar("update");
         height = $('#wrap').height() - $('.site-footer').outerHeight() - $('.main-container').height();
         if (height > 15) {
             // there's a bunch of white space at the bottom, let's use it
             $('#plays-table-detail').height(150 + (height / 3));
-            //$('#plays-table-detail').mCustomScrollbar("update");
+            $('#plays-table-detail').mCustomScrollbar("update");
             $('#tasks-table-detail').height(150 + (height / 3));
-            // Host details
+            $('#tasks-table-detail').mCustomScrollbar("update");
             $('#hosts-table-detail').height(150 + (height / 3));
-            scope.hostTableRows = Math.max(Math.ceil((150 + (height / 3)) / 20) * 3, 120);
+            $('#hosts-table-detail').mCustomScrollbar("update");
         }
-        refreshHostRows();
-
+       
         // Summary table height adjusting.
-        height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .header').outerHeight() - $('#hosts-summary-section .table-header').outerHeight() - 20;
-        scope.hostSummaryTableRows = Math.max(Math.ceil(height / 20), 120);
+        height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .header').outerHeight() - $('#hosts-summary-section .table-header').outerHeight() - 
+            $('#summary-search-section').outerHeight() - 20;
         $('#hosts-summary-table').height(height);
-        refreshSummaryHostRows();
+        scope.$emit('RefreshCompleted');
     };
 
-    function refreshHostRows() {
+    /*function refreshHostRows() {
         var url;
         if (scope.activeTask) {
             scope.hostResults = [];
@@ -376,7 +382,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             $('#hosts-table-detail').mCustomScrollbar("update");
             scope.$emit('RefreshCompleted');
         }
-    }
+    }*/
 
     setTimeout(function() { scope.adjustSize(); }, 500);
 
@@ -385,21 +391,34 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         scope.adjustSize();
     }, 500));
 
-    $scope.selectPlay = function(id) {
+    scope.setSearchAll = function(search) {
+        if (search === 'host') {
+            scope.search_all_label = 'Host name';
+            scope.searchAllDisabled = false;
+            scope.search_all_placeholder = 'Search all by host name';
+        }
+        else {
+            scope.search_all_label = 'Failures';
+            scope.searchAllDisabled = true; 
+            scope.search_all_placeholder = '';
+        }
+    };
+
+    scope.selectPlay = function(id) {
         SelectPlay({
             scope: scope,
             id: id
         });
     };
 
-    $scope.selectTask = function(id) {
+    scope.selectTask = function(id) {
         SelectTask({
             scope: scope,
             id: id
         });
     };
 
-    $scope.toggleSummary = function(hide) {
+    scope.toggleSummary = function(hide) {
         var docw, doch, height = $('#job-detail-container').height(), slide_width;
         if (!hide) {
             docw = $(window).width();
@@ -430,7 +449,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         }
     };
 
-    $scope.HostDetailOnTotalScroll = _.debounce(function() {
+    scope.HostDetailOnTotalScroll = _.debounce(function() {
         // Called when user scrolls down (or forward in time). Using _.debounce
         var url, mcs = arguments[0];
         scope.$apply(function() {
@@ -475,7 +494,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         });
     }, 300);
 
-    $scope.HostDetailOnTotalScrollBack = _.debounce(function() {
+    scope.HostDetailOnTotalScrollBack = _.debounce(function() {
         // Called when user scrolls up (or back in time)
         var url, mcs = arguments[0];
         scope.$apply(function() {
@@ -520,7 +539,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         });
     }, 300);
 
-    $scope.HostSummaryOnTotalScroll = function(mcs) {
+    scope.HostSummaryOnTotalScroll = function(mcs) {
         var url;
         if (!scope.auto_scroll && scope.hosts) {
             url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
@@ -561,7 +580,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         scope.auto_scroll = false;
     };
 
-    $scope.HostSummaryOnTotalScrollBack = function(mcs) {
+    scope.HostSummaryOnTotalScrollBack = function(mcs) {
         var url;
         if (!scope.auto_scroll && scope.hosts) {
             url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
@@ -601,7 +620,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         }
     };
 
-    $scope.searchTaskHosts = function() {
+    scope.searchTaskHosts = function() {
         var url;
         Wait('start');
         scope.hostResults = [];
@@ -638,13 +657,13 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         }
     };
 
-    $scope.taskHostNameKeyPress = function(e) {
+    scope.taskHostNameKeyPress = function(e) {
         if (e.keyCode === 13) {
-            $scope.searchTaskHosts();
+            scope.searchTaskHosts();
         }
     };
 
-    $scope.searchSummaryHosts = function() {
+    scope.searchSummaryHosts = function() {
         var url;
         Wait('start');
         scope.hosts = [];
@@ -681,9 +700,9 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         }
     };
 
-    $scope.summaryHostNameKeyPress = function(e) {
+    scope.summaryHostNameKeyPress = function(e) {
         if (e.keyCode === 13) {
-            $scope.searchSummaryHosts();
+            scope.searchSummaryHosts();
         }
     };
 }

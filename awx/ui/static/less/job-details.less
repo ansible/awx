@@ -148,7 +148,8 @@
 .table-detail { 
     overflow-x: hidden;
     overflow-y: auto;
-    border: 1px solid @black;
+    border: 1px solid @grey;
+    border-radius: 4px;
     background-color: @white;
     padding-left: 3px; 
     .row {
@@ -213,6 +214,19 @@
         a:hover {
             color: @black;
         }
+    }
+}
+
+#search-all-input-icons {
+    position: absolute;
+    right: 3px;
+    top: 5px;
+    z-index: 100;
+    a {
+        color: #a9a9a9;
+    }
+    a:hover {
+        color: @black;
     }
 }
 
