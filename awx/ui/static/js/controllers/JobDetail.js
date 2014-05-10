@@ -32,8 +32,11 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     scope.hostTableRows = 300;
     scope.hostSummaryTableRows = 300;
     scope.searchAllHostsEnabled = true;
-    scope.liveEventsEnabled = true;
-    scope.liveEventToggleDisabled = false;
+
+    scope.eventsHelpText = "<p><i class=\"fa fa-circle successful-hosts-color\"></i> Successful</p>\n" +
+        "<p><i class=\"fa fa-circle changed-hosts-color\"></i> Changed</p>\n" +
+        "<p><i class=\"fa fa-circle unreachable-hosts-color\"></i> Unreachable</p>\n" +
+        "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n";
 
     event_socket =  Socket({
         scope: scope,
@@ -265,7 +268,6 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             });
             $('#job-summary-container').css({ "width": "41.66666667%", "padding-right": "15px", "z-index": 0 }).show();
         }
-
         // Detail table height adjusting. First, put page height back to 'normal'.
         $('#plays-table-detail').height(150);
         $('#plays-table-detail').mCustomScrollbar("update");
@@ -283,9 +285,9 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             $('#hosts-table-detail').height(150 + (height / 3));
             $('#hosts-table-detail').mCustomScrollbar("update");
         }
-       
         // Summary table height adjusting.
-        height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .header').outerHeight() - $('#hosts-summary-section .table-header').outerHeight() -
+        height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .header').outerHeight() -
+            $('#hosts-summary-section .table-header').outerHeight() -
             $('#summary-search-section').outerHeight() - 20;
         $('#hosts-summary-table').height(height);
         $('#hosts-summary-table').mCustomScrollbar("update");
@@ -394,12 +396,13 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
 
     scope.setSearchAll = function(search) {
         if (search === 'host') {
-            scope.search_all_label = 'Host name';
+            scope.search_all_label = 'Host';
             scope.searchAllDisabled = false;
             scope.search_all_placeholder = 'Search all by host name';
         }
         else {
             scope.search_all_label = 'Failures';
+            scope.search_all_placeholder = 'Show failed events';
             scope.searchAllDisabled = true;
             scope.search_all_placeholder = '';
         }

@@ -65,6 +65,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                     name: event.play,
                     created: event.created,
                     status: (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'none',
+                    elapsed: '00:00:00',
                     children: []
                 });
                 SelectPlay({
@@ -105,6 +106,15 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                 SelectTask({
                     scope: scope,
                     id: event.id
+                });
+            }
+            if (event.event === 'playbook_on_no_hosts_matched') {
+                UpdatePlayStatus({
+                    scope: scope,
+                    play_id: event.parent,
+                    failed: true,
+                    changed: false,
+                    modified: event.modified
                 });
             }
             if (event.event === 'playbook_on_task_start') {
@@ -714,6 +724,9 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
         }, 700);
         
         // Get current list of hosts from the API
+
+        // is the job done? if so, only select hosts for the last task?
+
         Wait('start');
         scope.hostResults = [];
         url = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent=' + id + '&';

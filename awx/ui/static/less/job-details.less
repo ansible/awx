@@ -7,6 +7,11 @@
  *
  */
 
+@failed-hosts-color:        #DA4D49;
+@successful-hosts-color:    #9ED89E;
+@changed-hosts-color:       #FFC773;
+
+
 #jobs-detail {
     .nav-path {
         margin-bottom: 20px;
@@ -49,19 +54,31 @@
 }
 
 .failed-hosts {
-    background-color: #DA4D49;
+    background-color: @failed-hosts-color;
+}
+.failed-hosts-color { 
+    color: @failed-hosts-color;
 }
 .successful-hosts {
-    background-color: #9ED89E;
+    background-color: @successful-hosts-color;
+}
+.successful-hosts-color {
+    color: @successful-hosts-color;
 }
 .changed-hosts {
-    background-color: #FFC773;
+    background-color: @changed-hosts-color;
+}
+.changed-hosts-color {
+    color: @changed-hosts-color;
 }
 .skipped-hosts, .no-matching-hosts {
     background-color: #D4D4D4;
 }
 .unreachable-hosts {
-    background-color: @black;
+    background-color: @grey;
+}
+.unreachable-hosts-color {
+    color: @grey;
 }
 
 .job_well {
@@ -71,13 +88,6 @@
     border-radius: 4px;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
             box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
-}
-
-#summary-button {
-    position: absolute;
-    top: 5px;
-    right: 20px;
-    z-index: 100;
 }
 
 #hide-summary-button {
@@ -204,6 +214,7 @@
         float: right;
         input {
             width: 250px;
+            padding-right: 20px;
         }
         a {
             position: absolute;
@@ -217,6 +228,17 @@
     }
 }
 
+#search_all_hosts_name {
+    font-size: 14px;
+    padding-left: 3px;
+    padding-right: 20px;      
+}
+
+#event-help-link {
+    margin-left: 3px;
+    font-size: 14px;
+}
+
 #search-all-input-icons {
     position: absolute;
     right: 3px;
@@ -228,6 +250,10 @@
     a:hover {
         color: @black;
     }
+}
+
+label.small-label {
+    font-size: 12px;
 }
 
 #task-hosts-section {
@@ -265,6 +291,9 @@
     }
     .badge {
         font-size: 12px;
+    }
+    .badge-column a {
+        width: 20%;
     }
 }
 

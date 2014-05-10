@@ -15,13 +15,15 @@
         
         <div class="row" style="position: relative;">
             <div id="job-detail-container">
-                <div id="summary-button" style="display: hidden;">
-                    <a href="" class="btn btn-xs btn-default" ng-click="toggleSummary()" aw-tool-tip="View hosts summary" data-placement="top"><i class="fa fa-arrow-circle-left fa-lg"></i></a>
-                </div>
                 <div class="job_well">
                     <div class="row status-row">
                         <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 job-label">Status</div>
-                        <div class="col-lg-11 col-md-11 col-sm-10 col-xs-10 status-column"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }} {{ job_status.explanation }}</div>
+                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 status-column"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
+                        <div class="col-lg-7 col-md-7 col-sm-4 col-xs-4">{{ job_status.explanation }}</div>
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-right">
+                            <button type="button" class="btn btn-default btn-xs" aw-tool-tip="View standard out" data-placement="top"><i class="fa fa-external-link"></i></button>
+                            <button type="button" id="summary-button" class="btn btn-default btn-xs" ng-click="toggleSummary()" aw-tool-tip="View summary" data-placement="top"><i class="fa fa-arrow-circle-left fa-lg"></i></button>
+                        </div>
                     </div>
 
                     <div class="row status-row">
@@ -89,7 +91,7 @@
                                 </div>
                                 <div class="row" ng-show="taskList.length === 0">
                                     <div class="col-lg-12">
-                                        <div class="loading-info">No tasks found for selected play</div>
+                                        <div class="loading-info">No tasks matched</div>
                                     </div>
                                 </div>
                             </div>
@@ -99,7 +101,7 @@
                             <div class="header">
                                 <div class="title">Hosts</div>
                                 <div class="search-field">
-                                    <input type="text" ng-model="task_host_name" placeholder="Search" ng-keypress="taskHostNameKeyPress($event)" />
+                                    <input type="text" ng-model="task_host_name" placeholder="Host Name" ng-keypress="taskHostNameKeyPress($event)" />
                                     <a class="search-icon" ng-show="searchTaskHostsEnabled" ng-click="searchTaskHosts()"><i class="fa fa-search"></i></a>
                                     <a class="search-icon" ng-show="!searchTaskHostsEnabled" ng-click="task_host_name=''; searchTaskHosts()"><i class="fa fa-times"></i></a>
                                 </div>
@@ -115,7 +117,7 @@
                                             {{ result.msg }}
                                         </div>
                                     </div>
-                                    <div class="row" ng-show="results.length === 0">
+                                    <div class="row" ng-show="!results || results.length === 0">
                                         <div class="col-lg-12">
                                             <div class="loading-info">No hosts matched</div>
                                         </div>
@@ -133,64 +135,62 @@
             <div id="job-summary-container">
                 <div class="job_well">
                     <div id="hide-summary-button" style="display: hidden;">
-                        <a href="" class="btn btn-xs btn-default" ng-click="toggleSummary('hide')" aw-tool-tip="Hide hosts summary" data-placement="top"><i class="fa fa-arrow-circle-right fa-lg"></i></a>
+                        <a href="" class="btn btn-xs btn-default" ng-click="toggleSummary('hide')" aw-tool-tip="Hide summary" data-placement="top"><i class="fa fa-arrow-circle-right fa-lg"></i></a>
                     </div>
                     <div id="summary-search-section" class="section">
+                        <div class="header">
+                            <div class="title">Filter Events</div>
+                        </div>
                         <div class="row">
-                            <div class="col-lg-8">
-                                <div class="input-group input-group-sm">
-                                    <div class="input-group-btn">
-                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span ng-bind="search_all_label"></span> <span class="caret"></span></button>
-                                        <ul class="dropdown-menu">
-                                          <li><a href="" ng-click="setSearchAll('host')">Host</a></li>
-                                          <li><a href="" ng-click="setSearchAll('failures')">Failures</a></li>
-                                        </ul>
-                                    </div><!-- /btn-group -->
-                                    <input type="text" class="form-control" id="search_all_hosts_name" ng-model="search_all_hosts_name" placeholder="{{ search_all_placeholder }}" ng-disabled="searchAllDisabled"
-                                        ng-keypress="allHostNameKeyPress($event)" />
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                <div style="position:relative;">
+                                    <input type="text" class="input-sm form-control" id="search_all_hosts_name" ng-model="search_all_hosts_name"
+                                        placeholder="Host Name" ng-disabled="searchAllDisabled" ng-keypress="allHostNameKeyPress($event)" />
                                     <div id="search-all-input-icons">
                                         <a class="search-icon" ng-show="searchAllHostsEnabled" ng-click="searchAllHosts()"><i class="fa fa-search"></i></a>
                                         <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllHosts()"><i class="fa fa-times"></i></a>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4">
-                                <button type="button" class="btn btn-sm btn-default" aw-tool-top="Live updates enabled. Click to disable." ng-show="!liveEventsEnabled"><i class="fa fa-play"></i> Play</button>
-                                <button type="button" class="btn btn-sm btn-default" aw-tool-top="Live updates disabled. Click to Enable." ng-show="liveEventsEnabled" ng-disabled="liveEventToggleDisabled"><i class="fa fa-stop"></i> Stop</button>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                <div style="padding-top: 5px;">
+                                    <label class="small-label">Show</label>
+                                    <div class="btn-group" aw-toggle-button>
+                                        <button class="btn btn-xs btn-default">All</button>
+                                        <button class="btn btn-xs btn-primary active">Errors</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <hr />
                     </div>
                     <div id="hosts-summary-section" class="section job_summary">
                         <div class="header">
                             <div class="title">Host Summary</div>
                             <div class="search-field">
-                                <input type="text" ng-model="summary_host_name" placeholder="Search" ng-keypress="summaryHostNameKeyPress($event)" />
+                                <input type="text" ng-model="summary_host_name" placeholder="Host Name" ng-keypress="summaryHostNameKeyPress($event)" />
                                 <a class="search-icon" ng-show="searchSummaryHostsEnabled" ng-click="searchSummaryHosts()"><i class="fa fa-search"></i></a>
                                 <a class="search-icon" ng-show="!searchSummaryHostsEnabled" ng-click="summary_host_name=''; searchSummaryHosts()"><i class="fa fa-times"></i></a>
                             </div>
                         </div>
                         <div class="table-header">
                             <div class="row">
-                                <div class="col-lg-7 col-md-7 col-sm-4 col-xs-4">Host</div>
-                                <div class="col-lg-5 col-md-5 col-sm-8 col-xs-8">Events</div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Host</div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Events 
+                                    <a href="" id="event-help-link" aw-pop-over="{{ eventsHelpText }}" aw-tool-tip="Click for help" aw-pop-over-watch="eventsHelpText" data-placement="top" data-container="body" data-title="Help" class="help-link"><i class="fa fa-question-circle"></i></a>
+                                </div>
                             </div>
                         </div>
                         <div id="hosts-summary-table" class="table-detail" aw-custom-scroll data-on-total-scroll="HostSummaryOnTotalScroll"
                                 data-on-total-scroll-back="HostSummaryOnTotalScrollBack">
                             <div class="row" ng-repeat="host in hosts" id="{{ host.id }}">
-                                <div class="name col-lg-7 col-md-6 col-sm-4 col-xs-4"><a href="/#/home/hosts/?id={{ host.id }}"
+                                <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6"><a href="/#/home/hosts/?id={{ host.id }}"
                                     aw-tool-tip="Click to edit host" data-placement="top">{{ host.name }}</a>
                                 </div>
-                                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 badge-column">
                                     <a href="" aw-tool-tip="OK" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
-                                </div>
-                                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2">
                                     <a href="" aw-tool-tip="Changed" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
-                                </div>
-                                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2">
                                     <a href="" aw-tool-tip="Unreachable" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
-                                </div>
-                                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2">
                                     <a href="" aw-tool-tip="Failed" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
                                 </div>
                             </div>
