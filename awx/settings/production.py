@@ -43,6 +43,9 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 # The heartbeat file for the tower scheduler
 SCHEDULE_METADATA_LOCATION = '/var/lib/awx/.tower_cycle'
 
+# Use different cache prefix for production vs. development.
+CACHES['default']['KEY_PREFIX'] = 'tower'
+
 LOGGING['handlers']['rotating_file'] = {
     'level': 'WARNING',
     'class':'logging.handlers.RotatingFileHandler',

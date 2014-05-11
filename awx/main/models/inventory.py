@@ -300,7 +300,7 @@ class Host(CommonModelNameNotUnique):
             if summary_data[key] is None:
                 rebuild_cache = True
                 break
-        if rebuild_cache:
+        if rebuild_cache or not summary_data:
             summary_data = self.update_cached_values()
         summary_data_actual = dict(all_groups=summary_data['%s_all_groups' % self.id],
                                    groups=summary_data['%s_groups' % self.id],
