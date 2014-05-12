@@ -1233,10 +1233,11 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
+    vars_prompt_on_launch = serializers.Field(source='vars_prompt_on_launch')
 
     class Meta:
         model = Job
-        fields = ('*', 'job_template', 'passwords_needed_to_start')
+        fields = ('*', 'job_template', 'passwords_needed_to_start', 'vars_prompt_on_launch')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)

@@ -231,6 +231,10 @@ class Job(UnifiedJob, JobOptions):
             return '%d-%s' % (self.pk, h.hexdigest())
 
     @property
+    def vars_prompt_on_launch(self):
+        return self.job_template.vars_prompt_on_launch
+
+    @property
     def passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
         needed = []
