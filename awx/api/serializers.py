@@ -1216,7 +1216,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
     class Meta:
         model = JobTemplate
-        fields = ('*', 'host_config_key')
+        fields = ('*', 'host_config_key', 'vars_prompt_on_launch')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)

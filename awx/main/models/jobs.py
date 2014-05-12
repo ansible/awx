@@ -144,6 +144,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         blank=True,
         default='',
     )
+    vars_prompt_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
 
     @classmethod
     def _get_unified_job_class(cls):
