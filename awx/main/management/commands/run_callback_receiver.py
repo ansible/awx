@@ -83,9 +83,6 @@ def process_job_event(data):
     for key in data.keys():
         if key not in ('job_id', 'event', 'event_data', 'created'):
             data.pop(key)
-    data['play'] = data.get('event_data', {}).get('play', '').strip()
-    data['task'] = data.get('event_data', {}).get('task', '').strip()
-    data['host_name'] = data.get('event_data', {}).get('host', '').strip()
     for retry_count in xrange(11):
         try:
             if event == 'playbook_on_stats':

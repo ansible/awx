@@ -419,6 +419,7 @@ class RunJobTest(BaseCeleryTest):
             self.assertEqual(evt.host, self.host)
             self.assertTrue(evt.play, evt)
             self.assertTrue(evt.task, evt)
+            self.assertTrue(evt.host_name)
             if has_roles:
                 self.assertTrue(evt.role, evt)
             else:

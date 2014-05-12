@@ -485,7 +485,9 @@ class JobEvent(CreatedModifiedModel):
     )
     host_name = models.CharField(
         max_length=1024,
-        default='')
+        default='',
+        editable=False,
+    )
     hosts = models.ManyToManyField(
         'Host',
         related_name='job_events',
@@ -652,13 +654,16 @@ class JobEvent(CreatedModifiedModel):
             self.role = self.event_data.get('role', '').strip()
             if 'role' not in update_fields:
                 update_fields.append('role')
+            self.host_name = self.event_data.get('host', '').strip()
+            if 'host_name' not in update_fields:
+                update_fields.append('host_name')
         # Only update job event hierarchy and related models during post
         # processing (after running job).
         post_process = kwargs.pop('post_process', False)
         if post_process:
             try:
-                if not self.host_id and self.event_data.get('host', ''):
-                    host_qs = Host.objects.filter(inventory__jobs__id=self.job_id, name=self.event_data['host'])
+                if not self.host_id and self.host_name:
+                    host_qs = Host.objects.filter(inventory__jobs__id=self.job_id, name=self.host_name)
                     self.host_id = host_qs.only('id').values_list('id', flat=True)[0]
                     if 'host_id' not in update_fields:
                         update_fields.append('host_id')
@@ -695,8 +700,8 @@ class JobEvent(CreatedModifiedModel):
         from awx.main.models.inventory import Host
         extra_host_pks = set(extra_host_pks or [])
         hostnames = set()
-        if self.event_data.get('host', ''):
-            hostnames.add(self.event_data['host'])
+        if self.host_name:
+            hostnames.add(self.host_name)
         if self.event == 'playbook_on_stats':
             try:
                 for v in self.event_data.values():
