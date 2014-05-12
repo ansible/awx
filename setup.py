@@ -8,7 +8,6 @@ from distutils import log
 from setuptools import setup, find_packages
 from setuptools.command.sdist import sdist as _sdist
 
-
 from awx import __version__
 
 build_timestamp = os.getenv("BUILD",datetime.datetime.now().strftime('-%Y%m%d%H%M'))
@@ -105,6 +104,53 @@ class sdist_awx(_sdist, object):
                 self.pyc_only_files.append(f)
         super(sdist_awx, self).make_distribution()
 
+#####################################################################
+
+from distutils.command.install_lib import install_lib as _install_lib
+
+class install_lib(_install_lib, object):
+    '''
+    Custom install_lib command to distribute some files as .pyc only.
+    '''
+
+    def run(self):
+        '''
+        Overload the run method and remove all .py files after compilation
+        '''
+
+        super(install_lib, self).run()
+        for f in self.install():
+            if not f.startswith(self.install_dir + 'awx/'):
+                log.debug('install_lib skipping: %s', f)
+                continue
+            if f.startswith(self.install_dir + 'awx/lib/site-packages'):
+                log.debug('install_lib skipping: %s', f)
+                continue
+            if f.startswith(self.install_dir + 'awx/scripts'):
+                log.debug('install_lib skipping: %s', f)
+                continue
+            if f.startswith(self.install_dir + 'awx/plugins'):
+                log.debug('install_lib skipping: %s', f)
+                continue
+            if f.startswith(self.install_dir + 'awx/main/tests/data'):
+                log.debug('install_lib skipping: %s', f)
+                continue
+            if f.endswith('.py'):
+                log.debug('install_lib removing: %s', f)
+                os.unlink(f)
+
+    def get_outputs(self):
+        '''
+        Overload the get_outputs method and remove any .py entries in the file
+        list
+        '''
+
+        filenames = super(install_lib, self).get_outputs()
+        return [filename for filename in filenames
+            if not filename.endswith('.py')]
+
+#####################################################################
+
 setup(
     name='ansible-tower',
     version=__version__.split("-")[0], # FIXME: Should keep full version here?
@@ -160,6 +206,7 @@ setup(
         },
     },
     cmdclass = {
-        'sdist_awx': sdist_awx,
+        'sdist_awx': _sdist,
+        'install_lib': install_lib,
     },
 )

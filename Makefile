@@ -46,7 +46,7 @@ clean:
 	rm -rf dist/*
 	rm -rf build rpm-build *.egg-info
 	rm -rf debian deb-build
-	rm -f awx/ui/static/css/awx*.js awx/ui/static/css/awx*.css
+	rm -f awx/ui/static/{js,css}/awx*.{js,css}
 	rm -rf node_modules package.json
 	find . -type f -regex ".*\.py[co]$$" -delete
 
