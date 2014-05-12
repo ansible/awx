@@ -69,6 +69,7 @@ TEST_ASYNC_OK_PLAYBOOK = '''
 - hosts: test-group
   gather_facts: false
   tasks:
+  - debug: msg="one task before async"
   - name: async task should pass
     command: sleep 4
     async: 16
@@ -79,6 +80,7 @@ TEST_ASYNC_FAIL_PLAYBOOK = '''
 - hosts: test-group
   gather_facts: false
   tasks:
+  - debug: msg="one task before async"
   - name: async task should fail
     shell: sleep 4; test 1 = 0
     async: 16
@@ -89,6 +91,7 @@ TEST_ASYNC_TIMEOUT_PLAYBOOK = '''
 - hosts: test-group
   gather_facts: false
   tasks:
+  - debug: msg="one task before async"
   - name: async task should timeout
     command: sleep 16
     async: 8
@@ -338,7 +341,8 @@ class RunJobTest(BaseCeleryTest):
 
     def check_job_events(self, job, runner_status='ok', plays=1, tasks=1,
                          async=False, async_timeout=False, async_nowait=False,
-                         check_ignore_errors=False, has_roles=False):
+                         check_ignore_errors=False, async_tasks=0,
+                         has_roles=False):
         job_events = job.job_events.all()
         if False and async:
             print
@@ -384,7 +388,7 @@ class RunJobTest(BaseCeleryTest):
                                  host_pks)
         qs = job_events.filter(event='playbook_on_task_start')
         self.assertEqual(qs.count(), tasks)
-        for evt in qs:
+        for n, evt in enumerate(qs):
             self.assertFalse(evt.host, evt)
             self.assertTrue(evt.play, evt)
             self.assertTrue(evt.task, evt)
@@ -392,7 +396,10 @@ class RunJobTest(BaseCeleryTest):
                 self.assertTrue(evt.role, evt)
             else:
                 self.assertFalse(evt.role, evt)
-            self.assertEqual(evt.failed, should_be_failed)
+            if async and async_tasks < tasks and n == 0:
+                self.assertFalse(evt.failed)
+            else:
+                self.assertEqual(evt.failed, should_be_failed)
             if not async:
                 self.assertEqual(evt.changed, should_be_changed)
             if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
@@ -438,7 +445,7 @@ class RunJobTest(BaseCeleryTest):
             # Ansible 1.2 won't call the on_runner_async_failed callback when a
             # timeout occurs, so skip this check for now.
             if not async_timeout and not async_nowait:
-                self.assertEqual(qs.count(), tasks)
+                self.assertEqual(qs.count(), async_tasks)
             for evt in qs:
                 self.assertEqual(evt.host, self.host)
                 self.assertTrue(evt.play, evt)
@@ -999,7 +1006,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.check_job_events(job, 'ok', 1, 1, async=True)
+        self.check_job_events(job, 'ok', 1, 2, async=True, async_tasks=1)
         for job_host_summary in job.job_host_summaries.all():
             self.assertFalse(job_host_summary.failed)
             self.assertEqual(job_host_summary.host.last_job_host_summary,
@@ -1026,7 +1033,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'failed')
-        self.check_job_events(job, 'failed', 1, 1, async=True)
+        self.check_job_events(job, 'failed', 1, 2, async=True, async_tasks=1)
         for job_host_summary in job.job_host_summaries.all():
             self.assertTrue(job_host_summary.failed)
             self.assertEqual(job_host_summary.host.last_job_host_summary,
@@ -1053,8 +1060,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'failed')
-        self.check_job_events(job, 'failed', 1, 1, async=True,
-                              async_timeout=True)
+        self.check_job_events(job, 'failed', 1, 2, async=True,
+                              async_timeout=True, async_tasks=1)
         for job_host_summary in job.job_host_summaries.all():
             self.assertTrue(job_host_summary.failed)
             self.assertEqual(job_host_summary.host.last_job_host_summary,
