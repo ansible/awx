@@ -50,16 +50,16 @@ logger = logging.getLogger('awx.main.tasks')
 @task(bind=True)
 def tower_periodic_scheduler(self):
     def get_last_run():
-        if not os.path.exists('/tmp/.tower_cycle'):
+        if not os.path.exists(settings.SCHEDULE_METADATA_LOCATION):
             return None
-        fd = open('/tmp/.tower_cycle')
+        fd = open(settings.SCHEDULE_METADATA_LOCATION)
         try:
             last_run = dateutil.parser.parse(fd.read())
             return last_run
         except Exception, e:
             return None
     def write_last_run(last_run):
-        fd = open('/tmp/.tower_cycle', 'w')
+        fd = open(settings.SCHEDULE_METADATA_LOCATION, 'w')
         fd.write(last_run.isoformat())
         fd.close()
 

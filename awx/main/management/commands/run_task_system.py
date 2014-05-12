@@ -210,9 +210,9 @@ def rebuild_graph(message):
         graph.add_node(wait_task)
         for dependency in node_dependencies:
             graph.add_edge(wait_task, dependency)
-    #if settings.DEBUG:
     print("Graph Edges: %s" % str(graph.edges))
-    graph.generate_graphviz_plot()
+    if settings.DEBUG:
+        graph.generate_graphviz_plot()
     return graph
 
 def process_graph(graph, task_capacity):

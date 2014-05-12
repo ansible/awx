@@ -90,6 +90,9 @@ PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
 # directory should not be web-accessible
 JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_output')
 
+# The heartbeat file for the tower scheduler
+SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
+
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.

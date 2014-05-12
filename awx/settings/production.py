@@ -40,6 +40,8 @@ INTERNAL_API_URL = 'http://127.0.0.1:80'
 # This directory should not be web-accessible
 JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 
+ The heartbeat file for the tower scheduler
+SCHEDULE_METADATA_LOCATION = '/var/lib/awx/.tower_cycle'
 
 LOGGING['handlers']['rotating_file'] = {
     'level': 'WARNING',
