@@ -232,7 +232,9 @@ class Job(UnifiedJob, JobOptions):
 
     @property
     def vars_prompt_on_launch(self):
-        return self.job_template.vars_prompt_on_launch
+        if self.job_template is not None:
+            return self.job_template.vars_prompt_on_launch
+        return None
 
     @property
     def passwords_needed_to_start(self):
