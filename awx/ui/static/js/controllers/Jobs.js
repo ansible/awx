@@ -217,7 +217,6 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
         choicesCount++;
         if (choicesCount === 2) {
             setHeight();
-            console.log('rows: ' + max_rows);
             $scope.$emit('buildJobsList');
         }
     });
@@ -255,7 +254,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
             header = Math.max($('#completed_jobs_table thead').height(), 41);
             height = Math.floor(available_height / 2) - header - page_row - search_row - 15;
-            row_height = (docw < 1415) ? 47 : 27; 
+            row_height = (docw < 1415) ? 47 : 27;
             //$('.jobs-list-container tbody tr:eq(0)').height();  <-- only works if data is loaded
             max_rows = Math.floor(height / row_height);
         }

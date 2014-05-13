@@ -21,7 +21,7 @@
                         <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 status-column"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
                         <div class="col-lg-7 col-md-7 col-sm-4 col-xs-4">{{ job_status.explanation }}</div>
                         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-right">
-                            <button type="button" class="btn btn-default btn-xs" aw-tool-tip="View standard out" data-placement="top"><i class="fa fa-external-link"></i></button>
+                            <a href="/#/jobs/{{ job_id }}/stdout" target="_blank" type="button" class="btn btn-default btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top"><i class="fa fa-external-link"></i></a>
                             <button type="button" id="summary-button" class="btn btn-default btn-xs" ng-click="toggleSummary()" aw-tool-tip="View summary" data-placement="top"><i class="fa fa-arrow-circle-left fa-lg"></i></button>
                         </div>
                     </div>
@@ -58,7 +58,8 @@
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
                                         data-placement="top">{{ play.elapsed }}
                                     </div>
-                                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 status-column">
+                                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 status-column" aw-tool-tip="Event Id: {{ play.id }}<br />Status: {{ play.status_text }}" 
+                                        data-placement="top">
                                         <i class="fa icon-job-{{ play.status }}"></i> {{ play.name }}</span>
                                     </div>
                                 </div>
@@ -82,8 +83,9 @@
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
                                             data-placement="top">{{ task.elapsed }}
                                     </div>
-                                    <div class="col-lg-5 col-md-5 col-sm-10 col-xs-12 status-column" aw-tool-tip="Event Id: {{ task.id }} Status: {{ task.status }}" data-placement="top">
-                                            <i class="fa icon-job-{{  task.status }}"></i><span ng-show="hasRoles"> {{ task.role }} </span> {{ task.name }}
+                                    <div class="col-lg-5 col-md-5 col-sm-10 col-xs-12 status-column" aw-tool-tip="Event Id: {{ task.id }} Status: {{ task.status }}" 
+                                        data-placement="top">
+                                        <i class="fa icon-job-{{  task.status }}"></i><span ng-show="hasRoles"> {{ task.role }} </span> {{ task.name }}
                                     </div>
                                     <div class="col-lg-5 col-md-5 hidden-sm hidden-xs">
                                         <div class="status-bar"><div class="successful-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-successful-bar" aw-tool-tip="{{ task.successfulCount}} hosts OK" aw-tip-watch="task.successfulCount" data-placement="top" ng-style="task.successfulStyle">{{ task.successfulCount }}</div><div class="changed-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-changed-bar" aw-tool-tip="{{ task.changedCount}} hosts changed" aw-tip-watch="task.changedCount" data-placement="top" ng-style="task.changedStyle">{{ task.changedCount }}</div><div class="skipped-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-skipped-bar" aw-tool-tip="{{ task.skippedCount}} hosts skipped" aw-tip-watch="task.skippedCount" data-placement="top" ng-style="task.skippedStyle">{{ task.skippedCount }}</div><div class="failed-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-failed-bar" aw-tool-tip="{{ task.failedCount}} hosts failed" aw-tip-watch="task.failedCount" data-placement="top" ng-style="task.failedStyle">{{ task.failedCount }}</div><div class="no-matching-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-no-matching-hosts-bar" aw-tool-tip="No matching hosts were found" data-placement="top" style="width: 100%;" ng-show="task.status === 'no-m atching-hosts'">No matching hosts</div></div>

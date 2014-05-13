@@ -114,7 +114,8 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                     play_id: event.parent,
                     failed: true,
                     changed: false,
-                    modified: event.modified
+                    modified: event.modified,
+                    status_text: 'failed- no hosts matched'
                 });
             }
             if (event.event === 'playbook_on_task_start') {
@@ -392,7 +393,8 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
             changed = params.changed,
             id = params.play_id,
             modified = params.modified,
-            no_hosts = params.no_hosts;
+            no_hosts = params.no_hosts,
+            status_text = params.status_text;
         scope.plays.every(function(play,idx) {
             if (play.id === id) {
                 if (failed) {
@@ -412,6 +414,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                     start: play.created,
                     end: modified
                 });
+                scope.plays[idx].status_text = (status_text) ? status_text : scope.plays[idx].status;
                 UpdateJobStatus({
                     scope: scope,
                     failed: null,

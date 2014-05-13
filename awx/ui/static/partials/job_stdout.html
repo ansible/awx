@@ -1,0 +1,23 @@
+<div class="tab-pane" id="jobs-stdout">
+    <div ng-cloak id="htmlTemplate">
+        
+        <div class="row">
+            <div id="breadcrumb-container" class="col-md-12" style="position: relative;">
+                <div class="nav-path">
+                    <ul class="breadcrumb" id="breadcrumb-list">
+                        <li><a href="/#/jobs">Jobs</a></li>
+                        <li><a href="/#/jobs/{{ job.id }}"><strong>{{ job.id }}</strong> - {{ job.name }}</a></li>
+                        <li>Standard Out</li>
+                    </ul>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div id="stdout-container"></div>
+            </div>
+        </div>
+    </div>
+</div>

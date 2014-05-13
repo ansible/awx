@@ -123,6 +123,11 @@ angular.module('Tower', [
                 controller: 'JobDetailController'
             }).
 
+            when('/jobs/:id/stdout', {
+                templateUrl: urlPrefix + 'partials/job_stdout.html',
+                controller: 'JobStdoutController'
+            }).
+
             when('/job_events/:id', {
                 templateUrl: urlPrefix + 'partials/job_events.html',
                 controller: 'JobEventsList'
