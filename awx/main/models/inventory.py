@@ -263,12 +263,13 @@ class Host(CommonModelNameNotUnique):
             self.save(update_fields=computed_fields.keys())
         # Groups and inventory may also need to be updated when host fields
         # change.
-        if update_groups:
-            for group in self.all_groups.filter(active=True):
-                group.update_computed_fields()
-        if update_inventory:
-            self.inventory.update_computed_fields(update_groups=False,
-                                                  update_hosts=False)
+        # NOTE: I think this is no longer needed
+        # if update_groups:
+        #     for group in self.all_groups.filter(active=True):
+        #         group.update_computed_fields()
+        # if update_inventory:
+        #     self.inventory.update_computed_fields(update_groups=False,
+        #                                           update_hosts=False)
         # Rebuild summary fields cache
         self.update_cached_values()
     variables_dict = VarsDictProperty('variables')
@@ -391,6 +392,7 @@ class Group(CommonModelNameNotUnique):
         return reverse('api:group_detail', args=(self.pk,))
 
     def mark_inactive_recursive(self, parent=None):
+        from awx.main.tasks import update_inventory_computed_fields
         def mark_actual(parent=parent):
             linked_children = [(parent, self)] + [(self, child) for child in self.children.all()]
             marked_groups = []
@@ -418,7 +420,7 @@ class Group(CommonModelNameNotUnique):
                 host.mark_inactive()
         with ignore_inventory_computed_fields():
             mark_actual()
-        self.inventory.update_computed_fields()
+        update_inventory_computed_fields.delay(self.id, True)
 
     def mark_inactive(self, save=True, recompute=True):
         '''

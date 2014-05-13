@@ -127,7 +127,7 @@ def handle_work_error(self, task_id, subtasks=None):
                 instance.socketio_emit_status("failed")
 
 @task()
-def update_inventory_computed_fields(inventory_id, should_update_hosts):
+def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     '''
     Signal handler and wrapper around inventory.update_computed_fields to
     prevent unnecessary recursive calls.
@@ -589,6 +589,12 @@ class RunJob(BaseTask):
         Hook for actions to run after job/task has completed.
         '''
         super(RunJob, self).post_run_hook(job, **kwargs)
+        try:
+            inventory = job.inventory
+        except Inventory.DoesNotExist:
+            pass
+        else:
+            update_inventory_computed_fields.delay(inventory.id, True)
         # Update job event fields after job has completed (only when using REST
         # API callback).
         if not settings.CALLBACK_CONSUMER_PORT:

@@ -82,12 +82,31 @@ def emit_update_inventory_computed_fields(sender, **kwargs):
     except Inventory.DoesNotExist:
         pass
     else:
-        update_inventory_computed_fields.delay(inventory.id, issubclass(sender, Job))
+        update_inventory_computed_fields.delay(inventory.id, True)
 
-post_save.connect(emit_update_inventory_computed_fields, sender=Host)
-post_delete.connect(emit_update_inventory_computed_fields, sender=Host)
-post_save.connect(emit_update_inventory_computed_fields, sender=Group)
-post_delete.connect(emit_update_inventory_computed_fields, sender=Group)
+def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
+    if getattr(_inventory_updates, 'is_updating', False):
+        return
+    instance = kwargs['instance']
+    if kwargs['created'] or not instance.active or kwargs['signal'] == post_delete:
+        pass
+    else:
+        return
+    sender_name = unicode(sender._meta.verbose_name)    
+    logger.debug("%s created or deleted, updating inventory computed fields: %r %r",
+                 sender_name, sender, kwargs)
+    try:
+        inventory = instance.inventory
+    except Inventory.DoesNotExist:
+        pass
+    else:
+        update_inventory_computed_fields.delay(inventory.id, True)
+
+
+post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
+post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
+post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
+post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
