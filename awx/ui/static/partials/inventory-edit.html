@@ -57,44 +57,50 @@
                     <span ng-show="groupsCount > 0 && hostsCount > 0"> This group contains {{ groupsCount }} groups and {{ hostsCount }} hosts. </span>
                     <span ng-show="groupsCount == 0 && hostsCount > 0"> This group contains {{ hostsCount }} hosts. </span>
                     <span ng-show="groupsCopunt > 0 && hostsCount == 0"> This group contains {{ groupsCount }} groups. </span>
-                    Delete or preserve the group's children?</p>
+                    Delete or promote the group's children?</p>
                     <div style="width: 50%; margin: 15px auto;">
                         
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="preserve-all"> Preserve groups and hosts
+                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="preserve-all"> Promote groups and hosts 
                             </label>
                         </div>
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="delete-all"> Delete groups and hosts
+                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="delete-all"> Delete groups and hosts 
                             </label>
                         </div>
 
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount == 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="preserve-all"> Preserve groups
+                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="preserve-all"> Promote groups 
                             </label>
                         </div>
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount == 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="delete-all"> Delete groups
+                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="delete-all"> Delete groups 
                             </label>
                         </div>
 
                         <div class="radio" ng-show="groupsCount == 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="preserve-all"> Preserve hosts
+                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="preserve-all"> Promote hosts 
                             </label>
                         </div>
                         <div class="radio" ng-show="groupsCount == 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="delete-all"> Delete hosts
+                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="delete-all"> Delete hosts 
                             </label>
                         </div>
 
                     </div>
+
                 </div>
+                
+                <div class="help-container">
+                    <a href="" id="awp-promote" href="" aw-pop-over="{{ helpText }}" aw-tool-tip="Click for help" aw-pop-over-watch="helpText" data-placement="top" data-container="body" data-title="Help" class="help-link"><i class="fa fa-question-circle"></i> click for help</a>
+                </div>
+
             </div>
             <div ng-show="groupsCount == 0 && hostsCount == 0">
                 <div class="alert alert-info">Delete group <em>{{ group_name }}</em>?</div> 

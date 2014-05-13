@@ -1290,6 +1290,11 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
             scope.deleteOption = "preserve-all";
 
+            scope.helpText = "<dl><dt>Delete</dt><dd>Remove from inventory all groups and hosts associated with the group being deleted. " +
+                "If a group or host is associated with other groups, it will not be removed from the inventory.</dd>\n" +
+                "<dt style=\"margin-top: 5px;\">Promote</dt><dd>Groups and hosts associated with the group being removed will be promoted one level.</dd></dl>\n" +
+                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
+            
             buttonSet = [{
                 label: "Cancel",
                 onClick: function() {
@@ -1389,14 +1394,10 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 scope.$emit('ChildrenReady');
             }
 
-            scope.cancel = function() {
-                $('#group-delete-dialog').dialog('close');
-            };
-
-            if (scope.removeChildDeleteFinished) {
-                scope.removeChildDeleteFinished();
+            if (scope.removeDisassociateGroup) {
+                scope.removeDisassociateGroup();
             }
-            scope.removeChildDeleteFinished = scope.$on('ChildDeleteFinished', function() {
+            scope.removeDisassociateGroup = scope.$on('DisassociateGroup', function() {
                 var url = GetBasePath('inventory') + scope.inventory_id + '/groups/';
                 Rest.setUrl(url);
                 Rest.post({ id: node.group_id, disassociate: 1 })
@@ -1410,7 +1411,32 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 });
             });
 
-            if (scope.removeDeleteNextGroup) {
+            if (scope.removeDeleteGroup) {
+                scope.removeDeleteGroup();
+            }
+            scope.removeDeleteGroup = scope.$on('DeleteGroup', function() {
+                var parent, url;
+                if (node.parent === 0) {
+                    // this is a top level group
+                    url = GetBasePath('inventory') + scope.inventory_id + '/groups/' + node.group_id + '/';
+                }
+                else {
+                    parent = Find({ list: scope.groups, key: 'id', val: node.parent });
+                    url = GetBasePath('groups') + parent.group_id + '/children/' + node.group_id + '/';
+                }
+                Rest.setUrl(url);
+                Rest.destroy()
+                    .success( function() {
+                        scope.$emit('GroupDeleteCompleted'); // Signal a group refresh to start
+                    })
+                    .error( function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + ' failed. DELETE returned: ' + status
+                        });
+                    });
+            });
+
+            /*if (scope.removeDeleteNextGroup) {
                 scope.removeDeleteNextGroup();
             }
             scope.removeDeleteNextGroup = scope.$on('DeleteNextGroup', function() {
@@ -1433,8 +1459,9 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     scope.$emit('ChildDeleteFinished');
                 }
             });
+             */
 
-            if (scope.removeDeleteNextHost) {
+            /*if (scope.removeDeleteNextHost) {
                 scope.removeDeleteNextHost();
             }
             scope.removeDeleteNextHost = scope.$on('DeleteNextHost', function() {
@@ -1454,16 +1481,20 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 else {
                     scope.$emit('DeleteNextGroup');
                 }
-            });
+            });*/
+
+            scope.cancel = function() {
+                $('#group-delete-dialog').dialog('close');
+            };
 
             scope.performDelete = function() {
                 $('#group-delete-dialog').dialog('close');
                 Wait('start');
                 if (scope.deleteOption === 'delete-all') {
-                    scope.$emit('DeleteNextHost');
+                    scope.$emit('DeleteGroup');
                 }
                 else {
-                    scope.$emit('ChildDeleteFinished');
+                    scope.$emit('DisassociateGroup');
                 }
             };
 
