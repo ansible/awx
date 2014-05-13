@@ -240,16 +240,21 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
     }
 
     if ($routeParams.status && !$routeParams.source) {
-        scope[list.iterator + 'SearchField'] = 'status';
-        scope[list.iterator + 'SelectShow'] = true;
-        scope[list.iterator + 'SearchSelectOpts'] = list.fields.status.searchOptions;
-        scope[list.iterator + 'SearchFieldLabel'] = list.fields.status.label.replace(/<br\>/g, ' ');
-        for (opt in list.fields.status.searchOptions) {
-            if (list.fields.status.searchOptions[opt].value === $routeParams.status) {
-                scope[list.iterator + 'SearchSelectValue'] = list.fields.status.searchOptions[opt];
-                break;
-            }
-        }
+        scope[list.iterator + 'SearchField'] = 'last_update_failed';
+        scope[list.iterator + 'SearchFieldLabel'] = list.fields.last_update_failed.label;
+        scope[list.iterator + 'SelectShow'] = false;
+        scope[list.iterator + 'SearchValue'] = 'failed';
+        scope[list.iterator + 'SearchSelectValue'] = { value: 'failed' };
+
+        //scope[list.iterator + 'SelectShow'] = true;
+        //scope[list.iterator + 'SearchSelectOpts'] = list.fields.status.searchOptions;
+        //scope[list.iterator + 'SearchFieldLabel'] = list.fields.status.label.replace(/<br\>/g, ' ');
+        //for (opt in list.fields.status.searchOptions) {
+        //    if (list.fields.status.searchOptions[opt].value === $routeParams.status) {
+        //        scope[list.iterator + 'SearchSelectValue'] = list.fields.status.searchOptions[opt];
+        //        break;
+        //    }
+        //}
     }
 
     if ($routeParams.source) {
