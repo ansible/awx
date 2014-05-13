@@ -76,7 +76,7 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
                         if (scope.license_date) {
                             dt = new Date(parseInt(scope.license_date, 10) * 1000);
                             scope.license_date = FormatDate(dt);
-
+                            scope.time_remaining = scope.time_remaining * 1000;
                             days = parseInt(scope.time_remaining / 86400000, 10);
                             remainder = scope.time_remaining - (days * 86400000);
                             hours = parseInt(remainder / 3600000, 10);
