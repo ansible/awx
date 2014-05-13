@@ -881,7 +881,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         html += "<div class=\"checkbox\">\n";
                         html += "<label ";
                         html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
-                        html += "for=\"" + fld + '">';
+                        //html += "for=\"" + fld + '">';
+                        html += ">";
                         html += buildCheckbox(this.form, field, fld, undefined, false);
                         html += (field.icon) ? Icon(field.icon) : "";
                         html += '<span class=\"label-text\">' + field.label + "</span>";
