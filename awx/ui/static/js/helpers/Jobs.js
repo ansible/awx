@@ -357,7 +357,8 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             url = params.url,
             pageSize = params.pageSize || 5,
             base = $location.path().replace(/^\//, '').split('/')[0],
-            e, html;
+            search_params = params.searchParams,
+            e, html, key;
 
         // Add the search widget. We want it arranged differently, so we're injecting and compiling it separately
         html = SearchWidget({
@@ -406,6 +407,12 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 scope[list.iterator + 'SearchField'] = 'id';
                 scope[list.iterator + 'SearchValue'] = $routeParams.id__int;
                 scope[list.iterator + 'SearchFieldLabel'] = 'Job ID';
+            }
+        }
+
+        if (search_params) {
+            for (key in search_params) {
+                scope[key] = search_params[key];
             }
         }
         scope.search(list.iterator);

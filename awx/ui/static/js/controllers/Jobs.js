@@ -10,7 +10,7 @@
  
 'use strict';
 
-function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope, LoadJobsScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
+function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope, LoadJobsScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
     ScheduledJobsList, GetChoices, GetBasePath, Wait, Socket) {
     
     ClearScope();
@@ -135,6 +135,8 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         $scope.removeBuildJobsList();
     }
     $scope.removeBuildJobsList = $scope.$on('buildJobsList', function() {
+        var opt, search_params;
+
         if (CompletedJobsList.fields.type) {
             CompletedJobsList.fields.type.searchOptions = $scope.type_choices;
         }
@@ -144,6 +146,19 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
         if (QueuedJobsList.fields.type) {
             QueuedJobsList.fields.type.searchOptions = $scope.type_choices;
         }
+        if ($routeParams.status) {
+            search_params[CompletedJobsList.iterator + 'SearchField'] = 'status';
+            search_params[CompletedJobsList.iterator + 'SelectShow'] = true;
+            search_params[CompletedJobsList.iterator + 'SearchSelectOpts'] = CompletedJobsList.fields.status.searchOptions;
+            search_params[CompletedJobsList.iterator + 'SearchFieldLabel'] = CompletedJobsList.fields.status.label.replace(/<br\>/g,' ');
+            search_params[CompletedJobsList.iterator + 'SearchType'] = '';
+            for (opt in CompletedJobsList.fields.status.searchOptions) {
+                if (CompletedJobsList.fields.status.searchOptions[opt].value === $routeParams.status) {
+                    search_params[CompletedJobsList.iterator + 'SearchSelectValue'] = CompletedJobsList.fields.status.searchOptions[opt];
+                    break;
+                }
+            }
+        }
         completed_scope = $scope.$new(true);
         completed_scope.showJobType = true;
         LoadJobsScope({
@@ -151,7 +166,8 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
             scope: completed_scope,
             list: CompletedJobsList,
             id: 'completed-jobs',
-            url: GetBasePath('unified_jobs') + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled'
+            url: GetBasePath('unified_jobs') + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled',
+            searchParams: search_params
         });
         running_scope = $scope.$new(true);
         LoadJobsScope({
@@ -254,7 +270,7 @@ function JobsListController ($scope, $compile, ClearScope, Breadcrumbs, LoadBrea
     }
 }
 
-JobsListController.$inject = [ '$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope', 'RunningJobsList', 'CompletedJobsList',
+JobsListController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope', 'RunningJobsList', 'CompletedJobsList',
     'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'Socket' ];
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,
