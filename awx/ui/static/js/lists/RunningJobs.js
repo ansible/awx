@@ -43,7 +43,7 @@ angular.module('RunningJobsDefinition', [])
                 label: 'Started On',
                 noLink: true,
                 searchable: false,
-                filter: "date:'MM/dd/yy HH:mm:ss'",
+                filter: "date:'MM/dd HH:mm:ss'",
                 columnClass: "col-md-2 hidden-xs"
             },
             type: {

@@ -36,7 +36,7 @@ angular.module('ScheduledJobsDefinition', [])
                 noLink: true,
                 searchable: false,
                 columnClass: "col-md-2 hidden-xs",
-                filter: "date:'MM/dd/yy HH:mm:ss'",
+                filter: "date:'MM/dd HH:mm:ss'",
                 key: true
             },
             type: {

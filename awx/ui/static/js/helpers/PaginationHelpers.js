@@ -114,13 +114,14 @@ angular.module('PaginationHelpers', ['Utilities', 'RefreshHelper', 'RefreshRelat
             var scope = params.scope,
                 list = params.list,
                 iterator = (params.iterator) ? params.iterator : list.iterator,
+                pageSize = params.pageSize,
                 mode = (params.mode) ? params.mode : null;
 
             scope[iterator + '_page'] = (params.page) ? params.page : 1;
             scope[iterator + '_url'] = params.url;
             scope[iterator + '_mode'] = mode;
 
-            if (params.pageSize) {
+            if (pageSize) {
                 scope[iterator + '_page_size'] = params.pageSize;
             } else if (mode === 'lookup') {
                 scope[iterator + '_page_size'] = 5;

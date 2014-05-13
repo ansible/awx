@@ -47,7 +47,7 @@ angular.module('CompletedJobsDefinition', [])
                 label: 'Finished On',
                 noLink: true,
                 searchable: false,
-                filter: "date:'MM/dd/yy HH:mm:ss'",
+                filter: "date:'MM/dd HH:mm:ss'",
                 columnClass: "col-md-2 hidden-xs",
                 key: true,
                 desc: true
