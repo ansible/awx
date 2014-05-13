@@ -773,9 +773,9 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
             }
         };
             
-        body = (group) ? '<p>Are you sure you want to remove host <strong>' + host_name + '</strong> from group ' + group.name + '?' +
-            ' It will still be part of the inventory and available in All Hosts.</p>' :
-            '<p>Are you sure you want to permanently delete host <strong>' + host_name + '</strong> from the inventory?</p>';
+        body = (group) ? '<div class=\"alert alert-info\"><p>Are you sure you want to remove host <strong>' + host_name + '</strong> from group ' + group.name + '?' +
+            ' It will still be part of the inventory and available in All Hosts.</p></div>' :
+            '<div class=\"alert alert-info\"><p>Are you sure you want to permanently delete host <strong>' + host_name + '</strong> from the inventory?</p></div>';
         Prompt({ hdr: 'Delete Host', body: body, action: action_to_take, 'class': 'btn-danger' });
 
     };
