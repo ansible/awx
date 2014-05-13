@@ -197,6 +197,17 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
 
             },
 
+            buildHTML: function(form, options) {
+                // Get HTML without actually injecting into DOM. Caller is responsible for any injection.
+                // Example:
+                //   html = GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
+                
+                this.mode = options.mode;
+                this.modal = (options.modal) ? true : false;
+                this.setForm(form);
+                return this.build(options);
+            },
+
             applyDefaults: function () {
                 for (var fld in this.form.fields) {
                     if (this.form.fields[fld]['default'] || this.form.fields[fld]['default'] === 0) {

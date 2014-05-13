@@ -8,7 +8,7 @@
 'use strict';
 
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-    'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog'])
+    'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog', 'FormGenerator', 'JobVarsPromptFormDefinition'])
 
 .factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors', function(Rest, Wait, ProcessErrors) {
     return function(params) {
@@ -241,14 +241,146 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         };
     }])
 
+.factory('PromptForVars', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateDialog', 'GenerateForm', 'JobVarsPromptForm', 'Wait',
+    'ParseVariableString', 'ToJSON', 'ProcessErrors',
+    function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm, JobVarsPromptForm, Wait, ParseVariableString, ToJSON,
+        ProcessErrors) {
+    return function(params) {
+        var buttons,
+            parent_scope = params.scope,
+            scope = parent_scope.$new(),
+            callback = params.callback,
+            job = params.job,
+            e, helpContainer, html;
+
+        html = GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
+        helpContainer = "<div style=\"display:inline-block; font-size: 12px; margin-top: 6px;\" class=\"help-container pull-right\">\n" +
+            "<a href=\"\" id=\"awp-promote\" href=\"\" aw-pop-over=\"{{ helpText }}\" aw-tool-tip=\"Click for help\" aw-pop-over-watch=\"helpText\" " +
+            "aw-tip-placement=\"top\" data-placement=\"bottom\" data-container=\"body\" data-title=\"Help\" class=\"help-link\"><i class=\"fa fa-question-circle\">" +
+            "</i> click for help</a></div>\n";
+        
+        scope.helpText = "<p>After defining any extra variables, click Continue to start the job. Otherwise, click cancel to abort.</p>" +
+                    "<p>Extra variables are passed as command line variables to the playbook run. It is equivalent to the -e or --extra-vars " +
+                    "command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
+                    "JSON:<br />\n" +
+                    "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    "YAML:<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                    "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+
+        scope.variables = ParseVariableString(params.variables);
+        scope.parseType = 'yaml';
+
+        // Reuse password modal
+        $('#password-modal').empty().html(html);
+        $('#password-modal').find('textarea').before(helpContainer);
+        e = angular.element(document.getElementById('password-modal'));
+        $compile(e)(scope);
+
+        buttons = [{
+            label: "Cancel",
+            onClick: function() {
+                scope.varsCancel();
+            },
+            icon: "fa-times",
+            "class": "btn btn-default",
+            "id": "vars-cancel-button"
+        },{
+            label: "Continue",
+            onClick: function() {
+                scope.varsAccept();
+            },
+            icon: "fa-check",
+            "class": "btn btn-primary",
+            "id": "vars-accept-button"
+        }];
+
+        if (scope.removeDialogReady) {
+            scope.removeDialogReady();
+        }
+        scope.removeDialogReady = scope.$on('DialogReady', function() {
+            Wait('stop');
+            $('#password-modal').dialog('open');
+            setTimeout(function() {
+                TextareaResize({
+                    scope: scope,
+                    textareaId: 'job_variables',
+                    modalId: 'password-modal',
+                    formId: 'job_form',
+                    parse: true
+                });
+            }, 300);
+        });
+
+        CreateDialog({
+            id: 'password-modal',
+            scope: scope,
+            buttons: buttons,
+            width: 575,
+            height: 530,
+            minWidth: 450,
+            title: 'Extra Variables',
+            onResizeStop: function() {
+                TextareaResize({
+                    scope: scope,
+                    textareaId: 'job_variables',
+                    modalId: 'password-modal',
+                    formId: 'job_form',
+                    parse: true
+                });
+            },
+            beforeDestroy: function() {
+                if (scope.codeMirror) {
+                    scope.codeMirror.destroy();
+                }
+                $('#password-modal').empty();
+            },
+            onOpen: function() {
+                $('#job_variables').focus();
+            },
+            callback: 'DialogReady'
+        });
+
+        scope.varsCancel = function() {
+            $('#password-modal').dialog('close');
+            parent_scope.$emit('CancelJob');
+            scope.$destroy();
+        };
+
+        scope.varsAccept = function() {
+            job.extra_vars = ToJSON(scope.parseType, scope.variables, true);
+            Wait('start');
+            Rest.setUrl(GetBasePath('jobs') + job.id + '/');
+            Rest.put(job)
+                .success(function() {
+                    Wait('stop');
+                    $('#password-modal').dialog('close');
+                    parent_scope.$emit(callback);
+                    scope.$destroy();
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Failed updating job ' + job.id + ' with variables. PUT returned: ' + status });
+                });
+        };
+
+    };
+}])
+
 // Submit request to run a playbook
-.factory('PlaybookRun', ['$location','$routeParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'Empty', 'PromptForCredential',
-    function ($location, $routeParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, ProcessErrors, Wait, Empty, PromptForCredential) {
+.factory('PlaybookRun', ['$location','$routeParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'Empty', 'PromptForCredential', 'PromptForVars',
+    function ($location, $routeParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, ProcessErrors, Wait, Empty, PromptForCredential, PromptForVars) {
         return function (params) {
             var scope = params.scope,
                 id = params.id,
                 base = $location.path().replace(/^\//, '').split('/')[0],
-                url, job_template, new_job_id, launch_url;
+                url,
+                job_template,
+                new_job_id,
+                new_job,
+                launch_url,
+                prompt_for_vars = false,
+                passwords;
 
             if (!Empty($routeParams.template_id)) {
                 // launching a job from job_template detail page
@@ -268,10 +400,16 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 Rest.post(job_template).success(function (data) {
                     new_job_id = data.id;
                     launch_url = data.related.start;
+                    prompt_for_vars = data.vars_prompt_on_launch;
+                    new_job = data;
                     if (data.passwords_needed_to_start.length > 0) {
                         scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
-                    } else {
-                        scope.$emit('StartPlaybookRun', {});
+                    }
+                    else if (data.vars_prompt_on_launch) {
+                        scope.$emit('PromptForVars');
+                    }
+                    else {
+                        scope.$emit('StartPlaybookRun');
                     }
                 }).error(function (data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -279,10 +417,10 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 });
             });
 
-            if (scope.removePasswordsCanceled) {
-                scope.removePasswordsCanceled();
+            if (scope.removeCancelJob) {
+                scope.removeCancelJob();
             }
-            scope.removePasswordsCanceled = scope.$on('PasswordsCanceled', function() {
+            scope.removeCancelJob = scope.$on('CancelJob', function() {
                 // Delete the job
                 Wait('start');
                 Rest.setUrl(GetBasePath('jobs') + new_job_id + '/');
@@ -301,18 +439,17 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function() {
                 var base = $location.path().replace(/^\//, '').split('/')[0];
-                if (base !== 'jobs') {
+                if (base === 'jobs') {
+                    scope.refreshJobs();
+                } else {
                     $location.path('/jobs');
-                }
-                else {
-                    Wait('stop');
                 }
             });
 
             if (scope.removeStartPlaybookRun) {
                 scope.removeStartPlaybookRun();
             }
-            scope.removeStartPlaybookRun = scope.$on('StartPlaybookRun', function(e, passwords) {
+            scope.removeStartPlaybookRun = scope.$on('StartPlaybookRun', function() {
                 LaunchJob({
                     scope: scope,
                     url: launch_url,
@@ -324,8 +461,11 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             if (scope.removePromptForPasswords) {
                 scope.removePromptForPasswords();
             }
-            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function(e, passwords) {
-                PromptForPasswords({ scope: scope, passwords: passwords, callback: 'StartPlaybookRun' });
+            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function(e, passwords_needed_to_start) {
+                PromptForPasswords({ scope: scope,
+                    passwords: passwords_needed_to_start,
+                    callback: 'PromptForVars'
+                });
             });
 
             if (scope.removePromptForCredential) {
@@ -333,6 +473,25 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removePromptForCredential = scope.$on('PromptForCredential', function(e, data) {
                 PromptForCredential({ scope: scope, template: data });
+            });
+
+            if (scope.removePromptForVars) {
+                scope.removePromptForVars();
+            }
+            scope.removePromptForVars = scope.$on('PromptForVars', function(e, pwds) {
+                passwords = pwds;
+                if (prompt_for_vars) {
+                    // call prompt with callback of StartPlaybookRun, passwords
+                    PromptForVars({
+                        scope: scope,
+                        job: new_job,
+                        variables: job_template.extra_vars,
+                        callback: 'StartPlaybookRun'
+                    });
+                }
+                else {
+                    scope.$emit('StartPlaybookRun');
+                }
             });
 
             if (scope.removeCredentialReady) {
@@ -366,7 +525,6 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         };
     }
 ])
-
 
 // Submit SCM Update request
 .factory('ProjectUpdate', ['PromptForPasswords', 'LaunchJob', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',

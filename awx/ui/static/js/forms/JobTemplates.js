@@ -180,6 +180,24 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
                 dataPlacement: 'right',
                 dataContainer: "body"
             },
+            job_tags: {
+                label: 'Job Tags',
+                type: 'textarea',
+                rows: 1,
+                addRequired: false,
+                editRequired: false,
+                'class': 'span12',
+                column: 2,
+                awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
+                    "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
+                    "<p>For example, you might have a task consisiting of a long list of actions. Tag values can be assigned to each action. " +
+                    "Suppose the actions have been assigned tag values of &quot;configuration&quot;, &quot;packages&quot; and &quot;install&quot;.</p>" +
+                    "<p>If you just want to run the &quot;configuration&quot; and &quot;packages&quot; actions, you would enter the following here " +
+                    "in the Job Tags field:</p>\n<blockquote>configuration,packages</blockquote>\n",
+                dataTitle: "Job Tags",
+                dataPlacement: "right",
+                dataContainer: "body"
+            },
             variables: {
                 label: 'Extra Variables',
                 type: 'textarea',
@@ -199,22 +217,17 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
                 dataPlacement: 'right',
                 dataContainer: "body"
             },
-            job_tags: {
-                label: 'Job Tags',
-                type: 'textarea',
-                rows: 1,
+            vars_prompt_on_launch: {
+                label: 'Prompt for Extra Variables',
+                type: 'checkbox',
                 addRequired: false,
-                editRequired: false,
-                'class': 'span12',
+                editRequird: false,
+                trueValue: 'true',
+                falseValue: 'false',
                 column: 2,
-                awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
-                    "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
-                    "<p>For example, you might have a task consisiting of a long list of actions. Tag values can be assigned to each action. " +
-                    "Suppose the actions have been assigned tag values of &quot;configuration&quot;, &quot;packages&quot; and &quot;install&quot;.</p>" +
-                    "<p>If you just want to run the &quot;configuration&quot; and &quot;packages&quot; actions, you would enter the following here " +
-                    "in the Job Tags field:</p>\n<blockquote>configuration,packages</blockquote>\n",
-                dataTitle: "Job Tags",
-                dataPlacement: "right",
+                awPopOver: "<p>If checked, user will be prompted at job launch with a dialog allowing override of the extra variables setting.</p>",
+                dataPlacement: 'right',
+                dataTitle: 'Prompt for Extra Variables',
                 dataContainer: "body"
             },
             allow_callbacks: {
