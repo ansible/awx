@@ -816,7 +816,7 @@ angular.module('GeneratorHelpers', [])
             html += "<div class=\"col-lg-4 col-md-4\" ng-hide=\"" + iterator + "_mode == 'lookup'\">\n";
             html += "<div class=\"page-label\">\n";
             html += "Page {{ " + iterator + "_page }} of {{ " + iterator + "_num_pages }} for {{ " + iterator + "_total_rows | number:0 }} " +
-                set.replace(/\_/g,' ') + '.';
+                set.replace(/^home_/,'').replace(/\_/g,' ');
             html += "</div>\n";
             html += "</div>\n";
             html += "</div>\n";
