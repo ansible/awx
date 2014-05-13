@@ -31,7 +31,9 @@ angular.module('ProjectsListDefinition', [])
                 dataPlacement: 'top',
                 icon: "icon-job-{{ project.statusIcon }}",
                 columnClass: "col-lg-1 col-md-1 col-sm-2 col-xs-2",
-                nosort: true
+                nosort: true,
+                searchType: 'select',
+                searchOptions: []  //set in the controller
             },
             name: {
                 key: true,

@@ -113,7 +113,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         var opt;
 
         list.fields.scm_type.searchOptions = $scope.project_scm_type_options;
-        //list.fields.status.searchOptions = $scope.project_status_options;
+        list.fields.status.searchOptions = $scope.project_status_options;
 
         if ($routeParams.scm_type && $routeParams.status) {
             // Request coming from home page. User wants all errors for an scm_type
@@ -133,6 +133,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         });
 
         if ($routeParams.scm_type) {
+            $scope[list.iterator + 'SearchType'] = '';
             $scope[list.iterator + 'SearchField'] = 'scm_type';
             $scope[list.iterator + 'SelectShow'] = true;
             $scope[list.iterator + 'SearchSelectOpts'] = list.fields.scm_type.searchOptions;
@@ -144,6 +145,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                 }
             }
         } else if ($routeParams.status) {
+            $scope[list.iterator + 'SearchType'] = '';
             $scope[list.iterator + 'SearchValue'] = $routeParams.status;
             $scope[list.iterator + 'SearchField'] = 'status';
             $scope[list.iterator + 'SelectShow'] = true;

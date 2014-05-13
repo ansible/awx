@@ -25,6 +25,7 @@ coverage.xml
 pep8.txt
 .vagrant*
 .tox
+.tower_cycle
 nohup.out
 reports
 package.json
