@@ -79,8 +79,9 @@ class sdist_awx(_sdist, object):
         new_sources = file(new_sources_path, 'w')
         for line in file(sources_txt_path, 'r'):
             line = line.strip()
+            # Include both .py and .pyc files to SOURCES.txt
             if line in self.pyc_only_files:
-                line = line + 'c'
+                line = line + '\n' + line + 'c'
             new_sources.write(line + '\n')
 
     def make_distribution(self):
@@ -99,9 +100,13 @@ class sdist_awx(_sdist, object):
                 continue
             if f.endswith('.py'):
                 log.info('using pyc for: %s', f)
+                # Byte compile to create .pyc file
                 py_compile.compile(f, doraise=True)
+                # Replace .py with .pyc file
                 self.filelist.files[n] = f + 'c'
                 self.pyc_only_files.append(f)
+        # Add .py files back to the filelist
+        self.filelist.files.extend(self.pyc_only_files)
         super(sdist_awx, self).make_distribution()
 
 #####################################################################
@@ -206,7 +211,7 @@ setup(
         },
     },
     cmdclass = {
-        'sdist_awx': _sdist,
+        'sdist_awx': sdist_awx,
         'install_lib': install_lib,
     },
 )
