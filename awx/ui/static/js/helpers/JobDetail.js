@@ -229,8 +229,6 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                 });
                 scope.job_status.status = (event.failed) ? 'failed' : 'successful';
                 scope.job_status.status_class = "";
-                scope.liveEventsEnabled = true; // Show the stop button
-                scope.liveEventToggleDisabled = true;  //Disable clicking on the button, the job is over
             }
         });
     };
@@ -697,8 +695,8 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
     };
 }])
 
-.factory('SelectTask', ['SelectHost', 'GetBasePath', '$routeParams', 'Rest', 'ProcessErrors', 'Wait',
-    function(SelectHost, GetBasePath, $routeParams, Rest, ProcessErrors, Wait) {
+.factory('SelectTask', ['SelectHost', 'GetBasePath', '$routeParams', 'Rest', 'ProcessErrors',
+    function(SelectHost, GetBasePath, $routeParams, Rest, ProcessErrors) {
     return function(params) {
         var scope = params.scope,
             id = params.id,
@@ -730,7 +728,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
 
         // is the job done? if so, only select hosts for the last task?
 
-        Wait('start');
+        //Wait('start');
         scope.hostResults = [];
         url = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent=' + id + '&';
         url += (scope.task_host_name) ? 'host__name__icontains=' + scope.task_host_name + '&' : '';
@@ -749,7 +747,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                         msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
                     });
                 });
-                Wait('stop');
+                //Wait('stop');
                 SelectHost({ scope: scope });
             })
             .error(function(data, status) {
@@ -782,6 +780,75 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
         {label:"Skipped", color:"#D4D4D4"},
         {label:"Unreachable", color:""}
     ];*/
+}])
+
+.factory('FilterAllByHostName', ['Rest', 'GetBasePath', 'ProcessErrors', 'SelectPlay', function(Rest, GetBasePath, ProcessErrors, SelectPlay) {
+    return function(params) {
+        var scope = params.scope,
+            host = params.host,
+            job_id = scope.job_id,
+            url = GetBasePath('jobs') + job_id + '/job_events/?event__icontains=runner&host_name__icontains=' + host;
+        
+        scope.search_all_tasks = [];
+        scope.search_all_plays = [];
+
+        if (scope.removeAllPlaysReady) {
+            scope.removeAllPlaysReady();
+        }
+        scope.removeAllPlaysReady = scope.$on('AllPlaysReady', function() {
+            if (scope.activePlay) {
+                setTimeout(function() {
+                    SelectPlay({ scope: scope, id: scope.activePlay });
+                }, 500);
+            }
+        });
+
+        if (scope.removeAllTasksReady) {
+            scope.removeAllTasksReady();
+        }
+        scope.removeAllTasksReady = scope.$on('AllTasksReady', function() {
+            url = GetBasePath('jobs') + job_id + '/job_events/?id__in=' + scope.search_all_tasks.join();
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    data.results.forEach(function(row) {
+                        if (row.parent) {
+                            scope.search_all_plays.push(row.parent);
+                        }
+                    });
+                    if (scope.search_all_plays.length > 0) {
+                        scope.search_all_plays.sort();
+                        scope.activePlay = scope.search_all_plays[scope.search_all_plays.length - 1];
+                    }
+                    else {
+                        scope.activePlay = null;
+                    }
+                    scope.$emit('AllPlaysReady');
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
+        });
+
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                data.results.forEach(function(row) {
+                    if (row.parent) {
+                        scope.search_all_tasks.push(row.parent);
+                    }
+                });
+                if (scope.search_all_tasks.length > 0) {
+                    scope.search_all_tasks.sort();
+                }
+                scope.$emit('AllTasksReady');
+            })
+            .error(function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+    };
 }]);
 
 

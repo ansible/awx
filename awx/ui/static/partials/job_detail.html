@@ -20,7 +20,7 @@
                         <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 status-column"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
                         <div class="col-lg-7 col-md-7 col-sm-4 col-xs-4">{{ job_status.explanation }}</div>
                         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-right">
-                            <a href="/#/jobs/{{ job_id }}/stdout" target="_blank" type="button" class="btn btn-default btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top" ng-show="job_status == 'successful' || job_status == 'failed' || job_status == 'error'"><i class="fa fa-external-link"></i></a>
+                            <a href="/#/jobs/{{ job_id }}/stdout" target="_blank" type="button" class="btn btn-default btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top" ng-show="job_status.status == 'successful' || job_status.status == 'failed' || job_status.status == 'error'"><i class="fa fa-external-link"></i></a>
                             <button type="button" id="summary-button" class="btn btn-default btn-xs" ng-click="toggleSummary()" aw-tool-tip="View summary" data-placement="top"><i class="fa fa-arrow-circle-left fa-lg"></i></button>
                         </div>
                     </div>
@@ -52,7 +52,7 @@
                                 </div>
                             </div>
                             <div id="plays-table-detail" aw-custom-scroll class="table-detail">
-                                <div class="row cursor-pointer" ng-repeat="play in plays"  ng-class="play.playActiveClass" ng-click="selectPlay(play.id)">
+                                <div class="row cursor-pointer" ng-repeat="play in plays | FilterById : search_all_plays "  ng-class="play.playActiveClass" ng-click="selectPlay(play.id)">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ play.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
                                         data-placement="top">{{ play.elapsed }}
@@ -76,7 +76,7 @@
                                 </div>
                             </div>
                             <div id="tasks-table-detail" aw-custom-scroll class="table-detail">
-                                <div class="row cursor-pointer" ng-repeat="task in taskList = (tasks | filter:{ play_id: activePlay })" ng-class="task.taskActiveClass"
+                                <div class="row cursor-pointer" ng-repeat="task in taskList = (tasks | FilterById : search_all_tasks | filter:{ play_id: activePlay })" ng-class="task.taskActiveClass"
                                     ng-click="selectTask(task.id)">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ task.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
@@ -149,7 +149,7 @@
                                         placeholder="Host Name" ng-disabled="searchAllDisabled" ng-keypress="allHostNameKeyPress($event)" />
                                     <div id="search-all-input-icons">
                                         <a class="search-icon" ng-show="searchAllHostsEnabled" ng-click="searchAllHosts()"><i class="fa fa-search"></i></a>
-                                        <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllHosts()"><i class="fa fa-times"></i></a>
+                                        <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllByHost()"><i class="fa fa-times"></i></a>
                                     </div>
                                 </div>
                             </div>

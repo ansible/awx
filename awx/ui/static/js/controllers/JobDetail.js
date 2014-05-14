@@ -8,7 +8,7 @@
 'use strict';
 
 function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors, DigestEvents,
-    SelectPlay, SelectTask, Socket, GetElapsed, SelectHost) {
+    SelectPlay, SelectTask, Socket, GetElapsed, SelectHost, FilterAllByHostName) {
 
     ClearScope();
 
@@ -23,6 +23,8 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     scope.plays = [];
     scope.tasks = [];
     scope.hosts = [];
+    scope.search_all_tasks = [];
+    scope.search_all_plays = [];
     scope.hostResults = [];
     scope.job_status = {};
     scope.job_id = job_id;
@@ -457,7 +459,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         // Called when user scrolls down (or forward in time). Using _.debounce
         var url, mcs = arguments[0];
         scope.$apply(function() {
-            if (!scope.auto_scroll && scope.activeTask && scope.hostResults) {
+            if (!scope.auto_scroll && scope.activeTask && scope.hostResults.length) {
                 scope.auto_scroll = true;
                 url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
                 url += (scope.task_host_name) ? 'host__name__icontains=' + scope.task_host_name + '&' : '';
@@ -502,7 +504,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         // Called when user scrolls up (or back in time)
         var url, mcs = arguments[0];
         scope.$apply(function() {
-            if (!scope.auto_scroll && scope.activeTask && scope.hostResults) {
+            if (!scope.auto_scroll && scope.activeTask && scope.hostResults.length) {
                 scope.auto_scroll = true;
                 url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
                 url += (scope.task_host_name) ? 'host__name__icontains=' + scope.task_host_name + '&' : '';
@@ -716,8 +718,33 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             scope.searchSummaryHosts();
         }
     };
+
+    scope.searchAllByHost = function() {
+        if (scope.search_all_hosts_name) {
+            FilterAllByHostName({
+                scope: scope,
+                host: scope.search_all_hosts_name
+            });
+            scope.searchAllHostsEnabled = false;
+        }
+        else {
+            scope.search_all_tasks = [];
+            scope.search_all_plays = [];
+            scope.searchAllHostsEnabled = true;
+        }
+        scope.task_host_name = scope.search_all_hosts_name;
+        scope.searchTaskHosts();
+        scope.summary_host_name = scope.search_all_hosts_name;
+        scope.searchSummaryHosts();
+    };
+
+    scope.allHostNameKeyPress = function(e) {
+        if (e.keyCode === 13) {
+            scope.searchAllByHost();
+        }
+    };
 }
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',
-    'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'SelectHost'
+    'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'SelectHost', 'FilterAllByHostName'
 ];
