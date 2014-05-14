@@ -144,6 +144,12 @@ angular.module('GeneratorHelpers', [])
             case 'schedule':
                 icon = "fa-calendar";
                 break;
+            case 'stdout':
+                icon = "fa-external-link";
+                break;
+            case 'job_details':
+                icon = 'fa-list-ul';
+                break;
             }
             icon += (size) ? " " + size : "";
             return Icon(icon);

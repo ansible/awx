@@ -214,7 +214,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
 
                 // In the case that the job is already completed, or an error already happened,
                 // populate scope.job_status info
-                scope.job_status.status = data.status;
+                scope.job_status.status = (data.status === 'waiting' || data.status === 'new') ? 'pending' : data.status;
                 scope.job_status.started = data.started;
                 scope.job_status.status_class = ((data.status === 'error' || data.status === 'failed') && data.job_explanation) ? "alert alert-danger" : "";
                 scope.job_status.finished = data.finished;

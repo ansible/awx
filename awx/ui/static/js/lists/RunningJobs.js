@@ -26,7 +26,9 @@ angular.module('RunningJobsDefinition', [])
                 key: true,
                 desc: true,
                 searchType: 'int',
-                columnClass: 'col-md-1 col-sm-2 col-xs-2'
+                columnClass: 'col-md-1 col-sm-2 col-xs-2',
+                awToolTip: "{{ running_job.status_tip }}",
+                awTipPlacement: "top",
             },
             status: {
                 label: 'Status',
@@ -79,7 +81,19 @@ angular.module('RunningJobsDefinition', [])
                 awToolTip: 'Cancel the job',
                 dataPlacement: 'top'
             },
-            dropdown: {
+            job_details: {
+                mode: 'all',
+                href: '/#/jobs/{{ running_job.id }}',
+                awToolTip: 'View job details',
+                dataPlacement: 'top'
+            },
+            stdout: {
+                mode: 'all',
+                href: '/#/jobs/{{ running_job.id }}/stdout',
+                awToolTip: 'View standard output. Opens in a new window or tab.',
+                dataPlacement: 'top'
+            }
+            /*dropdown: {
                 type: 'DropDown',
                 ngShow: "running_job.type === 'job'",
                 label: 'View',
@@ -90,6 +104,6 @@ angular.module('RunningJobsDefinition', [])
                     { ngHref: '/#/job_events/{{ running_job.id }}', label: 'Events' },
                     { ngHref: '/#/job_host_summaries/{{ running_job.id }}', label: 'Host Summary' }
                 ]
-            }
+            }*/
         }
     });

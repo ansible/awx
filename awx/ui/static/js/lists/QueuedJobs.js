@@ -26,7 +26,9 @@ angular.module('QueuedJobsDefinition', [])
                 key: true,
                 desc: true,
                 searchType: 'int',
-                columnClass: 'col-md-1 col-sm-2 col-xs-2'
+                columnClass: 'col-md-1 col-sm-2 col-xs-2',
+                awToolTip: "{{ queued_job.status_tip }}",
+                awTipPlacement: "top",
             },
             status: {
                 label: 'Status',
@@ -77,6 +79,12 @@ angular.module('QueuedJobsDefinition', [])
                 mode: 'all',
                 ngClick: 'deleteJob(queued_job.id)',
                 awToolTip: 'Delete the job',
+                dataPlacement: 'top'
+            },
+            job_details: {
+                mode: 'all',
+                href: '/#/jobs/{{ queued_job.id }}',
+                awToolTip: 'View job details',
                 dataPlacement: 'top'
             }
         }

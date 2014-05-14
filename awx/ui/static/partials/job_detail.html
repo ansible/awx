@@ -20,7 +20,7 @@
                         <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 status-column"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
                         <div class="col-lg-7 col-md-7 col-sm-4 col-xs-4">{{ job_status.explanation }}</div>
                         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-right">
-                            <a href="/#/jobs/{{ job_id }}/stdout" target="_blank" type="button" class="btn btn-default btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top"><i class="fa fa-external-link"></i></a>
+                            <a href="/#/jobs/{{ job_id }}/stdout" target="_blank" type="button" class="btn btn-default btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top" ng-show="job_status == 'successful' || job_status == 'failed' || job_status == 'error'"><i class="fa fa-external-link"></i></a>
                             <button type="button" id="summary-button" class="btn btn-default btn-xs" ng-click="toggleSummary()" aw-tool-tip="View summary" data-placement="top"><i class="fa fa-arrow-circle-left fa-lg"></i></button>
                         </div>
                     </div>

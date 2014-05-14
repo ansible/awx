@@ -24,7 +24,9 @@ angular.module('CompletedJobsDefinition', [])
                 label: 'Job ID',
                 ngClick:"viewJobLog(completed_job.id)",
                 searchType: 'int',
-                columnClass: 'col-md-1 col-sm-2 col-xs-2'
+                columnClass: 'col-md-1 col-sm-2 col-xs-2',
+                awToolTip: "{{ completed_job.status_tip }}",
+                dataPlacement: 'top'
             },
             status: {
                 label: 'Status',
@@ -94,7 +96,19 @@ angular.module('CompletedJobsDefinition', [])
                 awToolTip: 'Delete the job',
                 dataPlacement: 'top'
             },
-            dropdown: {
+            job_details: {
+                mode: 'all',
+                href: '/#/jobs/{{ completed_job.id }}',
+                awToolTip: 'View job details',
+                dataPlacement: 'top'
+            },
+            stdout: {
+                mode: 'all',
+                href: '/#/jobs/{{ completed_job.id }}/stdout',
+                awToolTip: 'View standard output. Opens in a new window or tab.',
+                dataPlacement: 'top'
+            }
+            /*dropdown: {
                 type: 'DropDown',
                 ngShow: "completed_job.type === 'job'",
                 label: 'View',
@@ -105,6 +119,6 @@ angular.module('CompletedJobsDefinition', [])
                     { ngHref: '/#/job_events/{{ completed_job.id }}', label: 'Events', ngHide: "completed_job.status == 'new'" },
                     { ngHref: '/#/job_host_summaries/{{ completed_job.id }}', label: 'Host Summary' }
                 ]
-            }
+            }*/
         }
     });
