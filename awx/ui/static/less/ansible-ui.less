@@ -389,11 +389,13 @@ dd {
       content: "";
       display: block;
   }
-  .site-footer, #wrap:after {
-      height: @footer-height;
+  
+  #wrap:after {
+      height: @push-height;
   }
 
   .site-footer {
+      height: @footer-height;
       margin-top: @footer-margin;
   }
 
@@ -515,28 +517,27 @@ dd {
     }
 }
 
-
 .modal-header.login-header {
-  text-align: center;
-  background-color: @black;
-  border-left: 1px solid #686868;
-  border-right: 1px solid #686868;
-  border-top: 1px solid #686868;
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
+    text-align: center;
+    background-color: @black;
+    border-left: 1px solid #686868;
+    border-right: 1px solid #686868;
+    border-top: 1px solid #686868;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
 }
 
 .login-header img {
-  width: 327px;
+    width: 327px;
 }
 
 .form-title {
-  display: inline-block;
-  width: 100%;
-  vertical-align: middle;
-  font-weight: bold;
-  padding-left: 15px;
-  margin-bottom: 10px;
+    display: inline-block;
+    width: 100%;
+    vertical-align: middle;
+    font-weight: bold;
+    padding-left: 15px;
+    margin-bottom: 10px;
 }
 
 .form-group {
@@ -1634,6 +1635,13 @@ tr td button i {
     }
   }
 
+/* job stdout */
+
+  #stdout-iframe {
+      width: 100%;
+      border-radius: 4px;
+      margin: 0;
+  }
 
 
 /* ng-cloak directive */
@@ -1704,6 +1712,35 @@ tr td button i {
 /* Landscape phone to portrait tablet */
 
 @media (max-width: 767px) {
+  
+  /* The sticky footer: http://css-tricks.com/snippets/css/sticky-footer, with less variables */
+  @footer-height: 140px;
+  @footer-margin: 15px;
+  @push-height: (@footer-height + @footer-margin);
+  #wrap {
+      min-height: 100%;
+      height: 100%;
+      height: auto !important;
+      margin-bottom: -(@push-height);
+  }
+  #wrap:after {
+      content: "";
+      display: block;
+  }
+  #wrap:after {
+      height: @push-height;
+  }
+  .site-footer {
+      height: @footer-height;
+      margin-top: @footer-margin;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      .logo {
+          text-align: center;
+          padding-top: 10px;
+          margin-bottom: 10px;
+      }
+  }
 
   /* Job events */
 
@@ -1750,17 +1787,6 @@ tr td button i {
 
   .list-action-label {
       display: none;
-  }
-
-  .site-footer {
-      height: 145px;
-      padding-top: 5px;
-      padding-bottom: 5px;
-      .logo {
-          text-align: center;
-          padding-top: 10px;
-          margin-bottom: 10px;
-      }
   }
 
 }

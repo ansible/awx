@@ -11,7 +11,7 @@ function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBas
 
     ClearScope();
 
-    var job_id = $routeParams.id;
+    var available_height, job_id = $routeParams.id;
 
     Wait('start');
 
@@ -23,14 +23,32 @@ function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBas
         Rest.get()
             .success(function(data) {
                 Wait('stop');
-                $('#stdout-container').empty().html(data);
+                $('#stdout-iframe').attr('srcdoc', data);
             })
             .error(function(data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                     msg: 'Failed to retrieve stdout for job: ' + job_id + '. GET returned: ' + status });
             });
     });
-    
+
+    function resizeToFit() {
+        available_height = $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() -
+            $('#breadcrumb-container').outerHeight() - $('.site-footer').outerHeight();
+        if ($(window).width() < 768) {
+            available_height += 55;
+        }
+        else {
+            available_height += 5;
+        }
+        $('#stdout-iframe').height(available_height);
+        //$('#stdout-container').mCustomScrollbar("update");
+    }
+    resizeToFit();
+
+    $(window).resize(_.debounce(function() {
+        resizeToFit();
+    }, 500));
+
     Rest.setUrl(GetBasePath('jobs') + job_id + '/');
     Rest.get()
         .success(function(data) {
@@ -43,4 +61,4 @@ function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBas
         });
 }
 
-JobStdoutController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors'];
+JobStdoutController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors' ];
