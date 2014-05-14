@@ -638,7 +638,7 @@ class RunJobTest(BaseCeleryTest):
         host.last_job = job
         host.last_job_host_summary = JobHostSummary.objects.get(job=job, host=host)
         host.save()
-        job.inventory.update_computed_fields()
+        self.inventory.update_computed_fields()
         self.host = Host.objects.get(pk=self.host.pk)
         self.assertTrue(self.host.has_active_failures)
         self.group = Group.objects.get(pk=self.group.pk)

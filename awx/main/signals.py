@@ -88,11 +88,13 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
     if getattr(_inventory_updates, 'is_updating', False):
         return
     instance = kwargs['instance']
-    if kwargs['created'] or not instance.active or kwargs['signal'] == post_delete:
+    if ('created' in kwargs and kwargs['created']) or \
+       (hasattr(instance, '_saved_active_state') and instance._saved_active_state != instance.active) or \
+       kwargs['signal'] == post_delete:
         pass
     else:
         return
-    sender_name = unicode(sender._meta.verbose_name)    
+    sender_name = unicode(sender._meta.verbose_name)
     logger.debug("%s created or deleted, updating inventory computed fields: %r %r",
                  sender_name, sender, kwargs)
     try:
@@ -102,20 +104,37 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
     else:
         update_inventory_computed_fields.delay(inventory.id, True)
 
+def store_initial_active_state(sender, **kwargs):
+    instance = kwargs['instance']
+    if instance.id is not None:
+        instance._saved_active_state = sender.objects.get(id=instance.id).active
+    else:
+        instance._saved_active_state = True
 
+pre_save.connect(store_initial_active_state, sender=Host)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
+pre_save.connect(store_initial_active_state, sender=Group)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
+<<<<<<< HEAD
 post_save.connect(emit_update_inventory_computed_fields, sender=Job)
 post_delete.connect(emit_update_inventory_computed_fields, sender=Job)
 post_save.connect(emit_update_inventory_computed_fields, sender=InventorySource)
 post_delete.connect(emit_update_inventory_computed_fields, sender=InventorySource)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
+=======
+pre_save.connect(store_initial_active_state, sender=InventorySource)
+post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
+post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
+pre_save.connect(store_initial_active_state, sender=Job)
+post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
+post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
+>>>>>>> b307008... Make sure we recognize when a model changes state from active to inactive and back
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or
 # marked as inactive.
