@@ -430,6 +430,8 @@ def load_inventory_source(source, all_group=None, group_filter_re=None,
     original_all_group = all_group
     if not os.path.exists(source):
         raise IOError('Source does not exist: %s' % source)
+    source = os.path.join(os.path.dirname(source) or os.getcwd(), source)
+    source = os.path.normpath(os.path.abspath(source))
     if os.path.isdir(source):
         all_group = all_group or MemGroup('all', source)
         for filename in glob.glob(os.path.join(source, '*')):

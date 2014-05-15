@@ -860,12 +860,14 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         new_inv = self.organizations[0].inventories.create(name='newec2')
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)
-        inv_file = os.path.join(os.path.dirname(__file__), 'data',
-                                'large_ec2_inventory.py')
+        #inv_file = os.path.join(os.path.dirname(__file__), 'data',
+        #                        'large_ec2_inventory.py')
+        os.chdir(os.path.join(os.path.dirname(__file__), 'data'))
+        inv_file = 'large_ec2_inventory.py'
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
                                                   source=inv_file)
-        self.assertEqual(result, None)
+        self.assertEqual(result, None, stdout+stderr)
         # Check that inventory is populated as expected within a reasonable
         # amount of time.  Computed fields should also be updated.
         new_inv = Inventory.objects.get(pk=new_inv.pk)
