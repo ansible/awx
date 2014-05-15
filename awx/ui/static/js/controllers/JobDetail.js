@@ -8,7 +8,7 @@
 'use strict';
 
 function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors, DigestEvents,
-    SelectPlay, SelectTask, Socket, GetElapsed, SelectHost, FilterAllByHostName) {
+    SelectPlay, SelectTask, Socket, GetElapsed, SelectHost, FilterAllByHostName, DrawGraph) {
 
     ClearScope();
 
@@ -251,6 +251,10 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             // First time. User just loaded page.
             scope.$emit('LoadJob');
         }
+        else {
+            // Check if we need to redraw the group
+            setTimeout(function() { DrawGraph({ scope: scope }); }, 500);
+        }
     });
 
     scope.adjustSize = function() {
@@ -275,7 +279,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 "padding-right": "15px",
                 "z-index": 0
             });
-            setTimeout(function() { $('#job-summary-container .job_well').height($('#job-detail-container').height() - 18); }, 500);
+            setTimeout(function() { $('#job-summary-container .job_well').height($('#job-detail-container').height() - 17); }, 500);
             $('#job-summary-container').show();
         }
         // Detail table height adjusting. First, put page height back to 'normal'.
@@ -303,99 +307,6 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         $('#hosts-summary-table').mCustomScrollbar("update");
         scope.$emit('RefreshCompleted');
     };
-
-    /*function refreshHostRows() {
-        var url;
-        if (scope.activeTask) {
-            scope.hostResults = [];
-            scope.auto_scroll = true;
-            url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
-            url += (scope.task_host_name) ? 'host__name__icontains=' + scope.task_host_name + '&' : '';
-            url += 'host__isnull=false&page_size=' + scope.hostTableRows + '&order_by=host__name';
-            Wait('start');
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    data.results.forEach(function(row) {
-                        scope.hostResults.push({
-                            id: row.id,
-                            status: ( (row.failed) ? 'failed': (row.changed) ? 'changed' : 'successful' ),
-                            host_id: row.host,
-                            task_id: row.parent,
-                            name: row.event_data.host,
-                            created: row.created,
-                            msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
-                        });
-                    });
-                    $('#hosts-table-detail').mCustomScrollbar("update");
-                    setTimeout( function() { $('#hosts-table-detail').mCustomScrollbar("scrollTo", "bottom"); }, 700);
-                    Wait('stop');
-                    scope.$emit('RefreshCompleted');
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        }
-        else {
-            $('#hosts-table-detail').mCustomScrollbar("update");
-            scope.$emit('RefreshCompleted');
-        }
-    }
-
-    function refreshSummaryHostRows() {
-        if (scope.hosts.length < scope.hostSummaryTableRows) {
-            var url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
-            url += (scope.summary_host_name) ? 'host__name__icontains=' + scope.summary_host_name + '&': '';
-            url += '&page_size=' + scope.hostSummaryTableRows + '&order_by=host__name';
-            Wait('start');
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    data.results.forEach(function(row) {
-                        var found = false;
-                        scope.hosts.every(function(host) {
-                            if (host.id === row.host) {
-                                found = true;
-                                return false;
-                            }
-                            return true;
-                        });
-                        if (!found) {
-                            scope.hosts.push({
-                                id: row.host,
-                                name: row.summary_fields.host.name,
-                                ok: row.ok,
-                                changed: row.changed,
-                                unreachable: row.dark,
-                                failed: row.failures
-                            });
-                        }
-                    });
-                    scope.hosts.sort(function(a,b) {
-                        if (a.name < b.name) {
-                            return -1;
-                        }
-                        if (a.name > b.name) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    $('#hosts-summary-table').mCustomScrollbar("update");
-                    setTimeout( function() { $('#hosts-summary-table').mCustomScrollbar("scrollTo", "bottom"); }, 700);
-                    Wait('stop');
-                    scope.$emit('RefreshCompleted');
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        }
-        else {
-            $('#hosts-table-detail').mCustomScrollbar("update");
-            scope.$emit('RefreshCompleted');
-        }
-    }*/
 
     setTimeout(function() { scope.adjustSize(); }, 500);
 
@@ -443,10 +354,23 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 width: $(document).width(),
                 height: $(document).height()
             }).show();
+
+            // Adjust the summary table height 
             $('#job-summary-container .job_well').height(height - 18).css({
                 'box-shadow': '-3px 3px 5px 0 #ccc'
             });
+            height = Math.floor($('#job-detail-container').height() * 0.5) -
+                $('#hosts-summary-section .header').outerHeight() -
+                $('#hosts-summary-section .table-header').outerHeight() -
+                $('#hide-summary-button').outerHeight() -
+                $('#summary-search-section').outerHeight() -
+                $('#hosts-summary-section .header').outerHeight() -
+                $('#hosts-summary-section .legend').outerHeight();
+            $('#hosts-summary-table').height(height - 50);
+            $('#hosts-summary-table').mCustomScrollbar("update");
+            
             $('#hide-summary-button').show();
+        
             $('#job-summary-container').css({
                 top: 0,
                 right: 0,
@@ -455,6 +379,8 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 'padding-right': '15px',
                 'padding-left': '15px'
             }).show('slide', {'direction': 'right'});
+
+            setTimeout(function() { DrawGraph({ scope: scope }); }, 500);
         }
         else {
             $('.overlay').hide();
@@ -754,5 +680,5 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
 }
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',
-    'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'SelectHost', 'FilterAllByHostName'
+    'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'SelectHost', 'FilterAllByHostName', 'DrawGraph'
 ];

@@ -494,35 +494,31 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
         });
 
         if (!host_found) {
-            if (scope.hosts.length < 10 || name > scope.hosts[0].name) {
-                // This is a new host we want added to the list 
-                scope.hosts.push({
-                    id: host_id,
-                    name: name,
-                    ok: (status === 'successful') ? 1 : 0,
-                    changed: (status === 'changed') ? 1 : 0,
-                    unreachable: (status === 'unreachable') ? 1 : 0,
-                    failed: (status === 'failed') ? 1 : 0
-                });
-                scope.hosts.sort(function(a,b) {
-                    if (a.name < b.name) {
-                        return -1;
-                    }
-                    if (a.name > b.name) {
-                        return 1;
-                    }
-                    return 0;
-                });
-                // Only keep 10 hosts
-                if (scope.hosts.length > scope.hostSummaryTableRows) {
-                    scope.hosts.splice(0,1);
+            scope.hosts.push({
+                id: host_id,
+                name: name,
+                ok: (status === 'successful') ? 1 : 0,
+                changed: (status === 'changed') ? 1 : 0,
+                unreachable: (status === 'unreachable') ? 1 : 0,
+                failed: (status === 'failed') ? 1 : 0
+            });
+            scope.hosts.sort(function(a,b) {
+                if (a.name < b.name) {
+                    return -1;
                 }
-                $('#tasks-table-detail').mCustomScrollbar("update");
-                setTimeout( function() {
+                if (a.name > b.name) {
+                    return 1;
+                }
+                return 0;
+            });
+            if (scope.hosts.length > scope.hostSummaryTableRows) {
+                scope.hosts.pop();
+            }
+            $('#tasks-table-detail').mCustomScrollbar("update");
+                /*setTimeout( function() {
                     scope.auto_scroll = true;
                     $('#hosts-summary-table').mCustomScrollbar("scrollTo", "bottom");
-                }, 700);
-            }
+                }, 700);*/
         }
 
         UpdateTaskStatus({
@@ -774,61 +770,77 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
     return function(params) {
         var scope = params.scope,
             dark = 0, failed = 0, changed = 0, ok = 0,
-            svg_height, svg_width, graph_data, svg, url;
+            width, height, svg_height, svg_width, svg_radius, svg, url;
 
-        svg_width = $('#graph-section').width();
-        svg_height = 300;
-        if ($('#graph-section svg').length === 0) {
-            svg = d3.select("#graph-section").append("svg").attr("width", svg_width).attr("height", svg_height);
+        width = $('#job-summary-container .job_well').width();
+        height = $('#job-summary-container .job_well').height() - $('#summary-well-top-section').height() - $('#graph-section .header').outerHeight() - 15;
+        svg_radius = Math.min(width, height);
+        svg_width = width;
+        svg_height = height;
+        if  (svg_height > 0 && svg_width > 0) {
+            if ($('#graph-section svg').length > 0) {
+                $("#completedHostsDonut").attr('id', 'completedHostsDonut_old');
+                svg = d3.select("#graph-section svg").attr("width", svg_width).attr("height", svg_height);
+                $('#completedHostsDonut').remove();
+                svg.append("g").attr("id","completedHostsDonut");
+                $('#completedHostsDonut').hide();
+                scope.$emit('GraphLoadData');
+            }
+            else {
+                svg = d3.select("#graph-section").append("svg").attr("width", svg_width).attr("height", svg_height);
+                svg.append("g").attr("id","completedHostsDonut");
+                scope.$emit('GraphLoadData');
+            }
         }
-        else {
-            svg = d3.select("#graph-section svg");
-        }
-        svg.append("g").attr("id","completedHostsDonutNew");
-        $('#completedHostsDonutNew').hide();
-        
+
         if (scope.removeRenderGraph) {
             scope.removeRenderGraph();
         }
-        scope.removeRenderGraph = scope.$on('RenderGraph', function() {
-            Donut3D.draw("completedHostsDonutNew", graph_data, Math.floor(svg_width / 2), 150, 130, 100, 15, 0.4);
-            $('#completedHostsDonut').remove();
-            $('#completedHostsDonutNew').attr('id','completedHostsDonut');
+        scope.removeRenderGraph = scope.$on('RenderGraph', function(e, graph_data) {
+            Donut3D.draw("completedHostsDonut", graph_data, Math.floor(svg_width / 2), Math.floor(svg_height / 2), Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
+            $('#completedHostsDonut_old').remove();
             $('#completedHostsDonut').show();
+            $('#graph-section .legend').show();
         });
 
-        url = GetBasePath('jobs') + scope.job_id + '/job_host_summaries/';
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                if (data.count) {
-                    data.results.forEach(function(row) {
-                        if (row.dark) {
-                            dark ++;
-                        }
-                        else if (row.failures) {
-                            failed++;
-                        }
-                        else if (row.changed) {
-                            changed++;
-                        }
-                        else if (row.ok) {
-                            ok++;
-                        }
-                    });
-                    graph_data = [
-                        { label: 'OK', value: ok, color: '#9ED89E' },
-                        { label: 'Changed', value: changed, color: '#FFC773' },
-                        { label: 'Failed', value: failed, color: '#DA4D49' },
-                        { label: 'Unreachable', value: dark, color: '#A9A9A9' }
-                    ];
-                    scope.$emit('RenderGraph');
-                }
-            })
-            .error(function(data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + '. GET returned: ' + status });
-            });
+        if (scope.removeGraphLoadData) {
+            scope.removeGraphLoadData();
+        }
+        scope.removeGraphLoadData = scope.$on('GraphLoadData', function() {
+            url = GetBasePath('jobs') + scope.job_id + '/job_host_summaries/';
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    var graph_data;
+                    if (data.count) {
+                        data.results.forEach(function(row) {
+                            if (row.dark) {
+                                dark ++;
+                            }
+                            else if (row.failures) {
+                                failed++;
+                            }
+                            else if (row.changed) {
+                                changed++;
+                            }
+                            else if (row.ok) {
+                                ok++;
+                            }
+                        });
+                        graph_data = [
+                            { label: 'OK', value: ok, color: '#9ED89E' },
+                            { label: 'Changed', value: changed, color: '#FFC773' },
+                            { label: 'Failed', value: failed, color: '#DA4D49' },
+                            { label: 'Unreachable', value: dark, color: '#A9A9A9' }
+                        ];
+                        scope.$emit('RenderGraph', graph_data);
+                    }
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
+        });
     };
 }])
 

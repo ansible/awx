@@ -135,81 +135,85 @@
 
             <div id="job-summary-container">
                 <div class="job_well">
-                    <div id="hide-summary-button" style="display: hidden;">
-                        <a href="" class="btn btn-xs btn-default" ng-click="toggleSummary('hide')" aw-tool-tip="Hide summary" data-placement="top"><i class="fa fa-arrow-circle-right fa-lg"></i></a>
-                    </div>
-                    <div id="summary-search-section" class="section">
-                        <div class="header">
-                            <div class="title">Filter Events</div>
+                    <div id="summary-well-top-section">
+                        <div id="hide-summary-button" style="display: hidden;">
+                            <a href="" class="btn btn-xs btn-default" ng-click="toggleSummary('hide')" aw-tool-tip="Hide summary" data-placement="top"><i class="fa fa-arrow-circle-right fa-lg"></i></a>
                         </div>
-                        <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                <div style="position:relative;">
-                                    <input type="text" class="input-sm form-control" id="search_all_hosts_name" ng-model="search_all_hosts_name"
-                                        placeholder="Host Name" ng-disabled="searchAllDisabled" ng-keypress="allHostNameKeyPress($event)" />
-                                    <div id="search-all-input-icons">
-                                        <a class="search-icon" ng-show="searchAllHostsEnabled" ng-click="searchAllHosts()"><i class="fa fa-search"></i></a>
-                                        <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllByHost()"><i class="fa fa-times"></i></a>
-                                    </div>
-                                </div>
+                        <div id="summary-search-section" class="section">
+                            <div class="header">
+                                <div class="title">Filter Events</div>
                             </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                <div style="padding-top: 5px;">
-                                    <label class="small-label">Show</label>
-                                    <div class="btn-group" aw-toggle-button>
-                                        <button class="btn btn-xs btn-default">All</button>
-                                        <button class="btn btn-xs btn-primary active">Errors</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <hr />
-                    </div>
-                    <div id="hosts-summary-section" class="section job_summary">
-                        <div class="header">
-                            <div class="title">Host Summary</div>
-                            <div class="search-field">
-                                <input type="text" ng-model="summary_host_name" placeholder="Host Name" ng-keypress="summaryHostNameKeyPress($event)" />
-                                <a class="search-icon" ng-show="searchSummaryHostsEnabled" ng-click="searchSummaryHosts()"><i class="fa fa-search"></i></a>
-                                <a class="search-icon" ng-show="!searchSummaryHostsEnabled" ng-click="summary_host_name=''; searchSummaryHosts()"><i class="fa fa-times"></i></a>
-                            </div>
-                        </div>
-                        <div class="table-header">
                             <div class="row">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Host</div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Events 
-                                    <a href="" id="event-help-link" aw-pop-over="{{ eventsHelpText }}" aw-tool-tip="Click for help" aw-pop-over-watch="eventsHelpText" data-placement="top" data-container="body" data-title="Event Legend" class="help-link"><i class="fa fa-question-circle"></i></a>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                    <div style="position:relative;">
+                                        <input type="text" class="input-sm form-control" id="search_all_hosts_name" ng-model="search_all_hosts_name"
+                                            placeholder="Host Name" ng-disabled="searchAllDisabled" ng-keypress="allHostNameKeyPress($event)" />
+                                        <div id="search-all-input-icons">
+                                            <a class="search-icon" ng-show="searchAllHostsEnabled" ng-click="searchAllHosts()"><i class="fa fa-search"></i></a>
+                                            <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllByHost()"><i class="fa fa-times"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                    <div style="padding-top: 5px;">
+                                        <label class="small-label">Show</label>
+                                        <div class="btn-group" aw-toggle-button>
+                                            <button class="btn btn-xs btn-default">All</button>
+                                            <button class="btn btn-xs btn-primary active">Errors</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                            <hr />
                         </div>
-                        <div id="hosts-summary-table" class="table-detail" aw-custom-scroll data-on-total-scroll="HostSummaryOnTotalScroll"
-                                data-on-total-scroll-back="HostSummaryOnTotalScrollBack">
-                            <div class="row" ng-repeat="host in hosts" id="{{ host.id }}">
-                                <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6"><a href="/#/home/hosts/?id={{ host.id }}"
-                                    aw-tool-tip="Click to edit host" data-placement="top">{{ host.name }}</a>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 badge-column">
-                                    <a href="" aw-tool-tip="OK" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
-                                    <a href="" aw-tool-tip="Changed" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
-                                    <a href="" aw-tool-tip="Unreachable" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
-                                    <a href="" aw-tool-tip="Failed" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
+                        <div id="hosts-summary-section" class="section job_summary">
+                            <div class="header">
+                                <div class="title">Host Summary</div>
+                                <div class="search-field">
+                                    <input type="text" ng-model="summary_host_name" placeholder="Host Name" ng-keypress="summaryHostNameKeyPress($event)" />
+                                    <a class="search-icon" ng-show="searchSummaryHostsEnabled" ng-click="searchSummaryHosts()"><i class="fa fa-search"></i></a>
+                                    <a class="search-icon" ng-show="!searchSummaryHostsEnabled" ng-click="summary_host_name=''; searchSummaryHosts()"><i class="fa fa-times"></i></a>
                                 </div>
                             </div>
-                            <div class="row" ng-show="hosts.length === 0">
-                                <div class="col-lg-12">
-                                    <div class="loading-info">No hosts matched</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div><!-- section -->
-
-                    <div id="graph-section">
-                        <div class="header">
-                            <div class="title">Host Status Overview</div>
                             <div class="legend"><i class="fa fa-circle successful-hosts-color"></i> Successful <i class="fa fa-circle changed-hosts-color"></i> Changed 
                                 <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
+                            <div class="table-header">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Host</div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Completed Tasks
+                                        <!-- <a href="" id="event-help-link" aw-pop-over="{{ eventsHelpText }}" aw-tool-tip="Click for help" aw-pop-over-watch="eventsHelpText" data-placement="top" data-container="body" data-title="Event Legend" class="help-link"><i class="fa fa-question-circle"></i></a> -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="hosts-summary-table" class="table-detail" aw-custom-scroll data-on-total-scroll="HostSummaryOnTotalScroll"
+                                    data-on-total-scroll-back="HostSummaryOnTotalScrollBack">
+                                <div class="row" ng-repeat="host in hosts" id="{{ host.id }}">
+                                    <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6"><a href="/#/home/hosts/?id={{ host.id }}"
+                                        aw-tool-tip="Click to edit host" data-placement="top">{{ host.name }}</a>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 badge-column">
+                                        <a href="" aw-tool-tip="OK" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
+                                        <a href="" aw-tool-tip="Changed" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
+                                        <a href="" aw-tool-tip="Unreachable" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
+                                        <a href="" aw-tool-tip="Failed" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
+                                    </div>
+                                </div>
+                                <div class="row" ng-show="hosts.length === 0">
+                                    <div class="col-lg-12">
+                                        <div class="loading-info">No hosts matched</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- section -->
+                    </div><!-- summary-well-top-section -->
+
+                    <div id="graph-section" class="section">
+                        <div class="header">
+                            <div class="title">Host Status Overview</div>
+                            <div class="legend" style="display: none;"><i class="fa fa-circle successful-hosts-color"></i> Successful <i class="fa fa-circle changed-hosts-color"></i> Changed 
+                                    <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
                         </div>
-                    </div><!-- graph section -->
+                    </div><!-- graph section -->        
                 </div>
             </div><!-- col-md-5 -->
 
