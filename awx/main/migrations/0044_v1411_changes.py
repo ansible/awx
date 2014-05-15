@@ -9,6 +9,8 @@ class Migration(DataMigration):
 
     def forwards(self, orm):
         for iu in orm.InventoryUpdate.objects.filter(active=True):
+            if iu.inventory_source is None or iu.inventory_source.group is None or iu.inventory_source.inventory is None:
+                continue
             iu.name = "%s (%s)" % (iu.inventory_source.group.name, iu.inventory_source.inventory.name)
             iu.save()
 
