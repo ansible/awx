@@ -144,7 +144,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         blank=True,
         default='',
     )
-    vars_prompt_on_launch = models.BooleanField(
+    ask_variables_on_launch = models.BooleanField(
         blank=True,
         default=False,
     )
@@ -231,10 +231,10 @@ class Job(UnifiedJob, JobOptions):
             return '%d-%s' % (self.pk, h.hexdigest())
 
     @property
-    def vars_prompt_on_launch(self):
+    def ask_variables_on_launch(self):
         if self.job_template is not None:
-            return self.job_template.vars_prompt_on_launch
-        return None
+            return self.job_template.ask_variables_on_launch
+        return False
 
     @property
     def passwords_needed_to_start(self):

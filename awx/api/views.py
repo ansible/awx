@@ -1325,7 +1325,7 @@ class JobStart(GenericAPIView):
         )
         if obj.can_start:
             data['passwords_needed_to_start'] = obj.passwords_needed_to_start
-            data['vars_prompt_on_launch'] = obj.vars_prompt_on_launch
+            data['ask_variables_on_launch'] = obj.ask_variables_on_launch
         return Response(data)
 
     def post(self, request, *args, **kwargs):

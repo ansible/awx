@@ -460,7 +460,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
                            'modified', 'name', 'description', 'job_type',
                            'inventory', 'project', 'playbook', 'credential',
                            'cloud_credential', 'forks', 'limit', 'verbosity',
-                           'extra_vars', 'vars_prompt_on_launch', 'job_tags',
+                           'extra_vars', 'ask_variables_on_launch', 'job_tags',
                            'host_config_key', 'status', 'next_job_run',
                            'has_schedules', 'last_job_run', 'last_job_failed')
 
