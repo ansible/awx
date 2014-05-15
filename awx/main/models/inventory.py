@@ -394,7 +394,7 @@ class Group(CommonModelNameNotUnique):
     def mark_inactive_recursive(self, parent=None):
         from awx.main.tasks import update_inventory_computed_fields
         def mark_actual(parent=parent):
-            linked_children = [(parent, self)] + [(self, child) for child in self.children.all()]
+            linked_children = [(parent, self)]
             marked_groups = []
             marked_hosts = []
             for subgroup in linked_children:
