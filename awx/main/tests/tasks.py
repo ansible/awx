@@ -20,7 +20,9 @@ from awx.main.models import *
 from awx.main.tests.base import BaseLiveServerTest
 from awx.main.tasks import RunJob
 
-TEST_PLAYBOOK = '''- hosts: test-group
+TEST_PLAYBOOK = '''
+- name: test success
+  hosts: test-group
   gather_facts: False
   tasks:
   - name: should pass
@@ -29,14 +31,17 @@ TEST_PLAYBOOK = '''- hosts: test-group
     command: test 2 = 2
 '''
 
-TEST_PLAYBOOK2 = '''- hosts: test-group
+TEST_PLAYBOOK2 = '''- name: test failed
+  hosts: test-group
   gather_facts: False
   tasks:
   - name: should fail
     command: test 1 = 0
 '''
 
-TEST_EXTRA_VARS_PLAYBOOK = '''- hosts: test-group
+TEST_EXTRA_VARS_PLAYBOOK = '''
+- name: test extra vars
+  hosts: test-group
   gather_facts: false
   tasks:
   - fail: msg="{{item}} is not defined"
@@ -50,14 +55,18 @@ TEST_EXTRA_VARS_PLAYBOOK = '''- hosts: test-group
     - tower_user_name
 '''
 
-TEST_ENV_PLAYBOOK = '''- hosts: test-group
+TEST_ENV_PLAYBOOK = '''
+- name: test env vars
+  hosts: test-group
   gather_facts: False
   tasks:
   - shell: 'test -n "${%(env_var1)s}"'
   - shell: 'test -n "${%(env_var2)s}"'
 '''
 
-TEST_IGNORE_ERRORS_PLAYBOOK = '''- hosts: test-group
+TEST_IGNORE_ERRORS_PLAYBOOK = '''
+- name: test ignore errors
+  hosts: test-group
   gather_facts: False
   tasks:
   - name: should fail
@@ -66,7 +75,8 @@ TEST_IGNORE_ERRORS_PLAYBOOK = '''- hosts: test-group
 '''
 
 TEST_ASYNC_OK_PLAYBOOK = '''
-- hosts: test-group
+- name: test async ok
+  hosts: test-group
   gather_facts: false
   tasks:
   - debug: msg="one task before async"
@@ -77,7 +87,8 @@ TEST_ASYNC_OK_PLAYBOOK = '''
 '''
 
 TEST_ASYNC_FAIL_PLAYBOOK = '''
-- hosts: test-group
+- name: test async fail
+  hosts: test-group
   gather_facts: false
   tasks:
   - debug: msg="one task before async"
@@ -88,7 +99,8 @@ TEST_ASYNC_FAIL_PLAYBOOK = '''
 '''
 
 TEST_ASYNC_TIMEOUT_PLAYBOOK = '''
-- hosts: test-group
+- name: test async timeout
+  hosts: test-group
   gather_facts: false
   tasks:
   - debug: msg="one task before async"
@@ -99,7 +111,8 @@ TEST_ASYNC_TIMEOUT_PLAYBOOK = '''
 '''
 
 TEST_ASYNC_NOWAIT_PLAYBOOK = '''
-- hosts: test-group
+- name: test async no wait
+  hosts: test-group
   gather_facts: false
   tasks:
   - name: async task should run in background
@@ -109,7 +122,8 @@ TEST_ASYNC_NOWAIT_PLAYBOOK = '''
 '''
 
 TEST_PLAYBOOK_WITH_ROLES = '''
-- hosts: test-group
+- name: test with roles
+  hosts: test-group
   gather_facts: false
   roles:
   - some_stuff
@@ -381,6 +395,9 @@ class RunJobTest(BaseCeleryTest):
             self.assertFalse(evt.task, evt)
             self.assertFalse(evt.role, evt)
             self.assertEqual(evt.failed, should_be_failed)
+            self.assertEqual(evt.play, evt.event_data['name'])
+            # All test playbooks have a play name set explicitly.
+            self.assertNotEqual(evt.event_data['name'], evt.event_data['pattern'])
             if not async:
                 self.assertEqual(evt.changed, should_be_changed)
             if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):

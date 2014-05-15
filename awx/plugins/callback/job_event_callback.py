@@ -257,8 +257,10 @@ class CallbackModule(object):
         #                missing_file=missing_file)
         pass
 
-    def playbook_on_play_start(self, pattern):
-        self._log_event('playbook_on_play_start', pattern=pattern)
+    def playbook_on_play_start(self, name):
+        # Only play name is passed via callback, get host pattern from the play.
+        pattern = getattr(getattr(self, 'play', None), 'hosts', name)
+        self._log_event('playbook_on_play_start', name=name, pattern=pattern)
 
     def playbook_on_stats(self, stats):
         d = {}
