@@ -121,20 +121,12 @@ m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.th
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
-<<<<<<< HEAD
-post_save.connect(emit_update_inventory_computed_fields, sender=Job)
-post_delete.connect(emit_update_inventory_computed_fields, sender=Job)
-post_save.connect(emit_update_inventory_computed_fields, sender=InventorySource)
-post_delete.connect(emit_update_inventory_computed_fields, sender=InventorySource)
-post_save.connect(emit_job_event_detail, sender=JobEvent)
-=======
 pre_save.connect(store_initial_active_state, sender=InventorySource)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
 pre_save.connect(store_initial_active_state, sender=Job)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
->>>>>>> b307008... Make sure we recognize when a model changes state from active to inactive and back
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or
 # marked as inactive.
