@@ -269,7 +269,14 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 'box-shadow': 'none',
                 'height': 'auto'
             });
-            $('#job-summary-container').css({ "width": "41.66666667%", "padding-right": "15px", "z-index": 0 }).show();
+            $('#job-summary-container').css({
+                "width": "41.66666667%",
+                "padding-left": "7px",
+                "padding-right": "15px",
+                "z-index": 0
+            });
+            setTimeout(function() { $('#job-summary-container .job_well').height($('#job-detail-container').height() - 18); }, 500);
+            $('#job-summary-container').show();
         }
         // Detail table height adjusting. First, put page height back to 'normal'.
         $('#plays-table-detail').height(150);

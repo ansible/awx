@@ -7,7 +7,7 @@
     "jquery": true,
     "esnext": true,
     "globalstrict": true,
-    "globals": { "angular":false, "alert":false, "$AnsibleConfig":true, "$basePath":true, "jsyaml":false, "_":true },
+    "globals": { "angular":false, "alert":false, "$AnsibleConfig":true, "$basePath":true, "jsyaml":false, "_":false, "d3":false, "Donut3D":false },
     "strict": false,
     "quotmark": false,
     "smarttabs": true,

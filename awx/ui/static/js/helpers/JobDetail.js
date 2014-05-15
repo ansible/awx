@@ -40,9 +40,9 @@
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
 .factory('DigestEvents', ['UpdatePlayStatus', 'UpdateHostStatus', 'UpdatePlayChild', 'AddHostResult', 'SelectPlay', 'SelectTask',
-    'GetHostCount', 'GetElapsed', 'UpdateTaskStatus',
+    'GetHostCount', 'GetElapsed', 'UpdateTaskStatus', 'DrawGraph',
 function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed,
-    UpdateTaskStatus) {
+    UpdateTaskStatus, DrawGraph) {
     return function(params) {
         
         var scope = params.scope,
@@ -156,6 +156,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                     scope: scope,
                     id: event.id
                 });
+                DrawGraph({ scope: scope });
             }
             
             if (event.event === 'runner_on_unreachable') {
@@ -229,6 +230,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                 });
                 scope.job_status.status = (event.failed) ? 'failed' : 'successful';
                 scope.job_status.status_class = "";
+                DrawGraph({ scope: scope });
             }
         });
     };
@@ -768,18 +770,66 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
     };
 }])
 
-.factory('GetHostSummary', [ function() {
+.factory('DrawGraph', ['Rest', 'GetBasePath', 'ProcessErrors', function(Rest, GetBasePath, ProcessErrors) {
+    return function(params) {
+        var scope = params.scope,
+            dark = 0, failed = 0, changed = 0, ok = 0,
+            svg_height, svg_width, graph_data, svg, url;
 
-}])
+        svg_width = $('#graph-section').width();
+        svg_height = 300;
+        if ($('#graph-section svg').length === 0) {
+            svg = d3.select("#graph-section").append("svg").attr("width", svg_width).attr("height", svg_height);
+        }
+        else {
+            svg = d3.select("#graph-section svg");
+        }
+        svg.append("g").attr("id","completedHostsDonutNew");
+        $('#completedHostsDonutNew').hide();
+        
+        if (scope.removeRenderGraph) {
+            scope.removeRenderGraph();
+        }
+        scope.removeRenderGraph = scope.$on('RenderGraph', function() {
+            Donut3D.draw("completedHostsDonutNew", graph_data, Math.floor(svg_width / 2), 150, 130, 100, 15, 0.4);
+            $('#completedHostsDonut').remove();
+            $('#completedHostsDonutNew').attr('id','completedHostsDonut');
+            $('#completedHostsDonut').show();
+        });
 
-.factory('DrawGraph', [ function() {
-    /*var salesData=[
-        {label:"OK", color:"#9ED89E"},
-        {label:"Changed", color:"#DC3912"},
-        {label:"Failed", color:"#DA4D49;"},
-        {label:"Skipped", color:"#D4D4D4"},
-        {label:"Unreachable", color:""}
-    ];*/
+        url = GetBasePath('jobs') + scope.job_id + '/job_host_summaries/';
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                if (data.count) {
+                    data.results.forEach(function(row) {
+                        if (row.dark) {
+                            dark ++;
+                        }
+                        else if (row.failures) {
+                            failed++;
+                        }
+                        else if (row.changed) {
+                            changed++;
+                        }
+                        else if (row.ok) {
+                            ok++;
+                        }
+                    });
+                    graph_data = [
+                        { label: 'OK', value: ok, color: '#9ED89E' },
+                        { label: 'Changed', value: changed, color: '#FFC773' },
+                        { label: 'Failed', value: failed, color: '#DA4D49' },
+                        { label: 'Unreachable', value: dark, color: '#A9A9A9' }
+                    ];
+                    scope.$emit('RenderGraph');
+                }
+            })
+            .error(function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+    };
 }])
 
 .factory('FilterAllByHostName', ['Rest', 'GetBasePath', 'ProcessErrors', 'SelectPlay', function(Rest, GetBasePath, ProcessErrors, SelectPlay) {
@@ -787,7 +837,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
         var scope = params.scope,
             host = params.host,
             job_id = scope.job_id,
-            url = GetBasePath('jobs') + job_id + '/job_events/?event__icontains=runner&host_name__icontains=' + host;
+            url = GetBasePath('jobs') + job_id + '/job_events/?event__icontains=runner&host_name__icontains=' + host + '&parent__isnull=false';
         
         scope.search_all_tasks = [];
         scope.search_all_plays = [];
@@ -811,17 +861,22 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    data.results.forEach(function(row) {
-                        if (row.parent) {
-                            scope.search_all_plays.push(row.parent);
+                    if (data.count > 0) {
+                        data.results.forEach(function(row) {
+                            if (row.parent) {
+                                scope.search_all_plays.push(row.parent);
+                            }
+                        });
+                        if (scope.search_all_plays.length > 0) {
+                            scope.search_all_plays.sort();
+                            scope.activePlay = scope.search_all_plays[scope.search_all_plays.length - 1];
                         }
-                    });
-                    if (scope.search_all_plays.length > 0) {
-                        scope.search_all_plays.sort();
-                        scope.activePlay = scope.search_all_plays[scope.search_all_plays.length - 1];
+                        else {
+                            scope.activePlay = null;
+                        }
                     }
                     else {
-                        scope.activePlay = null;
+                        scope.search_all_plays.push(0);
                     }
                     scope.$emit('AllPlaysReady');
                 })
@@ -834,13 +889,18 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
         Rest.setUrl(url);
         Rest.get()
             .success(function(data) {
-                data.results.forEach(function(row) {
-                    if (row.parent) {
-                        scope.search_all_tasks.push(row.parent);
+                if (data.count > 0) {
+                    data.results.forEach(function(row) {
+                        if (row.parent) {
+                            scope.search_all_tasks.push(row.parent);
+                        }
+                    });
+                    if (scope.search_all_tasks.length > 0) {
+                        scope.search_all_tasks.sort();
                     }
-                });
-                if (scope.search_all_tasks.length > 0) {
-                    scope.search_all_tasks.sort();
+                }
+                else {
+                    scope.search_all_tasks.push(0);
                 }
                 scope.$emit('AllTasksReady');
             })

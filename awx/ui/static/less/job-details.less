@@ -142,6 +142,9 @@
     padding-left: 15px;
     padding-right: 7px;
     width: 58.33333333%;
+    .well {
+        overflow: hidden;
+    }
 }
 
 #job-summary-container {
@@ -302,4 +305,36 @@ label.small-label {
 
 .mCSB_container {
     margin-right: 18px;
+}
+
+
+#graph-section {
+    position: relative;
+    .legend {
+        font-size: 12px;
+        margin-top: 10px;
+    }
+    i {
+        margin-left: 5px;
+    }
+    i:first-child {
+        margin-left: 0;
+    }
+}
+
+path.slice{
+    stroke-width:2px;
+}
+
+polyline{
+    opacity: .3;
+    stroke: black;
+    stroke-width: 2px;
+    fill: none;
+}
+
+svg text.percent{
+    fill:white;
+    text-anchor:middle;
+    font-size:12px;
 }
