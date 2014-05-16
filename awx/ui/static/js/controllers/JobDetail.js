@@ -35,6 +35,13 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
     scope.hostSummaryTableRows = 300;
     scope.searchAllHostsEnabled = true;
 
+    scope.host_summary = {};
+    scope.host_summary.ok = 0;
+    scope.host_summary.changed = 0;
+    scope.host_summary.unreachable = 0;
+    scope.host_summary.failed = 0;
+    scope.host_summary.total = 0;
+
     scope.eventsHelpText = "<p><i class=\"fa fa-circle successful-hosts-color\"></i> Successful</p>\n" +
         "<p><i class=\"fa fa-circle changed-hosts-color\"></i> Changed</p>\n" +
         "<p><i class=\"fa fa-circle unreachable-hosts-color\"></i> Unreachable</p>\n" +
@@ -253,7 +260,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         }
         else {
             // Check if we need to redraw the group
-            setTimeout(function() { DrawGraph({ scope: scope }); }, 500);
+            setTimeout(function() { DrawGraph({ scope: scope, resize: true }); }, 500);
         }
     });
 
@@ -279,7 +286,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 "padding-right": "15px",
                 "z-index": 0
             });
-            setTimeout(function() { $('#job-summary-container .job_well').height($('#job-detail-container').height() - 17); }, 500);
+            setTimeout(function() { $('#job-summary-container .job_well').height($('#job-detail-container').height() - 19); }, 500);
             $('#job-summary-container').show();
         }
         // Detail table height adjusting. First, put page height back to 'normal'.
@@ -356,7 +363,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             }).show();
 
             // Adjust the summary table height 
-            $('#job-summary-container .job_well').height(height - 18).css({
+            $('#job-summary-container .job_well').height(height - 19).css({
                 'box-shadow': '-3px 3px 5px 0 #ccc'
             });
             height = Math.floor($('#job-detail-container').height() * 0.5) -
@@ -380,7 +387,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 'padding-left': '15px'
             }).show('slide', {'direction': 'right'});
 
-            setTimeout(function() { DrawGraph({ scope: scope }); }, 500);
+            setTimeout(function() { DrawGraph({ scope: scope, resize: true }); }, 500);
         }
         else {
             $('.overlay').hide();

@@ -40,9 +40,9 @@
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
 .factory('DigestEvents', ['UpdatePlayStatus', 'UpdateHostStatus', 'UpdatePlayChild', 'AddHostResult', 'SelectPlay', 'SelectTask',
-    'GetHostCount', 'GetElapsed', 'UpdateTaskStatus', 'DrawGraph',
+    'GetHostCount', 'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary',
 function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed,
-    UpdateTaskStatus, DrawGraph) {
+    UpdateTaskStatus, DrawGraph, LoadHostSummary) {
     return function(params) {
         
         var scope = params.scope,
@@ -230,6 +230,8 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                 });
                 scope.job_status.status = (event.failed) ? 'failed' : 'successful';
                 scope.job_status.status_class = "";
+                scope.host_summary = {};
+                LoadHostSummary({ scope: scope, data: event.event_data });
                 DrawGraph({ scope: scope });
             }
         });
@@ -468,7 +470,8 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
 }])
 
 // Update host summary totals and update the task
-.factory('UpdateHostStatus', ['UpdateTaskStatus', 'AddHostResult', function(UpdateTaskStatus, AddHostResult) {
+.factory('UpdateHostStatus', ['UpdateTaskStatus', 'AddHostResult',
+    function(UpdateTaskStatus, AddHostResult) {
     return function(params) {
         var scope = params.scope,
             status = params.status,  // successful, changed, unreachable, failed, skipped
@@ -494,6 +497,12 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
         });
 
         if (!host_found) {
+            // keep totalls for the summary graph
+            scope.host_summary.total += 1;
+            scope.host_summary.ok += (status === 'successful') ? 1 : 0;
+            scope.host_summary.changed += (status === 'changed') ? 1 : 0;
+            scope.host_summary.unreachable += (status === 'unreachable') ? 1 : 0;
+            scope.host_summary.failed += (status === 'failed') ? 1 : 0;
             scope.hosts.push({
                 id: host_id,
                 name: name,
@@ -766,81 +775,75 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
     };
 }])
 
-.factory('DrawGraph', ['Rest', 'GetBasePath', 'ProcessErrors', function(Rest, GetBasePath, ProcessErrors) {
+.factory('LoadHostSummary', [ function() {
     return function(params) {
         var scope = params.scope,
-            dark = 0, failed = 0, changed = 0, ok = 0,
-            width, height, svg_height, svg_width, svg_radius, svg, url;
+            data = params.data;
+        scope.host_summary.ok = Object.keys(data.ok).length;
+        scope.host_summary.changed = Object.keys(data.changed).length;
+        scope.host_summary.unreachable = Object.keys(data.dark).length;
+        scope.host_summary.failed = Object.keys(data.failures).length;
+        scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed +
+            scope.host_summary.unreachable + scope.host_summary.failed;
+    };
+}])
 
+.factory('DrawGraph', [ function() {
+    return function(params) {
+        var scope = params.scope,
+            resize = params.resize,
+            width, height, svg_height, svg_width, svg_radius, svg, graph_data = [];
+
+        // Ready the data
+        if (scope.host_summary.ok) {
+            graph_data.push({
+                label: 'OK',
+                value: (scope.host_summary.ok === scope.host_summary.total) ? 1 : scope.host_summary.ok,
+                color: '#5bb75b'
+            });
+        }
+        if (scope.host_summary.changed) {
+            graph_data.push({
+                label: 'Changed',
+                value: (scope.host_summary.changed === scope.host_summary.total) ? 1 : scope.host_summary.changed,
+                color: '#FF9900'
+            });
+        }
+        if (scope.host_summary.unreachable) {
+            graph_data.push({
+                label: 'Unreachable',
+                value: (scope.host_summary.unreachable === scope.host_summary.total) ? 1 : scope.host_summary.unreachable,
+                color: '#A9A9A9'
+            });
+        }
+        if (scope.host_summary.failed) {
+            graph_data.push({
+                label: 'Failed',
+                value: (scope.host_summary.failed === scope.host_summary.total) ? 1 : scope.host_summary.failed,
+                color: '#DA4D49'
+            });
+        }
+        
+        // Adjust the size
         width = $('#job-summary-container .job_well').width();
         height = $('#job-summary-container .job_well').height() - $('#summary-well-top-section').height() - $('#graph-section .header').outerHeight() - 15;
         svg_radius = Math.min(width, height);
         svg_width = width;
         svg_height = height;
-        if  (svg_height > 0 && svg_width > 0) {
-            if ($('#graph-section svg').length > 0) {
-                $("#completedHostsDonut").attr('id', 'completedHostsDonut_old');
-                svg = d3.select("#graph-section svg").attr("width", svg_width).attr("height", svg_height);
-                $('#completedHostsDonut').remove();
-                svg.append("g").attr("id","completedHostsDonut");
-                $('#completedHostsDonut').hide();
-                scope.$emit('GraphLoadData');
+        if (svg_height > 0 && svg_width > 0) {
+            if (!resize && $('#graph-section svg').length > 0) {
+                Donut3D.transition("completedHostsDonut", graph_data, Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
             }
             else {
+                if ($('#graph-section svg').length > 0) {
+                    $('#graph-section svg').remove();
+                }
                 svg = d3.select("#graph-section").append("svg").attr("width", svg_width).attr("height", svg_height);
                 svg.append("g").attr("id","completedHostsDonut");
-                scope.$emit('GraphLoadData');
+                Donut3D.draw("completedHostsDonut", graph_data, Math.floor(svg_width / 2), Math.floor(svg_height / 2), Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
+                $('#graph-section .header .legend').show();
             }
         }
-
-        if (scope.removeRenderGraph) {
-            scope.removeRenderGraph();
-        }
-        scope.removeRenderGraph = scope.$on('RenderGraph', function(e, graph_data) {
-            Donut3D.draw("completedHostsDonut", graph_data, Math.floor(svg_width / 2), Math.floor(svg_height / 2), Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
-            $('#completedHostsDonut_old').remove();
-            $('#completedHostsDonut').show();
-            $('#graph-section .legend').show();
-        });
-
-        if (scope.removeGraphLoadData) {
-            scope.removeGraphLoadData();
-        }
-        scope.removeGraphLoadData = scope.$on('GraphLoadData', function() {
-            url = GetBasePath('jobs') + scope.job_id + '/job_host_summaries/';
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    var graph_data;
-                    if (data.count) {
-                        data.results.forEach(function(row) {
-                            if (row.dark) {
-                                dark ++;
-                            }
-                            else if (row.failures) {
-                                failed++;
-                            }
-                            else if (row.changed) {
-                                changed++;
-                            }
-                            else if (row.ok) {
-                                ok++;
-                            }
-                        });
-                        graph_data = [
-                            { label: 'OK', value: ok, color: '#9ED89E' },
-                            { label: 'Changed', value: changed, color: '#FFC773' },
-                            { label: 'Failed', value: failed, color: '#DA4D49' },
-                            { label: 'Unreachable', value: dark, color: '#A9A9A9' }
-                        ];
-                        scope.$emit('RenderGraph', graph_data);
-                    }
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        });
     };
 }])
 
@@ -922,14 +925,3 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
             });
     };
 }]);
-
-
-
-
-
-
-
-
-
-
-

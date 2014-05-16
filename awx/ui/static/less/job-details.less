@@ -8,8 +8,10 @@
  */
 
 @failed-hosts-color:        #DA4D49;
-@successful-hosts-color:    #9ED89E;
-@changed-hosts-color:       #FFC773;
+@successful-hosts-color:    #5bb75b;
+@changed-hosts-color:       #FF9900;
+@skipped-hosts-color:       #00BFFF;
+@unreachable-hosts-color:   #A9A9A9;
 
 
 #jobs-detail {
@@ -72,10 +74,10 @@
     color: @changed-hosts-color;
 }
 .skipped-hosts, .no-matching-hosts {
-    background-color: #D4D4D4;
+    background-color: @skipped-hosts-color;
 }
 .unreachable-hosts {
-    background-color: @grey;
+    background-color: @unreachable-hosts-color;
 }
 .unreachable-hosts-color {
     color: @grey;
@@ -309,6 +311,7 @@ label.small-label {
 .legend {
     font-size: 12px;
     i {
+        font-size: 10px;
         margin-left: 5px;
     }
     i:first-child {
@@ -321,6 +324,7 @@ label.small-label {
 }
 
 #graph-section {
+    position: relative;
     width: 100%;
     .header {
         margin-top: 20px;
