@@ -101,11 +101,11 @@
                         <div id="task-hosts-section" class="section">
                             <div class="header">
                                 <div class="title">Hosts</div>
-                                <div class="search-field">
+                                <!-- <div class="search-field">
                                     <input type="text" ng-model="task_host_name" placeholder="Host Name" ng-keypress="taskHostNameKeyPress($event)" />
                                     <a class="search-icon" ng-show="searchTaskHostsEnabled" ng-click="searchTaskHosts()"><i class="fa fa-search"></i></a>
                                     <a class="search-icon" ng-show="!searchTaskHostsEnabled" ng-click="task_host_name=''; searchTaskHosts()"><i class="fa fa-times"></i></a>
-                                </div>
+                                </div>!-->
                             </div>
                             <div id="hosts-table-detail" aw-custom-scroll data-on-total-scroll="HostDetailOnTotalScroll"
                                 data-on-total-scroll-back="HostDetailOnTotalScrollBack" class="table-detail">
@@ -141,10 +141,10 @@
                         </div>
                         <div id="summary-search-section" class="section">
                             <div class="header">
-                                <div class="title">Filter Events</div>
+                                <div class="title">Filter Hosts</div>
                             </div>
                             <div class="row">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
                                     <div style="position:relative;">
                                         <input type="text" class="input-sm form-control" id="search_all_hosts_name" ng-model="search_all_hosts_name"
                                             placeholder="Host Name" ng-disabled="searchAllDisabled" ng-keypress="allHostNameKeyPress($event)" />
@@ -154,7 +154,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
                                     <div style="padding-top: 5px;">
                                         <label class="small-label">Show</label>
                                         <div class="btn-group" aw-toggle-button>
@@ -170,9 +170,9 @@
                             <div class="header">
                                 <div class="title">Host Summary</div>
                                 <div class="search-field">
-                                    <input type="text" ng-model="summary_host_name" placeholder="Host Name" ng-keypress="summaryHostNameKeyPress($event)" />
+                                    <!-- <input type="text" ng-model="summary_host_name" placeholder="Host Name" ng-keypress="summaryHostNameKeyPress($event)" />
                                     <a class="search-icon" ng-show="searchSummaryHostsEnabled" ng-click="searchSummaryHosts()"><i class="fa fa-search"></i></a>
-                                    <a class="search-icon" ng-show="!searchSummaryHostsEnabled" ng-click="summary_host_name=''; searchSummaryHosts()"><i class="fa fa-times"></i></a>
+                                    <a class="search-icon" ng-show="!searchSummaryHostsEnabled" ng-click="summary_host_name=''; searchSummaryHosts()"><i class="fa fa-times"></i></a> -->
                                 </div>
                             </div>
                             <div class="legend"><i class="fa fa-circle successful-hosts-color"></i> Successful <i class="fa fa-circle changed-hosts-color"></i> Changed 
@@ -181,7 +181,6 @@
                                 <div class="row">
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Host</div>
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Completed Tasks
-                                        <!-- <a href="" id="event-help-link" aw-pop-over="{{ eventsHelpText }}" aw-tool-tip="Click for help" aw-pop-over-watch="eventsHelpText" data-placement="top" data-container="body" data-title="Event Legend" class="help-link"><i class="fa fa-question-circle"></i></a> -->
                                     </div>
                                 </div>
                             </div>

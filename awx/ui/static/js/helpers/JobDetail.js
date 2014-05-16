@@ -738,7 +738,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
         //Wait('start');
         scope.hostResults = [];
         url = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent=' + id + '&';
-        url += (scope.task_host_name) ? 'host__name__icontains=' + scope.task_host_name + '&' : '';
+        url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
         url += 'host__isnull=false&page_size=' + scope.hostTableRows + '&order_by=host__name';
         Rest.setUrl(url);
         Rest.get()

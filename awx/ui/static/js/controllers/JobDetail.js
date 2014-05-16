@@ -286,7 +286,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 "padding-right": "15px",
                 "z-index": 0
             });
-            setTimeout(function() { $('#job-summary-container .job_well').height($('#job-detail-container').height() - 19); }, 500);
+            setTimeout(function() { $('#job-summary-container .job_well').height($('#job-detail-container').height() - 18); }, 500);
             $('#job-summary-container').show();
         }
         // Detail table height adjusting. First, put page height back to 'normal'.
@@ -363,7 +363,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             }).show();
 
             // Adjust the summary table height 
-            $('#job-summary-container .job_well').height(height - 19).css({
+            $('#job-summary-container .job_well').height(height - 18).css({
                 'box-shadow': '-3px 3px 5px 0 #ccc'
             });
             height = Math.floor($('#job-detail-container').height() * 0.5) -
@@ -572,55 +572,12 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         }
     };
 
-    scope.searchTaskHosts = function() {
-        var url;
-        Wait('start');
-        scope.hostResults = [];
-        url = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent=' + scope.activeTask;
-        url += (scope.task_host_name) ? '&host__name__icontains=' + scope.task_host_name : '';
-        url += '&host__name__isnull=false&page_size=' + scope.hostTableRows + '&order_by=host__name';
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                var i;
-                for (i = 0;  i < data.results.length; i++) {
-                    scope.hostResults.push({
-                        id: data.results[i].id,
-                        status: ( (data.results[i].failed) ? 'failed' : (data.results[i].changed) ? 'changed' : 'successful' ),
-                        host_id: data.results[i].host,
-                        task_id: data.results[i].parent,
-                        name: data.results[i].summary_fields.host.name,
-                        created: data.results[i].created,
-                        msg: data.results[i].event_data.res.msg
-                    });
-                }
-                Wait('stop');
-                SelectHost({ scope: scope });
-            })
-            .error(function(data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + '. GET returned: ' + status });
-            });
-        if (scope.task_host_name) {
-            scope.searchTaskHostsEnabled = false;
-        }
-        else {
-            scope.searchTaskHostsEnabled = true;
-        }
-    };
-
-    scope.taskHostNameKeyPress = function(e) {
-        if (e.keyCode === 13) {
-            scope.searchTaskHosts();
-        }
-    };
-
     scope.searchSummaryHosts = function() {
         var url;
         Wait('start');
         scope.hosts = [];
         url = GetBasePath('jobs') + $routeParams.id + '/job_host_summaries/?';
-        url += (scope.summary_host_name) ? 'host__name__icontains=' + scope.summary_host_name + '&': '';
+        url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&': '';
         url += 'page_size=' + scope.hostSummaryTableRows + '&order_by=host__name';
         Rest.setUrl(url);
         Rest.get()
@@ -637,27 +594,11 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
                 });
                 Wait('stop');
                 $('#hosts-summary-table').mCustomScrollbar("update");
-                setTimeout( function() {
-                    scope.auto_scroll = true;
-                    $('#hosts-summary-table').mCustomScrollbar("scrollTo", "bottom");
-                }, 700);
             })
             .error(function(data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                     msg: 'Call to ' + url + '. GET returned: ' + status });
             });
-        if (scope.summary_host_name) {
-            scope.searchSummaryHostsEnabled = false;
-        }
-        else {
-            scope.searchSummaryHostsEnabled = true;
-        }
-    };
-
-    scope.summaryHostNameKeyPress = function(e) {
-        if (e.keyCode === 13) {
-            scope.searchSummaryHosts();
-        }
     };
 
     scope.searchAllByHost = function() {
@@ -672,10 +613,11 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             scope.search_all_tasks = [];
             scope.search_all_plays = [];
             scope.searchAllHostsEnabled = true;
+            scope.activePlay = scope.plays[scope.plays.length - 1].id;
+            setTimeout(function() {
+                SelectPlay({ scope: scope, id: scope.activePlay });
+            }, 500);
         }
-        scope.task_host_name = scope.search_all_hosts_name;
-        scope.searchTaskHosts();
-        scope.summary_host_name = scope.search_all_hosts_name;
         scope.searchSummaryHosts();
     };
 
