@@ -746,6 +746,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     .directive('awToggleButton', [ function() {
         return function(scope, element) {
             $(element).click(function() {
+                var next, choice;
                 $(this).find('.btn').toggleClass('active');
                 if ($(this).find('.btn-primary').size()>0) {
                     $(this).find('.btn').toggleClass('btn-primary');
@@ -760,6 +761,19 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     $(this).find('.btn').toggleClass('btn-info');
                 }
                 $(this).find('.btn').toggleClass('btn-default');
+                
+                // Add data-after-toggle="functionName" to the btn-group, and we'll
+                // execute here. The newly active choice is passed as a parameter.
+                if ($(this).attr('data-after-toggle')) {
+                    next = $(this).attr('data-after-toggle');
+                    choice = $(this).find('.active').text();
+                    setTimeout(function() {
+                        scope.$apply(function() {
+                            scope[next](choice);
+                        });
+                    });
+                }
+
             });
         };
     }]);

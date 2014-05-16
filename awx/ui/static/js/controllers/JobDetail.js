@@ -403,7 +403,8 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             if (!scope.auto_scroll && scope.activeTask && scope.hostResults.length) {
                 scope.auto_scroll = true;
                 url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
-                url += (scope.task_host_name) ? 'host__name__icontains=' + scope.task_host_name + '&' : '';
+                url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
+                url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
                 url += 'host__name__gt=' + scope.hostResults[scope.hostResults.length - 1].name + '&host__isnull=false&page_size=' + (scope.hostTableRows / 3) + '&order_by=host__name';
                 Wait('start');
                 Rest.setUrl(url);
@@ -448,7 +449,8 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             if (!scope.auto_scroll && scope.activeTask && scope.hostResults.length) {
                 scope.auto_scroll = true;
                 url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
-                url += (scope.task_host_name) ? 'host__name__icontains=' + scope.task_host_name + '&' : '';
+                url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
+                url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
                 url += 'host__name__lt=' + scope.hostResults[0].name + '&host__isnull=false&page_size=' + (scope.hostTableRows / 3) + '&order_by=-host__name';
                 Wait('start');
                 Rest.setUrl(url);
@@ -490,7 +492,8 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         var url;
         if (!scope.auto_scroll && scope.hosts) {
             url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
-            url += (scope.summary_host_name) ? 'host__name__icontains=' + scope.summary_host_name + '&': '';
+            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
+            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
             url += 'host__name__gt=' + scope.hosts[scope.hosts.length - 1].name + '&page_size=' + (scope.hostSummaryTableRows / 3) + '&order_by=host__name';
             Wait('start');
             Rest.setUrl(url);
@@ -533,7 +536,8 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         var url;
         if (!scope.auto_scroll && scope.hosts) {
             url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
-            url += (scope.summary_host_name) ? 'host__name__icontains=' + scope.summary_host_name + '&': '';
+            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
+            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
             url += 'host__name__lt=' + scope.hosts[0].name + '&page_size=' + (scope.hostSummaryTableRows / 3) + '&order_by=-host__name';
             Wait('start');
             Rest.setUrl(url);
@@ -578,6 +582,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         scope.hosts = [];
         url = GetBasePath('jobs') + $routeParams.id + '/job_host_summaries/?';
         url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&': '';
+        url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
         url += 'page_size=' + scope.hostSummaryTableRows + '&order_by=host__name';
         Rest.setUrl(url);
         Rest.get()
@@ -625,6 +630,28 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         if (e.keyCode === 13) {
             scope.searchAllByHost();
         }
+    };
+
+    scope.filterByStatus = function(choice) {
+        var tmp = [];
+        if (choice === 'Failed') {
+            scope.searchAllStatus = 'failed';
+            scope.plays.forEach(function(row) {
+                if (row.status === 'failed') {
+                    tmp.push(row.id);
+                }
+            });
+            tmp.sort();
+            scope.activePlay = tmp[tmp.length - 1];
+        }
+        else {
+            scope.searchAllStatus = '';
+            scope.activePlay = scope.plays[scope.plays.length - 1].id;
+        }
+        scope.searchSummaryHosts();
+        setTimeout(function() {
+            SelectPlay({ scope: scope, id: scope.activePlay });
+        }, 500);
     };
 }
 

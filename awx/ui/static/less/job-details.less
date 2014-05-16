@@ -10,7 +10,7 @@
 @failed-hosts-color:        #DA4D49;
 @successful-hosts-color:    #5bb75b;
 @changed-hosts-color:       #FF9900;
-@skipped-hosts-color:       #00BFFF;
+@skipped-hosts-color:       #01BCC5;
 @unreachable-hosts-color:   #A9A9A9;
 
 
@@ -303,13 +303,12 @@ label.small-label {
     .badge-column a {
         width: 20%;
     }
-    .legend {
-        margin: 8px 0;
-    }
 }
 
 .legend {
+    display: inline-block;
     font-size: 12px;
+    text-align: center;
     i {
         font-size: 10px;
         margin-left: 5px;
@@ -329,8 +328,6 @@ label.small-label {
     .header {
         margin-top: 20px;
         .legend {
-            text-align: center;
-            margin: 15px 0 0 0;
             i { 
                 margin-left: 10px
             }
@@ -353,7 +350,8 @@ polyline{
 }
 
 svg text.percent{
-    fill:white;
+    fill:@black;
     text-anchor:middle;
     font-size:12px;
+    font-weight: bold;
 }

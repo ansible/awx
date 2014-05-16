@@ -232,7 +232,7 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
                 scope.job_status.status_class = "";
                 scope.host_summary = {};
                 LoadHostSummary({ scope: scope, data: event.event_data });
-                DrawGraph({ scope: scope });
+                DrawGraph({ scope: scope, resize: true });
             }
         });
     };
@@ -735,32 +735,34 @@ function(UpdatePlayStatus, UpdateHostStatus, UpdatePlayChild, AddHostResult, Sel
 
         // is the job done? if so, only select hosts for the last task?
 
-        //Wait('start');
         scope.hostResults = [];
-        url = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent=' + id + '&';
-        url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
-        url += 'host__isnull=false&page_size=' + scope.hostTableRows + '&order_by=host__name';
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                data.results.forEach(function(row) {
-                    scope.hostResults.push({
-                        id: row.id,
-                        status: ( (row.failed) ? 'failed' : (row.changed) ? 'changed' : 'successful' ),
-                        host_id: row.host,
-                        task_id: row.parent,
-                        name: row.event_data.host,
-                        created: row.created,
-                        msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
+        if (id > 0) {
+            // If we have a selected task, then get the list of hosts
+            url = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent=' + id + '&';
+            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
+            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
+            url += 'host__isnull=false&page_size=' + scope.hostTableRows + '&order_by=host__name';
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    data.results.forEach(function(row) {
+                        scope.hostResults.push({
+                            id: row.id,
+                            status: ( (row.failed) ? 'failed' : (row.changed) ? 'changed' : 'successful' ),
+                            host_id: row.host,
+                            task_id: row.parent,
+                            name: row.event_data.host,
+                            created: row.created,
+                            msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
+                        });
                     });
+                    SelectHost({ scope: scope });
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
-                //Wait('stop');
-                SelectHost({ scope: scope });
-            })
-            .error(function(data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + '. GET returned: ' + status });
-            });
+        }
     };
 }])
 

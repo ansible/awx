@@ -439,9 +439,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function() {
                 var base = $location.path().replace(/^\//, '').split('/')[0];
-                if (base === 'jobs') {
-                    scope.refreshJobs();
-                } else {
+                if (base !== 'jobs') {
                     $location.path('/jobs');
                 }
             });
