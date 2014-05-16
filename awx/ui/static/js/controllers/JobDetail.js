@@ -621,7 +621,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             scope.activePlay = scope.plays[scope.plays.length - 1].id;
             setTimeout(function() {
                 SelectPlay({ scope: scope, id: scope.activePlay });
-            }, 500);
+            }, 2000);
         }
         scope.searchSummaryHosts();
     };
@@ -651,7 +651,7 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
         scope.searchSummaryHosts();
         setTimeout(function() {
             SelectPlay({ scope: scope, id: scope.activePlay });
-        }, 500);
+        }, 2000);
     };
 }
 
