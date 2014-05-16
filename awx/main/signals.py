@@ -127,6 +127,7 @@ post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Inventor
 pre_save.connect(store_initial_active_state, sender=Job)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
+post_save.connect(emit_job_event_detail, sender=JobEvent)
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or
 # marked as inactive.
