@@ -227,7 +227,7 @@ class Inventory(CommonModel):
         root_group_pks = set(self.root_groups.values_list('pk', flat=True))
         group_depths = {} # pk: max_depth
         def update_group_depths(group_pk, current_depth=0):
-            max_depth = group_depths.get(group_pk, 0)
+            max_depth = group_depths.get(group_pk, -1)
             if current_depth > max_depth:
                 group_depths[group_pk] = current_depth
             for child_pk in group_children_map.get(group_pk, set()):
