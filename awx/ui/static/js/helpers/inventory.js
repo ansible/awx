@@ -18,23 +18,36 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
     function (ApplyEllipsis) {
         return function () {
             // Call to set or restore window resize
-            var timeOut;
-            $(window).resize(function () {
-                clearTimeout(timeOut);
-                timeOut = setTimeout(function () {
-                    // Hack to stop group-name div slipping to a new line
-                    $('#groups_table .name-column').each(function () {
-                        var td_width = $(this).width(),
-                            level_width = $(this).find('.level').width(),
-                            level_padding = parseInt($(this).find('.level').css('padding-left').replace(/px/, '')),
-                            level = level_width + level_padding,
-                            pct = (100 - Math.ceil((level / td_width) * 100)) + '%';
-                        $(this).find('.group-name').css({ width: pct });
-                    });
-                    ApplyEllipsis('#groups_table .group-name a');
-                    ApplyEllipsis('#hosts_table .host-name a');
-                }, 100);
-            });
+
+            function setGroupsHeight() {
+                // Attempt to set the group height
+                var height;
+                if ($(window).width() > 1210) {
+                    height = $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() - $('#breadcrumbs').outerHeight() -
+                        ($('.site-footer').outerHeight() * 2) - $('#groups-container .list-actions').outerHeight() - $('#groups-table-header').height() - 20;
+                    $('#groups-container .list-table-container').height(height);
+                }
+                else {
+                    $('#groups-container .list-table-container').height('auto');
+                }
+            }
+
+            setGroupsHeight();
+
+            $(window).resize(_.debounce(function() {
+                // Hack to stop group-name div slipping to a new line
+                $('#groups_table .name-column').each(function () {
+                    var td_width = $(this).width(),
+                        level_width = $(this).find('.level').width(),
+                        level_padding = parseInt($(this).find('.level').css('padding-left').replace(/px/, '')),
+                        level = level_width + level_padding,
+                        pct = (100 - Math.ceil((level / td_width) * 100)) + '%';
+                    $(this).find('.group-name').css({ width: pct });
+                });
+                ApplyEllipsis('#groups_table .group-name a');
+                ApplyEllipsis('#hosts_table .host-name a');
+                setGroupsHeight();
+            }, 500));
         };
     }
 ])
@@ -53,10 +66,10 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                 fld, json_data, data;
 
             Wait('start');
-            
+
             // Make sure we have valid variable data
             json_data = ToJSON(scope.inventoryParseType, scope.inventory_variables);
-        
+
             data = {};
             for (fld in form.fields) {
                 if (fld !== 'inventory_variables') {
@@ -178,7 +191,7 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
             }
             scope.removeInventorySaved = scope.$on('InventorySaved', function () {
                 $('#form-modal').modal('hide');
-                // Restore prior search state           
+                // Restore prior search state
                 if (scope.searchCleanp) {
                     scope.searchCleanup();
                 }

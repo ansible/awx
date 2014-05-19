@@ -1,8 +1,8 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  InventoryGroups.js 
- * 
+ *  InventoryGroups.js
+ *
  */
 angular.module('InventoryGroupsDefinition', [])
     .value('InventoryGroups', {
@@ -16,8 +16,8 @@ angular.module('InventoryGroupsDefinition', [])
         hover: false,
         hasChildren: true,
         filterBy: '{ show: true }',
-        'class': 'table-condensed table-no-border',
-        
+        'class': 'table-no-border',
+
         fields: {
             name: {
                 label: 'Groups',
@@ -26,7 +26,7 @@ angular.module('InventoryGroupsDefinition', [])
                 columnClick: "showHosts(group.id,group.group_id, false)",
                 ngClass: "group.selected_class",
                 hasChildren: true,
-                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-8',
+                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-9',
                 nosort: true,
                 awDroppable: "{{ group.isDroppable }}",
                 awDraggable: "{{ group.isDraggable }}",
@@ -37,7 +37,7 @@ angular.module('InventoryGroupsDefinition', [])
             }
         },
 
-        actions: {        
+        actions: {
             create: {
                 mode: 'all',
                 ngClick: "createGroup()",
@@ -62,8 +62,8 @@ angular.module('InventoryGroupsDefinition', [])
         },
 
         fieldActions: {
-            
-            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-4',
+
+            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-3',
 
             sync_status: {
                 mode: 'all',
@@ -120,4 +120,4 @@ angular.module('InventoryGroupsDefinition', [])
             }
         }
     });
-            
+

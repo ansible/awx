@@ -389,7 +389,7 @@ dd {
       content: "";
       display: block;
   }
-  
+
   #wrap:after {
       height: @push-height;
   }
@@ -953,7 +953,7 @@ input[type="checkbox"].checkbox-no-label {
   border-top: none;
 }
 
-/* Less padding on .table-condensed */ 
+/* Less padding on .table-condensed */
 .table-condensed>tbody>tr>td,
 .table-condensed>thead>tr>th {
     padding-top: 3px;
@@ -1077,7 +1077,7 @@ input[type="checkbox"].checkbox-no-label {
   }
   .icon-socket-error:before {
       content: "\f111";
-      color: @red;  
+      color: @red;
   }
   .icon-socket-connecting:before {
       content: "\f042";
@@ -1091,7 +1091,7 @@ input[type="checkbox"].checkbox-no-label {
     line-height: 1;
   }
 
-/* job_events page */ 
+/* job_events page */
 
   #jobevents_table {
       div.return-code {
@@ -1322,6 +1322,16 @@ input[type="checkbox"].checkbox-no-label {
   #hosts-container .well {
       padding: 8px;
       margin-bottom: 0;
+  }
+
+  #groups-table-header {
+      margin-bottom: 0;
+  }
+
+  #groups-container {
+      .list-table-container {
+          overflow: auto;
+      }
   }
 
   #inventories_table i[class*="icon-job-"],
@@ -1664,18 +1674,6 @@ tr td button i {
 
 }
 
-/* Portrait tablet to landscape and desktop */
-
-/*@media (max-width: 1200px) {
-    .site-footer {
-        .logo {
-            text-align: center;
-            padding-top: 20px;
-            margin-bottom: 10px;
-        }
-    }
-}*/
-
 @media (min-width: 768px) and (max-width: 1199px) {
 
   .level-1,
@@ -1709,6 +1707,7 @@ tr td button i {
   }
 
   #hosts-container.col-lg-6 {
+      margin-top: 15px;
       padding-left: 15px;
       padding-right: 15px;
       .well {
@@ -1722,7 +1721,7 @@ tr td button i {
 /* Landscape phone to portrait tablet */
 
 @media (max-width: 767px) {
-  
+
   /* The sticky footer: http://css-tricks.com/snippets/css/sticky-footer, with less variables */
   @footer-height: 140px;
   @footer-margin: 15px;
@@ -1804,6 +1803,7 @@ tr td button i {
   }
 
   #hosts-container.col-lg-6 {
+      margin-toop: 15px;
       padding-left: 15px;
       padding-right: 15px;
   }

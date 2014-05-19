@@ -531,7 +531,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
     }
     $scope.removeGroupTreeLoaded = $scope.$on('GroupTreeLoaded', function (event, inventory_name, groups) {
         // Add breadcrumbs
-        var e, inventoryAutoHelp;
+        var e, html, inventoryAutoHelp;
         e = angular.element(document.getElementById('breadcrumbs'));
         e.html(Breadcrumbs({ list: list, mode: 'edit' }));
         $compile(e)($scope);
@@ -541,8 +541,14 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
             mode: 'edit',
             id: 'groups-container',
             breadCrumbs: false,
-            searchSize: 'col-lg-5 col-md-5 col-sm-5'
+            searchSize: 'col-lg-5 col-md-5 col-sm-5',
+            skipTableHead: true
         });
+
+        // Keep the table header fixed while allowing the table body to scroll and still use <table> element
+        html = "<table class=\"table table-condensed\" id=\"groups-table-header\">" + generator.buildHeader() + "</table>\n";
+        $(html).insertBefore('#groups-container .list-table-container');
+
         $scope.groups = groups;
         $scope.inventory_name = inventory_name;
 
@@ -594,7 +600,6 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
         }
 
     });
-
 
     // Called after tree data is reloaded on refresh button click.
     if ($scope.removeGroupTreeRefreshed) {
