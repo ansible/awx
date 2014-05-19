@@ -1290,10 +1290,12 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
             scope.deleteOption = "preserve-all";
 
-            scope.helpText = "<dl><dt>Delete</dt><dd>Deletes all groups and hosts associated with the group being deleted. " +
+            scope.helpText = "<dl><dt>Delete</dt><dd>Deletes groups and hosts associated with the group being deleted. " +
                 "If a group or host is associated with other groups, it will still exist within those groups. Otherwise, " +
                 "the associated groups and hosts will no longer appear in the inventory.</dd>\n" +
-                "<dt style=\"margin-top: 5px;\">Promote</dt><dd>Groups and hosts associated with the group being removed will be promoted one level.</dd></dl>\n" +
+                "<dt style=\"margin-top: 5px;\">Promote</dt><dd>Groups and hosts associated with the group being removed will be " +
+                "promoted one level. Note: groups already associated with other groups cannot be promoted to the top level of the " +
+                "tree.</dd></dl>\n" +
                 "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
             
             buttonSet = [{
@@ -1399,7 +1401,14 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 scope.removeDisassociateGroup();
             }
             scope.removeDisassociateGroup = scope.$on('DisassociateGroup', function() {
-                var url = GetBasePath('inventory') + scope.inventory_id + '/groups/';
+                var parent, url;
+                if (node.parent === 0) {
+                    url = GetBasePath('inventory') + scope.inventory_id + '/groups/';
+                }
+                else {
+                    parent = Find({ list: scope.groups, key: 'id', val: node.parent });
+                    url = GetBasePath('groups') + parent.group_id + '/children/';
+                }
                 Rest.setUrl(url);
                 Rest.post({ id: node.group_id, disassociate: 1 })
                     .success(function () {
