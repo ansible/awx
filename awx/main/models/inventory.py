@@ -452,32 +452,6 @@ class Host(CommonModelNameNotUnique):
                 child_pks_to_check.update(p_ids - child_pks_checked)
         return Group.objects.filter(pk__in=group_pks).distinct()
 
-    def update_cached_values(self):
-        cacheable_data = {"%s_all_groups" % self.id: [{'id': g.id, 'name': g.name} for g in self.all_groups.all()],
-                          "%s_groups" % self.id: [{'id': g.id, 'name': g.name} for g in self.groups.all()],
-                          "%s_recent_jobs" % self.id: [{'id': j.job.id, 'name': j.job.job_template.name, 'status': j.job.status, 'finished': j.job.finished} \
-                                                       for j in self.job_host_summaries.all().order_by('-created')[:5]]}
-        cache.set_many(cacheable_data)
-        return cacheable_data
-
-    def get_cached_summary_values(self):
-        summary_data = cache.get_many(['%s_all_groups' % self.id, '%s_groups' % self.id, '%s_recent_jobs' % self.id])
-
-        rebuild_cache = False
-        for key in summary_data:
-            if summary_data[key] is None:
-                rebuild_cache = True
-                break
-        if rebuild_cache or not summary_data:
-            summary_data = self.update_cached_values()
-        summary_data_actual = dict(all_groups=summary_data['%s_all_groups' % self.id],
-                                   groups=summary_data['%s_groups' % self.id],
-                                   recent_jobs=summary_data['%s_recent_jobs' % self.id])
-        return summary_data_actual
-
-    def clear_cached_values(self):
-        cache.delete_many(["%s_all_groups" % self.id, "%s_groups" % self.id, "%s_recent_jobs" % self.id])
-
     # Use .job_host_summaries.all() to get jobs affecting this host.
     # Use .job_events.all() to get events affecting this host.
 

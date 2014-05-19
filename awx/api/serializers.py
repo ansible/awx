@@ -756,7 +756,8 @@ class HostSerializer(BaseSerializerWithVariables):
             d['last_job']['job_template_name'] = obj.last_job.job_template.name
         except (KeyError, AttributeError):
             pass
-        d.update(obj.get_cached_summary_values())
+        d.update({'recent_jobs': [{'id': j.job.id, 'name': j.job.job_template.name, 'status': j.job.status,
+                                   'finished': j.job.finished} for j in obj.job_host_summaries.all().order_by('-created')[:5]]})
         return d
 
     def _get_host_port_from_name(self, name):
