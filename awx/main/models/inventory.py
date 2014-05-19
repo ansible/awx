@@ -200,7 +200,7 @@ class Inventory(CommonModel):
         # Find all hosts that need the has_inventory_sources flag cleared.
         hosts_to_clear = hosts_qs.filter(has_inventory_sources=True).exclude(pk__in=hosts_with_cloud_inventory)
         for host_pk in hosts_to_clear.values_list('pk', flat=True):
-            host_updates = hosts_to_updates.setdefault(host_pk, {})
+            host_updates = hosts_to_update.setdefault(host_pk, {})
             host_updates['has_inventory_sources'] = False
         # Now apply updates to hosts where needed (in batches).
         all_update_pks = hosts_to_update.keys()
