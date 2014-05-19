@@ -26,7 +26,7 @@ angular.module('InventoryGroupsDefinition', [])
                 columnClick: "showHosts(group.id,group.group_id, false)",
                 ngClass: "group.selected_class",
                 hasChildren: true,
-                columnClass: 'col-lg-9 col-md-9 col-sm-7 col-xs-7',
+                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-8',
                 nosort: true,
                 awDroppable: "{{ group.isDroppable }}",
                 awDraggable: "{{ group.isDraggable }}",
@@ -37,10 +37,7 @@ angular.module('InventoryGroupsDefinition', [])
             }
         },
 
-        actions: {
-            
-            columnClass: 'col-lg-3 col-md-3 col-sm-5 col-xs-5',
-            
+        actions: {        
             create: {
                 mode: 'all',
                 ngClick: "createGroup()",
@@ -50,18 +47,6 @@ angular.module('InventoryGroupsDefinition', [])
                 mode: 'all',
                 awToolTip: "Edit inventory properties",
                 ngClick: 'editInventoryProperties()'
-            },
-            /*refresh: {
-                mode: 'all',
-                awToolTip: "Refresh the page",
-                ngClick: "refreshGroups()"
-            },*/
-            socket: {
-                mode: 'all',
-                iconClass: "{{ 'fa fa-power-off fa-lg socket-' + socketStatus }}",
-                awToolTip: "{{ socketTip }}",
-                dataTipWatch: "socketTip",
-                ngClick: "socketToggle()",
             },
             stream: {
                 ngClick: "showGroupActivity()",
@@ -77,6 +62,9 @@ angular.module('InventoryGroupsDefinition', [])
         },
 
         fieldActions: {
+            
+            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-4',
+
             sync_status: {
                 mode: 'all',
                 ngClick: "viewUpdateStatus(group.id, group.group_id)",

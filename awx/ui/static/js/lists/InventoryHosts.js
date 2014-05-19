@@ -28,7 +28,7 @@ angular.module('InventoryHostsDefinition', [])
                 label: 'Hosts',
                 ngClick: "editHost(host.id)",
                 searchPlaceholder: "search_place_holder",
-                columnClass: 'col-lg-9 col-md-9 col-sm-7 col-xs-7',
+                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-8',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
                 awDraggable: "true"
@@ -50,6 +50,9 @@ angular.module('InventoryHostsDefinition', [])
         },
 
         fieldActions: {
+            
+            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-4',
+
             enabled_flag: {
                 iconClass: "{{ 'fa icon-enabled-' + host.enabled }}",
                 dataPlacement: 'top',
@@ -83,9 +86,6 @@ angular.module('InventoryHostsDefinition', [])
         },
 
         actions: {
-
-            columnClass: 'col-lg-3 col-md-3 col-sm-5 col-xs-5',
-
             create: {
                 mode: 'all',
                 ngClick: "createHost()",
