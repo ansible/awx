@@ -21,7 +21,7 @@ import zmq
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import CASCADE, SET_NULL, PROTECT
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
@@ -39,6 +39,7 @@ from awx.main.utils import encrypt_field, ignore_inventory_computed_fields
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate']
 
 logger = logging.getLogger('awx.main.models.inventory')
+
 
 class Inventory(CommonModel):
     '''
@@ -120,24 +121,174 @@ class Inventory(CommonModel):
 
     variables_dict = VarsDictProperty('variables')
 
+    def get_group_hosts_map(self, active=None):
+        '''
+        Return dictionary mapping group_id to set of child host_id's.
+        '''
+        # FIXME: Cache this mapping?
+        group_hosts_kw = dict(group__inventory_id=self.pk, host__inventory_id=self.pk)
+        if active is not None:
+            group_hosts_kw['group__active'] = active
+            group_hosts_kw['host__active'] = active
+        group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
+        group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id')
+        group_hosts_map = {}
+        for group_id, host_id in group_hosts_qs:
+            group_host_ids = group_hosts_map.setdefault(group_id, set())
+            group_host_ids.add(host_id)
+        return group_hosts_map
+
+    def get_group_parents_map(self, active=None):
+        '''
+        Return dictionary mapping group_id to set of parent group_id's.
+        '''
+        # FIXME: Cache this mapping?
+        group_parents_kw = dict(from_group__inventory_id=self.pk, to_group__inventory_id=self.pk)
+        if active is not None:
+            group_parents_kw['from_group__active'] = active
+            group_parents_kw['to_group__active'] = active
+        group_parents_qs = Group.parents.through.objects.filter(**group_parents_kw)
+        group_parents_qs = group_parents_qs.values_list('from_group_id', 'to_group_id')
+        group_parents_map = {}
+        for from_group_id, to_group_id in group_parents_qs:
+            group_parents = group_parents_map.setdefault(from_group_id, set())
+            group_parents.add(to_group_id)
+        return group_parents_map
+
+    def get_group_children_map(self, active=None):
+        '''
+        Return dictionary mapping group_id to set of child group_id's.
+        '''
+        # FIXME: Cache this mapping?
+        group_parents_kw = dict(from_group__inventory_id=self.pk, to_group__inventory_id=self.pk)
+        if active is not None:
+            group_parents_kw['from_group__active'] = active
+            group_parents_kw['to_group__active'] = active
+        group_parents_qs = Group.parents.through.objects.filter(**group_parents_kw)
+        group_parents_qs = group_parents_qs.values_list('from_group_id', 'to_group_id')
+        group_children_map = {}
+        for from_group_id, to_group_id in group_parents_qs:
+            group_children = group_children_map.setdefault(to_group_id, set())
+            group_children.add(from_group_id)
+        return group_children_map
+
+    def update_host_computed_fields(self):
+        '''
+        Update computed fields for all active hosts in this inventory.
+        '''
+        hosts_to_update = {}
+        hosts_qs = self.hosts.filter(active=True)
+        # Define queryset of all hosts with active failures.
+        hosts_with_active_failures = hosts_qs.filter(last_job_host_summary__isnull=False, last_job_host_summary__job__active=True, last_job_host_summary__failed=True).values_list('pk', flat=True)
+        # Find all hosts that need the has_active_failures flag set.
+        hosts_to_set = hosts_qs.filter(has_active_failures=False, pk__in=hosts_with_active_failures)
+        for host_pk in hosts_to_set.values_list('pk', flat=True):
+            host_updates = hosts_to_update.setdefault(host_pk, {})
+            host_updates['has_active_failures'] = True
+        # Find all hosts that need the has_active_failures flag cleared.
+        hosts_to_clear = hosts_qs.filter(has_active_failures=True).exclude(pk__in=hosts_with_active_failures)
+        for host_pk in hosts_to_clear.values_list('pk', flat=True):
+            host_updates = hosts_to_update.setdefault(host_pk, {})
+            host_updates['has_active_failures'] = False
+        # Define queryset of all hosts with cloud inventory sources.
+        hosts_with_cloud_inventory = hosts_qs.filter(inventory_sources__active=True, inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True)
+        # Find all hosts that need the has_inventory_sources flag set.
+        hosts_to_set = hosts_qs.filter(has_inventory_sources=False, pk__in=hosts_with_cloud_inventory)
+        for host_pk in hosts_to_set.values_list('pk', flat=True):
+            host_updates = hosts_to_update.setdefault(host_pk, {})
+            host_updates['has_inventory_sources'] = True
+        # Find all hosts that need the has_inventory_sources flag cleared.
+        hosts_to_clear = hosts_qs.filter(has_inventory_sources=True).exclude(pk__in=hosts_with_cloud_inventory)
+        for host_pk in hosts_to_clear.values_list('pk', flat=True):
+            host_updates = hosts_to_updates.setdefault(host_pk, {})
+            host_updates['has_inventory_sources'] = False
+        # Now apply updates to hosts where needed.
+        for host in hosts_qs.filter(pk__in=hosts_to_update.keys()):
+            host_updates = hosts_to_update[host.pk]
+            for field, value in host_updates.items():
+                setattr(host, field, value)
+            host.save(update_fields=host_updates.keys())
+
+    def update_group_computed_fields(self):
+        '''
+        Update computed fields for all active groups in this inventory.
+        '''
+        group_children_map = self.get_group_children_map(active=True)
+        group_hosts_map = self.get_group_hosts_map(active=True)
+        active_host_pks = set(self.hosts.filter(active=True).values_list('pk', flat=True))
+        failed_host_pks = set(self.hosts.filter(active=True, last_job_host_summary__job__active=True, last_job_host_summary__failed=True).values_list('pk', flat=True))
+        active_group_pks = set(self.groups.filter(active=True).values_list('pk', flat=True))
+        failed_group_pks = set() # Update below as we check each group.
+        groups_with_cloud_pks = set(self.groups.filter(active=True, inventory_sources__active=True, inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True))
+        groups_to_update = {}
+
+        # Build list of group pks to check, starting with the groups at the
+        # deepest level within the tree.
+        root_group_pks = set(self.root_groups.values_list('pk', flat=True))
+        group_depths = {} # pk: max_depth
+        def update_group_depths(group_pk, current_depth=0):
+            max_depth = group_depths.get(group_pk, 0)
+            if current_depth > max_depth:
+                group_depths[group_pk] = current_depth
+            for child_pk in group_children_map.get(group_pk, set()):
+                update_group_depths(child_pk, current_depth + 1)
+        for group_pk in root_group_pks:
+            update_group_depths(group_pk)
+        group_pks_to_check = [x[1] for x in sorted([(v,k) for k,v in group_depths.items()], reverse=True)]
+
+        for group_pk in group_pks_to_check:
+            # Get all children and host pks for this group.
+            parent_pks_to_check = set([group_pk])
+            parent_pks_checked = set()
+            child_pks = set()
+            host_pks = set()
+            while parent_pks_to_check:
+                for parent_pk in list(parent_pks_to_check):
+                    c_ids = group_children_map.get(parent_pk, set())
+                    child_pks.update(c_ids)
+                    parent_pks_to_check.remove(parent_pk)
+                    parent_pks_checked.add(parent_pk)
+                    parent_pks_to_check.update(c_ids - parent_pks_checked)
+                    h_ids = group_hosts_map.get(parent_pk, set())
+                    host_pks.update(h_ids)
+            # Define updates needed for this group.
+            group_updates = groups_to_update.setdefault(group_pk, {})
+            group_updates.update({
+                'total_hosts': len(active_host_pks & host_pks),
+                'has_active_failures': bool(failed_host_pks & host_pks),
+                'hosts_with_active_failures': len(failed_host_pks & host_pks),
+                'total_groups': len(child_pks),
+                'groups_with_active_failures': len(failed_group_pks & child_pks),
+                'has_inventory_sources': bool(group_pk in groups_with_cloud_pks),
+            })
+            if group_updates['has_active_failures']:
+                failed_group_pks.add(group_pk)
+
+        # Now apply updates to each group as needed.
+        for group in self.groups.filter(pk__in=groups_to_update.keys()):
+            group_updates = groups_to_update[group.pk]
+            for field, value in group_updates.items():
+                if getattr(group, field) != value:
+                    setattr(group, field, value)
+                else:
+                    group_updates.pop(field)
+            if group_updates:
+                group.save(update_fields=group_updates.keys())
+
     def update_computed_fields(self, update_groups=True, update_hosts=True):
         '''
         Update model fields that are computed from database relationships.
         '''
         logger.debug("Going to update inventory computed fields")
         if update_hosts:
-            for host in self.hosts.filter(active=True):
-                host.update_computed_fields(update_inventory=False,
-                                            update_groups=False)
+            self.update_host_computed_fields()
         if update_groups:
-            for group in self.groups.filter(active=True):
-                group.update_computed_fields()
+            self.update_group_computed_fields()
         active_hosts = self.hosts.filter(active=True)
         failed_hosts = active_hosts.filter(has_active_failures=True)
         active_groups = self.groups.filter(active=True)
         failed_groups = active_groups.filter(has_active_failures=True)
         active_inventory_sources = self.inventory_sources.filter(active=True, source__in=CLOUD_INVENTORY_SOURCES)
-        #failed_inventory_sources = active_inventory_sources.filter(last_update_failed=True)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         computed_fields = {
             'has_active_failures': bool(failed_hosts.count()),
@@ -232,14 +383,15 @@ class Host(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:host_detail', args=(self.pk,))
 
-    def mark_inactive(self, save=True):
+    def mark_inactive(self, save=True, from_inventory_import=False):
         '''
         When marking hosts inactive, remove all associations to related
         inventory sources.
         '''
         super(Host, self).mark_inactive(save=save)
-        self.inventory_sources.clear()
-        self.clear_cached_values()
+        if not from_inventory_import:
+            self.inventory_sources.clear()
+            self.clear_cached_values()
 
     def update_computed_fields(self, update_inventory=True, update_groups=True):
         '''
@@ -280,10 +432,19 @@ class Host(CommonModelNameNotUnique):
         Return all groups of which this host is a member, avoiding infinite
         recursion in the case of cyclical group relations.
         '''
-        qs = self.groups.distinct()
-        for group in self.groups.all():
-            qs = qs | group.all_parents
-        return qs
+        group_parents_map = self.inventory.get_group_parents_map()
+        group_pks = set(self.groups.values_list('pk', flat=True))
+        child_pks_to_check = set()
+        child_pks_to_check.update(group_pks)
+        child_pks_checked = set()
+        while child_pks_to_check:
+            for child_pk in list(child_pks_to_check):
+                p_ids = group_parents_map.get(child_pk, set())
+                group_pks.update(p_ids)
+                child_pks_to_check.remove(child_pk)
+                child_pks_checked.add(child_pk)
+                child_pks_to_check.update(p_ids - child_pks_checked)
+        return Group.objects.filter(pk__in=group_pks).distinct()
 
     def update_cached_values(self):
         cacheable_data = {"%s_all_groups" % self.id: [{'id': g.id, 'name': g.name} for g in self.all_groups.all()],
@@ -422,7 +583,7 @@ class Group(CommonModelNameNotUnique):
             mark_actual()
         update_inventory_computed_fields.delay(self.id, True)
 
-    def mark_inactive(self, save=True, recompute=True):
+    def mark_inactive(self, save=True, recompute=True, from_inventory_import=False):
         '''
         When marking groups inactive, remove all associations to related
         groups/hosts/inventory_sources.
@@ -436,7 +597,9 @@ class Group(CommonModelNameNotUnique):
             self.hosts.clear()
         i = self.inventory
 
-        if recompute:
+        if from_inventory_import:
+            super(Group, self).mark_inactive(save=save)
+        elif recompute:
             with ignore_inventory_computed_fields():
                 mark_actual()
             i.update_computed_fields()
@@ -475,16 +638,21 @@ class Group(CommonModelNameNotUnique):
 
     def get_all_parents(self, except_pks=None):
         '''
-        Return all parents of this group recursively, avoiding infinite
-        recursion in the case of cyclical relations.  The group itself will be
-        excluded unless there is a cycle leading back to it.
+        Return all parents of this group recursively.  The group itself will
+        be excluded unless there is a cycle leading back to it.
         '''
-        except_pks = except_pks or set()
-        except_pks.add(self.pk)
-        qs = self.parents.distinct()
-        for group in self.parents.exclude(pk__in=except_pks):
-            qs = qs | group.get_all_parents(except_pks)
-        return qs
+        group_parents_map = self.inventory.get_group_parents_map()
+        child_pks_to_check = set([self.pk])
+        child_pks_checked = set()
+        parent_pks = set()
+        while child_pks_to_check:
+            for child_pk in list(child_pks_to_check):
+                p_ids = group_parents_map.get(child_pk, set())
+                parent_pks.update(p_ids)
+                child_pks_to_check.remove(child_pk)
+                child_pks_checked.add(child_pk)
+                child_pks_to_check.update(p_ids - child_pks_checked)
+        return Group.objects.filter(pk__in=parent_pks).distinct()
 
     @property
     def all_parents(self):
@@ -492,16 +660,21 @@ class Group(CommonModelNameNotUnique):
 
     def get_all_children(self, except_pks=None):
         '''
-        Return all children of this group recursively, avoiding infinite
-        recursion in the case of cyclical relations.  The group itself will be
-        excluded unless there is a cycle leading back to it.
+        Return all children of this group recursively.  The group itself will
+        be excluded unless there is a cycle leading back to it.
         '''
-        except_pks = except_pks or set()
-        except_pks.add(self.pk)
-        qs = self.children.distinct()
-        for group in self.children.exclude(pk__in=except_pks):
-            qs = qs | group.get_all_children(except_pks)
-        return qs
+        group_children_map = self.inventory.get_group_children_map()
+        parent_pks_to_check = set([self.pk])
+        parent_pks_checked = set()
+        child_pks = set()
+        while parent_pks_to_check:
+            for parent_pk in list(parent_pks_to_check):
+                c_ids = group_children_map.get(parent_pk, set())
+                child_pks.update(c_ids)
+                parent_pks_to_check.remove(parent_pk)
+                parent_pks_checked.add(parent_pk)
+                parent_pks_to_check.update(c_ids - parent_pks_checked)
+        return Group.objects.filter(pk__in=child_pks).distinct()
 
     @property
     def all_children(self):
@@ -509,15 +682,22 @@ class Group(CommonModelNameNotUnique):
 
     def get_all_hosts(self, except_group_pks=None):
         '''
-        Return all hosts associated with this group or any of its children,
-        avoiding infinite recursion in the case of cyclical group relations.
+        Return all hosts associated with this group or any of its children.
         '''
-        except_group_pks = except_group_pks or set()
-        except_group_pks.add(self.pk)
-        qs = self.hosts.distinct()
-        for group in self.children.exclude(pk__in=except_group_pks):
-            qs = qs | group.get_all_hosts(except_group_pks)
-        return qs
+        group_children_map = self.inventory.get_group_children_map()
+        group_hosts_map = self.inventory.get_group_hosts_map()
+        parent_pks_to_check = set([self.pk])
+        parent_pks_checked = set()
+        host_pks = set()
+        while parent_pks_to_check:
+            for parent_pk in list(parent_pks_to_check):
+                c_ids = group_children_map.get(parent_pk, set())
+                parent_pks_to_check.remove(parent_pk)
+                parent_pks_checked.add(parent_pk)
+                parent_pks_to_check.update(c_ids - parent_pks_checked)
+                h_ids = group_hosts_map.get(parent_pk, set())
+                host_pks.update(h_ids)
+        return Host.objects.filter(pk__in=host_pks).distinct()
 
     @property
     def all_hosts(self):

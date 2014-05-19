@@ -445,7 +445,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
            contact_name='AWX Admin',
            contact_email='awx@example.com',
            license_date=int(time.time() + 3600),
-           instance_count=500,
+           instance_count=10000,
         )
         handle, license_path = tempfile.mkstemp(suffix='.json')
         os.close(handle)
@@ -565,7 +565,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
                                                   source=inv_src)
-        self.assertEqual(result, None)
+        self.assertEqual(result, None, stdout + stderr)
         # Check that inventory is populated as expected.
         new_inv = Inventory.objects.get(pk=new_inv.pk)
         expected_group_names = set(['servers', 'dbservers', 'webservers'])
@@ -637,7 +637,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                                                   source=self.ini_path,
                                                   overwrite=overwrite,
                                                   overwrite_vars=overwrite_vars)
-        self.assertEqual(result, None)
+        self.assertEqual(result, None, stdout + stderr)
         # Check that inventory is populated as expected.
         new_inv = Inventory.objects.get(pk=new_inv.pk)
         expected_group_names = set(['servers', 'dbservers', 'webservers',
@@ -828,7 +828,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
                                                   source=source)
-        self.assertEqual(result, None)
+        self.assertEqual(result, None, stdout + stderr)
         # Check that inventory is populated as expected.
         new_inv = Inventory.objects.get(pk=new_inv.pk)
         self.assertEqual(old_inv.variables_dict, new_inv.variables_dict)
@@ -860,14 +860,13 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         new_inv = self.organizations[0].inventories.create(name='newec2')
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)
-        #inv_file = os.path.join(os.path.dirname(__file__), 'data',
-        #                        'large_ec2_inventory.py')
         os.chdir(os.path.join(os.path.dirname(__file__), 'data'))
         inv_file = 'large_ec2_inventory.py'
+        settings.DEBUG = True
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
                                                   source=inv_file)
-        self.assertEqual(result, None, stdout+stderr)
+        self.assertEqual(result, None, stdout + stderr)
         # Check that inventory is populated as expected within a reasonable
         # amount of time.  Computed fields should also be updated.
         new_inv = Inventory.objects.get(pk=new_inv.pk)
@@ -875,5 +874,45 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertNotEqual(new_inv.groups.count(), 0)
         self.assertNotEqual(new_inv.total_hosts, 0)
         self.assertNotEqual(new_inv.total_groups, 0)
-        self.assertElapsedLessThan(60)
+        self.assertElapsedLessThan(30)
 
+    def _get_ngroups_for_nhosts(self, n):
+        if n > 0:
+            return min(n, 10) + ((n - 1) / 10 + 1) + ((n - 1) / 100 + 1) + ((n - 1) / 1000 + 1)
+        else:
+            return 0
+
+    def _check_largeinv_import(self, new_inv, nhosts, nhosts_inactive=0):
+        self._start_time = time.time()
+        inv_file = os.path.join(os.path.dirname(__file__), 'data', 'largeinv.py')
+        ngroups = self._get_ngroups_for_nhosts(nhosts)
+        os.environ['NHOSTS'] = str(nhosts)
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=inv_file,
+                                                  overwrite=True, verbosity=0)
+        self.assertEqual(result, None, stdout + stderr)
+        # Check that inventory is populated as expected within a reasonable
+        # amount of time.  Computed fields should also be updated.
+        new_inv = Inventory.objects.get(pk=new_inv.pk)
+        self.assertEqual(new_inv.hosts.filter(active=True).count(), nhosts)
+        self.assertEqual(new_inv.groups.filter(active=True).count(), ngroups)
+        self.assertEqual(new_inv.hosts.filter(active=False).count(), nhosts_inactive)
+        self.assertEqual(new_inv.total_hosts, nhosts)
+        self.assertEqual(new_inv.total_groups, ngroups)
+        self.assertElapsedLessThan(30)
+
+    def test_large_inventory_file(self):
+        new_inv = self.organizations[0].inventories.create(name='largeinv')
+        self.assertEqual(new_inv.hosts.count(), 0)
+        self.assertEqual(new_inv.groups.count(), 0)
+        settings.DEBUG = True
+        nhosts = 2000
+        # Test initial import into empty inventory.
+        self._check_largeinv_import(new_inv, nhosts, 0)
+        # Test re-importing and overwriting.
+        self._check_largeinv_import(new_inv, nhosts, 0)
+        # Test re-importing with only half as many hosts.
+        self._check_largeinv_import(new_inv, nhosts / 2, nhosts / 2)
+        # Test re-importing that clears all hosts.
+        self._check_largeinv_import(new_inv, 0, nhosts)

@@ -614,7 +614,7 @@ class InventoryTest(BaseTest):
 
         # data used for testing listing all hosts that are transitive members of a group
         g2 = Group.objects.get(name='web4')
-        nh = Host.objects.create(name='newhost.example.com', inventory=inva,
+        nh = Host.objects.create(name='newhost.example.com', inventory=g2.inventory,
                                  created_by=self.super_django_user)
         g2.hosts.add(nh)
         g2.save()

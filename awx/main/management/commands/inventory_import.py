@@ -430,7 +430,8 @@ def load_inventory_source(source, all_group=None, group_filter_re=None,
     original_all_group = all_group
     if not os.path.exists(source):
         raise IOError('Source does not exist: %s' % source)
-    source = os.path.join(os.path.dirname(source) or os.getcwd(), source)
+    source = os.path.join(os.getcwd(), os.path.dirname(source),
+                          os.path.basename(source))
     source = os.path.normpath(os.path.abspath(source))
     if os.path.isdir(source):
         all_group = all_group or MemGroup('all', source)
@@ -511,7 +512,7 @@ class Command(NoArgsCommand):
     )
 
     def init_logging(self):
-        log_levels = dict(enumerate([logging.ERROR, logging.INFO,
+        log_levels = dict(enumerate([logging.WARNING, logging.INFO,
                                      logging.DEBUG, 0]))
         self.logger = logging.getLogger('awx.main.commands.inventory_import')
         self.logger.setLevel(log_levels.get(self.verbosity, 0))
@@ -577,15 +578,24 @@ class Command(NoArgsCommand):
         # FIXME: Wait or raise error if inventory is being updated by another
         # source.
 
-    def load_into_database(self):
-        '''
-        Load inventory from in-memory groups to the database, overwriting or
-        merging as appropriate.
-        '''
+    def _batch_add_m2m(self, related_manager, *objs, **kwargs):
+        key = (related_manager.instance.pk, related_manager.through._meta.db_table)
+        flush = bool(kwargs.get('flush', False))
+        if not hasattr(self, '_batch_add_m2m_cache'):
+            self._batch_add_m2m_cache = {}
+        cached_objs = self._batch_add_m2m_cache.setdefault(key, [])
+        cached_objs.extend(objs)
+        if len(cached_objs) > 100 or flush:
+            if len(cached_objs):
+                related_manager.add(*cached_objs)
+            self._batch_add_m2m_cache[key] = []
 
-        # Find any hosts in the database without an instance_id set that may
-        # still have one available via host variables.
-        db_instance_id_map = {}
+    def _build_db_instance_id_map(self):
+        '''
+        Find any hosts in the database without an instance_id set that may
+        still have one available via host variables.
+        '''
+        self.db_instance_id_map = {}
         if self.instance_id_var:
             if self.inventory_source.group:
                 host_qs = self.inventory_source.group.all_hosts
@@ -597,11 +607,14 @@ class Command(NoArgsCommand):
                 instance_id = host.variables_dict.get(self.instance_id_var, '')
                 if not instance_id:
                     continue
-                db_instance_id_map[instance_id] = host.pk
+                self.db_instance_id_map[instance_id] = host.pk
 
-        # Update instance ID for each imported host and define a mapping of
-        # instance IDs to MemHost instances.
-        mem_instance_id_map = {}
+    def _build_mem_instance_id_map(self):
+        '''
+        Update instance ID for each imported host and define a mapping of
+        instance IDs to MemHost instances.
+        '''
+        self.mem_instance_id_map = {}
         if self.instance_id_var:
             for mem_host in self.all_group.all_hosts.values():
                 instance_id = mem_host.variables.get(self.instance_id_var, '')
@@ -610,80 +623,113 @@ class Command(NoArgsCommand):
                                         mem_host.name, self.instance_id_var)
                     continue
                 mem_host.instance_id = instance_id
-                mem_instance_id_map[instance_id] = mem_host.name
-            #self.logger.warning('%r', instance_id_map)
+                self.mem_instance_id_map[instance_id] = mem_host.name
 
-        # If overwrite is set, for each host in the database that is NOT in
-        # the local list, delete it. When importing from a cloud inventory
-        # source attached to a specific group, only delete hosts beneath that
-        # group.  Delete each host individually so signal handlers will run.
-        if self.overwrite:
-            if self.inventory_source.group:
-                del_hosts = self.inventory_source.group.all_hosts
-                # FIXME: Also include hosts from inventory_source.managed_hosts?
-            else:
-                del_hosts = self.inventory.hosts.filter(active=True)
-            instance_ids = set(mem_instance_id_map.keys())
-            host_pks = set([v for k,v in db_instance_id_map.items() if k in instance_ids])
-            host_names = set(mem_instance_id_map.values()) - set(self.all_group.all_hosts.keys())
+    def _delete_hosts(self):
+        '''
+        For each host in the database that is NOT in the local list, delete
+        it. When importing from a cloud inventory source attached to a
+        specific group, only delete hosts beneath that group.  Delete each
+        host individually so signal handlers will run.
+        '''
+        if settings.SQL_DEBUG:
+            queries_before = len(connection.queries)
+        if self.inventory_source.group:
+            del_hosts = self.inventory_source.group.all_hosts
+            # FIXME: Also include hosts from inventory_source.managed_hosts?
+        else:
+            del_hosts = self.inventory.hosts.filter(active=True)
+        if self.instance_id_var:
+            instance_ids = set(self.mem_instance_id_map.keys())
+            host_pks = set([v for k,v in self.db_instance_id_map.items() if k in instance_ids])
+            host_names = set(self.mem_instance_id_map.values()) - set(self.all_group.all_hosts.keys())
             del_hosts = del_hosts.exclude(Q(name__in=host_names) | Q(instance_id__in=instance_ids) | Q(pk__in=host_pks))
-            for host in del_hosts:
-                host_name = host.name
-                host.mark_inactive()
-                self.logger.info('Deleted host "%s"', host_name)
+        else:
+            del_hosts = del_hosts.exclude(name__in=self.all_group.all_hosts.keys())
+        for host in del_hosts:
+            host_name = host.name
+            host.mark_inactive()#from_inventory_import=True)
+            self.logger.info('Deleted host "%s"', host_name)
+        if settings.SQL_DEBUG:
+            self.logger.warning('host deletions took %d queries for %d hosts',
+                                len(connection.queries) - queries_before,
+                                del_hosts.count())
 
+    def _delete_groups(self):
+        '''
         # If overwrite is set, for each group in the database that is NOT in
         # the local list, delete it. When importing from a cloud inventory
         # source attached to a specific group, only delete children of that
         # group.  Delete each group individually so signal handlers will run.
-        if self.overwrite:
-            if self.inventory_source.group:
-                del_groups = self.inventory_source.group.all_children
-                # FIXME: Also include groups from inventory_source.managed_groups?
-            else:
-                del_groups = self.inventory.groups.filter(active=True)
-            group_names = set(self.all_group.all_groups.keys())
-            del_groups = del_groups.exclude(name__in=group_names)
-            for group in del_groups:
-                group_name = group.name
-                group.mark_inactive(recompute=False)
-                self.logger.info('Group "%s" deleted', group_name)
+        '''
+        if settings.SQL_DEBUG:
+            queries_before = len(connection.queries)
+        if self.inventory_source.group:
+            del_groups = self.inventory_source.group.all_children
+            # FIXME: Also include groups from inventory_source.managed_groups?
+        else:
+            del_groups = self.inventory.groups.filter(active=True)
+        group_names = set(self.all_group.all_groups.keys())
+        del_groups = del_groups.exclude(name__in=group_names)
+        for group in del_groups:
+            group_name = group.name
+            group.mark_inactive(recompute=False)#from_inventory_import=True)
+            self.logger.info('Group "%s" deleted', group_name)
+        if settings.SQL_DEBUG:
+            self.logger.warning('group deletions took %d queries for %d groups',
+                                len(connection.queries) - queries_before,
+                                del_groups.count())
 
-        # If overwrite is set, clear all invalid child relationships for groups
-        # and all invalid host memberships.  When importing from a cloud
-        # inventory source attached to a specific group, only clear
-        # relationships for hosts and groups that are beneath the inventory
-        # source group.
-        if self.overwrite:
-            if self.inventory_source.group:
-                db_groups = self.inventory_source.group.all_children
-            else:
-                db_groups = self.inventory.groups.filter(active=True)
-            for db_group in db_groups:
-                db_children = db_group.children.filter(active=True)
-                mem_children = self.all_group.all_groups[db_group.name].children
-                mem_children_names = [g.name for g in mem_children]
-                for db_child in db_children.exclude(name__in=mem_children_names):
-                    if db_child not in db_group.children.filter(active=True):
-                        continue
-                    db_group.children.remove(db_child)
-                    self.logger.info('Group "%s" removed from group "%s"',
-                                     db_child.name, db_group.name)
-                db_hosts = db_group.hosts.filter(active=True)
-                mem_hosts = self.all_group.all_groups[db_group.name].hosts
-                mem_host_names = set([h.name for h in mem_hosts if not h.instance_id])
-                mem_instance_ids = set([h.instance_id for h in mem_hosts if h.instance_id])
-                db_host_pks = set([v for k,v in db_instance_id_map.items() if k in mem_instance_ids])
-                for db_host in db_hosts.exclude(Q(name__in=mem_host_names) | Q(instance_id__in=mem_instance_ids) | Q(pk__in=db_host_pks)):
-                    if db_host not in db_group.hosts.filter(active=True):
-                        continue
-                    db_group.hosts.remove(db_host)
-                    self.logger.info('Host "%s" removed from group "%s"',
-                                     db_host.name, db_group.name)
+    def _delete_group_children_and_hosts(self):
+        '''
+        Clear all invalid child relationships for groups and all invalid host
+        memberships.  When importing from a cloud inventory source attached to
+        a specific group, only clear relationships for hosts and groups that
+        are beneath the inventory source group.
+        '''
+        # FIXME: Optimize performance!
+        if settings.SQL_DEBUG:
+            queries_before = len(connection.queries)
+        group_group_count = 0
+        group_host_count = 0
+        if self.inventory_source.group:
+            db_groups = self.inventory_source.group.all_children
+        else:
+            db_groups = self.inventory.groups.filter(active=True)
+        for db_group in db_groups:
+            db_children = db_group.children.filter(active=True)
+            mem_children = self.all_group.all_groups[db_group.name].children
+            mem_children_names = [g.name for g in mem_children]
+            for db_child in db_children.exclude(name__in=mem_children_names):
+                group_group_count += 1
+                if db_child not in db_group.children.filter(active=True):
+                    continue
+                db_group.children.remove(db_child)
+                self.logger.info('Group "%s" removed from group "%s"',
+                                 db_child.name, db_group.name)
+            db_hosts = db_group.hosts.filter(active=True)
+            mem_hosts = self.all_group.all_groups[db_group.name].hosts
+            mem_host_names = set([h.name for h in mem_hosts if not h.instance_id])
+            mem_instance_ids = set([h.instance_id for h in mem_hosts if h.instance_id])
+            db_host_pks = set([v for k,v in self.db_instance_id_map.items() if k in mem_instance_ids])
+            for db_host in db_hosts.exclude(Q(name__in=mem_host_names) | Q(instance_id__in=mem_instance_ids) | Q(pk__in=db_host_pks)):
+                group_host_count += 1
+                if db_host not in db_group.hosts.filter(active=True):
+                    continue
+                db_group.hosts.remove(db_host)
+                self.logger.info('Host "%s" removed from group "%s"',
+                                 db_host.name, db_group.name)
+        if settings.SQL_DEBUG:
+            self.logger.warning('group-group and group-host deletions took %d queries for %d relationships',
+                                len(connection.queries) - queries_before,
+                                group_group_count + group_host_count)
 
-        # Update/overwrite variables from "all" group.  If importing from a
-        # cloud source attached to a specific group, variables will be set on
-        # the base group, otherwise they will be set on the whole inventory.
+    def _update_inventory(self):
+        '''
+        Update/overwrite variables from "all" group.  If importing from a
+        cloud source attached to a specific group, variables will be set on
+        the base group, otherwise they will be set on the whole inventory.
+        '''
         if self.inventory_source.group:
             all_obj = self.inventory_source.group
             all_obj.inventory_sources.add(self.inventory_source)
@@ -706,151 +752,262 @@ class Command(NoArgsCommand):
         else:
             self.logger.info('%s variables unmodified', all_name.capitalize())
 
-        # FIXME: Attribute changes to superuser?
-
-        # For each group in the local list, create it if it doesn't exist in
-        # the database.  Otherwise, update/replace database variables from the
-        # imported data.  Associate with the inventory source group if
-        # importing from cloud inventory source.
-        for k,v in self.all_group.all_groups.iteritems():
-            variables = json.dumps(v.variables)
-            defaults = dict(variables=variables, description='imported')
-            group, created = self.inventory.groups.get_or_create(name=k,
-                                                                 defaults=defaults)
-            # Access auto one-to-one attribute to create related object.
-            group.inventory_source
-            if created:
-                self.logger.info('Group "%s" added', k)
+    def _create_update_groups(self):
+        '''
+        For each group in the local list, create it if it doesn't exist in the
+        database.  Otherwise, update/replace database variables from the
+        imported data.  Associate with the inventory source group if importing
+        from cloud inventory source.
+        '''
+        if settings.SQL_DEBUG:
+            queries_before = len(connection.queries)
+        inv_src_group = self.inventory_source.group
+        group_names = set(self.all_group.all_groups.keys())
+        for group in self.inventory.groups.filter(name__in=group_names):
+            mem_group = self.all_group.all_groups[group.name]
+            db_variables = group.variables_dict
+            if self.overwrite_vars or self.overwrite:
+                db_variables = mem_group.variables
             else:
-                db_variables = group.variables_dict
+                db_variables.update(mem_group.variables)
+            if db_variables != group.variables_dict:
+                group.variables = json.dumps(db_variables)
+                group.save(update_fields=['variables'])
                 if self.overwrite_vars or self.overwrite:
-                    db_variables = v.variables
+                    self.logger.info('Group "%s" variables replaced', group.name)
                 else:
-                    db_variables.update(v.variables)
-                if db_variables != group.variables_dict:
-                    group.variables = json.dumps(db_variables)
-                    group.save(update_fields=['variables'])
-                    if self.overwrite_vars or self.overwrite:
-                        self.logger.info('Group "%s" variables replaced', k)
-                    else:
-                        self.logger.info('Group "%s" variables updated', k)
-                else:
-                    self.logger.info('Group "%s" variables unmodified', k)
-            if self.inventory_source.group and self.inventory_source.group != group:
-                self.inventory_source.group.children.add(group)
-            group.inventory_sources.add(self.inventory_source)
+                    self.logger.info('Group "%s" variables updated', group.name)
+            else:
+                self.logger.info('Group "%s" variables unmodified', group.name)
+            group_names.remove(group.name)
+            if inv_src_group and inv_src_group != group:
+                self._batch_add_m2m(inv_src_group.children, group)
+            self._batch_add_m2m(self.inventory_source.groups, group)
+        for group_name in group_names:
+            mem_group = self.all_group.all_groups[group_name]
+            group = self.inventory.groups.create(name=group_name, variables=json.dumps(mem_group.variables), description='imported')
+            # Access auto one-to-one attribute to create related object.
+            #group.inventory_source
+            InventorySource.objects.create(group=group, inventory=self.inventory, name=('%s (%s)' % (group_name, self.inventory.name)))
+            self.logger.info('Group "%s" added', group.name)
+            if inv_src_group:
+                self._batch_add_m2m(inv_src_group.children, group)
+            self._batch_add_m2m(self.inventory_source.groups, group)
+        if inv_src_group:
+            self._batch_add_m2m(inv_src_group.children, flush=True)
+        self._batch_add_m2m(self.inventory_source.groups, flush=True)
+        if settings.SQL_DEBUG:
+            self.logger.warning('group updates took %d queries for %d groups',
+                                len(connection.queries) - queries_before,
+                                len(self.all_group.all_groups))
 
-        # For each host in the local list, create it if it doesn't exist in
-        # the database.  Otherwise, update/replace database variables from the
-        # imported data.  Associate with the inventory source group if
-        # importing from cloud inventory source.
+    def _update_db_host_from_mem_host(self, db_host, mem_host):
+        # Update host variables.
+        db_variables = db_host.variables_dict
+        if self.overwrite_vars or self.overwrite:
+            db_variables = mem_host.variables
+        else:
+            db_variables.update(mem_host.variables)
+        update_fields = []
+        if db_variables != db_host.variables_dict:
+            db_host.variables = json.dumps(db_variables)
+            update_fields.append('variables')
+        # Update host enabled flag.
+        enabled = None
+        if self.enabled_var and self.enabled_var in mem_host.variables:
+            value = mem_host.variables[self.enabled_var]
+            if self.enabled_value is not None:
+                enabled = bool(unicode(self.enabled_value) == unicode(value))
+            else:
+                enabled = bool(value)
+        if enabled is not None and db_host.enabled != enabled:
+            db_host.enabled = enabled
+            update_fields.append('enabled')
+        # Update host name.
+        if mem_host.name != db_host.name:
+            old_name = db_host.name
+            db_host.name = mem_host.name
+            update_fields.append('name')
+        # Update host instance_id.
+        if self.instance_id_var:
+            instance_id = mem_host.variables.get(self.instance_id_var, '')
+        else:
+            instance_id = ''
+        if instance_id != db_host.instance_id:
+            old_instance_id = db_host.instance_id
+            db_host.instance_id = instance_id
+            update_fields.append('instance_id')
+        # Update host and display message(s) on what changed.
+        if update_fields:
+            db_host.save(update_fields=update_fields)
+        if 'name' in update_fields:
+            self.logger.info('Host renamed from "%s" to "%s"', old_name, mem_host.name)
+        if 'instance_id' in update_fields:
+            if old_instance_id:
+                self.logger.info('Host "%s" instance_id updated', mem_host.name)
+            else:
+                self.logger.info('Host "%s" instance_id added', mem_host.name)
+        if 'variables' in update_fields:
+            if self.overwrite_vars or self.overwrite:
+                self.logger.info('Host "%s" variables replaced', mem_host.name)
+            else:
+                self.logger.info('Host "%s" variables updated', mem_host.name)
+        else:
+            self.logger.info('Host "%s" variables unmodified', mem_host.name)
+        if 'enabled' in update_fields:
+            if enabled:
+                self.logger.info('Host "%s" is now enabled', mem_host.name)
+            else:
+                self.logger.info('Host "%s" is now disabled', mem_host.name)
+        if self.inventory_source.group:
+            self._batch_add_m2m(self.inventory_source.group.hosts, db_host)
+        self._batch_add_m2m(self.inventory_source.hosts, db_host)
+        #host.update_computed_fields(False, False)
+
+    def _create_update_hosts(self):
+        '''
+        For each host in the local list, create it if it doesn't exist in the
+        database.  Otherwise, update/replace database variables from the
+        imported data.  Associate with the inventory source group if importing
+        from cloud inventory source.
+        '''
+        if settings.SQL_DEBUG:
+            queries_before = len(connection.queries)
+        host_pks_updated = set()
+        mem_host_pk_map = {}
+        mem_host_instance_id_map = {}
+        mem_host_name_map = {}
+        mem_host_names_to_update = set(self.all_group.all_hosts.keys())
         for k,v in self.all_group.all_hosts.iteritems():
-            variables = json.dumps(v.variables)
-            defaults = dict(variables=variables, name=k, description='imported')
+            instance_id = ''
+            if self.instance_id_var:
+                instance_id = v.variables.get(self.instance_id_var, '')
+            if instance_id in self.db_instance_id_map:
+                mem_host_pk_map[self.db_instance_id_map[instance_id]] = v
+            elif instance_id:
+                mem_host_instance_id_map[instance_id] = v
+            else:
+                mem_host_name_map[k] = v
+
+        # Update all existing hosts where we know the PK based on instance_id.
+        for db_host in self.inventory.hosts.filter(active=True, pk__in=mem_host_pk_map.keys()):
+            mem_host = mem_host_pk_map[db_host.pk]
+            self._update_db_host_from_mem_host(db_host, mem_host)
+            host_pks_updated.add(db_host.pk)
+            mem_host_names_to_update.discard(mem_host.name)
+
+        # Update all existing hosts where we know the instance_id.
+        for db_host in self.inventory.hosts.filter(active=True, instance_id__in=mem_host_instance_id_map.keys()).exclude(pk__in=host_pks_updated):
+            mem_host = mem_host_instance_id_map[db_host.instance_id]
+            self._update_db_host_from_mem_host(db_host, mem_host)
+            host_pks_updated.add(db_host.pk)
+            mem_host_names_to_update.discard(mem_host.name)
+
+        # Update all existing hosts by name.
+        for db_host in self.inventory.hosts.filter(active=True, name__in=mem_host_name_map.keys()).exclude(pk__in=host_pks_updated):
+            mem_host = mem_host_name_map[db_host.name]
+            self._update_db_host_from_mem_host(db_host, mem_host)
+            host_pks_updated.add(db_host.pk)
+            mem_host_names_to_update.discard(mem_host.name)
+
+        # Create any new hosts.
+        for mem_host_name in mem_host_names_to_update:
+            mem_host = self.all_group.all_hosts[mem_host_name]
+            host_attrs = dict(variables=json.dumps(mem_host.variables),
+                              name=mem_host_name, description='imported')
             enabled = None
-            if self.enabled_var and self.enabled_var in v.variables:
-                value = v.variables[self.enabled_var]
+            if self.enabled_var and self.enabled_var in mem_host.variables:
+                value = mem_host.variables[self.enabled_var]
                 if self.enabled_value is not None:
                     enabled = bool(unicode(self.enabled_value) == unicode(value))
                 else:
                     enabled = bool(value)
-                defaults['enabled'] = enabled
-            instance_id = ''
+                host_attrs['enabled'] = enabled
             if self.instance_id_var:
-                instance_id = v.variables.get(self.instance_id_var, '')
-                defaults['instance_id'] = instance_id
-            if instance_id in db_instance_id_map:
-                attrs = {'pk': db_instance_id_map[instance_id]}
-            elif instance_id:
-                attrs = {'instance_id': instance_id}
-                defaults.pop('instance_id')
+                instance_id = mem_host.variables.get(self.instance_id_var, '')
+                host_attrs['instance_id'] = instance_id
+            db_host = self.inventory.hosts.create(**host_attrs)
+            if enabled is False:
+                self.logger.info('Host "%s" added (disabled)', mem_host_name)
             else:
-                attrs = {'name': k}
-                defaults.pop('name')
-            attrs['defaults'] = defaults
-            host, created = self.inventory.hosts.get_or_create(**attrs)
-            if created:
-                if enabled is False:
-                    self.logger.info('Host "%s" added (disabled)', k)
-                else:
-                    self.logger.info('Host "%s" added', k)
-                #self.logger.info('Host variables: %s', variables)
-            else:
-                db_variables = host.variables_dict
-                if self.overwrite_vars or self.overwrite:
-                    db_variables = v.variables
-                else:
-                    db_variables.update(v.variables)
-                update_fields = []
-                if db_variables != host.variables_dict:
-                    host.variables = json.dumps(db_variables)
-                    update_fields.append('variables')
-                if enabled is not None and host.enabled != enabled:
-                    host.enabled = enabled
-                    update_fields.append('enabled')
-                if k != host.name:
-                    old_name = host.name
-                    host.name = k
-                    update_fields.append('name')
-                if instance_id != host.instance_id:
-                    old_instance_id = host.instance_id
-                    host.instance_id = instance_id
-                    update_fields.append('instance_id')
-                if update_fields:
-                    host.save(update_fields=update_fields)
-                if 'name' in update_fields:
-                    self.logger.info('Host renamed from "%s" to "%s"', old_name, k)
-                if 'instance_id' in update_fields:
-                    if old_instance_id:
-                        self.logger.info('Host "%s" instance_id updated', k)
-                    else:
-                        self.logger.info('Host "%s" instance_id added', k)
-                if 'variables' in update_fields:
-                    if self.overwrite_vars or self.overwrite:
-                        self.logger.info('Host "%s" variables replaced', k)
-                    else:
-                        self.logger.info('Host "%s" variables updated', k)
-                else:
-                    self.logger.info('Host "%s" variables unmodified', k)
-                if 'enabled' in update_fields:
-                    if enabled:
-                        self.logger.info('Host "%s" is now enabled', k)
-                    else:
-                        self.logger.info('Host "%s" is now disabled', k)
+                self.logger.info('Host "%s" added', mem_host_name)
             if self.inventory_source.group:
-                self.inventory_source.group.hosts.add(host)
-            host.inventory_sources.add(self.inventory_source)
-            host.update_computed_fields(False, False)
+                self._batch_add_m2m(self.inventory_source.group.hosts, db_host)
+            self._batch_add_m2m(self.inventory_source.hosts, db_host)
+            #host.update_computed_fields(False, False)
 
+        if self.inventory_source.group:
+            self._batch_add_m2m(self.inventory_source.group.hosts, flush=True)
+        self._batch_add_m2m(self.inventory_source.hosts, flush=True)
+
+        if settings.SQL_DEBUG:
+            self.logger.warning('host updates took %d queries for %d hosts',
+                                len(connection.queries) - queries_before,
+                                len(self.all_group.all_hosts))
+
+    def _create_update_group_children(self):
+        '''
+        For each imported group, create all parent-child group relationships.
+        '''
+        if settings.SQL_DEBUG:
+            queries_before = len(connection.queries)
+        group_names = [k for k,v in self.all_group.all_groups.iteritems() if v.children]
+        group_group_count = 0
+        for db_group in self.inventory.groups.filter(name__in=group_names):
+            mem_group = self.all_group.all_groups[db_group.name]
+            group_group_count += len(mem_group.children)
+            child_names = set([g.name for g in mem_group.children])
+            db_children_qs = self.inventory.groups.filter(name__in=child_names)
+            for db_child in db_children_qs.filter(children__id=db_group.id):
+                self.logger.info('Group "%s" already child of group "%s"', db_child.name, db_group.name)
+            for db_child in db_children_qs.exclude(children__id=db_group.id):
+                self._batch_add_m2m(db_group.children, db_child)
+                self.logger.info('Group "%s" added as child of "%s"', db_child.name, db_group.name)
+            self._batch_add_m2m(db_group.children, flush=True)
+        if settings.SQL_DEBUG:
+            self.logger.warning('Group-group updates took %d queries for %d group-group relationships',
+                                len(connection.queries) - queries_before, group_group_count)
+
+    def _create_update_group_hosts(self):
         # For each host in a mem group, add it to the parent(s) to which it
         # belongs.
-        for k,v in self.all_group.all_groups.iteritems():
-            if not v.hosts:
-                continue
-            db_group = self.inventory.groups.get(name=k)
-            for h in v.hosts:
-                if h.instance_id:
-                    db_host = self.inventory.hosts.get(instance_id=h.instance_id)
-                else:
-                    db_host = self.inventory.hosts.get(name=h.name)
-                if db_host not in db_group.hosts.all():
-                    db_group.hosts.add(db_host)
-                    self.logger.info('Host "%s" added to group "%s"', h.name, k)
-                else:
-                    self.logger.info('Host "%s" already in group "%s"', h.name, k)
-  
-        # for each group, draw in child group arrangements
-        for k,v in self.all_group.all_groups.iteritems():
-            if not v.children:
-                continue
-            db_group = self.inventory.groups.get(name=k)
-            for g in v.children:
-                db_child = self.inventory.groups.get(name=g.name)
-                if db_child not in db_group.hosts.all():
-                    db_group.children.add(db_child)
-                    self.logger.info('Group "%s" added as child of "%s"', g.name, k)
-                else:
-                    self.logger.info('Group "%s" already child of group "%s"', g.name, k)
+        if settings.SQL_DEBUG:
+            queries_before = len(connection.queries)
+        group_names = [k for k,v in self.all_group.all_groups.iteritems() if v.hosts]
+        group_host_count = 0
+        for db_group in self.inventory.groups.filter(name__in=group_names):
+            mem_group = self.all_group.all_groups[db_group.name]
+            group_host_count += len(mem_group.hosts)
+            host_names = set([h.name for h in mem_group.hosts if not h.instance_id])
+            host_instance_ids = set([h.instance_id for h in mem_group.hosts if h.instance_id])
+            db_hosts_qs = self.inventory.hosts.filter(Q(name__in=host_names) | Q(instance_id__in=host_instance_ids))
+            for db_host in db_hosts_qs.filter(groups__id=db_group.id):
+                self.logger.info('Host "%s" already in group "%s"', db_host.name, db_group.name)
+            for db_host in db_hosts_qs.exclude(groups__id=db_group.id):
+                self._batch_add_m2m(db_group.hosts, db_host)
+                self.logger.info('Host "%s" added to group "%s"', db_host.name, db_group.name)
+            self._batch_add_m2m(db_group.hosts, flush=True)
+        if settings.SQL_DEBUG:
+            self.logger.warning('Group-host updates took %d queries for %d group-host relationships',
+                                len(connection.queries) - queries_before, group_host_count)
+
+    def load_into_database(self):
+        '''
+        Load inventory from in-memory groups to the database, overwriting or
+        merging as appropriate.
+        '''
+        # FIXME: Attribute changes to superuser?
+        self._build_db_instance_id_map()
+        self._build_mem_instance_id_map()
+        if self.overwrite:
+            self._delete_hosts()
+            self._delete_groups()
+            self._delete_group_children_and_hosts()
+        self._update_inventory()
+        self._create_update_groups()
+        self._create_update_hosts()
+        self._create_update_group_children()
+        self._create_update_group_hosts()
 
     def check_license(self):
         reader = LicenseReader()
@@ -914,6 +1071,9 @@ class Command(NoArgsCommand):
 
         status, tb, exc = 'error', '', None
         try:
+            if settings.SQL_DEBUG:
+                queries_before = len(connection.queries)
+
             # Update inventory update for this command line invocation.
             with ignore_inventory_computed_fields():
                 if self.inventory_update:
@@ -935,7 +1095,12 @@ class Command(NoArgsCommand):
                 else:
                     with disable_activity_stream():
                         self.load_into_database()
+                if settings.SQL_DEBUG:
+                    queries_before2 = len(connection.queries)
                 self.inventory.update_computed_fields()
+                if settings.SQL_DEBUG:
+                    self.logger.warning('update computed fields took %d queries',
+                                        len(connection.queries) - queries_before2)
             self.check_license()
  
             if self.inventory_source.group:
@@ -943,13 +1108,18 @@ class Command(NoArgsCommand):
             else:
                 inv_name = '"%s" (id=%s)' % (self.inventory.name,
                                              self.inventory.id)
-            self.logger.info('Inventory import completed for %s in %0.1fs',
-                             inv_name, time.time() - begin)
+            if settings.SQL_DEBUG:
+                self.logger.warning('Inventory import completed for %s in %0.1fs',
+                                    inv_name, time.time() - begin)
+            else:
+                self.logger.info('Inventory import completed for %s in %0.1fs',
+                                 inv_name, time.time() - begin)
             status = 'successful'
-            if settings.DEBUG:
-                sqltime = sum(float(x['time']) for x in connection.queries)
-                self.logger.info('Inventory import required %d queries '
-                                 'taking %0.3fs', len(connection.queries),
+            if settings.SQL_DEBUG:
+                queries_this_import = connection.queries[queries_before:]
+                sqltime = sum(float(x['time']) for x in queries_this_import)
+                self.logger.warning('Inventory import required %d queries '
+                                 'taking %0.3fs', len(queries_this_import),
                                  sqltime)
         except Exception, e:
             if isinstance(e, KeyboardInterrupt):
