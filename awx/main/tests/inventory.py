@@ -887,6 +887,115 @@ class InventoryTest(BaseTest):
         self.assertFalse(g_c.children.all())
         self.assertFalse(g_c.hosts.all())
 
+    def test_safe_delete_recursion(self):
+        # First hierarchy
+        top_group = self.inventory_a.groups.create(name='Top1')
+        sub_group = self.inventory_a.groups.create(name='Sub1')
+        low_group = self.inventory_a.groups.create(name='Low1')
+
+        # Second hierarchy
+        other_top_group = self.inventory_a.groups.create(name='Top2')
+        other_sub_group = self.inventory_a.groups.create(name='Sub2')
+        other_low_group = self.inventory_a.groups.create(name='Low2')
+
+        # Third hierarchy
+        third_top_group = self.inventory_a.groups.create(name='Top3')
+        third_sub_group = self.inventory_a.groups.create(name='Sub3')
+        third_low_group = self.inventory_a.groups.create(name='Low3')
+
+        sub_group.parents.add(top_group)
+        low_group.parents.add(sub_group)
+
+        other_sub_group.parents.add(other_top_group)
+        other_low_group.parents.add(other_sub_group)
+
+        third_sub_group.parents.add(third_top_group)
+        third_low_group.parents.add(third_sub_group)
+
+        t1 = self.inventory_a.hosts.create(name='t1')
+        t1.groups.add(top_group)
+        s1 = self.inventory_a.hosts.create(name='s1')
+        s1.groups.add(sub_group)
+        l1 = self.inventory_a.hosts.create(name='l1')
+        l1.groups.add(low_group)
+
+        t2 = self.inventory_a.hosts.create(name='t2')
+        t2.groups.add(other_top_group)
+        s2 = self.inventory_a.hosts.create(name='s2')
+        s2.groups.add(other_sub_group)
+        l2 = self.inventory_a.hosts.create(name='l2')
+        l2.groups.add(other_low_group)
+
+        t3 = self.inventory_a.hosts.create(name='t3')
+        t3.groups.add(third_top_group)
+        s3 = self.inventory_a.hosts.create(name='s3')
+        s3.groups.add(third_sub_group)
+        l3 = self.inventory_a.hosts.create(name='l3')
+        l3.groups.add(third_low_group)
+
+        # Copy second hierarchy subgroup under the first hierarchy subgroup
+        other_sub_group.parents.add(sub_group)
+        self.assertTrue(s2 in sub_group.all_hosts.all())
+        self.assertTrue(other_sub_group in sub_group.children.all())
+
+        # Now recursively remove it, the references in other_top_group should remain
+        other_sub_group.mark_inactive_recursive(parent=sub_group)
+        self.assertFalse(s2 in sub_group.all_hosts.all())
+        self.assertFalse(other_sub_group in sub_group.children.all())
+        self.assertTrue(s2 in other_top_group.all_hosts.all())
+        self.assertTrue(other_sub_group in other_top_group.children.all())
+
+        # Recursively remove the third hierarchy which has no links to others so should go inactive
+        third_top_group.mark_inactive_recursive(parent=None)
+        third_low_group = Group.objects.get(pk=third_low_group.pk)
+        third_sub_group = Group.objects.get(pk=third_sub_group.pk)
+        third_top_group = Group.objects.get(pk=third_top_group.pk)
+        t3 = Host.objects.get(pk=t3.pk)
+        s3 = Host.objects.get(pk=s3.pk)
+        l3 = Host.objects.get(pk=l3.pk)
+        self.assertFalse(third_low_group.active)
+        self.assertFalse(third_sub_group.active)
+        self.assertFalse(third_top_group.active)
+        self.assertFalse(l3.active)
+        self.assertFalse(s3.active)
+        self.assertFalse(t3.active)
+
+        # Add second hierarchy low group under the first hierarchy subgroup
+        other_low_group.parents.add(sub_group)
+
+        # Try to remove it with a regular user
+        with self.current_user(self.other_django_user):
+            url = reverse('api:group_children_remove', args=(sub_group.pk, other_low_group.pk))
+            self.delete(url, expect=403)
+
+        # Try to remove it with the admin user
+        with self.current_user(self.normal_django_user):
+            url = reverse('api:group_children_remove', args=(sub_group.pk, other_low_group.pk))
+            self.delete(url, expect=200)
+
+        # Admin user should have removed the reference
+        self.assertFalse(l2 in sub_group.all_hosts.all())
+        self.assertFalse(other_low_group in sub_group.children.all())
+
+        # Add the second hierarchy low group under the first hierarchy subgroup again
+        other_low_group.parents.add(sub_group)
+
+        with self.current_user(self.normal_django_user):
+            url = reverse('api:inventory_root_group_remove', args=(self.inventory_a.pk, other_top_group.pk,))
+            self.delete(url, expect=200)
+
+        # Entire hierarchy except for the low group should be gone
+        t2 = Host.objects.get(pk=t2.pk)
+        s2 = Host.objects.get(pk=s2.pk)
+        l2 = Host.objects.get(pk=l2.pk)
+        other_top_group = Group.objects.get(pk=other_top_group.pk)
+        other_sub_group = Group.objects.get(pk=other_sub_group.pk)
+        other_low_group = Group.objects.get(pk=other_low_group.pk)
+        self.assertFalse(t2.active or s2.active)
+        self.assertFalse(other_top_group.active or other_sub_group.active)
+        self.assertTrue(l2.active)
+        self.assertTrue(other_low_group.active)
+
     def test_group_parents_and_children(self):
         # Test for various levels of group parent/child relations, with hosts,
         # to verify that helper properties return the correct querysets.
@@ -1408,3 +1517,4 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # Verify that main group is in top level groups (hasn't been added as
         # its own child).
         self.assertTrue(self.group in self.inventory.root_groups)
+

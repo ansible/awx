@@ -386,6 +386,9 @@ class HostAccess(BaseAccess):
             raise ParseError('Cannot associate two items from different inventories')
         return True
 
+    def can_delete(self, obj):
+        return obj and self.user.can_access(Inventory, 'delete', obj.inventory)
+
 class GroupAccess(BaseAccess):
     '''
     I can see groups whenever I can see their inventory.
@@ -438,6 +441,10 @@ class GroupAccess(BaseAccess):
             if parent_pks & child_pks:
                 return False
         return True
+
+    def can_delete(self, obj):
+        return obj and self.user.can_access(Inventory, 'delete', obj.inventory)
+
 
 class InventorySourceAccess(BaseAccess):
     '''
