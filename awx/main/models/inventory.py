@@ -202,12 +202,15 @@ class Inventory(CommonModel):
         for host_pk in hosts_to_clear.values_list('pk', flat=True):
             host_updates = hosts_to_updates.setdefault(host_pk, {})
             host_updates['has_inventory_sources'] = False
-        # Now apply updates to hosts where needed.
-        for host in hosts_qs.filter(pk__in=hosts_to_update.keys()):
-            host_updates = hosts_to_update[host.pk]
-            for field, value in host_updates.items():
-                setattr(host, field, value)
-            host.save(update_fields=host_updates.keys())
+        # Now apply updates to hosts where needed (in batches).
+        all_update_pks = hosts_to_update.keys()
+        for offset in xrange(0, len(all_update_pks), 500):
+            update_pks = all_update_pks[offset:(offset + 500)]
+            for host in hosts_qs.filter(pk__in=update_pks):
+                host_updates = hosts_to_update[host.pk]
+                for field, value in host_updates.items():
+                    setattr(host, field, value)
+                host.save(update_fields=host_updates.keys())
 
     def update_group_computed_fields(self):
         '''
@@ -264,16 +267,19 @@ class Inventory(CommonModel):
             if group_updates['has_active_failures']:
                 failed_group_pks.add(group_pk)
 
-        # Now apply updates to each group as needed.
-        for group in self.groups.filter(pk__in=groups_to_update.keys()):
-            group_updates = groups_to_update[group.pk]
-            for field, value in group_updates.items():
-                if getattr(group, field) != value:
-                    setattr(group, field, value)
-                else:
-                    group_updates.pop(field)
-            if group_updates:
-                group.save(update_fields=group_updates.keys())
+        # Now apply updates to each group as needed (in batches).
+        all_update_pks = groups_to_update.keys()
+        for offset in xrange(0, len(all_update_pks), 500):
+            update_pks = all_update_pks[offset:(offset + 500)]
+            for group in self.groups.filter(pk__in=update_pks):
+                group_updates = groups_to_update[group.pk]
+                for field, value in group_updates.items():
+                    if getattr(group, field) != value:
+                        setattr(group, field, value)
+                    else:
+                        group_updates.pop(field)
+                if group_updates:
+                    group.save(update_fields=group_updates.keys())
 
     def update_computed_fields(self, update_groups=True, update_hosts=True):
         '''
