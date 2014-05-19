@@ -224,14 +224,14 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
 # Memcached django cache configuration
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-        'TIMEOUT': 864000,
-        'KEY_PREFIX': 'tower_dev',
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+#         'LOCATION': '127.0.0.1:11211',
+#         'TIMEOUT': 864000,
+#         'KEY_PREFIX': 'tower_dev',
+#     }
+# }
 
 # Use Django-Debug-Toolbar if installed.
 try:
