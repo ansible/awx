@@ -397,7 +397,6 @@ class Host(CommonModelNameNotUnique):
         super(Host, self).mark_inactive(save=save)
         if not from_inventory_import:
             self.inventory_sources.clear()
-            self.clear_cached_values()
 
     def update_computed_fields(self, update_inventory=True, update_groups=True):
         '''
@@ -429,7 +428,6 @@ class Host(CommonModelNameNotUnique):
         #     self.inventory.update_computed_fields(update_groups=False,
         #                                           update_hosts=False)
         # Rebuild summary fields cache
-        self.update_cached_values()
     variables_dict = VarsDictProperty('variables')
 
     @property
