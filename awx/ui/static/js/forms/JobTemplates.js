@@ -217,7 +217,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
                 dataPlacement: 'right',
                 dataContainer: "body"
             },
-            vars_prompt_on_launch: {
+             ask_variables_on_launch: {
                 label: 'Prompt for Extra Variables',
                 type: 'checkbox',
                 addRequired: false,

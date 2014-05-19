@@ -653,6 +653,11 @@ function JobDetailController ($scope, $compile, $routeParams, ClearScope, Breadc
             SelectPlay({ scope: scope, id: scope.activePlay });
         }, 2000);
     };
+
+    scope.viewEvent = function(event_id) {
+           
+    }
+    
 }
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',

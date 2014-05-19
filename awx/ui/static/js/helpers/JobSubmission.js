@@ -400,12 +400,12 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 Rest.post(job_template).success(function (data) {
                     new_job_id = data.id;
                     launch_url = data.related.start;
-                    prompt_for_vars = data.vars_prompt_on_launch;
+                    prompt_for_vars = data.ask_variables_on_launch;
                     new_job = data;
                     if (data.passwords_needed_to_start.length > 0) {
                         scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
                     }
-                    else if (data.vars_prompt_on_launch) {
+                    else if (data.ask_variables_on_launch) {
                         scope.$emit('PromptForVars');
                     }
                     else {

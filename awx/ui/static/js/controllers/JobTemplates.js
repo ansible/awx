@@ -614,6 +614,9 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 }
 
                 $scope.url = data.url;
+
+                $scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? 'true' : 'false';
+                master.ask_variables_on_launch = $scope.ask_variables_on_launch;
                 
                 relatedSets = form.relatedSets(data.related);
                 
