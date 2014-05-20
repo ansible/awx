@@ -1028,13 +1028,30 @@ class InventoryTreeView(RetrieveAPIView):
     filter_backends = ()
     new_in_13 = True
 
+    def _populate_group_children(self, group_data, all_group_data_map, group_children_map):
+        if 'children' in group_data:
+            return
+        group_data['children'] = []
+        for child_id in group_children_map.get(group_data['id'], set()):
+            group_data['children'].append(all_group_data_map[child_id])
+        group_data['children'].sort(key=lambda x: x['name'])
+        for child_data in group_data['children']:
+            self._populate_group_children(child_data, all_group_data_map, group_children_map)
+
     def retrieve(self, request, *args, **kwargs):
         inventory = self.get_object()
-        groups_qs = inventory.root_groups.filter(active=True)
+        group_children_map = inventory.get_group_children_map(active=True)
+        root_group_pks = inventory.root_groups.filter(active=True).order_by('name').values_list('pk', flat=True)
+        groups_qs = inventory.groups.filter(active=True)
         groups_qs = groups_qs.select_related('inventory')
         groups_qs = groups_qs.prefetch_related('inventory_source')
-        data = GroupTreeSerializer(groups_qs, many=True).data
-        return Response(data)
+        all_group_data = GroupSerializer(groups_qs, many=True).data
+        all_group_data_map = dict((x['id'], x) for x in all_group_data)
+        tree_data = [all_group_data_map[x] for x in root_group_pks]
+        for group_data in tree_data:
+            self._populate_group_children(group_data, all_group_data_map,
+                                          group_children_map)
+        return Response(tree_data)
 
     def get_description_context(self):
         d = super(InventoryTreeView, self).get_description_context()
