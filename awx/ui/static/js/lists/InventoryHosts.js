@@ -50,8 +50,9 @@ angular.module('InventoryHostsDefinition', [])
         },
 
         fieldActions: {
-            
+
             columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-3',
+            label: false,
 
             enabled_flag: {
                 iconClass: "{{ 'fa icon-enabled-' + host.enabled }}",

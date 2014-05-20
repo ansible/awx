@@ -475,11 +475,12 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                 }
                 if (options.mode === 'select' || options.mode === 'lookup') {
                     html += "<th>Select</th>";
-                } else if (options.mode === 'edit' && list.fieldActions &&
-                    (list.fieldActions.label === undefined || list.fieldActions.label)) {
+                } else if (options.mode === 'edit' && list.fieldActions) {
                     html += "<th class=\"actions-column";
                     html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : "";
-                    html += "\">Actions</th>\n";
+                    html += "\">";
+                    html += (list.fieldActions.label === undefined || list.fieldActions.label) ? "Actions" : "";
+                    html += "</th>\n";
                 }
                 html += "</tr>\n";
                 html += "</thead>\n";

@@ -21,7 +21,7 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
     };
 }])
 
-.factory('SetGroupContainerHeight', [ 'GetGroupContainerHeight', function(GetGroupContainerHeight) {
+.factory('SetContainerHeights', [ 'GetGroupContainerHeight', function(GetGroupContainerHeight) {
     return function() {
         var height;
         if ($(window).width() > 1210) {
@@ -32,13 +32,15 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
             $('#groups-container .list-table-container').height('auto');
         }
         $('#groups-container .list-table-container').mCustomScrollbar("update");
+        $('#hosts-container .well').height( $('#groups-container').height() - 39 );
     };
 }])
-.factory('WatchInventoryWindowResize', ['ApplyEllipsis', 'SetGroupContainerHeight',
-    function (ApplyEllipsis, SetGroupContainerHeight) {
+
+.factory('WatchInventoryWindowResize', ['ApplyEllipsis', 'SetContainerHeights',
+    function (ApplyEllipsis, SetContainerHeights) {
         return function () {
             // Call to set or restore window resize
-            SetGroupContainerHeight();
+            SetContainerHeights();
             $(window).resize(_.debounce(function() {
                 // Hack to stop group-name div slipping to a new line
                 $('#groups_table .name-column').each(function () {
@@ -51,7 +53,7 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                 });
                 ApplyEllipsis('#groups_table .group-name a');
                 ApplyEllipsis('#hosts_table .host-name a');
-                SetGroupContainerHeight();
+                SetContainerHeights();
             }, 500));
         };
     }
