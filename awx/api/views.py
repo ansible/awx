@@ -797,8 +797,31 @@ class GroupChildrenRemove(DestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         parent_group = self.get_object()
         group = Group.objects.get(id=kwargs['subgroup_pk'])
+        if group not in parent_group.children:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         group.mark_inactive_recursive(parent_group)
-        return Response()        
+        return Response()
+
+    def post(self, request, *args, **kwargs):
+        if not isinstance(request.DATA, dict):
+            return Response('invalid type for post data',
+                            status=status.HTTP_400_BAD_REQUEST)
+        if 'disassociate' in request.DATA:
+            parent_group = self.get_object()
+            group = Group.objects.get(id=kwargs['subgroup_pk'])
+            if group not in parent_group.children.all():
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            parent_group.children.remove(group)
+            for host in group.hosts.all():
+                parent_group.hosts.add(host)
+            for subgroup in group.children.all():
+                parent_group.children.add(subgroup)
+            if group.parents.count() < 1:
+                group.mark_inactive()
+            return Response()
+        else:
+            return Response()
+
 
 class GroupPotentialChildrenList(SubListAPIView):
 
