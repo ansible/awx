@@ -797,7 +797,7 @@ class GroupChildrenRemove(DestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         parent_group = self.get_object()
         group = Group.objects.get(id=kwargs['subgroup_pk'])
-        if group not in parent_group.children:
+        if group not in parent_group.children.all():
             return Response(status=status.HTTP_404_NOT_FOUND)
         group.mark_inactive_recursive(parent_group)
         return Response()
