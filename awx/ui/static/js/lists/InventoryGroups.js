@@ -17,6 +17,7 @@ angular.module('InventoryGroupsDefinition', [])
         hasChildren: true,
         filterBy: '{ show: true }',
         'class': 'table-no-border',
+        awCustomScroll: true,
 
         fields: {
             name: {
@@ -64,6 +65,7 @@ angular.module('InventoryGroupsDefinition', [])
         fieldActions: {
 
             columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-3',
+            label: false,
 
             sync_status: {
                 mode: 'all',

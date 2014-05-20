@@ -7,15 +7,15 @@
  *  Controller functions for the Inventory model.
  *
  */
- 
+
 'use strict';
 
 function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $compile, $filter, Rest, Alert, InventoryList, GenerateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
     EditInventoryProperties, Find, Empty, LogViewer) {
-    
+
     //ClearScope();
-  
+
     var list = InventoryList,
         defaultUrl = GetBasePath('inventory'),
         view = GenerateList,
@@ -60,7 +60,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
         list: list,
         url: defaultUrl
     });
-    
+
     PaginateInit({
         scope: $scope,
         list: list,
@@ -168,7 +168,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
         $scope.removeHostSummaryReady();
     }
     $scope.removeHostSummaryReady = $scope.$on('HostSummaryReady', function(e, event, data) {
-        
+
         var html, title = "Recent Jobs";
         Wait('stop');
         if (data.count > 0) {
@@ -182,7 +182,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
             html += "</tr>\n";
             html += "</thead>\n";
             html += "<tbody>\n";
-            
+
             data.results.forEach(function(row) {
                 html += "<tr>\n";
                 html += "<td><a ng-click=\"viewJob('" + row.url + "')\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
@@ -210,7 +210,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
     }
     $scope.removeGroupSummaryReady = $scope.$on('GroupSummaryReady', function(e, event, inventory, data) {
         var html, title;
-        
+
         Wait('stop');
 
         // Build the html for our popover
@@ -367,7 +367,7 @@ InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeP
 function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, OrganizationList, SearchInit, PaginateInit,
     LookUpInit, GetBasePath, ParseTypeChange, Wait) {
-    
+
     ClearScope();
 
     // Inject dynamic view
@@ -380,10 +380,10 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routePar
     form.formFieldSize = null;
 
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
-    
+
     generator.reset();
     LoadBreadCrumbs();
-    
+
     $scope.inventoryParseType = 'yaml';
     ParseTypeChange({ scope: $scope, variable: 'inventory_variables', parse_variable: 'inventoryParseType',
         field_id: 'inventory_inventory_variables' });
@@ -476,7 +476,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
     InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find, EditInventoryProperties, HostsEdit,
     HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost, Stream, GetBasePath, ShowJobSummary, ApplyEllipsis, WatchInventoryWindowResize,
     HelpDialog, InventoryGroupsHelp, Store, ViewJob) {
-    
+
     ClearScope();
 
     var generator = GenerateList,
@@ -709,7 +709,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
         var group = Find({ list: $scope.groups, key: 'id', val: id });
         if (group) {
             if (Empty(group.source)) {
-                // if no source, do nothing. 
+                // if no source, do nothing.
             } else if (group.status === 'updating') {
                 Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
                     group.name + '</em>. Use the Refresh button to monitor the status.', 'alert-info');

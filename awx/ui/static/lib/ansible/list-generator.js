@@ -63,15 +63,15 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                 } else {
                     element = angular.element(document.getElementById('htmlTemplate'));
                 }
-                
+
                 this.setOptions(options);
                 this.setList(list);
                 element.html(this.build(options)); // Inject the html
-                
+
                 if (options.prepend) {
                     element.prepend(options.prepend);
                 }
-                
+
                 if (options.append) {
                     element.append(options.append);
                 }
@@ -84,10 +84,10 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
 
                 $compile(element)(this.scope);
 
-                // Reset the scope to prevent displaying old data from our last visit to this list 
+                // Reset the scope to prevent displaying old data from our last visit to this list
                 //this.scope[list.name] = null;
                 this.scope[list.iterator] = [];
-                
+
                 // Remove any lingering tooltip and popover <div> elements
                 $('.tooltip').each(function() {
                     $(this).remove();
@@ -102,7 +102,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                 try {
                     $('#help-modal').empty().dialog('destroy');
                 } catch (e) {
-                    //ignore any errors should the dialog not be initialized 
+                    //ignore any errors should the dialog not be initialized
                 }
 
                 /*if (options.mode === 'lookup') {
@@ -126,8 +126,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
 
             build: function (options) {
                 //
-                // Generate HTML. Do NOT call this function directly. Called by inject(). Returns an HTML 
-                // string to be injected into the current view. 
+                // Generate HTML. Do NOT call this function directly. Called by inject(). Returns an HTML
+                // string to be injected into the current view.
                 //
                 var html = '',
                     list = this.list,
@@ -178,7 +178,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     html += "</div>\n";
                     html += "</div>\n";
                 }
-                
+
                 if (options.showSearch=== undefined || options.showSearch === true) {
                     html += "<div class=\"row\">\n";
                     if (list.name !== 'groups') {
@@ -285,9 +285,11 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     html += (options.mode === 'edit' || options.mode === 'summary') ? list.editTitle : list.addTitle;
                     html += "</div>\n";
                 }
-                
+
                 // table header row
-                html += "<div class=\"list-table-container\">\n";
+                html += "<div class=\"list-table-container\"";
+                html += (list.awCustomScroll) ? " aw-custom-scroll " : "";
+                html += ">\n";
                 html += "<table id=\"" + list.name + "_table\" ";
                 html += "class=\"table table-condensed";
                 html += (list['class']) ? " " + list['class'] : "";
@@ -297,7 +299,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                 html += (options.mode === 'summary') ? ' table-summary' : '';
                 html += "\" ";
                 html += ">\n";
-                
+
                 if (!options.skipTableHead) {
                     html += this.buildHeader(options);
                 }
@@ -435,11 +437,11 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
             buildHeader: function(options) {
                 var list = this.list,
                     fld, html;
-                
+
                 if (options === undefined) {
                     options = this.options;
                 }
-                
+
                 html = "<thead>\n";
                 html += "<tr>\n";
                 if (list.index) {
@@ -473,7 +475,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                 }
                 if (options.mode === 'select' || options.mode === 'lookup') {
                     html += "<th>Select</th>";
-                } else if (options.mode === 'edit' && list.fieldActions) {
+                } else if (options.mode === 'edit' && list.fieldActions &&
+                    (list.fieldActions.label === undefined || list.fieldActions.label)) {
                     html += "<th class=\"actions-column";
                     html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : "";
                     html += "\">Actions</th>\n";

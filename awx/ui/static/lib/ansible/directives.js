@@ -729,7 +729,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 scrollButtons: {
                     enable: true
                 },
-                theme: 'dark-thick',
+                theme: 'dark-thin',
                 mouseWheel: true,
                 scrollInertia: 300,
                 callbacks: {
@@ -761,7 +761,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     $(this).find('.btn').toggleClass('btn-info');
                 }
                 $(this).find('.btn').toggleClass('btn-default');
-                
+
                 // Add data-after-toggle="functionName" to the btn-group, and we'll
                 // execute here. The newly active choice is passed as a parameter.
                 if ($(this).attr('data-after-toggle')) {
