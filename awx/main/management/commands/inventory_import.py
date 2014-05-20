@@ -657,7 +657,7 @@ class Command(NoArgsCommand):
             for host_pk in hosts_qs.filter(name__in=host_names).values_list('pk', flat=True):
                 del_host_pks.discard(host_pk)
         # Now delete all remaining hosts in batches.
-        all_del_pks = list(del_host_pks)
+        all_del_pks = sorted(list(del_host_pks))
         for offset in xrange(0, len(all_del_pks), self._batch_size):
             del_pks = all_del_pks[offset:(offset + self._batch_size)]
             for host in hosts_qs.filter(pk__in=del_pks):
@@ -691,7 +691,7 @@ class Command(NoArgsCommand):
             for group_pk in groups_qs.filter(name__in=group_names).values_list('pk', flat=True):
                 del_group_pks.discard(group_pk)
         # Now delete all remaining groups in batches.
-        all_del_pks = list(del_group_pks)
+        all_del_pks = sorted(list(del_group_pks))
         for offset in xrange(0, len(all_del_pks), self._batch_size):
             del_pks = all_del_pks[offset:(offset + self._batch_size)]
             for group in groups_qs.filter(pk__in=del_pks):
@@ -804,7 +804,8 @@ class Command(NoArgsCommand):
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
         inv_src_group = self.inventory_source.group
-        all_group_names = self.all_group.all_groups.keys()
+        all_group_names = sorted(self.all_group.all_groups.keys())
+        existing_group_names = set()
         for offset in xrange(0, len(all_group_names), self._batch_size):
             group_names = all_group_names[offset:(offset + self._batch_size)]
             for group in self.inventory.groups.filter(name__in=group_names):
@@ -823,11 +824,13 @@ class Command(NoArgsCommand):
                         self.logger.info('Group "%s" variables updated', group.name)
                 else:
                     self.logger.info('Group "%s" variables unmodified', group.name)
-                all_group_names.remove(group.name)
+                existing_group_names.add(group.name)
                 if inv_src_group and inv_src_group != group:
                     self._batch_add_m2m(inv_src_group.children, group)
                 self._batch_add_m2m(self.inventory_source.groups, group)
         for group_name in all_group_names:
+            if group_name in existing_group_names:
+                continue
             mem_group = self.all_group.all_groups[group_name]
             group = self.inventory.groups.create(name=group_name, variables=json.dumps(mem_group.variables), description='imported')
             # Access auto one-to-one attribute to create related object.
@@ -934,7 +937,7 @@ class Command(NoArgsCommand):
                 mem_host_name_map[k] = v
 
         # Update all existing hosts where we know the PK based on instance_id.
-        all_host_pks = mem_host_pk_map.keys()
+        all_host_pks = sorted(mem_host_pk_map.keys())
         for offset in xrange(0, len(all_host_pks), self._batch_size):
             host_pks = all_host_pks[offset:(offset + self._batch_size)]
             for db_host in self.inventory.hosts.filter(active=True, pk__in=host_pks):
@@ -946,7 +949,7 @@ class Command(NoArgsCommand):
                 mem_host_names_to_update.discard(mem_host.name)
 
         # Update all existing hosts where we know the instance_id.
-        all_instance_ids = mem_host_instance_id_map.keys()
+        all_instance_ids = sorted(mem_host_instance_id_map.keys())
         for offset in xrange(0, len(all_instance_ids), self._batch_size):
             instance_ids = all_instance_ids[offset:(offset + self._batch_size)]
             for db_host in self.inventory.hosts.filter(active=True, instance_id__in=instance_ids):
@@ -958,7 +961,7 @@ class Command(NoArgsCommand):
                 mem_host_names_to_update.discard(mem_host.name)
 
         # Update all existing hosts by name.
-        all_host_names = mem_host_name_map.keys()
+        all_host_names = sorted(mem_host_name_map.keys())
         for offset in xrange(0, len(all_host_names), self._batch_size):
             host_names = all_host_names[offset:(offset + self._batch_size)]
             for db_host in self.inventory.hosts.filter(active=True, name__in=host_names):
@@ -970,7 +973,7 @@ class Command(NoArgsCommand):
                 mem_host_names_to_update.discard(mem_host.name)
 
         # Create any new hosts.
-        for mem_host_name in mem_host_names_to_update:
+        for mem_host_name in sorted(mem_host_names_to_update):
             mem_host = self.all_group.all_hosts[mem_host_name]
             host_attrs = dict(variables=json.dumps(mem_host.variables),
                               name=mem_host_name, description='imported')
@@ -1010,7 +1013,7 @@ class Command(NoArgsCommand):
         '''
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
-        all_group_names = [k for k,v in self.all_group.all_groups.iteritems() if v.children]
+        all_group_names = sorted([k for k,v in self.all_group.all_groups.iteritems() if v.children])
         group_group_count = 0
         for offset in xrange(0, len(all_group_names), self._batch_size):
             group_names = all_group_names[offset:(offset + self._batch_size)]
@@ -1035,14 +1038,14 @@ class Command(NoArgsCommand):
         # belongs.
         if settings.SQL_DEBUG:
             queries_before = len(connection.queries)
-        all_group_names = [k for k,v in self.all_group.all_groups.iteritems() if v.hosts]
+        all_group_names = sorted([k for k,v in self.all_group.all_groups.iteritems() if v.hosts])
         group_host_count = 0
         for offset in xrange(0, len(all_group_names), self._batch_size):
             group_names = all_group_names[offset:(offset + self._batch_size)]
             for db_group in self.inventory.groups.filter(name__in=group_names):
                 mem_group = self.all_group.all_groups[db_group.name]
                 group_host_count += len(mem_group.hosts)
-                all_host_names = [h.name for h in mem_group.hosts if not h.instance_id]
+                all_host_names = sorted([h.name for h in mem_group.hosts if not h.instance_id])
                 for offset2 in xrange(0, len(all_host_names), self._batch_size):
                     host_names = all_host_names[offset2:(offset2 + self._batch_size)]
                     db_hosts_qs = self.inventory.hosts.filter(name__in=host_names)
@@ -1051,7 +1054,7 @@ class Command(NoArgsCommand):
                     for db_host in db_hosts_qs.exclude(groups__id=db_group.id):
                         self._batch_add_m2m(db_group.hosts, db_host)
                         self.logger.info('Host "%s" added to group "%s"', db_host.name, db_group.name)
-                all_instance_ids = [h.instance_id for h in mem_group.hosts if h.instance_id]
+                all_instance_ids = sorted([h.instance_id for h in mem_group.hosts if h.instance_id])
                 for offset2 in xrange(0, len(all_instance_ids), self._batch_size):
                     instance_ids = all_instance_ids[offset2:(offset2 + self._batch_size)]
                     db_hosts_qs = self.inventory.hosts.filter(instance_id__in=instance_ids)
