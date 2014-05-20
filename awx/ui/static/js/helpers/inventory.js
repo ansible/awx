@@ -14,18 +14,18 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
     'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper', 'VariablesHelper',
 ])
 
-.factory('GetContainerHeight', [ function() {
+.factory('GetGroupContainerHeight', [ function() {
     return function() {
         return $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() - $('#breadcrumbs').outerHeight() -
             $('.site-footer').outerHeight() - $('#groups-container .list-actions').outerHeight() - $('#groups-table-header').height() - 15;
     };
 }])
 
-.factory('SetGroupContainerHeight', [ 'GetContainerHeight', function(GetContainerHeight) {
+.factory('SetGroupContainerHeight', [ 'GetGroupContainerHeight', function(GetGroupContainerHeight) {
     return function() {
         var height;
         if ($(window).width() > 1210) {
-            height = GetContainerHeight();
+            height = GetGroupContainerHeight();
             $('#groups-container .list-table-container').height(height);
         }
         else {
