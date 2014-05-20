@@ -6,7 +6,7 @@
  *  Routines that handle group add/edit/delete on the Inventory tree widget.
  *
  */
- 
+
 'use strict';
 
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition', 'SearchHelper',
@@ -190,7 +190,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 status_tip = 'Cloud source not configured. Click <i class="fa fa-pencil"></i> to update.';
                 launch_tip = 'Cloud source not configured.';
             }
-            
+
             return {
                 "class": stat_class,
                 "tooltip": status_tip,
@@ -342,7 +342,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 ])
 
 /**
- * 
+ *
  * Add the list of schedules to the Group Edit modal
  *
  */
@@ -405,7 +405,7 @@ ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
             pageSize: 5
         });
         schedule_scope.search(list.iterator);
-        
+
         schedule_scope.refreshSchedules = function() {
             schedule_scope.search(list.iterator);
         };
@@ -513,7 +513,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             scope.formShowing = true;
             scope.showRRuleDetail = false;
             scope.schedulesTitle = (mode === 'edit') ? 'Edit Schedule' : 'Create Schedule';
-        
+
             // display the scheduler widget
             showForm = function() {
                 Wait('stop');
@@ -565,7 +565,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             container.hide('slide', { direction: 'right' }, 500, restoreList);
             scope.$destroy();
         });
-        
+
         scope.saveScheduleForm = function() {
             if (scheduler.isValid()) {
                 scope.schedulerIsValid = true;
@@ -641,7 +641,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 elem, x, y, ww, wh, maxrows,
                 group,
                 schedules_url = '';
-            
+
             if (mode === 'edit') {
                 defaultUrl = GetBasePath('groups') + group_id + '/';
             }
@@ -649,21 +649,21 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 defaultUrl = (group_id !== null) ? GetBasePath('groups') + group_id + '/children/' :
                     GetBasePath('inventory') + inventory_id + '/groups/';
             }
-            
+
             $('#properties-tab').empty();
             $('#sources-tab').empty();
             $('#schedules-list').empty();
             $('#schedules-form').empty();
             $('#schedules-detail').empty();
-                    
+
             elem = document.getElementById('group-modal-dialog');
             $compile(elem)(modal_scope);
 
             generator.inject(GroupForm, { mode: 'edit', id: 'properties-tab', breadCrumbs: false, related: false, scope: properties_scope });
             generator.inject(SourceForm, { mode: 'edit', id: 'sources-tab', breadCrumbs: false, related: false, scope: sources_scope });
-            
+
             //generator.reset();
-            
+
             GetSourceTypeOptions({ scope: sources_scope, variable: 'source_type_options' });
             sources_scope.source = SourceForm.fields.source['default'];
             sources_scope.sourcePathRequired = false;
@@ -672,8 +672,8 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             properties_scope.parseType = 'yaml';
 
             function waitStop() { Wait('stop'); }
-            
-            // Attempt to create the largest textarea field that will fit on the window. Minimum 
+
+            // Attempt to create the largest textarea field that will fit on the window. Minimum
             // height is 6 rows, so on short windows you will see vertical scrolling
             function textareaResize(textareaID) {
                 var textArea, formHeight, model, windowHeight, offset, rows;
@@ -864,7 +864,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     master.variables = properties_scope.variables;
                     properties_scope.$emit('groupVariablesLoaded');
                 }
-                
+
                 if (sources_scope.source_url) {
                     // get source data
                     Rest.setUrl(sources_scope.source_url);
@@ -897,7 +897,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                                     }
                                     master.source = sources_scope.source;
                                 } else if (fld === 'source_vars') {
-                                    // Parse source_vars, converting to YAML.  
+                                    // Parse source_vars, converting to YAML.
                                     sources_scope.source_vars = ParseVariableString(data.source_vars);
                                     master.source_vars = sources_scope.variables;
                                 } else if (data[fld] !== undefined) {
@@ -1148,7 +1148,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                         });
                 }
             });
-            
+
             if (modal_scope.removeUpdateVariables) {
                 modal_scope.removeUpdateVariables();
             }
@@ -1164,7 +1164,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                             msg: 'Failed to update group variables. PUT status: ' + status });
                     });
             });
-            
+
             // Cancel
             modal_scope.cancelModal = function () {
                 Wait('stop');
@@ -1189,7 +1189,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 var fld, data, json_data;
 
                 try {
-                    
+
                     json_data = ToJSON(properties_scope.parseType, properties_scope.variables);
 
                     data = {};
@@ -1297,7 +1297,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 "promoted one level. Note: groups already associated with other groups cannot be promoted to the top level of the " +
                 "tree.</dd></dl>\n" +
                 "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
-            
+
             buttonSet = [{
                 label: "Cancel",
                 onClick: function() {
@@ -1401,16 +1401,18 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 scope.removeDisassociateGroup();
             }
             scope.removeDisassociateGroup = scope.$on('DisassociateGroup', function() {
-                var parent, url;
+                var data, parent, url;
                 if (node.parent === 0) {
                     url = GetBasePath('inventory') + scope.inventory_id + '/groups/';
+                    data = { id: node.group_id, disassociate: 1 };
                 }
                 else {
                     parent = Find({ list: scope.groups, key: 'id', val: node.parent });
-                    url = GetBasePath('groups') + parent.group_id + '/children/';
+                    url = GetBasePath('groups') + parent.group_id + '/children/' + node.group_id + '/';
+                    data = { disassociate: 'all' };
                 }
                 Rest.setUrl(url);
-                Rest.post({ id: node.group_id, disassociate: 1 })
+                Rest.post(data)
                     .success(function () {
                         scope.$emit('GroupDeleteCompleted'); // Signal a group refresh to start
                     })
