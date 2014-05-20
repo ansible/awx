@@ -475,7 +475,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
     GetSyncStatusMsg, InjectHosts, HostsReload, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, Rest, ProcessErrors,
     InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find, EditInventoryProperties, HostsEdit,
     HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost, Stream, GetBasePath, ShowJobSummary, ApplyEllipsis, WatchInventoryWindowResize,
-    HelpDialog, InventoryGroupsHelp, Store, ViewJob) {
+    HelpDialog, InventoryGroupsHelp, Store, ViewJob, SetContainerHeights) {
 
     ClearScope();
 
@@ -564,6 +564,9 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
             $scope.selected_group_id = null;
         }
 
+        // Resize the containers based on viewport width/height
+        SetContainerHeights({ scope: $scope, reloadHosts: false });
+
         // Add hosts view
         $scope.show_failures = false;
         InjectHosts({
@@ -590,7 +593,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
             ApplyEllipsis('#groups_table .group-name a');
             ApplyEllipsis('#hosts_table .host-name a');
         }, 2500); //give the window time to display
-        WatchInventoryWindowResize();
+        WatchInventoryWindowResize({ scope: $scope });
 
         inventoryAutoHelp = Store('inventoryAutoHelp');
         if (inventoryAutoHelp !== 'off' && $scope.autoShowGroupHelp) {
@@ -859,5 +862,5 @@ InventoriesEdit.$inject = ['$scope', '$location', '$routeParams', '$compile', '$
     'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren', 'ViewUpdateStatus', 'GroupsCancelUpdate',
     'Find', 'EditInventoryProperties', 'HostsEdit', 'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost',
     'Stream', 'GetBasePath', 'ShowJobSummary', 'ApplyEllipsis', 'WatchInventoryWindowResize', 'HelpDialog', 'InventoryGroupsHelp', 'Store',
-    'ViewJob'
+    'ViewJob', 'SetContainerHeights'
 ];

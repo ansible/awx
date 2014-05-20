@@ -615,11 +615,11 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
 .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-    'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find','WatchInventoryWindowResize',
+    'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find',
     'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize', 'BuildTree',
     function ($rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
-        GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, GroupsScheduleListInit,
+        GetChoices, UpdateGroup, SourceChange, Find, ParseVariableString, ToJSON, GroupsScheduleListInit,
         SourceForm, SetSchedulesInnerDialogSize, BuildTree) {
         return function (params) {
 
@@ -1044,7 +1044,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 } else {
                     Wait('stop');
                 }
-                WatchInventoryWindowResize();
+                //WatchInventoryWindowResize();
                 parent_scope.removeAddTreeRefreshed();
                 if (modal_scope.searchCleanUp) {
                     modal_scope.searchCleanup();
@@ -1178,9 +1178,9 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 //if (modal_scope.searchCleanup) {
                 //    modal_scope.searchCleanup();
                 //}
-                if (base === 'inventories') {
-                    WatchInventoryWindowResize();
-                }
+                //if (base === 'inventories') {
+                //    WatchInventoryWindowResize();
+                //}
             };
 
             // Save
@@ -1469,9 +1469,9 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 ])
 
 .factory('ShowUpdateStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm',
-    'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait', 'Empty', 'WatchInventoryWindowResize',
+    'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait',
     function ($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
-        FormatDate, InventoryStatusForm, Wait, Empty, WatchInventoryWindowResize) {
+        FormatDate, InventoryStatusForm, Wait) {
         return function (params) {
 
             var group_name = params.group_name,
@@ -1563,7 +1563,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                         });
                         $('#status-modal-dialog').dialog('destroy');
                         $('#inventory-modal-container').empty();
-                        WatchInventoryWindowResize();
+                        //WatchInventoryWindowResize();
                     },
                     open: function () {
                         Wait('stop');

@@ -4,7 +4,7 @@
  *  HostsHelper
  *
  *  Routines that handle host add/edit/delete on the Inventory detail page.
- *  
+ *
  */
 
 /* jshint loopfunc: true */
@@ -16,11 +16,11 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                                 'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
                                 'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'LogViewerHelper'
                                 ])
-  
+
 .factory('SetEnabledMsg', [ function() {
     return function(host) {
         if (host.has_inventory_sources) {
-            // Inventory sync managed, so not clickable 
+            // Inventory sync managed, so not clickable
             host.enabledToolTip = (host.enabled) ? 'Host is available' : 'Host is not available';
         }
         else {
@@ -51,13 +51,13 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         host.enabled_flag = host.enabled;
         SetEnabledMsg(host);
-      
+
     };
 }])
 
 .factory('SetStatus', ['SetEnabledMsg', 'Empty', function(SetEnabledMsg, Empty) {
     return function(params) {
-        
+
         var scope = params.scope,
             host = params.host,
             i, html, title;
@@ -68,7 +68,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             }
             return a;
         }
-        
+
         function noRecentJobs() {
             title = 'No job data';
             html = "<p>No recent job data available for this host.</p>\n" +
@@ -77,7 +77,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         function setMsg(host) {
             var j, job, jobs;
-                
+
             if (host.has_active_failures === true || (host.has_active_failures === false && host.last_job !== null)) {
                 if (host.has_active_failures === true) {
                     host.badgeToolTip = 'Most recent job failed. Click to view jobs.';
@@ -161,19 +161,18 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 }])
 
 .factory('HostsReload', [ '$routeParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait',
-    'SetHostStatus', 'SetStatus', 'ApplyEllipsis',
+    'SetHostStatus', 'SetStatus', 'ApplyEllipsis', 'SetContainerHeights', 'GetHostContainerRows',
 function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus, SetStatus,
-    ApplyEllipsis) {
+    ApplyEllipsis, SetContainerHeights) {
     return function(params) {
-        
+
         var scope = params.scope,
             group_id = params.group_id,
             inventory_id = params.inventory_id,
             list = InventoryHosts,
-            
             url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
                 GetBasePath('inventory') + inventory_id + '/hosts/';
-        
+
         scope.search_place_holder='Search ' + scope.selected_group_name;
 
         if (scope.removePostRefresh) {
@@ -190,6 +189,9 @@ function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateI
             Wait('stop');
             scope.$emit('HostReloadComplete');
         });
+
+        // Size containers based on viewport
+        SetContainerHeights({ scope: scope, reloadHosts: false });
 
         SearchInit({ scope: scope, set: 'hosts', list: list, url: url });
         PaginateInit({ scope: scope, list: list, url: url });
@@ -234,12 +236,12 @@ function(GenerateList, InventoryHosts, HostsReload) {
 .factory('ToggleHostEnabled', [ 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Alert', 'Find', 'SetEnabledMsg',
 function(GetBasePath, Rest, Wait, ProcessErrors, Alert, Find, SetEnabledMsg) {
     return function(params) {
-        
+
         var id = params.host_id,
             external_source = params.external_source,
             scope = params.scope,
             host;
-        
+
         function setMsg(host) {
             host.enabled = (host.enabled) ? false : true;
             host.enabled_flag = host.enabled;
@@ -251,7 +253,7 @@ function(GetBasePath, Rest, Wait, ProcessErrors, Alert, Find, SetEnabledMsg) {
             Wait('start');
             host = Find({ list: scope.hosts, key: 'id', val: id });
             setMsg(host);
-            
+
             Rest.setUrl(GetBasePath('hosts') + id + '/');
             Rest.put(host)
                 .success( function() {
@@ -277,7 +279,7 @@ function(GetBasePath, Rest, Wait, ProcessErrors, Alert, Find, SetEnabledMsg) {
 function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, GenerateList, Prompt, SearchInit,
     PaginateInit, ProcessErrors, GetBasePath, HostsAdd, HostsReload, SelectionInit) {
     return function(params) {
-        
+
         var inventory_id = params.inventory_id,
             group_id = params.group_id,
             list = HostList,
@@ -287,7 +289,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, Gener
         list.iterator = 'subhost';  //Override the iterator and name so the scope of the modal dialog
         list.name = 'subhosts';     //will not conflict with the parent scope
 
-        
+
 
         scope = generator.inject(list, {
             id: 'form-modal-body',
@@ -295,13 +297,13 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, Gener
             breadCrumbs: false,
             selectButton: false
         });
-        
+
         defaultUrl = GetBasePath('inventory') + inventory_id + '/hosts/?not__groups__id=' + scope.group_id;
-        
+
         scope.formModalActionLabel = 'Select';
         scope.formModalHeader = 'Add Existing Hosts';
         scope.formModalCancelShow = true;
-    
+
         SelectionInit({ scope: scope, list: list, url: GetBasePath('groups') + group_id + '/hosts/' });
 
         if (scope.removeModalClosed) {
@@ -311,11 +313,11 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, Gener
             // if the modal closed, assume something got changed and reload the host list
             HostsReload(params);
         });
-        
+
         $('.popover').popover('hide');  //remove any lingering pop-overs
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal({ backdrop: 'static', keyboard: false });
-        
+
         SearchInit({ scope: scope, set: 'subhosts', list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl, mode: 'lookup' });
         scope.search(list.iterator);
@@ -334,12 +336,12 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, Gener
 
 
 .factory('HostsCreate', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
-    'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'WatchInventoryWindowResize',
+    'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait',
     'ToJSON',
 function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-    GetBasePath, HostsReload, ParseTypeChange, Wait, WatchInventoryWindowResize, ToJSON) {
+    GetBasePath, HostsReload, ParseTypeChange, Wait, ToJSON) {
     return function(params) {
-        
+
         var parent_scope = params.scope,
             inventory_id = parent_scope.inventory_id,
             group_id = parent_scope.selected_group_id,
@@ -348,14 +350,14 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             generator = GenerateForm,
             scope = generator.inject(form, {mode: 'add', modal: true, related: false}),
             master={};
-        
+
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Create New Host';
         scope.formModalCancelShow = true;
-        
+
         scope.parseType = 'yaml';
         ParseTypeChange({ scope: scope, field_id: 'host_variables' });
-        
+
         if (scope.removeHostsReload) {
             scope.removeHostsReload();
         }
@@ -366,21 +368,21 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         //$('#form-modal').unbind('hidden');
         //$('#form-modal').on('hidden', function () { scope.$emit('hostsReload'); });
-        
+
         generator.reset();
         master={};
 
         if (!scope.$$phase) {
             scope.$digest();
         }
-       
+
         if (scope.removeHostSaveComplete) {
             scope.removeHostSaveComplete();
         }
         scope.removeHostSaveComplete = scope.$on('HostSaveComplete', function() {
             Wait('stop');
             $('#form-modal').modal('hide');
-            
+
             HostsReload({
                 scope: parent_scope,
                 group_id: parent_scope.selected_group_id,
@@ -388,14 +390,14 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                 inventory_id: parent_scope.inventory_id
             });
 
-            WatchInventoryWindowResize();
+            //WatchInventoryWindowResize();
         });
 
         // Save
         scope.formModalAction  = function() {
-            
+
             Wait('start');
-           
+
             var fld, data={};
             scope.formModalActionDisabled = true;
             data.variables = ToJSON(scope.parseType, scope.variables, true);
@@ -424,23 +426,23 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             // Defaults
             generator.reset();
         };
-        
+
         scope.cancelModal = function() {
-            WatchInventoryWindowResize();
+            // WatchInventoryWindowResize();
         };
-       
+
     };
 }])
 
 
 .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetStatus', 'ApplyEllipsis',
-    'WatchInventoryWindowResize', 'ToJSON', 'ParseVariableString', 'CreateDialog', 'TextareaResize', 'Empty',
+    'ToJSON', 'ParseVariableString', 'CreateDialog', 'TextareaResize', 'Empty',
 function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-    GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus, ApplyEllipsis, WatchInventoryWindowResize, ToJSON,
+    GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus, ApplyEllipsis, ToJSON,
     ParseVariableString, CreateDialog, TextareaResize, Empty) {
     return function(params) {
-        
+
         var parent_scope = params.scope,
             host_id = params.host_id,
             inventory_id = params.inventory_id,
@@ -453,10 +455,10 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             master = {},
             relatedSets = {},
             group, buttons;
-        
+
         generator.inject(HostForm, { mode: 'edit', id: 'host-modal-dialog', breadCrumbs: false, related: false, scope: scope });
         generator.reset();
-        
+
         buttons = [{
             label: "Cancel",
             onClick: function() {
@@ -488,7 +490,6 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                 Wait('stop');
                 scope.codeMirror.destroy();
                 $('#host-modal-dialog').empty();
-                WatchInventoryWindowResize();
             },
             onResizeStop: function() {
                 TextareaResize({
@@ -509,7 +510,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             },
             callback: 'HostEditDialogReady'
         });
-        
+
         scope.parseType = 'yaml';
 
         if (scope.hostVariablesLoadedRemove) {
@@ -553,7 +554,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             }
             master.variables = scope.variables;
         });
-         
+
         Wait('start');
 
         // Retrieve detail record and prepopulate the form
@@ -638,7 +639,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             }
 
             // Restore ellipsis response to window resize
-            WatchInventoryWindowResize();
+            //WatchInventoryWindowResize();
         });
 
         // Save changes to the parent
@@ -646,7 +647,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
 
             Wait('start');
             var fld, data={};
-            
+
             try {
                 data.variables = ToJSON(scope.parseType, scope.variables, true);
                 for (fld in form.fields) {
@@ -692,7 +693,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
         scope.cancelModal = function() {
             $('#host-modal-dialog').dialog('close');
         };
-           
+
     };
 }])
 
@@ -702,7 +703,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
 function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload, Wait, Find, Empty) {
     return function(params) {
         // Remove the selected host from the current group by disassociating
-       
+
         var action_to_take, body,
             scope = params.scope,
             host_id = params.host_id,
@@ -743,12 +744,12 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
         });
 
         $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('stop'); });
-            
+
         action_to_take = function() {
             var count=0, i;
 
             Wait('start');
-            
+
             if (scope.removeHostRemoved) {
                 scope.removeHostRemoved();
             }
@@ -772,7 +773,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
                     });
             }
         };
-            
+
         body = (group) ? '<div class=\"alert alert-info\"><p>Are you sure you want to remove host <strong>' + host_name + '</strong> from group ' + group.name + '?' +
             ' It will still be part of the inventory and available in All Hosts.</p></div>' :
             '<div class=\"alert alert-info\"><p>Are you sure you want to permanently delete host <strong>' + host_name + '</strong> from the inventory?</p></div>';
@@ -786,13 +787,13 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
 function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath, HostsReload,
     ParseTypeChange, Wait) {
     return function(params) {
-        
+
         var host_id = params.host_id,
             inventory_id = params.inventory_id,
             generator = GenerateForm,
             actions = [],
             i, html, defaultUrl, scope, postAction;
-        
+
         html = "<div class=\"row host-groups\">\n";
         html += "<div class=\"col-lg-6\">\n";
         html += "<label>Available Groups:</label>\n";
@@ -817,7 +818,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, P
 
         defaultUrl =  GetBasePath('hosts') + host_id + '/';
         scope = generator.inject(null, { mode: 'edit', modal: true, related: false, html: html });
-        
+
         for (i=0; i < scope.hosts.length; i++) {
             if (scope.hosts[i].id === host_id) {
                 scope.host = scope.hosts[i];
@@ -849,11 +850,11 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, P
                 HostsReload({ scope: scope, inventory_id: inventory_id, group_id: scope.group_id , action: postAction });
             }
         });
-        
+
         // Save changes
         scope.formModalAction = function() {
             var i, j, found;
-          
+
             $('#form-modal').modal('hide');
             Wait('start');
 
@@ -866,7 +867,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, P
                     }
                 }
                 if (!found) {
-                    // group was removed 
+                    // group was removed
                     actions.push({ group_id: scope.original_groups[i].id , action: 'delete' });
                     Rest.setUrl(GetBasePath('groups') + scope.original_groups[i].id + '/hosts/');
                     Rest.post({ id: host_id, disassociate: 1 })
@@ -919,7 +920,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, P
                 scope.rightButtonDisabled = true;
             }
         };
- 
+
         scope.rightChange = function() {
             // Select/deselect made on host groups list
             if (scope.assignedGroups !== null && scope.assignedGroups.length > 0) {
@@ -934,9 +935,9 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, P
 
         scope.moveLeft = function() {
             // Remove selected groups from the list of assigned groups
-            
+
             var i, j, found, placed;
-            
+
             for (i=0; i < scope.assignedGroups.length; i++){
                 for (j=0 ; j < scope.host_groups.length; j++) {
                     if (scope.host_groups[j].id === scope.assignedGroups[i].id) {
@@ -983,9 +984,9 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, P
 
         scope.moveRight = function() {
              // Remove selected groups from list of available groups
-            
+
             var i, j, found, placed;
-            
+
             for (i=0; i < scope.selectedGroups.length; i++){
                 for (j=0 ; j < scope.available_groups.length; j++) {
                     if (scope.available_groups[j].id === scope.selectedGroups[i].id) {
@@ -1074,14 +1075,14 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, P
         scope.removeHostsReload = scope.$on('hostsReload', function() {
             HostsReload(params);
         });
-       
+
         if (!scope.$$phase) {
             scope.$digest();
         }
     };
 }]);
 
-     
+
 
 
 
