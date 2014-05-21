@@ -7,12 +7,12 @@
  *  Controller functions for the Inventory model.
  *
  */
- 
+
 'use strict';
 
 function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope, LoadJobsScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
     ScheduledJobsList, GetChoices, GetBasePath, Wait, Socket) {
-    
+
     ClearScope();
 
     var e,
@@ -29,7 +29,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
         scope: $scope,
         endpoint: "jobs"
     });
-    
+
     event_socket.init();
 
     event_socket.on("status_changed", function(data) {
@@ -40,7 +40,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             event_queue.push(data);
         }
     });
-    
+
     function processEvent(event) {
         expecting = 0;
         switch(event.status) {
@@ -230,7 +230,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
         variable: 'status_choices',
         callback: 'choicesReady'
     });
-    
+
     GetChoices({
         scope: $scope,
         url: GetBasePath('unified_jobs'),
@@ -241,10 +241,11 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
 
     // Set the height of each container and calc max number of rows containers can hold
     function setHeight() {
-        var docw = $(document).width(),
+        var docw = $(window).width(),
+            doch = $(window).height(),
             available_height,
             search_row, page_row, height, header, row_height;
-        if (docw > 1240) {
+        if (docw > 1240 && doch > 800) {
             // customize the container height and # of rows based on available viewport height
             available_height = $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() - $('#breadcrumbs').outerHeight() - $('.site-footer').outerHeight() - 25;
             $('.jobs-list-container').each(function() {
@@ -259,7 +260,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             max_rows = Math.floor(height / row_height);
         }
         else {
-            // when width < 1240px put things back to their default state
+            // when width < 1240px || height < 800px put things back to their default state
             $('.jobs-list-container').each(function() {
                 $(this).css({ 'height': 'auto' });
             });
@@ -299,7 +300,7 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
         choicesCount = 0;
 
     generator.inject(JobForm, { mode: 'edit', related: true, scope: $scope });
-    
+
     $scope.job_id = id;
     $scope.parseType = 'yaml';
     $scope.statusSearchSpin = false;
@@ -354,7 +355,7 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
         } else {
             $scope.$emit('jobTemplateLoadFinished');
         }
-        
+
     });
 
     // Turn off 'Wait' after both cloud credential and playbook list come back
@@ -364,7 +365,7 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
     $scope.removeJobTemplateLoadFinished = $scope.$on('jobTemplateLoadFinished', function () {
         loadingFinishedCount++;
         if (loadingFinishedCount >= 2) {
-            // The initial template load finished. Now load related jobs, which 
+            // The initial template load finished. Now load related jobs, which
             // will turn off the 'working' spinner.
             Wait('stop');
         }
@@ -398,11 +399,11 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
         Rest.setUrl(defaultUrl + ':id/');
         Rest.get({ params: { id: id } })
             .success(function (data) {
-                
+
                 var i, fld;
-                
+
                 LoadBreadCrumbs();
-                
+
                 $scope.status = data.status;
                 $scope.created = FormatDate(data.created);
                 $scope.modified = FormatDate(data.modified);
@@ -479,7 +480,7 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
                     }
                     return true;
                 });
-                
+
                 $scope.$emit('jobLoaded', data.related.cloud_credential, data.project, data.playbook);
             })
             .error(function (data, status) {
