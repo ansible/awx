@@ -530,36 +530,13 @@ class Group(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:group_detail', args=(self.pk,))
 
-    def mark_inactive_recursive(self, parent=None):
-        from awx.main.tasks import update_inventory_computed_fields
-        def mark_actual(parent=parent):
-            linked_children = [(parent, self)]
-            marked_groups = []
-            marked_hosts = []
-            for subgroup in linked_children:
-                parent, group = subgroup
-                if parent is not None:
-                    group.parents.remove(parent)
-                if group.parents.count() > 0:
-                    continue
-                for host in group.hosts.all():
-                    host.groups.remove(group)
-                    host_inv_sources = host.inventory_sources.all()
-                    for inv_source in group.inventory_sources.all():
-                        if inv_source in host_inv_sources:
-                            host.inventory_sources.remove(inv_source)
-                    if host.groups.count() < 1:
-                        marked_hosts.append(host)
-                for childgroup in group.children.all():
-                    linked_children.append((group, childgroup))
-                marked_groups.append(group)
-            for group in marked_groups:
-                group.mark_inactive()
-            for host in marked_hosts:
-                host.mark_inactive()
-        with ignore_inventory_computed_fields():
-            mark_actual()
-        update_inventory_computed_fields.delay(self.id, True)
+    def mark_inactive_recursive(self):
+        from awx.main.tasks import update_inventory_computed_fields, bulk_inventory_element_delete
+        group_data = {'parent': self.id, 'inventory': self.inventory.id,
+                                             'children': [{'id': c.id} for c in self.children.all()],
+                                             'hosts': [{'id': h.id} for h in self.hosts.all()]}
+        self.mark_inactive()
+        bulk_inventory_element_delete.delay(group_data)
 
     def mark_inactive(self, save=True, recompute=True, from_inventory_import=False):
         '''

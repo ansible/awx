@@ -788,42 +788,7 @@ class GroupChildrenList(SubListCreateAPIView):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class GroupChildrenRemove(DestroyAPIView):
-
-    model = Group
-    serializer_class = GroupSerializer
-    view_name = 'Remove a subgroup recursively'
-
-    def destroy(self, request, *args, **kwargs):
-        parent_group = self.get_object()
-        group = Group.objects.get(id=kwargs['subgroup_pk'])
-        if group not in parent_group.children.all():
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        group.mark_inactive_recursive(parent_group)
-        return Response()
-
-    def post(self, request, *args, **kwargs):
-        if not isinstance(request.DATA, dict):
-            return Response('invalid type for post data',
-                            status=status.HTTP_400_BAD_REQUEST)
-        if 'disassociate' in request.DATA:
-            parent_group = self.get_object()
-            group = Group.objects.get(id=kwargs['subgroup_pk'])
-            if group not in parent_group.children.all():
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            parent_group.children.remove(group)
-            for host in group.hosts.all():
-                parent_group.hosts.add(host)
-            for subgroup in group.children.all():
-                parent_group.children.add(subgroup)
-            if group.parents.count() < 1:
-                group.mark_inactive()
-            return Response()
-        else:
-            return Response()
-
-
-class GroupPotentialChildrenList(SubListAPIView):
+lass GroupPotentialChildrenList(SubListAPIView):
 
     model = Group
     serializer_class = GroupSerializer
@@ -890,6 +855,19 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
     model = Group
     serializer_class = GroupSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # FIXME: Why isn't the active check being caught earlier by RBAC?
+        if getattr(obj, 'active', True) == False:
+            raise Http404()
+        if getattr(obj, 'is_active', True) == False:
+            raise Http404()
+        if not request.user.can_access(self.model, 'delete', obj):
+            raise PermissionDenied()
+        if hasattr(obj, 'mark_inactive'):
+            obj.mark_inactive_recursive()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 class InventoryGroupsList(SubListCreateAPIView):
 
     model = Group
@@ -897,17 +875,6 @@ class InventoryGroupsList(SubListCreateAPIView):
     parent_model = Inventory
     relationship = 'groups'
     parent_key = 'inventory'
-
-class InventoryRootGroupRemove(DestroyAPIView):
-
-    model = Group
-    serializer_class = GroupSerializer
-    view_name = 'Inventory Group Subgroup'
-
-    def destroy(self, request, *args, **kwargs):
-        group = Group.objects.get(id=kwargs['group_pk'])
-        group.mark_inactive_recursive()
-        return Response()        
 
 class InventoryRootGroupsList(SubListCreateAPIView):
 
