@@ -48,6 +48,6 @@ var $AnsibleConfig = {
         }
     },
 
-    websocket_port: 8090
+    websocket_port: 8080
 
 };
