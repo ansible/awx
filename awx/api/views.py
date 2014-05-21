@@ -788,7 +788,7 @@ class GroupChildrenList(SubListCreateAPIView):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-lass GroupPotentialChildrenList(SubListAPIView):
+class GroupPotentialChildrenList(SubListAPIView):
 
     model = Group
     serializer_class = GroupSerializer
