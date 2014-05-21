@@ -722,6 +722,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
 
     .directive('awCustomScroll', [ function() {
         return function(scope, element, attrs) {
+            var theme = (attrs.scrollTheme) ? attrs.scrollTheme : 'dark-thin';
             $(element).mCustomScrollbar({
                 advanced:{
                     updateOnContentResize: true
@@ -729,7 +730,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 scrollButtons: {
                     enable: true
                 },
-                theme: 'dark-thin',
+                theme: theme,
                 mouseWheel: true,
                 scrollInertia: 300,
                 callbacks: {

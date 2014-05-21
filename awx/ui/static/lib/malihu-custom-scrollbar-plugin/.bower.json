@@ -1,6 +1,6 @@
 {
   "name": "malihu-custom-scrollbar-plugin",
-  "version": "2.8.3",
+  "version": "2.8.4",
   "title": "malihu custom scrollbar plugin",
   "description": "Custom scrollbar jQuery plugin that's fully customizable with CSS. Features vertical/horizontal scrolling, mouse-wheel support, scroll easing, adjustable scrollbar height/width, nested scrollbars, user defined callbacks etc.",
   "main": "./jquery.mCustomScrollbar.js",
@@ -37,13 +37,13 @@
     "/source_files",
     "/js"
   ],
-  "_release": "2.8.3",
+  "_release": "2.8.4",
   "_resolution": {
     "type": "version",
-    "tag": "2.8.3",
-    "commit": "179ced37ef972b2c44bb4b71d20a6310fa317867"
+    "tag": "2.8.4",
+    "commit": "7f5be74468063f39e5f9bf0a8e2db380486c6e0e"
   },
   "_source": "git://github.com/malihu/malihu-custom-scrollbar-plugin.git",
-  "_target": "2.8.3",
+  "_target": "2.8.4",
   "_originalSource": "malihu-custom-scrollbar-plugin"
 }

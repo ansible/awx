@@ -1,6 +1,6 @@
 /*
 == malihu jquery custom scrollbars plugin == 
-version: 2.8.3 
+version: 2.8.4 
 author: malihu (http://manos.malihu.gr) 
 plugin home: http://manos.malihu.gr/jquery-custom-content-scroller 
 */
@@ -176,8 +176,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/lgpl.html.
 							percentage=maxHeight,
 							maxHeight=$this.parent().height()*percentage/100;
 						}
+						var paddingY=($this.innerHeight()-$this.height());
 						$this.css("overflow","hidden");
-						mCustomScrollBox.css("max-height",maxHeight);
+						mCustomScrollBox.css("max-height",maxHeight-paddingY);
 					}
 				}
 				$this.mCustomScrollbar("update");
@@ -192,8 +193,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/lgpl.html.
 							if(!$this.is(".mCS_disabled") && !$this.is(".mCS_destroyed")){
 								var winWidth=$(window).width(),winHeight=$(window).height();
 								if(currWinWidth!==winWidth || currWinHeight!==winHeight){ /*ie8 fix*/
-									if($this.css("max-height")!=="none" && percentage){
-										mCustomScrollBox.css("max-height",$this.parent().height()*percentage/100);
+									if($this.css("max-height")!=="none"){
+										if(percentage){
+											mCustomScrollBox.css("max-height",($this.parent().height()*percentage/100)-paddingY);
+										}else{
+											mCustomScrollBox.css("max-height",(parseInt($this.css("max-height"))-paddingY));
+										}
 									}
 									$this.mCustomScrollbar("update");
 									currWinWidth=winWidth; currWinHeight=winHeight;
@@ -206,22 +211,23 @@ along with this program.  If not, see http://www.gnu.org/licenses/lgpl.html.
 				if(options.advanced.updateOnContentResize){
 					var mCSB_onContentResize;
 					if(options.horizontalScroll){
-						var mCSB_containerOldSize=mCSB_container.outerWidth();
+						var mCSB_containerOldSize=mCSB_container.outerWidth(),mCSB_contentOldSize=mCSB_container.innerWidth();
 					}else{
-						var mCSB_containerOldSize=mCSB_container.outerHeight();
+						var mCSB_containerOldSize=mCSB_container.outerHeight(),mCSB_contentOldSize=mCSB_container.innerHeight();
 					}
 					mCSB_onContentResize=setInterval(function(){
 						if(options.horizontalScroll){
 							if(options.advanced.autoExpandHorizontalScroll){
 								mCSB_container.css({"position":"absolute","width":"auto"}).wrap("<div class='mCSB_h_wrapper' style='position:relative; left:0; width:999999px;' />").css({"width":mCSB_container.outerWidth(),"position":"relative"}).unwrap();
 							}
-							var mCSB_containerNewSize=mCSB_container.outerWidth();
+							var mCSB_containerNewSize=mCSB_container.outerWidth(),mCSB_contentNewSize=mCSB_container.innerWidth();
 						}else{
-							var mCSB_containerNewSize=mCSB_container.outerHeight();
+							var mCSB_containerNewSize=mCSB_container.outerHeight(),mCSB_contentNewSize=mCSB_container.innerHeight();
 						}
-						if(mCSB_containerNewSize!=mCSB_containerOldSize){
+						if(mCSB_containerNewSize!=mCSB_containerOldSize || mCSB_contentNewSize!=mCSB_contentOldSize){
 							$this.mCustomScrollbar("update");
 							mCSB_containerOldSize=mCSB_containerNewSize;
+							mCSB_contentOldSize=mCSB_contentNewSize;
 						}
 					},300);
 				}
@@ -681,6 +687,18 @@ along with this program.  If not, see http://www.gnu.org/licenses/lgpl.html.
 						}else{
 							draggerScrollTo=scrollTo=target;
 						}
+					}else if(typeof(scrollTo)==="object"){ /*if object, scroll by element position*/
+						var target=$(scrollTo);
+						if(target.length===1){ /*if such unique element exists, scroll to it*/
+							if($this.data("horizontalScroll")){
+								scrollTo=target.position().left;
+							}else{
+								scrollTo=target.position().top;
+							}
+							draggerScrollTo=scrollTo/$this.data("scrollAmount");
+						}else{
+							draggerScrollTo=scrollTo=target;
+						}
 					}
 					/*scroll to*/
 					if($this.data("horizontalScroll")){
@@ -767,7 +785,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/lgpl.html.
 			}
 			/*callbacks*/
 			function callbacks(cb){
-				if ($this.data("mCustomScrollbarIndex")) {
+				if($this.data("mCustomScrollbarIndex")){
 					this.mcs = {
 						top: mCSB_container.position().top, left: mCSB_container.position().left,
 						draggerTop: mCSB_dragger.position().top, draggerLeft: mCSB_dragger.position().left,
@@ -831,7 +849,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/lgpl.html.
 	functions={
 		/*hide/show scrollbar*/
 		showScrollbar:function(){
-			this.stop().animate({opacity:1},"fast");
+			if($(this).css("opacity")==0){
+				this.stop().animate({opacity:1},"fast");
+			}
 		},
 		hideScrollbar:function(){
 			this.stop().animate({opacity:0},"fast");
@@ -955,7 +975,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/lgpl.html.
 	$.support.msPointer=window.navigator.msPointerEnabled; /*MSPointer support*/
 	/*plugin dependencies*/
 	var _dlp=("https:"==document.location.protocol) ? "https:" : "http:";
-	$.event.special.mousewheel || document.write('<script src="'+_dlp+'//cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.0.6/jquery.mousewheel.min.js"><\/script>');
+	$.event.special.mousewheel || $("<script>",{src:_dlp+"//cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.6/jquery.mousewheel.min.js"}).appendTo("body");
 	/*plugin fn*/
 	$.fn.mCustomScrollbar=function(method){
 		if(methods[method]){

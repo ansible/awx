@@ -7,23 +7,44 @@
 
 'use strict';
 
-function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors) {
+function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, Socket) {
 
     ClearScope();
 
-    var available_height, job_id = $routeParams.id;
+    var available_height, job_id = $routeParams.id,
+        api_complete = false,
+        stdout_url,
+        event_socket = Socket({
+            scope: $scope,
+            endpoint: "job_events"
+        });
 
     Wait('start');
+
+    event_socket.init();
+
+    event_socket.on("job_events-" + job_id, function() {
+        if (api_complete) {
+            $scope.$emit('LoadStdout');
+        }
+    });
 
     if ($scope.removeLoadStdout) {
         $scope.removeLoadStdout();
     }
-    $scope.removeLoadStdout = $scope.$on('LoadStdout', function(e, url) {
-        Rest.setUrl(url + '?format=html');
+    $scope.removeLoadStdout = $scope.$on('LoadStdout', function() {
+        Rest.setUrl(stdout_url + '?format=html');
         Rest.get()
             .success(function(data) {
+                api_complete = true;
                 Wait('stop');
-                $('#stdout-iframe').attr('srcdoc', data);
+                var doc, style, pre, parser = new DOMParser();
+                doc = parser.parseFromString(data, "text/html");
+                pre = doc.getElementsByTagName('pre');
+                style = doc.getElementsByTagName('style');
+                $('#style-sheet-container').empty().html(style[0]);
+                $('#pre-container-content').empty().html($(pre[0]).html());
+                setTimeout(function() { $('#pre-container').mCustomScrollbar("scrollTo", 'bottom'); }, 1000);
             })
             .error(function(data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -33,15 +54,15 @@ function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBas
 
     function resizeToFit() {
         available_height = $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() -
-            $('#breadcrumb-container').outerHeight() - $('.site-footer').outerHeight();
+            $('#breadcrumb-container').outerHeight() - $('.site-footer').outerHeight() * 2;
         if ($(window).width() < 768) {
             available_height += 55;
         }
-        else {
+        else if ($(window).width() > 1240) {
             available_height += 5;
         }
-        $('#stdout-iframe').height(available_height);
-        //$('#stdout-container').mCustomScrollbar("update");
+        $('#pre-container').height(available_height);
+        $('#pre-container').mCustomScrollbar("update");
     }
     resizeToFit();
 
@@ -53,7 +74,8 @@ function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBas
     Rest.get()
         .success(function(data) {
             $scope.job = data;
-            $scope.$emit('LoadStdout', data.related.stdout);
+            stdout_url = data.related.stdout;
+            $scope.$emit('LoadStdout');
         })
         .error(function(data, status) {
             ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -61,4 +83,4 @@ function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBas
         });
 }
 
-JobStdoutController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors' ];
+JobStdoutController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors', 'Socket' ];

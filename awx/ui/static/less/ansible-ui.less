@@ -348,6 +348,12 @@ td.actions {
   font-family: Fixed, monospace;
 }
 
+/* Make a div or any element behave like pre. Use in conjunction with .mono-space */
+.pre {
+  white-space: pre;
+}
+
+
 dd {
   margin-left: 15px;
 }
@@ -1658,7 +1664,8 @@ tr td button i {
 
 /* job stdout */
 
-  #stdout-iframe {
+  #pre-container {
+      overflow: auto;
       width: 100%;
       border-radius: 4px;
       margin: 0;

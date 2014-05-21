@@ -18,7 +18,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 host = $location.host(),
                 endpoint = params.endpoint,
                 protocol = $location.protocol(),
-                url = protocol + '://' + host + ':8080/socket.io/' + endpoint;
+                url = protocol + '://' + host + ':' + $AnsibleConfig.websocket_port + '/socket.io/' + endpoint;
 
             function getSocketTip(status) {
                 var result = '';
