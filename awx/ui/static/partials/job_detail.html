@@ -1,6 +1,6 @@
 <div class="tab-pane" id="jobs-detail">
     <div ng-cloak id="htmlTemplate">
-        
+
         <div class="row">
             <div id="breadcrumb-container" class="col-md-12" style="position: relative;">
                 <div class="nav-path">
@@ -11,7 +11,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="row" style="position: relative;">
             <div id="job-detail-container">
                 <div class="job_well">
@@ -20,7 +20,7 @@
                         <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 status-column"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
                         <div class="col-lg-7 col-md-7 col-sm-4 col-xs-4">{{ job_status.explanation }}</div>
                         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-right">
-                            <a href="/#/jobs/{{ job_id }}/stdout" target="_blank" type="button" class="btn btn-default btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top" ng-show="job_status.status == 'successful' || job_status.status == 'failed' || job_status.status == 'error'"><i class="fa fa-external-link"></i></a>
+                            <a href="/#/jobs/{{ job_id }}/stdout" target="_blank" type="button" class="btn btn-default btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top"><i class="fa fa-external-link"></i></a>
                             <button type="button" id="summary-button" class="btn btn-default btn-xs" ng-click="toggleSummary()" aw-tool-tip="View summary" data-placement="top"><i class="fa fa-arrow-circle-left fa-lg"></i></button>
                         </div>
                     </div>
@@ -52,14 +52,14 @@
                                 </div>
                             </div>
                             <div id="plays-table-detail" aw-custom-scroll class="table-detail">
-                                <div class="row cursor-pointer" 
-                                    ng-repeat="play in plays | FilterById : search_all_plays | filter:{ status : searchAllStatus}" 
+                                <div class="row cursor-pointer"
+                                    ng-repeat="play in plays | FilterById : search_all_plays | filter:{ status : searchAllStatus}"
                                     ng-class="play.playActiveClass" ng-click="selectPlay(play.id)">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ play.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
                                         data-placement="top">{{ play.elapsed }}
                                     </div>
-                                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 status-column" aw-tool-tip="Event Id: {{ play.id }}<br />Status: {{ play.status_text }}" 
+                                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 status-column" aw-tool-tip="Event Id: {{ play.id }}<br />Status: {{ play.status_text }}"
                                         data-placement="top">
                                         <i class="fa icon-job-{{ play.status }}"></i> {{ play.name }}</span>
                                     </div>
@@ -84,7 +84,7 @@
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
                                             data-placement="top">{{ task.elapsed }}
                                     </div>
-                                    <div class="col-lg-5 col-md-5 col-sm-10 col-xs-12 status-column" aw-tool-tip="Event Id: {{ task.id }} Status: {{ task.status }}" 
+                                    <div class="col-lg-5 col-md-5 col-sm-10 col-xs-12 status-column" aw-tool-tip="Event Id: {{ task.id }} Status: {{ task.status }}"
                                         data-placement="top">
                                         <i class="fa icon-job-{{  task.status }}"></i><span ng-show="hasRoles"> {{ task.role }} </span> {{ task.name }}
                                     </div>
@@ -130,7 +130,7 @@
                         </div><!-- section -->
 
                     </div><!-- job-detail-tables -->
-                
+
                 </div><!-- well -->
 
             </div><!-- job-detail-container -->
@@ -171,7 +171,7 @@
                         <div id="hosts-summary-section" class="section job_summary">
                             <div class="header">
                                 <div class="title">Host Summary</div>
-                                <div class="legend pull-right"><i class="fa fa-circle successful-hosts-color"></i> Successful <i class="fa fa-circle changed-hosts-color"></i> Changed 
+                                <div class="legend pull-right"><i class="fa fa-circle successful-hosts-color"></i> Successful <i class="fa fa-circle changed-hosts-color"></i> Changed
                                 <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
                             </div>
                             <div class="table-header">
@@ -206,10 +206,10 @@
                     <div id="graph-section" class="section">
                         <div class="header">
                             <div class="title">Host Status Summary</div>
-                            <div class="legend pull-right" style="display: none;"><i class="fa fa-circle successful-hosts-color"></i> Successful <i class="fa fa-circle changed-hosts-color"></i> Changed 
+                            <div class="legend pull-right" style="display: none;"><i class="fa fa-circle successful-hosts-color"></i> Successful <i class="fa fa-circle changed-hosts-color"></i> Changed
                                     <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
                         </div>
-                    </div><!-- graph section -->        
+                    </div><!-- graph section -->
                 </div>
             </div><!-- col-md-5 -->
 

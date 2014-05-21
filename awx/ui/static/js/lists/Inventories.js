@@ -28,6 +28,7 @@ angular.module('InventoriesListDefinition', [])
                 nosort: true,
                 ngClick: "null",
                 iconOnly: true,
+                excludeModal: true,
                 icons: [{
                     icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
                     awToolTip: "{{ inventory.syncTip }}",
@@ -45,7 +46,8 @@ angular.module('InventoriesListDefinition', [])
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-md-4 col-sm-6 col-xs-6'
+                columnClass: 'col-md-4 col-sm-6 col-xs-6',
+                modalColumnClass: 'col-md-8'
             },
             organization: {
                 label: 'Organization',

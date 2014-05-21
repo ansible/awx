@@ -26,7 +26,8 @@ angular.module('CredentialsListDefinition', [])
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-md-3 col-sm-9 col-xs-9'
+                columnClass: 'col-md-3 col-sm-9 col-xs-9',
+                modalColumnClass: 'col-md-8'
             },
             description: {
                 label: 'Description',

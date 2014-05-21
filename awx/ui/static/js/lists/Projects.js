@@ -33,12 +33,14 @@ angular.module('ProjectsListDefinition', [])
                 columnClass: "col-lg-1 col-md-1 col-sm-2 col-xs-2",
                 nosort: true,
                 searchType: 'select',
-                searchOptions: []  //set in the controller
+                searchOptions: [],  //set in the controller
+                excludeModal: true
             },
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: "col-lg-6 col-md-4 col-sm-6 col-xs-6"
+                columnClass: "col-lg-6 col-md-4 col-sm-6 col-xs-6",
+                modalColumnClass: 'col-md-8'
             },
             last_updated: {
                 label: 'Last Updated',

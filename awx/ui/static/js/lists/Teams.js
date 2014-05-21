@@ -24,18 +24,21 @@ angular.module('TeamsListDefinition', [])
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-md-4 col-sm-9 col-xs-9'
+                columnClass: 'col-md-4 col-sm-9 col-xs-9',
+                modalColumnClass: 'col-md-8'
             },
             description: {
                 label: 'Description',
-                columnClass: 'col-md-3 hidden-sm hidden-xs'
+                columnClass: 'col-md-3 hidden-sm hidden-xs',
+                excludeModal: true
             },
             organization: {
                 label: 'Organization',
                 ngBind: 'team.organization_name',
                 sourceModel: 'organization',
                 sourceField: 'name',
-                columnClass: 'col-md-3 hidden-sm hidden-xs'
+                columnClass: 'col-md-3 hidden-sm hidden-xs',
+                excludeModal: true
             }
         },
 

@@ -323,8 +323,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                 for (fld in list.fields) {
                     cnt++;
                     if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&
-                        !(options.mode === 'lookup' && list.fields[fld].excludeModal !== undefined &&
-                        list.fields[fld].excludeModal === true)) {
+                        !(options.mode === 'lookup' && list.fields[fld].excludeModal === true)) {
                         html += Column({
                             list: list,
                             fld: fld,
@@ -449,9 +448,14 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                 }
                 for (fld in list.fields) {
                     if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&
-                        !(options.mode === 'lookup' && list.fields[fld].excludeModal !== undefined && list.fields[fld].excludeModal === true)) {
+                        !(options.mode === 'lookup' && list.fields[fld].excludeModal === true)) {
                         html += "<th class=\"list-header";
-                        html += (list.fields[fld].columnClass) ? " " + list.fields[fld].columnClass : "";
+                        if (options.mode === 'lookup' && list.fields[fld].modalColumnClass) {
+                            html += " " + list.fields[fld].modalColumnClass;
+                        }
+                        else if (list.fields[fld].columnClass) {
+                            html += " " + list.fields[fld].columnClass;
+                        }
                         html += "\" id=\"" + list.iterator + "-" + fld + "-header\"";
                         html += (list.fields[fld].columnShow) ? " ng-show=\"" + list.fields[fld].columnShow + "\" " : "";
                         html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? " ng-click=\"sort('" + list.iterator + "','" + fld + "')\"" : "";

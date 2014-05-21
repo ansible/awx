@@ -80,7 +80,7 @@ angular.module('GeneratorHelpers', [])
 .factory('SelectIcon', ['Icon',
     function (Icon) {
         return function (params) {
-            // Common point for matching any type of action to the appropriate 
+            // Common point for matching any type of action to the appropriate
             // icon. The intention is to maintain consistent meaning and presentation
             // for every icon used in the application.
             var icon,
@@ -465,7 +465,7 @@ angular.module('GeneratorHelpers', [])
             list = params.list,
             base = params.base,
             fld = params.fld;
-        
+
         if (field.linkTo) {
             html += "<a href=\"" + field.linkTo + "\" ";
         } else if (field.ngClick) {
@@ -509,7 +509,7 @@ angular.module('GeneratorHelpers', [])
             html += Icon(field.icon) + " ";
         }
 
-        // Add data binds 
+        // Add data binds
         if (!field.ngBindHtml && !field.iconOnly && (field.showValue === undefined || field.showValue === true)) {
             if (field.ngBind) {
                 html += "{{ " + field.ngBind;
@@ -552,7 +552,12 @@ angular.module('GeneratorHelpers', [])
             } else {
                 html += "<td class=\"" + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";
-                html += (field.columnClass) ? " " + field.columnClass : "";
+                if (options.mode === 'lookup' && field.modalColumnClass) {
+                    html += " " + field.modalColumnClass;
+                }
+                else if (field.columnClass) {
+                    html += " " + field.columnClass;
+                }
                 html += "\" ";
                 html += (field.ngClass) ? Attr(field, 'ngClass') : "";
                 html += (options.mode === 'lookup' || options.mode === 'select') ? " ng-click=\"toggle_" + list.iterator +
@@ -617,7 +622,7 @@ angular.module('GeneratorHelpers', [])
                     } else if (field.icon) {
                         html += Icon(field.icon) + " ";
                     }
-                    // Add data binds 
+                    // Add data binds
                     if (!field.ngBindHtml && !field.iconOnly && (field.showValue === undefined || field.showValue === true)) {
                         if (field.ngBind) {
                             html += "{{ " + field.ngBind;
@@ -662,14 +667,14 @@ angular.module('GeneratorHelpers', [])
 
 .factory('HelpCollapse', function () {
     return function (params) {
-        
+
         var hdr = params.hdr,
             content = params.content,
             show = params.show,
             idx = params.idx,
             bind = params.bind,
             html = '';
-        
+
         html += "<div class=\"panel-group collapsible-help\" ";
         html += (show) ? "ng-show=\"" + show + "\"" : "";
         html += ">\n";
@@ -707,7 +712,7 @@ angular.module('GeneratorHelpers', [])
             modifier,
             searchWidgets = (params.searchWidgets) ? params.searchWidgets : 1,
             sortedKeys;
-        
+
         function addSearchFields(idx) {
             var html = '';
             sortedKeys = Object.keys(form.fields).sort();
@@ -731,7 +736,7 @@ angular.module('GeneratorHelpers', [])
 
         for (i = 1; i <= searchWidgets; i++) {
             modifier = (i === 1) ? '' : i;
-    
+
             if (includeSize) {
                 html += "<div class=\"";
                 html += (size) ? size : "col-lg-4 col-md-6";
@@ -785,7 +790,7 @@ angular.module('GeneratorHelpers', [])
                 "!" + iterator + "ShowStartBtn" + modifier + " || " +
                 iterator + "HideAllStartBtn" + modifier + "\"" +
                 "><i class=\"fa fa-search\"></i></a>\n";
-            
+
             if (includeSize) {
                 html += "</div>\n";
             }

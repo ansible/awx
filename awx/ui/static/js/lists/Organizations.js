@@ -27,7 +27,8 @@ angular.module('OrganizationListDefinition', [])
             },
             description: {
                 label: 'Description',
-                columnClass: 'hidden-sm hidden-xs'
+                columnClass: 'hidden-sm hidden-xs',
+                excludeModal: true
             }
         },
 
