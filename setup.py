@@ -60,7 +60,7 @@ def proc_data_files(data_files):
 
 #####################################################################
 
-class sdist_awx(_sdist, object):
+class sdist_deb(_sdist, object):
     '''
     Custom sdist command to distribute some files as .pyc only.
     '''
@@ -70,7 +70,7 @@ class sdist_awx(_sdist, object):
             if f.endswith('.egg-info/SOURCES.txt'):
                 files.remove(f)
                 sources_txt_path = f
-        super(sdist_awx, self).make_release_tree(base_dir, files)
+        super(sdist_deb, self).make_release_tree(base_dir, files)
         new_sources_path = os.path.join(base_dir, sources_txt_path)
         if os.path.isfile(new_sources_path):
             log.warn('unlinking previous %s', new_sources_path)
@@ -79,9 +79,8 @@ class sdist_awx(_sdist, object):
         new_sources = file(new_sources_path, 'w')
         for line in file(sources_txt_path, 'r'):
             line = line.strip()
-            # Include both .py and .pyc files to SOURCES.txt
             if line in self.pyc_only_files:
-                line = line + '\n' + line + 'c'
+                line = line + 'c'
             new_sources.write(line + '\n')
 
     def make_distribution(self):
@@ -105,9 +104,7 @@ class sdist_awx(_sdist, object):
                 # Replace .py with .pyc file
                 self.filelist.files[n] = f + 'c'
                 self.pyc_only_files.append(f)
-        # Add .py files back to the filelist
-        self.filelist.files.extend(self.pyc_only_files)
-        super(sdist_awx, self).make_distribution()
+        super(sdist_deb, self).make_distribution()
 
 #####################################################################
 
@@ -206,12 +203,16 @@ setup(
             'tag_build': '-%s' % build_timestamp,
         },
         'aliases': {
-            'dev_build': 'clean --all egg_info sdist_awx',
-            'release_build': 'clean --all egg_info -b "" sdist_awx',
+            # For RPM builds, don't byte-compile awx ... RPM handles that for us
+            'dev_rpm': 'clean --all egg_info sdist',
+            'release_rpm': 'clean --all egg_info -b "" sdist',
+            # For DEB builds, do byte-compile awx
+            'dev_deb': 'clean --all egg_info sdist_deb',
+            'release_deb': 'clean --all egg_info -b "" sdist_deb',
         },
     },
     cmdclass = {
-        'sdist_awx': sdist_awx,
+        'sdist_deb': sdist_deb,
         'install_lib': install_lib,
     },
 )

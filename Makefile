@@ -210,11 +210,20 @@ release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
 
+# Traditional 'sdist'
 sdist: clean minjs
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
-	   $(PYTHON) setup.py release_build; \
+	   $(PYTHON) setup.py release_rpm; \
 	else \
-	   BUILD=$(BUILD) $(PYTHON) setup.py sdist_awx; \
+	   BUILD=$(BUILD) $(PYTHON) setup.py dev_rpm; \
+	fi
+
+# Differs from 'sdist' because it includes 'byte-compiled' files in the tarball
+sdist_deb: clean minjs
+	if [ "$(OFFICIAL)" = "yes" ] ; then \
+	   $(PYTHON) setup.py release_deb ; \
+	else \
+	   BUILD=$(BUILD) $(PYTHON) setup.py dev_deb; \
 	fi
 
 rpmtar: sdist
@@ -258,7 +267,7 @@ rpm: rpmtar
         --define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
         -ba rpm-build/$(NAME).spec
 
-deb: sdist
+deb: sdist_deb
 	@mkdir -p deb-build
 	@cp dist/$(SDIST_TAR_FILE) deb-build/
 	(cd deb-build && tar zxf $(SDIST_TAR_FILE))
