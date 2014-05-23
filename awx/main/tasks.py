@@ -48,44 +48,15 @@ logger = logging.getLogger('awx.main.tasks')
 # FIXME: Cleanly cancel task when celery worker is stopped.
 
 @task()
-def bulk_inventory_element_delete(group_details):
-    def remove_host_from_group(host, group):
-        host.groups.remove(group)
-        host_inv_sources = host.inventory_sources.all()
-        for inv_source in group.inventory_sources.all():
-            if inv_source in host_inv_sources:
-                host.inventory_sources.remove(inv_source)
-        return host.groups.count() < 1
-    def mark_actual(group_details):
-        overall_parent = Group.objects.get(id=group_details['parent'])
-        linked_children = [(overall_parent , Group.objects.get(id=g['id'])) for g in group_details['children']]
-        initial_hosts = [Host.objects.get(id=h['id']) for h in group_details['hosts']]
-        marked_hosts = []
-        marked_groups = []
-        for host in initial_hosts:
-            last_group = remove_host_from_group(host, overall_parent)
-            if last_group:
-                marked_hosts.append(host)
-        for subgroup in linked_children:
-            parent, group = subgroup
-            if parent is not None:
-                group.parents.remove(parent)
-            if group.parents.count() > 0:
-                continue
-            for host in group.hosts.all():
-                last_group = remove_host_from_group(host, group)
-                if last_group:
-                    marked_hosts.append(host)
-            for childgroup in group.children.all():
-                linked_children.append((group, childgroup))
-            marked_groups.append(group)
-        for group in marked_groups:
-            group.mark_inactive()
-        for host in marked_hosts:
-            host.mark_inactive()
+def bulk_inventory_element_delete(inventory, hosts=[], groups=[]):
+    from awx.main.signals import disable_activity_stream
     with ignore_inventory_computed_fields():
-        mark_actual(group_details)
-    update_inventory_computed_fields.delay(group_details['inventory'], True)
+        with disable_activity_stream():
+            for group in groups:
+                Group.objects.get(id=group).mark_inactive(skip_active_check=True)
+            for host in hosts:
+                Host.objects.get(id=host).mark_inactive(skip_active_check=True)
+    update_inventory_computed_fields(inventory)
 
 @task(bind=True)
 def tower_periodic_scheduler(self):

@@ -271,10 +271,10 @@ class PrimordialModel(CreatedModifiedModel):
 
     tags = TaggableManager(blank=True)
 
-    def mark_inactive(self, save=True, update_fields=None):
+    def mark_inactive(self, save=True, update_fields=None, skip_active_check=False):
         '''Use instead of delete to rename and mark inactive.'''
         update_fields = update_fields or []
-        if self.active:
+        if skip_active_check or self.active:
             dtnow = now()
             if 'name' in self._meta.get_all_field_names():
                 self.name   = "_deleted_%s_%s" % (dtnow.isoformat(), self.name)

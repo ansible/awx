@@ -20,7 +20,7 @@ import zmq
 
 # Django
 from django.conf import settings
-from django.db import models
+from django.db import models, connection
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
@@ -389,12 +389,12 @@ class Host(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:host_detail', args=(self.pk,))
 
-    def mark_inactive(self, save=True, from_inventory_import=False):
+    def mark_inactive(self, save=True, from_inventory_import=False, skip_active_check=False):
         '''
         When marking hosts inactive, remove all associations to related
         inventory sources.
         '''
-        super(Host, self).mark_inactive(save=save)
+        super(Host, self).mark_inactive(save=save, skip_active_check=skip_active_check)
         if not from_inventory_import:
             self.inventory_sources.clear()
 
@@ -532,19 +532,58 @@ class Group(CommonModelNameNotUnique):
 
     def mark_inactive_recursive(self):
         from awx.main.tasks import update_inventory_computed_fields, bulk_inventory_element_delete
-        group_data = {'parent': self.id, 'inventory': self.inventory.id,
-                                             'children': [{'id': c.id} for c in self.children.all()],
-                                             'hosts': [{'id': h.id} for h in self.hosts.all()]}
-        self.mark_inactive()
-        bulk_inventory_element_delete.delay(group_data)
+        from awx.main.utils import ignore_inventory_computed_fields
+        from awx.main.signals import disable_activity_stream
+        # group_data = {'parent': self.id, 'inventory': self.inventory.id,
+        #                                      'children': [{'id': c.id} for c in self.children.all()],
+        #                                      'hosts': [{'id': h.id} for h in self.hosts.all()]}
+        #self.mark_inactive(clear_children=False)
+        def remove_host_from_group(host, group):
+            #host.groups.remove(group)
+            host.inventory_sources.through.objects.filter(inventorysource__group=group).delete()
+            return host.groups.count() < 2
+        def mark_actual():
+            initial_hosts = self.hosts.all().prefetch_related('groups', 'inventory_sources')
+            linked_children = [(self, c) for c in self.children.all().prefetch_related('parents', 'hosts', 'inventory_sources', 'children')]
+            marked_hosts = []
+            marked_groups = [self]
+            for host in initial_hosts:
+                is_last_group = remove_host_from_group(host, self)
+                if is_last_group:
+                    marked_hosts.append(host)
+            self.hosts.through.objects.filter(group=self).delete()
+            self.children.through.objects.filter(to_group=self).delete()
+            for subgroup in linked_children:
+                parent, group = subgroup
+                #group.parents.remove(parent)
+                if group.parents.count() > 1:
+                    continue
+                all_group_hosts = group.hosts.all()
+                for host in group.hosts.all():
+                    is_last_group = remove_host_from_group(host, group)
+                    if is_last_group:
+                        marked_hosts.append(host)
+                group.hosts.through.objects.filter(group=group).delete()
+                for childgroup in group.children.all().prefetch_related('parents', 'hosts', 'inventory_sources', 'children'):
+                    linked_children.append((group, childgroup))
+                marked_groups.append(group)
+                group.children.through.objects.filter(to_group=group).delete()
+            all_groups = [g.id for g in marked_groups]
+            all_hosts = [h.id for h in marked_hosts]
+            Group.objects.filter(id__in=all_groups).update(active=False)
+            Host.objects.filter(id__in=all_hosts).update(active=False)
+            bulk_inventory_element_delete.delay(self.inventory.id, groups=all_groups, hosts=all_hosts)
+        with ignore_inventory_computed_fields():
+            with disable_activity_stream():
+                mark_actual()
 
-    def mark_inactive(self, save=True, recompute=True, from_inventory_import=False):
+    def mark_inactive(self, save=True, recompute=True, from_inventory_import=False, skip_active_check=False):
         '''
         When marking groups inactive, remove all associations to related
         groups/hosts/inventory_sources.
         '''
         def mark_actual():
-            super(Group, self).mark_inactive(save=save)
+            super(Group, self).mark_inactive(save=save, skip_active_check=skip_active_check)
             self.inventory_source.mark_inactive(save=save)
             self.inventory_sources.clear()
             self.parents.clear()
@@ -553,7 +592,7 @@ class Group(CommonModelNameNotUnique):
         i = self.inventory
 
         if from_inventory_import:
-            super(Group, self).mark_inactive(save=save)
+            super(Group, self).mark_inactive(save=save, skip_active_check=skip_active_check)
         elif recompute:
             with ignore_inventory_computed_fields():
                 mark_actual()
