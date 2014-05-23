@@ -381,6 +381,17 @@ class InventoryTest(BaseTest):
         with self.current_user(self.super_django_user):
             response = self.post(groups, data=data, expect=400)
 
+        # A new group should not be able to be added a removed group
+        del_group = inv.groups.create(name='del')
+        undel_group = inv.groups.create(name='nondel')
+        del_children_url = reverse('api:group_children_list', args=(del_group.pk,))
+        nondel_url         = reverse('api:group_detail',
+                                  args=(Group.objects.get(name='nondel').pk,))
+        del_group.mark_inactive()
+        nondel_detail = self.get(nondel_url, expect=200, auth=self.get_normal_credentials())
+        self.post(del_children_url, data=nondel_detail, expect=403, auth=self.get_normal_credentials())
+
+
         #################################################
         # HOSTS->inventories POST via subcollection
        
@@ -440,7 +451,7 @@ class InventoryTest(BaseTest):
         # make sure duplicates give 400s
         self.post(url5, data=new_group_d, expect=400, auth=self.get_other_credentials())
         got = self.get(url5, expect=200, auth=self.get_other_credentials())
-        self.assertEquals(got['count'], 4)
+        self.assertEquals(got['count'], 5)
         
         # side check: see if root groups URL is operational.  These are groups without parents.
         root_groups = self.get(root_groups, expect=200, auth=self.get_super_credentials())
@@ -450,7 +461,7 @@ class InventoryTest(BaseTest):
         remove_me['disassociate'] = 1
         self.post(url5, data=remove_me, expect=204, auth=self.get_other_credentials())
         got = self.get(url5, expect=200, auth=self.get_other_credentials())
-        self.assertEquals(got['count'], 3)
+        self.assertEquals(got['count'], 4)
         
         ###################################################
         # VARIABLES

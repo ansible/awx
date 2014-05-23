@@ -429,6 +429,9 @@ class GroupAccess(BaseAccess):
         if not super(GroupAccess, self).can_attach(obj, sub_obj, relationship,
                                                    data, skip_sub_obj_read_check):
             return False
+        # Don't allow attaching if the sub obj is not active
+        if not obj.active:
+            return False
         # Prevent assignments between different inventories.
         if obj.inventory != sub_obj.inventory:
             raise ParseError('Cannot associate two items from different inventories')
