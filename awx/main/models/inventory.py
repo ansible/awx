@@ -534,13 +534,8 @@ class Group(CommonModelNameNotUnique):
         from awx.main.tasks import update_inventory_computed_fields, bulk_inventory_element_delete
         from awx.main.utils import ignore_inventory_computed_fields
         from awx.main.signals import disable_activity_stream
-        # group_data = {'parent': self.id, 'inventory': self.inventory.id,
-        #                                      'children': [{'id': c.id} for c in self.children.all()],
-        #                                      'hosts': [{'id': h.id} for h in self.hosts.all()]}
-        #self.mark_inactive(clear_children=False)
         def remove_host_from_group(host, group):
-            #host.groups.remove(group)
-            host.inventory_sources.through.objects.filter(inventorysource__group=group).delete()
+            #host.inventory_sources.through.objects.filter(inventorysource__group=group).delete()
             return host.groups.count() < 2
         def mark_actual():
             initial_hosts = self.hosts.all().prefetch_related('groups', 'inventory_sources')
@@ -553,9 +548,9 @@ class Group(CommonModelNameNotUnique):
                     marked_hosts.append(host)
             self.hosts.through.objects.filter(group=self).delete()
             self.children.through.objects.filter(to_group=self).delete()
+            self.inventory_sources.through.objects.filter(group=self).delete()
             for subgroup in linked_children:
                 parent, group = subgroup
-                #group.parents.remove(parent)
                 if group.parents.count() > 1:
                     continue
                 all_group_hosts = group.hosts.all()
@@ -568,6 +563,7 @@ class Group(CommonModelNameNotUnique):
                     linked_children.append((group, childgroup))
                 marked_groups.append(group)
                 group.children.through.objects.filter(to_group=group).delete()
+                group.inventory_sources.through.objects.filter(group=group).delete()
             all_groups = [g.id for g in marked_groups]
             all_hosts = [h.id for h in marked_hosts]
             Group.objects.filter(id__in=all_groups).update(active=False)
