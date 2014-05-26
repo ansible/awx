@@ -733,6 +733,7 @@ class Command(NoArgsCommand):
                     db_group.children.remove(db_child)
                     self.logger.info('Group "%s" removed from group "%s"',
                                      db_child.name, db_group.name)
+            # FIXME: Inventory source group relationships
             # Delete group/host relationships not present in imported data.
             db_hosts = db_group.hosts.filter(active=True)
             del_host_pks = set(db_hosts.values_list('pk', flat=True))
@@ -804,6 +805,12 @@ class Command(NoArgsCommand):
             queries_before = len(connection.queries)
         inv_src_group = self.inventory_source.group
         all_group_names = sorted(self.all_group.all_groups.keys())
+        root_group_names = set()
+        for k,v in self.all_group.all_groups.items():
+            if not v.parents:
+                root_group_names.add(k)
+            if len(v.parents) == 1 and v.parents[0].name == 'all':
+                root_group_names.add(k)
         existing_group_names = set()
         for offset in xrange(0, len(all_group_names), self._batch_size):
             group_names = all_group_names[offset:(offset + self._batch_size)]
@@ -824,7 +831,7 @@ class Command(NoArgsCommand):
                 else:
                     self.logger.info('Group "%s" variables unmodified', group.name)
                 existing_group_names.add(group.name)
-                if inv_src_group and inv_src_group != group:
+                if inv_src_group and inv_src_group != group and group.name in root_group_names:
                     self._batch_add_m2m(inv_src_group.children, group)
                 self._batch_add_m2m(self.inventory_source.groups, group)
         for group_name in all_group_names:
@@ -836,7 +843,7 @@ class Command(NoArgsCommand):
             #group.inventory_source
             InventorySource.objects.create(group=group, inventory=self.inventory, name=('%s (%s)' % (group_name, self.inventory.name)))
             self.logger.info('Group "%s" added', group.name)
-            if inv_src_group:
+            if inv_src_group and group_name in root_group_names:
                 self._batch_add_m2m(inv_src_group.children, group)
             self._batch_add_m2m(self.inventory_source.groups, group)
         if inv_src_group:
@@ -908,7 +915,6 @@ class Command(NoArgsCommand):
         if self.inventory_source.group:
             self._batch_add_m2m(self.inventory_source.group.hosts, db_host)
         self._batch_add_m2m(self.inventory_source.hosts, db_host)
-        #host.update_computed_fields(False, False)
 
     def _create_update_hosts(self):
         '''
@@ -995,7 +1001,6 @@ class Command(NoArgsCommand):
             if self.inventory_source.group:
                 self._batch_add_m2m(self.inventory_source.group.hosts, db_host)
             self._batch_add_m2m(self.inventory_source.hosts, db_host)
-            #host.update_computed_fields(False, False)
 
         if self.inventory_source.group:
             self._batch_add_m2m(self.inventory_source.group.hosts, flush=True)

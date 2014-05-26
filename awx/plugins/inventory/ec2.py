@@ -230,8 +230,12 @@ class Ec2Inventory(object):
         self.cache_path_cache = cache_dir + "/ansible-ec2.cache"
         self.cache_path_index = cache_dir + "/ansible-ec2.index"
         self.cache_max_age = config.getint('ec2', 'cache_max_age')
-        
 
+        # Ansible Tower - configure nested groups instead of flat namespace.
+        if config.has_option('ec2', 'nested_groups'):
+            self.nested_groups = config.getboolean('ec2', 'nested_groups')
+        else:
+            self.nested_groups = False
 
     def parse_cli_args(self):
         ''' Command line argument processing '''
@@ -321,14 +325,14 @@ class Ec2Inventory(object):
             for instance in reservation.instances:
                 return instance
 
-
     def add_instance(self, instance, region):
         ''' Adds an instance to the inventory and index, as long as it is
         addressable '''
 
+        # For Ansible Tower, return all instances regardless of state.
         # Only want running instances
-        if instance.state != 'running':
-            return
+        #if instance.state != 'running':
+        #    return
 
         # Select the best destination address
         if instance.subnet_id:
@@ -347,23 +351,36 @@ class Ec2Inventory(object):
         self.inventory[instance.id] = [dest]
 
         # Inventory: Group by region
-        self.push(self.inventory, region, dest)
+        if self.nested_groups:
+            self.push_group(self.inventory, 'regions', region)
+        else:
+            self.push(self.inventory, region, dest)
 
         # Inventory: Group by availability zone
         self.push(self.inventory, instance.placement, dest)
+        if self.nested_groups:
+            self.push_group(self.inventory, region, instance.placement)
 
         # Inventory: Group by instance type
-        self.push(self.inventory, self.to_safe('type_' + instance.instance_type), dest)
+        type_name = self.to_safe('type_' + instance.instance_type)
+        self.push(self.inventory, type_name, dest)
+        if self.nested_groups:
+            self.push_group(self.inventory, 'types', type_name)
 
         # Inventory: Group by key pair
         if instance.key_name:
-            self.push(self.inventory, self.to_safe('key_' + instance.key_name), dest)
+            key_name = self.to_safe('key_' + instance.key_name)
+            self.push(self.inventory, key_name, dest)
+            if self.nested_groups:
+                self.push_group(self.inventory, 'keys', key_name)
         
         # Inventory: Group by security group
         try:
             for group in instance.groups:
                 key = self.to_safe("security_group_" + group.name)
                 self.push(self.inventory, key, dest)
+                if self.nested_groups:
+                    self.push_group(self.inventory, 'security_groups', key)
         except AttributeError:
             print 'Package boto seems a bit older.'
             print 'Please upgrade boto >= 2.3.0.'
@@ -373,12 +390,17 @@ class Ec2Inventory(object):
         for k, v in instance.tags.iteritems():
             key = self.to_safe("tag_" + k + "=" + v)
             self.push(self.inventory, key, dest)
+            if self.nested_groups:
+                self.push_group(self.inventory, 'tags', self.to_safe("tag_" + k))
+                self.push_group(self.inventory, self.to_safe("tag_" + k), key)
 
         # Inventory: Group by Route53 domain names if enabled
         if self.route53_enabled:
             route53_names = self.get_instance_route53_names(instance)
             for name in route53_names:
                 self.push(self.inventory, name, dest)
+                if self.nested_groups:
+                    self.push_group(self.inventory, 'route53', name)
 
         # Global Tag: tag all EC2 instances
         self.push(self.inventory, 'ec2', dest)
@@ -561,6 +583,12 @@ class Ec2Inventory(object):
         else:
             my_dict[key] = [element]
 
+    def push_group(self, my_dict, key, element):
+        '''Push a group as a child of another group.'''
+        parent_group = my_dict.setdefault(key, {})
+        child_groups = parent_group.setdefault('children', [])
+        if element not in child_groups:
+            child_groups.append(element)
 
     def get_inventory_from_cache(self):
         ''' Reads the inventory from the cache file and returns it as a JSON

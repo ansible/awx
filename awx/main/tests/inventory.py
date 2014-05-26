@@ -1398,7 +1398,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.group = group
         inventory_source = self.update_inventory_source(self.group,
             source='ec2', credential=credential, source_regions=source_regions,
-            source_vars='---')
+            source_vars='---\n\nnested_groups: false\n')
         # Check first without instance_id set (to import by name only).
         with self.settings(EC2_INSTANCE_ID_VAR=''):
             self.check_inventory_source(inventory_source)
@@ -1427,6 +1427,58 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # Verify that main group is in top level groups (hasn't been added as
         # its own child).
         self.assertTrue(self.group in self.inventory.root_groups)
+
+    def test_update_from_ec2_with_nested_groups(self):
+        source_username = getattr(settings, 'TEST_AWS_ACCESS_KEY_ID', '')
+        source_password = getattr(settings, 'TEST_AWS_SECRET_ACCESS_KEY', '')
+        source_regions = getattr(settings, 'TEST_AWS_REGIONS', 'all')
+        if not all([source_username, source_password]):
+            self.skipTest('no test ec2 credentials defined!')
+        credential = Credential.objects.create(kind='aws',
+                                               user=self.super_django_user,
+                                               username=source_username,
+                                               password=source_password)
+        group = self.group
+        group.name = 'AWS Inventory'
+        group.save()
+        self.group = group
+        inventory_source = self.update_inventory_source(self.group,
+            source='ec2', credential=credential, source_regions=source_regions,
+            source_vars='---') # nested_groups is true by default.
+        self.check_inventory_source(inventory_source)
+        # Manually disable all hosts, verify a new update re-enables them.
+        for host in self.inventory.hosts.all():
+            host.enabled = False
+            host.save()
+        self.check_inventory_source(inventory_source, initial=False)
+        # Verify that main group is in top level groups (hasn't been added as
+        # its own child).
+        self.assertTrue(self.group in self.inventory.root_groups)
+        # Verify that returned groups are nested:
+        child_names = self.group.children.values_list('name', flat=True)
+        for name in child_names:
+            self.assertFalse(name.startswith('us-'))
+            self.assertFalse(name.startswith('type_'))
+            self.assertFalse(name.startswith('key_'))
+            self.assertFalse(name.startswith('security_group_'))
+            self.assertFalse(name.startswith('tag_'))
+        self.assertTrue('ec2' in child_names)
+        self.assertTrue('regions' in child_names)
+        self.assertTrue('types' in child_names)
+        self.assertTrue('keys' in child_names)
+        self.assertTrue('security_groups' in child_names)
+        self.assertTrue('tags' in child_names)
+        # Print out group/host tree for debugging.
+        return
+        print
+        def draw_tree(g, d=0):
+            print ('  ' * d) + '+ ' + g.name
+            for h in g.hosts.order_by('name'):
+                print ('  ' * d) + '  - ' + h.name
+            for c in g.children.order_by('name'):
+                draw_tree(c, d+1)
+        for g in self.inventory.root_groups.order_by('name'):
+            draw_tree(g)
         
     def test_update_from_rax(self):
         source_username = getattr(settings, 'TEST_RACKSPACE_USERNAME', '')

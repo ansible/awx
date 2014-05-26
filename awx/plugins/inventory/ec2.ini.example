@@ -52,3 +52,7 @@ cache_path = ~/.ansible/tmp
 # The number of seconds a cache file is considered valid. After this many
 # seconds, a new API call will be made, and the cache file will be updated.
 cache_max_age = 300
+
+# For Ansible Tower, organize groups into a nested/hierarchy instead of a flat
+# namespace.
+nested_groups = True
