@@ -11,7 +11,7 @@ import os
 import re
 import shlex
 import uuid
-
+import copy
 # PyYAML
 import yaml
 
@@ -534,41 +534,61 @@ class Group(CommonModelNameNotUnique):
         from awx.main.tasks import update_inventory_computed_fields, bulk_inventory_element_delete
         from awx.main.utils import ignore_inventory_computed_fields
         from awx.main.signals import disable_activity_stream
-        def remove_host_from_group(host, group):
-            #host.inventory_sources.through.objects.filter(inventorysource__group=group).delete()
-            return host.groups.count() < 2
         def mark_actual():
-            initial_hosts = self.hosts.all().prefetch_related('groups', 'inventory_sources')
-            linked_children = [(self, c) for c in self.children.all().prefetch_related('parents', 'hosts', 'inventory_sources', 'children')]
+            all_group_hosts = Group.hosts.through.objects.select_related("host", "group").filter(group__inventory=self.inventory)
+            group_hosts = {'groups': {}, 'hosts': {}}
+            all_group_parents = Group.parents.through.objects.select_related("parent", "group").filter(from_group__inventory=self.inventory)
+            group_children = {}
+            group_parents = {}
             marked_hosts = []
-            marked_groups = [self]
-            for host in initial_hosts:
-                is_last_group = remove_host_from_group(host, self)
-                if is_last_group:
-                    marked_hosts.append(host)
-            self.hosts.through.objects.filter(group=self).delete()
-            self.children.through.objects.filter(to_group=self).delete()
-            self.inventory_sources.through.objects.filter(group=self).delete()
+            marked_groups = [self.id]
+
+            for pairing in all_group_hosts:
+                if pairing.group_id not in group_hosts['groups']:
+                    group_hosts['groups'][pairing.group_id] = []
+                if pairing.host_id not in group_hosts['hosts']:
+                    group_hosts['hosts'][pairing.host_id] = []
+                group_hosts['groups'][pairing.group_id].append(pairing.host_id)
+                group_hosts['hosts'][pairing.host_id].append(pairing.group_id)
+
+            for pairing in all_group_parents:
+                if pairing.to_group_id not in group_children:
+                    group_children[pairing.to_group_id] = []
+                if pairing.from_group_id not in group_parents:
+                    group_parents[pairing.from_group_id] = []
+                group_children[pairing.to_group_id].append(pairing.from_group_id)
+                group_parents[pairing.from_group_id].append(pairing.to_group_id)
+
+            linked_children = [(self.id, g) for g in group_children[self.id]] if self.id in group_children else []
+
+            if self.id in group_hosts['groups']:
+                for host in copy.copy(group_hosts['groups'][self.id]):
+                    group_hosts['hosts'][host].remove(self.id)
+                    group_hosts['groups'][self.id].remove(host)
+                    if len(group_hosts['hosts'][host]) < 1:
+                        marked_hosts.append(host)
+
             for subgroup in linked_children:
                 parent, group = subgroup
-                if group.parents.count() > 1:
+                group_parents[group].remove(parent)
+                group_children[parent].remove(group)
+                if len(group_parents[group]) > 0:
                     continue
-                all_group_hosts = group.hosts.all()
-                for host in group.hosts.all():
-                    is_last_group = remove_host_from_group(host, group)
-                    if is_last_group:
+                for host in copy.copy(group_hosts['groups'].get(group, [])):
+                    group_hosts['hosts'][host].remove(group)
+                    group_hosts['groups'][group].remove(host)
+                    if len(group_hosts['hosts'][host]) < 1:
                         marked_hosts.append(host)
-                group.hosts.through.objects.filter(group=group).delete()
-                for childgroup in group.children.all().prefetch_related('parents', 'hosts', 'inventory_sources', 'children'):
-                    linked_children.append((group, childgroup))
+                if group in group_children:
+                    for direct_child in group_children[group]:
+                        linked_children.append((group, direct_child))
                 marked_groups.append(group)
-                group.children.through.objects.filter(to_group=group).delete()
-                group.inventory_sources.through.objects.filter(group=group).delete()
-            all_groups = [g.id for g in marked_groups]
-            all_hosts = [h.id for h in marked_hosts]
-            Group.objects.filter(id__in=all_groups).update(active=False)
-            Host.objects.filter(id__in=all_hosts).update(active=False)
-            bulk_inventory_element_delete.delay(self.inventory.id, groups=all_groups, hosts=all_hosts)
+            Group.objects.filter(id__in=marked_groups).update(active=False)
+            Host.objects.filter(id__in=marked_hosts).update(active=False)
+            Group.parents.through.objects.filter(to_group__id__in=marked_groups)
+            Group.hosts.through.objects.filter(group__id__in=marked_groups)
+            Group.inventory_sources.through.objects.filter(group__id__in=marked_groups).delete()
+            bulk_inventory_element_delete.delay(self.inventory.id, groups=marked_groups, hosts=marked_hosts)
         with ignore_inventory_computed_fields():
             with disable_activity_stream():
                 mark_actual()
