@@ -12,8 +12,8 @@
 angular.module('GroupListDefinition', [])
     .value('GroupList', {
 
-        name: 'groups',
-        iterator: 'group',
+        name: 'copy_groups',
+        iterator: 'copy_group',
         selectTitle: 'Copy Groups',
         editTitle: 'Groups',
         index: true,
@@ -23,22 +23,10 @@ angular.module('GroupListDefinition', [])
             name: {
                 key: true,
                 label: 'Name'
-            },
-            description: {
-                label: 'Description'
             }
         },
 
-        actions: {
-            help: {
-                awPopOver: "Choose groups by clicking on each group you wish to add. Click the <em>Select</em> button to add the groups to " +
-                    "the selected inventory group.",
-                dataContainer: '#form-modal .modal-content',
-                mode: 'all',
-                awToolTip: 'Click for help',
-                dataTitle: 'Adding Groups'
-            }
-        },
+        actions: { },
 
         fieldActions: {
             edit: {

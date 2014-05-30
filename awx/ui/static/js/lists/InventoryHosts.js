@@ -18,9 +18,9 @@ angular.module('InventoryHostsDefinition', [])
         showTitle: false,
         well: true,
         index: false,
-        hover: false,
+        hover: true,
         hasChildren: true,
-        'class': 'table-condensed table-no-border',
+        'class': 'table-no-border',
 
         fields: {
             name: {
@@ -28,10 +28,9 @@ angular.module('InventoryHostsDefinition', [])
                 label: 'Hosts',
                 ngClick: "editHost(host.id)",
                 searchPlaceholder: "search_place_holder",
-                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-9',
+                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-7',
                 dataHostId: "{{ host.id }}",
-                dataType: "host",
-                awDraggable: "true"
+                dataType: "host"
             },
             enabled: {
                 label: 'Disabled?',
@@ -51,7 +50,7 @@ angular.module('InventoryHostsDefinition', [])
 
         fieldActions: {
 
-            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-3',
+            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-5',
             label: false,
 
             enabled_flag: {

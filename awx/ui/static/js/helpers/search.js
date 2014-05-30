@@ -30,7 +30,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 iterator = (params.iterator) ? params.iterator : list.iterator,
                 setWidgets = (params.setWidgets === false) ? false : true,
                 sort_order = params.sort_order || '',
-                widgets, i, modifier, current_params;
+                widgets, i, modifier;
 
             function setDefaults(widget) {
                 // Set default values
@@ -69,7 +69,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 }
 
                 // A field marked as key may not be 'searchable', and there might not be a 'defaultSearchField',
-                // so find the first searchable field.    
+                // so find the first searchable field.
                 if (Empty(scope[iterator + 'SearchField' + modifier])) {
                     for (fld in list.fields) {
                         if (list.fields[fld].searchWidget === undefined && widget === 1 ||
@@ -139,7 +139,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 }
             }
 
-            current_params = {
+            scope[iterator + '_current_search_params'] = {
                 set: set,
                 defaultUrl: defaultUrl,
                 list: list,
@@ -147,7 +147,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 sort_order: sort_order
             };
 
-            Store('CurrentSearchParams', current_params); // Save in case Activity Stream widget needs to restore
+            Store(iterator + '_current_search_params', scope[iterator + '_current_search_params']);
+            Store('CurrentSearchParams', scope[iterator + '_current_search_params']); // Keeping this around for activity stream
 
 
             // Functions to handle search widget changes
@@ -247,19 +248,19 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             if (scope.removeDoSearch) {
                 scope.removeDoSearch();
             }
-            scope.removeDoSearch = scope.$on('doSearch', function (e, iterator, page, load, calcOnly) {
+            scope.removeDoSearch = scope.$on('doSearch', function (e, iterator, page, load, calcOnly, deferWaitStop) {
                 //
                 // Execute the search
                 //
                 var url = (calcOnly) ? '' : defaultUrl,
                     connect;
-                
+
                 if (!calcOnly) {
                     scope[iterator + 'Loading'] = (load === undefined || load === true) ? true : false;
                     scope[iterator + 'Page'] = (page) ? parseInt(page) - 1 : 0;
                 }
 
-                //finalize and execute the query  
+                //finalize and execute the query
                 if (scope[iterator + 'SearchParams']) {
                     if (/\/$/.test(url)) {
                         url += '?' + scope[iterator + 'SearchParams'];
@@ -287,7 +288,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         scope: scope,
                         set: set,
                         iterator: iterator,
-                        url: url
+                        url: url,
+                        deferWaitStop: deferWaitStop
                     });
                 }
             });
@@ -296,7 +298,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             if (scope.removePrepareSearch) {
                 scope.removePrepareSearch();
             }
-            scope.removePrepareSearch = scope.$on('prepareSearch', function (e, iterator, page, load, calcOnly) {
+            scope.removePrepareSearch = scope.$on('prepareSearch', function (e, iterator, page, load, calcOnly, deferWaitStop) {
                 //
                 // Start building the search key/value pairs. This will process each search widget, if the
                 // selected field is an object type (used on activity stream).
@@ -342,13 +344,13 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         }
                     }
                 }
-                scope.$emit('prepareSearch2', iterator, page, load, calcOnly);
+                scope.$emit('prepareSearch2', iterator, page, load, calcOnly, deferWaitStop);
             });
 
             if (scope.removePrepareSearch2) {
                 scope.removePrepareSearch2();
             }
-            scope.removePrepareSearch2 = scope.$on('prepareSearch2', function (e, iterator, page, load, calcOnly) {
+            scope.removePrepareSearch2 = scope.$on('prepareSearch2', function (e, iterator, page, load, calcOnly, deferWaitStop) {
                 // Continue building the search by examining the remaining search widgets. If we're looking at activity_stream,
                 // there's more than one.
                 var i, modifier,
@@ -397,8 +399,10 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                 list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'gtzero') {
                                 scope[iterator + 'SearchParams'] += 'gt=0';
                             } else if ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'select') &&
-                                Empty(scope[iterator + 'SearchSelectValue' + modifier].value) ) {
+                                Empty(scope[iterator + 'SearchSelectValue' + modifier].value) && !/\_\_$/.test(scope[iterator + 'SearchParams']) ) {
                                 scope[iterator + 'SearchParams'] += '=iexact=';
+                            } else if (/\_\_$/.test(scope[iterator + 'SearchParams'])) {
+                                scope[iterator + 'SearchParams'] += 'icontains=';
                             } else {
                                 scope[iterator + 'SearchParams'] += scope[iterator + 'SearchType' + modifier] + '=';
                             }
@@ -431,7 +435,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     scope[iterator + 'SearchParams'] += 'order_by=' + encodeURI(sort_order);
                 }
 
-                scope.$emit('doSearch', iterator, page, load, calcOnly);
+                scope.$emit('doSearch', iterator, page, load, calcOnly, deferWaitStop);
             });
 
             scope.startSearch = function (e, iterator) {
@@ -441,22 +445,25 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 }
             };
 
-            /** 
+            /**
              * Initiate a searh.
              *
-             *   @iterator: required, list.iterator value  
-             *   @Page:     optional. Added to accomodate back function on Job Events detail. 
-             *   @Load:     optional, set to false if 'Loading' message not desired
-             *   @calcOnly: optiona, set to true when you want to calc or figure out search params without executing the search
+             *   @iterator:      required, list.iterator value
+             *   @Page:          optional. Added to accomodate back function on Job Events detail.
+             *   @Load:          optional, set to false if 'Loading' message not desired
+             *   @calcOnly:      optional, set to true when you want to calc or figure out search params without executing the search
+             *   @deferWaitStop: optional, when true refresh.js will NOT issue Wait('stop'), thus leaving the spinner. Caller is then
+             *                             responsible for stopping the spinner post refresh.
              */
-            scope.search = function (iterator, page, load, calcOnly) {
+            scope.search = function (iterator, page, load, calcOnly, deferWaitStop) {
                 page = page || null;
                 load = (load || !scope[set] || scope[set].length === 0) ? true : false;
                 calcOnly = (calcOnly) ? true : false;
+                deferWaitStop = (deferWaitStop) ? true : false;
                 if (load) {
                     scope[set] = [];  //clear the list array to make sure 'Loading' is the only thing visible on the list
                 }
-                scope.$emit('prepareSearch', iterator, page, load, calcOnly);
+                scope.$emit('prepareSearch', iterator, page, load, calcOnly, deferWaitStop);
             };
 
 
@@ -471,7 +478,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 });
 
                 // Toggle the icon for the clicked column
-                // and set the sort direction  
+                // and set the sort direction
                 var icon = $('#' + iterator + '-' + fld + '-header i'),
                     direction = '';
                 if (icon.hasClass('fa-sort')) {
@@ -498,6 +505,10 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         sort_order = direction + fld;
                     }
                 }
+
+                scope[list.iterator + '_current_search_params'].sort_order = sort_order;
+                Store(iterator + '_current_search_params', scope[iterator + '_current_search_params']);
+
                 scope.search(list.iterator);
             };
 

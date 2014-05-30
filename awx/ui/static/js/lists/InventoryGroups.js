@@ -13,28 +13,57 @@ angular.module('InventoryGroupsDefinition', [])
         showTitle: false,
         well: true,
         index: false,
-        hover: false,
-        hasChildren: true,
-        filterBy: '{ show: true }',
+        hover: true,
         'class': 'table-no-border',
-        awCustomScroll: true,
 
         fields: {
             name: {
                 label: 'Groups',
                 key: true,
-                ngClick: "showHosts(group.id,group.group_id, false)",
-                columnClick: "showHosts(group.id,group.group_id, false)",
-                ngClass: "group.selected_class",
-                hasChildren: true,
-                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-9',
-                nosort: true,
-                awDroppable: "{{ group.isDroppable }}",
-                awDraggable: "{{ group.isDraggable }}",
-                dataContainment: "#groups_table",
-                dataTreeId: "{{ group.id }}",
-                dataGroupId: "{{ group.group_id }}",
-                dataType: "group"
+                ngClick: "groupSelect(group.id)",
+                columnClick: "groupSelect(group.id)",
+                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-7'
+            },
+            source: {
+                label: 'Source',
+                searchType: 'select',
+                searchOptions: [{
+                    name: "ec2",
+                    value: "ec2"
+                }, {
+                    name: "none",
+                    value: ""
+                }, {
+                    name: "rax",
+                    value: "rax"
+                }],
+                sourceModel: 'inventory_source',
+                sourceField: 'source',
+                searchOnly: true
+            },
+            has_external_source: {
+                label: 'Has external source?',
+                searchType: 'in',
+                searchValue: 'ec2,rax',
+                searchOnly: true,
+                sourceModel: 'inventory_source',
+                sourceField: 'source'
+            },
+            has_active_failures: {
+                label: 'Has failed hosts?',
+                searchSingleValue: true,
+                searchType: 'boolean',
+                searchValue: 'true',
+                searchOnly: true
+            },
+            last_update_failed: {
+                label: 'Update failed?',
+                searchType: 'select',
+                searchSingleValue: true,
+                searchValue: 'failed',
+                searchOnly: true,
+                sourceModel: 'inventory_source',
+                sourceField: 'status'
             }
         },
 
@@ -64,13 +93,12 @@ angular.module('InventoryGroupsDefinition', [])
 
         fieldActions: {
 
-            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-3',
+            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-5',
             label: false,
 
             sync_status: {
                 mode: 'all',
                 ngClick: "viewUpdateStatus(group.id, group.group_id)",
-                ngShow: "group.id > 1", // hide for all hosts
                 awToolTip: "{{ group.status_tooltip }}",
                 dataTipWatch: "group.status_tooltip",
                 iconClass: "{{ 'fa icon-cloud-' + group.status_class }}",
@@ -80,7 +108,6 @@ angular.module('InventoryGroupsDefinition', [])
             failed_hosts: {
                 mode: 'all',
                 awToolTip: "{{ group.hosts_status_tip }}",
-                ngShow: "group.id > 1", // hide for all hosts
                 dataPlacement: "top",
                 ngClick: "showHosts(group.id, group.group_id, group.show_failures)",
                 iconClass: "{{ 'fa icon-job-' + group.hosts_status_class }}"
@@ -91,7 +118,7 @@ angular.module('InventoryGroupsDefinition', [])
                 ngClick: 'updateGroup(group.id)',
                 awToolTip: "{{ group.launch_tooltip }}",
                 dataTipWatch: "group.launch_tooltip",
-                ngShow: "group.id > 1 && (group.status !== 'running' && group.status !== 'pending' && group.status !== 'updating')",
+                ngShow: "group.status !== 'running' && group.status !== 'pending' && group.status !== 'updating'",
                 ngClass: "group.launch_class",
                 dataPlacement: "top"
             },
@@ -101,7 +128,7 @@ angular.module('InventoryGroupsDefinition', [])
                 ngClick: "cancelUpdate(group.id)",
                 awToolTip: "Cancel sync process",
                 'class': 'red-txt',
-                ngShow: "group.id > 1 && (group.status == 'running' || group.status == 'pending' || group.status == 'updating')",
+                ngShow: "group.status == 'running' || group.status == 'pending' || group.status == 'updating'",
                 dataPlacement: "top"
             },
             edit: {
@@ -109,7 +136,12 @@ angular.module('InventoryGroupsDefinition', [])
                 mode: 'all',
                 ngClick: "editGroup(group.group_id, group.id)",
                 awToolTip: 'Edit group',
-                ngShow: "group.id > 1", // hide for all hosts
+                dataPlacement: "top"
+            },
+            copy: {
+                mode: 'all',
+                ngClick: "copyGroup(group.id)",
+                awToolTip: 'Copy or move group',
                 dataPlacement: "top"
             },
             "delete": {
@@ -117,9 +149,7 @@ angular.module('InventoryGroupsDefinition', [])
                 mode: 'all',
                 ngClick: "deleteGroup(group.id, group.group_id)",
                 awToolTip: 'Delete group',
-                ngShow: "group.id != 1", // hide for all hosts
                 dataPlacement: "top"
             }
         }
     });
-

@@ -175,19 +175,20 @@ function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateI
 
         scope.search_place_holder='Search ' + scope.selected_group_name;
 
-        if (scope.removePostRefresh) {
-            scope.removePostRefresh();
-        }
-        scope.removePostRefresh = scope.$on('PostRefresh', function() {
-            for (var i=0; i < scope.hosts.length; i++) {
-                //Set tooltip for host enabled flag
-                scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
-                //SetHostStatus(scope.hosts[i]);
+        //if (scope.removePostRefresh) {
+        //    scope.removePostRefresh();
+        //}
+        scope.removePostRefresh = scope.$on('PostRefresh', function(e, set) {
+            if (set === 'hosts') {
+                for (var i=0; i < scope.hosts.length; i++) {
+                     //Set tooltip for host enabled flag
+                     scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
+                }
+                SetStatus({ scope: scope });
+                setTimeout(function() { ApplyEllipsis('#hosts_table .host-name a'); }, 2500);
+                Wait('stop');
+                scope.$emit('HostReloadComplete');
             }
-            SetStatus({ scope: scope });
-            setTimeout(function() { ApplyEllipsis('#hosts_table .host-name a'); }, 2500);
-            Wait('stop');
-            scope.$emit('HostReloadComplete');
         });
 
         // Size containers based on viewport
@@ -222,14 +223,13 @@ function(GenerateList, InventoryHosts, HostsReload) {
         var scope = params.scope,
             inventory_id = params.inventory_id,
             group_id = params.group_id,
-            tree_id = params.tree_id,
             generator = GenerateList;
 
         // Inject the list html
         generator.inject(InventoryHosts, { scope: scope, mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-6 col-md-6 col-sm-6' });
 
         // Load data
-        HostsReload({ scope: scope, group_id: group_id, tree_id: tree_id, inventory_id: inventory_id });
+        HostsReload({ scope: scope, group_id: group_id, inventory_id: inventory_id });
     };
 }])
 
@@ -239,7 +239,8 @@ function(GetBasePath, Rest, Wait, ProcessErrors, Alert, Find, SetEnabledMsg) {
 
         var id = params.host_id,
             external_source = params.external_source,
-            scope = params.scope,
+            parent_scope = params.parent_scope,
+            host_scope = params.host_scope,
             host;
 
         function setMsg(host) {
@@ -251,7 +252,7 @@ function(GetBasePath, Rest, Wait, ProcessErrors, Alert, Find, SetEnabledMsg) {
         if (!external_source) {
             // Host is not managed by an external source
             Wait('start');
-            host = Find({ list: scope.hosts, key: 'id', val: id });
+            host = Find({ list: host_scope.hosts, key: 'id', val: id });
             setMsg(host);
 
             Rest.setUrl(GetBasePath('hosts') + id + '/');
@@ -262,8 +263,7 @@ function(GetBasePath, Rest, Wait, ProcessErrors, Alert, Find, SetEnabledMsg) {
                 .error( function(data, status) {
                     // Flip the enabled flag back
                     setMsg(host);
-                    Wait('stop');
-                    ProcessErrors(scope, data, status, null,
+                    ProcessErrors(parent_scope, data, status, null,
                         { hdr: 'Error!', msg: 'Failed to update host. PUT returned status: ' + status });
                 });
         }
