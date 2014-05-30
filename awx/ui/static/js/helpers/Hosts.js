@@ -181,8 +181,8 @@ function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateI
         scope.removePostRefresh = scope.$on('PostRefresh', function(e, set) {
             if (set === 'hosts') {
                 for (var i=0; i < scope.hosts.length; i++) {
-                     //Set tooltip for host enabled flag
-                     scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
+                    //Set tooltip for host enabled flag
+                    scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
                 }
                 SetStatus({ scope: scope });
                 setTimeout(function() { ApplyEllipsis('#hosts_table .host-name a'); }, 2500);
@@ -269,7 +269,7 @@ function(GetBasePath, Rest, Wait, ProcessErrors, Alert, Find, SetEnabledMsg) {
         }
         else {
             Alert('Action Not Allowed', 'This host is managed by an external cloud source. Disable it at the external source, ' +
-                'and then run an inventory sync to update Tower with the new status.', 'alert-info');
+                'then run an inventory sync to update Tower with the new status.', 'alert-info');
         }
     };
 }])

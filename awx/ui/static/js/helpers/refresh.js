@@ -49,7 +49,7 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities', 'PaginationHelpers
                         if (!deferWaitStop) {
                             Wait('stop');
                         }
-                        scope.$emit('PostRefresh', set);scope.$emit('PostRefresh');
+                        scope.$emit('PostRefresh', set);
                     })
                     .error(function (data, status) {
                         scope[iterator + 'HoldInput'] = false;
