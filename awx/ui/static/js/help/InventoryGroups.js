@@ -62,16 +62,7 @@ angular.module('InventoryGroupsHelpDefinition', [])
                 },
                 box: "<div class=\"text-left\">First, select a group. Then click <i class=\"fa fa-plus\"></i> to create a new group. The new group " +
                     "will be added to the selected group.</div>"
-            }, {
-                intro: 'Copy or move groups:',
-                img: {
-                    src: 'groups006.png',
-                    maxWidth: 263,
-                    maxHeight: 211
-                },
-                box: "<div class=\"text-left\">Copy or move a group by dragging and dropping its name onto another group name. A dialog will appear " +
-                    "asking if the group should be coppied or moved.</div>"
-            }, {
+            },{
                 intro: 'Adding hosts:',
                 img: {
                     src: 'groups007.png',

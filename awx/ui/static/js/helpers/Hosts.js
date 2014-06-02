@@ -450,7 +450,8 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
     ParseVariableString, CreateDialog, TextareaResize) {
     return function(params) {
 
-        var parent_scope = params.parent_scope,
+        var parent_scope = params.host_scope,
+            group_scope = params.group_scope,
             host_id = params.host_id,
             inventory_id = params.inventory_id,
             mode = params.mode,  // 'add' or 'edit'
@@ -458,7 +459,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             generator = GenerateForm,
             form = HostForm,
             defaultUrl,
-            scope = params.host_scope,
+            scope = parent_scope.$new(),
             master = {},
             relatedSets = {},
             buttons, url;
@@ -614,36 +615,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             scope.removeSaveCompleted();
         }
         scope.removeSaveCompleted = scope.$on('saveCompleted', function() {
-            var host, old_name;
-            if (mode === 'edit') {
-                // Update the name on the list
-                host = Find({ list: scope.hosts, key: 'id', val: host_id });
-                old_name = host.name;
-                host.name = scope.name;
-                host.enabled = (scope.enabled) ? true : false;
-                host.enabled_flag = host.enabled;
-                SetStatus({ scope: scope, host: host });
-                // Update any titles attributes created by ApplyEllipsis
-                if (old_name) {
-                    setTimeout(function() {
-                        $('#hosts_table .host-name a[title="' + old_name + '"]').attr('title', host.name);
-                        ApplyEllipsis('#hosts_table .host-name a');
-                        // Close modal
-                        $('#host-modal-dialog').dialog('close');
-                    }, 2000);
-                }
-                else {
-                    // Close modal
-                    $('#host-modal-dialog').dialog('close');
-                }
-            }
-            else {
-                $('#host-modal-dialog').dialog('close');
-                parent_scope.refreshHosts();
-            }
-
-            // Restore ellipsis response to window resize
-            //WatchInventoryWindowResize();
+            scope.cancelModal();
         });
 
         // Save changes to the parent
@@ -701,7 +673,8 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             catch(err) {
                 // ignore
             }
-            parent_scope.refreshHosts();
+            group_scope.refreshHosts();
+            scope.$destroy();
         };
 
     };

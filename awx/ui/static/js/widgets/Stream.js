@@ -331,8 +331,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 view = GenerateList,
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 parent_scope = params.scope,
-                PreviousSearchParams = Store('CurrentSearchParams'),
+                search_iterator = params.search_iterator, // use to get correct current_search_params from local store
+                PreviousSearchParams = (search_iterator) ? Store(search_iterator + '_current_search_params') : Store('CurrentSearchParams'),
                 inventory_name = (params && params.inventory_name) ? params.inventory_name : null,
+                onClose = params.onClose, // optional callback to $emit after AS closes
                 url = (params && params.url) ? params.url : null,
                 type, paths, itm, scope;
 
@@ -401,6 +403,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 }
                 if (inUrl) {
                     $location.path(inUrl);
+                }
+                else if (onClose) {
+                    parent_scope.$emit(onClose);
                 }
                 scope.$destroy();
             };
