@@ -7,7 +7,7 @@
  *  Build data for the tree selector table used on inventory detail page.
  *
  */
- 
+
 'use strict';
 
 angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'PromptDialog'])
@@ -101,14 +101,14 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
             }
 
             function buildGroups(tree_data, parent, level) {
-                
+
                 var children, stat, hosts_status, group,
                     sorted = SortNodes(tree_data),
                     expand, show;
-                
+
                 sorted.forEach( function(row, i) {
                     id++;
-                    
+
                     stat = GetSyncStatusMsg({
                         status: sorted[i].summary_fields.inventory_source.status,
                         has_inventory_sources: sorted[i].has_inventory_sources,
@@ -131,7 +131,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                     show = getShowState(sorted[i].id);
                     if (show === null) {
                         // this is a node we haven't seen before, so check the parent expand/collapse state
-                        // If parent is not expanded, then child should be hidden. 
+                        // If parent is not expanded, then child should be hidden.
                         show = true;
                         if (parent > 0) {
                             groups.every(function(g) {
@@ -249,7 +249,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
 ])
 
 
-// Update a group with a set of properties 
+// Update a group with a set of properties
 .factory('UpdateGroup', ['ApplyEllipsis', 'GetSyncStatusMsg', 'Empty',
     function (ApplyEllipsis, GetSyncStatusMsg, Empty) {
         return function (params) {
@@ -258,9 +258,9 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 group_id = params.group_id,
                 properties = params.properties,
                 i, p, grp, old_name, stat;
-            
+
             for (i = 0; i < scope.groups.length; i++) {
-                if (scope.groups[i].group_id === group_id) {
+                if (scope.groups[i].id === group_id) {
                     grp = scope.groups[i];
                     for (p in properties) {
                         if (p === 'name') {
@@ -291,12 +291,12 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         scope.groups[i][p] = properties[p];
                     }
                 }
-                if (scope.groups[i].id === scope.selected_tree_id) {
+                /*if (scope.groups[i].id === scope.selected_tree_id) {
                     //Make sure potential group name change gets reflected throughout the page
                     scope.selected_group_name = scope.groups[i].name;
                     scope.search_place_holder = 'Search ' + scope.groups[i].name;
                     scope.hostSearchPlaceholder = 'Search ' + scope.groups[i].name;
-                }
+                }*/
             }
 
             // Update any titles attributes created by ApplyEllipsis
@@ -406,7 +406,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 show: true
             });
 
-            // Respond to move 
+            // Respond to move
             scope.moveGroup = function () {
                 var url, group, parent;
                 $('#copy-prompt-modal').modal('hide');

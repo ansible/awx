@@ -3,7 +3,7 @@
  *
  * FormGenerator
  *
- * Pass in a form definition and get back an html template. Use the.inject() method 
+ * Pass in a form definition and get back an html template. Use the.inject() method
  * to add the template to the DOM and compile.
  *
  */
@@ -123,7 +123,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                 try {
                     $('#help-modal').empty().dialog('destroy');
                 } catch (e) {
-                    //ignore any errors should the dialog not be initialized 
+                    //ignore any errors should the dialog not be initialized
                 }
 
                 if (options.modal) {
@@ -134,7 +134,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         if (options.modal_title_id) {
                             this.scope[options.modal_title_id] = (options.mode === 'add') ? form.addTitle : form.editTitle;
                         } else {
-                            this.scope.formModalHeader = (options.mode === 'add') ? form.addTitle : form.editTitle; //Default title for default modal       
+                            this.scope.formModalHeader = (options.mode === 'add') ? form.addTitle : form.editTitle; //Default title for default modal
                         }
                     }
                     if (options.modal_selector) {
@@ -189,8 +189,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         }
                     });
                 }
+
                 if (!this.scope.$$phase) {
-                    this.scope.$digest();
+                    setTimeout(function() {
+                        this.scope.$digest();
+                    }, 100);
                 }
 
                 return this.scope;
@@ -201,7 +204,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                 // Get HTML without actually injecting into DOM. Caller is responsible for any injection.
                 // Example:
                 //   html = GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
-                
+
                 this.mode = options.mode;
                 this.modal = (options.modal) ? true : false;
                 this.setForm(form);
@@ -351,7 +354,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                             active: active,
                             activate: function () {
                                 // Maintain in local storage of list of all accordions by page, recording
-                                // the active panel for each. If user navigates away and comes back, 
+                                // the active panel for each. If user navigates away and comes back,
                                 // we can activate the last panely viewed.
                                 $('.jqui-accordion').each(function () {
                                     var active = $(this).accordion('option', 'active'),
@@ -542,7 +545,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                     return html;
                 }
 
-                
+
                 if (field.type === 'alertblock') {
                     html += "<div class=\"row\">\n";
                     html += "<div class=\"";
@@ -1030,7 +1033,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
             },
 
             getActions: function (options) {
-                // Use to add things like Activity Stream to a detail page  
+                // Use to add things like Activity Stream to a detail page
                 var html = "<div class=\"list-actions\">\n", action;
                 for (action in this.form.actions) {
                     if (this.form.actions[action].mode === 'all' || this.form.actions[action].mode === options.mode) {
@@ -1102,8 +1105,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
 
             build: function (options) {
                 //
-                // Generate HTML. Do NOT call this function directly. Called by inject(). Returns an HTML 
-                // string to be injected into the current view. 
+                // Generate HTML. Do NOT call this function directly. Called by inject(). Returns an HTML
+                // string to be injected into the current view.
                 //
                 var btn, button, fld, field, html = '', i, section, group,
                     tab, sectionShow, offset, width;
@@ -1115,7 +1118,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         html += this.breadCrumbs(options);
                     }
                 }
-                
+
                 if (this.form.collapse && this.form.collapseMode === options.mode) {
                     html += "<div id=\"" + this.form.name + "-collapse-0\" ";
                     html += (this.form.collapseOpen) ? "data-open=\"true\" " : "";
@@ -1337,7 +1340,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                 if (this.form.collapse && this.form.collapseMode === options.mode) {
                     html += "</div>\n";
                 }
-            
+
                 if ((!this.modal) && options.related && this.form.related) {
                     html += this.buildCollections(options);
                 }
@@ -1357,7 +1360,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                 if (!options.collapseAlreadyStarted) {
                     html = "<div id=\"" + this.form.name + "-collapse-1\" class=\"jqui-accordion\">\n";
                 }
-                
+
                 for (itm in form.related) {
                     collection = form.related[itm];
                     html += "<h3 class=\"" + itm + "_collapse\">" + (collection.title || collection.editTitle) + "</h3>\n";
@@ -1370,7 +1373,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                     }
                     html += "</div>\n"; // accordion inner
                 }
-                
+
                 if (!options.collapseAlreadyStarted) {
                     html += "</div>\n"; // accordion body
                 }
@@ -1386,7 +1389,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                     itm = params.related,
                     collection = form.related[itm],
                     act, action, fld, cnt, base, fAction;
-                        
+
                 if (collection.instructions) {
                     html += "<div class=\"alert alert-info alert-block\">\n";
                     html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\n";

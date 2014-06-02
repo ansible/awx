@@ -3,23 +3,68 @@
         <div class="row">
             <div class="col-lg-12" id="breadcrumbs"></div>
         </div>
-        <!-- <div class="row">
-            <div id="hosts-title" class="col-lg-offset-6 col-lg-6">{{ selected_group_name }}</div>
-        </div> -->
+
+        <ul class="group-breadcrumbs">
+            <li ng-repeat="group_breadcrumb in group_breadcrumbs" ng-class="group_breadcrumb.active_class"><a href="" ng-click="breadcrumbGroupSelect(group_breadcrumb.id)">{{ group_breadcrumb.name }}</a></li>
+        </ul>
+
         <div class="row">
-            <div id="groups-container" class="col-lg-6"></div>
+            <div id="groups-container" class="col-lg-6">
+                <div id="group-list-container"></div>
+            </div>
             <div id="hosts-container" class="col-lg-6"></div>
         </div>
-        
+
         <div id="inventory-modal-container"></div>
-        
+
+        <div id="group-copy-dialog" style="display: none;">
+            <div id="copy-group-radio-container" class="well">
+                <div class="title"><span class="highlight">1.</span> Copy or move <span ng-bind="name"></span>?</div>
+                <div class="form-group">
+                    <label class="radio-inline">
+                        <input type="radio" ng-model="copy_choice" value="copy"> Copy
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" ng-model="copy_choice" value="move"> Move
+                    </label>
+                </div>
+            </div>
+            <div id="copy-group-target-container" class="well">
+                <div class="title" ng-show="offer_root_group"><span class="highlight">2.</span> Select a target group below, OR choose the inventory root:
+                    <div class="form-group">
+                        <label><input type="checkbox" ng-model="use_root_group" ng-change="toggleUseRootGroup()"> Use the inventory root</label>
+                    </div>
+                </div>
+                <div class="title" ng-show="!offer_root_group"><span class="highlight">2.</span> Select a target group:</div>
+                <div id="copy-select-container" ng-show="!use_root_group"></div>
+            </div>
+        </div>
+
+        <div id="host-copy-dialog" style="display: none;">
+            <div id="copy-group-radio-container" class="well">
+                <div class="title"><span class="highlight">1.</span> Copy or move <span ng-bind="name"></span>?</div>
+                <div class="form-group">
+                    <label class="radio-inline">
+                        <input type="radio" ng-model="copy_choice" value="copy"> Copy
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" ng-model="copy_choice" value="move"> Move
+                    </label>
+                </div>
+            </div>
+            <div id="copy-group-target-container" class="well">
+                <div class="title"><span class="highlight">2.</span> Select a target group:</div>
+                <div id="copy-host-select-container"></div>
+            </div>
+        </div>
+
         <div id="group-modal-dialog" style="display: none;">
             <ul id="group_tabs" class="nav nav-tabs">
-                <li class="active"><a id="properties_link" ng-click="toggleTab($event, 'properties_link', 'group_tabs')" 
+                <li class="active"><a id="properties_link" ng-click="toggleTab($event, 'properties_link', 'group_tabs')"
                         href="#properties-tab" data-toggle="tab">Properties</a></li>
                 <li ng-show="showSourceTab"><a id="source_link" ng-click="toggleTab($event, 'source_link', 'group_tabs')"
                         href="#sources-tab" data-toggle="tab">Source</a></li>
-                <li ng-show="showSchedulesTab"><a id="schedules_link" ng-click="toggleTab($event, 'schedules_link', 'group_tabs')" 
+                <li ng-show="showSchedulesTab"><a id="schedules_link" ng-click="toggleTab($event, 'schedules_link', 'group_tabs')"
                         href="#schedules-tab" data-toggle="tab">Schedule</a></li>
             </ul>
             <div class="tab-content">
@@ -45,11 +90,11 @@
                         </div>
                     </div>
                 </div>
-            </div>    
+            </div>
         </div>
 
         <div id="host-modal-dialog" style="display: none;" class="dialog-content"></div>
-        
+
         <div id="group-delete-dialog" style="display: none;" class="dialog-content">
             <div ng-show="groupsCount > 0 || hostsCount > 0">
                 <div class="alert alert-info">
@@ -59,55 +104,55 @@
                     <span ng-show="groupsCopunt > 0 && hostsCount == 0"> This group contains {{ groupsCount }} groups. </span>
                     Delete or promote the group's children?</p>
                     <div style="width: 50%; margin: 15px auto;">
-                        
+
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="preserve-all"> Promote groups and hosts 
+                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="preserve-all"> Promote groups and hosts
                             </label>
                         </div>
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="delete-all"> Delete groups and hosts 
+                                <input type="radio" ng-model="deleteOption" name="delete_option1" value="delete-all"> Delete groups and hosts
                             </label>
                         </div>
 
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount == 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="preserve-all"> Promote groups 
+                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="preserve-all"> Promote groups
                             </label>
                         </div>
                         <div class="radio" ng-show="groupsCount > 0 && hostsCount == 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="delete-all"> Delete groups 
+                                <input type="radio" ng-model="deleteOption" name="delete_option2" value="delete-all"> Delete groups
                             </label>
                         </div>
 
                         <div class="radio" ng-show="groupsCount == 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="preserve-all"> Promote hosts 
+                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="preserve-all"> Promote hosts
                             </label>
                         </div>
                         <div class="radio" ng-show="groupsCount == 0 && hostsCount > 0">
                             <label>
-                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="delete-all"> Delete hosts 
+                                <input type="radio" ng-model="deleteOption" name="delete_option3" value="delete-all"> Delete hosts
                             </label>
                         </div>
 
                     </div>
 
                 </div>
-                
+
                 <div class="help-container" style="text-align:right;">
                     <a href="" id="awp-promote" href="" aw-pop-over="{{ helpText }}" aw-tool-tip="Click for help" aw-pop-over-watch="helpText" data-placement="top" data-container="body" data-title="Help" class="help-link"><i class="fa fa-question-circle"></i> click for help</a>
                 </div>
 
             </div>
             <div ng-show="groupsCount == 0 && hostsCount == 0">
-                <div class="alert alert-info">Delete group <em>{{ group_name }}</em>?</div> 
-            </div> 
+                <div class="alert alert-info">Delete group <em>{{ group_name }}</em>?</div>
+            </div>
         </div>
-        
+
         <div ng-include="'/static/partials/logviewer.html'"></div>
-    
+
     </div>
 </div>

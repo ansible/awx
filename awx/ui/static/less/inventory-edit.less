@@ -1,0 +1,123 @@
+/*********************************************
+ *  Copyright (c) 2014 AnsibleWorks, Inc.
+ *
+ *  inventory-edit.less
+ *
+ *  custom animation mixins for ansible-ui
+ *
+ */
+#inventory_edit {
+    #breadcrumbs .nav-path {
+        margin-bottom: 8px;
+    }
+}
+.group-breadcrumbs {
+    list-style: none;
+    overflow: hidden;
+    padding: 0;
+    margin: 0 0 8px 0;
+}
+.group-breadcrumbs li {
+    float: left;
+    height: 26px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+.group-breadcrumbs li a {
+    color: @white;
+    font-weight: normal;
+    text-decoration: none;
+    padding: 3px 8px 3px 20px;
+    background: @blue-dark;                   /* fallback color */
+    position: relative;
+    left: 0;
+    top: 0;
+    display: block;
+    float: left;
+}
+.group-breadcrumbs li.active a {
+    background: @grey;
+    color: @black;
+    font-weight: normal;
+}
+.group-breadcrumbs li a:after {
+    content: " ";
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 13px dashed transparent;           /* Go big on the size, and let overflow hide */
+    border-bottom: 13px dashed transparent;
+    border-left: 11px solid @blue-dark;
+    position: absolute;
+    top: 50%;
+    margin-top: -13px;
+    left: 100%;
+    z-index: 2;
+}
+.group-breadcrumbs li.active a:after {
+    border-left: 13px solid @grey;
+}
+.group-breadcrumbs li a:before {
+    content: " ";
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 13px dashed transparent;
+    border-bottom: 13px dashed transparent;
+    border-left: 11px solid @white;
+    position: absolute;
+    top: 50%;
+    margin-top: -13px;
+    margin-left: 1px;
+    left: 100%;
+    z-index: 1;
+}
+.group-breadcrumbs li.active a:before {
+    border-left: 11px solid @white;
+}
+
+#group-copy-dialog,
+#host-copy-dialog {
+    .highlight {
+        font-size: 16px;
+        font-weight: bold;
+        color: red;
+        padding-right: 5px;
+    }
+    .title {
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    .well {
+        padding-left: 8px;
+        padding-right: 8px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+    .page-row ul li a {
+        font-size: 12px;
+    }
+    .page-row .col-lg-8 {
+        width: 100%;
+    }
+    .page-row .col-md-8 {
+        width: 100%;
+    }
+}
+
+#copy-group-radio-container .form-group {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+#copy-group-target-container .form-group {
+    margin-top: 10px;
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+#group-list-container {
+    .list-actions {
+        margin-bottom: 0;
+    }
+}

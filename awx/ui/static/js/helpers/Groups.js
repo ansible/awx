@@ -319,8 +319,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             // Cancel the update process
             if (Empty(group)) {
                 group = Find({ list: scope.groups, key: 'id', val: id });
-                scope.selected_tree_id = group.id;
-                scope.selected_group_id = group.group_id;
+                scope.selected_group_id = group.id;
             }
 
             if (group && (group.status === 'running' || group.status === 'pending')) {
@@ -615,26 +614,23 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
 .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-    'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find',
-    'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize', 'BuildTree',
+    'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find', 'WatchInventoryWindowResize',
+    'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize',
     function ($rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
-        GetChoices, UpdateGroup, SourceChange, Find, ParseVariableString, ToJSON, GroupsScheduleListInit,
-        SourceForm, SetSchedulesInnerDialogSize, BuildTree) {
+        GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, GroupsScheduleListInit,
+        SourceForm, SetSchedulesInnerDialogSize) {
         return function (params) {
 
             var parent_scope = params.scope,
                 group_id = params.group_id,
-                tree_id = params.tree_id,
                 mode = params.mode,  // 'add' or 'edit'
                 inventory_id = params.inventory_id,
-                groups_reload = params.groups_reload,
                 generator = GenerateForm,
                 group_created = false,
                 defaultUrl,
                 master = {},
                 choicesReady,
-                base = $location.path().replace(/^\//, '').split('/')[0],
                 modal_scope = parent_scope.$new(),
                 properties_scope = parent_scope.$new(),
                 sources_scope = parent_scope.$new(),
@@ -730,7 +726,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 height: y,
                 autoOpen: false,
                 minWidth: 440,
-                title: 'Edit Group',
+                title: (mode === 'edit') ? 'Edit Group' : 'Add Group',
                 closeOnEscape: false,
                 create: function () {
                     $('.ui-dialog[aria-describedby="group-modal-dialog"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
@@ -1038,14 +1034,8 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             }
             parent_scope.removeAddTreeRefreshed = parent_scope.$on('GroupTreeRefreshed', function() {
                 // Clean up
-                // Change the selected group
-                if (groups_reload && parent_scope.selected_tree_id !== tree_id) {
-                    parent_scope.showHosts(tree_id, group_id, false);
-                } else {
-                    Wait('stop');
-                }
-                //WatchInventoryWindowResize();
-                parent_scope.removeAddTreeRefreshed();
+                Wait('stop');
+                WatchInventoryWindowResize();
                 if (modal_scope.searchCleanUp) {
                     modal_scope.searchCleanup();
                 }
@@ -1062,42 +1052,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             }
             modal_scope.removeSaveComplete = modal_scope.$on('SaveComplete', function (e, error) {
                 if (!error) {
-                    // Update the parent view with any changes
-                    if (groups_reload) {
-                        $log.debug('calling UpdateGroup group_id: ' + group_id + ' name: ' + properties_scope.name + ' description: ' + properties_scope.description +
-                            'has_inventory_sources: ' + ((sources_scope.source && sources_scope.source.value) ? 'true' : 'false') + ' source: ' + sources_scope.source.value );
-                        UpdateGroup({
-                            scope: parent_scope,
-                            group_id: group_id,
-                            properties: {
-                                name: properties_scope.name,
-                                description: properties_scope.description,
-                                has_inventory_sources: (sources_scope.source && sources_scope.source.value) ? true : false,
-                                source: (sources_scope.source && sources_scope.source.value) ? sources_scope.source.value : ''
-                            }
-                        });
-                        parent_scope.$emit('GroupTreeRefreshed');
-                    } else if (base === 'inventories') {
-                        if (mode === 'add') {
-                            BuildTree({
-                                scope: parent_scope,
-                                inventory_id: inventory_id,
-                                refresh: true,
-                                new_group_id: group_id
-                            });
-                        }
-                        else {
-                            parent_scope.$emit('GroupTreeRefreshed');
-                        }
-                    } else if (base === 'home') {
-                        parent_scope.restoreSearch();
-                        try {
-                            $('#group-modal-dialog').dialog('close');
-                        }
-                        catch(err) {
-                            // ignore
-                        }
-                    }
+                    modal_scope.cancelModal();
                 }
             });
 
@@ -1167,20 +1122,21 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
             // Cancel
             modal_scope.cancelModal = function () {
-                Wait('stop');
                 try {
                     $('#group-modal-dialog').dialog('close');
                 }
                 catch(e) {
                     //ignore
                 }
-
-                //if (modal_scope.searchCleanup) {
-                //    modal_scope.searchCleanup();
-                //}
-                //if (base === 'inventories') {
-                //    WatchInventoryWindowResize();
-                //}
+                if (modal_scope.searchCleanup) {
+                    modal_scope.searchCleanup();
+                }
+                if (parent_scope.restoreSearch) {
+                    parent_scope.restoreSearch();
+                }
+                else {
+                    Wait('stop');
+                }
             };
 
             // Save
@@ -1463,10 +1419,327 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     scope.$emit('DisassociateGroup');
                 }
             };
-
         };
     }
 ])
+
+.factory('GetRootGroups', ['Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
+    return function(params) {
+        var scope = params.scope,
+            inventory_id = params.inventory_id,
+            //group_id = params.group_id,
+            callback = params.callback,
+            url;
+
+        url = GetBasePath('inventory') + inventory_id + '/root_groups/';
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                scope.$emit(callback, data.results);
+            })
+            .error(function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + ' failed. GET returned: ' + status });
+            });
+    };
+}])
+
+.factory('GroupsCopy', ['$compile', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'GenerateList', 'GroupList', 'SearchInit',
+    'PaginateInit', 'GetRootGroups',
+    function($compile, Rest, ProcessErrors, CreateDialog, GetBasePath, Wait, GenerateList, GroupList, SearchInit, PaginateInit, GetRootGroups) {
+    return function(params) {
+
+        var group_id = params.group_id,
+            parent_scope = params.scope,
+            scope = parent_scope.$new(),
+            parent_group = parent_scope.selected_group_id,
+            buttonSet, url, group;
+
+        buttonSet = [{
+            label: "Cancel",
+            onClick: function() {
+                scope.cancel();
+            },
+            icon: "fa-times",
+            "class": "btn btn-default",
+            "id": "group-copy-cancel-button"
+        },{
+            label: "OK",
+            onClick: function() {
+                scope.performCopy();
+            },
+            icon: "fa-check",
+            "class": "btn btn-primary",
+            "id": "group-copy-ok-button"
+        }];
+
+        if (scope.removeGroupsCopyPostRefresh) {
+            scope.removeGroupsCopyPostRefresh();
+        }
+        scope.removeGroupCopyPostRefresh = scope.$on('PostRefresh', function() {
+            scope.copy_groups.forEach(function(row, i) {
+                scope.copy_groups[i].checked = '0';
+            });
+            Wait('stop');
+            $('#group-copy-dialog').dialog('open');
+            $('#group-copy-ok-button').attr('disabled','disabled');
+
+            // prevent backspace from navigation when not in input or textarea field
+            $(document).on("keydown", function (e) {
+                if (e.which === 8 && !$(e.target).is('input[type="text"], textarea')) {
+                    e.preventDefault();
+                }
+            });
+
+        });
+
+        if (scope.removeCopyDialogReady) {
+            scope.removeCopyDialogReady();
+        }
+        scope.removeCopyDialogReady = scope.$on('CopyDialogReady', function() {
+            var url = GetBasePath('inventory') + parent_scope.inventory.id + '/groups/';
+            url += (parent_group) ? '?not__id__in=' + group_id + ',' + parent_group : '?not__id=' + group_id;
+            GenerateList.inject(GroupList, {
+                mode: 'lookup',
+                id: 'copy-select-container',
+                scope: scope
+                //,
+                //instructions: instructions
+            });
+            SearchInit({
+                scope: scope,
+                set: GroupList.name,
+                list: GroupList,
+                url: url
+            });
+            PaginateInit({
+                scope: scope,
+                list: GroupList,
+                url: url,
+                mode: 'lookup'
+            });
+            scope.search(GroupList.iterator);
+        });
+
+        if (scope.removeShowDialog) {
+            scope.removeShowDialog();
+        }
+        scope.removeShowDialog = scope.$on('ShowDialog', function() {
+            var d;
+            scope.name = group.name;
+            scope.copy_choice = "copy";
+            d = angular.element(document.getElementById('group-copy-dialog'));
+            $compile(d)(scope);
+
+            CreateDialog({
+                id: 'group-copy-dialog',
+                scope: scope,
+                buttons: buttonSet,
+                width: 650,
+                height: 650,
+                minWidth: 600,
+                title: 'Copy or Move Group',
+                callback: 'CopyDialogReady',
+                onClose: function() {
+                    scope.cancel();
+                }
+            });
+        });
+
+        if (scope.removeRootGroupsReady) {
+            scope.removeRootGroupsReady();
+        }
+        scope.removeRootGroupsReady = scope.$on('RootGroupsReady', function(e, root_groups) {
+            scope.offer_root_group = true;
+            scope.use_root_group = false;
+            root_groups.every(function(row) {
+                if (row.id === group_id) {
+                    scope.offer_root_group = false;
+                    return false;
+                }
+                return true;
+            });
+            url = GetBasePath('groups') + group_id + '/';
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    group = data;
+                    scope.$emit('ShowDialog');
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. GET returned: ' + status });
+                });
+        });
+
+        Wait('start');
+
+        GetRootGroups({
+            scope: scope,
+            group_id: group_id,
+            inventory_id: parent_scope.inventory.id,
+            callback: 'RootGroupsReady'
+        });
+
+        scope.cancel = function() {
+            $(document).off("keydown");
+            try {
+                $('#group-copy-dialog').dialog('close');
+            }
+            catch(e) {
+                // ignore
+            }
+            scope.searchCleanup();
+            parent_scope.restoreSearch();
+            scope.$destroy();
+        };
+
+        scope['toggle_' + GroupList.iterator] = function (id) {
+            var count = 0,
+                list = GroupList;
+            scope[list.name].forEach( function(row, i) {
+                if (row.id === id) {
+                    if (row.checked === '0') {
+                        scope[list.name][i].checked = '1';
+                        scope[list.name][i].success_class = 'success';
+                    }
+                    else {
+                        scope[list.name][i].checked = '0';
+                        scope[list.name][i].success_class = '';
+                    }
+                } else {
+                    scope[list.name][i].checked = '0';
+                    scope[list.name][i].success_class = '';
+                }
+            });
+            // Check if any rows are checked
+            scope[list.name].forEach(function(row) {
+                if (row.checked === '1') {
+                    count++;
+                }
+            });
+            if (count === 0) {
+                $('#group-copy-ok-button').attr('disabled','disabled');
+            }
+            else {
+                $('#group-copy-ok-button').removeAttr('disabled');
+            }
+        };
+
+        scope.toggleUseRootGroup = function() {
+            var list = GroupList;
+            //console.log("scope.use_root_group: " + scope.use_root_group);
+            if (scope.use_root_group) {
+                $('#group-copy-ok-button').removeAttr('disabled');
+            }
+            else {
+                // check for group selection
+                $('#group-copy-ok-button').attr('disabled','disabled');
+                scope[list.name].every(function(row) {
+                    if (row.checked === '1') {
+                        $('#group-copy-ok-button').removeAttr('disabled');
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        };
+
+        scope.performCopy = function() {
+            var list = GroupList,
+                target,
+                url;
+
+            Wait('start');
+
+            if (scope.use_root_group) {
+                target = null;
+            }
+            else {
+                scope[list.name].every(function(row) {
+                    if (row.checked === '1') {
+                        target = row;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
+            if (scope.copy_choice === 'move') {
+                // Respond to move
+
+                // disassociate the group from the original parent
+                if (scope.removeGroupRemove) {
+                    scope.removeGroupRemove();
+                }
+                scope.removeGroupRemove = scope.$on('RemoveGroup', function () {
+                    if (parent_group > 0) {
+                        // Only remove a group from a parent when the parent is a group and not the inventory root
+                        url = GetBasePath('groups') + parent_group + '/children/';
+                        Rest.setUrl(url);
+                        Rest.post({ id: group.id, disassociate: 1 })
+                            .success(function () {
+                                scope.cancel();
+                            })
+                            .error(function (data, status) {
+                                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                    msg: 'Failed to remove ' + group.name + ' from group ' + parent_group + '. POST returned: ' + status });
+                            });
+                    } else {
+                        scope.cancel();
+                    }
+                });
+
+                // add the new group to the target
+                url = (target) ?
+                    GetBasePath('groups') + target.id + '/children/' :
+                    GetBasePath('inventory') + parent_scope.inventory.id + '/groups/';
+                group = {
+                    id: group.id,
+                    name: group.name,
+                    description: group.description,
+                    inventory: parent_scope.inventory.id
+                };
+                Rest.setUrl(url);
+                Rest.post(group)
+                    .success(function () {
+                        scope.$emit('RemoveGroup');
+                    })
+                    .error(function (data, status) {
+                        var target_name = (target) ? target.name : 'inventory';
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to add ' + group.name + ' to ' + target_name + '. POST returned: ' + status });
+                    });
+            }
+            else {
+                // Respond to copy by adding the new group to the target
+                url = (target) ?
+                      GetBasePath('groups') + target.id + '/children/' :
+                      GetBasePath('inventory') + parent_scope.inventory.id + '/groups/';
+
+                group = {
+                    id: group.id,
+                    name: group.name,
+                    description: group.description,
+                    inventory: parent_scope.inventory.id
+                };
+
+                Rest.setUrl(url);
+                Rest.post(group)
+                    .success(function () {
+                        scope.cancel();
+                    })
+                    .error(function (data, status) {
+                        var target_name = (target) ? target.name : 'inventory';
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to add ' + group.name + ' to ' + target_name + '. POST returned: ' + status
+                        });
+                    });
+            }
+        };
+
+    };
+}])
 
 .factory('ShowUpdateStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait',

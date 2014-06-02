@@ -19,7 +19,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 .factory('ClearScope', [
     function () {
         return function () {
-            
+
             $('#form-modal .modal-body').empty();
             $('#form-modal2 .modal-body').empty();
 
@@ -59,7 +59,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 .factory('ToggleClass', function () {
     return function (selector, cssClass) {
-        // Toggles the existance of a css class on a given element   
+        // Toggles the existance of a css class on a given element
         if ($(selector) && $(selector).hasClass(cssClass)) {
             $(selector).removeClass(cssClass);
         } else if ($(selector)) {
@@ -69,7 +69,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 })
 
 
-/* 
+/*
  * Pass in the header and message you want displayed on TB modal dialog found in index.html.
  * Assumes an #id of 'alert-modal'. Pass in an optional TB alert class (i.e. alert-danger, alert-success,
  * alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
@@ -91,7 +91,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 backdrop: 'static'
             });
             scope.disableButtons2 = (disableButtons) ? true : false;
-            
+
             $('#alert-modal2').on('hidden.bs.modal', function () {
                 if (action) {
                     action();
@@ -238,7 +238,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 return (a === 'ies') ? 'y' : '';
             }
 
-            //Keep a list of path/title mappings. When we see /organizations/XX in the path, for example, 
+            //Keep a list of path/title mappings. When we see /organizations/XX in the path, for example,
             //we'll know the actual organization name it maps to.
             if (!Empty(crumb)) {
                 found = false;
@@ -288,7 +288,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     } else {
                         //if (/_/.test(paths[i])) {
                             // replace '_' with space and uppercase each word
-                            
+
                         //}
                         //title = paths[i].charAt(0).toUpperCase() + paths[i].slice(1);
                         title = paths[i].replace(/(?:^|_)\S/g, toUppercase).replace(/_/g, ' ');
@@ -313,7 +313,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 .factory('HelpDialog', ['$rootScope', '$location', 'Store',
     function ($rootScope, $location, Store) {
         return function (params) {
-            
+
             var defn = params.defn,
                 current_step = params.step,
                 autoShow = params.autoShow || false;
@@ -463,9 +463,9 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 ])
 
 
-/* 
+/*
  * Split the current path by '/' and use the array elements from 0 up to and
- * including idx as the new path.  If no idx value supplied, use 0 to length - 1.  
+ * including idx as the new path.  If no idx value supplied, use 0 to length - 1.
  *
  */
 .factory('ReturnToCaller', ['$location', 'Empty',
@@ -496,9 +496,9 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
-/* 
- * Display a spinning icon in the center of the screen to freeze the 
- * UI while waiting on async things to complete (i.e. API calls).    
+/*
+ * Display a spinning icon in the center of the screen to freeze the
+ * UI while waiting on async things to complete (i.e. API calls).
  * Wait('start' | 'stop');
  *
  */
@@ -575,16 +575,16 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
-/* 
+/*
  * Make an Options call to the API and retrieve dropdown options
  *
  * GetChoices({
  *     scope:       Parent $scope
- *     url:         API resource to access   
+ *     url:         API resource to access
  *     field:       API element in the response object that contains the option list.
  *     variable:    Scope variable that will receive the list.
  *     callback:    Optional. Will issue scope.$emit(callback) on completion.
- *     choice_name: Optional. Used when list is found in a variable other than 'choices'. 
+ *     choice_name: Optional. Used when list is found in a variable other than 'choices'.
  * })
  */
 .factory('GetChoices', ['Rest', 'ProcessErrors',
@@ -655,8 +655,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
-/* 
- * DeugForm({ form: <form object>, scope: <current scope object> });
+/*
+ * DebugForm({ form: <form object>, scope: <current scope object> });
  *
  * Use to log the $pristine and $valid properties of each form element. Helpful when form
  * buttons fail to enable/disable properly.
@@ -721,7 +721,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 .factory('ApplyEllipsis', [
     function () {
         return function (selector) {
-            // Add a hidden element to the DOM. We'll use this to calc the px length of 
+            // Add a hidden element to the DOM. We'll use this to calc the px length of
             // our target text.
             var tmp = $('#string-test');
             if (!tmp.length) {

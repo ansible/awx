@@ -181,45 +181,41 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
 
                 if (options.showSearch=== undefined || options.showSearch === true) {
                     html += "<div class=\"row\">\n";
-                    if (list.name !== 'groups') {
-                        if (options.searchSize) {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true,
-                                size: options.searchSize,
-                                searchWidgets: list.searchWidgets
-                            });
-                        } else if (options.mode === 'summary') {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true,
-                                size: 'col-lg-6'
-                            });
-                        } else if (options.mode === 'lookup' || options.id !== undefined) {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true,
-                                size: 'col-lg-8'
-                            });
-                        } else {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true
-                            });
-                        }
+                    if (options.searchSize) {
+                        html += SearchWidget({
+                            iterator: list.iterator,
+                            template: list,
+                            mini: true,
+                            size: options.searchSize,
+                            searchWidgets: list.searchWidgets
+                        });
+                    } else if (options.mode === 'summary') {
+                        html += SearchWidget({
+                            iterator: list.iterator,
+                            template: list,
+                            mini: true,
+                            size: 'col-lg-6'
+                        });
+                    } else if (options.mode === 'lookup' || options.id !== undefined) {
+                        html += SearchWidget({
+                            iterator: list.iterator,
+                            template: list,
+                            mini: true,
+                            size: 'col-lg-8'
+                        });
+                    } else {
+                        html += SearchWidget({
+                            iterator: list.iterator,
+                            template: list,
+                            mini: true
+                        });
                     }
 
                     if (options.mode !== 'lookup') {
                         //actions
                         base = $location.path().replace(/^\//, '').split('/')[0];
                         html += "<div class=\"";
-                        if (list.name === 'groups') {
-                            html += "col-lg-12";
-                        } else if (options.searchSize && !options.listSize) {
+                        if (options.searchSize && !options.listSize) {
                             // User supplied searchSize, calc the remaining
                             size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g, ''));
                             size = (list.searchWidgets) ? list.searchWidgets * size : size;
@@ -416,18 +412,16 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     html += "</div>\n"; //well
                 }
 
-                if (list.name !== 'groups') {
-                    if (options.mode === 'lookup' || (options.id && options.id === "form-modal-body")) {
-                        html += PaginateWidget({
-                            set: list.name,
-                            iterator: list.iterator
-                        });
-                    } else {
-                        html += PaginateWidget({
-                            set: list.name,
-                            iterator: list.iterator
-                        });
-                    }
+                if (options.mode === 'lookup' || (options.id && options.id === "form-modal-body")) {
+                    html += PaginateWidget({
+                        set: list.name,
+                        iterator: list.iterator
+                    });
+                } else {
+                    html += PaginateWidget({
+                        set: list.name,
+                        iterator: list.iterator
+                    });
                 }
 
                 return html;

@@ -92,7 +92,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 .factory('StreamBreadCrumbs', ['$rootScope', '$location',
     function ($rootScope, $location) {
         return function () {
-            // Load the breadcrumbs array. We have to do things a bit different than Utilities.LoadBreadcrumbs. 
+            // Load the breadcrumbs array. We have to do things a bit different than Utilities.LoadBreadcrumbs.
             // Rather than botch that all up, we'll do our own thing here.
             $rootScope.breadcrumbs = [];
             var path, title, i, j, paths = $location.path().split('/');
@@ -188,7 +188,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             // labels
             obj1 = activity.object1;
             obj2 = activity.object2;
-            
+
             // objects
             obj1_obj = (activity.summary_fields[obj1]) ? activity.summary_fields[obj1][0] : null;
             if (obj1 === obj2) {
@@ -279,7 +279,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 n, rows, scope;
 
             if (activity) {
-                // Setup changes field 
+                // Setup changes field
                 activity.changes_stringified = JSON.stringify(activity.changes, null, '\t');
                 n = activity.changes_stringified.match(/\n/g);
                 rows = (n) ? n.length : 1;
@@ -300,7 +300,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 $('#form-modal').on('show.bs.modal', function () {
                     $('#form-modal-body').css({
                         width: 'auto', //probably not needed
-                        height: 'auto', //probably not needed 
+                        height: 'auto', //probably not needed
                         'max-height': '100%'
                     });
                 });
@@ -349,7 +349,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     if (paths.length > 1 && /^\d+/.test(paths[paths.length - 1])) {
                         type = paths[paths.length - 2];
                         type = (type === 'inventories') ? 'inventory' : type.replace(/s$/, '');
-                        //defaultUrl += '?object1=' + type + '&object1__id=' + 
+                        //defaultUrl += '?object1=' + type + '&object1__id=' +
                         defaultUrl += '?' + type + '__id=' + paths[paths.length - 1];
                     } else if (paths.length > 1) {
                         type = paths[paths.length - 1];
@@ -368,7 +368,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
             // Fix inventory name. The way we're doing breadcrumbs doesn't support bind variables.
             if (inventory_name) {
-                itm = Find({ list: $rootScope.breadcrumbs, key: 'title', val: '{{ inventory_name }}' });
+                itm = Find({ list: $rootScope.breadcrumbs, key: 'title', val: '{{ inventory.name }}' });
                 if (itm) {
                     itm.title = inventory_name;
                 }
@@ -424,7 +424,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 scope.activities.forEach(function(activity, i) {
                     var row = scope.activities[i],
                         type, url;
-                    
+
                     if (scope.activities[i].summary_fields.actor) {
                         scope.activities[i].user = "<a href=\"/#/users/" + scope.activities[i].summary_fields.actor.id  + "\">" +
                             scope.activities[i].summary_fields.actor.username + "</a>";
@@ -436,7 +436,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     deleted = /^\_delete/;
                     obj1 = scope.activities[i].object1;
                     obj2 = scope.activities[i].object2;
-                    
+
                     if ((obj1 === "schedule" || obj2 === "schedule") && activity.summary_fields.schedule) {
                         if (activity.summary_fields.inventory_source) {
                             type = 'inventory_source';

@@ -14,7 +14,8 @@
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
                                 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'AuthService', 'HostsHelper',
                                 'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
-                                'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'LogViewerHelper'
+                                'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'LogViewerHelper',
+                                'GroupListDefinition'
                                 ])
 
 .factory('SetEnabledMsg', [ function() {
@@ -167,18 +168,21 @@ function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateI
     return function(params) {
 
         var scope = params.scope,
+            parent_scope = params.parent_scope,
             group_id = params.group_id,
             inventory_id = params.inventory_id,
             list = InventoryHosts,
+            pageSize = (params.pageSize) ? params.pageSize : 20,
+
             url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
                 GetBasePath('inventory') + inventory_id + '/hosts/';
 
         scope.search_place_holder='Search ' + scope.selected_group_name;
 
-        //if (scope.removePostRefresh) {
-        //    scope.removePostRefresh();
-        //}
-        scope.removePostRefresh = scope.$on('PostRefresh', function(e, set) {
+        if (scope.removeHostsReloadPostRefresh) {
+            scope.removeHostsReloadPostRefresh();
+        }
+        scope.removeHostsReloadPostRefresh = scope.$on('PostRefresh', function(e, set) {
             if (set === 'hosts') {
                 for (var i=0; i < scope.hosts.length; i++) {
                     //Set tooltip for host enabled flag
@@ -187,7 +191,9 @@ function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateI
                 SetStatus({ scope: scope });
                 setTimeout(function() { ApplyEllipsis('#hosts_table .host-name a'); }, 2500);
                 Wait('stop');
-                scope.$emit('HostReloadComplete');
+                if (parent_scope) {
+                    parent_scope.$emit('HostReloadComplete');
+                }
             }
         });
 
@@ -195,7 +201,7 @@ function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateI
         SetContainerHeights({ scope: scope, reloadHosts: false });
 
         SearchInit({ scope: scope, set: 'hosts', list: list, url: url });
-        PaginateInit({ scope: scope, list: list, url: url });
+        PaginateInit({ scope: scope, list: list, url: url, pageSize: pageSize });
 
         if ($routeParams.host_name) {
             scope[list.iterator + 'InputDisable'] = false;
@@ -220,16 +226,18 @@ function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateI
 function(GenerateList, InventoryHosts, HostsReload) {
     return function(params) {
 
-        var scope = params.scope,
+        var group_scope = params.group_scope,
+            host_scope = params.host_scope,
             inventory_id = params.inventory_id,
             group_id = params.group_id,
+            pageSize = params.pageSize,
             generator = GenerateList;
 
         // Inject the list html
-        generator.inject(InventoryHosts, { scope: scope, mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-6 col-md-6 col-sm-6' });
+        generator.inject(InventoryHosts, { scope: host_scope, mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-6 col-md-6 col-sm-6' });
 
         // Load data
-        HostsReload({ scope: scope, group_id: group_id, inventory_id: inventory_id });
+        HostsReload({ scope: host_scope, group_id: group_id, inventory_id: inventory_id, parent_scope: group_scope, cpageSize: pageSize });
     };
 }])
 
@@ -336,8 +344,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, Gener
 
 
 .factory('HostsCreate', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
-    'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait',
-    'ToJSON',
+    'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'ToJSON',
 function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
     GetBasePath, HostsReload, ParseTypeChange, Wait, ToJSON) {
     return function(params) {
@@ -437,13 +444,13 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
 
 .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetStatus', 'ApplyEllipsis',
-    'ToJSON', 'ParseVariableString', 'CreateDialog', 'TextareaResize', 'Empty',
+    'ToJSON', 'ParseVariableString', 'CreateDialog', 'TextareaResize',
 function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
     GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus, ApplyEllipsis, ToJSON,
-    ParseVariableString, CreateDialog, TextareaResize, Empty) {
+    ParseVariableString, CreateDialog, TextareaResize) {
     return function(params) {
 
-        var parent_scope = params.scope,
+        var parent_scope = params.parent_scope,
             host_id = params.host_id,
             inventory_id = params.inventory_id,
             mode = params.mode,  // 'add' or 'edit'
@@ -451,10 +458,10 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             generator = GenerateForm,
             form = HostForm,
             defaultUrl,
-            scope = parent_scope.$new(),
+            scope = params.host_scope,
             master = {},
             relatedSets = {},
-            group, buttons;
+            buttons, url;
 
         generator.inject(HostForm, { mode: 'edit', id: 'host-modal-dialog', breadCrumbs: false, related: false, scope: scope });
         generator.reset();
@@ -581,24 +588,26 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                     scope.$emit('hostLoaded');
                 })
                 .error( function(data, status) {
-                    ProcessErrors(scope, data, status, form,
+                    ProcessErrors(parent_scope, data, status, form,
                         { hdr: 'Error!', msg: 'Failed to retrieve host: ' + host_id + '. GET returned status: ' + status });
                 });
         }
         else {
             // Add mode
-            group = Find({ list: scope.groups, key: 'id', val: selected_group_id });
-            if (!Empty(group)) {
-                scope.has_inventory_sources = group.has_inventory_sources;
-                scope.enabled = true;
-                scope.variables = '---';
-                defaultUrl = GetBasePath('groups') + group.group_id + '/hosts/';
-                scope.$emit('hostVariablesLoaded');
-            }
-            else {
-                ProcessErrors(scope, null, status, null, { hdr: 'Error',
-                    msg: 'Group lookup failed. Selected group id: ' + selected_group_id });
-            }
+            url = GetBasePath('groups') + selected_group_id + '/';
+            Rest.setUrl(url);
+            Rest.get()
+                .success( function(data) {
+                    scope.has_inventory_sources = data.has_inventory_sources;
+                    scope.enabled = true;
+                    scope.variables = '---';
+                    defaultUrl = data.related.hosts;
+                    scope.$emit('hostVariablesLoaded');
+                })
+                .error( function(data, status) {
+                    ProcessErrors(parent_scope, data, status, form,
+                        { hdr: 'Error!', msg: 'Failed to retrieve group: ' + selected_group_id + '. GET returned status: ' + status });
+                });
         }
 
         if (scope.removeSaveCompleted) {
@@ -608,12 +617,12 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             var host, old_name;
             if (mode === 'edit') {
                 // Update the name on the list
-                host = Find({ list: parent_scope.hosts, key: 'id', val: host_id });
+                host = Find({ list: scope.hosts, key: 'id', val: host_id });
                 old_name = host.name;
                 host.name = scope.name;
                 host.enabled = (scope.enabled) ? true : false;
                 host.enabled_flag = host.enabled;
-                SetStatus({ scope: parent_scope, host: host });
+                SetStatus({ scope: scope, host: host });
                 // Update any titles attributes created by ApplyEllipsis
                 if (old_name) {
                     setTimeout(function() {
@@ -630,12 +639,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             }
             else {
                 $('#host-modal-dialog').dialog('close');
-                HostsReload({
-                    scope: parent_scope,
-                    group_id: parent_scope.selected_group_id,
-                    tree_id: parent_scope.selected_tree_id,
-                    inventory_id: parent_scope.inventory_id
-                });
+                parent_scope.refreshHosts();
             }
 
             // Restore ellipsis response to window resize
@@ -691,48 +695,38 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
         };
 
         scope.cancelModal = function() {
-            $('#host-modal-dialog').dialog('close');
+            try {
+                $('#host-modal-dialog').dialog('close');
+            }
+            catch(err) {
+                // ignore
+            }
+            parent_scope.refreshHosts();
         };
 
     };
 }])
 
 
-.factory('HostsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'Prompt', 'ProcessErrors', 'GetBasePath',
-    'HostsReload', 'Wait', 'Find', 'Empty',
-function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload, Wait, Find, Empty) {
+.factory('HostsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'Wait',
+function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload, Wait) {
     return function(params) {
         // Remove the selected host from the current group by disassociating
 
         var action_to_take, body,
-            scope = params.scope,
+            scope = params.parent_scope,
             host_id = params.host_id,
             host_name = params.host_name,
             group,
             url_list = [];
 
-        function getChildren(tree_id) {
-            var parent, found, j;
-            for (j = 0; j < scope.groups.length; j++) {
-                if (scope.groups[j].id === tree_id || scope.groups[j].parent === parent) {
-                    found = true;
-                    url_list.push(GetBasePath('groups') + scope.groups[j].group_id + '/hosts/');
-                    parent = scope.groups[j].id;
-                }
-                else {
-                    if (found) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (!Empty(scope.selected_group_id)) {
-            group = Find({ list: scope.groups, key: 'id', val: scope.selected_tree_id });
-            getChildren(group.id);
+        if (scope.selected_group_id) {
+            //group = Find({ list: parent_scope.groups, key: 'id', val: parent_scope.selected_group_id });
+            //getChildren(group.id);
+            url_list.push(GetBasePath('groups') + scope.selected_group_id + '/hosts/');
         }
         else {
-            url_list.push(GetBasePath('inventory') + scope.inventory_id + '/hosts/');
+            url_list.push(GetBasePath('inventory') + scope.inventory.id + '/hosts/');
         }
 
         if (scope.removeHostsReload) {
@@ -740,7 +734,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
         }
         scope.removeHostsReload = scope.$on('hostsReload', function() {
             $('#prompt-modal').modal('hide');
-            scope.showHosts(scope.selected_tree_id, scope.selected_group_id, false);
+            scope.refreshHosts();
         });
 
         $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('stop'); });
@@ -778,6 +772,243 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
             ' It will still be part of the inventory and available in All Hosts.</p></div>' :
             '<div class=\"alert alert-info\"><p>Are you sure you want to permanently delete host <strong>' + host_name + '</strong> from the inventory?</p></div>';
         Prompt({ hdr: 'Delete Host', body: body, action: action_to_take, 'class': 'btn-danger' });
+
+    };
+}])
+
+.factory('HostsCopy', ['$compile', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'GenerateList', 'GroupList', 'SearchInit',
+    'PaginateInit',
+    function($compile, Rest, ProcessErrors, CreateDialog, GetBasePath, Wait, GenerateList, GroupList, SearchInit, PaginateInit) {
+    return function(params) {
+
+        var host_id = params.host_id,
+            group_scope = params.group_scope,
+            parent_scope = params.host_scope,
+            parent_group = group_scope.selected_group_id,
+            scope = parent_scope.$new(),
+            buttonSet, url, host;
+
+        buttonSet = [{
+            label: "Cancel",
+            onClick: function() {
+                scope.cancel();
+            },
+            icon: "fa-times",
+            "class": "btn btn-default",
+            "id": "host-copy-cancel-button"
+        },{
+            label: "OK",
+            onClick: function() {
+                scope.performCopy();
+            },
+            icon: "fa-check",
+            "class": "btn btn-primary",
+            "id": "host-copy-ok-button"
+        }];
+
+        if (scope.removeHostCopyPostRefresh) {
+            scope.removeHostCopyPostRefresh();
+        }
+        scope.removeHostCopyPostRefresh = scope.$on('PostRefresh', function() {
+            scope.copy_groups.forEach(function(row, i) {
+                scope.copy_groups[i].checked = '0';
+            });
+            Wait('stop');
+            $('#host-copy-dialog').dialog('open');
+            $('#host-copy-ok-button').attr('disabled','disabled');
+
+            // prevent backspace from navigation when not in input or textarea field
+            $(document).on("keydown", function (e) {
+                if (e.which === 8 && !$(e.target).is('input[type="text"], textarea')) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        if (scope.removeHostCopyDialogReady) {
+            scope.removeHostCopyDialogReady();
+        }
+        scope.removeCopyDialogReady = scope.$on('HostCopyDialogReady', function() {
+            var url = GetBasePath('inventory') + group_scope.inventory.id + '/groups/';
+            GenerateList.inject(GroupList, {
+                mode: 'lookup',
+                id: 'copy-host-select-container',
+                scope: scope
+                //,
+                //instructions: instructions
+            });
+            SearchInit({
+                scope: scope,
+                set: GroupList.name,
+                list: GroupList,
+                url: url
+            });
+            PaginateInit({
+                scope: scope,
+                list: GroupList,
+                url: url,
+                mode: 'lookup'
+            });
+            scope.search(GroupList.iterator, null, true, false);
+        });
+
+        if (scope.removeShowDialog) {
+            scope.removeShowDialog();
+        }
+        scope.removeShowDialog = scope.$on('ShowDialog', function() {
+            var d;
+            scope.name = host.name;
+            scope.copy_choice = "copy";
+            d = angular.element(document.getElementById('host-copy-dialog'));
+            $compile(d)(scope);
+            CreateDialog({
+                id: 'host-copy-dialog',
+                scope: scope,
+                buttons: buttonSet,
+                width: 650,
+                height: 650,
+                minWidth: 600,
+                title: 'Copy or Move Host',
+                callback: 'HostCopyDialogReady',
+                onClose: function() {
+                    scope.cancel();
+                }
+            });
+        });
+
+        Wait('start');
+
+        url = GetBasePath('hosts') + host_id + '/';
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                host = data;
+                scope.$emit('ShowDialog');
+            })
+            .error(function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + ' failed. GET returned: ' + status });
+            });
+
+
+        scope.cancel = function() {
+            $(document).off("keydown");
+            try {
+                $('#host-copy-dialog').dialog('close');
+            }
+            catch(e) {
+                // ignore
+            }
+            scope.searchCleanup();
+            group_scope.restoreSearch();  // Restore all parent search stuff and refresh hosts and groups lists
+            scope.$destroy();
+        };
+
+        scope['toggle_' + GroupList.iterator] = function (id) {
+            var count = 0,
+                list = GroupList;
+            scope[list.name].forEach( function(row, i) {
+                if (row.id === id) {
+                    if (row.checked === '0') {
+                        scope[list.name][i].checked = '1';
+                        scope[list.name][i].success_class = 'success';
+                    }
+                    else {
+                        scope[list.name][i].checked = '0';
+                        scope[list.name][i].success_class = '';
+                    }
+                } else {
+                    scope[list.name][i].checked = '0';
+                    scope[list.name][i].success_class = '';
+                }
+            });
+            // Check if any rows are checked
+            scope[list.name].forEach(function(row) {
+                if (row.checked === '1') {
+                    count++;
+                }
+            });
+            if (count === 0) {
+                $('#host-copy-ok-button').attr('disabled','disabled');
+            }
+            else {
+                $('#host-copy-ok-button').removeAttr('disabled');
+            }
+        };
+
+        scope.performCopy = function() {
+            var list = GroupList,
+                target,
+                url;
+
+            Wait('start');
+
+            if (scope.use_root_group) {
+                target = null;
+            }
+            else {
+                scope[list.name].every(function(row) {
+                    if (row.checked === '1') {
+                        target = row;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
+            if (scope.copy_choice === 'move') {
+                // Respond to move
+
+                // disassociate the host from the original parent
+                if (scope.removeHostRemove) {
+                    scope.removeHostRemove();
+                }
+                scope.removeHostRemove = scope.$on('RemoveHost', function () {
+                    if (parent_group > 0) {
+                        // Only remove a host from a parent when the parent is a group and not the inventory root
+                        url = GetBasePath('groups') + parent_group + '/hosts/';
+                        Rest.setUrl(url);
+                        Rest.post({ id: host.id, disassociate: 1 })
+                            .success(function () {
+                                scope.cancel();
+                            })
+                            .error(function (data, status) {
+                                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                    msg: 'Failed to remove ' + host.name + ' from group ' + parent_group + '. POST returned: ' + status });
+                            });
+                    } else {
+                        scope.cancel();
+                    }
+                });
+
+                // add the new host to the target
+                url = GetBasePath('groups') + target.id + '/hosts/';
+                Rest.setUrl(url);
+                Rest.post(host)
+                    .success(function () {
+                        scope.$emit('RemoveHost');
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to add ' + host.name + ' to ' + target.name + '. POST returned: ' + status });
+                    });
+            }
+            else {
+                // Respond to copy by adding the new host to the target
+                url = GetBasePath('groups') + target.id + '/hosts/';
+                Rest.setUrl(url);
+                Rest.post(host)
+                    .success(function () {
+                        scope.cancel();
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to add ' + host.name + ' to ' + target.name + '. POST returned: ' + status
+                        });
+                    });
+            }
+        };
+
 
     };
 }])

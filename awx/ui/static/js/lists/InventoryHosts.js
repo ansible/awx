@@ -76,6 +76,12 @@ angular.module('InventoryHostsDefinition', [])
                 awToolTip: 'Edit host',
                 dataPlacement: 'top'
             },
+            copy: {
+                mode: 'all',
+                ngClick: "copyHost(host.id)",
+                awToolTip: 'Copy or move host to another group',
+                dataPlacement: "top"
+            },
             "delete": {
                 //label: 'Delete',
                 ngClick: "deleteHost(host.id, host.name)",
@@ -89,7 +95,7 @@ angular.module('InventoryHostsDefinition', [])
             create: {
                 mode: 'all',
                 ngClick: "createHost()",
-                ngHide: 'selected_tree_id == 1', //disable when 'All Hosts' selected
+                ngHide: '!selected_group_id', //disable when 'All Hosts' selected
                 awToolTip: "Create a new host"
             },
             stream: {

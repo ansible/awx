@@ -471,238 +471,259 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 
 
 
-function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootScope, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait,
-    GetSyncStatusMsg, InjectHosts, HostsReload, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, Rest, ProcessErrors,
-    InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find, EditInventoryProperties, HostsEdit,
-    HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost, Stream, GetBasePath, ShowJobSummary, ApplyEllipsis, WatchInventoryWindowResize,
-    HelpDialog, InventoryGroupsHelp, Store, ViewJob, SetContainerHeights) {
+function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, Empty, Wait, Rest, Alert, LoadBreadCrumbs, GetBasePath, ProcessErrors,
+    Breadcrumbs, InventoryGroups, InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, GroupsEdit, InventoryUpdate,
+    GroupsCancelUpdate, ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete, EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
+    InventoryGroupsHelp, HelpDialog, ViewJob, WatchInventoryWindowResize, SetContainerHeights, GetHostContainerRows, GetGroupContainerRows, GetGroupContainerHeight,
+    GroupsCopy, HostsCopy)
+{
+
+    var PreviousSearchParams,
+        url,
+        hostScope = $scope.$new();
 
     ClearScope();
 
-    var generator = GenerateList,
-        list = InventoryGroups;
+    $scope.group_breadcrumbs = [{
+        name: 'All',
+        id: 0,
+        description: '',
+        show: true,
+        ngicon: null,
+        has_children: false,
+        related: {},
+        active_class: 'active',
+        show_failures: false
+    }];
 
-    $scope.inventory_id = $routeParams.inventory_id;
+    $scope.refreshHostsOnGroupRefresh = false;
+    $scope.selected_group_id = null;
 
-    LoadBreadCrumbs({
-        path: $location.path(),
-        title: '{{ inventory_name }}'
-    });
+    Wait('start');
 
-    // Handle inventory sync status changes
-    if ($rootScope.removeJobStatusChange) {
-        $rootScope.removeJobStatusChange();
+
+    if ($scope.removeHostReloadComplete) {
+        $scope.removeHostReloadComplete();
     }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
-        var group, stat;
-        Wait('stop');
-        $log.debug(data);
-        if ($scope.groups) {
-            // Assuming we have a list of groups available
-            group = Find({ list: $scope.groups, key: 'group_id', val: data.group_id });
-            if (group) {
-                // And we found the affected group
-                $log.debug('Received event for group: ' + group.name);
-                if (data.status === 'failed' || data.status === 'successful') {
-                    $log.debug('Update completed. Refreshing the tree.');
-                    $scope.refreshGroups(group.id, group.group_id);
-                }
-                else {
-                    $log.debug('Status changed to: ' + data.status);
-                    stat = GetSyncStatusMsg({
-                        status: data.status,
-                        has_inventory_sources: group.has_inventory_sources,
-                        source: group.source
-                    });
-                    $log.debug('Changing tooltip to: ' + stat.tooltip);
-                    group.status = data.status;
-                    group.status_class = stat['class'];
-                    group.status_tooltip = stat.tooltip;
-                    group.launch_tooltip = stat.launch_tip;
-                    group.launch_class = stat.launch_class;
-                }
-            }
+    $scope.removeHostReloadComplete = $scope.$on('HostReloadComplete', function() {
+        if ($scope.initial_height) {
+            $('#hosts-container .well').height($scope.initial_height + 49);
+            $scope.initial_height = null;
         }
     });
 
-    // After the tree data loads for the first time, generate the groups and hosts lists
-    if ($scope.removeGroupTreeLoaded) {
-        $scope.removeGroupTreeLoaded();
+    if ($scope.removeInventoryLoaded) {
+        $scope.removeInventoryLoaded();
     }
-    $scope.removeGroupTreeLoaded = $scope.$on('GroupTreeLoaded', function (event, inventory_name, groups) {
-        // Add breadcrumbs
-        var e, html, inventoryAutoHelp;
+    $scope.removeInventoryLoaded = $scope.$on('InventoryLoaded', function() {
+        var e, rows;
+
+        LoadBreadCrumbs({
+            path: $location.path(),
+            title: '{{ inventory.name }}'
+        });
+
+        // Build page breadcrumbs
         e = angular.element(document.getElementById('breadcrumbs'));
-        e.html(Breadcrumbs({ list: list, mode: 'edit' }));
+        e.html(Breadcrumbs({ list: InventoryGroups, mode: 'edit' }));
         $compile(e)($scope);
 
         // Add groups view
-        generator.inject(list, {
+        GenerateList.inject(InventoryGroups, {
             mode: 'edit',
-            id: 'groups-container',
+            id: 'group-list-container',
             breadCrumbs: false,
-            searchSize: 'col-lg-5 col-md-5 col-sm-5',
-            skipTableHead: true
+            searchSize: 'col-lg-6 col-md-6 col-sm-6',
+            scope: $scope
         });
 
-        // Keep the table header fixed while allowing the table body to scroll and still use <table> element
-        html = "<table class=\"table table-condensed\" id=\"groups-table-header\">" + generator.buildHeader() + "</table>\n";
-        $(html).insertBefore('#groups-container .list-table-container');
+        /*SetContainerHeights({
+            group_scope: $scope,
+            host_scope: hostScope,
+            reloadHosts: false
+        });*/
 
-        $scope.groups = groups;
-        $scope.inventory_name = inventory_name;
-
-        // Default the selected group to the first node
-        if ($scope.groups.length > 0) {
-            $scope.selected_tree_id = $scope.groups[0].id;
-            $scope.selected_group_id = $scope.groups[0].group_id;
-            $scope.groups[0].selected_class = 'selected';
-            $scope.groups[0].active_class = 'active-row';
-            $scope.selected_group_name = $scope.groups[0].name;
-        } else {
-            $scope.selected_tree_id = null;
-            $scope.selected_group_id = null;
+        if ($(window).width() > 1210) {
+            $scope.initial_height = GetGroupContainerHeight() - 20;
+            $('#groups-container .list-table-container').height($scope.initial_height);
+            rows = GetGroupContainerRows();
+            //$('#hosts-container .well').height( height );
         }
-
-        // Resize the containers based on viewport width/height
-        SetContainerHeights({ scope: $scope, reloadHosts: false });
+        else {
+            rows = 20;
+        }
+        hostScope.host_page_size = rows;
+        $scope.group_page_size = rows;
 
         // Add hosts view
         $scope.show_failures = false;
         InjectHosts({
-            scope: $scope,
-            inventory_id: $scope.inventory_id,
-            tree_id: $scope.selected_tree_id,
-            group_id: $scope.selected_group_id
+            group_scope: $scope,
+            host_scope: hostScope,
+            inventory_id: $scope.inventory.id,
+            tree_id: null,
+            group_id: null,
+            pageSize: rows
         });
 
-        // As the window shrinks and expands, apply ellipsis
-        setTimeout(function () {
-            // Hack to keep group name from slipping to a new line
-            $('#groups_table .name-column').each(function () {
-                var td_width, level_width, level_padding, level, pct;
-                td_width = $(this).width();
-                level_width = $(this).find('.level').width();
-                level_padding = parseInt($(this).find('.level').css('padding-left').replace(/px/, ''));
-                level = level_width + level_padding;
-                pct = (100 - Math.ceil((level / td_width) * 100)) + '%';
-                $(this).find('.group-name').css({
-                    width: pct
+        SearchInit({ scope: $scope, set: 'groups', list: InventoryGroups, url: $scope.inventory.related.root_groups });
+        PaginateInit({ scope: $scope, list: InventoryGroups , url: $scope.inventory.related.root_groups, pageSize: rows });
+        $scope.search(InventoryGroups.iterator, null, true);
+    });
+
+    if ($scope.removePostRefresh) {
+        $scope.removePostRefresh();
+    }
+    $scope.removePostRefresh = $scope.$on('PostRefresh', function(e, set) {
+        if (set === 'groups') {
+            $scope.groups.forEach( function(group, idx) {
+                var stat, hosts_status;
+                stat = GetSyncStatusMsg({
+                    status: group.summary_fields.inventory_source.status,
+                    has_inventory_sources: group.has_inventory_sources,
+                    source: ( (group.summary_fields.inventory_source) ? group.summary_fields.inventory_source.source : null )
+                }); // from helpers/Groups.js
+                $scope.groups[idx].status_class = stat['class'];
+                $scope.groups[idx].status_tooltip = stat.tooltip;
+                $scope.groups[idx].launch_tooltip = stat.launch_tip;
+                $scope.groups[idx].launch_class = stat.launch_class;
+                hosts_status = GetHostsStatusMsg({
+                    active_failures: group.hosts_with_active_failures,
+                    total_hosts: group.total_hosts,
+                    inventory_id: $scope.inventory.id,
+                    group_id: group.id
+                }); // from helpers/Groups.js
+                $scope.groups[idx].hosts_status_tip = hosts_status.tooltip;
+                $scope.groups[idx].show_failures = hosts_status.failures;
+                $scope.groups[idx].hosts_status_class = hosts_status['class'];
+
+                $scope.groups[idx].source = (group.summary_fields.inventory_source) ? group.summary_fields.inventory_source.source : null;
+                $scope.groups[idx].status = (group.summary_fields.inventory_source) ? group.summary_fields.inventory_source.status : null;
+
+            });
+            if ($scope.refreshHostsOnGroupRefresh) {
+                $scope.refreshHostsOnGroupRefresh = false;
+                HostsReload({
+                    scope: hostScope,
+                    group_id: $scope.selected_group_id,
+                    inventory_id: $scope.inventory.id,
+                    pageSize: hostScope.host_page_size
                 });
-            });
-            ApplyEllipsis('#groups_table .group-name a');
-            ApplyEllipsis('#hosts_table .host-name a');
-        }, 2500); //give the window time to display
-        WatchInventoryWindowResize({ scope: $scope });
-
-        inventoryAutoHelp = Store('inventoryAutoHelp');
-        if (inventoryAutoHelp !== 'off' && $scope.autoShowGroupHelp) {
-            $scope.showGroupHelp({
-                autoShow: true
-            });
-        }
-
-    });
-
-    // Called after tree data is reloaded on refresh button click.
-    if ($scope.removeGroupTreeRefreshed) {
-        $scope.removeGroupTreeRefreshed();
-    }
-    $scope.removeGroupTreeRefreshed = $scope.$on('GroupTreeRefreshed', function () {
-        // Reapply ellipsis to groups
-        setTimeout(function () {
-            ApplyEllipsis('#groups_table .group-name a');
-        }, 2500);
-        // Reselect the preveiously selected group node, causing host view to refresh.
-        $scope.showHosts($scope.selected_tree_id, $scope.selected_group_id, false);
-    });
-
-    // Group was deleted. Now we need to refresh the group view.
-    if ($scope.removeGroupDeleteCompleted) {
-        $scope.removeGroupDeleteCompleted();
-    }
-    $scope.removeGroupDeleteCompleted = $scope.$on('GroupDeleteCompleted', function () {
-        $scope.selected_tree_id = 1;
-        $scope.selected_group_id = null;
-        BuildTree({
-            scope: $scope,
-            inventory_id: $scope.inventory_id,
-            refresh: true
-        });
-    });
-
-    // Respond to a group drag-n-drop
-    if ($scope.removeCopMoveGroup) {
-        $scope.removeCopyMoveGroup();
-    }
-    $scope.removeCopyMoveGroup = $scope.$on('CopyMoveGroup', function (e, inbound_tree_id, target_tree_id) {
-        CopyMoveGroup({
-            scope: $scope,
-            target_tree_id: target_tree_id,
-            inbound_tree_id: inbound_tree_id
-        });
-    });
-
-    // Respond to a host drag-n-drop
-    if ($scope.removeCopMoveHost) {
-        $scope.removeCopyMoveHost();
-    }
-    $scope.removeCopyMoveHost = $scope.$on('CopyMoveHost', function (e, target_tree_id, host_id) {
-        CopyMoveHost({
-            scope: $scope,
-            target_tree_id: target_tree_id,
-            host_id: host_id
-        });
-    });
-
-    $scope.showHosts = function (tree_id, group_id, show_failures) {
-        // Clicked on group
-        if (tree_id !== null) {
-            Wait('start');
-            $scope.selected_tree_id = tree_id;
-            $scope.selected_group_id = group_id;
-            $scope.hosts = [];
-            $scope.show_failures = show_failures; // turn on failed hosts filter in hosts view
-            for (var i = 0; i < $scope.groups.length; i++) {
-                if ($scope.groups[i].id === tree_id) {
-                    $scope.groups[i].selected_class = 'selected';
-                    $scope.groups[i].active_class = 'active-row';
-                    $scope.selected_group_name = $scope.groups[i].name;
-                } else {
-                    $scope.groups[i].selected_class = '';
-                    $scope.groups[i].active_class = '';
-                }
             }
-            if (Empty($scope.inventory_id)) {
-                $scope.inventory_id = $scope.groups[0].inentory_id;
+            else {
+                Wait('stop');
             }
-            HostsReload({
-                scope: $scope,
-                group_id: group_id,
-                tree_id: tree_id,
-                inventory_id: $scope.inventory_id
+
+            WatchInventoryWindowResize({
+                group_scope: $scope,
+                host_scope: hostScope
             });
-        } else {
-            Wait('stop');
+
         }
+    });
+
+    // Load Inventory
+    url = GetBasePath('inventory') + $routeParams.inventory_id + '/';
+    Rest.setUrl(url);
+    Rest.get()
+        .success(function (data) {
+            $scope.inventory = data;
+            $scope.$emit('InventoryLoaded');
+        })
+        .error(function (data, status) {
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve inventory: ' + $routeParams.inventory_id +
+                ' GET returned status: ' + status });
+        });
+
+    // Load group on selection
+    function loadGroups(url) {
+        SearchInit({ scope: $scope, set: 'groups', list: InventoryGroups, url: url });
+        PaginateInit({ scope: $scope, list: InventoryGroups , url: url, pageSize: $scope.group_page_size });
+        $scope.search(InventoryGroups.iterator, null, true, false, true);
+    }
+
+    function setActiveGroupBreadcrumb() {
+        $scope.group_breadcrumbs.forEach(function(crumb, idx) {
+            $scope.group_breadcrumbs[idx].active_class = '';
+        });
+        $scope.group_breadcrumbs[$scope.group_breadcrumbs.length - 1].active_class = 'active';
+        $scope.refreshHostsOnGroupRefresh = true;
+        $scope.selected_group_id = ($scope.group_breadcrumbs[$scope.group_breadcrumbs.length - 1].id === 0) ? null : $scope.group_breadcrumbs[$scope.group_breadcrumbs.length - 1].id;
+    }
+
+    $scope.refreshHosts = function() {
+        HostsReload({
+            scope: hostScope,
+            group_id: $scope.selected_group_id,
+            inventory_id: $scope.inventory.id,
+            pageSize: hostScope.host_page_size
+        });
+    };
+
+    $scope.refreshGroups = function() {
+        $scope.refreshHostsOnGroupRefresh = true;
+        $scope.search(InventoryGroups.iterator, null, true, false, true);
+    };
+
+    $scope.restoreSearch = function() {
+        // Restore search params and related stuff, plus refresh
+        // groups and hosts lists
+        SearchInit({
+            scope: $scope,
+            set: PreviousSearchParams.set,
+            list: PreviousSearchParams.list,
+            url: PreviousSearchParams.defaultUrl,
+            iterator: PreviousSearchParams.iterator,
+            sort_order: PreviousSearchParams.sort_order,
+            setWidgets: false
+        });
+        $scope.refreshHostsOnGroupRefresh = true;
+        $scope.search(InventoryGroups.iterator, null, true, false, true);
+    };
+
+    $scope.groupSelect = function(id) {
+        var group = Find({ list: $scope.groups, key: 'id', val: id });
+        $scope.group_breadcrumbs.push(group);
+        setActiveGroupBreadcrumb();
+        loadGroups(group.related.children, group.id);
+    };
+
+    $scope.breadcrumbGroupSelect = function(id) {
+        var i, url;
+        $scope.group_breadcrumbs.every(function(crumb, idx) {
+            if (crumb.id === id) {
+                i = idx;
+                return false;
+            }
+            return true;
+        });
+        $scope.group_breadcrumbs = $scope.group_breadcrumbs.slice(0,i + 1);
+        if (id > 0) {
+            url = $scope.group_breadcrumbs[$scope.group_breadcrumbs.length - 1].related.children;
+        }
+        else {
+            url = $scope.inventory.related.root_groups;
+        }
+        setActiveGroupBreadcrumb();
+        loadGroups(url);
     };
 
     $scope.createGroup = function () {
+        PreviousSearchParams = Store('group_current_search_params');
         GroupsEdit({
             scope: $scope,
-            inventory_id: $scope.inventory_id,
+            inventory_id: $scope.inventory.id,
             group_id: $scope.selected_group_id,
             mode: 'add'
         });
     };
 
-    $scope.editGroup = function (group_id, tree_id) {
+    $scope.editGroup = function (id) {
+        PreviousSearchParams = Store('group_current_search_params');
         GroupsEdit({
             scope: $scope,
-            inventory_id: $scope.inventory_id,
-            group_id: group_id,
-            tree_id: tree_id,
-            groups_reload: true,
+            inventory_id: $scope.inventory.id,
+            group_id: id,
             mode: 'edit'
         });
     };
@@ -715,7 +736,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
                 // if no source, do nothing.
             } else if (group.status === 'updating') {
                 Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
-                    group.name + '</em>. Use the Refresh button to monitor the status.', 'alert-info');
+                    group.name + '</em> Click the <i class="fa fa-refresh"></i> button to monitor the status.', 'alert-info');
             } else {
                 Wait('start');
                 Rest.setUrl(group.related.inventory_source);
@@ -726,109 +747,164 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
                             url: data.related.update,
                             group_name: data.summary_fields.group.name,
                             group_source: data.source,
-                            tree_id: group.id,
-                            group_id: group.group_id
+                            group_id: group.id,
                         });
                     })
                     .error(function (data, status) {
-                        Wait('stop');
                         ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' +
-                            group.related.inventory_source + ' POST returned status: ' + status });
+                            group.related.inventory_source + ' GET returned status: ' + status });
                     });
             }
         }
     };
 
-    $scope.cancelUpdate = function (tree_id) {
-        GroupsCancelUpdate({ scope: $scope, id: tree_id });
+    $scope.cancelUpdate = function (id) {
+        GroupsCancelUpdate({ scope: $scope, id: id });
     };
 
-    $scope.toggle = function (tree_id) {
-        // Expand/collapse nodes
-        ToggleChildren({ scope: $scope, list: list, id: tree_id });
-    };
-
-    $scope.refreshGroups = function (tree_id, group_id) {
-        // Refresh the tree data when refresh button cicked
-        if (tree_id) {
-            $scope.selected_tree_id = tree_id;
-            $scope.selected_group_id = group_id;
-        }
-        BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true });
-    };
-
-    $scope.viewUpdateStatus = function (tree_id, group_id) {
+    $scope.viewUpdateStatus = function (id) {
         ViewUpdateStatus({
             scope: $scope,
-            tree_id: tree_id,
-            group_id: group_id
+            group_id: id
         });
     };
 
-    $scope.deleteGroup = function (tree_id, group_id) {
+    $scope.copyGroup = function(id) {
+        PreviousSearchParams = Store('group_current_search_params');
+        GroupsCopy({
+            scope: $scope,
+            group_id: id
+        });
+    };
+
+    $scope.deleteGroup = function (id) {
         GroupsDelete({
             scope: $scope,
-            tree_id: tree_id,
-            group_id: group_id,
-            inventory_id: $scope.inventory_id
+            group_id: id,
+            inventory_id: $scope.inventory.id
         });
-    };
-
-    $scope.createHost = function () {
-        HostsEdit({ scope: $scope, mode: 'add', host_id: null, selected_group_id: $scope.selected_tree_id, inventory_id: $scope.inventory_id });
     };
 
     $scope.editInventoryProperties = function () {
-        EditInventoryProperties({ scope: $scope, inventory_id: $scope.inventory_id });
+        EditInventoryProperties({ scope: $scope, inventory_id: $scope.inventory.id });
     };
 
-    $scope.editHost = function (host_id) {
-        HostsEdit({ scope: $scope, mode: 'edit', host_id: host_id, inventory_id: $scope.inventory_id });
+    hostScope.createHost = function () {
+        HostsEdit({
+            host_scope: hostScope,
+            group_scope: $scope,
+            mode: 'add',
+            host_id: null,
+            selected_group_id: $scope.selected_group_id,
+            inventory_id: $scope.inventory.id
+        });
     };
 
-    $scope.deleteHost = function (host_id, host_name) {
-        HostsDelete({ scope: $scope, host_id: host_id, host_name: host_name });
+    hostScope.editHost = function (host_id) {
+        HostsEdit({
+            host_scope: hostScope,
+            group_scope: $scope,
+            mode: 'edit',
+            host_id: host_id,
+            inventory_id: $scope.inventory.id
+        });
     };
 
-    $scope.toggleHostEnabled = function (host_id, external_source) {
-        ToggleHostEnabled({ scope: $scope, host_id: host_id, external_source: external_source });
+    hostScope.deleteHost = function (host_id, host_name) {
+        HostsDelete({
+            parent_scope: $scope,
+            host_scope: hostScope,
+            host_id: host_id,
+            host_name: host_name
+        });
+    };
+
+    hostScope.copyHost = function(id) {
+        PreviousSearchParams = Store('group_current_search_params');
+        HostsCopy({
+            group_scope: $scope,
+            host_scope: hostScope,
+            host_id: id
+        });
+    };
+
+    /*hostScope.restoreSearch = function() {
+        SearchInit({
+            scope: hostScope,
+            set: PreviousSearchParams.set,
+            list: PreviousSearchParams.list,
+            url: PreviousSearchParams.defaultUrl,
+            iterator: PreviousSearchParams.iterator,
+            sort_order: PreviousSearchParams.sort_order,
+            setWidgets: false
+        });
+        hostScope.search('host');
+    };*/
+
+    hostScope.toggleHostEnabled = function (host_id, external_source) {
+        ToggleHostEnabled({
+            parent_scope: $scope,
+            host_scope: hostScope,
+            host_id: host_id,
+            external_source: external_source
+        });
     };
 
     $scope.showGroupActivity = function () {
         var url, title, group;
         if ($scope.selected_group_id) {
-            group = Find({
-                list: $scope.groups,
-                key: 'id',
-                val: $scope.selected_tree_id
+            $scope.group_breadcrumbs.every(function(crumb) {
+                if (crumb.id === $scope.selected_group_id) {
+                    group = crumb;
+                    return false;
+                }
+                return true;
             });
             url = GetBasePath('activity_stream') + '?group__id=' + $scope.selected_group_id;
             title = 'Showing all activities for group ' + group.name;
         } else {
-            title = 'Showing all activities for all ' + $scope.inventory_name + ' groups';
-            url = GetBasePath('activity_stream') + '?group__inventory__id=' + $scope.inventory_id;
+            title = 'Showing all activities for all ' + $scope.inventory.name + ' groups';
+            url = GetBasePath('activity_stream') + '?group__inventory__id=' + $scope.inventory.id;
         }
         Stream({
             scope: $scope,
-            inventory_name: $scope.inventory_name,
+            inventory_name: $scope.inventory.name,
             url: url,
-            title: title
+            title: title,
+            search_iterator: 'group',
+            onClose: 'GroupStreamClosed'
         });
     };
 
-    $scope.showHostActivity = function () {
+    if ($scope.removeGroupStreamClosed) {
+        $scope.removeGroupStreamClosed();
+    }
+    $scope.removeGroupStreamClosed = $scope.$on('GroupStreamClosed', function() {
+        $scope.refreshGroups();
+    });
+
+    hostScope.showHostActivity = function () {
         var url, title;
-        title = 'Showing all activities for all ' + $scope.inventory_name + ' hosts';
-        url = GetBasePath('activity_stream') + '?host__inventory__id=' + $scope.inventory_id;
+        title = 'Showing all activities for all ' + $scope.inventory.name + ' hosts';
+        url = GetBasePath('activity_stream') + '?host__inventory__id=' + $scope.inventory.id;
         Stream({
-            scope: $scope,
-            inventory_name: $scope.inventory_name,
+            scope: hostScope,
+            inventory_name: $scope.inventory.name,
             url: url,
-            title: title
+            title: title,
+            search_iterator: 'host',
+            onClose: 'HostStreamClosed'
         });
     };
 
-    $scope.showJobSummary = function (job_id) {
+    if (hostScope.removeHostStreamClosed) {
+        hostScope.removeHostStreamClosed();
+    }
+    hostScope.removeHostStreamClosed = hostScope.$on('HostStreamClosed', function() {
+        $scope.refreshGroups();
+    });
+
+    hostScope.showJobSummary = function (job_id) {
         ShowJobSummary({
             job_id: job_id
         });
@@ -848,19 +924,31 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, $log, $rootS
         ViewJob({ scope: $scope, id: id });
     };
 
-    //Load tree data for the first time
-    BuildTree({
-        scope: $scope,
-        inventory_id: $scope.inventory_id,
-        refresh: false
+    $scope.showHosts = function (group_id, show_failures) {
+        // Clicked on group
+        if (group_id !== null) {
+            Wait('start');
+            hostScope.show_failures = show_failures;
+            $scope.groupSelect(group_id);
+            hostScope.hosts = [];
+            $scope.show_failures = show_failures; // turn on failed hosts filter in hosts view
+        } else {
+            Wait('stop');
+        }
+    };
+
+    if ($scope.removeGroupDeleteCompleted) {
+        $scope.removeGroupDeleteCompleted();
+    }
+    $scope.removeGroupDeleteCompleted = $scope.$on('GroupDeleteCompleted', function() {
+        $scope.refreshGroups();
     });
 
 }
 
-InventoriesEdit.$inject = ['$scope', '$location', '$routeParams', '$compile', '$log', '$rootScope', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts',
-    'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsEdit', 'GroupsDelete', 'Breadcrumbs',
-    'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren', 'ViewUpdateStatus', 'GroupsCancelUpdate',
-    'Find', 'EditInventoryProperties', 'HostsEdit', 'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost',
-    'Stream', 'GetBasePath', 'ShowJobSummary', 'ApplyEllipsis', 'WatchInventoryWindowResize', 'HelpDialog', 'InventoryGroupsHelp', 'Store',
-    'ViewJob', 'SetContainerHeights'
-];
+InventoriesEdit.$inject = ['$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'Empty', 'Wait', 'Rest', 'Alert', 'LoadBreadCrumbs',
+    'GetBasePath', 'ProcessErrors', 'Breadcrumbs', 'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg',
+    'GetHostsStatusMsg', 'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
+    'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary', 'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'WatchInventoryWindowResize',
+    'SetContainerHeights', 'GetHostContainerRows', 'GetGroupContainerRows', 'GetGroupContainerHeight', 'GroupsCopy', 'HostsCopy'
+    ];

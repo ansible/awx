@@ -279,7 +279,6 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     url += connect + scope[iterator + 'ExtraParms'];
                 }
                 url = url.replace(/\&\&/g, '&');
-
                 if (calcOnly) {
                     scope.$emit('searchParamsReady', url);
                 }

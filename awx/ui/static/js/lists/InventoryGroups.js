@@ -142,6 +142,7 @@ angular.module('InventoryGroupsDefinition', [])
                 mode: 'all',
                 ngClick: "copyGroup(group.id)",
                 awToolTip: 'Copy or move group',
+                ngShow: "group.id > 0",
                 dataPlacement: "top"
             },
             "delete": {

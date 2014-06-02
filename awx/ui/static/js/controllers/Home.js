@@ -14,7 +14,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Objec
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button) {
 
     ClearScope('home');
-  
+
     var buttons, html, e, waitCount, loadedCount;
 
     // Add buttons to the top of the Home page. We're using lib/ansible/generator_helpers.js-> Buttons()
@@ -31,19 +31,19 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Objec
             mode: 'all'
         }
     };
-    
+
     html = Button({
         btn: buttons.refresh,
         action: 'refresh',
         toolbar: true
     });
-    
+
     html += Button({
         btn: buttons.stream,
         action: 'stream',
         toolbar: true
     });
-    
+
     e = angular.element(document.getElementById('home-list-actions'));
     e.html(html);
     $compile(e)($scope);
@@ -137,7 +137,7 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
         opt, PreviousSearchParams;
 
     generator.inject(list, { mode: 'edit', scope: scope });
-        
+
     function ellipsis(a) {
         if (a.length > 20) {
             return a.substr(0,20) + '...';
@@ -299,7 +299,7 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
     };
 
     scope.editGroup = function (group_id, inventory_id) {
-        PreviousSearchParams = Store('CurrentSearchParams');
+        PreviousSearchParams = Store('group_current_search_params');
         GroupsEdit({
             scope: scope,
             group_id: group_id,
@@ -335,7 +335,7 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
         var group = Find({ list: scope.home_groups, key: 'id', val: id });
         if (group) {
             if (Empty(group.source)) {
-                // if no source, do nothing. 
+                // if no source, do nothing.
             } else if (group.status === 'updating') {
                 Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
                     group.name + '</em>. Use the Refresh button to monitor the status.', 'alert-info');
@@ -410,7 +410,7 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
     }
     scope.removeGroupSummaryReady = scope.$on('GroupSummaryReady', function(e, event, inventory, data) {
         var html, title;
-        
+
         Wait('stop');
 
         // Build the html for our popover
