@@ -615,7 +615,19 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             scope.removeSaveCompleted();
         }
         scope.removeSaveCompleted = scope.$on('saveCompleted', function() {
-            scope.cancelModal();
+            if (scope.removeSaveCompleted) {
+                scope.removeSaveCompleted();
+            }
+            scope.removeSaveCompleted = scope.$on('saveCompleted', function() {
+                try {
+                    $('#host-modal-dialog').dialog('close');
+                }
+                catch(err) {
+                    // ignore
+                }
+                group_scope.refreshHosts();
+                scope.$destroy();
+            });
         });
 
         // Save changes to the parent
@@ -673,7 +685,6 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             catch(err) {
                 // ignore
             }
-            group_scope.refreshHosts();
             scope.$destroy();
         };
 

@@ -53,14 +53,12 @@ angular.module('InventoryFormDefinition', [])
                     init: "true"
                 }
             },
-            inventory_variables: {
-                realName: 'variables',
+            variables: {
                 label: 'Variables',
                 type: 'textarea',
                 'class': 'span12',
                 addRequired: false,
                 editRequird: false,
-                parseTypeName: 'inventoryParseType',
                 rows: 6,
                 "default": "---",
                 awPopOver: "<p>Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +

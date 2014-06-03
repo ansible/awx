@@ -384,9 +384,13 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routePar
     generator.reset();
     LoadBreadCrumbs();
 
-    $scope.inventoryParseType = 'yaml';
-    ParseTypeChange({ scope: $scope, variable: 'inventory_variables', parse_variable: 'inventoryParseType',
-        field_id: 'inventory_inventory_variables' });
+    $scope.parseType = 'yaml';
+    ParseTypeChange({
+        scope: $scope,
+        variable: 'variables',
+        parse_variable: 'parseType',
+        field_id: 'inventory_variables'
+    });
 
     LookUpInit({
         scope:  $scope,
@@ -405,9 +409,9 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routePar
 
             // Make sure we have valid variable data
             if ( $scope.inventoryParseType === 'json') {
-                json_data = JSON.parse( $scope.inventory_variables); //make sure JSON parses
+                json_data = JSON.parse( $scope.variables); //make sure JSON parses
             } else {
-                json_data = jsyaml.load( $scope.inventory_variables); //parse yaml
+                json_data = jsyaml.load( $scope.variables); //parse yaml
             }
 
             // Make sure our JSON is actually an object
@@ -417,7 +421,7 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routePar
 
             data = {};
             for (fld in form.fields) {
-                if (fld !== 'inventory_variables') {
+                if (fld !== 'variables') {
                     if (form.fields[fld].realName) {
                         data[form.fields[fld].realName] =  $scope[fld];
                     } else {
@@ -426,22 +430,30 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routePar
                 }
             }
 
+            if ($scope.removeUpdateInventoryVariables) {
+                $scope.removeUpdateInventoryVariables();
+            }
+            $scope.removeUpdateInventoryVariables = $scope.$on('UpdateInventoryVariables', function(e, data) {
+                var inventory_id = data.id;
+                Rest.setUrl(data.related.variable_data);
+                Rest.put(json_data)
+                    .success(function () {
+                        Wait('stop');
+                        $location.path('/inventories/' + inventory_id + '/');
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
+                        });
+                    });
+            });
+
             Rest.setUrl(defaultUrl);
             Rest.post(data)
                 .success(function (data) {
                     var inventory_id = data.id;
-                    if ($scope.inventory_variables) {
-                        Rest.setUrl(data.related.variable_data);
-                        Rest.put(json_data)
-                            .success(function () {
-                                Wait('stop');
-                                $location.path('/inventories/' + inventory_id + '/');
-                            })
-                            .error(function (data, status) {
-                                ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
-                                    msg: 'Failed to add inventory varaibles. PUT returned status: ' + status
-                                });
-                            });
+                    if ($scope.variables) {
+                        $scope.$emit('UpdateInventoryVariables', data);
                     } else {
                         Wait('stop');
                         $location.path('/inventories/' + inventory_id + '/');

@@ -117,11 +117,11 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
             Wait('start');
 
             // Make sure we have valid variable data
-            json_data = ToJSON(scope.inventoryParseType, scope.inventory_variables);
+            json_data = ToJSON(scope.parseType, scope.variables);
 
             data = {};
             for (fld in form.fields) {
-                if (fld !== 'inventory_variables') {
+                if (fld !== 'variables') {
                     if (form.fields[fld].realName) {
                         data[form.fields[fld].realName] = scope[fld];
                     } else {
@@ -130,21 +130,28 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                 }
             }
 
+            if (scope.removeUpdateInventoryVariables) {
+                scope.removeUpdateInventoryVariables();
+            }
+            scope.removeUpdateInventoryVariables = scope.$on('UpdateInventoryVariables', function(e, data) {
+                Rest.setUrl(data.related.variable_data);
+                Rest.put(json_data)
+                    .success(function () {
+                        Wait('stop');
+                        scope.$emit('InventorySaved');
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                            msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
+                        });
+                    });
+            });
+
             Rest.setUrl(defaultUrl + scope.inventory_id + '/');
             Rest.put(data)
                 .success(function (data) {
                     if (scope.inventory_variables) {
-                        Rest.setUrl(data.related.variable_data);
-                        Rest.put(json_data)
-                            .success(function () {
-                                Wait('stop');
-                                scope.$emit('InventorySaved');
-                            })
-                            .error(function (data, status) {
-                                ProcessErrors(scope, data, status, form, { hdr: 'Error!',
-                                    msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
-                                });
-                            });
+                        scope.$emit('UpdateInventoryVariables', data);
                     } else {
                         scope.$emit('InventorySaved');
                     }
@@ -159,9 +166,9 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
 
 
 .factory('EditInventoryProperties', ['InventoryForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList',
-    'GetBasePath', 'ParseTypeChange', 'SaveInventory', 'Wait', 'Store', 'SearchInit', 'ParseVariableString',
+    'GetBasePath', 'ParseTypeChange', 'SaveInventory', 'Wait', 'Store', 'SearchInit', 'ParseVariableString', 'CreateDialog', 'TextareaResize',
     function (InventoryForm, GenerateForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange, SaveInventory,
-        Wait, Store, SearchInit, ParseVariableString) {
+        Wait, Store, SearchInit, ParseVariableString, CreateDialog, TextareaResize) {
         return function (params) {
 
             var parent_scope = params.scope,
@@ -169,21 +176,94 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                 generator = GenerateForm,
                 form = InventoryForm,
                 master = {},
-                PreviousSearchParams = Store('CurrentSearchParams'),
-                scope;
+                //PreviousSearchParams = Store('CurrentSearchParams'),
+                buttons,
+                scope = parent_scope.$new();
 
             form.well = false;
-            scope = generator.inject(form, { mode: 'edit', modal: true, related: false, modal_show: false });
+
+            generator.inject(form, {
+                mode: 'edit',
+                showButtons: false,
+                showActions: false,
+                id: 'inventory-edit-modal-dialog',
+                breadCrumbs: false,
+                related: false,
+                scope: scope
+            });
 
             /* Reset form properties. Otherwise it screws up future requests of the Inventories detail page */
             form.well = true;
 
-            scope.$on('inventoryPropertiesLoaded', function() {
-                var callback = function() { Wait('stop'); };
-                $('#form-modal').modal('show');
-                scope.inventoryParseType = 'yaml';
-                ParseTypeChange({ scope: scope, variable: 'inventory_variables', parse_variable: 'inventoryParseType',
-                    field_id: 'inventory_inventory_variables', onReady: callback });
+            buttons = [{
+                label: "Cancel",
+                onClick: function() {
+                    scope.cancelModal();
+                },
+                icon: "fa-times",
+                "class": "btn btn-default",
+                "id": "inventory-edit-cancel-button"
+            },{
+                label: "Save",
+                onClick: function() {
+                    scope.saveModal();
+                },
+                icon: "fa-check",
+                "class": "btn btn-primary",
+                "id": "inventory-edit-save-button"
+            }];
+
+            CreateDialog({
+                scope: scope,
+                buttons: buttons,
+                width: 675,
+                height: 750,
+                minWidth: 400,
+                title: 'Inventory Properties',
+                id: 'inventory-edit-modal-dialog',
+                clonseOnEscape: false,
+                onClose: function() {
+                    Wait('stop');
+                    scope.codeMirror.destroy();
+                    $('#inventory-edit-modal-dialog').empty();
+                },
+                onResizeStop: function() {
+                    TextareaResize({
+                        scope: scope,
+                        textareaId: 'inventory_variables',
+                        modalId: 'inventory-edit-modal-dialog',
+                        formId: 'inventory_form'
+                    });
+                },
+                beforeDestroy: function() {
+                    if (scope.codeMirror) {
+                        scope.codeMirror.destroy();
+                    }
+                    $('#inventory-edit-modal-dialog').empty();
+                },
+                onOpen: function() {
+                    $('#inventory_name').focus();
+                    setTimeout(function() {
+                        TextareaResize({
+                            scope: scope,
+                            textareaId: 'inventory_variables',
+                            modalId: 'inventory-edit-modal-dialog',
+                            formId: 'inventory_form',
+                            parse: true
+                        });
+                    }, 300);
+                },
+                callback: 'InventoryEditDialogReady'
+            });
+
+            scope.parseType = 'yaml';
+
+            if (scope.removeInventoryPropertiesLoaded) {
+                scope.removeInventoryPropertiesLoaded();
+            }
+            scope.removeInventoryPropertiesLoaded = scope.$on('inventoryPropertiesLoaded', function() {
+                Wait('stop');
+                $('#inventory-edit-modal-dialog').dialog('open');
             });
 
             scope.formModalActionLabel = 'Save';
@@ -197,9 +277,9 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                 .success(function (data) {
                     var fld;
                     for (fld in form.fields) {
-                        if (fld === 'inventory_variables') {
-                            scope.inventory_variables = ParseVariableString(data.variables);
-                            master.inventory_variables = scope.variables;
+                        if (fld === 'variables') {
+                            scope.variables = ParseVariableString(data.variables);
+                            master.variables = scope.variables;
                         } else if (fld === 'inventory_name') {
                             scope[fld] = data.name;
                             master[fld] = scope[fld];
@@ -239,26 +319,33 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                 scope.removeInventorySaved();
             }
             scope.removeInventorySaved = scope.$on('InventorySaved', function () {
-                $('#form-modal').modal('hide');
+                //$('#form-modal').modal('hide');
                 // Restore prior search state
-                if (scope.searchCleanp) {
-                    scope.searchCleanup();
+                //if (scope.searchCleanp) {
+                //    scope.searchCleanup();
+                //}
+                //SearchInit({
+                //    scope: parent_scope,
+                //    set: PreviousSearchParams.set,
+                //    list: PreviousSearchParams.list,
+                //    url: PreviousSearchParams.defaultUrl,
+                //    iterator: PreviousSearchParams.iterator,
+                //    sort_order: PreviousSearchParams.sort_order,
+                //    setWidgets: false
+                //});
+                //parent_scope.$emit('RefreshInventories');
+                try {
+                    $('#inventory-edit-modal-dialog').dialog('close');
                 }
-                SearchInit({
-                    scope: parent_scope,
-                    set: PreviousSearchParams.set,
-                    list: PreviousSearchParams.list,
-                    url: PreviousSearchParams.defaultUrl,
-                    iterator: PreviousSearchParams.iterator,
-                    sort_order: PreviousSearchParams.sort_order,
-                    setWidgets: false
-                });
-                parent_scope.$emit('RefreshInventories');
+                catch(err) {
+                    // ignore
+                }
+                scope.$destroy();
             });
 
             scope.cancelModal = function () {
                 // Restore prior search state
-                if (scope.searchCleanp) {
+                /*if (scope.searchCleanp) {
                     scope.searchCleanup();
                 }
                 SearchInit({
@@ -269,10 +356,17 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                     iterator: PreviousSearchParams.iterator,
                     sort_order: PreviousSearchParams.sort_order,
                     setWidgets: false
-                });
+                });*/
+                try {
+                    $('#inventory-edit-modal-dialog').dialog('close');
+                }
+                catch(err) {
+                    // ignore
+                }
+                scope.$destroy();
             };
 
-            scope.formModalAction = function () {
+            scope.saveModal = function () {
                 scope.inventory_id = inventory_id;
                 parent_scope.inventory_name = scope.inventory_name;
                 SaveInventory({ scope: scope });
