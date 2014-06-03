@@ -1136,7 +1136,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                     }
                 }
 
-                if (!this.modal && this.form.actions) {
+                if ((options.showActions === undefined || options.showActions === true) && !this.modal && this.form.actions) {
                     html += this.getActions(options);
                 }
 
@@ -1251,7 +1251,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                 }
 
                 //buttons
-                if (!this.modal) {
+                if ((options.showButtons === undefined || options.showButtons === true) && !this.modal) {
                     if (this.has('buttons')) {
 
                         if (this.form.twoColumns) {

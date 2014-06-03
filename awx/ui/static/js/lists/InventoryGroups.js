@@ -9,7 +9,7 @@ angular.module('InventoryGroupsDefinition', [])
 
         name: 'groups',
         iterator: 'group',
-        editTitle: '{{ inventory_name }}',
+        editTitle: '{{ inventory.name }}',
         showTitle: false,
         well: true,
         index: false,
@@ -134,7 +134,7 @@ angular.module('InventoryGroupsDefinition', [])
             edit: {
                 //label: 'Edit',
                 mode: 'all',
-                ngClick: "editGroup(group.group_id, group.id)",
+                ngClick: "editGroup(group.id)",
                 awToolTip: 'Edit group',
                 dataPlacement: "top"
             },
@@ -148,7 +148,7 @@ angular.module('InventoryGroupsDefinition', [])
             "delete": {
                 //label: 'Delete',
                 mode: 'all',
-                ngClick: "deleteGroup(group.id, group.group_id)",
+                ngClick: "deleteGroup(group.id)",
                 awToolTip: 'Delete group',
                 dataPlacement: "top"
             }

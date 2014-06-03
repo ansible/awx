@@ -486,7 +486,7 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, Empty, Wait, Rest, Alert, LoadBreadCrumbs, GetBasePath, ProcessErrors,
     Breadcrumbs, InventoryGroups, InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, GroupsEdit, InventoryUpdate,
     GroupsCancelUpdate, ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete, EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
-    InventoryGroupsHelp, HelpDialog, ViewJob, WatchInventoryWindowResize, SetContainerHeights, GetHostContainerRows, GetGroupContainerRows, GetGroupContainerHeight,
+    InventoryGroupsHelp, HelpDialog, ViewJob, WatchInventoryWindowResize, GetHostContainerRows, GetGroupContainerRows, GetGroupContainerHeight,
     GroupsCopy, HostsCopy)
 {
 
@@ -519,7 +519,19 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     }
     $scope.removeHostReloadComplete = $scope.$on('HostReloadComplete', function() {
         if ($scope.initial_height) {
-            $('#hosts-container .well').height($scope.initial_height + 49);
+            var host_height = $('#hosts-container .well').height(),
+                group_height = $('#group-list-container .well').height(),
+                new_height;
+
+            if (host_height > group_height) {
+                new_height = host_height - (host_height - group_height);
+            }
+            else if (host_height < group_height) {
+                new_height = host_height + (group_height - host_height);
+            }
+            if (new_height) {
+                $('#hosts-container .well').height(new_height);
+            }
             $scope.initial_height = null;
         }
     });
@@ -549,17 +561,10 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
             scope: $scope
         });
 
-        /*SetContainerHeights({
-            group_scope: $scope,
-            host_scope: hostScope,
-            reloadHosts: false
-        });*/
-
         if ($(window).width() > 1210) {
-            $scope.initial_height = GetGroupContainerHeight() - 20;
+            $scope.initial_height = GetGroupContainerHeight();
             $('#groups-container .list-table-container').height($scope.initial_height);
             rows = GetGroupContainerRows();
-            //$('#hosts-container .well').height( height );
         }
         else {
             rows = 20;
