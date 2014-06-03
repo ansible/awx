@@ -316,9 +316,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
 
         var action = function () {
             var url = defaultUrl + id + '/';
-            $('#prompt-modal').on('hidden.bs.modal', function () {
-                Wait('start');
-            });
+            Wait('start');
             $('#prompt-modal').modal('hide');
             Rest.setUrl(url);
             Rest.destroy()

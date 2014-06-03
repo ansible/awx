@@ -21,7 +21,7 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
         view = GenerateList,
         base = $location.path().replace(/^\//, '').split('/')[0],
         mode = (base === 'job_templates') ? 'edit' : 'select';
-    
+
     view.inject(list, { mode: mode, scope: $scope });
     $rootScope.flashMessage = null;
 
@@ -71,10 +71,8 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
 
     $scope.deleteJobTemplate = function (id, name) {
         var action = function () {
-            $('#prompt-modal').on('hidden.bs.modal', function () {
-                Wait('start');
-            });
             $('#prompt-modal').modal('hide');
+            Wait('start');
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
@@ -110,7 +108,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath,
     InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty, ToJSON,
     CallbackHelpInit) {
-    
+
     ClearScope();
 
     // Inject dynamic view
@@ -121,11 +119,11 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         CloudCredentialList = {},
         selectPlaybook, checkSCMStatus,
         callback;
-    
+
     CallbackHelpInit({ scope: $scope });
 
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
-    
+
     callback = function() {
         // Make sure the form controller knows there was a change
         $scope[form.name + '_form'].setDirty();
@@ -343,7 +341,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
     GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit) {
-    
+
     ClearScope();
 
     var defaultUrl = GetBasePath('job_templates'),
@@ -364,19 +362,19 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
     $scope.parseType = 'yaml';
     $scope.showJobType = false;
-    
+
     // Our job type options
     $scope.job_type_options = [
         { value: 'run', label: 'Run' },
         { value: 'check', label: 'Check' }
     ];
-    
+
     $scope.verbosity_options = [
         { value: 0, label: 'Default' },
         { value: 1, label: 'Verbose' },
         { value: 3, label: 'Debug' }
     ];
-    
+
     callback = function() {
         // Make sure the form controller knows there was a change
         $scope[form.name + '_form'].$setDirty();
@@ -482,7 +480,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     $scope.removeJobTemplateLoadFinished = $scope.$on('jobTemplateLoadFinished', function () {
         loadingFinishedCount++;
         if (loadingFinishedCount >= 2) {
-            // The initial template load finished. Now load related jobs, which 
+            // The initial template load finished. Now load related jobs, which
             // will turn off the 'working' spinner.
             for (var set in relatedSets) {
                 $scope.search(relatedSets[set].iterator);
@@ -601,7 +599,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                         master[fld] = $scope[fld];
                     }
                     if (fld === 'variables') {
-                        // Parse extra_vars, converting to YAML. 
+                        // Parse extra_vars, converting to YAML.
                         $scope.variables = ParseVariableString(data.extra_vars);
                         master.variables = $scope.variables;
                     }
@@ -617,15 +615,15 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
                 $scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? 'true' : 'false';
                 master.ask_variables_on_launch = $scope.ask_variables_on_launch;
-                
+
                 relatedSets = form.relatedSets(data.related);
-                
+
                 if (data.host_config_key) {
                     $scope.example_config_key = data.host_config_key;
                 }
                 $scope.example_template_id = id;
                 $scope.setCallbackHelp();
-                
+
                 $scope.callback_url = $scope.callback_server_path + ((data.related.callback) ? data.related.callback :
                     GetBasePath('job_templates') + id + '/callback/');
                 master.callback_url = $scope.callback_url;
@@ -661,7 +659,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     form: form,
                     relatedSets: relatedSets
                 });
-                
+
                 RelatedPaginateInit({
                     scope: $scope,
                     relatedSets: relatedSets
@@ -694,7 +692,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         variable: 'status_choices',
         callback: 'choicesReady'
     });
-    
+
     GetChoices({
         scope: $scope,
         url: GetBasePath('unified_jobs'),

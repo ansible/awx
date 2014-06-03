@@ -12,7 +12,7 @@
 function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices, Wait, Stream) {
-    
+
     ClearScope();
 
     Wait('start');
@@ -40,8 +40,8 @@ function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         var i, j;
-        
-        // Cleanup after a delete 
+
+        // Cleanup after a delete
         Wait('stop');
         $('#prompt-modal').modal('hide');
 
@@ -102,10 +102,8 @@ function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest
 
     $scope.deleteCredential = function (id, name) {
         var action = function () {
-            $('#prompt-modal').on('hidden.bs.modal', function () {
-                Wait('start');
-            });
             $('#prompt-modal').modal('hide');
+            Wait('start');
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
@@ -135,7 +133,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeP
 function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList,
     GetBasePath, GetChoices, Empty, KindChange, OwnerChange, FormSave) {
-    
+
     ClearScope();
 
     // Inject dynamic view
@@ -143,7 +141,7 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
         generator = GenerateForm,
         defaultUrl = GetBasePath('credentials'),
         url;
-    
+
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     generator.reset();
     LoadBreadCrumbs();
@@ -269,7 +267,7 @@ CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
     KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave, Stream, Wait) {
-    
+
     ClearScope();
 
     var defaultUrl = GetBasePath('credentials'),
@@ -278,7 +276,7 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
         id = $routeParams.credential_id;
-    
+
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
     $scope.id = id;
@@ -344,9 +342,9 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
         Rest.setUrl(defaultUrl + ':id/');
         Rest.get({ params: { id: id } })
             .success(function (data) {
-                
+
                 var i, fld;
-                
+
                 LoadBreadCrumbs({
                     path: '/credentials/' + id,
                     title: data.name

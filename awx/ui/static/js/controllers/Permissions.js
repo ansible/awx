@@ -7,20 +7,20 @@
  *  Controller functions for Permissions model.
  *
  */
- 
+
 'use strict';
 
 function PermissionsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, PermissionList,
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
     GetBasePath, CheckAccess, Wait) {
-    
+
     ClearScope();
 
     var list = PermissionList,
         base = $location.path().replace(/^\//, '').split('/')[0],
         defaultUrl = GetBasePath(base),
         generator = GenerateList;
-    
+
     generator.inject(list, { mode: 'edit', scope: $scope });
     defaultUrl += ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id;
     defaultUrl += '/permissions/';
@@ -67,10 +67,8 @@ function PermissionsList($scope, $rootScope, $location, $log, $routeParams, Rest
 
     $scope.deletePermission = function (id, name) {
         var action = function () {
-            $('#prompt-modal').on('hidden.bs.modal', function () {
-                Wait('start');
-            });
             $('#prompt-modal').modal('hide');
+            Wait('start');
             var url = GetBasePath('base') + 'permissions/' + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
@@ -104,7 +102,7 @@ function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routePar
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope,
     GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess,
     Wait, PermissionCategoryChange) {
-    
+
     ClearScope();
 
     // Inject dynamic view
@@ -113,7 +111,7 @@ function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routePar
         id = ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id,
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {};
-    
+
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     CheckAccess({ scope: $scope });
     generator.reset();
@@ -198,7 +196,7 @@ PermissionsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt, GetBasePath,
     InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, PermissionCategoryChange) {
-    
+
     ClearScope();
 
     var generator = GenerateForm,
@@ -207,11 +205,11 @@ function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routePa
         id = $routeParams.permission_id,
         defaultUrl = GetBasePath('base') + 'permissions/' + id + '/',
         master = {};
-    
+
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
 
-    
+
     CheckAccess({ scope: $scope });
 
     $scope.selectCategory = function (resetIn) {

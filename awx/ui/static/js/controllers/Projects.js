@@ -13,7 +13,7 @@
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate,
     Refresh, Wait, Stream, GetChoices, Empty, Find, LogViewer, GetProjectIcon, GetProjectToolTip) {
-    
+
     ClearScope();
 
     Wait('start');
@@ -45,10 +45,10 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         Wait('stop');
-        
+
         if ($scope.projects) {
             $scope.projects.forEach(function(project, i) {
-                
+
                 $scope.projects[i].statusIcon = GetProjectIcon(project.status);
                 $scope.projects[i].statusTip = GetProjectToolTip(project.status);
 
@@ -233,10 +233,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
     $scope.deleteProject = function (id, name) {
         var action = function () {
-            $('#prompt-modal').on('hiden.bs.modal', function () {
-                Wait('start');
-            });
             $('#prompt-modal').modal('hide');
+            Wait('start');
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
@@ -376,7 +374,7 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routePara
 function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
     LoadBreadCrumbs, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
     CredentialList, GetChoices, DebugForm, Wait) {
-    
+
     ClearScope();
 
     // Inject dynamic view
@@ -385,7 +383,7 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
         base = $location.path().replace(/^\//, '').split('/')[0],
         defaultUrl = GetBasePath('projects'),
         master = {};
-    
+
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     generator.reset();
     LoadBreadCrumbs();
@@ -518,7 +516,7 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit, GetChoices,
     Empty, DebugForm, Wait, Stream, SchedulesControllerInit, SchedulesListInit, SchedulesList) {
-    
+
     ClearScope('htmlTemplate');
 
     // Inject dynamic view
@@ -529,7 +527,7 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
         master = {},
         id = $routeParams.id,
         relatedSets = {};
-    
+
     SchedulesList.well = false;
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
@@ -622,7 +620,7 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
                             data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                     }
                 }
-                
+
                 relatedSets = form.relatedSets(data.related);
 
                 data.scm_type = (Empty(data.scm_type)) ? '' : data.scm_type;

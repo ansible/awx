@@ -12,7 +12,7 @@
 
 function OrganizationsList($routeParams, $scope, $rootScope, $location, $log, Rest, Alert, LoadBreadCrumbs, Prompt,
     GenerateList, OrganizationList, SearchInit, PaginateInit, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {
-    
+
     ClearScope();
 
     var list = OrganizationList,
@@ -21,11 +21,11 @@ function OrganizationsList($routeParams, $scope, $rootScope, $location, $log, Re
         mode = (paths[0] === 'organizations') ? 'edit' : 'select',
         defaultUrl = GetBasePath('organizations'),
         url;
-    
+
     generate.inject(OrganizationList, { mode: mode, scope: $scope });
     $rootScope.flashMessage = null;
     LoadBreadCrumbs();
-    
+
     if (mode === 'select') {
         url = GetBasePath('projects') + $routeParams.project_id + '/organizations/';
         SelectionInit({ scope: $scope, list: list, url: url, returnToCaller: 1 });
@@ -69,10 +69,8 @@ function OrganizationsList($routeParams, $scope, $rootScope, $location, $log, Re
     $scope.deleteOrganization = function (id, name) {
 
         var action = function () {
-            $('#prompt-modal').on('hidden.bs.modal', function () {
-                Wait('start');
-            });
             $('#prompt-modal').modal('hide');
+            Wait('start');
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
@@ -102,9 +100,9 @@ OrganizationsList.$inject = ['$routeParams', '$scope', '$rootScope', '$location'
 function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath,
     ReturnToCaller, Wait) {
-    
+
     ClearScope();
-    
+
     // Inject dynamic view
     var generator = GenerateForm,
         form = OrganizationForm,
@@ -152,7 +150,7 @@ OrganizationsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$l
 
 function OrganizationsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath, Wait, Stream) {
-    
+
     ClearScope();
 
     // Inject dynamic view

@@ -23,7 +23,7 @@ function UsersList($scope, $rootScope, $location, $log, $routeParams, Rest, Aler
             GetBasePath('teams') + $routeParams.team_id + '/users/';
 
     generator.inject(UserList, { mode: mode, scope: $scope });
-        
+
     $scope.selected = [];
 
     if (mode === 'select') {
@@ -70,10 +70,11 @@ function UsersList($scope, $rootScope, $location, $log, $routeParams, Rest, Aler
     $scope.deleteUser = function (id, name) {
 
         var action = function () {
-            $('#prompt-modal').on('hidden.bs.modal', function () {
-                Wait('start');
-            });
+            //$('#prompt-modal').on('hidden.bs.modal', function () {
+            //    Wait('start');
+            //});
             $('#prompt-modal').modal('hide');
+            Wait('start');
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
@@ -102,17 +103,17 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams'
 
 function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
     LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList, ResetForm, Wait) {
-    
+
     ClearScope();
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('organizations'),
         form = UserForm,
         generator = GenerateForm;
-    
+
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     ResetForm();
-    
+
     $scope.ldap_user = false;
     $scope.not_ldap_user = !$scope.ldap_user;
     $scope.ldap_dn = null;
@@ -121,7 +122,7 @@ function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, U
 
     LoadBreadCrumbs();
 
-    // Configure the lookup dialog. If we're adding a user through the Organizations tab, 
+    // Configure the lookup dialog. If we're adding a user through the Organizations tab,
     // default the Organization value.
     LookUpInit({
         scope: $scope,
@@ -205,7 +206,7 @@ UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
     Prompt, CheckAccess, ResetForm, Wait, Stream) {
-    
+
     ClearScope();
 
     var defaultUrl = GetBasePath('users'),
@@ -422,7 +423,7 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
         };
     }); // $scope.$on
 
-    // Put form back to its original state   
+    // Put form back to its original state
     ResetForm();
 
 
