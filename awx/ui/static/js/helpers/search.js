@@ -291,6 +291,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         deferWaitStop: deferWaitStop
                     });
                 }
+                e.stopPropagation();
             });
 
 
@@ -343,7 +344,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         }
                     }
                 }
+                e.stopPropagation();
                 scope.$emit('prepareSearch2', iterator, page, load, calcOnly, deferWaitStop);
+
             });
 
             if (scope.removePrepareSearch2) {
@@ -433,7 +436,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     scope[iterator + 'SearchParams'] += (scope[iterator + 'SearchParams']) ? '&' : '';
                     scope[iterator + 'SearchParams'] += 'order_by=' + encodeURI(sort_order);
                 }
-
+                e.stopPropagation();
                 scope.$emit('doSearch', iterator, page, load, calcOnly, deferWaitStop);
             });
 

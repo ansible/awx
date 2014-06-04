@@ -534,6 +534,26 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         }
     });
 
+    if ($scope.removeRowCountReady) {
+        $scope.removeRowCountReady();
+    }
+    $scope.removeRowCountReady = $scope.$on('RowCountReady', function(e, rows) {
+        // Add hosts view
+        $scope.show_failures = false;
+        InjectHosts({
+            group_scope: $scope,
+            host_scope: hostScope,
+            inventory_id: $scope.inventory.id,
+            tree_id: null,
+            group_id: null,
+            pageSize: rows
+        });
+
+        SearchInit({ scope: $scope, set: 'groups', list: InventoryGroups, url: $scope.inventory.related.root_groups });
+        PaginateInit({ scope: $scope, list: InventoryGroups , url: $scope.inventory.related.root_groups, pageSize: rows });
+        $scope.search(InventoryGroups.iterator, null, true);
+    });
+
     if ($scope.removeInventoryLoaded) {
         $scope.removeInventoryLoaded();
     }
@@ -570,7 +590,6 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         hostScope.host_page_size = rows;
         $scope.group_page_size = rows;
 
-        // Add hosts view
         $scope.show_failures = false;
         InjectHosts({
             group_scope: $scope,
@@ -965,5 +984,5 @@ InventoriesEdit.$inject = ['$scope', '$location', '$routeParams', '$compile', 'G
     'GetBasePath', 'ProcessErrors', 'Breadcrumbs', 'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg',
     'GetHostsStatusMsg', 'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary', 'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'WatchInventoryWindowResize',
-    'SetContainerHeights', 'GetHostContainerRows', 'GetGroupContainerRows', 'GetGroupContainerHeight', 'GroupsCopy', 'HostsCopy'
+    'GetHostContainerRows', 'GetGroupContainerRows', 'GetGroupContainerHeight', 'GroupsCopy', 'HostsCopy'
     ];

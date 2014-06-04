@@ -237,7 +237,7 @@ function(GenerateList, InventoryHosts, HostsReload) {
         generator.inject(InventoryHosts, { scope: host_scope, mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-6 col-md-6 col-sm-6' });
 
         // Load data
-        HostsReload({ scope: host_scope, group_id: group_id, inventory_id: inventory_id, parent_scope: group_scope, cpageSize: pageSize });
+        HostsReload({ scope: host_scope, group_id: group_id, inventory_id: inventory_id, parent_scope: group_scope, pageSize: pageSize });
     };
 }])
 

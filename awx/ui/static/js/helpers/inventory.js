@@ -17,8 +17,22 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
 
 .factory('GetGroupContainerHeight', [ function() {
     return function() {
+
+      /*console.log('window height: ' + $(window).height());
+        console.log('main-menu: ' + $('.main-menu').outerHeight());
+        console.log('main_tabs: ' + $('#main_tabs').outerHeight());
+        console.log('breadcrumbs: ' + $('#breadcrumbs').outerHeight());
+        console.log('footer: ' + $('.site-footer').outerHeight());
+        console.log('group-breadcrumbs: ' + $('.group-breadcrumbs').outerHeight());
+        console.log('searchwidget: ' + $('#groups-container #search-widget-container').outerHeight());
+        console.log('group table head: ' + $('#groups_table thead').height());
+        console.log('subtotal: ' + ( $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() - $('#breadcrumbs').outerHeight() -
+            $('.site-footer').outerHeight() - $('.group-breadcrumbs').outerHeight() - $('#groups-container #search-widget-container').outerHeight() -
+            $('#groups_table thead').height() ));
+      */
         return $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() - $('#breadcrumbs').outerHeight() -
-            $('.site-footer').outerHeight() - $('.group-breadcrumbs').outerHeight() - $('#groups-container #search-widget-container').outerHeight() - $('#groups_table thead').height() - 70;
+            $('.site-footer').outerHeight() - $('.group-breadcrumbs').outerHeight() - $('#groups-container #search-widget-container').outerHeight() -
+            $('#groups_table thead').height() - 70;
     };
 }])
 
