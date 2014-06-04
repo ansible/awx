@@ -1237,8 +1237,8 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
         return function (params) {
 
             var scope = params.scope,
-                tree_id = params.tree_id,
-                node = Find({ list: scope.groups, key: 'id', val: tree_id }),
+                group_id = params.group_id,
+                node = Find({ list: scope.groups, key: 'id', val: group_id }),
                 hosts = [],
                 groups = [],
                 childCount = 0,
@@ -1357,16 +1357,16 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 scope.removeDisassociateGroup();
             }
             scope.removeDisassociateGroup = scope.$on('DisassociateGroup', function() {
-                var data, parent, url;
-                if (node.parent === 0) {
-                    url = GetBasePath('inventory') + scope.inventory_id + '/groups/';
-                    data = { id: node.group_id, disassociate: 1 };
+                var data, url;
+                if (!scope.selected_group_id) {
+                    url = GetBasePath('inventory') + scope.inventory.id + '/groups/';
+                    data = { id: node.id, disassociate: 1 };
                 }
                 else {
-                    parent = Find({ list: scope.groups, key: 'id', val: node.parent });
-                    url = GetBasePath('groups') + parent.group_id + '/children/' + node.group_id + '/';
-                    data = { disassociate: 'all' };
+                    url = GetBasePath('groups') + node.id + '/children/';
+                    data = { disassociate: 1 };
                 }
+
                 Rest.setUrl(url);
                 Rest.post(data)
                     .success(function () {
@@ -1383,15 +1383,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 scope.removeDeleteGroup();
             }
             scope.removeDeleteGroup = scope.$on('DeleteGroup', function() {
-                var parent, url;
-                if (node.parent === 0) {
-                    // this is a top level group
-                    url = GetBasePath('inventory') + scope.inventory_id + '/groups/' + node.group_id + '/';
-                }
-                else {
-                    parent = Find({ list: scope.groups, key: 'id', val: node.parent });
-                    url = GetBasePath('groups') + parent.group_id + '/children/' + node.group_id + '/';
-                }
+                var url = GetBasePath('groups') + node.id + '/';
                 Rest.setUrl(url);
                 Rest.destroy()
                     .success( function() {
