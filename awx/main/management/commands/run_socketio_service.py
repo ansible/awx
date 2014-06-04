@@ -21,6 +21,7 @@ from django.utils.timezone import now, is_aware, make_aware
 from django.utils.tzinfo import FixedOffset
 
 # AWX
+import awx
 from awx.main.models import *
 
 # ZeroMQ
@@ -59,7 +60,7 @@ class TowerSocket(object):
                                       '/socket.io/job_events': JobEventNamespace})
         else:
             start_response('404 Not Found', [])
-            return ['<h1>Not Found</h1>']
+            return ['Tower version %s' % awx.__version__]
 
 def notification_handler(bind_port, server):
     handler_context = zmq.Context()
