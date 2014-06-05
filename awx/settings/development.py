@@ -6,6 +6,7 @@
 # Python
 import sys
 import traceback
+import glob
 
 # Django Split Settings
 from split_settings.tools import optional, include
@@ -21,6 +22,29 @@ if 'celeryd' in sys.argv:
 # if there is also a nightly install running on the development machine.
 CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5557"
 CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver_dev.ipc"
+
+# Use Django-Jenkins if installed. Only run tests for awx.main app.
+try:
+    import django_jenkins
+    INSTALLED_APPS += ('django_jenkins',)
+    PROJECT_APPS = ('awx.main', 'awx.api',)
+except ImportError:
+    pass
+
+if 'django_jenkins' in INSTALLED_APPS:
+    JENKINS_TASKS = (
+        'django_jenkins.tasks.run_pylint',
+        'django_jenkins.tasks.with_coverage',
+        'django_jenkins.tasks.django_tests',
+        'django_jenkins.tasks.run_pep8',
+        'django_jenkins.tasks.run_pyflakes',
+        'django_jenkins.tasks.run_jshint',
+        'django_jenkins.tasks.run_csslint',
+        )
+    PEP8_RCFILE = "setup.cfg"
+    CSSLINT_CHECKED_FILES = glob.glob(os.path.join(BASE_DIR, 'ui/static/less/*.less'))
+    JSHINT_CHECKED_FILES = [os.path.join(BASE_DIR, 'ui/static/js'),
+                            os.path.join(BASE_DIR, 'ui/static/lib/ansible'),]
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using
