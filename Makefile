@@ -148,7 +148,7 @@ socketservice:
 	$(PYTHON) manage.py run_socketio_service
 
 pep8:
-	pep8 -r --ignore=E501,E221,W291,W391,E302,E251,E203,W293,E231,E303,E201,E225,E261,E241 --exclude awx/lib/site-packages awx/
+	pep8 -r awx/
 
 pyflakes:
 	pyflakes awx/
@@ -175,7 +175,7 @@ test_tox:
 
 # Run unit tests to produce output for Jenkins.
 test_jenkins:
-	$(PYTHON) manage.py jenkins -v2
+	$(PYTHON) manage.py jenkins -v2 --csslint-exclude "*.min.css" --jslint-exclude "*.min.js"
 
 package.json:
 	sed -e 's/%NAME%/$(NAME)/;s/%VERSION%/$(VERSION)/' packaging/grunt/package.template > $@

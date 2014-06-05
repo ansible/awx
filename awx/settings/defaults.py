@@ -3,6 +3,7 @@
 
 import os
 import sys
+import glob
 from datetime import timedelta
 
 # Update this module's local settings from the global settings module.
@@ -496,3 +497,18 @@ LOGGING = {
         },
     }
 }
+
+if 'django_jenkins' in INSTALLED_APPS:
+    JENKINS_TASKS = (
+        'django_jenkins.tasks.with_coverage',
+        'django_jenkins.tasks.run_pylint',
+        'django_jenkins.tasks.run_pep8',
+        'django_jenkins.tasks.run_pyflakes',
+        'django_jenkins.tasks.run_jshint',
+        'django_jenkins.tasks.run_csslint',
+        )
+    PEP8_RCFILE = "setup.cfg"
+    CSSLINT_CHECKED_FILES = [os.path.join(BASE_DIR, 'ui/static/less')]
+    JSHINT_CHECKED_FILES = [os.path.join(BASE_DIR, 'ui/static/js'),
+                            os.path.join(BASE_DIR, 'ui/static/lib/ansible'),]
+
