@@ -272,14 +272,6 @@ DEVSERVER_MODULES = (
     #'devserver.modules.profile.LineProfilerModule',
 )
 
-# Use Django-Jenkins if installed.  Only run tests for awx.main app.
-try:
-    import django_jenkins
-    INSTALLED_APPS += ('django_jenkins',)
-    PROJECT_APPS = ('awx.main', 'awx.api',)
-except ImportError:
-    pass
-
 # Set default ports for live server tests.
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
@@ -497,19 +489,3 @@ LOGGING = {
         },
     }
 }
-
-if 'django_jenkins' in INSTALLED_APPS:
-    JENKINS_TASKS = (
-        'django_jenkins.tasks.run_pylint',
-        'django_jenkins.tasks.with_coverage',
-        'django_jenkins.tasks.django_tests',
-        'django_jenkins.tasks.run_pep8',
-        'django_jenkins.tasks.run_pyflakes',
-        'django_jenkins.tasks.run_jshint',
-        'django_jenkins.tasks.run_csslint',
-        )
-    PEP8_RCFILE = "setup.cfg"
-    CSSLINT_CHECKED_FILES = [os.path.join(BASE_DIR, 'ui/static/less')]
-    JSHINT_CHECKED_FILES = [os.path.join(BASE_DIR, 'ui/static/js'),
-                            os.path.join(BASE_DIR, 'ui/static/lib/ansible'),]
-
