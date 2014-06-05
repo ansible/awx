@@ -862,7 +862,6 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertEqual(new_inv.groups.count(), 0)
         os.chdir(os.path.join(os.path.dirname(__file__), 'data'))
         inv_file = 'large_ec2_inventory.py'
-        settings.DEBUG = True
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
                                                   source=inv_file)
@@ -906,7 +905,6 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         new_inv = self.organizations[0].inventories.create(name='largeinv')
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)
-        settings.DEBUG = True
         nhosts = 2000
         # Test initial import into empty inventory.
         self._check_largeinv_import(new_inv, nhosts, 0)
