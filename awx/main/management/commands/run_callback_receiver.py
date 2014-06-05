@@ -34,6 +34,11 @@ def run_subscriber(consumer_port, queue_port, use_workers=True):
             signal.signal(signum, signal.SIG_DFL)
             os.kill(os.getpid(), signum) # Rethrow signal, this time without catching it
         return _handler
+    def check_pre_handle(data):
+        event = data.get('event', '')
+        if event == 'playbook_on_play_start':
+            return True
+        return False
         
     consumer_context = zmq.Context()
     consumer_subscriber = consumer_context.socket(zmq.REP)
@@ -59,10 +64,10 @@ def run_subscriber(consumer_port, queue_port, use_workers=True):
 
     while True: # Handle signal
         message = consumer_subscriber.recv_json()
-        if use_workers:
-            queue_publisher.send_json(message)
-        else:
+        if check_pre_handle(message) or not use_workers:
             process_job_event(message)
+        else:
+            queue_publisher.send_json(message)
         consumer_subscriber.send("1")
 
 
