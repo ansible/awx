@@ -9,6 +9,7 @@ import json
 import os
 import random
 import shutil
+import sys
 import tempfile
 import time
 from multiprocessing import Process
@@ -28,6 +29,7 @@ from awx.main.backend import LDAPSettings
 from awx.main.management.commands.run_callback_receiver import run_subscriber
 from awx.main.management.commands.run_task_system import run_taskmanager
 from awx.main.utils import get_ansible_version
+from awx.main.task_engine import TaskEngager as LicenseWriter
 
 
 class BaseTestMixin(object):
@@ -38,6 +40,13 @@ class BaseTestMixin(object):
     def setUp(self):
         super(BaseTestMixin, self).setUp()
         self.object_ctr = 0
+        # Save sys.path before tests.
+        self._sys_path = [x for x in sys.path]
+        # Save os.environ before tests.
+        self._environ = dict(os.environ.items())
+        # Capture current directory to change back after each test.
+        self._cwd = os.getcwd()
+        # Capture list of temp files/directories created during tests.
         self._temp_paths = []
         self._current_auth = None
         self._user_passwords = {}
@@ -46,8 +55,6 @@ class BaseTestMixin(object):
         # Wrap settings so we can redefine them within each test.
         self._wrapped = settings._wrapped
         settings._wrapped = UserSettingsHolder(settings._wrapped)
-        # Capture current directory, change back after each test.
-        self._cwd = os.getcwd()
         # Set all AUTH_LDAP_* settings to defaults to avoid using LDAP for
         # tests unless expicitly configured.
         for name, value in LDAPSettings.defaults.items():
@@ -84,6 +91,18 @@ class BaseTestMixin(object):
 
     def tearDown(self):
         super(BaseTestMixin, self).tearDown()
+        # Restore sys.path after tests.
+        sys.path = self._sys_path
+        # Restore os.environ after tests.
+        for k,v in self._environ.items():
+            if os.environ.get(k, None) != v:
+                os.environ[k] = v
+        for k,v in os.environ.items():
+            if k not in self._environ.keys():
+                del os.environ[k]
+        # Restore current directory after each test.
+        os.chdir(self._cwd)
+        # Cleanup temp files/directories created during tests.
         for project_dir in self._temp_paths:
             if os.path.exists(project_dir):
                 if os.path.isdir(project_dir):
@@ -92,8 +111,20 @@ class BaseTestMixin(object):
                     os.remove(project_dir)
         # Restore previous settings after each test.
         settings._wrapped = self._wrapped
-        # Restore current directory after each test.
-        os.chdir(self._cwd)
+
+    def create_test_license_file(self, instance_count=10000):
+        writer = LicenseWriter( 
+           company_name='AWX',
+           contact_name='AWX Admin',
+           contact_email='awx@example.com',
+           license_date=int(time.time() + 3600),
+           instance_count=instance_count,
+        )
+        handle, license_path = tempfile.mkstemp(suffix='.json')
+        os.close(handle)
+        writer.write_file(license_path)
+        self._temp_paths.append(license_path)
+        os.environ['AWX_LICENSE_FILE'] = license_path
 
     def assertElapsedLessThan(self, seconds):
         elapsed = time.time() - self._start_time

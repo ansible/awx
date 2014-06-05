@@ -21,7 +21,6 @@ from django.utils.timezone import now
 from django.test.utils import override_settings
 
 # AWX
-from awx.main.task_engine import TaskEngager as LicenseWriter
 from awx.main.models import *
 from awx.main.tests.base import BaseTest, BaseLiveServerTest
 
@@ -96,25 +95,6 @@ class BaseCommandMixin(object):
     '''
     Base class for tests that run management commands.
     '''
-
-    def setUp(self):
-        super(BaseCommandMixin, self).setUp()
-        self._sys_path = [x for x in sys.path]
-        self._environ = dict(os.environ.items())
-        self._temp_files = []
-
-    def tearDown(self):
-        super(BaseCommandMixin, self).tearDown()
-        sys.path = self._sys_path
-        for k,v in self._environ.items():
-            if os.environ.get(k, None) != v:
-                os.environ[k] = v
-        for k,v in os.environ.items():
-            if k not in self._environ.keys():
-                del os.environ[k]
-        for tf in self._temp_files:
-            if os.path.exists(tf):
-                os.remove(tf)
 
     def create_test_inventories(self):
         self.setup_users()
@@ -439,27 +419,13 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.create_test_ini()
         self.create_test_license_file()
 
-    def create_test_license_file(self):
-        writer = LicenseWriter( 
-           company_name='AWX',
-           contact_name='AWX Admin',
-           contact_email='awx@example.com',
-           license_date=int(time.time() + 3600),
-           instance_count=10000,
-        )
-        handle, license_path = tempfile.mkstemp(suffix='.json')
-        os.close(handle)
-        writer.write_file(license_path)
-        self._temp_files.append(license_path)
-        os.environ['AWX_LICENSE_FILE'] = license_path
-
     def create_test_ini(self, inv_dir=None, ini_content=None):
         ini_content = ini_content or TEST_INVENTORY_INI
         handle, self.ini_path = tempfile.mkstemp(suffix='.txt', dir=inv_dir)
         ini_file = os.fdopen(handle, 'w')
         ini_file.write(ini_content)
         ini_file.close()
-        self._temp_files.append(self.ini_path)
+        self._temp_paths.append(self.ini_path)
 
     def create_test_dir(self, hostnames=None):
         hostnames = hostnames or []
