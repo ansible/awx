@@ -175,7 +175,7 @@ test_tox:
 
 # Run unit tests to produce output for Jenkins.
 test_jenkins:
-	$(PYTHON) manage.py jenkins -v2 --csslint-exclude "*.min.css" --jslint-exclude "*.min.js"
+	$(PYTHON) manage.py jenkins -v2
 
 package.json:
 	sed -e 's/%NAME%/$(NAME)/;s/%VERSION%/$(VERSION)/' packaging/grunt/package.template > $@
