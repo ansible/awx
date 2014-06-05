@@ -46,6 +46,8 @@ class BaseTestMixin(object):
         # Wrap settings so we can redefine them within each test.
         self._wrapped = settings._wrapped
         settings._wrapped = UserSettingsHolder(settings._wrapped)
+        # Capture current directory, change back after each test.
+        self._cwd = os.getcwd()
         # Set all AUTH_LDAP_* settings to defaults to avoid using LDAP for
         # tests unless expicitly configured.
         for name, value in LDAPSettings.defaults.items():
@@ -90,6 +92,8 @@ class BaseTestMixin(object):
                     os.remove(project_dir)
         # Restore previous settings after each test.
         settings._wrapped = self._wrapped
+        # Restore current directory after each test.
+        os.chdir(self._cwd)
 
     def assertElapsedLessThan(self, seconds):
         elapsed = time.time() - self._start_time
