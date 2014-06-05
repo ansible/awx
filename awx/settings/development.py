@@ -42,6 +42,7 @@ if 'django_jenkins' in INSTALLED_APPS:
         'django_jenkins.tasks.run_csslint',
         )
     PEP8_RCFILE = "setup.cfg"
+    PYLINT_RCFILE = ".pylintrc"
     CSSLINT_CHECKED_FILES = glob.glob(os.path.join(BASE_DIR, 'ui/static/less/*.less'))
     JSHINT_CHECKED_FILES = [os.path.join(BASE_DIR, 'ui/static/js'),
                             os.path.join(BASE_DIR, 'ui/static/lib/ansible'),]
