@@ -572,6 +572,9 @@ class InventoryTest(BaseTest):
 
         # access        
         url1 = reverse('api:group_hosts_list', args=(groups[0].pk,))
+        alt_group_hosts = reverse('api:group_hosts_list', args=(groups[1].pk,))
+        other_alt_group_hosts = reverse('api:group_hosts_list', args(groups[2].pk,))
+
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 2)
         self.assertTrue(host1.pk in [x['id'] for x in data['results']])
@@ -592,6 +595,14 @@ class InventoryTest(BaseTest):
         
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 4)
+
+        # You should be able to add an existing host to a group as a new host and have it be copied
+        existing_host = new_host
+        self.post(alt_group_hosts, data=existing_host, expect=204, auth=self.get_normal_credentials())
+
+        # Not if the variables are different though
+        existing_host['variables'] = '{"booh": "bah"}'
+        self.post(other_alt_group_hosts, data=existing_host, expect=400, auth=self.get_normal_credentials())
 
         # removal
         got['disassociate'] = 1

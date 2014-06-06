@@ -821,6 +821,17 @@ class GroupHostsList(SubListCreateAPIView):
     parent_model = Group
     relationship = 'hosts'
 
+    def create(self, request, *args, **kwargs):
+        parent_group = Group.objects.get(id=self.kwargs['pk'])
+        existing_hosts = Host.objects.filter(inventory=parent_group.inventory, name=request.DATA['name'])
+        if existing_hosts.count() > 0 and ('variables' not in request.DATA or \
+                                           request.DATA['variables'] == '' or \
+                                           request.DATA['variables'] == '{}' or \
+                                           request.DATA['variables'] == '---'):
+            request.DATA['id'] = existing_hosts[0].id
+            return self.attach(request, *args, **kwargs)
+        return super(GroupHostsList, self).create(request, *args, **kwargs)
+
 class GroupAllHostsList(SubListAPIView):
     ''' the list of all hosts below a group, even including subgroups '''
 
