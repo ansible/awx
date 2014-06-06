@@ -621,7 +621,6 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             catch(err) {
                 // ignore
             }
-            console.log('calling refreshHosts()');
             group_scope.refreshHosts();
             scope.$destroy();
         });
