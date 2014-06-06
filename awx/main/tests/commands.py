@@ -775,8 +775,13 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertTrue(isinstance(result, ValueError), result)
 
     def test_executable_file(self):
-        # New empty inventory.
+        # Use existing inventory as source.
         old_inv = self.inventories[1]
+        # Modify host name to contain brackets (AC-1295).
+        old_host = old_inv.hosts.all()[0]
+        old_host.name = '[hey look some brackets]'
+        old_host.save()
+        # New empty inventory.
         new_inv = self.organizations[0].inventories.create(name='newb')
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)

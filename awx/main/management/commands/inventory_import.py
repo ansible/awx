@@ -169,10 +169,9 @@ class BaseLoader(object):
 
     def get_host(self, name):
         '''
-        Return a MemHost instance from host name, creating if needed.
+        Return a MemHost instance from host name, creating if needed.  If name
+        contains brackets, they will not be interpreted as a host pattern.
         '''
-        if '[' in name or ']' in name:
-            raise ValueError('host ranges like %s are not supported by this importer' % name)
         host_name = name.split(':')[0]
         if self.host_filter_re and not self.host_filter_re.match(host_name):
             logger.debug('Filtering host %s', host_name)
