@@ -615,19 +615,15 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             scope.removeSaveCompleted();
         }
         scope.removeSaveCompleted = scope.$on('saveCompleted', function() {
-            if (scope.removeSaveCompleted) {
-                scope.removeSaveCompleted();
+            try {
+                $('#host-modal-dialog').dialog('close');
             }
-            scope.removeSaveCompleted = scope.$on('saveCompleted', function() {
-                try {
-                    $('#host-modal-dialog').dialog('close');
-                }
-                catch(err) {
-                    // ignore
-                }
-                group_scope.refreshHosts();
-                scope.$destroy();
-            });
+            catch(err) {
+                // ignore
+            }
+            console.log('calling refreshHosts()');
+            group_scope.refreshHosts();
+            scope.$destroy();
         });
 
         // Save changes to the parent

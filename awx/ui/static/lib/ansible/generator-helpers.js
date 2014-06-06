@@ -150,6 +150,9 @@ angular.module('GeneratorHelpers', [])
             case 'job_details':
                 icon = 'fa-list-ul';
                 break;
+            case 'copy':
+                icon = "fa-cut";
+                break;
             }
             icon += (size) ? " " + size : "";
             return Icon(icon);
