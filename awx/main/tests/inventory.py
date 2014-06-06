@@ -573,7 +573,7 @@ class InventoryTest(BaseTest):
         # access        
         url1 = reverse('api:group_hosts_list', args=(groups[0].pk,))
         alt_group_hosts = reverse('api:group_hosts_list', args=(groups[1].pk,))
-        other_alt_group_hosts = reverse('api:group_hosts_list', args(groups[2].pk,))
+        other_alt_group_hosts = reverse('api:group_hosts_list', args=(groups[2].pk,))
 
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 2)
