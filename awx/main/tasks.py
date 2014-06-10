@@ -37,7 +37,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import * # Job, JobEvent, ProjectUpdate, InventoryUpdate, Schedule, UnifiedJobTemplate
-from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url, ignore_inventory_computed_fields
+from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url, ignore_inventory_computed_fields, emit_websocket_notification
 
 __all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate', 'handle_work_error', 'update_inventory_computed_fields']
 
@@ -96,6 +96,7 @@ def tower_periodic_scheduler(self):
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
             new_unified_job.save(update_fields=['job_status', 'job_explanation'])
             new_unified_job.socketio_emit_status("failed")
+        emit_websocket_notification('/socket.io/schedules', 'schedule_change', dict(id=schedule.id))
 
 @task()
 def notify_task_runner(metadata_dict):

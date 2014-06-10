@@ -49,6 +49,11 @@ class JobEventNamespace(BaseNamespace):
     def recv_connect(self):
         print("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
 
+class ScheduleNamespace(BaseNamespace):
+
+    def recv_connect(self):
+        print("Received client connect for schedule namespace from %s" % str(self.environ['REMOTE_ADDR']))
+
 class TowerSocket(object):
 
     def __call__(self, environ, start_response):
@@ -57,7 +62,8 @@ class TowerSocket(object):
         if path.startswith('socket.io'):
             socketio_manage(environ, {'/socket.io/test': TestNamespace,
                                       '/socket.io/jobs': JobNamespace,
-                                      '/socket.io/job_events': JobEventNamespace})
+                                      '/socket.io/job_events': JobEventNamespace,
+                                      '/socket.io/schedules': ScheduleNamespace})
         else:
             start_response('404 Not Found', [])
             return ['Tower version %s' % awx.__version__]
