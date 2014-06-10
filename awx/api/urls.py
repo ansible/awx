@@ -143,6 +143,8 @@ job_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'job_cancel'),
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'job_job_host_summaries_list'),
     url(r'^(?P<pk>[0-9]+)/job_events/$',                'job_job_events_list'),
+    url(r'^(?P<pk>[0-9]+)/job_plays/$',                 'job_job_plays_list'),
+    url(r'^(?P<pk>[0-9]+)/job_tasks/$',                 'job_job_tasks_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'job_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/stdout/$',                    'job_stdout'),
 )

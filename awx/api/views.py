@@ -1475,6 +1475,66 @@ class JobJobEventsList(BaseJobEventsList):
                             headers=headers)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class JobJobPlaysList(BaseJobEventsList):
+
+    parent_model = Job
+    authentication_classes = [JobTaskAuthentication] + \
+                             api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    permission_classes = (JobTaskPermission,)
+    new_in_150 = True
+ 
+    def get(self, request, *args, **kwargs):
+        all_plays = []
+        job = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        for play_event in job.job_events.filter(event='playbook_on_play_start'):
+            all_plays.append(dict(id=play_event.id, play=play_event.play, started=play_event.created))
+        return Response(all_plays)
+
+class JobJobTasksList(BaseJobEventsList):
+
+    parent_model = Job
+    authentication_classes = [JobTaskAuthentication] + \
+                             api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    permission_classes = (JobTaskPermission,)
+    new_in_150 = True
+
+    def get(self, request, *args, **kwargs):
+        tasks = []
+        job = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        parent_task = get_object_or_404(job.job_events, pk=int(request.QUERY_PARAMS.get('event_id', -1)))
+        for task_start_event in parent_task.children.filter(Q(event='playbook_on_task_start') | Q(event='playbook_on_setup')):
+            task_data = dict(id=task_start_event.id, name="Gathering Facts" if task_start_event.event == 'playbook_on_setup' else task_start_event.task,
+                             created=task_start_event.created, modified=task_start_event.modified,
+                             failed=False, changed=False, host_count=0, reported_hosts=0, successful_count=0, failed_count=0,
+                             changed_count=0, skipped_count=0)
+            for child_event in task_start_event.children.all():
+                if child_event.event == 'runner_on_failed':
+                    task_data['failed'] = True
+                    task_data['host_count'] += 1
+                    task_data['reported_hosts'] += 1
+                    task_data['failed_count'] += 1
+                elif child_event.event == 'runner_on_ok':
+                    task_data['host_count'] += 1
+                    task_data['reported_hosts'] += 1
+                    if child_event.changed:
+                        task_data['changed_count'] += 1
+                        task_data['changed'] = True
+                    else:
+                        task_data['successful_count'] += 1
+                elif child_event.event == 'runn_on_skipped':
+                    task_data['host_count'] += 1
+                    task_data['reported_hosts'] += 1
+                    task_data['skipped_count'] += 1
+                elif child_event.event == 'runner_on_error':
+                    task_data['host_count'] += 1
+                    task_data['reported_hosts'] += 1
+                    task_data['failed'] = True
+                    task_data['failed_count'] += 1
+                elif child_event.event == 'runner_on_no_hosts':
+                    task_data['host_count'] += 1
+            tasks.append(task_data)
+        return Response(tasks)
+
 class UnifiedJobTemplateList(ListAPIView):
 
     model = UnifiedJobTemplate
