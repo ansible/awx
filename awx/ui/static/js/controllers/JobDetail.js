@@ -13,19 +13,22 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
     ClearScope();
 
     var job_id = $routeParams.id,
-        event_socket, job,
+        event_socket,
         event_queue = [],
-        processed_events = [],
         scope = $scope,
         api_complete = false,
-        refresh_count = 0;
-    
-    scope.plays = [];
-    scope.tasks = [];
+        refresh_count = 0,
+        lastEventId = 0;
+
+    scope.plays = {};
+    scope.tasks = {};
     scope.hosts = [];
+    scope.hostResults = [];
+    scope.hostResultsMap = {};
+    scope.hostsMap = {};
+
     scope.search_all_tasks = [];
     scope.search_all_plays = [];
-    scope.hostResults = [];
     scope.job_status = {};
     scope.job_id = job_id;
     scope.auto_scroll = false;
@@ -52,116 +55,238 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         scope: scope,
         endpoint: "job_events"
     });
-    
+
     event_socket.init();
 
-    // Evaluate elements of an array, returning the set of elements that 
-    // match a condition as expressed in a function
-    //
-    //    matches = myarray.find(function(x) { return x.id === 5 }); 
-    //
-    Array.prototype.find = function(parameterFunction) {
-        var results = [];
-        this.forEach(function(row) {
-            if (parameterFunction(row)) {
-                results.push(row);
-            }
-        });
-        return results;
-    };
-
-    // Reduce an array of objects down to just the bits we want from each object by
-    // passing in a function that returns just those parts.
-    // 
-    // new_array = myarray.reduce(function(x) { return { blah: x.blah, foo: x.foo } });
-    //
-    Array.prototype.reduce = function(parameterFunction) {
-        var results= [];
-        this.forEach(function(row) {
-            results.push(parameterFunction(row));
-        });
-        return results;
-    };
-
-
-    // Apply each event to the view
-    if (scope.removeEventsReady) {
-        scope.removeEventsReady();
-    }
-    scope.removeEventsReady = scope.$on('EventsReady', function(e, events) {
-        DigestEvents({
-            scope: scope,
-            events: events
-        });
-    });
-    
     event_socket.on("job_events-" + job_id, function(data) {
-        var matches;
         data.event = data.event_name;
         if (api_complete) {
-            matches = processed_events.find(function(x) { return x === data.id; });
-            if (matches.length === 0) {
-                // event not processed
-                scope.$emit('EventsReady', [ data ]);
-            }
+            // api loading is complete, process incoming event
+            DigestEvents({
+                scope: scope,
+                events: [ data ]
+            });
         }
         else {
+            // waiting on api load, queue incoming event
             event_queue.push(data);
         }
     });
-
 
     if (scope.removeAPIComplete) {
         scope.removeAPIComplete();
     }
     scope.removeAPIComplete = scope.$on('APIComplete', function() {
-        var events;
+        // process any events sitting in the queue
+        var events = [];
         if (event_queue.length > 0) {
-            // Events arrived while we were processing API results
-            events = event_queue.find(function(event) {
-                var matched = false;
-                processed_events.every(function(event_id) {
-                    if (event_id === event.id) {
-                        matched = true;
-                        return false;
-                    }
-                    return true;
-                });
-                return (!matched);  //return true when event.id not in the list of processed_events
+            event_queue.forEach(function(event) {
+                if (event.id > lastEventId) {
+                    events.push(event);
+                }
             });
-            if (events.length > 0) {
-                scope.$emit('EventsReady', events);
-                api_complete = true;
+            if (events.legnt > 0) {
+                DigestEvents({
+                    scope: scope,
+                    events: events
+                });
             }
         }
-        else {
-            api_complete = true;
-        }
+        api_complete = true;
     });
 
-    // Get events, 50 at a time. When done, emit APIComplete
-    if (scope.removeJobReady) {
-        scope.removeJobReady();
+    if (scope.removeJobHostSummariesReady) {
+        scope.removeJobHostSummariesReady();
     }
-    scope.removeJobReady = scope.$on('JobReady', function(e, next) {
-        Rest.setUrl(next);
+    scope.removeJobHostSummariesReady = scope.$on('JobHostSummariesReady', function() {
+        var url = scope.job.related.job_events + '?parent=' + scope.activeTask + '&host__isnull=false&order_by=host__name';
+        Rest.setUrl(url);
         Rest.get()
             .success(function(data) {
-                processed_events = processed_events.concat( data.results.reduce(function(x) { return x.id; }) );
-                scope.$emit('EventsReady', data.results);
-                if (data.next) {
-                    scope.$emit('JobReady', data.next);
-                }
-                else {
-                    Wait('stop');
-                    scope.$emit('APIComplete');
-                }
+                data.results.forEach(function(event) {
+                    scope.hostResults.push({
+                        id: event.id,
+                        status: ( (event.failed) ? 'failed': (event.changed) ? 'changed' : 'successful' ),
+                        host_id: event.host,
+                        task_id: event.parent,
+                        name: event.event_data.host,
+                        created: event.created,
+                        msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
+                    });
+                    scope.hostResultsMap[event.id] = scope.hostResults.length - 1;
+                    if (event.id > lastEventId) {
+                        lastEventId = event.id;
+                    }
+                });
+                scope.$emit('APIComplete');
+                Wait('stop');
             })
             .error(function(data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Failed to retrieve job events: ' + next + ' GET returned: ' + status });
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
             });
     });
+
+    if (scope.removeTasksReady) {
+        scope.removeTasksReady();
+    }
+    scope.removeTasksReady = scope.$on('TasksReady', function() {
+        var url = scope.job.related.job_host_summaries + '?page_size=' + scope.hostSummaryTableRows + '&order_by=host__name';
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                data.results.forEach(function(event) {
+                    scope.hosts.push({
+                        id: event.host,
+                        name: event.summary_fields.host.name,
+                        ok: event.ok,
+                        changed: event.changed,
+                        unreachable: event.dark,
+                        failed: event.failures
+                    });
+                    scope.hostsMap[event.id] = scope.hosts.length - 1;
+                });
+                scope.$emit('JobHostSummariesReady');
+            })
+            .error(function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+    });
+
+    if (scope.removePlaysReady) {
+        scope.removePlaysReady();
+    }
+    scope.removePlaysReady = scope.$on('PlaysReady', function(e, events_url) {
+        var url = events_url + '?event__in=playbook_on_task_start,playbook_on_setup&parent=' + scope.activePlay + '&order_by=id',
+            task;
+
+        Rest.setUrl(url);
+        Rest.get()
+            .success( function(data) {
+                data.results.forEach(function(event, idx) {
+                    var end, play_id, elapsed;
+
+                    if (idx < data.results.length - 1) {
+                        // end date = starting date of the next event
+                        end = data.results[idx + 1].created;
+                    }
+                    else {
+                        // no next event (task), get the end time of the play
+                        end = scope.plays[scope.activePlay].finished;
+                    }
+                    if (end) {
+                        elapsed = GetElapsed({
+                            start: event.created,
+                            end: end
+                        });
+                    }
+                    else {
+                        elapsed = '00:00:00';
+                    }
+
+                    play_id = (event.parent) ? event.parent : scope.activePlay;
+
+                    if (!scope.tasks[play_id]) {
+                        scope.tasks[play_id] = {};
+                    }
+
+                    scope.tasks[play_id][event.id] = {
+                        id: event.id,
+                        play_id: play_id,
+                        name: event.event_display,
+                        status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                        created: event.created,
+                        modified: event.modified,
+                        finished: end,
+                        elapsed: elapsed,
+                        hostCount: 0,             // hostCount,
+                        reportedHosts: 0,
+                        successfulCount: 0,
+                        failedCount: 0,
+                        changedCount: 0,
+                        skippedCount: 0,
+                        successfulStyle: { display: 'none'},
+                        failedStyle: { display: 'none' },
+                        changedStyle: { display: 'none' },
+                        skippedStyle: { display: 'none' },
+                        taskActiveClass: ''
+                    };
+                });
+                if (data.results.length > 0) {
+                    task = data.results[data.results.length - 1];
+                    lastEventId = task.id;
+                    scope.tasks[scope.activePlay][task.id].taskActiveClass = 'active';
+                    scope.activeTask = task.id;
+                    scope.activeTaskName = task.name;
+                }
+                scope.$emit('TasksReady', events_url);
+            })
+            .error( function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+    });
+
+    if (scope.removeJobReady) {
+        scope.removeJobReady();
+    }
+    scope.removeJobReady = scope.$on('JobReady', function(e, events_url) {
+        // Job finished loading. Now get the set of plays
+        var url = events_url + '?event=playbook_on_play_start&order_by=id',
+            play;
+        Rest.setUrl(url);
+        Rest.get()
+            .success( function(data) {
+                data.results.forEach(function(event, idx) {
+                    var status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'none',
+                        start = event.created,
+                        end,
+                        elapsed;
+                    if (idx < data.results.length - 1) {
+                        // end date = starting date of the next event
+                        end = data.results[idx + 1].created;
+                    }
+                    else if (scope.job_status.status === 'successful' || scope.job_status.status === 'failed' || scope.job_status.status === 'error' || scope.job_status.status === 'canceled') {
+                        // this is the last play and the job already finished
+                        end = scope.job_status.finished;
+                    }
+                    if (end) {
+                        elapsed = GetElapsed({
+                            start: start,
+                            end: end
+                        });
+                    }
+                    else {
+                        elapsed = '00:00:00';
+                    }
+                    scope.plays[event.id] = {
+                        id: event.id,
+                        name: event.play,
+                        created: event.created,
+                        finished: end,
+                        status: status,
+                        elapsed: elapsed,
+                        children: [],
+                        playActiveClass: ''
+                    };
+                });
+
+                if (data.results.length > 0) {
+                    play = data.results[data.results.length - 1];
+                    lastEventId = play.id;
+                    scope.plays[play.id].playActiveClass = 'active';
+                    scope.activePlay = play.id;
+                    scope.activePlayName = play.play;
+                }
+                scope.$emit('PlaysReady', events_url);
+            })
+            .error( function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+    });
+
 
     if (scope.removeGetCredentialNames) {
         scope.removeGetCredentialNames();
@@ -195,8 +320,8 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
                 });
         }
     });
-    
-    
+
+
     if (scope.removeLoadJob) {
         scope.removeLoadJob();
     }
@@ -206,7 +331,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         Rest.setUrl(GetBasePath('jobs') + job_id + '/');
         Rest.get()
             .success(function(data) {
-                job = data;
+                scope.job = data;
                 scope.job_template_name = data.name;
                 scope.project_name = (data.summary_fields.project) ? data.summary_fields.project.name : '';
                 scope.inventory_name = (data.summary_fields.inventory) ? data.summary_fields.inventory.name : '';
@@ -229,6 +354,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
                 scope.job_status.status_class = ((data.status === 'error' || data.status === 'failed') && data.job_explanation) ? "alert alert-danger" : "";
                 scope.job_status.finished = data.finished;
                 scope.job_status.explanation = data.job_explanation;
+
                 if (data.started && data.finished) {
                     scope.job_status.elapsed = GetElapsed({
                         start: data.started,
@@ -240,7 +366,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
                 }
 
                 scope.setSearchAll('host');
-                scope.$emit('JobReady', data.related.job_events + '?page_size=50&order_by=id');
+                scope.$emit('JobReady', data.related.job_events);
                 scope.$emit('GetCredentialNames', data);
             })
             .error(function(data, status) {
@@ -362,7 +488,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
                 height: $(document).height()
             }).show();
 
-            // Adjust the summary table height 
+            // Adjust the summary table height
             $('#job-summary-container .job_well').height(height - 18).css({
                 'box-shadow': '-3px 3px 5px 0 #ccc'
             });
@@ -375,9 +501,9 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
                 $('#hosts-summary-section .legend').outerHeight();
             $('#hosts-summary-table').height(height - 50);
             $('#hosts-summary-table').mCustomScrollbar("update");
-            
+
             $('#hide-summary-button').show();
-        
+
             $('#job-summary-container').css({
                 top: 0,
                 right: 0,
@@ -657,7 +783,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
     scope.viewEvent = function(event_id) {
         $log.debug(event_id);
     };
-    
+
 }
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',
