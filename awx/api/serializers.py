@@ -1241,6 +1241,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         res = super(JobSerializer, self).get_related(obj)
         res.update(dict(
             job_events  = reverse('api:job_job_events_list', args=(obj.pk,)),
+            job_plays = reverse('api:job_job_plays_list', args=(obj.pk,)),
+            job_tasks = reverse('api:job_job_tasks_list', args=(obj.pk,)),
             job_host_summaries = reverse('api:job_job_host_summaries_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_activity_stream_list', args=(obj.pk,)),
         ))
