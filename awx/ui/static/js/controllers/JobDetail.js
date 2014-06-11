@@ -8,7 +8,7 @@
 'use strict';
 
 function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors, DigestEvents,
-    SelectPlay, SelectTask, Socket, GetElapsed, SelectHost, FilterAllByHostName, DrawGraph, LoadHostSummary) {
+    SelectPlay, SelectTask, Socket, GetElapsed, SelectHost, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList) {
 
     ClearScope();
 
@@ -700,5 +700,5 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',
     'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'SelectHost', 'FilterAllByHostName', 'DrawGraph',
-    'LoadHostSummary'
+    'LoadHostSummary', 'ReloadHostSummaryList'
 ];

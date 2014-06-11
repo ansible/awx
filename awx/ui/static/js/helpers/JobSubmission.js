@@ -16,7 +16,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             passwords = params.passwords || {},
             callback = params.callback || 'JobLaunched',
             url = params.url;
-        
+
         Wait('start');
         Rest.setUrl(url);
         Rest.post(passwords)
@@ -33,11 +33,11 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
 .factory('PromptForCredential', ['$location', 'Wait', 'GetBasePath', 'LookUpInit', 'JobTemplateForm', 'CredentialList', 'Rest', 'Prompt', 'ProcessErrors',
 function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Rest, Prompt, ProcessErrors) {
     return function(params) {
-        
+
         var scope = params.scope,
             callback = params.callback || 'CredentialReady',
             selectionMade;
-        
+
         Wait('stop');
         scope.credential = '';
 
@@ -48,7 +48,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             selectionMade = function () {
                 scope.$emit(callback, scope.credential);
             };
-            
+
             LookUpInit({
                 url: GetBasePath('credentials') + '?kind=ssh',
                 scope: scope,
@@ -107,15 +107,15 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 acceptedPasswords = {},
                 scope = parent_scope.$new(),
                 e, buttons;
-                
+
             Wait('stop');
-            
+
             function buildHtml() {
                 var fld, field, html;
                 html = "";
                 html += "<div class=\"alert alert-info\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
                 html += "<form name=\"password_form\" novalidate>\n";
-                
+
                 passwords.forEach(function(password) {
                     // Prompt for password
                     field = form.fields[password];
@@ -204,7 +204,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 $('#password-modal').dialog('open');
                 $('#password-accept-button').attr({ "disabled": "disabled" });
             });
-            
+
             scope.passwordAccept = function() {
                 if (!scope.password_form.$invalid) {
                     passwords.forEach(function(password) {
@@ -258,7 +258,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             "<a href=\"\" id=\"awp-promote\" href=\"\" aw-pop-over=\"{{ helpText }}\" aw-tool-tip=\"Click for help\" aw-pop-over-watch=\"helpText\" " +
             "aw-tip-placement=\"top\" data-placement=\"bottom\" data-container=\"body\" data-title=\"Help\" class=\"help-link\"><i class=\"fa fa-question-circle\">" +
             "</i> click for help</a></div>\n";
-        
+
         scope.helpText = "<p>After defining any extra variables, click Continue to start the job. Otherwise, click cancel to abort.</p>" +
                     "<p>Extra variables are passed as command line variables to the playbook run. It is equivalent to the -e or --extra-vars " +
                     "command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
@@ -368,8 +368,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 }])
 
 // Submit request to run a playbook
-.factory('PlaybookRun', ['$location','$routeParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'Empty', 'PromptForCredential', 'PromptForVars',
-    function ($location, $routeParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, ProcessErrors, Wait, Empty, PromptForCredential, PromptForVars) {
+.factory('PlaybookRun', ['$location','$routeParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors', 'Wait', 'Empty', 'PromptForCredential', 'PromptForVars',
+    function ($location, $routeParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty, PromptForCredential, PromptForVars) {
         return function (params) {
             var scope = params.scope,
                 id = params.id,
@@ -397,24 +397,39 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 var url = (job_template.related.jobs) ? job_template.related.jobs : job_template.related.job_template + 'jobs/';
                 Wait('start');
                 Rest.setUrl(url);
-                Rest.post(job_template).success(function (data) {
-                    new_job_id = data.id;
-                    launch_url = data.related.start;
-                    prompt_for_vars = data.ask_variables_on_launch;
-                    new_job = data;
-                    if (data.passwords_needed_to_start.length > 0) {
-                        scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
-                    }
-                    else if (data.ask_variables_on_launch) {
-                        scope.$emit('PromptForVars');
-                    }
-                    else {
-                        scope.$emit('StartPlaybookRun');
-                    }
-                }).error(function (data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to create job. POST returned status: ' + status });
-                });
+                Rest.post(job_template)
+                    .success(function (data) {
+                        new_job_id = data.id;
+                        launch_url = data.related.start;
+                        prompt_for_vars = data.ask_variables_on_launch;
+                        new_job = data;
+                        if (data.passwords_needed_to_start.length > 0) {
+                            scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
+                        }
+                        else if (data.ask_variables_on_launch) {
+                            scope.$emit('PromptForVars');
+                        }
+                        else {
+                            scope.$emit('StartPlaybookRun');
+                        }
+                    })
+                    .error(function (data, status) {
+                        var key, html;
+                        if (status === 400) {
+                            // there's a data problem with the job template
+                            html = "<ul style=\"list-style-type: none; margin: 15px 0;\">\n";
+                            for (key in data) {
+                                html += "<li><strong>" + key + "</strong>: " + data[key][0] + "</li>\n";
+                            }
+                            html += "</ul>\n";
+                            Wait('stop');
+                            Alert('Job Template Error', "<p>Fix the following issues before using the template:</p>" + html, 'alert-danger');
+                        }
+                        else {
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                               msg: 'Failed to create job. POST returned status: ' + status });
+                        }
+                    });
             });
 
             if (scope.removeCancelJob) {
