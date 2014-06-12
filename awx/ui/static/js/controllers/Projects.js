@@ -56,6 +56,9 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                     $scope.projects[i].statusTip = 'Canceled. Click for details';
                 }
 
+                if (project.status === 'running' || project.status === 'updating') {
+                }
+
                 $scope.project_scm_type_options.forEach(function(type) {
                     if (type.value === project.scm_type) {
                         $scope.projects[i].scm_type = type.label;
@@ -65,6 +68,10 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                             $scope.projects[i].scm_type_class = 'btn-disabled';
                             $scope.projects[i].statusTip = 'Not configured for SCM';
                             $scope.projects[i].statusIcon = 'none';
+                        } else if (type.label === "Running" || type.label === "Updating") {
+                            $scope.projects[i].scm_update_tooltip = "SCM update currently running";
+                            $scope.projects[i].scm_type_class = 'btn-disabled';
+                            $scope.projects[i].scm_schedule_tooltip = "Schedule future SCM updates";
                         } else {
                             $scope.projects[i].scm_update_tooltip = "Start an SCM update";
                             $scope.projects[i].scm_schedule_tooltip = "Schedule future SCM updates";
