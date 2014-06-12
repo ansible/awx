@@ -33,7 +33,7 @@ angular.module('HomeGroupListDefinition', [])
                     awToolTip: "{{ group.status_tooltip }}",
                     dataTipWatch: "group.launch_tooltip",
                     awTipPlacement: "top",
-                    ngClick: "showGroupSummary($event, group.id)",
+                    ngClick: "viewUpdateStatus(group.id)",
                     ngClass: "group.launch_class"
                 },{
                     icon: "{{ 'icon-job-' + group.hosts_status_class }}",

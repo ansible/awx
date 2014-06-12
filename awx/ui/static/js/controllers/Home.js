@@ -367,7 +367,7 @@ function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, Lo
         scope.groups = scope.home_groups;
         ViewUpdateStatus({
             scope: scope,
-            id: id
+            group_id: id
         });
     };
 
