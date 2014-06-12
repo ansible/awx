@@ -1506,10 +1506,10 @@ class JobJobPlaysList(BaseJobEventsList):
                     ok_count = change_aggregate['id__count']
                 else:
                     changed_count = change_aggregate['id__count']
-            play_details['ok'] = ok_count
-            play_details['failed'] = failed_count
-            play_details['changed'] = changed_count
-            play_details['skipped'] = skipped_count
+            play_details['ok_count'] = ok_count
+            play_details['failed_count'] = failed_count
+            play_details['changed_count'] = changed_count
+            play_details['skipped_count'] = skipped_count
             all_plays.append(play_details)
         return Response(all_plays)
 
