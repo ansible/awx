@@ -217,8 +217,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
             scope.passwordCancel = function() {
                 $('#password-modal').dialog('close');
-                Alert('Missing Password', 'Required password(s) not provided. Your request will not be submitted.', 'alert-info');
-                parent_scope.$emit('PasswordsCanceled');
+                parent_scope.$emit('CancelJob');
                 scope.$destroy();
             };
 
