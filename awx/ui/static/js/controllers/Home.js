@@ -122,9 +122,9 @@ Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location',
 ];
 
 
-function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
-    Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store) {
+    Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store, Socket) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //scope.
@@ -134,7 +134,8 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
         defaultUrl = GetBasePath('groups'),
         scope = $scope,
         modal_scope = $scope.$new(),
-        opt, PreviousSearchParams;
+        opt, PreviousSearchParams,
+        io;
 
     generator.inject(list, { mode: 'edit', scope: scope });
 
@@ -290,7 +291,39 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
 
     scope.search(list.iterator);
 
+    scope.$emit('WatchUpdateStatus');  // Start watching for live updates
+
     LoadBreadCrumbs();
+
+    io = Socket({ scope: $scope, endpoint: "jobs" });
+    io.init();
+    $log.debug('Watching for job updates: ');
+    io.on("status_changed", function(data) {
+        var stat, group;
+        if (data.group_id) {
+            group = Find({ list: scope[list.name], key: 'id', val: data.group_id });
+            if (group && (data.status === "failed" || data.status === "successful")) {
+                // job completed, fefresh all groups
+                $log.debug('Update completed. Refreshing the list');
+                scope.refresh();
+            }
+            else if (group) {
+                // incremental update, just update
+                $log.debug('Status of group: ' + data.group_id + ' changed to: ' + data.status);
+                stat = GetSyncStatusMsg({
+                    status: data.status,
+                    has_inventory_sources: group.has_inventory_sources,
+                    source: group.source
+                });
+                $log.debug('changing tooltip to: ' + stat.tooltip);
+                group.status = data.status;
+                group.status_class = stat['class'];
+                group.status_tooltip = stat.tooltip;
+                group.launch_tooltip = stat.launch_tip;
+                group.launch_class = stat.launch_class;
+            }
+        }
+    });
 
     scope.showActivity = function () {
         Stream({
@@ -508,9 +541,9 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
 
 }
 
-HomeGroups.$inject = ['$scope', '$filter', '$compile', '$location', '$routeParams', 'LogViewer', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
+HomeGroups.$inject = ['$log', '$scope', '$filter', '$compile', '$location', '$routeParams', 'LogViewer', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
-    'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store'
+    'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store', 'Socket'
 ];
 
 

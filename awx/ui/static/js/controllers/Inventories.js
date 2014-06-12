@@ -490,7 +490,8 @@ function InventoriesEdit ($log, $scope, $location, $routeParams, $compile, Gener
 
     var PreviousSearchParams,
         url,
-        hostScope = $scope.$new();
+        hostScope = $scope.$new(),
+        io;
 
     ClearScope();
 
@@ -677,7 +678,7 @@ function InventoriesEdit ($log, $scope, $location, $routeParams, $compile, Gener
         $scope.removeWatchUpdateStatus();
     }
     $scope.removeWatchUpdateStatus = $scope.$on('WatchUpdateStatus', function() {
-        var io = Socket({ scope: $scope, endpoint: "jobs" });
+        io = Socket({ scope: $scope, endpoint: "jobs" });
         io.init();
         $log.debug('Watching for job updates: ');
         io.on("status_changed", function(data) {

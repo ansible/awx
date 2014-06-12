@@ -153,11 +153,6 @@ angular.module('HomeGroupListDefinition', [])
         },
 
         actions: {
-            refresh: {
-                mode: 'all',
-                awToolTip: "Refresh the page",
-                ngClick: "refresh()"
-            },
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
