@@ -11,7 +11,7 @@ import sys
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -1482,12 +1482,35 @@ class JobJobPlaysList(BaseJobEventsList):
                              api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
     new_in_150 = True
- 
+
     def get(self, request, *args, **kwargs):
         all_plays = []
         job = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
         for play_event in job.job_events.filter(event='playbook_on_play_start'):
-            all_plays.append(dict(id=play_event.id, play=play_event.play, started=play_event.created))
+            play_details = dict(id=play_event.id, play=play_event.play, started=play_event.created, failed=play_event.failed, changed=play_event.changed)
+            event_aggregates = JobEvent.objects.filter(parent__in=play_event.children.all()).values("event").annotate(Count("id")).order_by()
+            change_aggregates = JobEvent.objects.filter(parent__in=play_event.children.all(), event='runner_on_ok').values("changed").annotate(Count("id")).order_by()
+            failed_count = 0
+            ok_count = 0
+            changed_count = 0
+            skipped_count = 0
+            for event_aggregate in event_aggregates:
+                if event_aggregate['event'] == 'runner_on_failed':
+                    failed_count += event_aggregate['id__count']
+                elif event_aggregate['event'] == 'runner_on_error':
+                    failed_count += event_aggregate['id_count']
+                elif event_aggregate['event'] == 'runner_on_skipped':
+                    skipped_count = event_aggregate['id__count']
+            for change_aggregate in change_aggregates:
+                if change_aggregate['changed'] == False:
+                    ok_count = change_aggregate['id__count']
+                else:
+                    changed_count = change_aggregate['id__count']
+            play_details['ok'] = ok_count
+            play_details['failed'] = failed_count
+            play_details['changed'] = changed_count
+            play_details['skipped'] = skipped_count
+            all_plays.append(play_details)
         return Response(all_plays)
 
 class JobJobTasksList(BaseJobEventsList):
@@ -1521,7 +1544,7 @@ class JobJobTasksList(BaseJobEventsList):
                         task_data['changed'] = True
                     else:
                         task_data['successful_count'] += 1
-                elif child_event.event == 'runn_on_skipped':
+                elif child_event.event == 'runner_on_skipped':
                     task_data['host_count'] += 1
                     task_data['reported_hosts'] += 1
                     task_data['skipped_count'] += 1
