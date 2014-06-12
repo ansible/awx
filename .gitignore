@@ -30,6 +30,5 @@ pep8.txt
 nohup.out
 reports
 package.json
-Vagrantfile
-ansible.cfg
+tools/vagrant/local.yml
 *~
