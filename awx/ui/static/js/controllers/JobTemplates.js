@@ -711,10 +711,6 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     $scope.removeTemplateSaveSuccess = $scope.$on('templateSaveSuccess', function(e, data) {
         Wait('stop');
         if ($scope.allow_callbacks && ($scope.host_config_key !== master.host_config_key || $scope.callback_url !== master.callback_url)) {
-            console.log('host_config_key: ' + $scope.host_config_key);
-            console.log('master_host_config_key: ' + master.host_config_key);
-            console.log('callback_url: ' + $scope.callback_url);
-            console.log('master_callback_url: ' + master.callback_url);
             if (data.related && data.related.callback) {
                 Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is:</p>'+
                     '<p style="padding: 10px 0;"><strong>' + $scope.callback_server_path + data.related.callback + '</strong></p>'+
