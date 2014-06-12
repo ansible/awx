@@ -175,7 +175,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
     }
     scope.removeJobReady = scope.$on('JobReady', function(e, events_url) {
         // Job finished loading. Now get the set of plays
-        var url = scope.job.related.job_plays + '?order_by=id';
+        var url = scope.job.url  + 'job_plays/?order_by=id';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data) {

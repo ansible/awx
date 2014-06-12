@@ -203,6 +203,30 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         $location.path($location.path() + '/' + id);
     };
 
+    if ($scope.removeShowLogViewer) {
+        $scope.removeShowLogViewer();
+    }
+    $scope.removeShowLogViewer = $scope.$on('ShowLogViewer', function(e, data) {
+        if (data.related.current_update) {
+            Wait('start');
+            LogViewer({
+                scope: $scope,
+                url: data.related.current_update,
+                getIcon: GetProjectIcon
+            });
+        } else if (data.related.last_update) {
+            Wait('start');
+            LogViewer({
+                scope: $scope,
+                url: data.related.last_update,
+                getIcon: GetProjectIcon
+            });
+        } else {
+            Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
+                ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
+        }
+    });
+
     $scope.showSCMStatus = function (id) {
         // Refresh the project list
         var project = Find({ list: $scope.projects, key: 'id', val: id });
@@ -210,24 +234,16 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
             Alert('No SCM Configuration', 'The selected project is not configured for SCM. To configure for SCM, edit the project and provide SCM settings, ' +
                 'and then run an update.', 'alert-info');
         } else {
-            if (project.related.current_update) {
-                Wait('start');
-                LogViewer({
-                    scope: $scope,
-                    url: project.related.current_update,
-                    getIcon: GetProjectIcon
+            // Refresh what we have in memory to insure we're accessing the most recent status record
+            Rest.setUrl(project.url);
+            Rest.get()
+                .success(function(data) {
+                    $scope.$emit('ShowLogViewer', data);
+                })
+                .error(function(data, status) {
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Project lookup failed. GET returned: ' + status });
                 });
-            } else if (project.related.last_update) {
-                Wait('start');
-                LogViewer({
-                    scope: $scope,
-                    url: project.related.last_update,
-                    getIcon: GetProjectIcon
-                });
-            } else {
-                Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
-                    ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
-            }
         }
     };
 
@@ -242,7 +258,6 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                     $scope.search(list.iterator);
                 })
                 .error(function (data, status) {
-                    Wait('stop');
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                 });
