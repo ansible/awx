@@ -326,7 +326,7 @@ function HomeGroups($scope, $filter, $compile, $location, $routeParams, LogViewe
         scope.groups = scope.home_groups;
         ViewUpdateStatus({
             scope: scope,
-            tree_id: id
+            id: id
         });
     };
 

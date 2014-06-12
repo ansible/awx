@@ -98,7 +98,7 @@ angular.module('InventoryGroupsDefinition', [])
 
             sync_status: {
                 mode: 'all',
-                ngClick: "viewUpdateStatus(group.id, group.group_id)",
+                ngClick: "viewUpdateStatus(group.id)",
                 awToolTip: "{{ group.status_tooltip }}",
                 dataTipWatch: "group.status_tooltip",
                 iconClass: "{{ 'fa icon-cloud-' + group.status_class }}",

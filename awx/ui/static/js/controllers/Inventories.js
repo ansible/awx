@@ -481,11 +481,11 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 
 
 
-function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, Empty, Wait, Rest, Alert, LoadBreadCrumbs, GetBasePath, ProcessErrors,
+function InventoriesEdit ($log, $scope, $location, $routeParams, $compile, GenerateList, ClearScope, Empty, Wait, Rest, Alert, LoadBreadCrumbs, GetBasePath, ProcessErrors,
     Breadcrumbs, InventoryGroups, InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, GroupsEdit, InventoryUpdate,
     GroupsCancelUpdate, ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete, EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
     InventoryGroupsHelp, HelpDialog, ViewJob, WatchInventoryWindowResize, GetHostContainerRows, GetGroupContainerRows, GetGroupContainerHeight,
-    GroupsCopy, HostsCopy)
+    GroupsCopy, HostsCopy, Socket)
 {
 
     var PreviousSearchParams,
@@ -600,9 +600,12 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
             pageSize: rows
         });
 
+        // Load data
         SearchInit({ scope: $scope, set: 'groups', list: InventoryGroups, url: $scope.inventory.related.root_groups });
         PaginateInit({ scope: $scope, list: InventoryGroups , url: $scope.inventory.related.root_groups, pageSize: rows });
         $scope.search(InventoryGroups.iterator, null, true);
+
+        $scope.$emit('WatchUpdateStatus');  // init socket io conneciton and start watching for status updates
     });
 
     if ($scope.removePostRefresh) {
@@ -668,6 +671,44 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve inventory: ' + $routeParams.inventory_id +
                 ' GET returned status: ' + status });
         });
+
+    // start watching for real-time updates
+    if ($scope.removeWatchUpdateStatus) {
+        $scope.removeWatchUpdateStatus();
+    }
+    $scope.removeWatchUpdateStatus = $scope.$on('WatchUpdateStatus', function() {
+        var io = Socket({ scope: $scope, endpoint: "jobs" });
+        io.init();
+        $log.debug('Watching for job updates: ');
+        io.on("status_changed", function(data) {
+            var stat, group;
+            if (data.group_id) {
+                group = Find({ list: $scope.groups, key: 'id', val: data.group_id });
+                if (data.status === "failed" || data.status === "successful") {
+                    if (data.group_id === $scope.selected_group_id || group) {
+                        // job completed, fefresh all groups
+                        $log.debug('Update completed. Refreshing the tree.');
+                        $scope.refreshGroups();
+                    }
+                }
+                else if (group) {
+                    // incremental update, just update
+                    $log.debug('Status of group: ' + data.group_id + ' changed to: ' + data.status);
+                    stat = GetSyncStatusMsg({
+                        status: data.status,
+                        has_inventory_sources: group.has_inventory_sources,
+                        source: group.source
+                    });
+                    $log.debug('changing tooltip to: ' + stat.tooltip);
+                    group.status = data.status;
+                    group.status_class = stat['class'];
+                    group.status_tooltip = stat.tooltip;
+                    group.launch_tooltip = stat.launch_tip;
+                    group.launch_class = stat.launch_class;
+                }
+            }
+        });
+    });
 
     // Load group on selection
     function loadGroups(url) {
@@ -977,12 +1018,11 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     $scope.removeGroupDeleteCompleted = $scope.$on('GroupDeleteCompleted', function() {
         $scope.refreshGroups();
     });
-
 }
 
-InventoriesEdit.$inject = ['$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'Empty', 'Wait', 'Rest', 'Alert', 'LoadBreadCrumbs',
+InventoriesEdit.$inject = ['$log', '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'Empty', 'Wait', 'Rest', 'Alert', 'LoadBreadCrumbs',
     'GetBasePath', 'ProcessErrors', 'Breadcrumbs', 'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg',
     'GetHostsStatusMsg', 'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary', 'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'WatchInventoryWindowResize',
-    'GetHostContainerRows', 'GetGroupContainerRows', 'GetGroupContainerHeight', 'GroupsCopy', 'HostsCopy'
+    'GetHostContainerRows', 'GetGroupContainerRows', 'GetGroupContainerHeight', 'GroupsCopy', 'HostsCopy', 'Socket'
     ];

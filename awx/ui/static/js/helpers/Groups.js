@@ -53,8 +53,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         return function (params) {
 
             var scope = params.scope,
-                tree_id = params.tree_id,
-                group = Find({ list: scope.groups, key: 'id', val: tree_id });
+                group_id = params.group_id,
+                group = Find({ list: scope.groups, key: 'id', val: group_id });
 
             if (scope.removeSourceReady) {
                 scope.removeSourceReady();
