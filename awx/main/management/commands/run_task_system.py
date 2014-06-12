@@ -242,7 +242,9 @@ def process_graph(graph, task_capacity):
             start_status = node_obj.start(error_callback=error_handler)
             if not start_status:
                 node_obj.status = 'failed'
-                node_obj.job_explanation += "Task failed pre-start check"
+                if node_obj.job_explanation:
+                    node_obj.job_explanation += ' '
+                node_obj.job_explanation += 'Task failed pre-start check.'
                 node_obj.save()
                 # TODO: Run error handler
                 continue

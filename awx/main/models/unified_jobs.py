@@ -572,7 +572,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         opts = dict([(field, start_args.get(field, '')) for field in needed])
         if not all(opts.values()):
             missing_fields = ', '.join([k for k,v in opts.items() if not v])
-            self.job_explanation = u'Missing needed fields: %s' % missing_fields
+            self.job_explanation = u'Missing needed fields: %s.' % missing_fields
             self.save(update_fields=['job_explanation'])
             return False
         task_class().apply_async((self.pk,), opts, link_error=error_callback)
