@@ -38,6 +38,14 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
         catch(err) {
             //ignore
         }
+        $('.popover').each(function() {
+            // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+            $(this).remove();
+        });
+        $('.tooltip').each( function() {
+            // close any lingering tool tipss
+            $(this).hide();
+        });
         elem.attr({ "aw-pop-over": html, "data-title": title, "data-placement": "right" });
         $compile(elem)($scope);
         elem.on('shown.bs.popover', function() {
