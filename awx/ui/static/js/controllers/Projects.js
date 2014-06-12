@@ -92,8 +92,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                 $log.debug('Received event for project: ' + project.name);
                 $log.debug('Status changed to: ' + data.status);
                 if (data.status === 'successful' || data.status === 'failed') {
-                    project.scm_update_tooltip = "Start an SCM update";
-                    project.scm_type_class = "";
+                    $scope.refresh();
                 }
                 else {
                     project.scm_update_tooltip = "SCM update currently running";
