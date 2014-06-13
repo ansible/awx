@@ -1494,6 +1494,7 @@ class JobJobPlaysList(BaseJobEventsList):
             ok_count = 0
             changed_count = 0
             skipped_count = 0
+            unreachable_count = 0
             for event_aggregate in event_aggregates:
                 if event_aggregate['event'] == 'runner_on_failed':
                     failed_count += event_aggregate['id__count']
@@ -1501,6 +1502,8 @@ class JobJobPlaysList(BaseJobEventsList):
                     failed_count += event_aggregate['id_count']
                 elif event_aggregate['event'] == 'runner_on_skipped':
                     skipped_count = event_aggregate['id__count']
+                elif event_aggregate['event'] == 'runner_on_unreachable':
+                    unreachable_count = event_aggregate['id__count']
             for change_aggregate in change_aggregates:
                 if change_aggregate['changed'] == False:
                     ok_count = change_aggregate['id__count']
@@ -1510,6 +1513,7 @@ class JobJobPlaysList(BaseJobEventsList):
             play_details['failed_count'] = failed_count
             play_details['changed_count'] = changed_count
             play_details['skipped_count'] = skipped_count
+            play_details['unreachable_count'] = unreachable_count
             all_plays.append(play_details)
         return Response(all_plays)
 
