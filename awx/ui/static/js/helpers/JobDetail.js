@@ -474,7 +474,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
 }])
 
 // Add a new host result
-.factory('AddHostResult', ['FindFirstTaskofPlay', function(FindFirstTaskofPlay) {
+.factory('AddHostResult', ['FindFirstTaskofPlay', 'SetTaskStyles', function(FindFirstTaskofPlay, SetTaskStyles) {
     return function(params) {
         var scope = params.scope,
             task_id = params.task_id,
@@ -484,7 +484,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
             created = params.created,
             name = params.name,
             msg = params.message,
-            pId, diff, task, play_id, first;
+            task, play_id, first;
 
         if (scope.activeTask === task_id && !scope.hostResultsMap[host_id]) {
             // the event applies to the currently selected task
@@ -510,30 +510,39 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
             if (scope.hostResults.length > scope.hostTableRows) {
                 scope.hostResults.splice(0,1);
             }
+            // Refresh the map
+            scope.hostResultsMap = {};
+            scope.hostResults.forEach(function(result, idx) {
+                scope.hostResultsMap[result.id] = idx;
+            });
         }
 
-        // get the correct play_id for this event. the task_id is always correct/available, but sometimes
-        // the event does not have a play_id
-        for (pId in scope.tasks) {
-            if (scope.tasks[pId][task_id]) {
-                play_id = pId;
-            }
-        }
+        // update the task
+        if (scope.tasks[task_id]) {
+            task = scope.tasks[task_id];
+            play_id = scope.tasks[task_id].play_id;
 
-        first = FindFirstTaskofPlay({
-            scope: scope,
-            play_id: play_id
-        });
+            first = FindFirstTaskofPlay({
+                scope: scope,
+                play_id: play_id
+            });
 
-        task = scope.tasks[play_id][task_id];
-        if (task_id === first) {
             task.hostCount += 1;
+            task.reportedHosts++;
+            task.failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
+            task.changedCount += (status === 'changed') ? 1 : 0;
+            task.successfulCount += (status === 'successful') ? 1 : 0;
+            task.skippedCount += (status === 'skipped') ? 1 : 0;
+
+            SetTaskStyles({ task: task });
         }
-        task.reportedHosts++;
-        task.failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
-        task.changedCount += (status === 'changed') ? 1 : 0;
-        task.successfulCount += (status === 'successful') ? 1 : 0;
-        task.skippedCount += (status === 'skipped') ? 1 : 0;
+    };
+}])
+
+.factory('SetTaskStyles', [ function() {
+    return function(params) {
+        var task = params.task,
+            diff;
 
         task.failedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.failedCount / task.hostCount))) : 0;
         task.changedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.changedCount / task.hostCount))) : 0;
@@ -555,14 +564,10 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                 task.successfulPct = task.successfulPct - diff;
             }
         }
-        task.successfulStyle = (task.successfulPct > 0) ? { display: 'inline-block', width: task.successfulPct + '%' } : { display: 'none' };
-        task.changedStyle = (task.changedPct > 0) ? { display: 'inline-block', width: task.changedPct + '%' } : { display: 'none' };
-        task.skippedStyle = (task.skippedPct > 0) ? { display: 'inline-block', width: task.skippedPct + '%' } : { display: 'none' };
-        task.failedStyle = (task.failedPct > 0) ? { display: 'inline-block', width: task.failedPct + '%' } : { display: 'none' };
-        $('#' + task.id + '-' + task.play_id + '-' + 'successful-bar').css(task.successfulStyle);
-        $('#' + task.id + '-' + task.play_id + '-' + 'changed-bar').css(task.changedStyle);
-        $('#' + task.id + '-' + task.play_id + '-' + 'skipped-bar').css(task.skippedStyle);
-        $('#' + task.id + '-' + task.play_id + '-' + 'failed-bar').css(task.failedStyle);
+        task.successfulStyle = (task.successfulPct > 0) ? { 'display': 'inline-block', 'width': task.successfulPct + "%" } : { 'display': 'none' };
+        task.changedStyle = (task.changedPct > 0) ? { 'display': 'inline-block', 'width': task.changedPct + "%" } : { 'display': 'none' };
+        task.skippedStyle = (task.skippedPct > 0) ? { 'display': 'inline-block', 'width': task.skippedPct + "%" } : { 'display': 'none' };
+        task.failedStyle = (task.failedPct > 0) ? { 'display': 'inline-block', 'width': task.failedPct + "%" } : { 'display': 'none' };
     };
 }])
 
@@ -570,93 +575,112 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
 .factory('SelectPlay', ['SelectTask', 'LoadTasks', function(SelectTask, LoadTasks) {
     return function(params) {
         var scope = params.scope,
-            id = params.id;
+            id = params.id,
+            callback = params.callback;
 
         if (scope.plays[scope.activePlay]) {
             scope.plays[scope.activePlay].playActiveClass = '';
         }
-        scope.plays[id].playActiveClass = 'active';
+        if (id) {
+            scope.plays[id].playActiveClass = 'active';
+        }
         scope.activePlay = id;
-        scope.activePlayName = scope.plays[id].name;
 
         LoadTasks({
-            scope: scope
+            scope: scope,
+            callback: callback
         });
-
     };
 }])
 
-.factory('LoadTasks', ['Rest', 'ProcessErrors', 'GetElapsed', 'SelectTask', function(Rest, ProcessErrors, GetElapsed, SelectTask) {
+.factory('LoadTasks', ['Rest', 'ProcessErrors', 'GetElapsed', 'SelectTask', 'SetTaskStyles', function(Rest, ProcessErrors, GetElapsed, SelectTask, SetTaskStyles) {
     return function(params) {
         var scope = params.scope,
             callback = params.callback,
-            url = scope.job.related.job_tasks + '?parent=' + scope.activePlay + '&order_by=id';
+            url, tIds, lastId;
 
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                var tIds, lastId;
-                scope.tasks = {};
-                data.results.forEach(function(event, idx) {
-                    var end, elapsed;
+        if (scope.activePlay) {
+            url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
+            // job_tasks seems to ignore all query predicates other than event_id
+            //+ '&';
+            //url += (scope.search_all_plays.length > 0) ? 'event_id__in=' + scope.search_all_plays.join() + '&' : '';
+            //url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
+            //url += 'order_by=id';
 
-                    if (idx < data.results.length - 1) {
-                        // end date = starting date of the next event
-                        end = data.results[idx + 1].created;
-                    }
-                    else {
-                        // no next event (task), get the end time of the play
-                        end = scope.plays[scope.activePlay].finished;
-                    }
-                    if (end) {
-                        elapsed = GetElapsed({
-                            start: event.created,
-                            end: end
-                        });
-                    }
-                    else {
-                        elapsed = '00:00:00';
-                    }
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    scope.tasks = {};
+                    data.forEach(function(event, idx) {
+                        var end, elapsed;
+                        if ((!scope.searchAllStatus) || (scope.searchAllStatus === 'failed' && event.failed) &&
+                            ((scope.search_all_tasks.length === 0) || (scope.searchAllTasks.indexOf(event.id)))) {
 
-                    scope.tasks[event.id] = {
-                        id: event.id,
-                        play_id: event.id,
-                        name: event.event_display,
-                        status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
-                        created: event.created,
-                        modified: event.modified,
-                        finished: end,
-                        elapsed: elapsed,
-                        hostCount: 0,             // hostCount,
-                        reportedHosts: 0,
-                        successfulCount: 0,
-                        failedCount: 0,
-                        changedCount: 0,
-                        skippedCount: 0,
-                        successfulStyle: { display: 'none'},
-                        failedStyle: { display: 'none' },
-                        changedStyle: { display: 'none' },
-                        skippedStyle: { display: 'none' },
-                        taskActiveClass: ''
-                    };
+                            if (idx < data.length - 1) {
+                                // end date = starting date of the next event
+                                end = data[idx + 1].created;
+                            }
+                            else {
+                                // no next event (task), get the end time of the play
+                                end = scope.plays[scope.activePlay].finished;
+                            }
+
+                            if (end) {
+                                elapsed = GetElapsed({
+                                    start: event.created,
+                                    end: end
+                                });
+                            }
+                            else {
+                                elapsed = '00:00:00';
+                            }
+
+                            scope.tasks[event.id] = {
+                                id: event.id,
+                                play_id: event.id,
+                                name: event.name,
+                                status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                                created: event.created,
+                                modified: event.modified,
+                                finished: end,
+                                elapsed: elapsed,
+                                hostCount: event.host_count,          // hostCount,
+                                reportedHosts: event.reported_hosts,
+                                successfulCount: event.successful_count,
+                                failedCount: event.failed_count,
+                                changedCount: event.changed_count,
+                                skippedCount: event.skipped_count,
+                                taskActiveClass: ''
+                            };
+
+                            SetTaskStyles({ task: scope.tasks[event.id] });
+                        }
+                    });
+
+                    // set the active task
+                    tIds = Object.keys(scope.tasks);
+                    lastId = (tIds.length > 0) ? tIds[tIds.length - 1] : null;
+                    SelectTask({
+                        scope: scope,
+                        id: lastId,
+                        callback: callback
+                    });
+                })
+                .error(function(data) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
-
-                // set the active task
-                tIds = Object.keys(scope.tasks);
-                lastId = (tIds.length > 0) ? tIds[tIds.length - 1] : null;
-                SelectTask({
-                    scope: scope,
-                    id: lastId
-                });
-
-                if (callback) {
-                    scope.$emit(callback);
-                }
-            })
-            .error(function(data) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + '. GET returned: ' + status });
+        }
+        else {
+            // set the active task
+            tIds = Object.keys(scope.tasks);
+            lastId = (tIds.length > 0) ? tIds[tIds.length - 1] : null;
+            SelectTask({
+                scope: scope,
+                id: lastId,
+                callback: callback
             });
+        }
     };
 }])
 
@@ -667,14 +691,15 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
             id = params.id,
             callback = params.callback;
 
-        scope.tasks[scope.activePlay][scope.activeTask].taskActiveClass = '';
-        scope.tasks[scope.activePlay][id].taskActiveClass = 'active';
-        scope.activeTask = id;
-        scope.activeTaskName = scope.tasks[scope.activePlay][id].name;
-
-        if (callback) {
-            callback();
+        if (scope.activeTask && scope.tasks[scope.activeTask]) {
+            scope.tasks[scope.activeTask].taskActiveClass = '';
         }
+
+        if (id) {
+            scope.tasks[id].taskActiveClass = 'active';
+            scope.activeTaskName = scope.tasks[id].name;
+        }
+        scope.activeTask = id;
 
         $('#tasks-table-detail').mCustomScrollbar("update");
         setTimeout( function() {
@@ -683,7 +708,8 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
         }, 700);
 
         LoadHosts({
-            scope: scope
+            scope: scope,
+            callback: callback
         });
     };
 }])
@@ -696,38 +722,43 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
             url;
         scope.hostResults = [];
         scope.hostResultsMap = {};
-        // If we have a selected task, then get the list of hosts
-        url = scope.job.related.job_events + '?parent=' + scope.activeTask + '&';
-        url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
-        url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
-        url += 'host__isnull=false&page_size=' + scope.hostTableRows + '&order_by=host__name';
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                data.results.forEach(function(event) {
-                    scope.hostResults.push({
-                        id: event.id,
-                        status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
-                        host_id: event.host,
-                        task_id: event.parent,
-                        name: event.event_data.host,
-                        created: event.created,
-                        msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
+        if (scope.activeTask) {
+            // If we have a selected task, then get the list of hosts
+            url = scope.job.related.job_events + '?parent=' + scope.activeTask + '&';
+            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
+            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
+            url += 'host__isnull=false&page_size=' + scope.hostTableRows + '&order_by=host__name';
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    data.results.forEach(function(event) {
+                        scope.hostResults.push({
+                            id: event.id,
+                            status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                            host_id: event.host,
+                            task_id: event.parent,
+                            name: event.event_data.host,
+                            created: event.created,
+                            msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
+                        });
+                        scope.hostResultsMap[event.id] = scope.hostResults.length - 1;
                     });
-                    scope.hostResultsMap[event.id] = scope.hostResults.length - 1;
+                    if (callback) {
+                        scope.$emit(callback);
+                    }
+                    SelectHost({ scope: scope });
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
-                SelectHost({ scope: scope });
-                if (callback) {
-                    scope.$emit(callback);
-                }
-                else {
-                    scope.$emit('InitialDataLoaded');
-                }
-            })
-            .error(function(data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + '. GET returned: ' + status });
-            });
+        }
+        else {
+            if (callback) {
+                scope.$emit(callback);
+            }
+            SelectHost({ scope: scope });
+        }
     };
 }])
 
@@ -873,6 +904,10 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                         id: newActivePlay
                     });
                 }, 500);
+            }
+            else {
+                scope.tasks = {};
+                scope.hostResults = [];
             }
         });
 

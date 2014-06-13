@@ -147,7 +147,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
     if (scope.removeInitialDataLoaded) {
         scope.removeInitialDataLoaded();
     }
-    scope.removeInitialDataLoaded= scope.$on('InitialDataLoaded', function() {
+    scope.removeInitialDataLoaded = scope.$on('InitialDataLoaded', function() {
         // Load data for the host summary table
         if (!api_complete) {
             ReloadHostSummaryList({
@@ -167,6 +167,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         SelectPlay({
             scope: scope,
             id: lastPlay,
+            callback: 'InitialDataLoaded'
         });
     });
 
@@ -181,14 +182,15 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
             .success( function(data) {
                 data.forEach(function(event, idx) {
                     var status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'none',
-                        start = event.start,
+                        start = event.started,
                         end,
                         elapsed;
-                    if (idx < data.results.length - 1) {
+                    if (idx < data.length - 1) {
                         // end date = starting date of the next event
-                        end = data.results[idx + 1].started;
+                        end = data[idx + 1].started;
                     }
-                    else if (scope.job_status.status === 'successful' || scope.job_status.status === 'failed' || scope.job_status.status === 'error' || scope.job_status.status === 'canceled') {
+                    else if (scope.job_status.status === 'successful' || scope.job_status.status === 'failed' ||
+                        scope.job_status.status === 'error' || scope.job_status.status === 'canceled') {
                         // this is the last play and the job already finished
                         end = scope.job_status.finished;
                     }
@@ -640,11 +642,8 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         }
     };
 
-    scope.searchSummaryHosts = function() {
-
-    };
-
     scope.searchAllByHost = function() {
+        var nxtPlay;
         if (scope.search_all_hosts_name) {
             FilterAllByHostName({
                 scope: scope,
@@ -656,12 +655,18 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
             scope.search_all_tasks = [];
             scope.search_all_plays = [];
             scope.searchAllHostsEnabled = true;
-            scope.activePlay = scope.plays[scope.plays.length - 1].id;
-            setTimeout(function() {
-                SelectPlay({ scope: scope, id: scope.activePlay });
-            }, 2000);
+            nxtPlay = scope.plays[scope.plays.length - 1].id;
+            SelectPlay({
+                scope: scope,
+                id: nxtPlay
+            });
+            ReloadHostSummaryList({
+                scope: scope
+            });
+            //setTimeout(function() {
+            //    SelectPlay({ scope: scope, id: scope.activePlay });
+            //}, 2000);
         }
-        scope.searchSummaryHosts();
     };
 
     scope.allHostNameKeyPress = function(e) {
@@ -671,25 +676,30 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
     };
 
     scope.filterByStatus = function(choice) {
-        var tmp = [];
+        var key, keys, nxtPlay;
         if (choice === 'Failed') {
             scope.searchAllStatus = 'failed';
-            scope.plays.forEach(function(row) {
-                if (row.status === 'failed') {
-                    tmp.push(row.id);
+            for(key in scope.plays) {
+                if (scope.plays[key].status === 'failed') {
+                    nxtPlay = key;
                 }
-            });
-            tmp.sort();
-            scope.activePlay = tmp[tmp.length - 1];
+            }
         }
         else {
             scope.searchAllStatus = '';
-            scope.activePlay = scope.plays[scope.plays.length - 1].id;
+            keys = Object.keys(scope.plays);
+            nxtPlay = (keys.length > 0) ? keys[keys.length - 1] : null;
         }
-        scope.searchSummaryHosts();
-        setTimeout(function() {
-            SelectPlay({ scope: scope, id: scope.activePlay });
-        }, 2000);
+        SelectPlay({
+            scope: scope,
+            id: nxtPlay
+        });
+        ReloadHostSummaryList({
+            scope: scope
+        });
+        //setTimeout(function() {
+        //    SelectPlay({ scope: scope, id: scope.activePlay });
+        //}, 2000);
     };
 
     scope.viewEvent = function(event_id) {

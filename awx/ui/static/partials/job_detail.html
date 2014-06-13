@@ -85,10 +85,9 @@
                             </div>
                             <div id="tasks-table-detail" aw-custom-scroll class="table-detail">
                                 <div class="row cursor-pointer"
-                                    ng-repeat="(task_id, task) in taskList = (FilterById : search_all_tasks | filter:{ status : searchAllStatus}) track by task_id"
+                                    ng-repeat="(task_id, task) in tasks track by task_id"
                                     ng-class="task.taskActiveClass" ng-click="selectTask(task.id)">
-
-                                <!-- = (tasks | FilterById : search_all_tasks | filter:{ status : searchAllStatus} | filter:{ play_id: activePlay }} -->
+                                    <!-- = (tasks | FilterById : search_all_tasks | filter:{ status : searchAllStatus} | filter:{ play_id: activePlay }} -->
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ task.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
                                             data-placement="top">{{ task.elapsed }}
@@ -101,7 +100,7 @@
                                         <div class="status-bar"><div class="successful-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-successful-bar" aw-tool-tip="Hosts OK" data-placement="top" ng-style="task.successfulStyle">{{ task.successfulCount }}</div><div class="changed-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-changed-bar" aw-tool-tip="Hosts Changed" data-placement="top" ng-style="task.changedStyle">{{ task.changedCount }}</div><div class="skipped-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-skipped-bar" aw-tool-tip="Hosts Skipped" data-placement="top" ng-style="task.skippedStyle">{{ task.skippedCount }}</div><div class="failed-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-failed-bar" aw-tool-tip="Hosts Failed" data-placement="top" ng-style="task.failedStyle">{{ task.failedCount }}</div><div class="no-matching-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-no-matching-hosts-bar" aw-tool-tip="No matching hosts were found" data-placement="top" style="width: 100%;" ng-show="task.status === 'no-m atching-hosts'">No matching hosts</div></div>
                                     </div>
                                 </div>
-                                <div class="row" ng-show="!taskList">
+                                <div class="row" ng-show="!tasks">
                                     <div class="col-lg-12">
                                         <div class="loading-info">No tasks matched</div>
                                     </div>
