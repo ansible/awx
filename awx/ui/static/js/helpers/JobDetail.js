@@ -39,17 +39,45 @@
 
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
-.factory('DigestEvents', ['UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult', 'SelectPlay', 'SelectTask',
+.factory('DigestEvents', ['$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult', 'SelectPlay', 'SelectTask',
     'GetHostCount', 'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary',
-function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed,
+function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed,
     UpdateTaskStatus, DrawGraph, LoadHostSummary) {
     return function(params) {
 
         var scope = params.scope,
-            events = params.events;
+            queue = params.queue,
+            lastEventId = params.lastEventId,
+            myInterval;
 
-        events.forEach(function(event) {
+        if (scope.removeGetNextEvent) {
+            scope.removeGetNextEvent();
+        }
+        scope.removeGetNextEvent = scope.$on('GetNextEvent', function() {
+            if (myInterval) {
+                window.clearInterval(myInterval);
+            }
+            if (scope.job.status !== 'successful' && scope.job.status !== 'failed' && scope.job.status !== 'error') {
+                myInterval = window.setInterval(function() {
+                    var event;
+                    $log.debug('checking queue  length is: ' + queue.length);
+                    if (queue.length > 0) {
+                        event = queue.splice(0,1);
+                        if (event[0].id > lastEventId) {
+                            $log.debug('processing event: ' + event[0].id);
+                            scope.$emit('ProcessEvent', event[0]);
+                        }
+                    }
+                }, 2000);
+            }
+        });
+
+        if (scope.removeProcessEvent) {
+            scope.removeProcessEvent();
+        }
+        scope.removeProcessEvent = scope.$on('ProcessEvent', function(e, event) {
             var hostCount;
+            $log.debug('handling event: ' + event.id);
             if (event.event === 'playbook_on_start') {
                 if (scope.job_status.status!== 'failed' && scope.job_status.status !== 'canceled' &&
                     scope.job_status.status !== 'error' && scope.job_status !== 'successful') {
@@ -117,6 +145,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                     modified: event.modified,
                     status_text: 'failed- no hosts matched'
                 });
+                scope.$emit('GetNextEvent');
             }
             if (event.event === 'playbook_on_task_start') {
                 if (scope.activePlay === event.parent) {
@@ -159,6 +188,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                     changed: event.changed,
                     modified: event.modified
                 });
+                scope.$emit('GetNextEvent');
             }
 
             if (event.event === 'runner_on_unreachable') {
@@ -173,7 +203,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                     modified: event.modified,
                     message: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
                 });
-
+                scope.$emit('GetNextEvent');
             }
             if (event.event === 'runner_on_error' || event.event === 'runner_on_async_failed') {
                 UpdateHostStatus({
@@ -187,6 +217,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                     modified: event.modified,
                     message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
                 });
+                scope.$emit('GetNextEvent');
             }
             if (event.event === 'runner_on_no_hosts') {
                 UpdateTaskStatus({
@@ -197,6 +228,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                     modified: event.modified,
                     no_hosts: true
                 });
+                scope.$emit('GetNextEvent');
             }
             if (event.event === 'runner_on_skipped') {
                 UpdateHostStatus({
@@ -210,6 +242,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                     modified: event.modified,
                     message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
                 });
+                scope.$emit('GetNextEvent');
             }
             if (event.event === 'runner_on_ok' || event.event === 'runner_on_async_ok') {
                 UpdateHostStatus({
@@ -223,6 +256,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                     modified: event.modified,
                     message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
                 });
+                scope.$emit('GetNextEvent');
             }
             if (event.event === 'playbook_on_stats') {
                 scope.job_status.finished = event.modified;
@@ -235,8 +269,12 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                 scope.host_summary = {};
                 LoadHostSummary({ scope: scope, data: event.event_data });
                 DrawGraph({ scope: scope, resize: true });
+                scope.$emit('GetNextEvent');
             }
         });
+
+        scope.$emit('GetNextEvent');
+
     };
 }])
 
@@ -753,6 +791,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                         scope.$emit(callback);
                     }
                     SelectHost({ scope: scope });
+                    scope.$emit('GetNextEvent');
                 })
                 .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -764,6 +803,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                 scope.$emit(callback);
             }
             SelectHost({ scope: scope });
+            scope.$emit('GetNextEvent');
         }
     };
 }])

@@ -59,18 +59,16 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
     event_socket.init();
 
     event_socket.on("job_events-" + job_id, function(data) {
-        if (api_complete && data.id > lastEventId) {
+        data.event = data.event_name;
+        $log.debug('push event: ' + data.id);
+        event_queue.push(data);
+
+       /* if (api_complete && data.id > lastEventId) {
             // api loading is complete, process incoming events
-            data.event = data.event_name;
-            DigestEvents({
-                scope: scope,
-                events: [ data ]
-            });
         }
         else {
             // Waiting on values from the api to load. Until then queue incoming events.
-            event_queue.push(data);
-        }
+        } */
     });
 
     if (scope.removeAPIComplete) {
@@ -78,7 +76,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
     }
     scope.removeAPIComplete = scope.$on('APIComplete', function() {
         // process any events sitting in the queue
-        var events = [], url, hostId = 0, taskId = 0, playId = 0;
+        var url, hostId = 0, taskId = 0, playId = 0;
 
         function notEmpty(x) {
             return Object.keys(x).length > 0;
@@ -103,7 +101,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         lastEventId = Math.max(hostId, taskId, playId);
 
         // Only process queued events > the max event in memory
-        if (event_queue.length > 0) {
+        /*if (event_queue.length > 0) {
             event_queue.forEach(function(event) {
                 if (event.id > lastEventId) {
                     events.push(event);
@@ -115,7 +113,14 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
                     events: events
                 });
             }
-        }
+        }*/
+
+        DigestEvents({
+            scope: scope,
+            queue: event_queue,
+            lastEventId: lastEventId
+        });
+
         api_complete = true;
 
         // Draw the graph
