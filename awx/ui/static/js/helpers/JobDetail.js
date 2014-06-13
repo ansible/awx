@@ -50,7 +50,6 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
 
         events.forEach(function(event) {
             var hostCount;
-
             if (event.event === 'playbook_on_start') {
                 if (scope.job_status.status!== 'failed' && scope.job_status.status !== 'canceled' &&
                     scope.job_status.status !== 'error' && scope.job_status !== 'successful') {
@@ -125,6 +124,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                         scope: scope,
                         play_id: event.parent
                     });
+
                     scope.tasks[event.id] = {
                         id: event.id,
                         name: event.task,
@@ -258,10 +258,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
         var scope = params.scope,
             taskIds;
         taskIds = Object.keys(scope.tasks);
-        if (taskIds.length > 0) {
-            return scope.tasks[taskIds.length - 1].id;
-        }
-        return null;
+        return (taskIds.length > 0) ? taskIds[0] : null;
     };
 })
 
@@ -329,24 +326,27 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
             status_text = params.status_text,
             play = scope.plays[id];
 
-        if (failed) {
-            scope.plays[id].status = 'failed';
-        }
-        else if (play.status !== 'changed' && play.status !== 'failed') {
-            // once the status becomes 'changed' or 'failed' don't modify it
-            if (no_hosts) {
-                scope.plays[id].status = 'no-matching-hosts';
+        if (scope.plays[id]) {
+            if (failed) {
+                scope.plays[id].status = 'failed';
             }
-            else {
-                scope.plays[id].status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+            else if (play.status !== 'changed' && play.status !== 'failed') {
+                // once the status becomes 'changed' or 'failed' don't modify it
+                if (no_hosts) {
+                    scope.plays[id].status = 'no-matching-hosts';
+                }
+                else {
+                    scope.plays[id].status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+                }
             }
+            scope.plays[id].finished = modified;
+            scope.plays[id].elapsed = GetElapsed({
+                start: play.created,
+                end: modified
+            });
+            scope.plays[id].status_text = (status_text) ? status_text : scope.plays[id].status;
         }
-        scope.plays[id].finished = modified;
-        scope.plays[id].elapsed = GetElapsed({
-            start: play.created,
-            end: modified
-        });
-        scope.plays[id].status_text = (status_text) ? status_text : scope.plays[id].status;
+
         UpdateJobStatus({
             scope: scope,
             failed: null,
@@ -363,30 +363,34 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
             id = params.task_id,
             modified = params.modified,
             no_hosts = params.no_hosts,
-            task = scope.tasks[scope.activePlay][id];
-        if (no_hosts){
-            task.status = 'no-matching-hosts';
+            task = scope.tasks[id];
+
+        if (scope.tasks[id]) {
+            if (no_hosts){
+                task.status = 'no-matching-hosts';
+            }
+            else if (failed) {
+                task.status = 'failed';
+            }
+            else if (task.status !== 'changed' && task.status !== 'failed') {
+                // once the status becomes 'changed' or 'failed' don't modify it
+                task.status = (failed) ? 'failed' : (changed) ? 'changed' : 'successful';
+            }
+            task.finished = params.modified;
+            task.elapsed = GetElapsed({
+                start: task.created,
+                end: modified
+            });
+
+            UpdatePlayStatus({
+                scope: scope,
+                failed: failed,
+                changed: changed,
+                play_id: task.play_id,
+                modified: modified,
+                no_hosts: no_hosts
+            });
         }
-        else if (failed) {
-            task.status = 'failed';
-        }
-        else if (task.status !== 'changed' && task.status !== 'failed') {
-            // once the status becomes 'changed' or 'failed' don't modify it
-            task.status = (failed) ? 'failed' : (changed) ? 'changed' : 'successful';
-        }
-        task.finished = params.modified;
-        task.elapsed = GetElapsed({
-            start: task.created,
-            end: modified
-        });
-        UpdatePlayStatus({
-            scope: scope,
-            failed: failed,
-            changed: changed,
-            play_id: task.play_id,
-            modified: modified,
-            no_hosts: no_hosts
-        });
     };
 }])
 
@@ -419,6 +423,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
             scope.host_summary.changed += (status === 'changed') ? 1 : 0;
             scope.host_summary.unreachable += (status === 'unreachable') ? 1 : 0;
             scope.host_summary.failed += (status === 'failed') ? 1 : 0;
+
             scope.hosts.push({
                 id: host_id,
                 name: name,
@@ -446,10 +451,6 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                 scope.hostsMap[host.id] = idx;
             });
             $('#tasks-table-detail').mCustomScrollbar("update");
-            /*setTimeout( function() {
-                scope.auto_scroll = true;
-                $('#hosts-summary-table').mCustomScrollbar("scrollTo", "bottom");
-            }, 700);*/
         }
 
         UpdateTaskStatus({
@@ -526,14 +527,14 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                 scope: scope,
                 play_id: play_id
             });
-
-            task.hostCount += 1;
-            task.reportedHosts++;
+            if (task.id === first) {
+                task.hostCount += 1;
+            }
+            task.reportedHosts += 1;
             task.failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
             task.changedCount += (status === 'changed') ? 1 : 0;
             task.successfulCount += (status === 'successful') ? 1 : 0;
             task.skippedCount += (status === 'skipped') ? 1 : 0;
-
             SetTaskStyles({ task: task });
         }
     };
@@ -543,7 +544,6 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
     return function(params) {
         var task = params.task,
             diff;
-
         task.failedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.failedCount / task.hostCount))) : 0;
         task.changedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.changedCount / task.hostCount))) : 0;
         task.skippedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.skippedCount / task.hostCount))) : 0;
@@ -637,7 +637,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
 
                             scope.tasks[event.id] = {
                                 id: event.id,
-                                play_id: event.id,
+                                play_id: scope.activePlay,
                                 name: event.name,
                                 status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
                                 created: event.created,

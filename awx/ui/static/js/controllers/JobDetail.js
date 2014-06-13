@@ -61,6 +61,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
     event_socket.on("job_events-" + job_id, function(data) {
         if (api_complete && data.id > lastEventId) {
             // api loading is complete, process incoming events
+            data.event = data.event_name;
             DigestEvents({
                 scope: scope,
                 events: [ data ]
@@ -77,7 +78,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
     }
     scope.removeAPIComplete = scope.$on('APIComplete', function() {
         // process any events sitting in the queue
-        var events = [], url;
+        var events = [], url, hostId = 0, taskId = 0, playId = 0;
 
         function notEmpty(x) {
             return Object.keys(x).length > 0;
@@ -91,14 +92,15 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
 
         // Find the max event.id value in memory
         if (notEmpty(scope.hostResults)) {
-            lastEventId = getMaxId(scope.hostResults);
+            hostId = getMaxId(scope.hostResults);
         }
         else if (notEmpty(scope.tasks)) {
-            lastEventId = getMaxId(scope.tasks);
+            taskId = getMaxId(scope.tasks);
         }
         else if (notEmpty(scope.plays)) {
-            lastEventId = getMaxId(scope.plays);
+            playId = getMaxId(scope.plays);
         }
+        lastEventId = Math.max(hostId, taskId, playId);
 
         // Only process queued events > the max event in memory
         if (event_queue.length > 0) {
@@ -117,7 +119,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         api_complete = true;
 
         // Draw the graph
-        if (scope.job.status === 'successful' && scope.job.status === 'failed' && scope.job.status === 'error') {
+        if (scope.job.status === 'successful' || scope.job.status === 'failed' || scope.job.status === 'error') {
             // The job has already completed. graph values found on playbook stats
             url = scope.job.related.job_events + '?event=playbook_on_stats';
             Rest.setUrl(url);
@@ -212,11 +214,12 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
                         elapsed: elapsed,
                         playActiveClass: ''
                     };
-                    scope.host_summary.total += data.total;
-                    scope.host_summary.ok += data.ok;
-                    scope.host_summary.changed += data.changed;
-                    scope.host_summary.unreachable += data.unreachable;
-                    scope.host_summary.failed += data.failed;
+                    scope.host_summary.ok += data.ok_count;
+                    scope.host_summary.changed += data.changed_count;
+                    scope.host_summary.unreachable += (data.unreachable_count) ? data.unreachable_count : 0;
+                    scope.host_summary.failed += data.failed_count;
+                    scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed +
+                        scope.host_summary.unreachable + scope.host_summary.failed;
                 });
 
                 scope.$emit('PlaysReady', events_url);
@@ -460,6 +463,10 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
             $('#summary-button').show();
             $('#job-summary-container').hide('slide', {'direction': 'right'});
         }
+    };
+
+    scope.objectIsEmpty = function(obj) {
+        return (Object.keys(obj).length > 0) ? false : true;
     };
 
     scope.HostDetailOnTotalScroll = _.debounce(function() {
