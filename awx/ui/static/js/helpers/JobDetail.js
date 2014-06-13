@@ -68,7 +68,7 @@ function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, Se
                             scope.$emit('ProcessEvent', event[0]);
                         }
                     }
-                }, 2000);
+                }, 500);
             }
         });
 
