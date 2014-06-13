@@ -258,7 +258,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
         var scope = params.scope,
             taskIds;
         taskIds = Object.keys(scope.tasks);
-        return (taskIds.length > 0) ? taskIds[0] : null;
+        return (taskIds.length > 0) ? scope.tasks[taskIds[0]].id : null;
     };
 })
 
@@ -485,7 +485,7 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
             created = params.created,
             name = params.name,
             msg = params.message,
-            task, play_id, first;
+            play_id, first;
 
         if (scope.activeTask === task_id && !scope.hostResultsMap[host_id]) {
             // the event applies to the currently selected task
@@ -520,54 +520,57 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
 
         // update the task
         if (scope.tasks[task_id]) {
-            task = scope.tasks[task_id];
             play_id = scope.tasks[task_id].play_id;
 
             first = FindFirstTaskofPlay({
                 scope: scope,
                 play_id: play_id
             });
-            if (task.id === first) {
-                task.hostCount += 1;
+            if (task_id === first) {
+                scope.tasks[task_id].hostCount += 1;
             }
-            task.reportedHosts += 1;
-            task.failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
-            task.changedCount += (status === 'changed') ? 1 : 0;
-            task.successfulCount += (status === 'successful') ? 1 : 0;
-            task.skippedCount += (status === 'skipped') ? 1 : 0;
-            SetTaskStyles({ task: task });
+            scope.tasks[task_id].reportedHosts += 1;
+            scope.tasks[task_id].failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
+            scope.tasks[task_id].changedCount += (status === 'changed') ? 1 : 0;
+            scope.tasks[task_id].successfulCount += (status === 'successful') ? 1 : 0;
+            scope.tasks[task_id].skippedCount += (status === 'skipped') ? 1 : 0;
+            SetTaskStyles({
+                scope: scope,
+                task_id: task_id
+            });
         }
     };
 }])
 
 .factory('SetTaskStyles', [ function() {
     return function(params) {
-        var task = params.task,
+        var task_id = params.task_id,
+            scope = params.scope,
             diff;
-        task.failedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.failedCount / task.hostCount))) : 0;
-        task.changedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.changedCount / task.hostCount))) : 0;
-        task.skippedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.skippedCount / task.hostCount))) : 0;
-        task.successfulPct = (task.hostCount > 0) ? Math.ceil((100 * (task.successfulCount / task.hostCount))) : 0;
+        scope.tasks[task_id].failedPct = (scope.tasks[task_id].hostCount > 0) ? Math.ceil((100 * (scope.tasks[task_id].failedCount / scope.tasks[task_id].hostCount))) : 0;
+        scope.tasks[task_id].changedPct = (scope.tasks[task_id].hostCount > 0) ? Math.ceil((100 * (scope.tasks[task_id].changedCount / scope.tasks[task_id].hostCount))) : 0;
+        scope.tasks[task_id].skippedPct = (scope.tasks[task_id].hostCount > 0) ? Math.ceil((100 * (scope.tasks[task_id].skippedCount / scope.tasks[task_id].hostCount))) : 0;
+        scope.tasks[task_id].successfulPct = (scope.tasks[task_id].hostCount > 0) ? Math.ceil((100 * (scope.tasks[task_id].successfulCount / scope.tasks[task_id].hostCount))) : 0;
 
-        diff = (task.failedPct + task.changedPct + task.skippedPct + task.successfulPct) - 100;
+        diff = (scope.tasks[task_id].failedPct + scope.tasks[task_id].changedPct + scope.tasks[task_id].skippedPct + scope.tasks[task_id].successfulPct) - 100;
         if (diff > 0) {
-            if (task.failedPct > diff) {
-                task.failedPct  = task.failedPct - diff;
+            if (scope.tasks[task_id].failedPct > diff) {
+                scope.tasks[task_id].failedPct  = scope.tasks[task_id].failedPct - diff;
             }
-            else if (task.changedPct > diff) {
-                task.changedPct = task.changedPct - diff;
+            else if (scope.tasks[task_id].changedPct > diff) {
+                scope.tasks[task_id].changedPct = scope.tasks[task_id].changedPct - diff;
             }
-            else if (task.skippedPct > diff) {
-                task.skippedPct = task.skippedPct - diff;
+            else if (scope.tasks[task_id].skippedPct > diff) {
+                scope.tasks[task_id].skippedPct = scope.tasks[task_id].skippedPct - diff;
             }
-            else if (task.successfulPct > diff) {
-                task.successfulPct = task.successfulPct - diff;
+            else if (scope.tasks[task_id].successfulPct > diff) {
+                scope.tasks[task_id].successfulPct = scope.tasks[task_id].successfulPct - diff;
             }
         }
-        task.successfulStyle = (task.successfulPct > 0) ? { 'display': 'inline-block', 'width': task.successfulPct + "%" } : { 'display': 'none' };
-        task.changedStyle = (task.changedPct > 0) ? { 'display': 'inline-block', 'width': task.changedPct + "%" } : { 'display': 'none' };
-        task.skippedStyle = (task.skippedPct > 0) ? { 'display': 'inline-block', 'width': task.skippedPct + "%" } : { 'display': 'none' };
-        task.failedStyle = (task.failedPct > 0) ? { 'display': 'inline-block', 'width': task.failedPct + "%" } : { 'display': 'none' };
+        scope.tasks[task_id].successfulStyle = (scope.tasks[task_id].successfulPct > 0) ? { 'display': 'inline-block', 'width': scope.tasks[task_id].successfulPct + "%" } : { 'display': 'none' };
+        scope.tasks[task_id].changedStyle = (scope.tasks[task_id].changedPct > 0) ? { 'display': 'inline-block', 'width': scope.tasks[task_id].changedPct + "%" } : { 'display': 'none' };
+        scope.tasks[task_id].skippedStyle = (scope.tasks[task_id].skippedPct > 0) ? { 'display': 'inline-block', 'width': scope.tasks[task_id].skippedPct + "%" } : { 'display': 'none' };
+        scope.tasks[task_id].failedStyle = (scope.tasks[task_id].failedPct > 0) ? { 'display': 'inline-block', 'width': scope.tasks[task_id].failedPct + "%" } : { 'display': 'none' };
     };
 }])
 
@@ -653,7 +656,10 @@ function(UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTa
                                 taskActiveClass: ''
                             };
 
-                            SetTaskStyles({ task: scope.tasks[event.id] });
+                            SetTaskStyles({
+                                scope: scope,
+                                task_id: event.id
+                            });
                         }
                     });
 
