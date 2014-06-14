@@ -40,35 +40,43 @@
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
 .factory('DigestEvents', ['$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult', 'SelectPlay', 'SelectTask',
-    'GetHostCount', 'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary',
+    'GetHostCount', 'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary', 'JobIsFinished',
 function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed,
-    UpdateTaskStatus, DrawGraph, LoadHostSummary) {
+    UpdateTaskStatus, DrawGraph, LoadHostSummary, JobIsFinished) {
     return function(params) {
 
         var scope = params.scope,
             queue = params.queue,
-            lastEventId = params.lastEventId,
-            myInterval;
+            lastEventId = params.lastEventId;
+
+        function popEvent() {
+            $log.debug('queue length: ' + queue.length);
+            if (queue.length > 0 && queue.length < 500) {
+                var event = queue.splice(0,1);
+                if (event[0].id > lastEventId) {
+                    $log.debug('processing event: ' + event[0].id);
+                    scope.$emit('ProcessEvent', event[0]);
+                }
+            }
+            else if (queue.length > 500) {
+                // if we get too far behind, clear the queue and refresh
+                queue = [];
+                scope.emit('LoadJob');
+            }
+        }
 
         if (scope.removeGetNextEvent) {
             scope.removeGetNextEvent();
         }
         scope.removeGetNextEvent = scope.$on('GetNextEvent', function() {
-            if (myInterval) {
-                window.clearInterval(myInterval);
+            if (scope.myInterval) {
+                window.clearInterval(scope.myInterval);
             }
-            if (scope.job.status !== 'successful' && scope.job.status !== 'failed' && scope.job.status !== 'error') {
-                myInterval = window.setInterval(function() {
-                    var event;
-                    $log.debug('checking queue  length is: ' + queue.length);
-                    if (queue.length > 0) {
-                        event = queue.splice(0,1);
-                        if (event[0].id > lastEventId) {
-                            $log.debug('processing event: ' + event[0].id);
-                            scope.$emit('ProcessEvent', event[0]);
-                        }
-                    }
-                }, 500);
+            popEvent();
+            if (!JobIsFinished(scope)) {
+                scope.myInterval = window.setInterval(function() {
+                    popEvent();
+                }, 600);
             }
         });
 
@@ -79,11 +87,11 @@ function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, Se
             var hostCount;
             $log.debug('handling event: ' + event.id);
             if (event.event === 'playbook_on_start') {
-                if (scope.job_status.status!== 'failed' && scope.job_status.status !== 'canceled' &&
-                    scope.job_status.status !== 'error' && scope.job_status !== 'successful') {
+                if (!JobIsFinished(scope)) {
                     scope.job_status.started = event.created;
                     scope.job_status.status = 'running';
                 }
+                scope.$emit('GetNextEvent');
             }
 
             if (event.event === 'playbook_on_play_start') {
@@ -94,6 +102,9 @@ function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, Se
                     status: (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'none',
                     elapsed: '00:00:00'
                 };
+                if (scope.plays.length > 1) {
+                    DrawGraph({ scope: scope, resize: false });
+                }
                 SelectPlay({
                     scope: scope,
                     id: event.id
@@ -135,6 +146,7 @@ function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, Se
                     changed: event.changed,
                     modified: event.modified
                 });
+                scope.$emit('GetNextEvent');
             }
             if (event.event === 'playbook_on_no_hosts_matched') {
                 UpdatePlayStatus({
@@ -273,8 +285,15 @@ function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, Se
             }
         });
 
-        scope.$emit('GetNextEvent');
+        scope.$emit('GetNextEvent');  // Start checking the queue
 
+    };
+}])
+
+.factory('JobIsFinished', [ function() {
+    return function(scope) {
+        return (scope.job_status.status === 'failed' || scope.job_status.status === 'canceled' ||
+                    scope.job_status.status === 'error' || scope.job_status.status === 'successful');
     };
 }])
 

@@ -7,8 +7,9 @@
 
 'use strict';
 
-function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors, DigestEvents,
-    SelectPlay, SelectTask, Socket, GetElapsed, SelectHost, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList) {
+function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest, ProcessErrors,
+    DigestEvents, SelectPlay, SelectTask, Socket, GetElapsed, SelectHost, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList,
+    JobIsFinished) {
 
     ClearScope();
 
@@ -19,13 +20,6 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         api_complete = false,
         refresh_count = 0,
         lastEventId = 0;
-
-    scope.plays = {};
-    scope.tasks = {};
-    scope.hosts = [];
-    scope.hostResults = [];
-    scope.hostResultsMap = {};
-    scope.hostsMap = {};
 
     scope.search_all_tasks = [];
     scope.search_all_plays = [];
@@ -62,13 +56,6 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         data.event = data.event_name;
         $log.debug('push event: ' + data.id);
         event_queue.push(data);
-
-       /* if (api_complete && data.id > lastEventId) {
-            // api loading is complete, process incoming events
-        }
-        else {
-            // Waiting on values from the api to load. Until then queue incoming events.
-        } */
     });
 
     if (scope.removeAPIComplete) {
@@ -100,20 +87,8 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         }
         lastEventId = Math.max(hostId, taskId, playId);
 
-        // Only process queued events > the max event in memory
-        /*if (event_queue.length > 0) {
-            event_queue.forEach(function(event) {
-                if (event.id > lastEventId) {
-                    events.push(event);
-                }
-            });
-            if (events.length > 0) {
-                DigestEvents({
-                    scope: scope,
-                    events: events
-                });
-            }
-        }*/
+        api_complete = true;
+        Wait('stop');
 
         DigestEvents({
             scope: scope,
@@ -121,11 +96,8 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
             lastEventId: lastEventId
         });
 
-        api_complete = true;
-
         // Draw the graph
-        if (scope.job.status === 'successful' || scope.job.status === 'failed' || scope.job.status === 'error') {
-            // The job has already completed. graph values found on playbook stats
+        if (JobIsFinished(scope)) {
             url = scope.job.related.job_events + '?event=playbook_on_stats';
             Rest.setUrl(url);
             Rest.get()
@@ -146,7 +118,6 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         }
         else {
             // Draw the graph based on summary values in memory
-            Wait('stop');
             DrawGraph({ scope: scope, resize: true });
         }
     });
@@ -178,12 +149,22 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
         });
     });
 
-    if (scope.removeJobReady) {
-        scope.removeJobReady();
+    if (scope.removeLoadJobDetails) {
+        scope.removeLoadJobDetails();
     }
-    scope.removeJobReady = scope.$on('JobReady', function(e, events_url) {
-        // Job finished loading. Now get the set of plays
+    scope.removeRefreshJobDetails = scope.$on('LoadJobDetails', function(e, events_url) {
+
+        // Call to load all the job bits including, plays, tasks, hosts results and host summary
         var url = scope.job.url  + 'job_plays/?order_by=id';
+
+        scope.plays = {};
+        scope.tasks = {};
+        scope.hostResults = [];
+        scope.hostResultsMap = {};
+        scope.hosts = [];
+        scope.hostsMap = {};
+        api_complete = false;
+
         Rest.setUrl(url);
         Rest.get()
             .success( function(data) {
@@ -196,8 +177,7 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
                         // end date = starting date of the next event
                         end = data[idx + 1].started;
                     }
-                    else if (scope.job_status.status === 'successful' || scope.job_status.status === 'failed' ||
-                        scope.job_status.status === 'error' || scope.job_status.status === 'canceled') {
+                    else if (JobIsFinished(scope)) {
                         // this is the last play and the job already finished
                         end = scope.job_status.finished;
                     }
@@ -312,9 +292,11 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
                 else {
                     scope.job_status.elapsed = '00:00:00';
                 }
-
+                if (scope.myInterval) {
+                    window.clearInterval(scope.myInterval);
+                }
                 scope.setSearchAll('host');
-                scope.$emit('JobReady', data.related.job_events);
+                scope.$emit('LoadJobDetails', data.related.job_events);
                 scope.$emit('GetCredentialNames', data);
             })
             .error(function(data, status) {
@@ -675,9 +657,6 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
             ReloadHostSummaryList({
                 scope: scope
             });
-            //setTimeout(function() {
-            //    SelectPlay({ scope: scope, id: scope.activePlay });
-            //}, 2000);
         }
     };
 
@@ -722,5 +701,5 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
 
 JobDetailController.$inject = [ '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath', 'Wait',
     'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'SelectHost', 'FilterAllByHostName', 'DrawGraph',
-    'LoadHostSummary', 'ReloadHostSummaryList'
+    'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished'
 ];
