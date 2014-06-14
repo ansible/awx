@@ -453,7 +453,10 @@ function JobDetailController ($scope, $compile, $routeParams, $log, ClearScope, 
     };
 
     scope.objectIsEmpty = function(obj) {
-        return (Object.keys(obj).length > 0) ? false : true;
+        if (angular.isObject(obj)) {
+            return (Object.keys(obj).length > 0) ? false : true;
+        }
+        return true;
     };
 
     scope.HostDetailOnTotalScroll = _.debounce(function() {
