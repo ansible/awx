@@ -76,7 +76,7 @@ function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, Se
             if (!JobIsFinished(scope)) {
                 scope.myInterval = window.setInterval(function() {
                     popEvent();
-                }, 600);
+                }, 1000);
             }
         });
 
@@ -146,7 +146,6 @@ function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, Se
                     changed: event.changed,
                     modified: event.modified
                 });
-                scope.$emit('GetNextEvent');
             }
             if (event.event === 'playbook_on_no_hosts_matched') {
                 UpdatePlayStatus({
@@ -200,7 +199,6 @@ function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, Se
                     changed: event.changed,
                     modified: event.modified
                 });
-                scope.$emit('GetNextEvent');
             }
 
             if (event.event === 'runner_on_unreachable') {
@@ -281,7 +279,6 @@ function($log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, Se
                 scope.host_summary = {};
                 LoadHostSummary({ scope: scope, data: event.event_data });
                 DrawGraph({ scope: scope, resize: true });
-                scope.$emit('GetNextEvent');
             }
         });
 
