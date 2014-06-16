@@ -92,7 +92,6 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
         var event;
         listCount=0;
         if (event_queue.length > 0) {
-            //console.log('found queued events');
             event = event_queue[0];
             processEvent(event);
             event_queue.splice(0,1);
@@ -107,9 +106,6 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
                 }
             });
         }
-        //else {
-            //console.log('no more events');
-        //}
     });
 
     LoadBreadCrumbs();
