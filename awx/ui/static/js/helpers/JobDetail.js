@@ -605,8 +605,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
         var scope = params.scope,
             id = params.id,
             callback = params.callback,
-            clear;
-        clear = (scope.activePlay === id) ? false : true;  //are we moving to a new play?
+            clear = false;
+
+        // Determine if the tasks and hostResults arrays should be initialized
+        if (scope.search_all_hosts_name || scope.searchAllStatus === 'failed') {
+            clear = true;
+        }
+        else {
+            clear = (scope.activePlay === id) ? false : true;  //are we moving to a new play?
+        }
+
         if (scope.plays[scope.activePlay]) {
             scope.plays[scope.activePlay].playActiveClass = '';
         }
@@ -615,11 +623,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
         }
         scope.activePlay = id;
 
-        LoadTasks({
-            scope: scope,
-            callback: callback,
-            clear: clear
+        setTimeout(function() {
+            scope.$apply(function() {
+                LoadTasks({
+                    scope: scope,
+                    callback: callback,
+                    clear: clear
+                });
+            });
         });
+
     };
 }])
 
@@ -629,6 +642,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             callback = params.callback,
             clear = params.clear,
             url, tIds, lastId;
+
+        if (clear) {
+            scope.tasks = {};
+        }
 
         if (scope.activePlay) {
             url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
@@ -641,13 +658,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    if (clear) {
-                        scope.tasks = {};
-                    }
                     data.forEach(function(event, idx) {
                         var end, elapsed;
                         if ((!scope.searchAllStatus) || (scope.searchAllStatus === 'failed' && event.failed) &&
-                            ((scope.search_all_tasks.length === 0) || (scope.searchAllTasks.indexOf(event.id)))) {
+                            ((!scope.search_all_hosts_name) || (scope.search_all_hosts_name && scope.search_all_tasks.indexOf(event.id)))) {
 
                             if (idx < data.length - 1) {
                                 // end date = starting date of the next event
@@ -709,11 +723,15 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
         }
         else {
             // set the active task
-            tIds = Object.keys(scope.tasks);
-            lastId = (tIds.length > 0) ? tIds[tIds.length - 1] : null;
+            //tIds = Object.keys(scope.tasks);
+            //lastId = (tIds.length > 0) ? tIds[tIds.length - 1] : null;
+            //console.log('selecting task: ' + lastId);
+            //console.log('tasks: ');
+            //console.log(scope.tasks);
+            scope.tasks = {};
             SelectTask({
                 scope: scope,
-                id: lastId,
+                id: null,
                 callback: callback
             });
         }
@@ -726,8 +744,14 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
         var scope = params.scope,
             id = params.id,
             callback = params.callback,
-            clear;
-        clear = (scope.activeTask === id) ? false : true;
+            clear=false;
+
+        if (scope.search_all_hosts_name || scope.searchAllStatus === 'failed') {
+            clear = true;
+        }
+        else {
+            clear = (scope.activeTask === id) ? false : true;
+        }
 
         if (scope.activeTask && scope.tasks[scope.activeTask]) {
             scope.tasks[scope.activeTask].taskActiveClass = '';
@@ -760,10 +784,12 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             callback = params.callback,
             clear = params.clear,
             url;
+
         if (clear) {
             scope.hostResults = [];
             scope.hostResultsMap = {};
         }
+
         if (scope.activeTask) {
             // If we have a selected task, then get the list of hosts
             url = scope.job.related.job_events + '?parent=' + scope.activeTask + '&';
@@ -796,6 +822,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                 });
         }
         else {
+            scope.hostResults = [];
+            scope.hostResultsMap = {};
             if (callback) {
                 scope.$emit(callback);
             }
@@ -821,25 +849,39 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
         var scope = params.scope,
             callback = params.callback,
             url;
-        scope.hosts = [];
-        scope.hostsMap = {};
+
         url = scope.job.related.job_host_summaries + '?';
         url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&': '';
         url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
         url += 'page_size=' + scope.hostSummaryTableRows + '&order_by=host__name';
+
+        if (scope.search_all_hosts_name || scope.searchAllStatus === 'failed') {
+            // User initiated a search
+            scope.hosts = [];
+            scope.hostsMap = {};
+        }
+
         Rest.setUrl(url);
         Rest.get()
             .success(function(data) {
                 data.results.forEach(function(event) {
-                    scope.hosts.push({
-                        id: event.host,
-                        name: event.summary_fields.host.name,
-                        ok: event.ok,
-                        changed: event.changed,
-                        unreachable: event.dark,
-                        failed: event.failures
-                    });
-                    scope.hostsMap[event.id] = scope.hosts.length - 1;
+                    if (scope.hostsMap[event.host]) {
+                        scope.hosts[scope.hostsMap[event.host]].ok = event.ok;
+                        scope.hosts[scope.hostsMap[event.host]].changed = event.changed;
+                        scope.hosts[scope.hostsMap[event.host]].dark = event.dark;
+                        scope.hosts[scope.hostsMap[event.host]].failures = event.failures;
+                    }
+                    else {
+                        scope.hosts.push({
+                            id: event.host,
+                            name: event.summary_fields.host.name,
+                            ok: event.ok,
+                            changed: event.changed,
+                            unreachable: event.dark,
+                            failed: event.failures
+                        });
+                        scope.hostsMap[event.host] = scope.hosts.length - 1;
+                    }
                 });
                 $('#hosts-summary-table').mCustomScrollbar("update");
                 if (callback) {
@@ -957,33 +999,40 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             scope.removeAllTasksReady();
         }
         scope.removeAllTasksReady = scope.$on('AllTasksReady', function() {
-            url = scope.job.related.job_events + '?id__in=' + scope.search_all_tasks.join();
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    if (data.count > 0) {
-                        data.results.forEach(function(row) {
-                            if (row.parent) {
-                                scope.search_all_plays.push(row.parent);
+            if (scope.search_all_tasks.length > 0) {
+                url = scope.job.related.job_events + '?id__in=' + scope.search_all_tasks.join();
+                Rest.setUrl(url);
+                Rest.get()
+                    .success(function(data) {
+                        if (data.count > 0) {
+                            data.results.forEach(function(row) {
+                                if (row.parent) {
+                                    scope.search_all_plays.push(row.parent);
+                                }
+                            });
+                            if (scope.search_all_plays.length > 0) {
+                                scope.search_all_plays.sort();
+                                newActivePlay = scope.search_all_plays[scope.search_all_plays.length - 1];
                             }
-                        });
-                        if (scope.search_all_plays.length > 0) {
-                            scope.search_all_plays.sort();
-                            newActivePlay = scope.search_all_plays[scope.search_all_plays.length - 1];
+                            else {
+                                newActivePlay = null;
+                            }
                         }
                         else {
-                            newActivePlay = null;
+                            scope.search_all_plays.push(0);
                         }
-                    }
-                    else {
-                        scope.search_all_plays.push(0);
-                    }
-                    scope.$emit('AllPlaysReady');
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
+                        scope.$emit('AllPlaysReady');
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + '. GET returned: ' + status });
+                    });
+            }
+            else {
+                newActivePlay = null;
+                scope.search_all_plays.push(0);
+                scope.$emit('AllPlaysReady');
+            }
         });
 
         Rest.setUrl(url);
@@ -998,9 +1047,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                     if (scope.search_all_tasks.length > 0) {
                         scope.search_all_tasks.sort();
                     }
-                }
-                else {
-                    scope.search_all_tasks.push(0);
                 }
                 scope.$emit('AllTasksReady');
             })

@@ -652,7 +652,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     */
 
     scope.searchAllByHost = function() {
-        var nxtPlay;
+        var keys, nxtPlay;
         if (scope.search_all_hosts_name) {
             FilterAllByHostName({
                 scope: scope,
@@ -664,15 +664,17 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             scope.search_all_tasks = [];
             scope.search_all_plays = [];
             scope.searchAllHostsEnabled = true;
-            nxtPlay = scope.plays[scope.plays.length - 1].id;
+            keys = Object.keys(scope.plays);
+            nxtPlay = (keys.length > 0) ? keys[keys.length - 1] : null;
             SelectPlay({
                 scope: scope,
                 id: nxtPlay
             });
-            ReloadHostSummaryList({
-                scope: scope
-            });
+
         }
+        ReloadHostSummaryList({
+            scope: scope
+        });
     };
 
     scope.allHostNameKeyPress = function(e) {

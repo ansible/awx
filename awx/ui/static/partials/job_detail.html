@@ -52,7 +52,7 @@
                                 </div>
                             </div>
                             <div id="plays-table-detail" aw-custom-scroll class="table-detail">
-                                <div class="row cursor-pointer" ng-repeat="(play_id, play) in playList = (plays | FilterById : search_all_plays | filter:{ status : searchAllStatus }) track by play_id"
+                                <div class="row cursor-pointer" ng-repeat="(play_id, play) in playList = (plays | FilterById : search_all_plays | FilterByField: { status : searchAllStatus }) track by play_id"
                                         ng-class="play.playActiveClass" ng-click="selectPlay(play.id)">
                                      <!-- | FilterById : search_all_plays | filter:{ status : searchAllStatus} -->
 
@@ -65,7 +65,7 @@
                                         <i class="fa icon-job-{{ play.status }}"></i> {{ play.name }}</span>
                                     </div>
                                 </div>
-                                <div class="row" ng-show="!playList">
+                                <div class="row" ng-show="objectIsEmpty(playList)">
                                     <div class="col-lg-12">
                                         <div class="loading-info">No plays matched</div>
                                     </div>
@@ -160,8 +160,8 @@
                                         <input type="text" class="input-sm form-control" id="search_all_hosts_name" ng-model="search_all_hosts_name"
                                             placeholder="Host Name" ng-disabled="searchAllDisabled" ng-keypress="allHostNameKeyPress($event)" />
                                         <div id="search-all-input-icons">
-                                            <a class="search-icon" ng-show="searchAllHostsEnabled" ng-click="searchAllHosts()"><i class="fa fa-search"></i></a>
-                                            <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllHosts()"><i class="fa fa-times"></i></a>
+                                            <a class="search-icon" ng-show="searchAllHostsEnabled" ng-click="searchAllByHost()"><i class="fa fa-search"></i></a>
+                                            <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllByHost()"><i class="fa fa-times"></i></a>
                                         </div>
                                     </div>
                                 </div>
