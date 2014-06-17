@@ -81,6 +81,23 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         }
     });
 
+    if ($rootScope.removeJobStatusChange) {
+        $rootScope.removeJobStatusChange();
+    }
+    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
+        // if we receive a status change event for the current job indicating the job
+        // is finished, stop event queue processing and reload
+        if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10)) {
+            if (data.status === 'failed' || data.status === 'canceled' ||
+                    data.status === 'error' || data.status === 'successful') {
+                $log.debug('Job completed!');
+                api_complete = false;
+                scope.haltEventQueue = true;
+                queue = [];
+                scope.$emit('LoadJob');
+            }
+        }
+    });
 
     if (scope.removeAPIComplete) {
         scope.removeAPIComplete();
@@ -114,11 +131,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         api_complete = true;
         Wait('stop');
 
-        ProcessEventQueue({
-            scope: scope,
-            eventQueue: queue
-        });
-
         // Draw the graph
         if (JobIsFinished(scope)) {
             url = scope.job.related.job_events + '?event=playbook_on_stats';
@@ -139,10 +151,16 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
         }
-        else {
+        else if (scope.host_summary.total > 0) {
             // Draw the graph based on summary values in memory
             DrawGraph({ scope: scope, resize: true });
         }
+
+        ProcessEventQueue({
+            scope: scope,
+            eventQueue: queue
+        });
+
     });
 
     if (scope.removeInitialDataLoaded) {
@@ -212,10 +230,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         elapsed: elapsed,
                         playActiveClass: ''
                     };
-                    scope.host_summary.ok += data.ok_count;
-                    scope.host_summary.changed += data.changed_count;
+                    scope.host_summary.ok += (data.ok_count) ? data.ok_count : 0;
+                    scope.host_summary.changed += (data.changed_count) ? data.changed_count : 0;
                     scope.host_summary.unreachable += (data.unreachable_count) ? data.unreachable_count : 0;
-                    scope.host_summary.failed += data.failed_count;
+                    scope.host_summary.failed += (data.failed_count) ? data.failed_count : 0;
                     scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed +
                         scope.host_summary.unreachable + scope.host_summary.failed;
                 });

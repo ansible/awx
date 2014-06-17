@@ -545,6 +545,7 @@ angular.module('Tower', [
                     });
                 },2000);
                 sock.on("status_changed", function(data) {
+                    $log.debug('Job ' + data.unified_job_id + ' status changed to ' + data.status);
                     $rootScope.$emit('JobStatusChange', data);
                 });
             }
