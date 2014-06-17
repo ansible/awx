@@ -20,7 +20,7 @@ Vagrant.configure('2') do |config|
       :mount_options => [ 'gid=5853', 'dmode=2775' ]
 
     precise.vm.provider :virtualbox do |vb|
-      vb.customize ["modifyvm", :id, "--memory", "512"]
+      vb.customize ["modifyvm", :id, "--memory", '1024']
     end
   end
 
