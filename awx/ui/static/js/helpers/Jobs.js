@@ -14,7 +14,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
 
 /**
  *  JobsControllerInit({ scope: $scope });
- *  
+ *
  *  Initialize calling scope with all the bits required to support a jobs list
  *
  */
@@ -22,10 +22,9 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
     function($location, Find, DeleteJob, RelaunchJob, LogViewer) {
         return function(params) {
             var scope = params.scope,
-                parent_scope = params.parent_scope,
                 iterator = (params.iterator) ? params.iterator : scope.iterator,
                 base = $location.path().replace(/^\//, '').split('/')[0];
-        
+
             scope.deleteJob = function(id) {
                 DeleteJob({ scope: scope, id: id });
             };
@@ -61,10 +60,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             };
 
             scope.refreshJobs = function() {
-                if (base === 'jobs') {
-                    parent_scope.refreshJobs();
-                }
-                else {
+                if (base !== 'jobs') {
                     scope.search(iterator);
                 }
 
@@ -169,7 +165,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 '<div id=\"form-container\" style=\"width: 100%;\"></div></div>\n';
 
             $('#inventory-modal-container').empty().append(html);
-            
+
             scope = generator.inject(form, { mode: 'edit', id: 'form-container', breadCrumbs: false, related: false });
 
             // Set modal dimensions based on viewport width
@@ -321,7 +317,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             else if (item.type === "job") {
                 itm.nameHref = "";
             }
-            
+
             if (list.name === 'completed_jobs' || list.name === 'running_jobs') {
                 itm.status_tip = itm.status_label + '. Click for details.';
             }
@@ -343,7 +339,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
 }])
 
 /**
- * 
+ *
  *  Called from JobsList controller to load each section or list on the page
  *
  */
@@ -390,7 +386,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             url: url,
             pageSize: pageSize
         });
-        
+
         scope.iterator = list.iterator;
 
         if (scope.removePostRefresh) {
@@ -422,7 +418,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
 .factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Alert',
 function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
     return function(params) {
-        
+
         var scope = params.scope,
             id = params.id,
             action, jobs, job, url, action_label, hdr;

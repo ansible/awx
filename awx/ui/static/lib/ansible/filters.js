@@ -43,4 +43,26 @@ angular.module('AWFilters', [])
             }
             return input;
         };
+    }])
+
+    .filter('FilterByField', [ function() {
+        return function(input, list) {
+            var fld, key, search = {}, results = {};
+            for (fld in list) {
+                if (list[fld]) {
+                    search[fld] = list[fld];
+                }
+            }
+            if (Object.keys(search).length > 0) {
+                for (fld in search) {
+                    for (key in input) {
+                        if (input[key][fld] === search[fld]) {
+                            results[key] = input[key];
+                        }
+                    }
+                }
+                return results;
+            }
+            return input;
+        };
     }]);

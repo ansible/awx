@@ -8,26 +8,22 @@
 'use strict';
 
 function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
-    ProcessErrors, ProcessEventQueue, SelectPlay, SelectTask, Socket, GetElapsed, SelectHost, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList,
+    ProcessErrors, DigestEvents, SelectPlay, SelectTask, Socket, GetElapsed, SelectHost, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList,
     JobIsFinished) {
 
     ClearScope();
 
     var job_id = $routeParams.id,
         event_socket,
+        event_queue = [],
         scope = $scope,
         api_complete = false,
         refresh_count = 0,
-        lastEventId = 0,
-        queue = [];
+        lastEventId = 0;
 
     scope.plays = {};
     scope.hosts = [];
     scope.hostsMap = {};
-    scope.tasks = {};
-    scope.hostResults = [];
-    scope.hostResultsMap = {};
-    api_complete = false;
 
     scope.search_all_tasks = [];
     scope.search_all_plays = [];
@@ -36,10 +32,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     scope.auto_scroll = false;
     scope.searchTaskHostsEnabled = true;
     scope.searchSummaryHostsEnabled = true;
-    scope.hostTableRows = 150;
-    scope.hostSummaryTableRows = 150;
+    scope.hostTableRows = 300;
+    scope.hostSummaryTableRows = 300;
     scope.searchAllHostsEnabled = true;
-    scope.haltEventQueue = false;
 
     scope.host_summary = {};
     scope.host_summary.ok = 0;
@@ -63,24 +58,15 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
 
     event_socket.on("job_events-" + job_id, function(data) {
         data.event = data.event_name;
-        if (api_complete && data.id > lastEventId) {
-            $log.debug('received event: ' + data.id);
-            if (queue.length < 50) {
-                queue.unshift(data);
-            }
-            else {
-                api_complete = false;  // stop more events from hitting the queue
-                $log.debug('queue halted. reloading in 1.');
-                setTimeout(function() {
-                    $log.debug('reloading');
-                    scope.haltEventQueue = true;
-                    queue = [];
-                    scope.$emit('LoadJob');
-                }, 1000);
-            }
+        $log.debug('push event: ' + data.id);
+        if (event_queue.length < 100) {
+            event_queue.push(data);
+        }
+        else {
+            // if we get too far behind, clear the queue and refresh
+            scope.$emit('LoadJob');
         }
     });
-
 
     if (scope.removeAPIComplete) {
         scope.removeAPIComplete();
@@ -114,9 +100,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         api_complete = true;
         Wait('stop');
 
-        ProcessEventQueue({
+        DigestEvents({
             scope: scope,
-            eventQueue: queue
+            queue: event_queue,
+            lastEventId: lastEventId
         });
 
         // Draw the graph
@@ -176,8 +163,15 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         scope.removeLoadJobDetails();
     }
     scope.removeRefreshJobDetails = scope.$on('LoadJobDetails', function(e, events_url) {
+
         // Call to load all the job bits including, plays, tasks, hosts results and host summary
         var url = scope.job.url  + 'job_plays/?order_by=id';
+
+        scope.tasks = {};
+        scope.hostResults = [];
+        scope.hostResultsMap = {};
+        api_complete = false;
+
         Rest.setUrl(url);
         Rest.get()
             .success( function(data) {
@@ -288,7 +282,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 scope.verbosity = data.verbosity;
                 scope.job_tags = data.job_tags;
 
-                // In the case the job is already completed, or an error already happened,
+                // In the case that the job is already completed, or an error already happened,
                 // populate scope.job_status info
                 scope.job_status.status = (data.status === 'waiting' || data.status === 'new') ? 'pending' : data.status;
                 scope.job_status.started = data.started;
@@ -304,6 +298,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 }
                 else {
                     scope.job_status.elapsed = '00:00:00';
+                }
+                if ($rootScope.myInterval) {
+                    window.clearInterval($rootScope.myInterval);
                 }
                 scope.setSearchAll('host');
                 scope.$emit('LoadJobDetails', data.related.job_events);
@@ -325,7 +322,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             scope.$emit('LoadJob');
         }
         else {
-            // Check if the graph needs to redraw
+            // Check if we need to redraw the group
             setTimeout(function() { DrawGraph({ scope: scope, resize: true }); }, 500);
         }
     });
@@ -469,7 +466,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         return true;
     };
 
-    /*
     scope.HostDetailOnTotalScroll = _.debounce(function() {
         // Called when user scrolls down (or forward in time). Using _.debounce
         var url, mcs = arguments[0];
@@ -649,10 +645,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             scope.auto_scroll = false;
         }
     };
-    */
 
     scope.searchAllByHost = function() {
-        var keys, nxtPlay;
+        var nxtPlay;
         if (scope.search_all_hosts_name) {
             FilterAllByHostName({
                 scope: scope,
@@ -664,17 +659,15 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             scope.search_all_tasks = [];
             scope.search_all_plays = [];
             scope.searchAllHostsEnabled = true;
-            keys = Object.keys(scope.plays);
-            nxtPlay = (keys.length > 0) ? keys[keys.length - 1] : null;
+            nxtPlay = scope.plays[scope.plays.length - 1].id;
             SelectPlay({
                 scope: scope,
                 id: nxtPlay
             });
-
+            ReloadHostSummaryList({
+                scope: scope
+            });
         }
-        ReloadHostSummaryList({
-            scope: scope
-        });
     };
 
     scope.allHostNameKeyPress = function(e) {
@@ -717,6 +710,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
 }
 
 JobDetailController.$inject = [ '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
-    'Wait', 'Rest', 'ProcessErrors', 'ProcessEventQueue', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'SelectHost', 'FilterAllByHostName', 'DrawGraph',
+    'Wait', 'Rest', 'ProcessErrors', 'DigestEvents', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'SelectHost', 'FilterAllByHostName', 'DrawGraph',
     'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished'
 ];
