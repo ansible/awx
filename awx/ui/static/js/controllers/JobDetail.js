@@ -9,7 +9,7 @@
 
 function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, ProcessEventQueue, SelectPlay, SelectTask, Socket, GetElapsed, SelectHost, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList,
-    JobIsFinished) {
+    JobIsFinished, SetTaskStyles) {
 
     ClearScope();
 
@@ -21,13 +21,20 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         lastEventId = 0,
         queue = [];
 
-    scope.plays = {};
+    scope.plays = [];
+    scope.playsMap = {};
     scope.hosts = [];
     scope.hostsMap = {};
-    scope.tasks = {};
+    scope.tasks = [];
+    scope.tasksMap = {};
     scope.hostResults = [];
     scope.hostResultsMap = {};
     api_complete = false;
+
+    scope.hostTableRows = 150;
+    scope.hostSummaryTableRows = 150;
+    scope.tasksMaxRows = 150;
+    scope.playsMaxRows = 150;
 
     scope.search_all_tasks = [];
     scope.search_all_plays = [];
@@ -36,8 +43,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     scope.auto_scroll = false;
     scope.searchTaskHostsEnabled = true;
     scope.searchSummaryHostsEnabled = true;
-    scope.hostTableRows = 150;
-    scope.hostSummaryTableRows = 150;
     scope.searchAllHostsEnabled = true;
     scope.haltEventQueue = false;
 
@@ -202,8 +207,8 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 data.forEach(function(event, idx) {
                     var status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful',
                         start = event.started,
-                        end,
-                        elapsed;
+                        end, elapsed, play;
+
                     if (idx < data.length - 1) {
                         // end date = starting date of the next event
                         end = data[idx + 1].started;
@@ -221,15 +226,25 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                     else {
                         elapsed = '00:00:00';
                     }
-                    scope.plays[event.id] = {
-                        id: event.id,
-                        name: event.play,
-                        created: start,
-                        finished: end,
-                        status: status,
-                        elapsed: elapsed,
-                        playActiveClass: ''
-                    };
+                    if (scope.playsMap[event.id]) {
+                        play = scope.plays[scope.playsMapp[event.id]];
+                        play.finished = end;
+                        play.elapsed = elapsed;
+                        play.status = status;
+                        play.playActiveClass = '';
+                    }
+                    else {
+                        scope.plays.push({
+                            id: event.id,
+                            name: event.play,
+                            created: start,
+                            finished: end,
+                            status: status,
+                            elapsed: elapsed,
+                            playActiveClass: ''
+                        });
+                        scope.playsMap[event.id] = scope.plays.length - 1;
+                    }
                     scope.host_summary.ok += (data.ok_count) ? data.ok_count : 0;
                     scope.host_summary.changed += (data.changed_count) ? data.changed_count : 0;
                     scope.host_summary.unreachable += (data.unreachable_count) ? data.unreachable_count : 0;
@@ -487,9 +502,23 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         return true;
     };
 
-    /*
+
+    function rebuildHostResultsMap() {
+        scope.hostResultsMap = {};
+        scope.hostResults.forEach(function(result, idx) {
+            scope.hostResultsMap[result.id] = idx;
+        });
+    }
+
+    function rebuildTasksMap() {
+        scope.tasksMap = {};
+        scope.tasks.forEach(function(task, idx) {
+            scope.tasksMap[task.id] = idx;
+        });
+    }
+
     scope.HostDetailOnTotalScroll = _.debounce(function() {
-        // Called when user scrolls down (or forward in time). Using _.debounce
+        // Called when user scrolls down (or forward in time)
         var url, mcs = arguments[0];
         scope.$apply(function() {
             if (!scope.auto_scroll && scope.activeTask && scope.hostResults.length) {
@@ -513,7 +542,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                                 msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
                             });
                             if (scope.hostResults.length > scope.hostTableRows) {
-                                scope.hostResults.splice(0,1);
+                                scope.hostResults.shift();
                             }
                         });
                         if (data.next) {
@@ -521,6 +550,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             setTimeout(function() { $('#hosts-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop - 15) + 'px'}); }, 700);
                         }
                         scope.auto_scroll = false;
+                        rebuildHostResultsMap();
                         Wait('stop');
                     })
                     .error(function(data, status) {
@@ -566,8 +596,165 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             // there are more rows. move dragger down, letting user know.
                             setTimeout(function() { $('#hosts-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop + 15) + 'px' }); }, 700);
                         }
+                        rebuildHostResultsMap();
                         Wait('stop');
                         scope.auto_scroll = false;
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + '. GET returned: ' + status });
+                    });
+            }
+            else {
+                scope.auto_scroll = false;
+            }
+        });
+    }, 300);
+
+    scope.TasksOnTotalScroll = _.debounce(function() {
+        // Called when user scrolls down (or forward in time)
+        var url, mcs = arguments[0];
+        scope.$apply(function() {
+            if (!scope.auto_scroll && scope.activePlay && scope.tasks.length) {
+                scope.auto_scroll = true;
+                url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
+                url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
+                url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
+                url += 'id__gt=' + scope.tasks[scope.tasks.length - 1].id + '&page_size=' + (scope.tasksMaxRows / 3) + '&order_by=id';
+                Wait('start');
+                Rest.setUrl(url);
+                Rest.get()
+                    .success(function(data) {
+                        data.results.forEach(function(event, idx) {
+                            var end, elapsed;
+                            if (idx < data.length - 1) {
+                                // end date = starting date of the next event
+                                end = data[idx + 1].created;
+                            }
+                            else {
+                                // no next event (task), get the end time of the play
+                                end = scope.plays[scope.activePlay].finished;
+                            }
+                            if (end) {
+                                elapsed = GetElapsed({
+                                    start: event.created,
+                                    end: end
+                                });
+                            }
+                            else {
+                                elapsed = '00:00:00';
+                            }
+                            scope.tasks.push({
+                                id: event.id,
+                                play_id: scope.activePlay,
+                                name: event.name,
+                                status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                                created: event.created,
+                                modified: event.modified,
+                                finished: end,
+                                elapsed: elapsed,
+                                hostCount: event.host_count,          // hostCount,
+                                reportedHosts: event.reported_hosts,
+                                successfulCount: event.successful_count,
+                                failedCount: event.failed_count,
+                                changedCount: event.changed_count,
+                                skippedCount: event.skipped_count,
+                                taskActiveClass: ''
+                            });
+                            scope.tasksMap[event.id] = scope.tasks.length - 1;
+                            SetTaskStyles({
+                                scope: scope,
+                                task_id: event.id
+                            });
+                            if (scope.tasks.length > scope.tasksMaxRows) {
+                                scope.tasks.shift();
+                            }
+                        });
+                        if (data.next) {
+                            // there are more rows. move dragger up, letting user know.
+                            setTimeout(function() { $('#tasks-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop - 15) + 'px'}); }, 700);
+                        }
+                        scope.auto_scroll = false;
+                        rebuildTasksMap();
+                        Wait('stop');
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + '. GET returned: ' + status });
+                    });
+            }
+            else {
+                scope.auto_scroll = false;
+            }
+        });
+    }, 300);
+
+    scope.TasksOnTotalScrollBack = _.debounce(function() {
+        // Called when user scrolls up (or back in time)
+        var url, mcs = arguments[0];
+        scope.$apply(function() {
+            if (!scope.auto_scroll && scope.activePlay && scope.tasks.length) {
+                scope.auto_scroll = true;
+                url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
+                url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
+                url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
+                url += 'id__lt=' + scope.tasks[scope.tasks[0]].name + '&page_size=' + (scope.tasksMaxRows / 3) + '&order_by=id';
+                Wait('start');
+                Rest.setUrl(url);
+                Rest.get()
+                    .success(function(data) {
+                        data.results.forEach(function(event, idx) {
+                            var end, elapsed;
+                            if (idx < data.length - 1) {
+                                // end date = starting date of the next event
+                                end = data[idx + 1].created;
+                            }
+                            else {
+                                // no next event (task), get the end time of the play
+                                end = scope.plays[scope.activePlay].finished;
+                            }
+                            if (end) {
+                                elapsed = GetElapsed({
+                                    start: event.created,
+                                    end: end
+                                });
+                            }
+                            else {
+                                elapsed = '00:00:00';
+                            }
+                            scope.tasks.unshift({
+                                id: event.id,
+                                play_id: scope.activePlay,
+                                name: event.name,
+                                status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                                created: event.created,
+                                modified: event.modified,
+                                finished: end,
+                                elapsed: elapsed,
+                                hostCount: event.host_count,          // hostCount,
+                                reportedHosts: event.reported_hosts,
+                                successfulCount: event.successful_count,
+                                failedCount: event.failed_count,
+                                changedCount: event.changed_count,
+                                skippedCount: event.skipped_count,
+                                taskActiveClass: ''
+                            });
+                            scope.tasksMap[event.id] = scope.tasks.length - 1;
+                            SetTaskStyles({
+                                scope: scope,
+                                task_id: event.id
+                            });
+                            if (scope.tasks.length > scope.tasksMaxRows) {
+                                scope.tasks.pop();
+                            }
+                        });
+                        if (data.next) {
+                            // there are more rows. move dragger up, letting user know.
+                            setTimeout(function() { $('#tasks-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop + 15) + 'px'}); }, 700);
+                        }
+                        scope.auto_scroll = false;
+                        rebuildTasksMap();
+                        Wait('stop');
                     })
                     .error(function(data, status) {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -603,7 +790,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                                     failed: row.failures
                                 });
                                 if (scope.hosts.length > scope.hostSummaryTableRows) {
-                                    scope.hosts.splice(0,1);
+                                    scope.hosts.shift();
                                 }
                             });
                             if (data.next) {
@@ -667,7 +854,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             scope.auto_scroll = false;
         }
     };
-    */
 
     scope.searchAllByHost = function() {
         var keys, nxtPlay;
@@ -723,9 +909,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         ReloadHostSummaryList({
             scope: scope
         });
-        //setTimeout(function() {
-        //    SelectPlay({ scope: scope, id: scope.activePlay });
-        //}, 2000);
     };
 
     scope.viewEvent = function(event_id) {
@@ -736,5 +919,5 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
 
 JobDetailController.$inject = [ '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'ProcessEventQueue', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'SelectHost', 'FilterAllByHostName', 'DrawGraph',
-    'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished'
+    'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished', 'SetTaskStyles'
 ];
