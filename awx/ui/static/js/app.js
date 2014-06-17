@@ -426,7 +426,32 @@ angular.module('Tower', [
             $rootScope.crumbCache = [];
             $rootScope.sessionTimer = Timer.init();
 
+            function detectBrowser() {
+                var ua = window.navigator.userAgent,
+                    browser;
+                if (ua.search("MSIE") >= 0) {
+                    browser = "MSIE";
+                }
+                else if (navigator.userAgent.search("Chrome") >= 0) {
+                    browser = "CHROME";
+                }
+                else if (navigator.userAgent.search("Firefox") >= 0) {
+                    browser = "FF";
+                }
+                else if (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0) {
+                    browser = "SAFARI";
+                }
+                else if (navigator.userAgent.search("Opera") >= 0) {
+                    browser = "OPERA";
+                }
+                return browser;
+            }
+
+            $rootScope.browser = detectBrowser();
+
             $rootScope.$on("$routeChangeStart", function (event, next) {
+                var base;
+
                 // Before navigating away from current tab, make sure the primary view is visible
                 if ($('#stream-container').is(':visible')) {
                     HideStream();
@@ -456,7 +481,7 @@ angular.module('Tower', [
                 }
 
                 // Make the correct tab active
-                var base = $location.path().replace(/^\//, '').split('/')[0];
+                base = $location.path().replace(/^\//, '').split('/')[0];
                 if (base === '') {
                     base = 'home';
                 } else {
@@ -464,6 +489,7 @@ angular.module('Tower', [
                     base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
                 }
                 $('.nav-tabs a[href="#' + base + '"]').tab('show');
+
             });
 
             if (!Authorization.getToken()) {
@@ -515,7 +541,6 @@ angular.module('Tower', [
                 setTimeout(function() {
                     $rootScope.$apply(function() {
                         sock.checkStatus();
-                        //$rootScope.$emit('SocketErrorEncountered');
                         $log.debug('socket status: ' + $rootScope.socketStatus);
                     });
                 },2000);

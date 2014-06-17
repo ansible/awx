@@ -7,7 +7,7 @@
 
 'use strict';
 
-function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, Socket) {
+function JobStdoutController ($rootScope, $scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, Socket) {
 
     ClearScope();
 
@@ -36,14 +36,50 @@ function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBas
         Rest.setUrl(stdout_url + '?format=html');
         Rest.get()
             .success(function(data) {
+                var lines, styles=[], html=[], found=false, doc, style, pre, parser;
                 api_complete = true;
                 Wait('stop');
-                var doc, style, pre, parser = new DOMParser();
-                doc = parser.parseFromString(data, "text/html");
-                pre = doc.getElementsByTagName('pre');
-                style = doc.getElementsByTagName('style');
-                $('#style-sheet-container').empty().html(style[0]);
-                $('#pre-container-content').empty().html($(pre[0]).html());
+                if ($rootScope.browser === "SAFARI") {
+                    // Safari's DOMParser will not parse HTML, so we have to do our best to extract the
+                    // parts we want.
+
+                    lines = data.split("\n");
+                    // Get the style sheet
+                    lines.forEach(function(line) {
+                        if (/<style.*/.test(line)) {
+                            found = true;
+                        }
+                        if (found) {
+                            styles.push(line);
+                        }
+                        if (/<\/style>/.test(line)) {
+                            found = false;
+                        }
+                    });
+                    found = false;
+                    // Get all the bits between <pre> and  </pre>
+                    lines.forEach(function(line) {
+                        if (/<pre>/.test(line)) {
+                            found = true;
+                        }
+                        else if (/<\/pre>/.test(line)) {
+                            found = false;
+                        }
+                        else if (found) {
+                            html.push(line);
+                        }
+                    });
+                    $('#style-sheet-container').empty().html(styles.join("\n"));
+                    $('#pre-container-content').empty().html(html.join("\n"));
+                }
+                else {
+                    parser = new DOMParser();
+                    doc = parser.parseFromString(data, "text/html");
+                    pre = doc.getElementsByTagName('pre');
+                    style = doc.getElementsByTagName('style');
+                    $('#style-sheet-container').empty().html(style[0]);
+                    $('#pre-container-content').empty().html($(pre[0]).html());
+                }
                 setTimeout(function() { $('#pre-container').mCustomScrollbar("scrollTo", 'bottom'); }, 1000);
             })
             .error(function(data, status) {
@@ -83,4 +119,5 @@ function JobStdoutController ($scope, $compile, $routeParams, ClearScope, GetBas
         });
 }
 
-JobStdoutController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors', 'Socket' ];
+JobStdoutController.$inject = [ '$rootScope', '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors', 'Socket' ];
+
