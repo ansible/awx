@@ -123,6 +123,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                     changed: event.changed,
                     modified: event.modified
                 });
+                if (scope.host_summary.total > 0) {
+                    DrawGraph({ scope: scope, resize: true });
+                }
                 break;
 
             case 'playbook_on_task_start':
@@ -161,6 +164,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                     changed: event.changed,
                     modified: event.modified
                 });
+                if (scope.host_summary.total > 0) {
+                    DrawGraph({ scope: scope, resize: true });
+                }
                 break;
 
             case 'runner_on_ok':
@@ -251,7 +257,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                 });
                 scope.job_status.status = (event.failed) ? 'failed' : 'successful';
                 scope.job_status.status_class = "";
-                scope.host_summary = {};
                 LoadHostSummary({ scope: scope, data: event.event_data });
                 DrawGraph({ scope: scope, resize: true });
                 break;
@@ -432,24 +437,22 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             task_id = params.task_id,
             modified = params.modified,
             created = params.created,
-            msg = params.message,
-            host;
+            msg = params.message;
+
+        scope.host_summary.ok += (status === 'successful') ? 1 : 0;
+        scope.host_summary.changed += (status === 'changed') ? 1 : 0;
+        scope.host_summary.unreachable += (status === 'unreachable') ? 1 : 0;
+        scope.host_summary.failed += (status === 'failed') ? 1 : 0;
+        scope.host_summary.total  = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
+            scope.host_summary.failed;
 
         if (scope.hostsMap[host_id]) {
-            host = scope.hosts[scope.hostsMap[host_id]];
-            host.ok += (status === 'successful') ? 1 : 0;
-            host.changed += (status === 'changed') ? 1 : 0;
-            host.unreachable += (status === 'unreachable') ? 1 : 0;
-            host.failed += (status === 'failed') ? 1 : 0;
+            scope.hosts[scope.hostsMap[host_id]].ok += (status === 'successful') ? 1 : 0;
+            scope.hosts[scope.hostsMap[host_id]].changed += (status === 'changed') ? 1 : 0;
+            scope.hosts[scope.hostsMap[host_id]].unreachable += (status === 'unreachable') ? 1 : 0;
+            scope.hosts[scope.hostsMap[host_id]].failed += (status === 'failed') ? 1 : 0;
         }
-        else {
-            // Totals for the summary graph
-            scope.host_summary.total += 1;
-            scope.host_summary.ok += (status === 'successful') ? 1 : 0;
-            scope.host_summary.changed += (status === 'changed') ? 1 : 0;
-            scope.host_summary.unreachable += (status === 'unreachable') ? 1 : 0;
-            scope.host_summary.failed += (status === 'failed') ? 1 : 0;
-
+        else if (scope.hosts.length < scope.hostSummaryTableRows) {
             scope.hosts.push({
                 id: host_id,
                 name: name,
@@ -467,11 +470,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                 // a must be equal to b
                 return 0;
             });
-
-            // prune the hosts array and rebuild the map
-            if (scope.hosts.length > scope.hostSummaryTableRows) {
-                scope.hosts.pop();
-            }
             scope.hostsMap = {};
             scope.hosts.forEach(function(host, idx){
                 scope.hostsMap[host.id] = idx;
@@ -513,7 +511,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             msg = params.message,
             play_id, first;
 
-        if (!scope.hostResultsMap[host_id]) {
+        if (!scope.hostResultsMap[host_id] && scope.hostResults.length < scope.hostTableRows) {
             scope.hostResults.push({
                 id: event_id,
                 status: status,
@@ -532,10 +530,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                 }
                 return 0;
             });
-            // Keep the list pruned to a limited # of hosts
-            if (scope.hostResults.length > scope.hostTableRows) {
-                scope.hostResults.splice(0,1);
-            }
             // Refresh the map
             scope.hostResultsMap = {};
             scope.hostResults.forEach(function(result, idx) {
@@ -543,10 +537,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             });
         }
 
-        // update the task
+        // update the task status bar
         if (scope.tasks[task_id]) {
             play_id = scope.tasks[task_id].play_id;
-
             first = FindFirstTaskofPlay({
                 scope: scope,
                 play_id: play_id
@@ -904,7 +897,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
         scope.host_summary.unreachable = Object.keys(data.dark).length;
         scope.host_summary.failed = Object.keys(data.failures).length;
         scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed +
-        scope.host_summary.unreachable + scope.host_summary.failed;
+            scope.host_summary.unreachable + scope.host_summary.failed;
     };
 }])
 
