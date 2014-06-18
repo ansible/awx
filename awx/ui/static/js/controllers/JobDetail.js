@@ -111,26 +111,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         // process any events sitting in the queue
         var url, hostId = 0, taskId = 0, playId = 0;
 
-        function notEmpty(x) {
-            return Object.keys(x).length > 0;
-        }
-
-        function getMaxId(x) {
-            var keys = Object.keys(x);
-            keys.sort();
-            return keys[keys.length - 1];
-        }
-
         // Find the max event.id value in memory
-        if (notEmpty(scope.hostResults)) {
-            hostId = getMaxId(scope.hostResults);
-        }
-        else if (notEmpty(scope.tasks)) {
-            taskId = getMaxId(scope.tasks);
-        }
-        else if (notEmpty(scope.plays)) {
-            playId = getMaxId(scope.plays);
-        }
+        hostId = (scope.hostResults.length > 0) ? scope.hostResults[scope.hostResults.length - 1] : 0;
+        taskId = (scope.tasks.length > 0) ? scope.tasks[scope.tasks.length - 1] : 0;
+        playId = (scope.plays.length > 0) ? scope.plays[scope.plays.length - 1] : 0;
         lastEventId = Math.max(hostId, taskId, playId);
 
         api_complete = true;
@@ -198,6 +182,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     }
     scope.removeRefreshJobDetails = scope.$on('LoadJobDetails', function(e, events_url) {
         // Call to load all the job bits including, plays, tasks, hosts results and host summary
+
+        scope.plays = [];
+        scope.playsMap = {};
+
         var url = scope.job.url  + 'job_plays/?order_by=id';
         Rest.setUrl(url);
         Rest.get()
@@ -205,7 +193,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 data.forEach(function(event, idx) {
                     var status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful',
                         start = event.started,
-                        end, elapsed, play;
+                        end, elapsed;
 
                     if (idx < data.length - 1) {
                         // end date = starting date of the next event
@@ -224,25 +212,20 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                     else {
                         elapsed = '00:00:00';
                     }
-                    if (scope.playsMap[event.id]) {
-                        play = scope.plays[scope.playsMapp[event.id]];
-                        play.finished = end;
-                        play.elapsed = elapsed;
-                        play.status = status;
-                        play.playActiveClass = '';
-                    }
-                    else {
-                        scope.plays.push({
-                            id: event.id,
-                            name: event.play,
-                            created: start,
-                            finished: end,
-                            status: status,
-                            elapsed: elapsed,
-                            playActiveClass: ''
-                        });
-                        scope.playsMap[event.id] = scope.plays.length - 1;
-                    }
+
+                    scope.plays.push({
+                        id: event.id,
+                        name: event.play,
+                        created: start,
+                        finished: end,
+                        status: status,
+                        elapsed: elapsed,
+                        playActiveClass: '',
+                        hostCount: 0,
+                        fistTask: null
+                    });
+                    scope.playsMap[event.id] = scope.plays.length - 1;
+
                     scope.host_summary.ok += (data.ok_count) ? data.ok_count : 0;
                     scope.host_summary.changed += (data.changed_count) ? data.changed_count : 0;
                     scope.host_summary.unreachable += (data.unreachable_count) ? data.unreachable_count : 0;
