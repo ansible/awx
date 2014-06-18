@@ -28,7 +28,10 @@
 @tip-background: #0088CC;
 @tip-color: #fff;
 
+@import url(http://fonts.googleapis.com/css?family=Open+Sans);
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:400, 600);
 
+@import "main-layout.less";
 @import "animations.less";
 @import "jquery-ui-overrides.less";
 @import "codemirror.less";
@@ -37,18 +40,8 @@
 @import "job-details.less";
 @import "jobs.less";
 @import "inventory-edit.less";
+@import "breadcrumbs.less";
 
-
-html, body { height: 100%; }
-
-html {
-  background-color: @white;
-}
-
-body {
-  padding-top: 75px;
-  color: @black;
-}
 
 /* Bootstrap fix that's causing a right margin to appear
    whenver a modal is opened */
@@ -412,54 +405,8 @@ dd {
   background-color: @black;
 }
 
-.main-menu .nav {
-  margin-top: 0;
-}
-
-.main-menu .nav > li > a {
-  font-size: 12px;
-  color: @grey;
-}
-
-.main-menu .nav > li > a:hover,
-.main-menu .nav > li > a:focus {
-  color: @blue;
-}
-
-#main_tabs.nav-tabs>li.active>a, #main_tabs.nav-tabs>li.active>a:hover, #main_tabs.nav-tabs>li.active>a:focus {
-  color: @blue;
-  cursor: pointer;
-}
-
 .text-justify {
   text-align: justify;
-}
-
-.navbar-collapse {
-  padding-right: 0;
-}
-
-.main-menu .nav >li >a:last-child {
-  padding-right: 0;
-  padding-left: 20px;
-}
-
-.navbar>.container-fluid .navbar-brand {
-  height: 0;
-  margin-left: 0;
-  margin-top: 11px;
-}
-
-/* Using inline-block rather than block keeps
-    brand img from right aligning into the collapse button
-    on mobile screens */
-.main-menu .navbar-brand {
-  display: inline-block;
-  padding: 0;
-}
-
-.main-menu .navbar-brand img {
-  max-width: 260px;
 }
 
 .help-link,

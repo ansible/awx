@@ -1,10 +1,9 @@
 <div class="tab-pane" id="inventory_edit">
     <div ng-cloak id="htmlTemplate">
-        <div class="row">
-            <div class="col-lg-12" id="breadcrumbs"></div>
-        </div>
 
-        <ul class="group-breadcrumbs">
+        <ul class="ansible-breadcrumb">
+            <li><a href="#/inventories">Inventories</a></li>
+            <li><a href="">{{ inventory.name }}</a></li>
             <li ng-repeat="group_breadcrumb in group_breadcrumbs" ng-class="group_breadcrumb.active_class"><a href="" ng-click="breadcrumbGroupSelect(group_breadcrumb.id)">{{ group_breadcrumb.name }}</a></li>
         </ul>
 

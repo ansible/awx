@@ -1,0 +1,73 @@
+/*********************************************
+ *  Copyright (c) 2014 AnsibleWorks, Inc.
+ *
+ *  breadcrumbs.less
+ *
+ *  custom breadcrumbs
+ *
+ */
+
+.ansible-breadcrumb {
+    list-style: none;
+    overflow: hidden;
+    padding: 0;
+    margin: 0 0 8px 0;
+}
+.ansible-breadcrumb li {
+    float: left;
+    height: 26px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+.ansible-breadcrumb li a {
+    color: @white;
+    font-weight: normal;
+    text-decoration: none;
+    padding: 3px 8px 3px 20px;
+    background: @blue-dark;                   /* fallback color */
+    position: relative;
+    left: 0;
+    top: 0;
+    display: block;
+    float: left;
+}
+.ansible-breadcrumb li.active a {
+    background: @grey;
+    color: @black;
+    font-weight: normal;
+}
+.ansible-breadcrumb li a:after {
+    content: " ";
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 13px dashed transparent;           /* Go big on the size, and let overflow hide */
+    border-bottom: 13px dashed transparent;
+    border-left: 11px solid @blue-dark;
+    position: absolute;
+    top: 50%;
+    margin-top: -13px;
+    left: 100%;
+    z-index: 2;
+}
+.ansible-breadcrumb li.active a:after {
+    border-left: 13px solid @grey;
+}
+.ansible-breadcrumb li a:before {
+    content: " ";
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 13px dashed transparent;
+    border-bottom: 13px dashed transparent;
+    border-left: 11px solid @white;
+    position: absolute;
+    top: 50%;
+    margin-top: -13px;
+    margin-left: 1px;
+    left: 100%;
+    z-index: 1;
+}
+.ansible-breadcrumb li.active a:before {
+    border-left: 11px solid @white;
+}

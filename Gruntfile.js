@@ -27,10 +27,12 @@ module.exports = function(grunt) {
         less: {
             production: {
                 options: {
-                    cleancss: true
+                    cleancss: true,
+		    compress: true
                 },
                 files: {
-                    "awx/ui/static/css/awx.min.css": "awx/ui/static/less/ansible-ui.less"
+                    "awx/ui/static/css/awx.min.css": "awx/ui/static/less/ansible-ui.less",
+                    "awx/ui/static/css/ansible-bootstrap.min.css": "awx/ui/static/ansible-bootstrap/bootstrap.less"
                 }
             }
         }

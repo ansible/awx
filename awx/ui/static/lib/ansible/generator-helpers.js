@@ -401,8 +401,7 @@ angular.module('GeneratorHelpers', [])
                 mode = params.mode,
                 html = '', itm, navigation;
 
-            html += "<div class=\"nav-path\">\n";
-            html += "<ul class=\"breadcrumb\" id=\"breadcrumb-list\">\n";
+            html += "<ul class=\"ansible-breadcrumb\" id=\"breadcrumb-list\">\n";
             html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title }}</a></li>\n";
 
             if (list.navigationLinks) {
@@ -443,15 +442,14 @@ angular.module('GeneratorHelpers', [])
                 }
                 html += "</ul>\n";
                 html += "</div><!-- dropdown -->\n";
-                html += "</div><!-- nav-path -->\n";
             } else {
-                html += "<li class=\"active\">";
+                html += "<li class=\"active\"><a href=\"\">";
                 if (mode === 'select') {
                     html += list.selectTitle;
                 } else {
                     html += list.editTitle;
                 }
-                html += "</li>\n</ul>\n</div>\n";
+                html += "</a></li>\n</ul>\n";
             }
 
             return html;

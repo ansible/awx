@@ -5,7 +5,7 @@
   <title>Ansible Tower</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/custom-theme/jquery-ui-1.10.3.custom.min.css" />
-  <link rel="stylesheet" href="{{ STATIC_URL }}lib/bootstrap/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}css/ansible-bootstrap.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/components-font-awesome/css/font-awesome.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2/select2.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2/select2-bootstrap.css" />
@@ -169,52 +169,51 @@
 
 </head>
 <body>
-<div id="wrap">
-    <div id="navbar-container">
-        <div class="navbar navbar-inverse navbar-fixed-top main-menu" role="navigation">
-           <div class="container-fluid">
-             <div class="navbar-header">
-                <a class="navbar-brand" href="#home"><img class="logo" src="{{ STATIC_URL }}img/tower_console_logo.png" /></a>
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                </button>
-             </div>
-             <div class="collapse navbar-collapse navbar-responsive-collapse">
-                <ul class="nav navbar-nav pull-right">
-                  <li id="socket-beacon"></li>
-                  <li ng-show="current_user.username != null && current_user.username != undefined">
-                     <a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
-                  <li ng-show="userLoggedIn == true"><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
-                  <li ng-show="userLoggedIn == true"><a id="main_contact_support" target="_blank"
-                      href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a><li>
-                  <li ng-show="userLoggedIn == true"><a id="main_logout" href="#/logout">Logout</a></li>
-                </ul>
-             </div><!-- nav-collapse -->
-           </div>
-        </div><!-- navbar -->
-    </div>
-    <div class="container-fluid main-container" id="main">
-
-    <div class="row">
-      <div class="col-lg-12">
-        <ul class="nav nav-tabs" id="main_tabs">
-          <li class="active"><a href="#home" id="main_home_tab" data-toggle="tab" class="main-tab-link">Home</a></li>
-          <li><a href="#organizations" id="main_organizations_tab" class="main-tab-link" data-toggle="tab">Organizations</a></li>
-          <li><a href="#users" id="main_users_tab" data-toggle="tab" class="main-tab-link">Users</a></li>
-          <li><a href="#teams" id="main_teams_tab" data-toggle="tab" class="main-tab-link">Teams</a></li>
-          <li><a href="#credentials" id="main_credentials_tab" data-toggle="tab" class="main-tab-link">Credentials</a></li>
-          <li><a href="#projects" id="main_projects_tab" data-toggle="tab" class="main-tab-link">Projects</a></li>
-          <li><a href="#inventories" id="main_inventories_tab" data-toggle="tab" class="main-tab-link">Inventories</a></li>
-          <li><a href="#job_templates" id="main_job_templates_tab" data-toggle="tab" class="main-tab-link">Job Templates</a></li>
-          <li><a href="#jobs" id="main_jobs_tab" data-toggle="tab" class="main-tab-link">Jobs</a></li>
-          <li><a href="#sockets" id="main_sockets_tab" data-toggle="tab" class="main-tab-link">Sockets</a></li>
-        </ul>
-
-        <div class="tab-content" id="tab-content-container">
-          <div ng-view id="main-view"></div>
+    <div id="main-menu-container">
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-navbar-collapse">
+                      <span class="sr-only">Toggle navigation</span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="http://www.ansible.com" target="_blank"><img src="{{ STATIC_URL }}img/tower_console_bug_black.png" /></a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav" id="ansible-main-menu">
+                        <li id="home" class="active"><a href="#home" id="main_home_link" >Dashboard</a></li>
+                        <li id="organizations"><a href="#organizations" id="main_organizations_link">Organizations</a></li>
+                        <li id="users"><a href="#users" id="main_users_link">Users</a></li>
+                        <li id="teams"><a href="#teams" id="main_teams_link">Teams</a></li>
+                        <li id="credentials"><a href="#credentials" id="main_credentials_link">Credentials</a></li>
+                        <li id="projects"><a href="#projects" id="main_projects_link">Projects</a></li>
+                        <li id="inventories"><a href="#inventories" id="main_inventories_link">Inventories</a></li>
+                        <li id="job_templates"><a href="#job_templates" id="main_job_templates_link">Job Templates</a></li>
+                        <li id="jobs"><a href="#jobs" id="main_jobs_link">Jobs</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav pull-right">
+                        <li class="dropdown">
+                            <a href="" id="account-menu-link" data-toggle="dropdown">Account <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                               <li><a href="">Logout</a></li>
+                               <li><a href="">License</a></li>
+                               <li><a href="">Contact Support</a></li>
+                               <li><a href="">About</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
         </div>
+    </div>
+
+    <div class="container-fluid" id="#content-container">
+      <div class="row">
+          <div class="col-lg-12">
+              <div ng-view id="main-view"></div>
+          </div>
       </div>
     </div>
 
@@ -364,6 +363,7 @@
   <div class="spinny"><i class="fa fa-cog fa-spin fa-2x"></i> <p>working...</p></div>
 </div>
 
+<!--
 <div class="navbar navbar-inverse site-footer fade-in">
     <div class="container-fluid">
         <div class="row">
@@ -382,6 +382,7 @@
         </div>
     </div>
 </div>
+-->
 
   <script src="{{ STATIC_URL }}lib/jqueryui/ui/minified/jquery-ui.min.js"></script>
   <script src="{{ STATIC_URL }}lib/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -407,19 +408,6 @@
   <script scr="{{ STATIC_URL }}lib/lib/jQuery.dotdotdot/src/js/jquery.dotdotdot.min.js"></script>
   <script src="{{ STATIC_URL }}lib/d3js/build/d3.v3.min.js"></script>
   <script src="{{ STATIC_URL }}lib/d3Donut/d3Donut.js"></script>
-
-  <script>
-      // When user clicks on main tab, fire the matching Angular route
-      $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-          var url, regx, loc;
-          url = ($(e.target).text() === 'Jobs') ? 'job' : $(e.target).text().toLowerCase().replace(/ /g,'_');
-          regx = new RegExp('/\#\/' + url);
-          loc = window.location.toString();
-          if (! regx.test(loc)) {
-             window.location = '#/' + url.toLowerCase().replace(/ /g,'_');
-          }
-      });
-  </script>
 
 </body>
 </html>

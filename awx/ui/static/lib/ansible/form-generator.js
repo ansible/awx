@@ -1048,8 +1048,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
             breadCrumbs: function (options, navigation) {
 
                 var itm, paths, html = '';
-                html += "<div class=\"nav-path\">\n";
-                html += "<ul class=\"breadcrumb\">\n";
+                html += "<ul class=\"ansible-breadcrumb\">\n";
                 html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title }}</a></li>\n";
 
                 if (navigation) {
@@ -1090,15 +1089,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                     }
                     html += "</ul>\n";
                     html += "</div><!-- dropdown -->\n";
-                    html += "</div><!-- nav-path -->\n";
                 } else {
-                    html += "<li class=\"active\">";
+                    html += "<li class=\"active\"><a href=\"\">";
                     if (options.mode === 'edit') {
                         html += this.form.editTitle;
                     } else {
                         html += this.form.addTitle;
                     }
-                    html += "</li>\n</ul>\n</div><!-- nav-path -->\n";
+                    html += "</a></li>\n</ul> <!-- group-breadcrumbs -->\n";
                 }
                 return html;
             },
