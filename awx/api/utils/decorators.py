@@ -23,14 +23,14 @@ def paginated(method):
         # Manually spin up pagination.
         # How many results do we show?
         limit = api_settings.PAGINATE_BY
-        if request.GET.get(api_settings.PAGINATE_BY_PARAM, False):
-            limit = request.GET[api_settings.PAGINATE_BY_PARAM]
+        if request.QUERY_PARAMS.get(api_settings.PAGINATE_BY_PARAM, False):
+            limit = request.QUERY_PARAMS[api_settings.PAGINATE_BY_PARAM]
         if api_settings.MAX_PAGINATE_BY:
             limit = min(api_settings.MAX_PAGINATE_BY, limit)
         limit = int(limit)
 
         # What page are we on?
-        page = int(request.GET.get('page', 1))
+        page = int(request.QUERY_PARAMS.get('page', 1))
         offset = (page - 1) * limit
 
         # Add the limit, offset, and page variables to the keyword arguments
