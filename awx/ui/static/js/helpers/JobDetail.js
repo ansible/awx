@@ -61,8 +61,8 @@ angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 }])
 
 .factory('DigestEvent', ['$rootScope', '$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult', 'SelectPlay', 'SelectTask',
-    'GetHostCount', 'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary', 'JobIsFinished', 'AddNewTask',
-function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTask, GetHostCount, GetElapsed,
+    'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary', 'JobIsFinished', 'AddNewTask',
+function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTask, GetElapsed,
     UpdateTaskStatus, DrawGraph, LoadHostSummary, JobIsFinished, AddNewTask) {
     return function(params) {
 
@@ -467,7 +467,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
 }])
 
 // Add a new host result
-.factory('AddHostResult', ['FindFirstTaskofPlay', 'SetTaskStyles', function(FindFirstTaskofPlay, SetTaskStyles) {
+.factory('AddHostResult', ['SetTaskStyles', function(SetTaskStyles) {
     return function(params) {
         var scope = params.scope,
             task_id = params.task_id,
