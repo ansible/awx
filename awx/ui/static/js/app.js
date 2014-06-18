@@ -418,7 +418,7 @@ angular.module('Tower', [
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
             Timer, ClearScope, HideStream, Socket) {
 
-            var base, e, html, sock;
+            var e, html, sock;
 
             LoadBasePaths();
 
@@ -447,11 +447,24 @@ angular.module('Tower', [
                 return browser;
             }
 
+            function activateTab() {
+                // Make the correct tab active
+                var base = $location.path().replace(/^\//, '').split('/')[0];
+                if (base === '') {
+                    base = 'home';
+                } else {
+                    //base.replace(/\_/g, ' ');
+                    base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
+                }
+                $('#ansible-main-menu li').each(function() {
+                    $(this).removeClass('active');
+                });
+                $('#ansible-main-menu #' + base).addClass('active');
+            }
+
             $rootScope.browser = detectBrowser();
 
             $rootScope.$on("$routeChangeStart", function (event, next) {
-                var base;
-
                 // Before navigating away from current tab, make sure the primary view is visible
                 if ($('#stream-container').is(':visible')) {
                     HideStream();
@@ -480,16 +493,7 @@ angular.module('Tower', [
                     CheckLicense();
                 }
 
-                // Make the correct tab active
-                base = $location.path().replace(/^\//, '').split('/')[0];
-                if (base === '') {
-                    base = 'home';
-                } else {
-                    base.replace(/\_/g, ' ');
-                    base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
-                }
-                $('.nav-tabs a[href="#' + base + '"]').tab('show');
-
+                activateTab();
             });
 
             if (!Authorization.getToken()) {
@@ -502,18 +506,7 @@ angular.module('Tower', [
                 $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
             }
 
-            // If browser refresh, activate the correct tab
-            base = ($location.path().replace(/^\//, '').split('/')[0]);
-            if (base === '') {
-                base = 'home';
-                $location.path('/home');
-            } else {
-                base.replace(/\_/g, ' ');
-                if (base === 'jobevents' || base === 'jobhostsummaries') {
-                    base = 'jobs';
-                }
-            }
-            $('.nav-tabs a[href="#' + base + '"]').tab('show');
+            activateTab();
 
             $rootScope.viewCurrentUser = function () {
                 $location.path('/users/' + $rootScope.current_user.id);
