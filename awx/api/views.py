@@ -21,6 +21,7 @@ from django.utils.timezone import now
 # Django REST Framework
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.exceptions import PermissionDenied, ParseError
+from rest_framework.pagination import BasePaginationSerializer
 from rest_framework.parsers import YAMLParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.renderers import YAMLRenderer
@@ -42,6 +43,7 @@ from awx.api.authentication import JobTaskAuthentication
 from awx.api.permissions import *
 from awx.api.renderers import *
 from awx.api.serializers import *
+from awx.api.utils.decorators import paginated
 from awx.api.generics import *
 from awx.api.generics import get_view_name
 
@@ -1517,16 +1519,28 @@ class JobJobPlaysList(BaseJobEventsList):
             all_plays.append(play_details)
         return Response(all_plays)
 
-class JobJobTasksList(BaseJobEventsList):
 
+class JobJobTasksList(BaseJobEventsList):
+    """A view for displaying aggregate data about tasks within a job
+    and their completion status.
+    """
     parent_model = Job
     authentication_classes = [JobTaskAuthentication] + \
                              api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
     new_in_150 = True
 
-    def get(self, request, *args, **kwargs):
-        tasks = []
+    @paginated
+    def get(self, request, limit, offset, *args, **kwargs):
+        """Return aggregate data about each of the job tasks that is:
+          - an immediate child of the job event
+          - corresponding to the spinning up of a new task or playbook
+        """
+        results = []
+
+        # Get the job and the parent task.
+        # If there's no event ID specified, this will return a 404.
+        # FIXME: Make this a good error message.
         job = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
         parent_task = get_object_or_404(job.job_events,
             pk=int(request.QUERY_PARAMS.get('event_id', -1)),
@@ -1542,23 +1556,25 @@ class JobJobTasksList(BaseJobEventsList):
         # relationship with itself (parent-child), and we're getting
         # information for an arbitrary number of children. This means we
         # need stats on grandchildren, sorted by child. 
-        raw_data = (JobEvent.objects.filter(parent__parent=parent_task,
+        queryset = (JobEvent.objects.filter(parent__parent=parent_task,
                                             parent__event__in=STARTING_EVENTS)
                                     .values('parent__id', 'event', 'changed')
                                     .annotate(num=Count('event'))
                                     .order_by('parent__id'))
+        count = queryset.count()
 
         # The data above will come back in a list, but we are going to
         # want to access it based on the parent id, so map it into a
         # dictionary.
         data = {}
-        for line in raw_data:
+        for line in queryset[offset:offset + limit]:
             parent_id = line.pop('parent__id')
             data.setdefault(parent_id, [])
             data[parent_id].append(line)
 
         # Iterate over the start events and compile information about each one.
-        qs = parent_task.children.filter(event__in=STARTING_EVENTS)
+        qs = parent_task.children.filter(event__in=STARTING_EVENTS,
+                                         id__in=data.keys())
         for task_start_event in qs:
             # Create initial task data.
             task_data = {
@@ -1605,10 +1621,10 @@ class JobJobTasksList(BaseJobEventsList):
                     task_data['failed_count'] += child_data['num']
                 elif child_data['event'] == 'runner_on_no_hosts':
                     task_data['host_count'] += child_data['num']
-            tasks.append(task_data)
+            results.append(task_data)
 
-        # Okay, we're done; return response data.
-        return Response(tasks)
+        # Done; return the results and count.
+        return results, count
 
 
 class UnifiedJobTemplateList(ListAPIView):
