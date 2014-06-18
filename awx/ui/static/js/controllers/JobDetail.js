@@ -186,11 +186,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     }
     scope.removePlaysReady = scope.$on('PlaysReady', function() {
         // Select the most recent play, which will trigger tasks and hosts to load
-        var ids = Object.keys(scope.plays),
-            lastPlay = (ids.length > 0) ? ids[ids.length - 1] : null;
         SelectPlay({
             scope: scope,
-            id: lastPlay,
+            id: ((scope.plays.length > 0) ? scope.plays[scope.plays.length - 1].id : null ),
             callback: 'InitialDataLoaded'
         });
     });
