@@ -68,6 +68,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
 
     event_socket.on("job_events-" + job_id, function(data) {
         data.event = data.event_name;
+        console.log("id: " + data.id + " lastEventId: " + lastEventId);
         if (api_complete && data.id > lastEventId) {
             $log.debug('received event: ' + data.id);
             if (queue.length < 50) {
@@ -109,12 +110,17 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     }
     scope.removeAPIComplete = scope.$on('APIComplete', function() {
         // process any events sitting in the queue
-        var url, hostId = 0, taskId = 0, playId = 0;
+        var keys, url, hostId = 0, taskId = 0, playId = 0;
 
         // Find the max event.id value in memory
-        hostId = (scope.hostResults.length > 0) ? scope.hostResults[scope.hostResults.length - 1] : 0;
-        taskId = (scope.tasks.length > 0) ? scope.tasks[scope.tasks.length - 1] : 0;
-        playId = (scope.plays.length > 0) ? scope.plays[scope.plays.length - 1] : 0;
+        hostId = (scope.hostResults.length > 0) ? scope.hostResults[scope.hostResults.length - 1].id : 0;
+        if (scope.hostResults.length > 0) {
+            keys = Object.keys(scope.hostResults);
+            keys.sort();
+            hostId = keys[keys.length - 1];
+        }
+        taskId = (scope.tasks.length > 0) ? scope.tasks[scope.tasks.length - 1].id : 0;
+        playId = (scope.plays.length > 0) ? scope.plays[scope.plays.length - 1].id : 0;
         lastEventId = Math.max(hostId, taskId, playId);
 
         api_complete = true;
