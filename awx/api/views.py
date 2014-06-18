@@ -1528,39 +1528,88 @@ class JobJobTasksList(BaseJobEventsList):
     def get(self, request, *args, **kwargs):
         tasks = []
         job = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        parent_task = get_object_or_404(job.job_events, pk=int(request.QUERY_PARAMS.get('event_id', -1)))
-        for task_start_event in parent_task.children.filter(Q(event='playbook_on_task_start') | Q(event='playbook_on_setup')):
-            task_data = dict(id=task_start_event.id, name="Gathering Facts" if task_start_event.event == 'playbook_on_setup' else task_start_event.task,
-                             created=task_start_event.created, modified=task_start_event.modified,
-                             failed=False, changed=False, host_count=0, reported_hosts=0, successful_count=0, failed_count=0,
-                             changed_count=0, skipped_count=0)
-            for child_event in task_start_event.children.all():
-                if child_event.event == 'runner_on_failed':
+        parent_task = get_object_or_404(job.job_events,
+            pk=int(request.QUERY_PARAMS.get('event_id', -1)),
+        )
+
+        # Some events correspond to a playbook or task starting up,
+        # and these are what we're interested in here.
+        STARTING_EVENTS = ('playbook_on_task_start', 'playbook_on_setup')
+
+        # We need to pull information about each start event.
+        #
+        # This is super tricky, because this table has a one-to-many
+        # relationship with itself (parent-child), and we're getting
+        # information for an arbitrary number of children. This means we
+        # need stats on grandchildren, sorted by child. 
+        raw_data = (JobEvent.objects.filter(parent__parent=parent_task,
+                                            parent__event__in=STARTING_EVENTS)
+                                    .values('parent__id', 'event', 'changed')
+                                    .annotate(num=Count('event'))
+                                    .order_by('parent__id'))
+
+        # The data above will come back in a list, but we are going to
+        # want to access it based on the parent id, so map it into a
+        # dictionary.
+        data = {}
+        for line in raw_data:
+            parent_id = line.pop('parent__id')
+            data.setdefault(parent_id, [])
+            data[parent_id].append(line)
+
+        # Iterate over the start events and compile information about each one.
+        qs = parent_task.children.filter(event__in=STARTING_EVENTS)
+        for task_start_event in qs:
+            # Create initial task data.
+            task_data = {
+                'changed': False,
+                'changed_count': 0,
+                'created': task_start_event.created,
+                'failed': False,
+                'failed_count': 0,
+                'host_count': 0,
+                'id': task_start_event.id,
+                'modified': task_start_event.modified,
+                'name': 'Gathering Facts' if
+                            task_start_event.event == 'playbook_on_setup' else
+                            task_start_event.task,
+                'reported_hosts': 0,
+                'skipped_count': 0,
+                'successful_count': 0,
+            }
+
+            # Iterate over the data compiled for this child event, and
+            # make appropriate changes to the task data.
+            for child_data in data.get(task_start_event.id, []):
+                if child_data['event'] == 'runner_on_failed':
                     task_data['failed'] = True
-                    task_data['host_count'] += 1
-                    task_data['reported_hosts'] += 1
-                    task_data['failed_count'] += 1
-                elif child_event.event == 'runner_on_ok':
-                    task_data['host_count'] += 1
-                    task_data['reported_hosts'] += 1
-                    if child_event.changed:
-                        task_data['changed_count'] += 1
+                    task_data['host_count'] += child_data['num']
+                    task_data['reported_hosts'] += child_data['num']
+                    task_data['failed_count'] += child_data['num']
+                elif child_data['event'] == 'runner_on_ok':
+                    task_data['host_count'] += child_data['num']
+                    task_data['reported_hosts'] += child_data['num']
+                    if child_data['changed']:
+                        task_data['changed_count'] += child_data['num']
                         task_data['changed'] = True
                     else:
-                        task_data['successful_count'] += 1
-                elif child_event.event == 'runner_on_skipped':
-                    task_data['host_count'] += 1
-                    task_data['reported_hosts'] += 1
-                    task_data['skipped_count'] += 1
-                elif child_event.event == 'runner_on_error':
-                    task_data['host_count'] += 1
-                    task_data['reported_hosts'] += 1
+                        task_data['successful_count'] += child_data['num']
+                elif child_data['event'] == 'runner_on_skipped':
+                    task_data['host_count'] += child_data['num']
+                    task_data['reported_hosts'] += child_data['num']
+                    task_data['skipped_count'] += child_data['num']
+                elif child_data['event'] == 'runner_on_error':
+                    task_data['host_count'] += child_data['num']
+                    task_data['reported_hosts'] += child_data['num']
                     task_data['failed'] = True
-                    task_data['failed_count'] += 1
-                elif child_event.event == 'runner_on_no_hosts':
-                    task_data['host_count'] += 1
+                    task_data['failed_count'] += child_data['num']
+                elif child_data['event'] == 'runner_on_no_hosts':
+                    task_data['host_count'] += child_data['num']
             tasks.append(task_data)
+
+        # Okay, we're done; return response data.
         return Response(tasks)
+
 
 class UnifiedJobTemplateList(ListAPIView):
 
