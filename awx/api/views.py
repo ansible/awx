@@ -1485,10 +1485,17 @@ class JobJobPlaysList(BaseJobEventsList):
     permission_classes = (JobTaskPermission,)
     new_in_150 = True
 
-    def get(self, request, *args, **kwargs):
+    @paginated
+    def get(self, request, limit, offset, *args, **kwargs):
         all_plays = []
         job = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        for play_event in job.job_events.filter(event='playbook_on_play_start'):
+
+        # Put together a queryset for relevant job events.
+        qs = job.job_events.filter(event='playbook_on_play_start')
+        count = qs.count()
+
+        # Iterate over the relevant play events and get the details.
+        for play_event in qs[offset:offset + limit]:
             play_details = dict(id=play_event.id, play=play_event.play, started=play_event.created, failed=play_event.failed, changed=play_event.changed)
             event_aggregates = JobEvent.objects.filter(parent__in=play_event.children.all()).values("event").annotate(Count("id")).order_by()
             change_aggregates = JobEvent.objects.filter(parent__in=play_event.children.all(), event='runner_on_ok').values("changed").annotate(Count("id")).order_by()
@@ -1517,7 +1524,9 @@ class JobJobPlaysList(BaseJobEventsList):
             play_details['skipped_count'] = skipped_count
             play_details['unreachable_count'] = unreachable_count
             all_plays.append(play_details)
-        return Response(all_plays)
+
+        # Done; return the plays and the total count.
+        return all_plays, count
 
 
 class JobJobTasksList(BaseJobEventsList):
