@@ -9,7 +9,7 @@
 
 function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, ProcessEventQueue, SelectPlay, SelectTask, Socket, GetElapsed, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList,
-    JobIsFinished, SetTaskStyles, DigestEvent) {
+    JobIsFinished, SetTaskStyles) {
 
     ClearScope();
 
@@ -19,8 +19,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         api_complete = false,
         refresh_count = 0,
         lastEventId = 0,
-        queue = [],
-        processEvent;
+        queue = [];
 
     scope.plays = [];
     scope.playsMap = {};
@@ -67,41 +66,26 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
 
     event_socket.init();
 
-
-    processEvent = _.throttle(function() {
-        var event;
-        if (queue.length > 0) {
-            event = queue.pop();
-            $log.debug('processing event: ' + event.id);
-            DigestEvent({
-                scope: scope,
-                event: event
-            });
-        }
-    }, 200);
-
     event_socket.on("job_events-" + job_id, function(data) {
         data.event = data.event_name;
         if (api_complete && data.id > lastEventId) {
-            $log.debug('received event: ' + data.id);
-            queue.unshift(data);
-            processEvent();
+            if (queue.length < 20) {
+                queue.unshift(data);
+            }
+            else {
+                api_complete = false;  // stop more events from hitting the queue
+                window.clearInterval($rootScope.jobDetailInterval);
+                $log.debug('queue halted. reloading...');
+                setTimeout(function() {
+                    $log.debug('reload');
+                    scope.haltEventQueue = true;
+                    queue = [];
+                    scope.$emit('LoadJob');
+                }, 300);
+            }
         }
-            //if (queue.length < 20) {
-            //    queue.unshift(data);
-            //}
-            //*else {
-            //    api_complete = false;  // stop more events from hitting the queue
-            //    $log.debug('queue halted. reloading in 1.');
-            //    setTimeout(function() {
-            //        $log.debug('reloading');
-            //        scope.haltEventQueue = true;
-            //        queue = [];
-            //        scope.$emit('LoadJob');
-            //    }, 1000);
-           // }
-           //}
     });
+
 
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
@@ -120,6 +104,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             }
         }
     });
+
 
     if (scope.removeAPIComplete) {
         scope.removeAPIComplete();
@@ -167,10 +152,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             DrawGraph({ scope: scope, resize: true });
         }
 
-        //ProcessEventQueue({
-        //    scope: scope,
-        //    eventQueue: queue
-        //});
+        ProcessEventQueue({
+            scope: scope,
+            eventQueue: queue
+        });
 
     });
 
@@ -984,5 +969,5 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
 
 JobDetailController.$inject = [ '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'ProcessEventQueue', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'FilterAllByHostName', 'DrawGraph',
-    'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished', 'SetTaskStyles', 'DigestEvent'
+    'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished', 'SetTaskStyles'
 ];
