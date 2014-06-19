@@ -11,6 +11,7 @@ import sys
 import tempfile
 import time
 import urlparse
+import unittest
 
 # Django
 from django.conf import settings
@@ -872,6 +873,9 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertEqual(new_inv.total_groups, ngroups)
         self.assertElapsedLessThan(30)
 
+    @unittest.skipIf(getattr(settings, 'LOCAL_DEVELOPMENT', False),
+                     'Skip this test in local development environments, '
+                     'which may vary widely on memory.')
     def test_large_inventory_file(self):
         new_inv = self.organizations[0].inventories.create(name='largeinv')
         self.assertEqual(new_inv.hosts.count(), 0)
