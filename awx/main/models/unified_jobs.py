@@ -8,6 +8,7 @@ import re
 import shlex
 import os
 import os.path
+from cStringIO import StringIO
 
 # PyYAML
 import yaml
@@ -501,20 +502,34 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 pass
         super(UnifiedJob, self).delete()
 
-    @property
-    def result_stdout_raw(self):
+    def result_stdout_raw_handle(self):
         if self.result_stdout_file != "":
             if not os.path.exists(self.result_stdout_file):
-                return "stdout capture is missing"
-            with open(self.result_stdout_file, "r") as stdout_fd:
-                return stdout_fd.read()
+                return StringIO("stdout capture is missing")
+            return open(self.result_stdout_file, "r")
         else:
-            return self.result_stdout_text
+            return StringIO(self.result_stdout_text)
+
+    @property
+    def result_stdout_raw(self):
+        return self.result_stdout_raw_handle().read()
 
     @property
     def result_stdout(self):
         ansi_escape = re.compile(r'\x1b[^m]*m')
         return ansi_escape.sub('', self.result_stdout_raw)
+
+    def result_stdout_raw_limited(self, start_line=0, end_line=None):
+        return_buffer = ""
+        if end_line is not None:
+            end_line = int(end_line)
+        for line in self.result_stdout_raw_handle().readlines()[int(start_line):end_line]:
+            return_buffer += line
+        return return_buffer
+
+    def result_stdout_limited(self, start_line=0, end_line=None):
+        ansi_escape = re.compile(r'\x1b[^m]*m')
+        return ansi_escape.sub('', self.result_stdout_raw_limited(start_line, end_line))
 
     @property
     def celery_task(self):

@@ -1653,6 +1653,8 @@ class UnifiedJobStdout(RetrieveAPIView):
         unified_job = self.get_object()
         if request.accepted_renderer.format in ('html', 'api'):
             scheme = request.QUERY_PARAMS.get('scheme', None)
+            start_line = request.QUERY_PARAMS.get('start_line', 0)
+            end_line = request.QUERY_PARAMS.get('end_line', None)
             if scheme not in SCHEME:
                 scheme = 'ansi2html'
             dark_val = request.QUERY_PARAMS.get('dark', '')
@@ -1663,11 +1665,11 @@ class UnifiedJobStdout(RetrieveAPIView):
                                       title=get_view_name(self.__class__))
             if content_only:
                 headers = conv.produce_headers()
-                body = conv.convert(unified_job.result_stdout_raw, full=False)
+                body = conv.convert(unified_job.result_stdout_raw_limited(start_line, end_line), full=False)
                 data = '\n'.join([headers, body])
                 data = '<div class="nocode body_foreground body_background">%s</div>' % data
             else:
-                data = conv.convert(unified_job.result_stdout_raw)
+                data = conv.convert(unified_job.result_stdout_raw_limited(start_line, end_line))
             # Fix ugly grey background used by default.
             data = data.replace('.body_background { background-color: #AAAAAA; }',
                                 '.body_background { background-color: #f5f5f5; }')
