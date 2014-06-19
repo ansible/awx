@@ -92,6 +92,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     }
     scope.removeInitialLoadComplete = scope.$on('InitialLoadComplete', function() {
         var url;
+        Wait('stop');
         if (JobIsFinished(scope)) {
             url = scope.job.related.job_events + '?event=playbook_on_stats';
             Rest.setUrl(url);
