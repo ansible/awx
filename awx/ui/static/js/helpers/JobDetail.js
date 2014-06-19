@@ -39,30 +39,33 @@
 
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
-.factory('ProcessEventQueue', ['$log', 'DigestEvent', 'JobIsFinished', function ($log, DigestEvent, JobIsFinished) {
+.factory('ProcessEventQueue', ['$log', '$rootScope', 'DigestEvent', 'JobIsFinished', function ($log, $rootScope, DigestEvent, JobIsFinished) {
     return function(params) {
         var scope = params.scope,
-            eventQueue = params.eventQueue,
-            event;
+            eventQueue = params.eventQueue;
         function runTheQ() {
-            while (eventQueue.length > 0) {
+            var event;
+            scope.processing = true;
+            while (!JobIsFinished(scope) && !scope.haltEventQueue && eventQueue.length > 0) {
                 event = eventQueue.pop();
-                $log.debug('read event: ' + event.id);
+                $log.debug('processing event: ' + event.id);
                 DigestEvent({ scope: scope, event: event });
             }
-            if (!JobIsFinished(scope) && !scope.haltEventQueue) {
-                setTimeout( function() {
-                    runTheQ();
-                }, 300);
-            }
+            $log.debug('processing halted');
+            scope.processing = false;
         }
-        runTheQ();
+        $rootScope.jobDetailInterval = window.setInterval(function() {
+            $log.debug('checking... processing: ' + scope.processing + ' queue.length: ' + eventQueue.length);
+            if (!scope.processing && eventQueue.length > 0) {
+                runTheQ();
+            }
+        }, 1000);
     };
 }])
 
-.factory('DigestEvent', ['$rootScope', '$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult', 'SelectPlay', 'SelectTask',
+.factory('DigestEvent', ['$rootScope', '$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult',
     'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary', 'JobIsFinished', 'AddNewTask',
-function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, SelectPlay, SelectTask, GetElapsed,
+function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, GetElapsed,
     UpdateTaskStatus, DrawGraph, LoadHostSummary, JobIsFinished, AddNewTask) {
     return function(params) {
 
@@ -88,11 +91,18 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                     fistTask: null
                 });
                 scope.playsMap[event.id] = scope.plays.length -1;
+                if (scope.playsMap[scope.activePlay] !== undefined) {
+                    scope.plays[scope.playsMap[scope.activePlay]].playActiveClass = '';
+                }
+                scope.activePlay = event.id;
+                scope.plays[scope.playsMap[event.id]].playActiveClass = 'active';
                 scope.tasks = [];
                 scope.tasksMap = {};
                 scope.hostResults = [];
                 scope.hostResultsMap = {};
-                scope.activePlay = event.id;
+                $('#hosts-table-detail').mCustomScrollbar("update");
+                $('#tasks-table-detail').mCustomScrollbar("update");
+                scope.$emit('FixPlaysScroll');
                 break;
 
             case 'playbook_on_setup':
@@ -254,21 +264,27 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             changedStyle: { display: 'none' },
             skippedStyle: { display: 'none' }
         });
-
+        scope.tasksMap[event.id] = scope.tasks.length - 1;
         if (scope.tasks.length > scope.tasksMaxRows) {
             scope.tasks.shift();
         }
-
-        if (!scope.playsMap[scope.activePlay].firstTask) {
-            scope.playsMap[scope.activePlay].firstTask = event.id;
+        if (!scope.plays[scope.playsMap[scope.activePlay]].firstTask) {
+            scope.plays[scope.playsMap[scope.activePlay]].firstTask = event.id;
         }
 
+        if (scope.activeTask && scope.tasksMap[scope.activeTask] !== undefined) {
+            scope.tasks[scope.tasksMap[scope.activeTask]].taskActiveClass = '';
+        }
+        scope.activeTask = event.id;
+        scope.tasks[scope.tasksMap[event.id]].taskActiveClass = 'active';
         scope.hostResults = [];
         scope.hostResultsMap = {};
-        scope.activeTask = event.id;
 
         // Not sure if this still works
         scope.hasRoles = (event.role) ? true : false;
+
+        $('#hosts-table-detail').mCustomScrollbar("update");
+        scope.$emit('FixTasksScroll');
 
         // Record the first task id
         UpdatePlayStatus({
@@ -323,7 +339,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             status_text = params.status_text,
             play;
 
-        if (scope.playsMap[id]) {
+        if (scope.playsMap[id] !== undefined) {
             play = scope.plays[scope.playsMap[id]];
             if (failed) {
                 play.status = 'failed';
@@ -363,7 +379,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             no_hosts = params.no_hosts,
             task;
 
-        if (scope.tasksMap[id]) {
+        if (scope.tasksMap[id] !== undefined) {
             task = scope.tasks[scope.tasksMap[id]];
             if (no_hosts){
                 task.status = 'no-matching-hosts';
@@ -414,7 +430,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
         scope.host_summary.total  = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
             scope.host_summary.failed;
 
-        if (scope.hostsMap[host_id]) {
+        if (scope.hostsMap[host_id] !== undefined) {
             scope.hosts[scope.hostsMap[host_id]].ok += (status === 'successful') ? 1 : 0;
             scope.hosts[scope.hostsMap[host_id]].changed += (status === 'changed') ? 1 : 0;
             scope.hosts[scope.hostsMap[host_id]].unreachable += (status === 'unreachable') ? 1 : 0;
@@ -442,7 +458,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             scope.hosts.forEach(function(host, idx){
                 scope.hostsMap[host.id] = idx;
             });
-            $('#tasks-table-detail').mCustomScrollbar("update");
+            $('#hosts-table-detail').mCustomScrollbar("update");
         }
 
         UpdateTaskStatus({
@@ -479,7 +495,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             msg = params.message,
             task;
 
-        if (!scope.hostResultsMap[host_id] && scope.hostResults.length < scope.hostTableRows) {
+        if (scope.hostResultsMap[host_id] === undefined && scope.hostResults.length < scope.hostTableRows) {
             scope.hostResults.push({
                 id: event_id,
                 status: status,
@@ -503,12 +519,13 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             scope.hostResults.forEach(function(result, idx) {
                 scope.hostResultsMap[result.id] = idx;
             });
+            scope.$emit('FixHostResultsScroll');
         }
 
         // update the task status bar
-        if (scope.tasksMap[task_id]) {
+        if (scope.tasksMap[task_id] !== undefined) {
             task = scope.tasks[scope.tasksMap[task_id]];
-            if (task_id === scope.plays[scope.playsMap[scope.activePlays]].firstPlay) {
+            if (task_id === scope.plays[scope.playsMap[scope.activePlay]].firstTask) {
                 scope.plays[scope.playsMap[scope.activePlay]].hostCount++;
                 task.hostCount++;
             }
@@ -575,7 +592,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             clear = (scope.activePlay === id) ? false : true;  //are we moving to a new play?
         }
 
-        if (scope.playsMap[scope.activePlay]) {
+        if (scope.activePlay && scope.playsMap[scope.activePlay] !== undefined) {
             scope.plays[scope.playsMap[scope.activePlay]].playActiveClass = '';
         }
         if (id) {
@@ -612,13 +629,18 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
             url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
             url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
-            url += '&page_size=' + scope.tasksMaxRows;
+            url += '&page_size=' + scope.tasksMaxRows + '&order_by=id';
 
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
                     data.results.forEach(function(event, idx) {
-                        var end, elapsed, task;
+                        var task, end, elapsed;
+
+                        if (!scope.plays[scope.playsMap[scope.activePlay]].firstTask) {
+                            scope.plays[scope.playsMap[scope.activePlay]].firstTask = event.id;
+                            scope.plays[scope.playsMap[scope.activePlay]].hostCount = (event.host_count) ? event.host_count : 0;
+                        }
 
                         if (idx < data.length - 1) {
                             // end date = starting date of the next event
@@ -626,7 +648,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                         }
                         else {
                             // no next event (task), get the end time of the play
-                            end = scope.plays[scope.activePlay].finished;
+                            end = scope.plays[scope.playsMap[scope.activePlay]].finished;
                         }
 
                         if (end) {
@@ -639,9 +661,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                             elapsed = '00:00:00';
                         }
 
-                        if (scope.tasksMap[event.id]) {
+                        if (scope.tasksMap[event.id] !== undefined) {
                             task = scope.tasks[scope.tasksMap[event.id]];
-                            task.status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                            task.status = ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' );
+                            task.modified = event.modified;
                             task.finished = end;
                             task.elapsed = elapsed;
                             task.hostCount = (event.host_count) ? event.host_count : 0;
@@ -671,11 +694,20 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                                 taskActiveClass: ''
                             });
                             scope.tasksMap[event.id] = scope.tasks.length - 1;
+                            if (scope.tasks.length > scope.tasksMaxRows) {
+                                scope.tasks.shift();
+                            }
                         }
                         SetTaskStyles({
                             scope: scope,
                             task_id: event.id
                         });
+                    });
+
+                    //rebuild the index;
+                    scope.tasksMap = {};
+                    scope.tasks.forEach(function(task, idx) {
+                        scope.tasksMap[task.id] = idx;
                     });
 
                     // set the active task
@@ -684,6 +716,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
                         id: (scope.tasks.length > 0) ? scope.tasks[scope.tasks.length - 1].id : null,
                         callback: callback
                     });
+
+                    scope.$emit('FixTasksScroll');
+
                 })
                 .error(function(data) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -693,6 +728,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
         else {
             scope.tasks = [];
             scope.tasksMap = {};
+            $('#tasks-table-detail').mCustomScrollbar("update");
             SelectTask({
                 scope: scope,
                 id: null,
@@ -717,20 +753,13 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             clear = (scope.activeTask === id) ? false : true;
         }
 
-        if (scope.activeTask && scope.tasksMap[scope.activeTask]) {
+        if (scope.activeTask && scope.tasksMap[scope.activeTask] !== undefined) {
             scope.tasks[scope.tasksMap[scope.activeTask]].taskActiveClass = '';
         }
         if (id) {
             scope.tasks[scope.tasksMap[id]].taskActiveClass = 'active';
         }
         scope.activeTask = id;
-
-        $('#tasks-table-detail').mCustomScrollbar("update");
-        setTimeout( function() {
-            scope.auto_scroll = true;
-            $('#tasks-table-detail').mCustomScrollbar("scrollTo", "bottom");
-
-        }, 1500);
 
         LoadHosts({
             scope: scope,
@@ -741,7 +770,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
 }])
 
 // Refresh the list of hosts
-.factory('LoadHosts', ['Rest', 'ProcessErrors', 'SelectHost', function(Rest, ProcessErrors, SelectHost) {
+.factory('LoadHosts', ['Rest', 'ProcessErrors', function(Rest, ProcessErrors) {
     return function(params) {
         var scope = params.scope,
             callback = params.callback,
@@ -763,21 +792,39 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             Rest.get()
                 .success(function(data) {
                     data.results.forEach(function(event) {
-                        scope.hostResults.push({
-                            id: event.id,
-                            status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
-                            host_id: event.host,
-                            task_id: event.parent,
-                            name: event.event_data.host,
-                            created: event.created,
-                            msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
-                        });
-                        scope.hostResultsMap[event.id] = scope.hostResults.length - 1;
+                        var result;
+                        if (scope.hostResultsMap[event.id] !== undefined) {
+                            result = scope.hostResults[scope.hostResultsMap[event.id]];
+                            result.status = ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' );
+                            result.created = event.created;
+                            result.msg = (event.event_data && event.event_data.res) ? event.event_data.res.msg : '';
+                        }
+                        else {
+                            scope.hostResults.push({
+                                id: event.id,
+                                status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                                host_id: event.host,
+                                task_id: event.parent,
+                                name: event.event_data.host,
+                                created: event.created,
+                                msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
+                            });
+                            if (scope.hostResults.length > scope.hostTableRows) {
+                                scope.hostResults.shift();
+                            }
+                        }
                     });
+
+                    // Rebuild the index
+                    scope.hostResultsMap = {};
+                    scope.hostResults.forEach(function(result, idx) {
+                        scope.hostResultsMap[result.id] = idx;
+                    });
+
                     if (callback) {
                         scope.$emit(callback);
                     }
-                    SelectHost({ scope: scope });
+                    scope.$emit('FixHostResultsScroll');
                 })
                 .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -790,19 +837,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
             if (callback) {
                 scope.$emit(callback);
             }
-            SelectHost({ scope: scope });
+            $('#hosts-table-detail').mCustomScrollbar("update");
         }
-    };
-}])
-
-.factory('SelectHost', [ function() {
-    return function(params) {
-        var scope = params.scope;
-        $('#tasks-table-detail').mCustomScrollbar("update");
-        setTimeout( function() {
-            scope.auto_scroll = true;
-            $('#hosts-table-detail').mCustomScrollbar("scrollTo", "bottom");
-        }, 700);
     };
 }])
 
@@ -861,11 +897,24 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Se
 .factory('LoadHostSummary', [ function() {
     return function(params) {
         var scope = params.scope,
-            data = params.data;
-        scope.host_summary.ok = Object.keys(data.ok).length;
-        scope.host_summary.changed = Object.keys(data.changed).length;
-        scope.host_summary.unreachable = Object.keys(data.dark).length;
-        scope.host_summary.failed = Object.keys(data.failures).length;
+            data = params.data,
+            host;
+        scope.host_summary.ok = 0;
+        for (host in data.ok) {
+            scope.host_summary.ok += data.ok[host];
+        }
+        scope.host_summary.changed = 0;
+        for (host in data.changed) {
+            scope.host_summary.changed += data.changed[host];
+        }
+        scope.host_summary.unreachable = 0;
+        for (host in data.dark) {
+            scope.host_summary.dark += data.dark[host];
+        }
+        scope.host_summary.failed = 0;
+        for (host in data.failures) {
+            scope.host_summary.failed += data.failures[host];
+        }
         scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed +
             scope.host_summary.unreachable + scope.host_summary.failed;
     };

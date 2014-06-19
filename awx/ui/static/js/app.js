@@ -470,6 +470,10 @@ angular.module('Tower', [
                     HideStream();
                 }
 
+                if ($rootScope.jobDetailInterval) {
+                    window.clearInterval($rootScope.jobDetailInterval);
+                }
+
                 // On each navigation request, check that the user is logged in
                 if (!/^\/(login|logout)/.test($location.path())) {
                     // capture most recent URL, excluding login/logout
