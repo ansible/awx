@@ -42,25 +42,21 @@ angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 .factory('ProcessEventQueue', ['$log', '$rootScope', 'DigestEvent', 'JobIsFinished', function ($log, $rootScope, DigestEvent, JobIsFinished) {
     return function(params) {
         var scope = params.scope,
-            eventQueue = params.eventQueue,
-            processing = false;
+            eventQueue = params.eventQueue;
         function runTheQ() {
             var event;
-            processing = true;
+            scope.processing = true;
             while (!JobIsFinished(scope) && !scope.haltEventQueue && eventQueue.length > 0) {
                 event = eventQueue.pop();
                 $log.debug('processing event: ' + event.id);
                 DigestEvent({ scope: scope, event: event });
             }
-            processing = false;
-            //if (!JobIsFinished(scope) && !scope.haltEventQueue) {
-            //    setTimeout( function() {
-            //        runTheQ();
-            //    }, 1000);
-            //}
+            $log.debug('processing halted');
+            scope.processing = false;
         }
         $rootScope.jobDetailInterval = window.setInterval(function() {
-            if (!processing && eventQueue.length > 0) {
+            $log.debug('checking... processing: ' + scope.processing + ' queue.length: ' + eventQueue.length);
+            if (!scope.processing && eventQueue.length > 0) {
                 runTheQ();
             }
         }, 1000);
