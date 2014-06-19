@@ -3,12 +3,10 @@
 
         <div class="row">
             <div id="breadcrumb-container" class="col-md-12" style="position: relative;">
-                <div class="nav-path">
-                    <ul class="breadcrumb" id="breadcrumb-list">
-                        <li><a href="/#/jobs">Jobs</a></li>
-                        <li><strong>{{ job_id }}</strong> - <a href="{{ job_template_url }}" aw-tool-tip="Edit the job template" data-placement="top">{{ job_template_name }}</a></li>
-                    </ul>
-                </div>
+                <ul class="ansible-breadcrumb" id="breadcrumb-list">
+                    <li><a href="/#/jobs">Jobs</a></li>
+                    <li class="active"><a href="">{{ job_id }} - {{ job.name }}</a></li>
+                </ul>
             </div>
         </div>
 
