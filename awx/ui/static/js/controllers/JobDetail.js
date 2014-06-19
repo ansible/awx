@@ -82,6 +82,8 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                     data.status === 'error' || data.status === 'successful') {
                 $log.debug('Job completed!');
                 $log.debug(scope.jobData);
+                window.clearInterval($rootScope.jobDetailInterval);
+                UpdateDOM({ scope: scope });
             }
         }
     });
@@ -94,6 +96,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         var url;
         Wait('stop');
         if (JobIsFinished(scope)) {
+            UpdateDOM({ scope: scope });
             url = scope.job.related.job_events + '?event=playbook_on_stats';
             Rest.setUrl(url);
             Rest.get()
@@ -207,20 +210,19 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             var play = scope.jobData.plays[scope.activePlay], url;
 
             url = scope.job.url + 'job_tasks/?event_id=' + play.id;
-            url += '&page_size=' + scope.tasksMaxRows + '&order_by=-id';
+            url += '&page_size=' + scope.tasksMaxRows + '&order_by=id';
 
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    var idx, end, elapsed, event;
                     if (data.results.length > 0) {
-                        lastEventId = data.results[0].id;
-                        scope.activeTask = data.results[0].id;
+                        lastEventId = data.results[data.results.length - 1].id;
+                        scope.activeTask = data.results[data.results.length - 1].id;
                     }
-                    for (idx=data.results.length - 1; idx >= 0; idx--) {
-                        event = data.results[idx];
+                    data.results.forEach(function(event, idx) {
+                        var end, elapsed;
 
-                        if (play.firstTask === null) {
+                        if (!play.firstTask) {
                             play.firstTask = event.id;
                             play.hostCount = (event.host_count) ? event.host_count : 0;
                         }
@@ -266,7 +268,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             scope: scope,
                             task_id: event.id
                         });
-                    }
+                    });
                     scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
                     scope.$emit('LoadHosts');
                 })
@@ -295,17 +297,18 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         scope.jobData.plays = {};
 
         var url = scope.job.url  + 'job_plays/?order_by=id';
-        url += '&page_size=' + scope.playsMaxRows + '&order_by=-id';
+        url += '&page_size=' + scope.playsMaxRows + '&order_by=id';
 
         Rest.setUrl(url);
         Rest.get()
             .success( function(data) {
-                var idx, event, status, start, end, elapsed;
-                if (data.length > 0) {
-                    scope.activePlay = data[0].id;
+                if (data.results.length > 0) {
+                    lastEventId = data.results[data.results.length - 1].id;
+                    scope.activePlay = data.results[data.results.length - 1].id;
                 }
-                for (idx=data.length - 1; idx >= 0; idx--) {
-                    event = data[idx];
+                data.results.forEach(function(event, idx) {
+                    var status, start, end, elapsed;
+
                     status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
                     start = event.started;
 
@@ -336,6 +339,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         elapsed: elapsed,
                         hostCount: 0,
                         fistTask: null,
+                        playActiveClass: '',
                         tasks: {}
                     };
 
@@ -345,6 +349,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                     scope.host_summary.failed += (data.failed_count) ? data.failed_count : 0;
                     scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed +
                         scope.host_summary.unreachable + scope.host_summary.failed;
+                });
+                if (scope.activePlay) {
+                    scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
                 }
                 scope.$emit('LoadTasks', events_url);
                 //scope.$emit('FixPlaysScroll');

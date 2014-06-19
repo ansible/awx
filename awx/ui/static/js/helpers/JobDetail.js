@@ -95,8 +95,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 };
                 if (scope.activePlay) {
                     scope.jobData.plays[scope.activePlay].tasks = {};
+                    scope.jobData.plays[scope.activePlay].playActiveClass = '';
                 }
                 scope.activePlay = event.id;
+                scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
                 break;
 
             case 'playbook_on_setup':
@@ -940,7 +942,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             idx = 0,
             result = [],
             keys = Object.keys(scope.jobData.plays);
-        keys.reverse();
+        keys.sort();
         while (idx < keys.length && idx < scope.playsMaxRows) {
             result.push(scope.jobData.plays[keys[idx]]);
             idx++;
@@ -954,11 +956,14 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         var scope = params.scope,
             result = [],
             idx = 0,
+            keys;
+        if (scope.activePlay) {
             keys = Object.keys(scope.jobData.plays[scope.activePlay].tasks);
-        keys.reverse();
-        while (idx < keys.length && idx < scope.tasksMaxRows) {
-            result.push(scope.jobData.plays[scope.activePlay].tasks[keys[idx]]);
-            idx++;
+            keys.sort();
+            while (idx < keys.length && idx < scope.tasksMaxRows) {
+                result.push(scope.jobData.plays[scope.activePlay].tasks[keys[idx]]);
+                idx++;
+            }
         }
         scope.tasks = result;
     };
@@ -969,20 +974,26 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         var scope = params.scope,
             result = [],
             idx = 0,
-            hostResults = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults,
+            hostResults,
+            keys;
+
+        if (scope.activePlay && scope.activeTask) {
+            hostResults = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults;
             keys = Object.keys(hostResults);
 
-        keys.sort(function(a,b) {
-            if (hostResults[a].name < hostResults[b].name)
-                return 1;
-            if (hostResults[a].name > hostResults[b].name)
-                return -1;
-            // a must be equal to b
-            return 0;
-        });
+            keys.sort(function(a,b) {
+                if (hostResults[a].name > hostResults[b].name)
+                    return 1;
+                if (hostResults[a].name < hostResults[b].name)
+                    return -1;
+                // a must be equal to b
+                return 0;
+            });
 
-        while (idx < keys.length && idx < scope.hostResultsMaxRows) {
-            result.push(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostsResults[keys[idx]]);
+            while (idx < keys.length && idx < scope.hostResultsMaxRows) {
+                result.push(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults[keys[idx]]);
+                idx++;
+            }
         }
         scope.hostResults = result;
     };
