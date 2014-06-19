@@ -746,7 +746,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
                 url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
                 url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
-                url += '&id__lt=' + scope.tasks[scope.tasks[0]].id + '&page_size=' + scope.tasksMaxRows + '&order_by=id';
+                url += '&id__lt=' + scope.tasks[0].id + '&page_size=' + scope.tasksMaxRows + '&order_by=-id';
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.get()
