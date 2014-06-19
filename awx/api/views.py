@@ -1600,24 +1600,24 @@ class JobJobTasksList(BaseJobEventsList):
             for child_data in data.get(task_start_event.id, []):
                 if child_data['event'] == 'runner_on_failed':
                     task_data['failed'] = True
-                    task_data['host_count'] += 1
-                    task_data['reported_hosts'] += 1
-                    task_data['failed_count'] += 1
+                    task_data['host_count'] += child_data['num']
+                    task_data['reported_hosts'] += child_data['num']
+                    task_data['failed_count'] += child_data['num']
                 elif child_data['event'] == 'runner_on_ok':
-                    task_data['host_count'] += 1
-                    task_data['reported_hosts'] += 1
+                    task_data['host_count'] += child_data['num']
+                    task_data['reported_hosts'] += child_data['num']
                     if child_data['changed']:
-                        task_data['changed_count'] += 1
+                        task_data['changed_count'] += child_data['num']
                         task_data['changed'] = True
                     else:
-                        task_data['successful_count'] += 1
+                        task_data['successful_count'] += child_data['num']
                 elif child_data['event'] == 'runner_on_skipped':
-                    task_data['host_count'] += 1
-                    task_data['reported_hosts'] += 1
-                    task_data['skipped_count'] += 1
+                    task_data['host_count'] += child_data['num']
+                    task_data['reported_hosts'] += child_data['num']
+                    task_data['skipped_count'] += child_data['num']
                 elif child_data['event'] == 'runner_on_error':
-                    task_data['host_count'] += 1
-                    task_data['reported_hosts'] += 1
+                    task_data['host_count'] += child_data['num']
+                    task_data['reported_hosts'] += child_data['num']
                     task_data['failed'] = True
                     task_data['failed_count'] += child_data['num']
                 elif child_data['event'] == 'runner_on_no_hosts':
