@@ -1602,19 +1602,19 @@ class JobJobTasksList(BaseJobEventsList):
                     task_data['host_count'] += 1
                     task_data['reported_hosts'] += 1
                     task_data['failed_count'] += 1
-                elif child_event.event == 'runner_on_ok':
+                elif child_data['event'] == 'runner_on_ok':
                     task_data['host_count'] += 1
                     task_data['reported_hosts'] += 1
-                    if child_event.changed:
+                    if child_data['changed']:
                         task_data['changed_count'] += 1
                         task_data['changed'] = True
                     else:
                         task_data['successful_count'] += 1
-                elif child_event.event == 'runner_on_skipped':
+                elif child_data['event'] == 'runner_on_skipped':
                     task_data['host_count'] += 1
                     task_data['reported_hosts'] += 1
                     task_data['skipped_count'] += 1
-                elif child_event.event == 'runner_on_error':
+                elif child_data['event'] == 'runner_on_error':
                     task_data['host_count'] += 1
                     task_data['reported_hosts'] += 1
                     task_data['failed'] = True
