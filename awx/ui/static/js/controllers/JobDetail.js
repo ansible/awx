@@ -347,7 +347,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 }
                 scope.setSearchAll('host');
                 scope.$emit('LoadJobDetails', data.related.job_events);
-                scope.$emit('GetCredentialNames', data);
+                if (!scope.credential_name) {
+                    scope.$emit('GetCredentialNames', data);
+                }
             })
             .error(function(data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -375,10 +377,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         scope.removeFixPlaysScroll();
     }
     scope.removeFixPlaysScroll = scope.$on('FixPlaysScroll', function() {
+        scope.auto_scroll = true;
         $('#plays-table-detail').mCustomScrollbar("update");
         setTimeout( function() {
-            scope.auto_scroll = true;
-            $('#tasks-table-detail').mCustomScrollbar("scrollTo", "bottom");
+            $('#plays-table-detail').mCustomScrollbar("scrollTo", "bottom");
         }, 500);
     });
 
@@ -386,9 +388,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         scope.removeFixTasksScroll();
     }
     scope.removeFixTasksScroll = scope.$on('FixTasksScroll', function() {
+        scope.auto_scroll = true;
         $('#tasks-table-detail').mCustomScrollbar("update");
         setTimeout( function() {
-            scope.auto_scroll = true;
             $('#tasks-table-detail').mCustomScrollbar("scrollTo", "bottom");
         }, 500);
     });
@@ -398,9 +400,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         scope.removeFixHostResultsScroll();
     }
     scope.removeFixHostResultsScroll = scope.$on('FixHostResultsScroll', function() {
+        scope.auto_scroll = true;
         $('#hosts-table-detail').mCustomScrollbar("update");
         setTimeout( function() {
-            scope.auto_scroll = true;
             $('#hosts-table-detail').mCustomScrollbar("scrollTo", "bottom");
         }, 500);
     });
@@ -564,7 +566,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         // Called when user scrolls down (or forward in time)
         var url, mcs = arguments[0];
         scope.$apply(function() {
-            if (!scope.auto_scroll && scope.activeTask && scope.hostResults.length) {
+            if ((!scope.auto_scroll) && scope.activeTask && scope.hostResults.length) {
                 scope.auto_scroll = true;
                 url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
                 url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
@@ -611,7 +613,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         // Called when user scrolls up (or back in time)
         var url, mcs = arguments[0];
         scope.$apply(function() {
-            if (!scope.auto_scroll && scope.activeTask && scope.hostResults.length) {
+            if ((!scope.auto_scroll) && scope.activeTask && scope.hostResults.length) {
                 scope.auto_scroll = true;
                 url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
                 url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
@@ -658,7 +660,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         // Called when user scrolls down (or forward in time)
         var url, mcs = arguments[0];
         scope.$apply(function() {
-            if (!scope.auto_scroll && scope.activePlay && scope.tasks.length) {
+            if ((!scope.auto_scroll) && scope.activePlay && scope.tasks.length) {
                 scope.auto_scroll = true;
                 url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
                 url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
@@ -676,7 +678,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             }
                             else {
                                 // no next event (task), get the end time of the play
-                                end = scope.plays[scope.activePlay].finished;
+                                end = scope.plays[scope.playsMap[scope.activePlay]].finished;
                             }
                             if (end) {
                                 elapsed = GetElapsed({
@@ -736,7 +738,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         // Called when user scrolls up (or back in time)
         var url, mcs = arguments[0];
         scope.$apply(function() {
-            if (!scope.auto_scroll && scope.activePlay && scope.tasks.length) {
+            if ((!scope.auto_scroll) && scope.activePlay && scope.tasks.length) {
                 scope.auto_scroll = true;
                 url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
                 url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
@@ -754,7 +756,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             }
                             else {
                                 // no next event (task), get the end time of the play
-                                end = scope.plays[scope.activePlay].finished;
+                                end = scope.plays[scope.playsMap[scope.activePlay]].finished;
                             }
                             if (end) {
                                 elapsed = GetElapsed({
@@ -812,7 +814,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
 
     scope.HostSummaryOnTotalScroll = function(mcs) {
         var url;
-        if (!scope.auto_scroll && scope.hosts) {
+        if ((!scope.auto_scroll) && scope.hosts) {
             url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
             url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
             url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
@@ -856,7 +858,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
 
     scope.HostSummaryOnTotalScrollBack = function(mcs) {
         var url;
-        if (!scope.auto_scroll && scope.hosts) {
+        if ((!scope.auto_scroll) && scope.hosts) {
             url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
             url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
             url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
