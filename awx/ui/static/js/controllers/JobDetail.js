@@ -9,7 +9,7 @@
 
 function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList,
-    JobIsFinished, SetTaskStyles, DigestEvent) {
+    JobIsFinished, SetTaskStyles, DigestEvent, UpdateDOM) {
 
     ClearScope();
 
@@ -21,14 +21,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         lastEventId = 0;
 
     scope.plays = [];
-    scope.playsMap = {};
     scope.hosts = [];
-    scope.hostsMap = {};
     scope.tasks = [];
-    scope.tasksMap = {};
     scope.hostResults = [];
-    scope.hostResultsMap = {};
-    api_complete = false;
 
     scope.hostResultsMaxRows = 75;
     scope.hostSummariesMaxRows = 75;
@@ -123,6 +118,11 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 DrawGraph({ scope: scope, resize: true });
             }
             api_complete = true;  //trigger events to start processing
+
+            $rootScope.jobDetailInterval = setInterval(function() {
+                $log.debug('Updating the DOM...');
+                UpdateDOM({ scope: scope });
+            }, 3000);
         }
     });
 
@@ -1053,5 +1053,5 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
 
 JobDetailController.$inject = [ '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'FilterAllByHostName', 'DrawGraph',
-    'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished', 'SetTaskStyles', 'DigestEvent'
+    'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM'
 ];

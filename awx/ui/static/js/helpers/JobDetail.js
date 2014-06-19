@@ -323,7 +323,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             status_text = params.status_text,
             play;
 
-        if (scope.jobData.plays[scope.activePlay] !== undefined) {
+        if (scope.jobData.plays[id] !== undefined) {
             play = scope.jobData.plays[scope.activePlay];
             if (failed) {
                 play.status = 'failed';
@@ -363,7 +363,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             no_hosts = params.no_hosts,
             task;
 
-        if (scope.jobData.plays[scope.activePlay].tasks[scope.activeTask] !== undefined) {
+        if (scope.jobData.plays[scope.activePlay].tasks[id] !== undefined) {
             task = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask];
             if (no_hosts){
                 task.status = 'no-matching-hosts';
@@ -473,7 +473,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             name: name,
             created: created,
             msg: msg
-        }
+        };
 
         // update the task status bar
         if (scope.jobData.plays[scope.activePlay].tasks[task_id] !== undefined) {
@@ -931,6 +931,70 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 $('#graph-section .header .legend').show();
             }
         }
+    };
+}])
+
+.factory('DrawPlays', [ function() {
+    return function(params) {
+        var scope = params.scope,
+            idx = 0,
+            result = [],
+            keys = Object.keys(scope.jobData.plays);
+        keys.reverse();
+        while (idx < keys.length && idx < scope.playsMaxRows) {
+            result.push(scope.jobData.plays[keys[idx]]);
+            idx++;
+        }
+        scope.plays = result;
+    };
+}])
+
+.factory('DrawTasks', [ function() {
+    return function(params) {
+        var scope = params.scope,
+            result = [],
+            idx = 0,
+            keys = Object.keys(scope.jobData.plays[scope.activePlay].tasks);
+        keys.reverse();
+        while (idx < keys.length && idx < scope.tasksMaxRows) {
+            result.push(scope.jobData.plays[scope.activePlay].tasks[keys[idx]]);
+            idx++;
+        }
+        scope.tasks = result;
+    };
+}])
+
+.factory('DrawHostResults', [ function() {
+    return function(params) {
+        var scope = params.scope,
+            result = [],
+            idx = 0,
+            hostResults = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults,
+            keys = Object.keys(hostResults);
+
+        keys.sort(function(a,b) {
+            if (hostResults[a].name < hostResults[b].name)
+                return 1;
+            if (hostResults[a].name > hostResults[b].name)
+                return -1;
+            // a must be equal to b
+            return 0;
+        });
+
+        while (idx < keys.length && idx < scope.hostResultsMaxRows) {
+            result.push(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostsResults[keys[idx]]);
+        }
+        scope.hostResults = result;
+    };
+}])
+
+.factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults', function(DrawPlays, DrawTasks, DrawHostResults) {
+    return function(params) {
+        var scope = params.scope;
+
+        DrawPlays({ scope: scope });
+        DrawTasks({ scope: scope });
+        DrawHostResults({ scope: scope });
     };
 }])
 
