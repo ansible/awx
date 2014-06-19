@@ -45,6 +45,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     scope.searchSummaryHostsEnabled = true;
     scope.searchAllHostsEnabled = true;
     scope.haltEventQueue = false;
+    scope.processing = false;
 
     scope.host_summary = {};
     scope.host_summary.ok = 0;
@@ -69,13 +70,14 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     event_socket.on("job_events-" + job_id, function(data) {
         data.event = data.event_name;
         if (api_complete && data.id > lastEventId) {
-            if (queue.length < 20) {
+            if (queue.length < 25) {
+                $log.debug('received event: ' + data.id);
                 queue.unshift(data);
             }
             else {
                 api_complete = false;  // stop more events from hitting the queue
                 window.clearInterval($rootScope.jobDetailInterval);
-                $log.debug('queue halted. reloading...');
+                $log.debug('halting queue. reloading...');
                 setTimeout(function() {
                     $log.debug('reload');
                     scope.haltEventQueue = true;
@@ -99,6 +101,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 $log.debug('Job completed!');
                 api_complete = false;
                 scope.haltEventQueue = true;
+                window.clearInterval($rootScope.jobDetailInterval);
                 queue = [];
                 scope.$emit('LoadJob');
             }
@@ -124,7 +127,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         playId = (scope.plays.length > 0) ? scope.plays[scope.plays.length - 1].id : 0;
         lastEventId = Math.max(hostId, taskId, playId);
 
-        api_complete = true;
         Wait('stop');
 
         // Draw the graph
@@ -147,16 +149,18 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
         }
-        else if (scope.host_summary.total > 0) {
-            // Draw the graph based on summary values in memory
-            DrawGraph({ scope: scope, resize: true });
+        else {
+            if (scope.host_summary.total > 0) {
+                // Draw the graph based on summary values in memory
+                DrawGraph({ scope: scope, resize: true });
+            }
+            api_complete = true;
+            scope.haltEventQueue = false;
+            ProcessEventQueue({
+                scope: scope,
+                eventQueue: queue
+            });
         }
-
-        ProcessEventQueue({
-            scope: scope,
-            eventQueue: queue
-        });
-
     });
 
     if (scope.removeInitialDataLoaded) {
