@@ -1572,7 +1572,8 @@ class JobJobTasksList(BaseJobEventsList):
             data.setdefault(parent_id, [])
             data[parent_id].append(line)
 
-        # Iterate over the start events and compile information about each one.
+        # Iterate over the start events and compile information about each one
+        # using their children.
         qs = parent_task.children.filter(event__in=STARTING_EVENTS,
                                          id__in=data.keys())
         for task_start_event in qs:
