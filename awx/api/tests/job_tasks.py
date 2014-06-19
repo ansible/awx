@@ -50,7 +50,7 @@ class JobTasksTests(BaseJobTestMixin, LiveServerTestCase):
 
         # Test to make sure we got back what we expected.
         result = response['results'][0]
-        self.assertEqual(result['host_count'], 1)
-        self.assertEqual(result['changed_count'], 1)
+        self.assertEqual(result['host_count'], 7)
+        self.assertEqual(result['changed_count'], 7)
         self.assertFalse(result['failed'])
         self.assertTrue(result['changed'])
