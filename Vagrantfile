@@ -34,8 +34,8 @@ Vagrant.configure('2') do |config|
       'vagrant' => true,
       'vagrant_host_user' => ENV['USER'],
     }
-    ansible.inventory_path = 'tools/vagrant/inventory'
-    ansible.playbook = 'tools/vagrant/playbook.yml'
+    ansible.inventory_path = 'tools/dev_setup/inventory'
+    ansible.playbook = 'tools/dev_setup/playbook.yml'
     ansible.verbose = 'v'
   end
 end
