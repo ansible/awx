@@ -72,6 +72,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         var scope = params.scope,
             event = params.event;
 
+        $log.debug('processing event: ' + event.id);
+
         switch (event.event) {
             case 'playbook_on_start':
                 if (!JobIsFinished(scope)) {
@@ -81,28 +83,20 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 break;
 
             case 'playbook_on_play_start':
-                scope.plays.push({
+                scope.jobData.plays[event.id] = {
                     id: event.id,
                     name: event.play,
                     created: event.created,
                     status: (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful',
                     elapsed: '00:00:00',
                     hostCount: 0,
-                    fistTask: null
-                });
-                scope.playsMap[event.id] = scope.plays.length -1;
-                if (scope.playsMap[scope.activePlay] !== undefined) {
-                    scope.plays[scope.playsMap[scope.activePlay]].playActiveClass = '';
+                    fistTask: null,
+                    tasks: {}
+                };
+                if (scope.activePlay) {
+                    scope.jobData.plays[scope.activePlay].tasks = {};
                 }
                 scope.activePlay = event.id;
-                scope.plays[scope.playsMap[event.id]].playActiveClass = 'active';
-                scope.tasks = [];
-                scope.tasksMap = {};
-                scope.hostResults = [];
-                scope.hostResultsMap = {};
-                $('#hosts-table-detail').mCustomScrollbar("update");
-                $('#tasks-table-detail').mCustomScrollbar("update");
-                scope.$emit('FixPlaysScroll');
                 break;
 
             case 'playbook_on_setup':
@@ -201,8 +195,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 });
                 scope.job_status.status = (event.failed) ? 'failed' : 'successful';
                 scope.job_status.status_class = "";
-                LoadHostSummary({ scope: scope, data: event.event_data });
-                DrawGraph({ scope: scope, resize: true });
+                //LoadHostSummary({ scope: scope, data: event.event_data });
+                //DrawGraph({ scope: scope, resize: true });
                 break;
         }
     };
@@ -246,14 +240,14 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         var scope = params.scope,
             event = params.event;
 
-        scope.tasks.push({
+        scope.jobData.plays[scope.activePlay].tasks[event.id] = {
             id: event.id,
             play_id: event.parent,
             name: event.event_display,
             status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
             created: event.created,
             modified: event.modified,
-            hostCount: scope.plays[scope.playsMap[scope.activePlay]].hostCount,
+            hostCount: scope.jobData.plays[scope.activePlay].hostCount,
             reportedHosts: 0,
             successfulCount: 0,
             failedCount: 0,
@@ -262,31 +256,21 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             successfulStyle: { display: 'none'},
             failedStyle: { display: 'none' },
             changedStyle: { display: 'none' },
-            skippedStyle: { display: 'none' }
-        });
-        scope.tasksMap[event.id] = scope.tasks.length - 1;
-        if (scope.tasks.length > scope.tasksMaxRows) {
-            scope.tasks.shift();
-        }
-        if (!scope.plays[scope.playsMap[scope.activePlay]].firstTask) {
-            scope.plays[scope.playsMap[scope.activePlay]].firstTask = event.id;
+            skippedStyle: { display: 'none' },
+            hostResults: {}
+        };
+
+        if (!scope.jobData.plays[scope.activePlay].firstTask) {
+            scope.jobData.plays[scope.activePlay].firstTask = event.id;
         }
 
-        if (scope.activeTask && scope.tasksMap[scope.activeTask] !== undefined) {
-            scope.tasks[scope.tasksMap[scope.activeTask]].taskActiveClass = '';
+        if (scope.activeTask && scope.jobData.plays[scope.activePlay].tasks[scope.activeTask] !== undefined) {
+            scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = '';
+            scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults = {};
         }
         scope.activeTask = event.id;
-        scope.tasks[scope.tasksMap[event.id]].taskActiveClass = 'active';
-        scope.hostResults = [];
-        scope.hostResultsMap = {};
+        scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
 
-        // Not sure if this still works
-        scope.hasRoles = (event.role) ? true : false;
-
-        $('#hosts-table-detail').mCustomScrollbar("update");
-        scope.$emit('FixTasksScroll');
-
-        // Record the first task id
         UpdatePlayStatus({
             scope: scope,
             play_id: event.parent,
@@ -295,9 +279,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             modified: event.modified
         });
 
-        if (scope.host_summary.total > 0) {
+        /*if (scope.host_summary.total > 0) {
             DrawGraph({ scope: scope, resize: true });
-        }
+        }*/
     };
 }])
 
@@ -339,8 +323,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             status_text = params.status_text,
             play;
 
-        if (scope.playsMap[id] !== undefined) {
-            play = scope.plays[scope.playsMap[id]];
+        if (scope.jobData.plays[scope.activePlay] !== undefined) {
+            play = scope.jobData.plays[scope.activePlay];
             if (failed) {
                 play.status = 'failed';
             }
@@ -379,8 +363,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             no_hosts = params.no_hosts,
             task;
 
-        if (scope.tasksMap[id] !== undefined) {
-            task = scope.tasks[scope.tasksMap[id]];
+        if (scope.jobData.plays[scope.activePlay].tasks[scope.activeTask] !== undefined) {
+            task = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask];
             if (no_hosts){
                 task.status = 'no-matching-hosts';
             }
@@ -430,35 +414,21 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         scope.host_summary.total  = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
             scope.host_summary.failed;
 
-        if (scope.hostsMap[host_id] !== undefined) {
-            scope.hosts[scope.hostsMap[host_id]].ok += (status === 'successful') ? 1 : 0;
-            scope.hosts[scope.hostsMap[host_id]].changed += (status === 'changed') ? 1 : 0;
-            scope.hosts[scope.hostsMap[host_id]].unreachable += (status === 'unreachable') ? 1 : 0;
-            scope.hosts[scope.hostsMap[host_id]].failed += (status === 'failed') ? 1 : 0;
+        if (scope.jobData.hostSummaries[host_id] !== undefined) {
+            scope.jobData.hostSummaries[host_id].ok += (status === 'successful') ? 1 : 0;
+            scope.jobData.hostSummaries[host_id].changed += (status === 'changed') ? 1 : 0;
+            scope.jobData.hostSummaries[host_id].unreachable += (status === 'unreachable') ? 1 : 0;
+            scope.jobData.hostSummaries[host_id].failed += (status === 'failed') ? 1 : 0;
         }
-        else if (scope.hosts.length < scope.hostSummaryTableRows) {
-            scope.hosts.push({
+        else {
+            scope.jobData.hostSummaries[host_id] = {
                 id: host_id,
                 name: name,
                 ok: (status === 'successful') ? 1 : 0,
                 changed: (status === 'changed') ? 1 : 0,
                 unreachable: (status === 'unreachable') ? 1 : 0,
                 failed: (status === 'failed') ? 1 : 0
-            });
-
-            scope.hosts.sort(function (a, b) {
-                if (a.name > b.name)
-                    return 1;
-                if (a.name < b.name)
-                    return -1;
-                // a must be equal to b
-                return 0;
-            });
-            scope.hostsMap = {};
-            scope.hosts.forEach(function(host, idx){
-                scope.hostsMap[host.id] = idx;
-            });
-            $('#hosts-table-detail').mCustomScrollbar("update");
+            };
         }
 
         UpdateTaskStatus({
@@ -495,40 +465,25 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             msg = params.message,
             task;
 
-        if (scope.hostResultsMap[host_id] === undefined && scope.hostResults.length < scope.hostTableRows) {
-            scope.hostResults.push({
-                id: event_id,
-                status: status,
-                host_id: host_id,
-                task_id: task_id,
-                name: name,
-                created: created,
-                msg: msg
-            });
-            scope.hostResults.sort(function(a,b) {
-                if (a.name < b.name) {
-                    return -1;
-                }
-                if (a.name > b.name) {
-                    return 1;
-                }
-                return 0;
-            });
-            // Refresh the map
-            scope.hostResultsMap = {};
-            scope.hostResults.forEach(function(result, idx) {
-                scope.hostResultsMap[result.id] = idx;
-            });
-            scope.$emit('FixHostResultsScroll');
+        scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults[event_id] = {
+            id: event_id,
+            status: status,
+            host_id: host_id,
+            task_id: task_id,
+            name: name,
+            created: created,
+            msg: msg
         }
 
         // update the task status bar
-        if (scope.tasksMap[task_id] !== undefined) {
-            task = scope.tasks[scope.tasksMap[task_id]];
-            if (task_id === scope.plays[scope.playsMap[scope.activePlay]].firstTask) {
-                scope.plays[scope.playsMap[scope.activePlay]].hostCount++;
+        if (scope.jobData.plays[scope.activePlay].tasks[task_id] !== undefined) {
+            task = scope.jobData.plays[scope.activePlay].tasks[task_id];
+
+            if (task_id === scope.jobData.plays[scope.activePlay].firstTask) {
+                scope.jobData.plays[scope.activePlay].hostCount++;
                 task.hostCount++;
             }
+
             task.reportedHosts += 1;
             task.failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
             task.changedCount += (status === 'changed') ? 1 : 0;
@@ -548,7 +503,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             scope = params.scope,
             diff, task;
 
-        task = scope.tasks[scope.tasksMap[task_id]];
+        task = scope.jobData.plays[scope.activePlay].tasks[task_id];
         task.failedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.failedCount / task.hostCount))) : 0;
         task.changedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.changedCount / task.hostCount))) : 0;
         task.skippedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.skippedCount / task.hostCount))) : 0;
