@@ -68,10 +68,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
 
     event_socket.on("job_events-" + job_id, function(data) {
         data.event = data.event_name;
-        console.log("id: " + data.id + " lastEventId: " + lastEventId);
         if (api_complete && data.id > lastEventId) {
             $log.debug('received event: ' + data.id);
-            if (queue.length < 50) {
+            if (queue.length < 20) {
                 queue.unshift(data);
             }
             else {
@@ -607,7 +606,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
                 url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
                 url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
-                url += 'id__gt=' + scope.tasks[scope.tasks.length - 1].id + '&page_size=' + (scope.tasksMaxRows / 3) + '&order_by=id';
+                url += '&id__gt=' + scope.tasks[scope.tasks.length - 1].id + '&page_size=' + (scope.tasksMaxRows / 3) + '&order_by=id';
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.get()
@@ -685,7 +684,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
                 url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
                 url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
-                url += 'id__lt=' + scope.tasks[scope.tasks[0]].name + '&page_size=' + (scope.tasksMaxRows / 3) + '&order_by=id';
+                url += '&id__lt=' + scope.tasks[scope.tasks[0]].name + '&page_size=' + (scope.tasksMaxRows / 3) + '&order_by=id';
                 Wait('start');
                 Rest.setUrl(url);
                 Rest.get()

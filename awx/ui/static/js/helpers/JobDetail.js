@@ -459,7 +459,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             scope.hosts.forEach(function(host, idx){
                 scope.hostsMap[host.id] = idx;
             });
-            $('#tasks-table-detail').mCustomScrollbar("update");
+            $('#hosts-table-detail').mCustomScrollbar("update");
         }
 
         UpdateTaskStatus({
