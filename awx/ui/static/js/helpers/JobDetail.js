@@ -516,6 +516,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             scope.hostResults.forEach(function(result, idx) {
                 scope.hostResultsMap[result.id] = idx;
             });
+            scope.$emit('FixHostResultsScroll');
         }
 
         // update the task status bar
