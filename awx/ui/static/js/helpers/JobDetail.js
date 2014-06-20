@@ -458,10 +458,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         if (scope.jobData.plays[scope.activePlay].tasks[task_id] !== undefined) {
             task = scope.jobData.plays[scope.activePlay].tasks[task_id];
 
-            if (task_id === scope.jobData.plays[scope.activePlay].firstTask) {
-                scope.jobData.plays[scope.activePlay].hostCount++;
-                task.hostCount++;
-            }
+            //if (task_id === scope.jobData.plays[scope.activePlay].firstTask) {
+            //    scope.jobData.plays[scope.activePlay].hostCount++;
+            //    task.hostCount++;
+            //}
 
             task.reportedHosts += 1;
             task.failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
@@ -525,20 +525,22 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             clear = (scope.activePlay === id) ? false : true;  //are we moving to a new play?
         }
 
-        if (scope.activePlay && scope.playsMap[scope.activePlay] !== undefined) {
-            scope.plays[scope.playsMap[scope.activePlay]].playActiveClass = '';
-        }
-        if (id) {
-            scope.plays[scope.playsMap[id]].playActiveClass = 'active';
-        }
         scope.activePlay = id;
+        scope.plays.forEach(function(play, idx) {
+            if (play.id === scope.activePlay) {
+                scope.plays[idx].playActiveClass = 'active';
+            }
+            else {
+                scope.plays[idx].playActiveClass = '';
+            }
+        });
 
         setTimeout(function() {
             scope.$apply(function() {
                 LoadTasks({
                     scope: scope,
                     callback: callback,
-                    clear: clear
+                    clear: true
                 });
             });
         });
@@ -568,12 +570,12 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             Rest.get()
                 .success(function(data) {
                     data.results.forEach(function(event, idx) {
-                        var task, end, elapsed;
+                        var end, elapsed;
 
-                        if (!scope.plays[scope.playsMap[scope.activePlay]].firstTask) {
-                            scope.plays[scope.playsMap[scope.activePlay]].firstTask = event.id;
-                            scope.plays[scope.playsMap[scope.activePlay]].hostCount = (event.host_count) ? event.host_count : 0;
-                        }
+                        //if (!scope.plays[scope.playsMap[scope.activePlay]].firstTask) {
+                        //    scope.plays[scope.playsMap[scope.activePlay]].firstTask = event.id;
+                        //    scope.plays[scope.playsMap[scope.activePlay]].hostCount = (event.host_count) ? event.host_count : 0;
+                        //}
 
                         if (idx < data.length - 1) {
                             // end date = starting date of the next event
@@ -581,7 +583,13 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                         }
                         else {
                             // no next event (task), get the end time of the play
-                            end = scope.plays[scope.playsMap[scope.activePlay]].finished;
+                            scope.plays.every(function(play) {
+                                if (play.id === scope.activePlay) {
+                                    end = play.finished;
+                                    return false;
+                                }
+                                return true;
+                            });
                         }
 
                         if (end) {
@@ -594,64 +602,37 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                             elapsed = '00:00:00';
                         }
 
-                        if (scope.tasksMap[event.id] !== undefined) {
-                            task = scope.tasks[scope.tasksMap[event.id]];
-                            task.status = ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' );
-                            task.modified = event.modified;
-                            task.finished = end;
-                            task.elapsed = elapsed;
-                            task.hostCount = (event.host_count) ? event.host_count : 0;
-                            task.reportedHosts = (event.reported_hosts) ? event.reported_hosts : 0;
-                            task.successfulCount = (event.successful_count) ? event.successful_count : 0;
-                            task.failedCount = (event.failed_count) ? event.failed_count : 0;
-                            task.changedCount = (event.changed_count) ? event.changed_count : 0;
-                            task.skippedCount = (event.skipped_count) ? event.skipped_count : 0;
-                            task.taskActiveClass = '';
-                        }
-                        else {
-                            scope.tasks.push({
-                                id: event.id,
-                                play_id: scope.activePlay,
-                                name: event.name,
-                                status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
-                                created: event.created,
-                                modified: event.modified,
-                                finished: end,
-                                elapsed: elapsed,
-                                hostCount: (event.host_count) ? event.host_count : 0,
-                                reportedHosts: (event.reported_hosts) ? event.reported_hosts : 0,
-                                successfulCount: (event.successful_count) ? event.successful_count : 0,
-                                failedCount: (event.failed_count) ? event.failed_count : 0,
-                                changedCount: (event.changed_count) ? event.changed_count : 0,
-                                skippedCount: (event.skipped_count) ? event.skipped_count : 0,
-                                taskActiveClass: ''
-                            });
-                            scope.tasksMap[event.id] = scope.tasks.length - 1;
-                            if (scope.tasks.length > scope.tasksMaxRows) {
-                                scope.tasks.shift();
-                            }
-                        }
-                        SetTaskStyles({
-                            scope: scope,
-                            task_id: event.id
+                        scope.tasks.push({
+                            id: event.id,
+                            play_id: scope.activePlay,
+                            name: event.name,
+                            status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                            created: event.created,
+                            modified: event.modified,
+                            finished: end,
+                            elapsed: elapsed,
+                            hostCount: (event.host_count) ? event.host_count : 0,
+                            reportedHosts: (event.reported_hosts) ? event.reported_hosts : 0,
+                            successfulCount: (event.successful_count) ? event.successful_count : 0,
+                            failedCount: (event.failed_count) ? event.failed_count : 0,
+                            changedCount: (event.changed_count) ? event.changed_count : 0,
+                            skippedCount: (event.skipped_count) ? event.skipped_count : 0,
+                            taskActiveClass: ''
                         });
-                    });
 
-                    //rebuild the index;
-                    scope.tasksMap = {};
-                    scope.tasks.forEach(function(task, idx) {
-                        scope.tasksMap[task.id] = idx;
+                        SetTaskStyles({
+                            task: scope.tasks[scope.tasks.length - 1]
+                        });
                     });
 
                     // set the active task
                     SelectTask({
                         scope: scope,
-                        id: (scope.tasks.length > 0) ? scope.tasks[scope.tasks.length - 1].id : null,
+                        id: (scope.tasks.length > 0) ? scope.tasks[0].id : null,
                         callback: callback
                     });
 
-                    scope.$emit('FixTasksScroll');
-
+                    $('#tasks-table-detail').mCustomScrollbar("update");
                 })
                 .error(function(data) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -659,8 +640,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 });
         }
         else {
-            scope.tasks = [];
-            scope.tasksMap = {};
             $('#tasks-table-detail').mCustomScrollbar("update");
             SelectTask({
                 scope: scope,
@@ -686,18 +665,20 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             clear = (scope.activeTask === id) ? false : true;
         }
 
-        if (scope.activeTask && scope.tasksMap[scope.activeTask] !== undefined) {
-            scope.tasks[scope.tasksMap[scope.activeTask]].taskActiveClass = '';
-        }
-        if (id) {
-            scope.tasks[scope.tasksMap[id]].taskActiveClass = 'active';
-        }
         scope.activeTask = id;
+        scope.tasks.forEach(function(task, idx) {
+            if (task.id === scope.activeTask) {
+                scope.tasks[idx].taskActiveClass = 'active';
+            }
+            else {
+                scope.tasks[idx].taskActiveClass = '';
+            }
+        });
 
         LoadHosts({
             scope: scope,
             callback: callback,
-            clear: clear
+            clear: true
         });
     };
 }])
@@ -725,39 +706,20 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             Rest.get()
                 .success(function(data) {
                     data.results.forEach(function(event) {
-                        var result;
-                        if (scope.hostResultsMap[event.id] !== undefined) {
-                            result = scope.hostResults[scope.hostResultsMap[event.id]];
-                            result.status = ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' );
-                            result.created = event.created;
-                            result.msg = (event.event_data && event.event_data.res) ? event.event_data.res.msg : '';
-                        }
-                        else {
-                            scope.hostResults.push({
-                                id: event.id,
-                                status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
-                                host_id: event.host,
-                                task_id: event.parent,
-                                name: event.event_data.host,
-                                created: event.created,
-                                msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
-                            });
-                            if (scope.hostResults.length > scope.hostTableRows) {
-                                scope.hostResults.shift();
-                            }
-                        }
+                        scope.hostResults.push({
+                            id: event.id,
+                            status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                            host_id: event.host,
+                            task_id: event.parent,
+                            name: event.event_data.host,
+                            created: event.created,
+                            msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
+                        });
                     });
-
-                    // Rebuild the index
-                    scope.hostResultsMap = {};
-                    scope.hostResults.forEach(function(result, idx) {
-                        scope.hostResultsMap[result.id] = idx;
-                    });
-
                     if (callback) {
                         scope.$emit(callback);
                     }
-                    scope.$emit('FixHostResultsScroll');
+                    $('#hosts-table-detail').mCustomScrollbar("update");
                 })
                 .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -765,8 +727,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 });
         }
         else {
-            scope.hostResults = [];
-            scope.hostResultsMap = {};
             if (callback) {
                 scope.$emit(callback);
             }
@@ -787,33 +747,21 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
         url += 'page_size=' + scope.hostSummaryTableRows + '&order_by=host__name';
 
-        if (scope.search_all_hosts_name || scope.searchAllStatus === 'failed') {
-            // User initiated a search
-            scope.hosts = [];
-            scope.hostsMap = {};
-        }
+        scope.hosts = [];
+        scope.hostsMap = {};
 
         Rest.setUrl(url);
         Rest.get()
             .success(function(data) {
                 data.results.forEach(function(event) {
-                    if (scope.hostsMap[event.host]) {
-                        scope.hosts[scope.hostsMap[event.host]].ok = event.ok;
-                        scope.hosts[scope.hostsMap[event.host]].changed = event.changed;
-                        scope.hosts[scope.hostsMap[event.host]].dark = event.dark;
-                        scope.hosts[scope.hostsMap[event.host]].failures = event.failures;
-                    }
-                    else {
-                        scope.hosts.push({
-                            id: event.host,
-                            name: event.summary_fields.host.name,
-                            ok: event.ok,
-                            changed: event.changed,
-                            unreachable: event.dark,
-                            failed: event.failures
-                        });
-                        scope.hostsMap[event.host] = scope.hosts.length - 1;
-                    }
+                    scope.hosts.push({
+                        id: event.host,
+                        name: event.summary_fields.host.name,
+                        ok: event.ok,
+                        changed: event.changed,
+                        unreachable: event.dark,
+                        failed: event.failures
+                    });
                 });
                 $('#hosts-summary-table').mCustomScrollbar("update");
                 if (callback) {
@@ -932,8 +880,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         }
 
         scope.plays = result;
-        scope.$emit('FixPlaysScroll');
-
+        if (scope.liveEventProcessing) {
+            scope.$emit('FixPlaysScroll');
+        }
     };
 }])
 
@@ -960,7 +909,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         }
 
         scope.tasks = result;
-        scope.$emit('FixTasksScroll');
+        if (scope.liveEventProcessing) {
+            scope.$emit('FixTasksScroll');
+        }
     };
 }])
 
@@ -991,7 +942,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             }
         }
         scope.hostResults = result;
-        scope.$emit('FixHostResultsScroll');
+        if (scope.liveEventProcessing) {
+            scope.$emit('FixHostResultsScroll');
+        }
     };
 }])
 
@@ -1022,7 +975,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             }
         }
         scope.hosts = result;
-        scope.$emit('FixHostResultsScroll');
+        if (scope.liveEventProcessing) {
+            scope.$emit('FixHostSummariesScroll');
+        }
     };
 }])
 
@@ -1066,7 +1021,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 }, 500);
             }
             else {
-                scope.tasks = {};
+                scope.tasks = [];
                 scope.hostResults = [];
             }
         });
@@ -1082,20 +1037,17 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     .success(function(data) {
                         if (data.count > 0) {
                             data.results.forEach(function(row) {
-                                if (row.parent) {
+                                if (row.parent && scope.search_all_plays.indexOf(row.parent) < 0) {
                                     scope.search_all_plays.push(row.parent);
                                 }
                             });
                             if (scope.search_all_plays.length > 0) {
                                 scope.search_all_plays.sort();
-                                newActivePlay = scope.search_all_plays[scope.search_all_plays.length - 1];
+                                newActivePlay = scope.search_all_plays[0];
                             }
                             else {
                                 newActivePlay = null;
                             }
-                        }
-                        else {
-                            scope.search_all_plays.push(0);
                         }
                         scope.$emit('AllPlaysReady');
                     })
@@ -1116,7 +1068,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             .success(function(data) {
                 if (data.count > 0) {
                     data.results.forEach(function(row) {
-                        if (row.parent) {
+                        if (scope.search_all_tasks.indexOf(row.parent) < 0) {
                             scope.search_all_tasks.push(row.parent);
                         }
                     });

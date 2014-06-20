@@ -50,10 +50,8 @@
                                 </div>
                             </div>
                             <div id="plays-table-detail" aw-custom-scroll class="table-detail">
-                                <div class="row cursor-pointer" ng-repeat="play in plays"
+                                <div class="row cursor-pointer" ng-repeat="play in playList = (plays | FilterById : search_all_plays | filter:{ status : searchAllStatus }) track by $index"
                                         ng-class="play.playActiveClass" ng-click="selectPlay(play.id)">
-                                     <!-- | FilterById : search_all_plays | filter:{ status : searchAllStatus} -->
-                                     <!-- ) in playList = (plays | FilterById : search_all_plays | FilterByField: { status : searchAllStatus }) track by play_id" -->
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ play.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
                                         data-placement="top">{{ play.elapsed }}
@@ -63,7 +61,7 @@
                                         <i class="fa icon-job-{{ play.status }}"></i> {{ play.name }}</span>
                                     </div>
                                 </div>
-                                <div class="row" ng-show="plays.length == 0">
+                                <div class="row" ng-show="playList.length == 0">
                                     <div class="col-lg-12">
                                         <div class="loading-info">No matching plays</div>
                                     </div>
@@ -84,9 +82,8 @@
                             <div id="tasks-table-detail" class="table-detail" aw-custom-scroll data-on-total-scroll="TasksOnTotalScroll"
                                     data-on-total-scroll-back="TasksOnTotalScrollBack">
                                 <div class="row cursor-pointer"
-                                    ng-repeat="task in tasks"
+                                    ng-repeat="task in taskList = (tasks | FilterById : search_all_tasks | filter: { status : searchAllStatus }) track by $index"
                                     ng-class="task.taskActiveClass" ng-click="selectTask(task.id)">
-                                    <!-- = (tasks | FilterById : search_all_tasks | filter:{ status : searchAllStatus} | filter:{ play_id: activePlay }} -->
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ task.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
                                             data-placement="top">{{ task.elapsed }}
@@ -99,7 +96,7 @@
                                         <div class="status-bar"><div class="successful-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-successful-bar" aw-tool-tip="Hosts OK" data-placement="top" ng-style="task.successfulStyle">{{ task.successfulCount }}</div><div class="changed-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-changed-bar" aw-tool-tip="Hosts Changed" data-placement="top" ng-style="task.changedStyle">{{ task.changedCount }}</div><div class="skipped-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-skipped-bar" aw-tool-tip="Hosts Skipped" data-placement="top" ng-style="task.skippedStyle">{{ task.skippedCount }}</div><div class="failed-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-failed-bar" aw-tool-tip="Hosts Failed" data-placement="top" ng-style="task.failedStyle">{{ task.failedCount }}</div><div class="no-matching-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-no-matching-hosts-bar" aw-tool-tip="No matching hosts were found" data-placement="top" style="width: 100%;" ng-show="task.status === 'no-m atching-hosts'">No matching hosts</div></div>
                                     </div>
                                 </div>
-                                <div class="row" ng-show="tasks.length == 0">
+                                <div class="row" ng-show="taskList.length == 0">
                                     <div class="col-lg-12">
                                         <div class="loading-info">No matching tasks</div>
                                     </div>
@@ -119,7 +116,7 @@
                             <div id="hosts-table-detail" aw-custom-scroll data-on-total-scroll="HostDetailOnTotalScroll"
                                 data-on-total-scroll-back="HostDetailOnTotalScrollBack" class="table-detail">
                                 <div id="hosts-table-detail-inner">
-                                    <div class="row" ng-repeat="result in hostResults">
+                                    <div class="row" ng-repeat="result in results = (hostResults | filter:{ status : searchAllStatus}) track by $index">
                                         <!-- ng-repeat="result in results = (hostResults | filter:{ status : searchAllStatus} })" -->
                                         <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7 status-column">
                                             <a href="" ng-click="viewEvent(result.id)" aw-tool-tip="Event Id: {{ result.id }} Status: {{ result.status }}. Click for details" data-placement="top"><i class="fa icon-job-{{ result.status }}"></i> {{ result.name }}</a>
@@ -128,7 +125,7 @@
                                             {{ result.msg }}
                                         </div>
                                     </div>
-                                    <div class="row" ng-show="hostResults.length == 0">
+                                    <div class="row" ng-show="results.length == 0">
                                         <div class="col-lg-12">
                                             <div class="loading-info">No matching hosts</div>
                                         </div>
@@ -191,7 +188,7 @@
                             </div>
                             <div id="hosts-summary-table" class="table-detail" aw-custom-scroll data-on-total-scroll="HostSummaryOnTotalScroll"
                                     data-on-total-scroll-back="HostSummaryOnTotalScrollBack">
-                                <div class="row" ng-repeat="host in hosts" id="{{ host.id }}">
+                                <div class="row" ng-repeat="host in summaryList = (hosts | filter:{ status : searchAllStatus}) track by $index" id="{{ host.id }}">
                                     <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6"><a href="/#/home/hosts/?id={{ host.id }}"
                                         aw-tool-tip="Click to edit host" data-placement="top">{{ host.name }}</a>
                                     </div>
@@ -202,7 +199,7 @@
                                         <a href="" aw-tool-tip="Failed" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
                                     </div>
                                 </div>
-                                <div class="row" ng-show="hosts.length === 0">
+                                <div class="row" ng-show="summaryList.length === 0">
                                     <div class="col-lg-12">
                                         <div class="loading-info">No matching hosts</div>
                                     </div>

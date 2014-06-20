@@ -32,12 +32,14 @@ angular.module('AWFilters', [])
     //
     .filter('FilterById', [ function() {
         return function(input, list) {
-            var results = {};
+            var results = [];
             if (input && list.length > 0) {
-                list.forEach(function(row) {
-                    if (input[row]) {
-                        results[row] = input[row];
-                    }
+                list.forEach(function(itm) {
+                    input.forEach(function(row) {
+                        if (row.id === itm) {
+                            results.push(row);
+                        }
+                    });
                 });
                 return results;
             }

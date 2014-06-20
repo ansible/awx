@@ -216,7 +216,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 .success(function(data) {
                     if (data.results.length > 0) {
                         lastEventId = data.results[data.results.length - 1].id;
-                        scope.activeTask = data.results[data.results.length - 1].id;
+                        scope.activeTask = data.results[0].id;
                     }
                     data.results.forEach(function(event, idx) {
                         var end, elapsed;
@@ -304,7 +304,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             .success( function(data) {
                 if (data.results.length > 0) {
                     lastEventId = data.results[data.results.length - 1].id;
-                    scope.activePlay = data.results[data.results.length - 1].id;
+                    scope.activePlay = data.results[0].id;
                 }
                 data.results.forEach(function(event, idx) {
                     var status, start, end, elapsed;
@@ -971,7 +971,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     };
 
     scope.searchAllByHost = function() {
-        var keys, nxtPlay;
         if (scope.search_all_hosts_name) {
             FilterAllByHostName({
                 scope: scope,
@@ -983,11 +982,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             scope.search_all_tasks = [];
             scope.search_all_plays = [];
             scope.searchAllHostsEnabled = true;
-            keys = Object.keys(scope.plays);
-            nxtPlay = (keys.length > 0) ? keys[keys.length - 1] : null;
             SelectPlay({
                 scope: scope,
-                id: nxtPlay
+                id: (scope.plays.length > 0) ? scope.plays[0].id : null
             });
 
         }
