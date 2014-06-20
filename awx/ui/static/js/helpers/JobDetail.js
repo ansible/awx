@@ -960,6 +960,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             keys;
         if (scope.activePlay) {
             keys = Object.keys(scope.jobData.plays[scope.activePlay].tasks);
+            keys.reverse();
+            if (keys.length > scope.tasksMaxRows + 1) {
+                keys.splice(0, keys.length - (scope.taskMaxRows + 1));
+            }
             keys.sort();
             while (idx < keys.length && idx < scope.tasksMaxRows) {
                 result.push(scope.jobData.plays[scope.activePlay].tasks[keys[idx]]);
@@ -1006,11 +1010,11 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
         DrawPlays({ scope: scope });
         DrawTasks({ scope: scope });
-        DrawHostResults({ scope: scope });
+        // DrawHostResults({ scope: scope });
 
-        if (scope.host_summary.total > 0) {
-            DrawGraph({ scope: scope, resize: true });
-        }
+        //if (scope.host_summary.total > 0) {
+        //    DrawGraph({ scope: scope, resize: true });
+        //}
     };
 }])
 

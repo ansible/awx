@@ -25,10 +25,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     scope.tasks = [];
     scope.hostResults = [];
 
-    scope.hostResultsMaxRows = 75;
-    scope.hostSummariesMaxRows = 75;
-    scope.tasksMaxRows = 75;
-    scope.playsMaxRows = 75;
+    scope.hostResultsMaxRows = 25;
+    scope.hostSummariesMaxRows = 25;
+    scope.tasksMaxRows = 25;
+    scope.playsMaxRows = 25;
 
     scope.search_all_tasks = [];
     scope.search_all_plays = [];
