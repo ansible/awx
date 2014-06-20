@@ -80,10 +80,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10)) {
             if (data.status === 'failed' || data.status === 'canceled' ||
                     data.status === 'error' || data.status === 'successful') {
-                $log.debug('Job completed!');
-                $log.debug(scope.jobData);
-                window.clearInterval($rootScope.jobDetailInterval);
-                UpdateDOM({ scope: scope });
+                if ($rootScope.jobDetailInterval) {
+                    window.clearInterval($rootScope.jobDetailInterval);
+                }
+                $scope.$emit('LoadJob');
             }
         }
     });
@@ -96,7 +96,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         var url;
         Wait('stop');
         if (JobIsFinished(scope)) {
-            UpdateDOM({ scope: scope });
             url = scope.job.related.job_events + '?event=playbook_on_stats';
             Rest.setUrl(url);
             Rest.get()
@@ -106,7 +105,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             scope: scope,
                             data: data.results[0].event_data
                         });
-                        DrawGraph({ scope: scope, resize: true });
+                        UpdateDOM({ scope: scope });
                     }
                 })
                 .error(function(data, status) {
@@ -114,13 +113,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
 
+            $log.debug('Job completed!');
             $log.debug(scope.jobData);
         }
         else {
-            if (scope.host_summary.total > 0) {
-                // Draw the graph based on summary values in memory
-                DrawGraph({ scope: scope, resize: true });
-            }
             api_complete = true;  //trigger events to start processing
 
             $rootScope.jobDetailInterval = setInterval(function() {

@@ -189,7 +189,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 });
                 break;
 
-            case 'playbook_on_stats':
+            // We will respond to the job status change event. No need to do this 2x.
+            /*case 'playbook_on_stats':
                 scope.job_status.finished = event.modified;
                 scope.job_status.elapsed = GetElapsed({
                     start: scope.job_status.started,
@@ -199,7 +200,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 scope.job_status.status_class = "";
                 //LoadHostSummary({ scope: scope, data: event.event_data });
                 //DrawGraph({ scope: scope, resize: true });
-                break;
+                break;*/
         }
     };
 }])
@@ -999,13 +1000,17 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     };
 }])
 
-.factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults', function(DrawPlays, DrawTasks, DrawHostResults) {
+.factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults', 'DrawGraph', function(DrawPlays, DrawTasks, DrawHostResults, DrawGraph) {
     return function(params) {
         var scope = params.scope;
 
         DrawPlays({ scope: scope });
         DrawTasks({ scope: scope });
         DrawHostResults({ scope: scope });
+
+        if (scope.host_summary.total > 0) {
+            DrawGraph({ scope: scope, resize: true });
+        }
     };
 }])
 
