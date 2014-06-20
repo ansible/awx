@@ -39,30 +39,6 @@
 
 angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
 
-.factory('ProcessEventQueue', ['$log', '$rootScope', 'DigestEvent', 'JobIsFinished', function ($log, $rootScope, DigestEvent, JobIsFinished) {
-    return function(params) {
-        var scope = params.scope,
-            eventQueue = params.eventQueue;
-        function runTheQ() {
-            var event;
-            scope.processing = true;
-            while (!JobIsFinished(scope) && !scope.haltEventQueue && eventQueue.length > 0) {
-                event = eventQueue.pop();
-                $log.debug('processing event: ' + event.id);
-                DigestEvent({ scope: scope, event: event });
-            }
-            $log.debug('processing halted');
-            scope.processing = false;
-        }
-        $rootScope.jobDetailInterval = window.setInterval(function() {
-            $log.debug('checking... processing: ' + scope.processing + ' queue.length: ' + eventQueue.length);
-            if (!scope.processing && eventQueue.length > 0) {
-                runTheQ();
-            }
-        }, 1000);
-    };
-}])
-
 .factory('DigestEvent', ['$rootScope', '$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult',
     'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary', 'JobIsFinished', 'AddNewTask',
 function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, GetElapsed,
@@ -942,7 +918,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             idx = 0,
             result = [],
             newKeys = [],
-            keys = Object.keys(scope.jobData.plays);
+            plays = JSON.parse(JSON.stringify(scope.jobData.plays)),
+            keys = Object.keys(plays);
         keys.reverse();
         for (idx=0; idx < scope.playsMaxRows && idx < keys.length; idx++) {
             newKeys.push(keys[idx]);
@@ -950,7 +927,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         newKeys.sort();
         idx = 0;
         while (idx < newKeys.length) {
-            result.push(scope.jobData.plays[newKeys[idx]]);
+            result.push(plays[newKeys[idx]]);
             idx++;
         }
 
@@ -964,10 +941,11 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
         var scope = params.scope,
             result = [],
-            idx, keys, newKeys;
+            idx, keys, newKeys, tasks;
 
         if (scope.activePlay) {
-            keys = Object.keys(scope.jobData.plays[scope.activePlay].tasks);
+            tasks = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks));
+            keys = Object.keys(tasks);
             keys.reverse();
             newKeys = [];
             for (idx=0; idx < scope.tasksMaxRows && idx < keys.length; idx++) {
@@ -976,7 +954,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             newKeys.sort();
             idx = 0;
             while (idx < newKeys.length) {
-                result.push(scope.jobData.plays[scope.activePlay].tasks[newKeys[idx]]);
+                result.push(tasks[newKeys[idx]]);
                 idx++;
             }
         }
@@ -995,7 +973,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             keys;
 
         if (scope.activePlay && scope.activeTask) {
-            hostResults = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults;
+            hostResults = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults));
             keys = Object.keys(hostResults);
 
             keys.sort(function(a,b) {
@@ -1008,7 +986,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             });
 
             while (idx < keys.length && idx < scope.hostResultsMaxRows) {
-                result.push(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults[keys[idx]]);
+                result.push(hostResults[keys[idx]]);
                 idx++;
             }
         }
@@ -1017,17 +995,51 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     };
 }])
 
-.factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults', function(DrawPlays, DrawTasks, DrawHostResults) {
+.factory('DrawHostSummaries', [ function() {
+    return function(params) {
+        var scope = params.scope,
+            result = [],
+            idx = 0,
+            hostSummaries,
+            keys;
+
+        if (scope.activePlay && scope.activeTask) {
+            hostSummaries = JSON.parse(JSON.stringify(scope.jobData.hostSummaries));
+            keys = Object.keys(hostSummaries);
+
+            keys.sort(function(a,b) {
+                if (hostSummaries[a].name > hostSummaries[b].name)
+                    return 1;
+                if (hostSummaries[a].name < hostSummaries[b].name)
+                    return -1;
+                // a must be equal to b
+                return 0;
+            });
+
+            while (idx < keys.length && idx < scope.hostSummariesMaxRows) {
+                result.push(hostSummaries[keys[idx]]);
+                idx++;
+            }
+        }
+        scope.hosts = result;
+        scope.$emit('FixHostResultsScroll');
+    };
+}])
+
+
+.factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults', 'DrawHostSummaries', 'DrawGraph',
+    function(DrawPlays, DrawTasks, DrawHostResults, DrawHostSummaries, DrawGraph) {
     return function(params) {
         var scope = params.scope;
 
         DrawPlays({ scope: scope });
         DrawTasks({ scope: scope });
         DrawHostResults({ scope: scope });
+        DrawHostSummaries({ scope: scope });
 
-        //if (scope.host_summary.total > 0) {
-        //    DrawGraph({ scope: scope, resize: true });
-        //}
+        if (scope.host_summary.total > 0) {
+            DrawGraph({ scope: scope, resize: true });
+        }
     };
 }])
 
