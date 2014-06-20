@@ -7,7 +7,6 @@ awx/public/media
 awx/public/static
 awx/ui/static/js/awx.min.js
 awx/ui/static/css/awx.min.css
-awx/ui/static/css/ansible-bootstrap.min.css
 awx/main/fixtures
 awx/tower_warnings.log
 celerybeat-schedule
