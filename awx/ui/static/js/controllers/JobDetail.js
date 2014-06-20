@@ -1000,19 +1000,21 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     };
 
     scope.filterByStatus = function(choice) {
-        var key, keys, nxtPlay;
+        var nxtPlay;
         if (choice === 'Failed') {
             scope.searchAllStatus = 'failed';
-            for(key in scope.plays) {
-                if (scope.plays[key].status === 'failed') {
-                    nxtPlay = key;
+            nxtPlay = null;
+            scope.plays.every(function(play) {
+                if (play.status === 'failed') {
+                    nxtPlay = play.id;
+                    return false;
                 }
-            }
+                return true;
+            });
         }
         else {
             scope.searchAllStatus = '';
-            keys = Object.keys(scope.plays);
-            nxtPlay = (keys.length > 0) ? keys[keys.length - 1] : null;
+            nxtPlay = (scope.plays.length > 0) ? scope.plays[0].id : null;
         }
         SelectPlay({
             scope: scope,
