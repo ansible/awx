@@ -493,8 +493,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             task.successfulCount += (status === 'successful') ? 1 : 0;
             task.skippedCount += (status === 'skipped') ? 1 : 0;
             SetTaskStyles({
-                scope: scope,
-                task_id: task_id
+                task: task
             });
         }
     };
@@ -502,11 +501,11 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
 .factory('SetTaskStyles', [ function() {
     return function(params) {
-        var task_id = params.task_id,
-            scope = params.scope,
-            diff, task;
+        var task = params.task,
+            diff;
 
-        task = scope.jobData.plays[scope.activePlay].tasks[task_id];
+        //task = scope.jobData.plays[scope.activePlay].tasks[task_id];
+        task.hostCount = task.failedCount + task.changedCount + task.skippedCount + task.successfulCount;
         task.failedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.failedCount / task.hostCount))) : 0;
         task.changedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.changedCount / task.hostCount))) : 0;
         task.skippedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.skippedCount / task.hostCount))) : 0;
@@ -942,15 +941,22 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         var scope = params.scope,
             idx = 0,
             result = [],
+            newKeys = [],
             keys = Object.keys(scope.jobData.plays);
-        keys.sort();
-        while (idx < keys.length && idx < scope.playsMaxRows) {
-            result.push(scope.jobData.plays[keys[idx]]);
+        keys.reverse();
+        for (idx=0; idx < scope.playsMaxRows && idx < keys.length; idx++) {
+            newKeys.push(keys[idx]);
+        }
+        newKeys.sort();
+        idx = 0;
+        while (idx < newKeys.length) {
+            result.push(scope.jobData.plays[newKeys[idx]]);
             idx++;
         }
-        setTimeout(function() {
-            scope.$apply(function() { scope.plays = result; });
-        });
+
+        scope.plays = result;
+        scope.$emit('FixPlaysScroll');
+
     };
 }])
 
@@ -958,23 +964,25 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
         var scope = params.scope,
             result = [],
-            idx = 0,
-            keys;
+            idx, keys, newKeys;
+
         if (scope.activePlay) {
             keys = Object.keys(scope.jobData.plays[scope.activePlay].tasks);
             keys.reverse();
-            if (keys.length > scope.tasksMaxRows + 1) {
-                keys.splice(0, keys.length - (scope.taskMaxRows + 1));
+            newKeys = [];
+            for (idx=0; idx < scope.tasksMaxRows && idx < keys.length; idx++) {
+                newKeys.push(keys[idx]);
             }
-            keys.sort();
-            while (idx < keys.length && idx < scope.tasksMaxRows) {
-                result.push(scope.jobData.plays[scope.activePlay].tasks[keys[idx]]);
+            newKeys.sort();
+            idx = 0;
+            while (idx < newKeys.length) {
+                result.push(scope.jobData.plays[scope.activePlay].tasks[newKeys[idx]]);
                 idx++;
             }
         }
-        setTimeout(function() {
-            scope.$apply(function() { scope.tasks = result; });
-        });
+
+        scope.tasks = result;
+        scope.$emit('FixTasksScroll');
     };
 }])
 
@@ -1005,16 +1013,17 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             }
         }
         scope.hostResults = result;
+        scope.$emit('FixHostResultsScroll');
     };
 }])
 
-.factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults', 'DrawGraph', function(DrawPlays, DrawTasks, DrawHostResults, DrawGraph) {
+.factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults', function(DrawPlays, DrawTasks, DrawHostResults) {
     return function(params) {
         var scope = params.scope;
 
         DrawPlays({ scope: scope });
         DrawTasks({ scope: scope });
-        // DrawHostResults({ scope: scope });
+        DrawHostResults({ scope: scope });
 
         //if (scope.host_summary.total > 0) {
         //    DrawGraph({ scope: scope, resize: true });
