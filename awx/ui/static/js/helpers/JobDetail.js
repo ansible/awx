@@ -948,7 +948,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             result.push(scope.jobData.plays[keys[idx]]);
             idx++;
         }
-        scope.plays = result;
+        setTimeout(function() {
+            scope.$apply(function() { scope.plays = result; });
+        });
     };
 }])
 
@@ -970,7 +972,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 idx++;
             }
         }
-        scope.tasks = result;
+        setTimeout(function() {
+            scope.$apply(function() { scope.tasks = result; });
+        });
     };
 }])
 

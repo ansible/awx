@@ -100,13 +100,13 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    if (data.count > 0) {
+                    if (data.results.length > 0) {
                         LoadHostSummary({
                             scope: scope,
                             data: data.results[0].event_data
                         });
-                        UpdateDOM({ scope: scope });
                     }
+                    UpdateDOM({ scope: scope });
                 })
                 .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
