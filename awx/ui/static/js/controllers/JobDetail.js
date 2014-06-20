@@ -885,7 +885,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             msg: 'Call to ' + url + '. GET returned: ' + status });
                     });
             }
-         });
+        });
     }, 300);
 
     scope.HostSummaryOnTotalScroll = function(mcs) {
