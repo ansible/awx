@@ -53,14 +53,14 @@ function JobStdoutController ($rootScope, $scope, $compile, $routeParams, ClearS
     });
 
     function resizeToFit() {
-        available_height = $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() -
-            $('#breadcrumb-container').outerHeight() - $('.site-footer').outerHeight() * 2;
-        if ($(window).width() < 768) {
+        available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() -
+            $('#breadcrumb-container').outerHeight() - 20;
+        /*if ($(window).width() < 768) {
             available_height += 55;
         }
         else if ($(window).width() > 1240) {
             available_height += 5;
-        }
+        }*/
         $('#pre-container').height(available_height);
         $('#pre-container').mCustomScrollbar("update");
     }
