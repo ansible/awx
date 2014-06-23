@@ -756,7 +756,11 @@ class HostSerializer(BaseSerializerWithVariables):
             d['last_job']['job_template_name'] = obj.last_job.job_template.name
         except (KeyError, AttributeError):
             pass
-        d.update({'recent_jobs': [{'id': j.job.id, 'name': j.job.job_template.name, 'status': j.job.status,
+        if j.job.job_template is not None:
+            job_template_name = j.job.job_template.name
+        else:
+            job_template_name = ""
+        d.update({'recent_jobs': [{'id': j.job.id, 'name': job_template_name, 'status': j.job.status,
                                    'finished': j.job.finished} for j in obj.job_host_summaries.all().order_by('-created')[:5]]})
         return d
 

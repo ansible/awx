@@ -259,7 +259,7 @@ class Job(UnifiedJob, JobOptions):
     def is_blocked_by(self, obj):
         from awx.main.models import InventoryUpdate, ProjectUpdate
         if type(obj) == Job:
-            if obj.job_template == self.job_template:
+            if obj.job_template is not None and obj.job_template == self.job_template:
                 if obj.launch_type == 'callback' and self.launch_type == 'callback':
                     if obj.limit != self.limit:
                         return False
