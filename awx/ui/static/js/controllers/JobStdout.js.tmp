@@ -36,8 +36,6 @@ function JobStdoutController ($rootScope, $scope, $compile, $routeParams, ClearS
         Rest.setUrl(stdout_url + '?format=json&start_line=-1000');
         Rest.get()
             .success(function(data) {
-                api_complete = true;
-                Wait('stop');
                 if (data.content) {
                     $('#pre-container-content').empty().html(data.content);
                 }

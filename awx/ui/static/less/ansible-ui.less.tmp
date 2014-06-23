@@ -12,16 +12,14 @@
 @blue:         #1778c3;   /* logo blue */
 @blue-link:    #1778c3;
 @blue-dark:    #2a6496;   /* link hover */
-@green:        #00aa00;   // Ansible OK
+@green:        #5bb75b;
 @grey:         #A9A9A9;
 @grey-txt:     #707070;
 @info:         #d9edf7;   /* alert info background color */
 @info-border:  #bce8f1;   /* alert info border color */
 @info-color:   #3a87ad;
-@red:          #aa0000;   // Ansible Unreachable
+@red:          #da4f49;
 @red-hover:    #AE3F3A;
-@changed:      #aa5500;   // Ansible Changed
-@skipped:      #00aaaa;   // Ansible Skipped
 @warning:      #FF9900;
 @well:         #f5f5f5;   /* well background color */
 @well-border:  #e3e3e3;
@@ -54,6 +52,7 @@
 @import "jobs.less";
 @import "inventory-edit.less";
 @import "breadcrumbs.less";
+@import "stdout.less";
 
 
 /* Bootstrap fix that's causing a right margin to appear
