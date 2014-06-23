@@ -523,13 +523,24 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return_buffer = ""
         if end_line is not None:
             end_line = int(end_line)
-        for line in self.result_stdout_raw_handle().readlines()[int(start_line):end_line]:
+        stdout_lines = self.result_stdout_raw_handle().readlines()
+        for line in stdout_lines[int(start_line):end_line]:
             return_buffer += line
-        return return_buffer
+        if int(start_line) < 0:
+            start_actual = len(stdout_lines) + int(start_line)
+            end_actual = len(stdout_lines)
+        else:
+            start_actual = int(start_line)
+            if end_line is not None:
+                end_actual = min(int(start_line)+int(end_line), len(stdout_lines))
+            else:
+                end_actual = len(stdout_lines)
+        return return_buffer, start_actual, end_actual
 
     def result_stdout_limited(self, start_line=0, end_line=None):
         ansi_escape = re.compile(r'\x1b[^m]*m')
-        return ansi_escape.sub('', self.result_stdout_raw_limited(start_line, end_line))
+        content, start, end = self.result_stdout_raw_limited(start_line, end_line)
+        return ansi_escape.sub('', content), start, end
 
     @property
     def celery_task(self):

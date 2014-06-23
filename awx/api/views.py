@@ -1660,7 +1660,7 @@ class UnifiedJobStdout(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
-        if request.accepted_renderer.format in ('html', 'api'):
+        if request.accepted_renderer.format in ('html', 'api', 'json'):
             scheme = request.QUERY_PARAMS.get('scheme', None)
             start_line = request.QUERY_PARAMS.get('start_line', 0)
             end_line = request.QUERY_PARAMS.get('end_line', None)
@@ -1668,20 +1668,24 @@ class UnifiedJobStdout(RetrieveAPIView):
                 scheme = 'ansi2html'
             dark_val = request.QUERY_PARAMS.get('dark', '')
             dark = bool(dark_val and dark_val[0].lower() in ('1', 't', 'y'))
-            content_only = bool(request.accepted_renderer.format == 'api')
+            content_only = bool(request.accepted_renderer.format == 'api' or \
+                                request.accepted_renderer.format == 'json')
             dark_bg = (content_only and dark) or (not content_only and (dark or not dark_val))
             conv = Ansi2HTMLConverter(scheme=scheme, dark_bg=dark_bg,
                                       title=get_view_name(self.__class__))
+            content, start, end = unified_job.result_stdout_raw_limited(start_line, end_line)
             if content_only:
                 headers = conv.produce_headers()
-                body = conv.convert(unified_job.result_stdout_raw_limited(start_line, end_line), full=False)
+                body = conv.convert(content, full=False)
                 data = '\n'.join([headers, body])
                 data = '<div class="nocode body_foreground body_background">%s</div>' % data
             else:
-                data = conv.convert(unified_job.result_stdout_raw_limited(start_line, end_line))
+                data = conv.convert(content)
             # Fix ugly grey background used by default.
             data = data.replace('.body_background { background-color: #AAAAAA; }',
                                 '.body_background { background-color: #f5f5f5; }')
+            if request.accepted_renderer.format == 'json':
+                return Response({'range': {'start': start, 'end': end}, 'content': body})
             return Response(data)
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
