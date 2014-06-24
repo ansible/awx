@@ -11,9 +11,9 @@
 
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
-        'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon', 'Breadcrumbs',
+        'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon',
     function ($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink,
-        Button, SelectIcon, Breadcrumbs) {
+        Button, SelectIcon) {
         return {
 
             setList: function (list) {
