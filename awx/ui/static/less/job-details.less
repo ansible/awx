@@ -1,23 +1,21 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *  
+ *
  *  job-details.less
- *  
+ *
  *  Styles for job details page
  *
  */
 
-@failed-hosts-color:        #DA4D49;
-@successful-hosts-color:    #5bb75b;
-@changed-hosts-color:       #FF9900;
-@skipped-hosts-color:       #01BCC5;
+@failed-hosts-color:        @red;
+@successful-hosts-color:    @green;
+@changed-hosts-color:       @changed;
+@skipped-hosts-color:       @skipped;
 @unreachable-hosts-color:   #A9A9A9;
 
 
 #jobs-detail {
-    .nav-path {
-        margin-bottom: 20px;
-    }
+    margin-top: 20px;
 }
 
 .job_summary {
@@ -58,7 +56,7 @@
 .failed-hosts {
     background-color: @failed-hosts-color;
 }
-.failed-hosts-color { 
+.failed-hosts-color {
     color: @failed-hosts-color;
 }
 .successful-hosts {
@@ -85,11 +83,11 @@
 
 .job_well {
     padding: 8px;
-    background-color: @well;
+    background-color: @white;
     border: 1px solid @well-border;
     border-radius: 4px;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
-            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+    /*-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);*/
 }
 
 #hide-summary-button {
@@ -115,9 +113,8 @@
 .status-row {
      margin-bottom: 10px;
      .job-label {
-        font-weight: bold;   
-        font-size: 12px;
-     }   
+        font-weight: bold;
+     }
 }
 
 #job_options {
@@ -163,7 +160,7 @@
     font-size: 12px;
 }
 
-.table-detail { 
+.table-detail {
     overflow-x: hidden;
     overflow-y: auto;
     border: 1px solid @grey;
@@ -239,7 +236,7 @@
 #search_all_hosts_name {
     font-size: 14px;
     padding-left: 3px;
-    padding-right: 20px;      
+    padding-right: 20px;
 }
 
 #event-help-link {
@@ -265,7 +262,7 @@ label.small-label {
 }
 
 #task-hosts-section {
-    position: relative; 
+    position: relative;
     top: 0;
     left: 0;
     #hosts-table-detail {
@@ -328,7 +325,7 @@ label.small-label {
     .header {
         margin-top: 20px;
         .legend {
-            i { 
+            i {
                 margin-left: 10px
             }
             i:first-child {

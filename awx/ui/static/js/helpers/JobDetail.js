@@ -812,7 +812,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             graph_data.push({
                 label: 'OK',
                 value: (scope.host_summary.ok === scope.host_summary.total) ? 1 : scope.host_summary.ok,
-                color: '#5bb75b'
+                color: '#00aa00'
             });
         }
         if (scope.host_summary.changed) {
@@ -833,7 +833,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             graph_data.push({
                 label: 'Failed',
                 value: (scope.host_summary.failed === scope.host_summary.total) ? 1 : scope.host_summary.failed,
-                color: '#DA4D49'
+                color: '#aa0000'
             });
         }
 
