@@ -675,7 +675,8 @@ class JobEvent(CreatedModifiedModel):
                         update_fields.append('host_id')
             except (IndexError, AttributeError):
                 pass
-            self.parent = self._find_parent()
+            if self.parent is None:
+                self.parent = self._find_parent()
             if 'parent' not in update_fields:
                 update_fields.append('parent')
         super(JobEvent, self).save(*args, **kwargs)

@@ -26,7 +26,7 @@ from django.test.client import Client
 # AWX
 from awx.main.models import *
 from awx.main.backend import LDAPSettings
-from awx.main.management.commands.run_callback_receiver import run_subscriber
+from awx.main.management.commands.run_callback_receiver import CallbackReceiver
 from awx.main.management.commands.run_task_system import run_taskmanager
 from awx.main.utils import get_ansible_version
 from awx.main.task_engine import TaskEngager as LicenseWriter
@@ -453,7 +453,8 @@ class BaseTestMixin(object):
             self.taskmanager_process.terminate()
 
     def start_queue(self, consumer_port, queue_port):
-        self.queue_process = Process(target=run_subscriber,
+        receiver = CallbackReceiver()
+        self.queue_process = Process(target=receiver.run_subscriber,
                                 args=(consumer_port, queue_port, False,))
         self.queue_process.start()
 
