@@ -13,11 +13,6 @@
 @skipped-hosts-color:       @skipped;
 @unreachable-hosts-color:   #A9A9A9;
 
-
-#jobs-detail {
-    margin-top: 20px;
-}
-
 .job_summary {
     .table {
         margin-bottom: 0;
@@ -110,13 +105,6 @@
     margin-top: 20px;
 }
 
-.status-row {
-     margin-bottom: 10px;
-     .job-label {
-        font-weight: bold;
-     }
-}
-
 #job_options {
     height: 100px;
     overflow-y: auto;
@@ -144,6 +132,31 @@
     .well {
         overflow: hidden;
     }
+
+    #job-status-form {
+        label {
+            font-weight: normal;
+        }
+        .control-label {
+            padding-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        #finished-time,
+        #elapsed-time {
+            padding-left: 15px;
+        }
+        hr {
+            margin-top: 0;
+        }
+        .more-or-less {
+            font-size: 12px;
+            text-align: right;
+            margin-bottom: 15px;
+        }
+    }
+
 }
 
 #job-summary-container {
@@ -351,4 +364,11 @@ svg text.percent{
     text-anchor:middle;
     font-size:12px;
     font-weight: bold;
+}
+
+
+@media (max-width: 767px) {
+    #job-status-form .more-or-less {
+        text-align: left;
+    }
 }

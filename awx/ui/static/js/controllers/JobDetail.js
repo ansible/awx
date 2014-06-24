@@ -42,6 +42,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     scope.searchAllHostsEnabled = true;
     scope.haltEventQueue = false;
     scope.processing = false;
+    scope.lessStatus = true;
 
     scope.host_summary = {};
     scope.host_summary.ok = 0;
@@ -529,7 +530,8 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         $('#tasks-table-detail').mCustomScrollbar("update");
         $('#hosts-table-detail').height(150);
         $('#hosts-table-detail').mCustomScrollbar("update");
-        height = $('#wrap').height() - $('.site-footer').outerHeight() - $('.main-container').height();
+        //height = $('#wrap').height() - $('.site-footer').outerHeight() - $('.main-container').height();
+        height = $(window).height() - $('#main-menu-container .navbar').outerHeight()
         if (height > 15) {
             // there's a bunch of white space at the bottom, let's use it
             $('#plays-table-detail').height(150 + (height / 3));
@@ -636,6 +638,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             return (Object.keys(obj).length > 0) ? false : true;
         }
         return true;
+    };
+
+    scope.toggleLessStatus = function() {
+        scope.lessStatus = (scope.lessStatus) ? false : true;
     };
 
     scope.HostDetailOnTotalScroll = _.debounce(function() {

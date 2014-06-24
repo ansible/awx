@@ -1,42 +1,75 @@
 <div class="tab-pane" id="jobs-detail">
     <div ng-cloak id="htmlTemplate">
 
-        <!-- <div class="row">
+        <div class="row">
             <div id="breadcrumb-container" class="col-md-12" style="position: relative;">
                 <ul class="ansible-breadcrumb" id="breadcrumb-list">
                     <li><a href="/#/jobs">Jobs</a></li>
                     <li class="active"><a href="">{{ job_id }} - {{ job.name }}</a></li>
                 </ul>
             </div>
-        </div> -->
+        </div>
 
         <div class="row" style="position: relative;">
             <div id="job-detail-container">
                 <div class="job_well">
-                    <div class="row status-row">
-                        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 job-label">Status</div>
-                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4 status-column"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
-                        <div class="col-lg-7 col-md-7 col-sm-4 col-xs-4">{{ job_status.explanation }}</div>
-                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-right">
+                    <div class="row">
+                        <div class="col-md-12 text-right">
                             <a href="/#/jobs/{{ job_id }}/stdout" target="_blank" type="button" class="btn btn-primary btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top"><i class="fa fa-external-link"></i></a>
                             <button type="button" id="summary-button" class="btn btn-primary btn-xs" ng-click="toggleSummary()" aw-tool-tip="View summary" data-placement="top"><i class="fa fa-arrow-circle-left fa-lg"></i></button>
                         </div>
                     </div>
 
-                    <div class="row status-row">
-                        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 job-label">Started</div>
-                        <div ng-show="job_status.started" class="col-lg-5 col-md-5 col-sm-4 col-xs-4">{{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</div>
-                        <div ng-show="!job_status.started" class="col-lg-5 col-md-5 col-sm-4 col-xs-4">Not Started</div>
-                        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 job-label">Elapsed</div>
-                        <div ng-show="job_status.finished" class="col-lg-5 col-md-5 col-sm-4 col-xs-4">{{ job_status.elapsed }}</div>
-                        <div ng-show="!job_status.finished" class="col-lg-5 col-md-5 col-sm-4 col-xs-4">00:00:00</div>
-                    </div>
+                    <div class="form-horizontal" id="job-status-form">
+                        <div class="form-group">
+                            <label class="col-md-1 col-sm-2 control-label">Status</label>
+                            <div class="col-md-11 col-sm-10">
+                                <i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }} {{ job_status.explanation }}
+                            </div>
+                        </div>
 
-                    <div class="row status-row">
-                        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 job-label">Project</div>
-                        <div class="col-lg-5 col-md-5 col-sm-4 col-xs-4"><a href="{{ project_url }}" aw-tool-tip="Edit the project" data-placement="top">{{ project_name }}</a></div>
-                        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 job-label">Inventory</div>
-                        <div class="col-lg-5 col-md-5 col-sm-4 col-xs-4"><a href="{{ inventory_url }}" aw-tool-tip="Edit the inventory" data-placement="top">{{ inventory_name }}</a></div>
+                        <div class="form-group">
+                            <label class="col-md-1 col-sm-2 control-label">Started</label>
+                            <div class="col-md-11 col-sm-10">
+                                <span ng-show="job_status.started">{{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</span>
+                                <span ng-show="job_status.finished" id="finished-time">Finished &nbsp;{{ job_status.finished | date:'MM/dd/yy HH:mm:ss' }}</span>
+                                <span ng-show="job_status.finished" id="elapsed-time">Elapsed &nbsp;{{ job_status.elapsed }}</span>
+                            </div>
+                        </div>
+
+                        <div class="row" ng-show="lessStatus">
+                            <div class="col-md-1 col-sm-2 more-or-less">
+                                <a href="" ng-click="toggleLessStatus()">more...</a>
+                            </div>
+                        </div>
+
+                        <div class="form-group" ng-show="!lessStatus">
+                            <label class="col-md-1 col-sm-2 control-label">Template</label>
+                            <div class="col-md-11 col-sm-10">
+                                <a href="{{ job_template_url }}" aw-tool-tip="Edit the job template" data-placement="top">{{ job_template_name }}</a>
+                            </div>
+                        </div>
+
+                        <div class="form-group" ng-show="!lessStatus">
+                            <label class="col-md-1 col-sm-2 control-label">Project</label>
+                            <div class="col-md-11 col-sm-10">
+                                <a href="{{ project_url }}" aw-tool-tip="Edit the project" data-placement="top">{{ project_name }}</a>
+                            </div>
+                        </div>
+
+                        <div class="form-group" ng-show="!lessStatus">
+                            <label class="col-md-1 col-sm-2 control-label">Inventory</label>
+                            <div class="col-md-11 col-sm-10">
+                                <a href="{{ inventory_url }}" aw-tool-tip="Edit the inventory" data-placement="top">{{ inventory_name }}</a>
+                            </div>
+                        </div>
+
+                        <div class="row" ng-show="!lessStatus">
+                            <div class="col-md-1 col-sm-2 more-or-less">
+                                <a href="" ng-click="toggleLessStatus()">less <i class="fa fa-angle-up"></i></a>
+                            </div>
+                        </div>
+                        <hr>
                     </div>
 
                     <div id="job-detail-tables">

@@ -242,8 +242,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             search_row, page_row, height, header, row_height;
         if (docw > 1240 && doch > 800) {
             // customize the container height and # of rows based on available viewport height
-            available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#job-status').outerHeight() -
-                $('#breadcrumb-container').outerHeight() - 80;
+            available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#job-status').outerHeight() - 80;
             $('.jobs-list-container').each(function() {
                 $(this).height(Math.floor(available_height / 2));
             });
