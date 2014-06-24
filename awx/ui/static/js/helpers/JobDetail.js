@@ -927,14 +927,15 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             hostResults = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults));
             keys = Object.keys(hostResults);
 
-            keys.sort(function(a,b) {
+            /*keys.sort(function(a,b) {
                 if (hostResults[a].name > hostResults[b].name)
                     return 1;
                 if (hostResults[a].name < hostResults[b].name)
                     return -1;
                 // a must be equal to b
                 return 0;
-            });
+            });*/
+            keys.reverse();
 
             while (idx < keys.length && idx < scope.hostResultsMaxRows) {
                 result.push(hostResults[keys[idx]]);
