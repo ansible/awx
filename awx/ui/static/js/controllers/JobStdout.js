@@ -7,17 +7,21 @@
 
 'use strict';
 
-function JobStdoutController ($rootScope, $scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, Socket) {
+function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, Socket) {
 
     ClearScope();
 
     var available_height, job_id = $routeParams.id,
         api_complete = false,
         stdout_url,
-        event_socket = Socket({
-            scope: $scope,
-            endpoint: "job_events"
-        });
+        current_range,
+        event_socket,
+        first_time=0;
+
+    event_socket = Socket({
+        scope: $scope,
+        endpoint: "job_events"
+    });
 
     Wait('start');
 
@@ -33,18 +37,17 @@ function JobStdoutController ($rootScope, $scope, $compile, $routeParams, ClearS
         $scope.removeLoadStdout();
     }
     $scope.removeLoadStdout = $scope.$on('LoadStdout', function() {
-        Rest.setUrl(stdout_url + '?format=json&start_line=-1000');
+        Rest.setUrl(stdout_url + '?format=json&start_line=-500');
         Rest.get()
             .success(function(data) {
                 api_complete = true;
                 Wait('stop');
-                if (data.content) {
-                    $('#pre-container-content').empty().html(data.content);
-                }
-                else {
-                    $('#pre-container-content').empty();
-                }
-                setTimeout(function() { $('#pre-container').mCustomScrollbar("scrollTo", 'bottom'); }, 1000);
+                $('#pre-container-content').html(data.content);
+                current_range = data.range;
+                //$('#pre-container').mCustomScrollbar("update");
+                setTimeout(function() {
+                    $('#pre-container').mCustomScrollbar("scrollTo", 'bottom');
+                }, 300);
             })
             .error(function(data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -55,12 +58,6 @@ function JobStdoutController ($rootScope, $scope, $compile, $routeParams, ClearS
     function resizeToFit() {
         available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() -
             $('#breadcrumb-container').outerHeight() - 20;
-        /*if ($(window).width() < 768) {
-            available_height += 55;
-        }
-        else if ($(window).width() > 1240) {
-            available_height += 5;
-        }*/
         $('#pre-container').height(available_height);
         $('#pre-container').mCustomScrollbar("update");
     }
@@ -81,7 +78,43 @@ function JobStdoutController ($rootScope, $scope, $compile, $routeParams, ClearS
             ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                 msg: 'Failed to retrieve job: ' + job_id + '. GET returned: ' + status });
         });
+
+
+    $scope.onTotalScroll = function() {
+        $log.debug('Total scroll!');
+    };
+
+    $scope.onTotalScrollBack = function() {
+        // scroll up or back in time toward the beginning of the file
+        if (current_range.start > 0) {
+            //we haven't hit the top yet
+            var start = (current_range.start < 500) ? 0 : current_range.start - 500,
+                url = stdout_url + '?format=json&start_line=' + start + '&end_line=' + (current_range.start - 1);
+            first_time++;
+            Wait('start');
+            Rest.setUrl(url);
+            Rest.get()
+                .success( function(data) {
+                    Wait('stop');
+                    var oldContentHeight, heightDiff;
+                    oldContentHeight=$("#pre-container .mCSB_container").innerHeight();
+                    $('#pre-container-content').prepend(data.content);
+                    current_range = data.range;
+                    heightDiff=$("#pre-container .mCSB_container").innerHeight() - oldContentHeight;
+                    if (first_time === 1) {
+                        //setTimeout(function() { $("#pre-container").mCustomScrollbar("scrollTo", heightDiff, {scrollInertia:0}); }, 300);
+                        $('#pre-container').mCustomScrollbar("update");
+                    }
+                    $("#pre-container").mCustomScrollbar("scrollTo", heightDiff, {scrollInertia:0});
+                })
+                .error(function(data, status) {
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Failed to retrieve stdout for job: ' + job_id + '. GET returned: ' + status });
+                });
+        }
+    };
 }
 
-JobStdoutController.$inject = [ '$rootScope', '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors', 'Socket' ];
+JobStdoutController.$inject = [ '$log', '$rootScope', '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors',
+    'Socket' ];
 
