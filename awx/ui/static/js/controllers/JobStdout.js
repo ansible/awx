@@ -104,7 +104,7 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
 
     function resizeToFit() {
         available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#job-status').outerHeight() -
-            $('#breadcrumb-container').outerHeight() - 20;
+            $('#breadcrumb-container').outerHeight() - 30;
         $('#pre-container').height(available_height);
         $('#pre-container').mCustomScrollbar("update");
     }

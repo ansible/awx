@@ -15,8 +15,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
 
     ClearScope();
 
-    var e,
-        completed_scope, running_scope, queued_scope, scheduled_scope,
+    var completed_scope, running_scope, queued_scope, scheduled_scope,
         choicesCount = 0,
         listCount = 0,
         api_complete = false,
@@ -111,9 +110,9 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
     LoadBreadCrumbs();
 
     // Add breadcrumbs
-    e = angular.element(document.getElementById('breadcrumbs'));
-    e.html(Breadcrumbs({ list: { editTitle: 'Jobs' } , mode: 'edit' }));
-    $compile(e)($scope);
+    //e = angular.element(document.getElementById('breadcrumbs'));
+    //e.html(Breadcrumbs({ list: { editTitle: 'Jobs' } , mode: 'edit' }));
+    //$compile(e)($scope);
 
     if ($scope.removeListLoaded) {
         $scope.removeListLoaded();
@@ -243,7 +242,8 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             search_row, page_row, height, header, row_height;
         if (docw > 1240 && doch > 800) {
             // customize the container height and # of rows based on available viewport height
-            available_height = $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() - $('#breadcrumbs').outerHeight() - $('.site-footer').outerHeight() - 25;
+            available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#job-status').outerHeight() -
+                $('#breadcrumb-container').outerHeight() - 80;
             $('.jobs-list-container').each(function() {
                 $(this).height(Math.floor(available_height / 2));
             });
