@@ -1486,12 +1486,26 @@ class JobJobPlaysList(BaseJobEventsList):
     new_in_150 = True
 
     @paginated
-    def get(self, request, limit, offset, *args, **kwargs):
+    def get(self, request, limit, offset, ordering, *args, **kwargs):
         all_plays = []
         job = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
 
         # Put together a queryset for relevant job events.
         qs = job.job_events.filter(event='playbook_on_play_start')
+        if ordering is not None:
+            qs = qs.order_by(ordering)
+
+        # This is a bit of a special case for id filtering requested by the UI
+        # doing this here for the moment until/unless we need to implement more
+        # complex filtering (since we aren't under a serializer)
+
+        if "id__in" in request.QUERY_PARAMS:
+            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
+        elif "id__gt" in request.QUERY_PARAMS:
+            qs = qs.filter(id__gt=request.QUERY_PARAMS['id__gt'])
+        if "failed" in request.QUERY_PARAMS:
+            qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
+
         count = qs.count()
 
         # Iterate over the relevant play events and get the details.
@@ -1540,7 +1554,7 @@ class JobJobTasksList(BaseJobEventsList):
     new_in_150 = True
 
     @paginated
-    def get(self, request, limit, offset, *args, **kwargs):
+    def get(self, request, limit, offset, ordering, *args, **kwargs):
         """Return aggregate data about each of the job tasks that is:
           - an immediate child of the job event
           - corresponding to the spinning up of a new task or playbook
@@ -1570,6 +1584,18 @@ class JobJobTasksList(BaseJobEventsList):
                                     .values('parent__id', 'event', 'changed')
                                     .annotate(num=Count('event'))
                                     .order_by('parent__id'))
+
+        # This is a bit of a special case for id filtering requested by the UI
+        # doing this here for the moment until/unless we need to implement more
+        # complex filtering (since we aren't under a serializer)
+
+        if "id__in" in request.QUERY_PARAMS:
+            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
+        elif "id__gt" in request.QUERY_PARAMS:
+            qs = qs.filter(id__gt=request.QUERY_PARAMS['id__gt'])
+        if "failed" in request.QUERY_PARAMS:
+            qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
+
         count = queryset.count()
 
         # The data above will come back in a list, but we are going to

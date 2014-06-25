@@ -29,14 +29,21 @@ def paginated(method):
             limit = min(api_settings.MAX_PAGINATE_BY, limit)
         limit = int(limit)
 
+        # Get the order parameter if it's given
+        if request.QUERY_PARAMS.get("ordering", False):
+            ordering = request.QUERY_PARAMS[ordering]
+        else:
+            ordering = None
+
         # What page are we on?
         page = int(request.QUERY_PARAMS.get('page', 1))
         offset = (page - 1) * limit
 
-        # Add the limit, offset, and page variables to the keyword arguments
+        # Add the limit, offset, page, and order variables to the keyword arguments
         # being sent to the underlying method.
         kwargs['limit'] = limit
         kwargs['offset'] = offset
+        kwargs['ordering'] = ordering
 
         # Okay, call the underlying method.
         results, count = method(self, request, *args, **kwargs)
@@ -64,3 +71,4 @@ def paginated(method):
         # Okay, we're done; return response data.
         return Response(answer)
     return func
+
