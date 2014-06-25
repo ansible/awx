@@ -531,7 +531,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         $('#hosts-table-detail').height(150);
         $('#hosts-table-detail').mCustomScrollbar("update");
         //height = $('#wrap').height() - $('.site-footer').outerHeight() - $('.main-container').height();
-        height = $(window).height() - $('#main-menu-container .navbar').outerHeight()
+        height = $(window).height() - $('#main-menu-container .navbar').outerHeight();
         if (height > 15) {
             // there's a bunch of white space at the bottom, let's use it
             $('#plays-table-detail').height(150 + (height / 3));
