@@ -31,7 +31,7 @@ def paginated(method):
 
         # Get the order parameter if it's given
         if request.QUERY_PARAMS.get("ordering", False):
-            ordering = request.QUERY_PARAMS[ordering]
+            ordering = request.QUERY_PARAMS["ordering"]
         else:
             ordering = None
 
