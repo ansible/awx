@@ -239,7 +239,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             hostResults: {}
         };
 
-        if (!scope.jobData.plays[scope.activePlay].firstTask) {
+        if (scope.jobData.plays[scope.activePlay].firstTask === undefined || scope.jobData.plays[scope.activePlay].firstTask === null) {
             scope.jobData.plays[scope.activePlay].firstTask = event.id;
         }
 
@@ -458,10 +458,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         if (scope.jobData.plays[scope.activePlay].tasks[task_id] !== undefined) {
             task = scope.jobData.plays[scope.activePlay].tasks[task_id];
 
-            //if (task_id === scope.jobData.plays[scope.activePlay].firstTask) {
-            //    scope.jobData.plays[scope.activePlay].hostCount++;
-            //    task.hostCount++;
-            //}
+            if (task_id === scope.jobData.plays[scope.activePlay].firstTask && status !== 'unreachable') {
+                scope.jobData.plays[scope.activePlay].hostCount++;
+                task.hostCount++;
+            }
 
             task.reportedHosts += 1;
             task.failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
@@ -481,7 +481,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             diff;
 
         //task = scope.jobData.plays[scope.activePlay].tasks[task_id];
-        task.hostCount = task.failedCount + task.changedCount + task.skippedCount + task.successfulCount;
+        //task.hostCount = task.failedCount + task.changedCount + task.skippedCount + task.successfulCount;
         task.failedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.failedCount / task.hostCount))) : 0;
         task.changedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.changedCount / task.hostCount))) : 0;
         task.skippedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.skippedCount / task.hostCount))) : 0;

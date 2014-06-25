@@ -308,7 +308,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                     scope.activePlay = data.results[0].id;
                 }
                 data.results.forEach(function(event, idx) {
-                    var status, start, end, elapsed;
+                    var status, start, end, elapsed, ok, changed, failed, skipped;
 
                     status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
                     start = event.started;
@@ -344,12 +344,19 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         tasks: {}
                     };
 
-                    scope.host_summary.ok += (data.ok_count) ? data.ok_count : 0;
-                    scope.host_summary.changed += (data.changed_count) ? data.changed_count : 0;
+                    ok = (data.ok_count) ? data.ok_count : 0;
+                    changed = (data.changed_count) ? data.changed_count : 0;
+                    failed = (data.failed_count) ? data.failed_count : 0;
+                    skipped = (data.skipped_count) ? data.skipped_count : 0;
+
+                    scope.jobData.plays[event.id].hostCount = ok + changed + failed + skipped;
+
+                    scope.host_summary.ok += ok;
+                    scope.host_summary.changed += changed;
                     scope.host_summary.unreachable += (data.unreachable_count) ? data.unreachable_count : 0;
-                    scope.host_summary.failed += (data.failed_count) ? data.failed_count : 0;
-                    scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed +
-                        scope.host_summary.unreachable + scope.host_summary.failed;
+                    scope.host_summary.failed += failed;
+                    scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
+                        scope.host_summary.failed;
                 });
                 if (scope.activePlay) {
                     scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
@@ -523,6 +530,9 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             setTimeout(function() { $('#job-summary-container .job_well').height($('#job-detail-container').height() - 18); }, 500);
             $('#job-summary-container').show();
         }
+
+        scope.lessStatus = true; // close the view more status option
+
         // Detail table height adjusting. First, put page height back to 'normal'.
         $('#plays-table-detail').height(80);
         $('#plays-table-detail').mCustomScrollbar("update");
