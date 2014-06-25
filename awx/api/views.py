@@ -1590,11 +1590,11 @@ class JobJobTasksList(BaseJobEventsList):
         # complex filtering (since we aren't under a serializer)
 
         if "id__in" in request.QUERY_PARAMS:
-            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
+            queryset = queryset.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
         elif "id__gt" in request.QUERY_PARAMS:
-            qs = qs.filter(id__gt=request.QUERY_PARAMS['id__gt'])
+            queryset = queryset.filter(id__gt=request.QUERY_PARAMS['id__gt'])
         if "failed" in request.QUERY_PARAMS:
-            qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
+            queryset = queryset.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
 
         count = queryset.count()
 
