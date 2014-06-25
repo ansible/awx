@@ -1106,7 +1106,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
             pass # If should_fail is None, we don't care.
         return inventory_update
 
-    def check_inventory_source(self, inventory_source, initial=True):
+    def check_inventory_source(self, inventory_source, initial=True, enabled_host_pks=None):
+        enabled_host_pks = enabled_host_pks or set()
         inventory_source = InventorySource.objects.get(pk=inventory_source.pk)
         inventory = inventory_source.group.inventory
         self.assertTrue(inventory_source.can_update)
@@ -1132,7 +1133,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
             source_pks = host.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(host.has_inventory_sources)
-            self.assertTrue(host.enabled)
+            if host.pk in enabled_host_pks:
+                self.assertTrue(host.enabled)
             # Make sure EC2 RDS hosts are excluded.
             if inventory_source.source == 'ec2':
                 self.assertFalse(re.match(r'^.+\.rds\.amazonaws\.com$', host.name, re.I),
@@ -1413,12 +1415,13 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # Manually disable all hosts, verify a new update re-enables them.
         # Also change the host name, and verify it is not deleted, but instead
         # updated because the instance ID matches.
+        enabled_host_pks = set(self.inventory.hosts.filter(enabled=True).values_list('pk', flat=True))
         for host in self.inventory.hosts.all():
             host.enabled = False
             host.name = 'changed-%s' % host.name
             host.save()
         old_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
-        self.check_inventory_source(inventory_source, initial=False)
+        self.check_inventory_source(inventory_source, initial=False, enabled_host_pks=enabled_host_pks)
         new_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
         self.assertEqual(old_host_pks, new_host_pks)
         # Verify that main group is in top level groups (hasn't been added as
@@ -1459,12 +1462,13 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # Manually disable all hosts, verify a new update re-enables them.
         # Also change the host name, and verify it is not deleted, but instead
         # updated because the instance ID matches.
+        enabled_host_pks = set(self.inventory.hosts.filter(enabled=True).values_list('pk', flat=True))
         for host in self.inventory.hosts.all():
             host.enabled = False
             host.name = 'changed-%s' % host.name
             host.save()
         old_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
-        self.check_inventory_source(inventory_source, initial=False)
+        self.check_inventory_source(inventory_source, initial=False, enabled_host_pks=enabled_host_pks)
         new_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
         self.assertEqual(old_host_pks, new_host_pks)
         # If test source regions is given, test again with empty string.
