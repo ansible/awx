@@ -530,7 +530,11 @@ angular.module('Tower', [
 
             html = "<a href=\"\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
                 "data-popover-title=\"Live Updates\" data-container=\"body\" style=\"font-size: 10px;\"><i class=\"fa icon-socket-{{ socketStatus }}\"></i></a>";
-            e = angular.element(document.getElementById('socket-beacon'));
+            e = angular.element(document.getElementById('socket-beacon-div'));
+            e.empty().append(html);
+            $compile(e)($rootScope);
+
+            e = angular.element(document.getElementById('socket-beacon-li'));
             e.empty().append(html);
             $compile(e)($rootScope);
 

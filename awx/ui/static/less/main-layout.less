@@ -46,12 +46,24 @@ body {
     margin-bottom: 20px;
 }
 
-/*
-@media (min-width: 1200px) {
-    #main-menu-container {
-        #account-menu {
-            margin-right: 60px;
-            float: right;
-        }
+#socket-beacon-div {
+    display: none;
+}
+
+#socket-beacon-li {
+    display: block;
+}
+
+@media (max-width: 1075px) {
+    #socket-beacon-div {
+        display: block;
+        position: fixed;
+        right: 30px;
+        top: 5px;
+        margin-right: 50px;
+        margin-top: 15px;
     }
-}*/
+    #socket-beacon-li {
+        display: none;
+    }
+}
