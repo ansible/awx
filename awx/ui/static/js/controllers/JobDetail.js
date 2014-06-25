@@ -524,20 +524,21 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             $('#job-summary-container').show();
         }
         // Detail table height adjusting. First, put page height back to 'normal'.
-        $('#plays-table-detail').height(150);
+        $('#plays-table-detail').height(80);
         $('#plays-table-detail').mCustomScrollbar("update");
-        $('#tasks-table-detail').height(150);
+        $('#tasks-table-detail').height(120);
         $('#tasks-table-detail').mCustomScrollbar("update");
         $('#hosts-table-detail').height(150);
         $('#hosts-table-detail').mCustomScrollbar("update");
-        height = $(window).height() - $('#main-menu-container .navbar').outerHeight();
+        height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#breadcrumb-container').outerHeight() -
+            $('#job-detail-container').outerHeight() - 20;
         if (height > 15) {
             // there's a bunch of white space at the bottom, let's use it
-            $('#plays-table-detail').height(150 + (height / 3));
+            $('#plays-table-detail').height(80 + (height * 0.10));
             $('#plays-table-detail').mCustomScrollbar("update");
-            $('#tasks-table-detail').height(150 + (height / 3));
+            $('#tasks-table-detail').height(120 + (height * 0.20));
             $('#tasks-table-detail').mCustomScrollbar("update");
-            $('#hosts-table-detail').height(150 + (height / 3));
+            $('#hosts-table-detail').height(150 + (height * 0.70));
             $('#hosts-table-detail').mCustomScrollbar("update");
         }
         // Summary table height adjusting.
