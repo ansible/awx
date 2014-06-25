@@ -36,6 +36,9 @@ body {
     .navbar-collapse {
         margin-left: 42px;
     }
+    .collapsed-option {
+        display: none;
+    }
 }
 
 #content-container {
@@ -54,7 +57,21 @@ body {
     display: block;
 }
 
+#account-submenu {
+    margin-right: 5px;
+}
 @media (max-width: 1075px) {
+
+    #main-menu-container {
+        .collapsed-option {
+            display: block;
+        }
+    }
+
+    #account-menu {
+        display: none;
+    }
+
     #socket-beacon-div {
         display: block;
         position: fixed;
