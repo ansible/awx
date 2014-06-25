@@ -24,7 +24,7 @@ class PaginatedDecoratorTests(TestCase):
         class View(APIView):
             permission_classes = (AllowAny,)
             @paginated
-            def get(self, request, limit, offset):
+            def get(self, request, limit, ordering, offset):
                 return ['a', 'b', 'c', 'd', 'e'], 26
         self.view = View.as_view()
 
