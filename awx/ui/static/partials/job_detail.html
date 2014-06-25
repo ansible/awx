@@ -20,56 +20,54 @@
                         </div>
                     </div>
 
-                    <div class="form-horizontal" id="job-status-form">
+                    <div class="form-horizontal" role="form" id="job-status-form">
+
                         <div class="form-group">
-                            <label class="col-md-1 col-sm-2 control-label">Status</label>
-                            <div class="col-md-11 col-sm-10">
+                            <label class="col-md-2 col-sm-2 col-xs-3 control-label">Status</label>
+                            <div class="col-md-10 col-sm-10 col-xs-9">
                                 <i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }} {{ job_status.explanation }}
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="col-md-1 col-sm-2 control-label">Started</label>
-                            <div class="col-md-11 col-sm-10">
-                                <span ng-show="job_status.started">{{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</span>
-                                <span ng-show="job_status.finished" id="finished-time">Finished &nbsp;{{ job_status.finished | date:'MM/dd/yy HH:mm:ss' }}</span>
-                                <span ng-show="job_status.finished" id="elapsed-time">Elapsed &nbsp;{{ job_status.elapsed }}</span>
-                            </div>
-                        </div>
-
-                        <div class="row" ng-show="lessStatus">
-                            <div class="col-md-1 col-sm-2 more-or-less">
-                                <a href="" ng-click="toggleLessStatus()">more...</a>
+                            <label class="col-md-2 col-sm-2 col-xs-3 control-label">Started</label>
+                            <div class="col-md-10 col-sm-10 col-xs-9">
+                                <div ng-show="job_status.started" id="started-time">{{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</div>
+                                <div ng-show="job_status.finished" id="finished-time">Finished &nbsp;{{ job_status.finished | date:'MM/dd/yy HH:mm:ss' }}</div>
+                                <div ng-show="job_status.finished" id="elapsed-time">Elapsed &nbsp;{{ job_status.elapsed }}</div>
                             </div>
                         </div>
 
                         <div class="form-group" ng-show="!lessStatus">
-                            <label class="col-md-1 col-sm-2 control-label">Template</label>
-                            <div class="col-md-11 col-sm-10">
+                            <label class="col-md-2 col-sm-2 col-xs-3 control-label">Template</label>
+                            <div class="col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ job_template_url }}" aw-tool-tip="Edit the job template" data-placement="top">{{ job_template_name }}</a>
                             </div>
                         </div>
 
                         <div class="form-group" ng-show="!lessStatus">
-                            <label class="col-md-1 col-sm-2 control-label">Project</label>
-                            <div class="col-md-11 col-sm-10">
+                            <label class="col-md-2 col-sm-2 col-xs-3 control-label">Project</label>
+                            <div class="col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ project_url }}" aw-tool-tip="Edit the project" data-placement="top">{{ project_name }}</a>
                             </div>
                         </div>
 
                         <div class="form-group" ng-show="!lessStatus">
-                            <label class="col-md-1 col-sm-2 control-label">Inventory</label>
-                            <div class="col-md-11 col-sm-10">
+                            <label class="col-md-2 col-sm-2 col-xs-3 control-label">Inventory</label>
+                            <div class="col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ inventory_url }}" aw-tool-tip="Edit the inventory" data-placement="top">{{ inventory_name }}</a>
                             </div>
                         </div>
 
-                        <div class="row" ng-show="!lessStatus">
-                            <div class="col-md-1 col-sm-2 more-or-less">
-                                <a href="" ng-click="toggleLessStatus()">less <i class="fa fa-angle-up"></i></a>
+                        <div class="row">
+                            <div class="col-sm-12 more-or-less">
+                                <a ng-show="lessStatus" href="" ng-click="toggleLessStatus()">more...</a>
+                                <a ng-show="!lessStatus" href="" ng-click="toggleLessStatus()">less <i class="fa fa-angle-up"></i></a>
                             </div>
                         </div>
+
                         <hr>
+
                     </div>
 
                     <div id="job-detail-tables">
@@ -179,33 +177,36 @@
                         <div id="hide-summary-button" style="display: hidden;">
                             <a href="" class="btn btn-xs btn-primary" ng-click="toggleSummary('hide')" aw-tool-tip="Hide summary" data-placement="top"><i class="fa fa-arrow-circle-right fa-lg"></i></a>
                         </div>
+
                         <div id="summary-search-section" class="section">
                             <div class="header">
-                                <div class="title">Filter Hosts</div>
+                                <div class="title">Filter</div>
                             </div>
-                            <div class="row">
-                                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                            <form class="form-inline" id="job-filter-form">
+                                <div class="col-sm-7 col-xs-7 remove-left-padding">
                                     <div style="position:relative;">
                                         <input type="text" class="input-sm form-control" id="search_all_hosts_name" ng-model="search_all_hosts_name"
-                                            placeholder="Host Name" ng-disabled="searchAllDisabled" ng-keypress="allHostNameKeyPress($event)" />
+                                                placeholder="Host Name" ng-disabled="searchAllDisabled" ng-keypress="allHostNameKeyPress($event)" />
                                         <div id="search-all-input-icons">
                                             <a class="search-icon" ng-show="searchAllHostsEnabled" ng-click="searchAllByHost()"><i class="fa fa-search"></i></a>
                                             <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllByHost()"><i class="fa fa-times"></i></a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                                    <div style="padding-top: 5px;">
-                                        <label class="small-label">Show</label>
-                                        <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
-                                            <button class="btn btn-xs btn-primary active">All</button>
-                                            <button class="btn btn-xs btn-default">Failed</button>
-                                        </div>
+                                <div class="col-sm-5 col-xs-5 remove-left-padding">
+                                    <label>Status</label>
+                                    <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
+                                        <button class="btn btn-xs btn-primary active">All</button>
+                                        <button class="btn btn-xs btn-default">Failed</button>
                                     </div>
                                 </div>
-                            </div>
-                            <hr />
+                            </form>
                         </div>
+
+                        <div style="display:block; clear:both; width:100%; height:1px; margin-top:55px; margin-bottom:20px;">
+                            <hr>
+                        </div>
+
                         <div id="hosts-summary-section" class="section job_summary">
                             <div class="header">
                                 <div class="title">Host Summary</div>
@@ -215,8 +216,7 @@
                             <div class="table-header">
                                 <div class="row">
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Host</div>
-                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Completed Tasks
-                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Completed Tasks</div>
                                 </div>
                             </div>
                             <div id="hosts-summary-table" class="table-detail" aw-custom-scroll data-on-total-scroll="HostSummaryOnTotalScroll"

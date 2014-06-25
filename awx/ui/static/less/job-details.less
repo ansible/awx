@@ -136,25 +136,32 @@
 
     #job-status-form {
         label {
-            font-weight: normal;
+            font-weight: bold;
         }
         .control-label {
             padding-top: 0;
+            padding-right: 0;
+            text-align: left;
         }
         .form-group {
             margin-bottom: 15px;
-        }
-        #finished-time,
-        #elapsed-time {
-            padding-left: 15px;
         }
         hr {
             margin-top: 0;
         }
         .more-or-less {
             font-size: 12px;
-            text-align: right;
+            text-align: left;
             margin-bottom: 15px;
+        }
+        #started-time,
+        #finished-time,
+        #elapsed-time {
+            display: inline-block;
+        }
+        #finished-time,
+        #elapsed-time {
+            padding-left: 15px;
         }
     }
 
@@ -247,10 +254,22 @@
     }
 }
 
-#search_all_hosts_name {
-    font-size: 14px;
-    padding-left: 3px;
-    padding-right: 20px;
+#summary-search-section {
+    .remove-left-padding {
+        padding-left: 0;
+    }
+    label {
+        text-align: left;
+        font-weight: normal;
+        padding-left: 0;
+        padding-right: 0;
+        padding-top: 6px;
+    }
+    #search_all_hosts_name {
+        width: 100%;
+        padding-left: 3px;
+        padding-right: 20px;
+    }
 }
 
 #event-help-link {
@@ -367,9 +386,20 @@ svg text.percent{
     font-weight: bold;
 }
 
-
 @media (max-width: 767px) {
-    #job-status-form .more-or-less {
-        text-align: left;
+    #job-detail-container {
+        #job-status-form {
+            #finished-time,
+            #elapsed-time {
+                display: block;
+            }
+            #finished-time,
+            #elapsed-time {
+                padding-left: 0;
+                margin-left: 0;
+                padding-top: 15px;
+            }
+        }
     }
 }
+
