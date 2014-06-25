@@ -1503,6 +1503,8 @@ class JobJobPlaysList(BaseJobEventsList):
             qs = qs.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
         elif "id__gt" in request.QUERY_PARAMS:
             qs = qs.filter(id__gt=request.QUERY_PARAMS['id__gt'])
+        elif "id__lt" in request.QUERY_PARAMS:
+            qs = qs.filter(id__gt=request.QUERY_PARAMS['id__ltt'])
         if "failed" in request.QUERY_PARAMS:
             qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
 
@@ -1593,6 +1595,8 @@ class JobJobTasksList(BaseJobEventsList):
             queryset = queryset.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
         elif "id__gt" in request.QUERY_PARAMS:
             queryset = queryset.filter(id__gt=request.QUERY_PARAMS['id__gt'])
+        elif "id__lt" in request.QUERY_PARAMS:
+            queryset = queryset.filter(id__gt=request.QUERY_PARAMS['id__lt'])
         if "failed" in request.QUERY_PARAMS:
             queryset = queryset.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
 
