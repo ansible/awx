@@ -1614,10 +1614,10 @@ class JobJobTasksList(BaseJobEventsList):
         for task_start_event in qs:
             # Create initial task data.
             task_data = {
-                'changed': False,
+                'changed': task_start_event.changed,
                 'changed_count': 0,
                 'created': task_start_event.created,
-                'failed': False,
+                'failed': task_start_event.failed,
                 'failed_count': 0,
                 'host_count': 0,
                 'id': task_start_event.id,
