@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+</style>
+<body>
+
+<svg id="test1"></svg>
+
+<svg id="test2"></svg>
+
+<script src="../lib/d3.v3.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/utils.js"></script>
+<script src="../src/models/pie.js"></script>
+<script> 
+
+  var testdata = [
+    { 
+      key: "One",
+      y: 5
+    },
+    { 
+      key: "Two",
+      y: 2
+    },
+    { 
+      key: "Three",
+      y: 9
+    },
+    { 
+      key: "Four",
+      y: 7
+    },
+    { 
+      key: "Five",
+      y: 4
+    },
+    {
+        key: "Six",
+        y: 3
+    }
+  ];
+
+
+nv.addGraph(function() {
+    var width = nv.utils.windowSize().width - 40,
+        height = nv.utils.windowSize().height / 2 - 40;
+
+    var chart = nv.models.pie()
+        .values(function(d) { return d })
+        .width(width)
+        .height(height);
+
+    d3.select("#test1")
+        .datum([testdata])
+      .transition().duration(1200)
+        .attr('width', width)
+        .attr('height', height)
+        .call(chart);
+
+    return chart;
+});
+
+nv.addGraph(function() {
+    var width = nv.utils.windowSize().width - 40,
+        height = nv.utils.windowSize().height / 2 - 40;
+
+    var chart = nv.models.pie()
+        .values(function(d) { return d })
+        .width(width)
+        .height(height)
+        .donut(true);
+
+    d3.select("#test2")
+        .datum([testdata])
+      .transition().duration(1200)
+        .attr('width', width)
+        .attr('height', height)
+        .call(chart);
+
+    return chart;
+});
+
+</script>

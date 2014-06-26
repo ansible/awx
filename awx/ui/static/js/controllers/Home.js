@@ -10,8 +10,8 @@
 
 'use strict';
 
-function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, ObjectCount, JobStatus, InventorySyncStatus, SCMSyncStatus,
-    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button) {
+function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDash, ObjectCount, JobStatus, InventorySyncStatus, SCMSyncStatus,
+    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button){
 
     ClearScope('home');
 
@@ -70,7 +70,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Objec
     if ($scope.removeDashboardReady) {
         $scope.removeDashboardReady();
     }
-    $scope.removeDashboardReady = $scope.$on('dashboardReady', function (e, data) {
+    $scope.removeDashboardReady = $scope.$on('dashboardReady', function (e, data) { 
         JobStatus({
             scope: $scope,
             target: 'container1',
@@ -89,6 +89,11 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Objec
         ObjectCount({
             scope: $scope,
             target: 'container3',
+            dashboard: data
+        });
+         NewDash({
+            scope: $scope,
+            target: 'container5',
             dashboard: data
         });
     });
@@ -117,8 +122,8 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Objec
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
-    'SCMSyncStatus', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'NewDash', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
+    'SCMSyncStatus', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button' 
 ];
 
 

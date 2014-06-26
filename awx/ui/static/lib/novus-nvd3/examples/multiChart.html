@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+#chart1 svg {
+  height: 500px;
+  margin: 10px;
+  min-width: 100px;
+  min-height: 100px;
+/*
+  Minimum height and width is a good idea to prevent negative SVG dimensions...
+  For example width should be =< margin.left + margin.right + 1,
+  of course 1 pixel for the entire chart would not be very useful, BUT should not have errors
+*/
+}
+
+</style>
+<body class='with-3d-shadow with-transitions'>
+
+  <div id="chart1" >
+    <svg> </svg>
+  </div>
+
+<script src="../lib/d3.v3.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/utils.js"></script>
+<script src="../src/tooltip.js"></script>
+<script src="../src/models/legend.js"></script>
+<script src="../src/models/axis.js"></script>
+<script src="../src/models/scatter.js"></script>
+<script src="../src/models/line.js"></script>
+<script src="../src/models/multiBar.js"></script>
+<script src="../src/models/multiChart.js"></script>
+<script src="stream_layers.js"></script>
+<script>
+
+
+var testdata = stream_layers(7,10+Math.random()*100,.1).map(function(data, i) {
+  return {
+    key: 'Stream' + i,
+    values: data.map(function(a){a.y = a.y * (i <= 1 ? -1 : 1); return a})
+  };
+});
+
+testdata[0].type = "area"
+testdata[0].yAxis = 1
+testdata[1].type = "area"
+testdata[1].yAxis = 1
+testdata[2].type = "line"
+testdata[2].yAxis = 1
+testdata[3].type = "line"
+testdata[3].yAxis = 2
+testdata[4].type = "bar"
+testdata[4].yAxis = 2
+testdata[5].type = "bar"
+testdata[5].yAxis = 2
+testdata[6].type = "bar"
+testdata[6].yAxis = 2
+
+
+nv.addGraph(function() {
+    var chart = nv.models.multiChart()
+        .margin({top: 30, right: 60, bottom: 50, left: 70})
+        .color(d3.scale.category10().range());
+
+    chart.xAxis
+        .tickFormat(d3.format(',f'));
+
+    chart.yAxis1
+        .tickFormat(d3.format(',.1f'));
+
+    chart.yAxis2
+        .tickFormat(d3.format(',.1f'));
+
+
+    d3.select('#chart1 svg')
+        .datum(testdata)
+      .transition().duration(500).call(chart);
+
+    return chart;
+});
+
+</script>
+</html>

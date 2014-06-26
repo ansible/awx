@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
+<link href="teststyle.css" rel="stylesheet" type='text/css'>
+
+<body>
+  <h3>Unit tests for nv.interactiveBisect - this function is important for rendering tooltips and the guideline on charts.</h3>
+  <div class='navigation'>
+      Tests:
+      <a href="lineChartTest.html">Line Chart</a>
+      <a href="stackedAreaChartTest.html">Stacked Area</a>
+      <a href="../examples/cumulativeLineChart.html">Cumulative Line</a>
+  </div>
+
+<script src="../lib/d3.v3.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/interactiveLayer.js"></script>
+
+<script>
+function runTest(description, dataArray, searchVal, expectedResult, xAccessor) {
+    var result = nv.interactiveBisect(dataArray, searchVal, xAccessor);
+    var content = "";
+    if (result === expectedResult) {
+        content = "PASSED: " + description;
+    }
+    else {
+        content = "FAILED: " + description;
+    }
+
+    var node = document.createElement("div");
+    node.innerHTML = content;
+    document.getElementsByTagName("body")[0].appendChild(node);
+}
+
+var x = function(d) {return d;};
+
+runTest("Basic test",
+      [0,1,2,3,4,5],
+      3,
+      3,
+      x
+  );
+
+runTest("Basic test - zero bound",
+      [0,1,2,3,4,5],
+      0,
+      0,
+      x
+  );
+
+runTest("Basic test - length bound",
+      [0,1,2,3,4,5],
+      5,
+      5,
+      x
+  );
+
+runTest("Basic test - negative number",
+      [0,1,2,3,4,5],
+      -4,
+      0,
+      x
+  );
+
+runTest("Basic test - past the end",
+      [0,1,2,3,4,5],
+      10,
+      5,
+      x
+  );
+
+runTest("Floating point number",
+      [0,1,2,3,4,5],
+      0.34,
+      0,
+      x
+  );
+
+runTest("Floating point number part 2",
+      [0,1,2,3,4,5],
+      1.50001,
+      2,
+      x
+  );
+
+runTest("Fibonacci - existing item search",
+      [0,1,1,2,3,5,8,13,21,34],
+      8,
+      6,
+      x
+  );
+
+runTest("Fibonacci - inbetween item (left)",
+      [0,1,1,2,3,5,8,13,21,34],
+      15,
+      7,
+      x
+  );
+
+runTest("Fibonacci - inbetween item (right)",
+      [0,1,1,2,3,5,8,13,21,34],
+      20,
+      8,
+      x
+  );
+
+x = function(d,i) { return i};
+
+runTest("xAccessor is index mode - existing item",
+      [0,1,1,2,3,5,8,13,21,34],
+      7,
+      7,
+      x
+  );
+
+runTest("xAccessor is index mode - inbetween item",
+      [0,1,1,2,3,5,8,13,21,34],
+      7.3,
+      7,
+      x
+  );
+
+runTest("xAccessor is index mode - inbetween item part 2",
+      [0,1,1,2,3,5,8,13,21,34],
+      7.500001,
+      8,
+      x
+  );
+
+runTest("Empty array",
+      [],
+      4,
+      0,
+      x
+  );
+
+runTest("Single element array",
+      [0],
+      0,
+      0,
+      x
+  );
+
+runTest("Single element array - negative bound",
+      [0],
+      -10,
+      0,
+      x
+  );
+
+runTest("Single element array - past the end",
+      [0],
+      1,
+      0,
+      x
+  );
+</script>

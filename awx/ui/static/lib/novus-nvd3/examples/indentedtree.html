@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+</style>
+<body>
+
+  <div id="example1" style="width:600px"></div>
+
+
+<script src="../lib/d3.v3.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/utils.js"></script>
+<script src="../src/models/indentedTree.js"></script>
+<script>
+
+// THIS API WILL BE CHANGING!!  this was ported from a different graphing collection, its only been halfway ported to the nvd3 style
+
+var testTree = [{
+  key: 'NVD3',
+  url: 'http://novus.github.com/nvd3',
+  values: [
+    {
+      key: "Charts",
+      _values: [
+        {
+          key: "Simple Line",
+          type: "Historical",
+          url: "http://novus.github.com/nvd3/ghpages/line.html"
+        },
+        {
+          key: "Scatter / Bubble",
+          type: "Snapshot",
+          url: "http://novus.github.com/nvd3/ghpages/scatter.html"
+        },
+        {
+          key: "Stacked / Stream / Expanded Area",
+          type: "Historical",
+          url: "http://novus.github.com/nvd3/ghpages/stackedArea.html"
+        },
+        {
+          key: "Discrete Bar",
+          type: "Snapshot",
+          url: "http://novus.github.com/nvd3/ghpages/discreteBar.html"
+        },
+        {
+          key: "Grouped / Stacked Multi-Bar",
+          type: "Snapshot / Historical",
+          url: "http://novus.github.com/nvd3/ghpages/multiBar.html"
+        },
+        {
+          key: "Horizontal Grouped Bar",
+          type: "Snapshot",
+          url: "http://novus.github.com/nvd3/ghpages/multiBarHorizontal.html"
+        },
+        {
+          key: "Line and Bar Combo",
+          type: "Historical",
+          url: "http://novus.github.com/nvd3/ghpages/linePlusBar.html"
+        },
+        {
+          key: "Cumulative Line",
+          type: "Historical",
+          url: "http://novus.github.com/nvd3/ghpages/cumulativeLine.html"
+        },
+        {
+          key: "Line with View Finder",
+          type: "Historical",
+          url: "http://novus.github.com/nvd3/ghpages/lineWithFocus.html"
+        }
+      ]
+    },
+    {
+      key: "Chart Components",
+      _values: [
+        {
+          key: "Legend",
+          type: "Universal",
+          url: "http://novus.github.com/nvd3/examples/legend.html"
+        }
+      ]
+    }
+  ]
+}];
+
+
+
+var testColumns = [
+  {
+    key: 'key',
+    label: 'Name',
+    showCount: true,
+    width: '75%',
+    type: 'text',
+    classes: function(d) { return d.url ? 'clickable name' : 'name' },
+    click: function(d) {
+       if (d.url) window.location.href = d.url;
+    }
+  },
+  {
+    key: 'type',
+    label: 'Type',
+    width: '25%',
+    type: 'text'
+  }
+];
+
+
+
+nv.addGraph(function() {
+  var chart = nv.models.indentedTree()
+                .columns(testColumns);
+
+  d3.select('#example1')
+      .datum(testTree)
+    .call(chart);
+});
+
+
+
+
+</script>

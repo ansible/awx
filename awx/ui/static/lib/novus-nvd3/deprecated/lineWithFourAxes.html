@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="../src/d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+#chart1 {
+  height: 500px;
+  margin: 10px;
+  min-width: 100px;
+  min-height: 100px;
+/*
+  Minimum height and width is a good idea to prevent negative SVG dimensions...
+  For example width should be =< margin.left + margin.right + 1,
+  of course 1 pixel for the entire chart would not be very useful, BUT should not have errors
+*/
+}
+
+</style>
+<body>
+
+  <div id="chart1">
+  </div>
+
+<script src="../lib/d3.v2.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/tooltip.js"></script>
+<script src="../src/models/legend.js"></script>
+<script src="../src/models/axis.js"></script>
+<script src="../src/models/line.js"></script>
+<script src="../src/models/lineWithFourAxes.js"></script>
+<script>
+
+/************
+ * Considering making an nv.charts object which will contain abstractions similar to the one below, 
+ *     but with the usual d3 reusable style.
+ * I could make this abstraction inside the layer above, but this layer incorporates some jQuery, so
+ *     thinking nv.charts can be the glue that's not 100% d3
+ ************/
+
+var selector = '#chart1',
+    chart = nv.models.lineWithLegend(),
+    data = sinAndCos(),
+    xTickFormat = d3.format(',r'),
+    yTickFormat = d3.format(',.2f'),
+    xAxisLabel = null,
+    yAxisLabel = 'Voltage (v)',
+    duration = 500;
+
+nv.addGraph({
+  generate: function() {
+    var container = d3.select(selector),
+        width = function() { return parseInt(container.style('width')) },
+        height = function() { return parseInt(container.style('height')) },
+        svg = container.append('svg');
+
+    chart
+        .width(width)
+        .height(height)
+
+    chart.xAxis
+        .tickFormat(xTickFormat);
+
+    chart.yAxis
+        .tickFormat(yTickFormat)
+        .axisLabel(yAxisLabel);
+
+    svg
+        .attr('width', width())
+        .attr('height', height())
+        .datum(data)
+      .transition().duration(duration).call(chart);
+
+    return chart;
+  },
+  callback: function(chart) {
+    var showTooltip = function(e) {
+          var offsetElement = document.getElementById(selector.substr(1)),
+              left = e.pos[0] + offsetElement.offsetLeft,
+              top = e.pos[1] + offsetElement.offsetTop,
+              formatY = chart.yAxis.tickFormat(), //Assumes using same format as axis, can customize to show higher precision, etc.
+              formatX = chart.xAxis.tickFormat();
+
+          // uses the chart's getX and getY, you may customize if x position is not the same as the value you want 
+          //   ex. daily data without weekends, x is the index, while you want the date
+          var content = '<h3>' + e.series.key + '</h3>' +
+                        '<p>' +
+                        formatY(chart.y()(e.point)) + ' at ' + formatX(chart.x()(e.point)) +
+                        '</p>';
+
+          nv.tooltip.show([left, top], content);
+        };
+
+    chart.dispatch.on('tooltipShow', showTooltip);
+    chart.dispatch.on('tooltipHide', nv.tooltip.cleanup);
+
+
+    window.onresize =
+    function() {
+      // now that width and height are functions, should be automatic..of course you can always override them
+      d3.select('#chart1 svg')
+          .attr('width', chart.width()()) //need to set SVG dimensions, chart is not aware of the SVG component
+          .attr('height', chart.height()())
+          .call(chart);
+    };
+  }
+});
+
+
+
+function sinAndCos() {
+  var sin = [],
+      cos = [];
+
+  for (var i = 0; i < 100; i++) {
+    sin.push({x: i, y: Math.sin(i/10)});
+    cos.push({x: i, y: .5 * Math.cos(i/10)});
+  }
+
+  return [
+    {
+      values: sin,
+      key: "Sine Wave",
+      color: "#ff7f0e"
+    },
+    {
+      values: cos,
+      key: "Cosine Wave",
+      color: "#2ca02c"
+    }
+  ];
+}
+
+
+</script>

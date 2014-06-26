@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="../src/d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+#chart1 {
+  height: 500px;
+  margin: 10px;
+  min-width: 100px;
+  min-height: 100px;
+/*
+  Minimum height and width is a good idea to prevent negative SVG dimensions...
+  For example width should be =< margin.left + margin.right + 1,
+  of course 1 pixel for the entire chart would not be very useful, BUT should not have errors
+*/
+}
+
+</style>
+<body>
+
+  <div id="chart1">
+  </div>
+
+<script src="../lib/d3.v2.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/tooltip.js"></script>
+<script src="../src/models/axis.js"></script>
+<script src="../src/models/discreteBar.js"></script>
+<script src="../src/models/discreteBarWithAxes.js"></script>
+<script src="stream_layers.js"></script>
+<script>
+
+
+
+historicalBarChart = [ 
+  {
+    key: "Cumulative Return",
+    values: [
+      { 
+        "label" : "CDS / Options" ,
+        "value" : -29.765957771107
+      } , 
+      { 
+        "label" : "Cash" , 
+        "value" : 0
+      } , 
+      { 
+        "label" : "Corporate Bonds" , 
+        "value" : 32.807804682612
+      } , 
+      { 
+        "label" : "Equity" , 
+        "value" : 196.45946739256
+      } , 
+      { 
+        "label" : "Index Futures" ,
+        "value" : 0.19434030906893
+      } , 
+      { 
+        "label" : "Options" , 
+        "value" : -98.079782601442
+      } , 
+      { 
+        "label" : "Preferred" , 
+        "value" : -13.925743130903
+      } , 
+      { 
+        "label" : "Not Available" , 
+        "value" : -5.1387322875705
+      }
+    ]
+  }
+];
+ 
+
+
+
+
+
+var selector = '#chart1',
+    chart = nv.models.discreteBarWithAxes()
+              .color(d3.scale.category10().range())
+              .x(function(d) { return d.label })
+              .y(function(d) { return d.value }),
+    data = historicalBarChart,
+    xTickFormat = function(d) { return d },
+    yTickFormat = d3.format(',.2f'),
+    xAxisLabel = null,
+    yAxisLabel = null,
+    duration = 500;
+
+nv.addGraph({
+  generate: function() {
+    var container = d3.select(selector),
+        width = function() { return parseInt(container.style('width')) },
+        height = function() { return parseInt(container.style('height')) },
+        svg = container.append('svg');
+
+    chart
+        .width(width)
+        .height(height)
+        .staggerLabels(true);
+
+    chart.xAxis
+        .tickFormat(xTickFormat);
+
+    chart.yAxis
+        .tickFormat(yTickFormat)
+        .axisLabel(yAxisLabel);
+
+    svg
+        .attr('width', width())
+        .attr('height', height())
+        .datum(data)
+      .transition().duration(duration).call(chart);
+
+    return chart;
+  },
+  callback: function(chart) {
+    var showTooltip = function(e) {
+      var offsetElement = document.getElementById(selector.substr(1)),
+          left = e.pos[0] + offsetElement.offsetLeft,
+          top = e.pos[1] + offsetElement.offsetTop,
+          formatY = chart.yAxis.tickFormat(), //Assumes using same format as axis, can customize to show higher precision, etc.
+          formatX = chart.xAxis.tickFormat();
+
+      // uses the chart's getX and getY, you may customize if x position is not the same as the value you want
+      //   ex. daily data without weekends, x is the index, while you want the date
+      var content = '<h3>' + formatX(chart.x()(e.point))  + '</h3>' +
+                    '<p>' +
+                    formatY(chart.y()(e.point)) + 
+                    '</p>';
+
+      nv.tooltip.show([left, top], content, e.value < 0 ? 'n' : 's');
+    };
+
+    chart.dispatch.on('tooltipShow', showTooltip);
+    chart.dispatch.on('tooltipHide', nv.tooltip.cleanup);
+
+
+    window.onresize= function() {
+      // now that width and height are functions, should be automatic..of course you can always override them
+
+      d3.select('#chart1 svg')
+          .attr('width', chart.width()()) //need to set SVG dimensions, chart is not aware of the SVG component
+          .attr('height', chart.height()())
+        .transition().duration(duration)
+          .call(chart);
+
+/*
+      d3.select('#chart1 svg')
+          .attr('width', chart.width()()) //need to set SVG dimensions, chart is not aware of the SVG component
+          .attr('height', chart.height()())
+          .call(chart);
+*/
+    };
+  }
+});
+
+
+
+</script>

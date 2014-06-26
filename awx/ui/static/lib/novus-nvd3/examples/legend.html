@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
+<style>
+
+</style>
+<body>
+
+<svg id="test1"></svg>
+
+<script src="../lib/d3.v3.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/utils.js"></script>
+<script src="../src/models/legend.js"></script>
+<script>
+
+
+//Format A
+nv.addGraph({
+  generate: function() {
+    var width = 500,
+        height = 20;
+
+    var chart = nv.models.legend()
+                .width(width)
+                .height(height);
+
+    chart.dispatch.on('legendClick', function(d,i) { console.log(d,i) });
+
+    //chart.xaxis.tickFormat(d3.format(".02f"))
+
+    d3.select('#test1')
+      .attr('width', width)
+      .attr('height', height)
+      .datum(sinAndCos())
+      .call(chart);
+
+    return chart;
+  },
+  callback: function(graph) {
+    var chart = graph,
+        height = chart.height();
+
+    d3.select('#test1')
+        .attr('height', height)
+        .call(chart)
+  }
+});
+
+
+
+function sinAndCos() {
+  return [
+    {
+      key: "Sine Wave"
+    },
+    {
+      key: "A Very Long Series Label"
+    },
+    {
+      key: "A Very Long Series Label"
+    },
+    {
+      key: "A Very Long Series Label"
+    },
+    {
+      key: "Cosine Wave"
+    },
+    {
+      key: "Another test label"
+    }
+  ];
+}
+
+
+</script>

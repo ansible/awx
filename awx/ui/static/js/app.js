@@ -74,6 +74,7 @@ angular.module('Tower', [
     'SelectionHelper',
     'License',
     'HostGroupsFormDefinition',
+    'NewDashWidget',
     'JobStatusWidget',
     'InventorySyncStatusWidget',
     'SCMSyncStatusWidget',

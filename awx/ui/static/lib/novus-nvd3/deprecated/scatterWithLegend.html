@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="../src/d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+  margin: 0;
+  padding: 0;
+}
+
+svg {
+  overflow: hidden;
+}
+
+div {
+  border: 0;
+  margin: 0;
+}
+
+
+#offsetDiv {
+}
+
+
+#test1 {
+  margin: 0;
+}
+
+
+</style>
+
+<body>
+
+<div id="offsetDiv">
+  <div id="test1" class="chartWrap">
+    <svg></svg>
+  </div>
+</div>
+
+<script src="../lib/d3.v2.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/tooltip.js"></script>
+<script src="../src/models/legend.js"></script>
+<script src="../src/models/axis.js"></script>
+<script src="../src/models/scatter.js"></script>
+<script src="../src/models/scatterWithLegend.js"></script>
+<script>
+
+
+
+//Format A
+nv.addGraph({
+  generate: function() {
+      var width = nv.utils.windowSize().width - 40,
+          height = nv.utils.windowSize().height - 40;
+
+      var chart = nv.models.scatterWithLegend()
+                .width(width)
+                .height(height)
+                .showDistX(true)
+                .showDistY(true)
+                .color(d3.scale.category10().range());
+                //.width(width)
+                //.height(height)
+                //.forceX([-4,4])
+                //.forceY([-4,4])
+                //.margin({top: 20, right: 10, bottom: 50, left: 80})
+
+
+    //chart.xaxis.tickFormat(d3.format(".02f"))
+
+    var svg =d3.select('#test1 svg')
+      .datum(randomData());
+
+
+    svg.transition().duration(500)
+      .attr('width', width)
+      .attr('height', height)
+      .call(chart)
+      //.attr('width', wid0th)
+      //.attr('height', height)
+
+    return chart;
+  },
+  callback: function(graph) {
+
+    graph.dispatch.on('tooltipShow', function(e) {
+        var offsetElement = document.getElementById("test1"),
+                left = e.pos[0] + offsetElement.offsetLeft,
+                top = e.pos[1] + offsetElement.offsetTop,
+                formatter = d3.format(".2f");
+
+
+      /*
+      var content = '<h3>' + e.series.key + '</h3>' +
+                    '<p>' +
+                    '<span class="value"><span class="label">x:</span><span class="val">' + formatter(e.point.x) + '</span></span><br>' +
+                    '<s0pan class="value"><span class="label">y:</span><span class="val">' + formatter(e.point.y) + '</span></span>' +
+                    '</p>';
+
+      nvtooltip.show([left, top], content);
+      */
+
+      var contentX = '<strong>' + formatter(e.point.x) + '</strong>';
+      var contentY = '<strong>' + formatter(e.point.y) + '</strong>';
+      var height = nv.utils.windowSize().height - 40;
+
+      nv.tooltip.show([left, height - 50], contentX, 'n', 1);
+      nv.tooltip.show([5, top], contentY, 'w', 1);
+    });
+
+
+    graph.dispatch.on('tooltipHide', function(e) {
+      nv.tooltip.cleanup();
+    });
+
+    window.onresize = function() {
+     var width = nv.utils.windowSize().width - 40,
+        height = nv.utils.windowSize().height - 40,
+        margin = graph.margin();
+
+
+      if (width < margin.left + margin.right + 20)
+        width = margin.left + margin.right + 20;
+
+      if (height < margin.top + margin.bottom + 20)
+        height = margin.top + margin.bottom + 20;
+
+
+      graph
+        .width(width)
+        .height(height);
+
+      d3.select('#test1 svg')
+        .attr('width', width)
+        .attr('height', height)
+        .call(graph);
+
+      };
+  }
+});
+
+
+function randomData() {
+  var data = [],
+      random = d3.random.normal();
+
+  for (i = 0; i < 2; i++) {
+    data.push({
+      key: 'Group ' + i,
+      values: []
+    });
+
+    for (j = 0; j < 100; j++) {
+      data[i].values.push({x: random(), y: random(), size: Math.random()});
+    }
+  }
+
+  return data;
+}
+
+
+
+</script>

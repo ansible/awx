@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="../src/d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+svg {
+  display: block;
+}
+
+#wrapper {
+  width: 960;
+  padding: 100px;  
+}
+
+#chart1 {
+  width: 960px;
+}
+
+#chart1 svg{
+  height: 500px;
+  min-width: 100px;
+  min-height: 100px;
+/*
+  margin: 10px;
+  Minimum height and width is a good idea to prevent negative SVG dimensions...
+  For example width should be =< margin.left + margin.right + 1,
+  of course 1 pixel for the entire chart would not be very useful, BUT should not have errors
+*/
+}
+
+</style>
+<body>
+  <div id="wrapper">
+
+    <div id="chart1">
+      <svg></svg>
+    </div>
+
+  </div>
+
+<script src="../lib/d3.v2.js"></script>
+<script src="../nv.d3.js"></script>
+<!-- including all the components so I don't have to minify every time I test in development -->
+<script src="../src/tooltip.js"></script>
+<script src="../src/models/axis.js"></script>
+<script src="../src/models/discreteBar.js"></script>
+<script src="../src/models/discreteBarChartWithEnabledTooltip.js"></script>
+<script>
+
+
+
+
+
+historicalBarChart = [ 
+  {
+    key: "Cumulative Return",
+    values: [
+      { 
+        "label" : "CDS / Options" ,
+        "value" : -29.765957771107
+      } , 
+      { 
+        "label" : "Cash" , 
+        "value" : 0
+      } , 
+      { 
+        "label" : "Corporate Bonds" , 
+        "value" : 32.807804682612
+      } , 
+      { 
+        "label" : "Equity" , 
+        "value" : 196.45946739256
+      } , 
+      { 
+        "label" : "Index Futures" ,
+        "value" : 0.19434030906893
+      } , 
+      { 
+        "label" : "Options" , 
+        "value" : -98.079782601442
+      } , 
+      { 
+        "label" : "Preferred" , 
+        "value" : -13.925743130903
+      } , 
+      { 
+        "label" : "Not Available" , 
+        "value" : -5.1387322875705
+      }
+    ]
+  }
+];
+
+
+
+
+nv.addGraph(function() {  
+  var chart = nv.models.discreteBarChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      .staggerLabels(true)
+      //.staggerLabels(historicalBarChart[0].values.length > 8)
+      .tooltips(true)
+      .showValues(true)
+
+
+  d3.select('#chart1 svg')
+      .datum(historicalBarChart)
+    .transition().duration(500)
+      .call(chart);
+
+  nv.utils.windowResize(chart.update);
+
+  return chart;
+});
+
+
+</script>
+</body>

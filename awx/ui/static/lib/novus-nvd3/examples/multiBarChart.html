@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+#chart1 {
+  height: 500px;
+  margin: 10px;
+  min-width: 100px;
+  min-height: 100px;
+/*
+  Minimum height and width is a good idea to prevent negative SVG dimensions...
+  For example width should be =< margin.left + margin.right + 1,
+  of course 1 pixel for the entire chart would not be very useful, BUT should not have errors
+*/
+}
+
+</style>
+<body>
+
+  <div id="chart1" class='with-3d-shadow with-transitions'>
+    <svg></svg>
+  </div>
+
+<script src="../lib/d3.v3.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/tooltip.js"></script>
+<script src="../src/utils.js"></script>
+<script src="../src/models/legend.js"></script>
+<script src="../src/models/axis.js"></script>
+<script src="../src/models/multiBar.js"></script>
+<script src="../src/models/multiBarChart.js"></script>
+<script src="stream_layers.js"></script>
+<script>
+
+var test_data = stream_layers(3,10+Math.random()*100,.1).map(function(data, i) {
+//var test_data = stream_layers(3,1,.1).map(function(data, i) { //for testing single data point
+  return {
+    key: 'Stream' + i,
+    values: data
+  };
+});
+
+console.log('td',test_data);
+
+var negative_test_data = new d3.range(0,3).map(function(d,i) { return {
+  key: 'Stream' + i,
+  values: new d3.range(0,11).map( function(f,j) {
+    return { 
+             y: 10 + Math.random()*100 * (Math.floor(Math.random()*100)%2 ? 1 : -1),
+             x: j
+           }
+  })
+  };  
+});
+
+var chart;
+nv.addGraph(function() {
+    chart = nv.models.multiBarChart()
+      .barColor(d3.scale.category20().range())
+      .margin({bottom: 100})
+      .transitionDuration(300)
+      .delay(0)
+      .rotateLabels(45)
+      .groupSpacing(0.1)
+      ;
+
+    chart.multibar
+      .hideable(true);
+
+    chart.reduceXTicks(false).staggerLabels(true);
+
+    chart.xAxis
+        .axisLabel("Current Index")
+        .showMaxMin(true)
+        .tickFormat(d3.format(',.6f'));
+
+    chart.yAxis
+        .tickFormat(d3.format(',.1f'));
+
+    d3.select('#chart1 svg')
+        .datum(negative_test_data)
+       .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+
+    return chart;
+});
+
+
+
+
+</script>

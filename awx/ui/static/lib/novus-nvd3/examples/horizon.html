@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
+<style>
+
+  /*
+* {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+*/
+
+
+body {
+  font-family: sans-serif;
+}
+
+svg {
+  top: 10px;
+  left: 10px;
+  position: absolute;
+}
+
+svg > g > path {
+  pointer-events: none;
+}
+
+.nv-horizonBackground {
+  fill: none;
+  stroke: none;
+  pointer-events: all;
+}
+
+#horizon-controls {
+  position: absolute;
+  width: 940px;
+  padding: 10px;
+  z-index: 1;
+}
+
+#horizon-bands {
+  float: right;
+}
+
+
+</style>
+<body>
+
+  <div id="wrap">
+
+    <div id="horizon-controls">
+      <input name="mode" type="radio" value="mirror" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Mirror</label>
+      <input name="mode" type="radio" value="offset" id="horizon-mode-offset"><label for="horizon-mode-offset"> Offset</label>
+      <span id="horizon-bands"><span id="horizon-bands-value">1</span> <button class="first">&#x2212;</button><button class="last">+</button></span>
+    </div>
+    <div><svg id="chart1"></svg></div>
+
+  </div>
+
+
+<script src="../lib/d3.v2.js"></script>
+<script src="../lib/horizon.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/utils.js"></script>
+<script>
+
+
+//TODO: create a nv.models.horizonChart model 
+// (if need be an nv.models.horizon model as well, but might get away with just using d3.horizon)
+// the horizontChart model should have a "tooltip" like functionality that shows a point over the 
+// current value based on the mouse's x position
+
+var width = 960,
+    height = 300;
+
+nv.addGraph(function() {
+  var data = sine();
+
+  var chart = d3.horizon()
+    .width(width)
+    .height(height)
+    .bands(1)
+    .mode("mirror")
+    .interpolate("basis");
+
+  var svg = d3.select('#chart1').attr('width', width).attr('height', height);
+
+  var bg = svg.append('rect').attr('class', 'nv-horizonBackground').attr('height', height).attr('width', width);
+
+  svg.datum(data).call(chart);
+
+  var point = svg.append('circle').attr('class', 'nv-hoverPoint')
+      .attr('r', '4')
+      .attr('cx', -3)
+      .attr('cy', -3);
+
+  // Enable mode buttons.
+  d3.selectAll("#horizon-controls input[name=mode]").on("change", function() {
+    svg.call(chart.duration(0).mode(this.value));
+  });
+
+  // Enable bands buttons.
+  d3.selectAll("#horizon-bands button").data([-1, 1]).on("click", function(d) {
+    var n = Math.max(1, chart.bands() + d);
+    d3.select("#horizon-bands-value").text(n);
+    svg.call(chart.duration(1000).bands(n).height(height / n));
+
+    //just updating point temporarily here to have it not be visible on band change until user moves his mouse over the chart
+    point
+      .attr('cx', -3)
+      .attr('cy', -3)
+  });
+
+
+  //****THE CHANGES MADE TO THIS EXAMPLE BY ME ARE VERY UGLY.... TODO: Fix/Clean up after all functionality is correct
+  bg.on('mousemove', function() {
+    var m1 = d3.mouse(this);
+    var x = m1[0];
+    var scales = svg.node().__chart__;
+    var i = Math.round( scales.x.invert(x) );
+    //var y = (data[i][1] < 0 || chart.mode() == 'mirror' ? height : 0) - scales.y(chart.mode() == 'mirror' ? Math.abs(data[i][1]) : data[i][1] );
+    var y = height - scales.y(chart.mode() == 'mirror' ? Math.abs(data[i][1]) : data[i][1] ) - (chart.mode() == 'offset' && data[i][1] < 0 ? height : 0  );
+    var t = scales.t(data[i][1]);
+    var bandRange = scales.y.range()[1];
+
+    y = y % (height / chart.bands());
+    //nv.log(y, height, y % height);
+
+    //nv.log(scales.y.range(), scales.y.domain());
+
+    //nv.log( x, i, data[i], y )
+    //nv.log(scales);
+
+    point
+      .attr('cx', scales.x(i))
+      .attr('cy', y)
+      .attr('transform',
+        'translate(0,' + chart.bands + ')'
+      );
+
+    //var m2 = d3.mouse(d3.select('body').node());
+    //nv.log(m1, m2);
+    //nv.log(d3.event, this, d3.mouse(this));
+  });
+
+  return chart;
+});
+
+
+
+function sine() {
+  var sin = [];
+
+  for (var i = 0; i < 200; i++) {
+    sin.push([ i, Math.sin(i/10) + .2 ]);
+  }
+
+  return sin;
+}
+
+
+</script>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+</style>
+<body>
+
+  <div id="test1">
+    <svg></svg>
+  </div>
+
+<script src="../lib/d3.v3.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/tooltip.js"></script>
+<script src="../src/models/legend.js"></script>
+<script src="../src/models/axis.js"></script>
+<script src="../src/models/multiBar.js"></script>
+<script src="../src/utils.js"></script>
+<script src="stream_layers.js"></script>
+<script>
+
+  //var test_data = stream_layers(3,128,.1).map(function(data, i) {
+  var test_data = stream_layers(3,128,.1).map(function(data, i) {
+    return {
+      key: 'Stream' + i,
+      values: data
+    };
+  });
+
+nv.addGraph({
+  generate: function() {
+      var width = nv.utils.windowSize().width - 40,
+      height = nv.utils.windowSize().height - 40;
+
+      var chart = nv.models.multiBar()
+                .width(width)
+                .height(height)
+                .stacked(true)
+
+
+    var svg = d3.select('#test1 svg')
+      .attr('width', width)
+      .attr('height', height)
+      .datum(test_data);
+
+    svg.transition().duration(500).call(chart);
+
+    return chart;
+  },
+  callback: function(graph) {
+
+
+    window.onresize = function() {
+    var width = nv.utils.windowSize().width - 40,
+        height = nv.utils.windowSize().height - 40,
+        margin = graph.margin();
+
+
+      if (width < margin.left + margin.right + 20)
+        width = margin.left + margin.right + 20;
+
+      if (height < margin.top + margin.bottom + 20)
+        height = margin.top + margin.bottom + 20;
+
+
+      graph
+         .width(width)
+         .height(height);
+
+      d3.select('#test1 svg')
+        .attr('width', width)
+        .attr('height', height)
+        transition().duration(500)
+        .call(graph);
+
+      };
+  }
+});
+
+
+
+</script>

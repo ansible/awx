@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+svg {
+  display: block;
+}
+
+#chart1 svg {
+  height: 500px;
+  min-width: 100px;
+  min-height: 100px;
+/*
+  margin: 50px;
+  Minimum height and width is a good idea to prevent negative SVG dimensions...
+  For example width should be =< margin.left + margin.right + 1,
+  of course 1 pixel for the entire chart would not be very useful, BUT should not have errors
+*/
+}
+
+</style>
+<body>
+
+  <div id="chart">
+    <svg style="height: 500px;"></svg>
+  </div>
+  <div id="stream1" style="float: left; margin-left: 15px;">
+    <div><h1>Stream #1</h1></div>
+  </div>
+  <div id="stream2" style="float: left; margin-left: 15px;">
+    <div><h1>Stream #2</h1></div>
+  </div>
+  <div id="stream3" style="float: left; margin-left: 15px;">
+    <div><h1>Stream #3</h1></div>
+  </div>
+
+<script src="../lib/d3.v3.js"></script>
+<script src="../lib/crossfilter.js"></script>
+<script src="../nv.d3.js"></script>
+<script src="../src/tooltip.js"></script>
+<script src="../src/utils.js"></script>
+<script src="../src/models/legend.js"></script>
+<script src="../src/models/axis.js"></script>
+<script src="../src/models/scatter.js"></script>
+<script src="../src/models/line.js"></script>
+<script src="../src/models/lineWithFocusChart.js"></script>
+<script src="stream_layers.js"></script>
+<script>
+
+extend = function(destination, source) {
+    for (var property in source) {
+    if (property in destination) { 
+      if ( typeof source[property] === "object" &&
+        typeof destination[property] === "object") {
+          destination[property] = extend(destination[property], source[property]);
+      } else {
+        continue;
+      }
+    } else {
+      destination[property] = source[property];
+    };
+    }
+    return destination;
+};
+
+var rawData = testCrossfilterData();
+
+nv.addGraph(function() {
+  var chart = nv.models.lineWithFocusChart();
+
+  chart.xAxis
+      .tickFormat(d3.format(',f'));
+  chart.x2Axis
+      .tickFormat(d3.format(',f'));
+
+  chart.yAxis
+      .tickFormat(d3.format(',.2f'));
+  chart.y2Axis
+      .tickFormat(d3.format(',.2f'));
+
+  chart.dispatch.on('brush', click);
+
+  var data = normalizeData(rawData.datum, 
+        [
+        {
+          name: 'Stream #1',
+          key: 'stream1'
+        },
+        {
+          name: 'Stream #2',
+          key: 'stream2'
+        },
+        {
+          name: 'Stream #3',
+          key: 'stream3'
+        }
+        ]);
+nv.log(data);
+  d3.select('#chart svg')
+      .datum(data)
+    .transition().duration(500)
+      .call(chart);
+
+  nv.utils.windowResize(chart.update);
+
+  return chart;
+});
+
+function click(e) {
+  extent = e.extent;
+
+  rawData.data.filter([extent[0], extent[1]]);
+  streams("stream1");
+  streams("stream2");
+  streams("stream3");
+}
+
+function streams(key) {
+  var topData = rawData.data.top(5);
+
+  var stream = d3.select("div#" + key).selectAll(".stream-data")
+      .data(topData, function(d) {
+        return d.key;
+      });
+
+  stream
+    .html(function(d) {
+      return d[key];
+    })
+
+  stream.enter().append("div")
+      .attr("class", "stream-data")
+      .html(function(d) {
+        return  d[key]; 
+      })
+
+  stream.exit().remove();
+
+  stream.order();
+}
+
+function normalizeData(data, series) {
+  var sort = crossfilter.quicksort.by(function(d) { return d.key; });
+  var result = [];
+
+  for (var i = 0; i < series.length; i++) {
+    var seriesData = data.top(Infinity);
+    var sorted = sort(seriesData, 0, seriesData.length);
+    var values = [];
+
+    seriesData.forEach(function(item, index) {
+        values.push({x: item.key,  y: item.value[series[i].key]});
+    });
+
+    result.push({key: series[i].name, values: values, color: series[i].color});
+  };
+
+  return result;
+};
+
+function testCrossfilterData() {
+  var data = crossfilter(testData());
+
+  try {
+    data.data = data.dimension(function(d) { return d.x; });
+    data.datum = data.data.group(function(d) { return d; });
+    data.datum.reduce(
+      function (p, v) {
+        p.count++;
+        p.stream1 += v.stream1;
+        p.stream2 += v.stream2;
+        p.stream3 += v.stream3;
+        return p;
+      },
+      function (p, v) {
+        p.count--;
+        p.stream1 -= v.stream1;
+        p.stream2 -= v.stream2;
+        p.stream3 -= v.stream3;
+        return p;
+      },
+      function () {
+        return {count: 0, stream1: 0, stream2: 0, stream3: 0};
+      });
+
+    data.stream1 = data.dimension(function(d) { return d.stream1; });
+    data.stream1datum = data.data.group(function(d) { return d; });
+    data.stream1datum.reduce(
+      function (p, v) {
+        p.count++;
+        p.stream1 += v.stream1;
+        p.stream2 += v.stream2;
+        p.stream3 += v.stream3;
+        return p;
+      },
+      function (p, v) {
+        p.count--;
+        p.stream1 -= v.stream1;
+        p.stream2 -= v.stream2;
+        p.stream3 -= v.stream3;
+        return p;
+      },
+      function () {
+        return {count: 0, stream1: 0, stream2: 0, stream3: 0};
+      }
+    );
+
+    data.stream2 = data.dimension(function(d) { return d.stream2; });
+    data.stream2datum = data.data.group(function(d) { return d; });
+    data.stream2datum.reduce(
+      function (p, v) {
+        p.count++;
+        p.stream1 += v.stream1;
+        p.stream2 += v.stream2;
+        p.stream3 += v.stream3;
+        return p;
+      },
+      function (p, v) {
+        p.count--;
+        p.stream1 -= v.stream1;
+        p.stream2 -= v.stream2;
+        p.stream3 -= v.stream3;
+        return p;
+      },
+      function () {
+        return {count: 0, stream1: 0, stream2: 0, stream3: 0};
+      }
+    );
+
+    data.stream3 = data.dimension(function(d) { return d.stream3; });
+    data.stream3datum = data.data.group(function(d) { return d; });
+    data.stream3datum.reduce(
+      function (p, v) {
+        p.count++;
+        p.stream1 += v.stream1;
+        p.stream2 += v.stream2;
+        p.stream3 += v.stream3;
+        return p; },
+      function (p, v) {
+        p.count--;
+        p.stream1 -= v.stream1;
+        p.stream2 -= v.stream2;
+        p.stream3 -= v.stream3;
+        return p;
+      },
+      function () {
+        return {count: 0, stream1: 0, stream2: 0, stream3: 0};
+      }
+    );
+  } catch (e) {
+    nv.log(e.stack);
+  }
+
+  return data;
+}
+
+function testData() {
+  var data1 = [];
+  var data2 = [];
+  var data3 = [];
+
+  stream_layers(3,128,.1).map(function(layer, index) {
+    layer.forEach(function(item, i) {
+      var object = { x: item.x };
+      object['stream' + (index + 1)] = item.y;
+      eval('data' + (index + 1)).push(object);
+    });
+  });
+
+  var data = extend(data1, data2);
+  var result = extend(data, data3);
+
+  return result;
+}
+
+
+</script>

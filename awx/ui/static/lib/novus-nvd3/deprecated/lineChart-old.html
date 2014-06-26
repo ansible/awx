@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<link href="../src/d3.css" rel="stylesheet" type="text/css">
+
+<style>
+
+body {
+  overflow-y:scroll;
+}
+
+text {
+  font: 12px sans-serif;
+}
+
+#chart1 {
+  height: 500px;
+  margin: 10px;
+  min-width: 100px;
+  min-height: 100px;
+/*
+  Minimum height and width is a good idea to prevent negative SVG dimensions...
+  For example width should be =< margin.left + margin.right + 1,
+  of course 1 pixel for the entire chart would not be very useful, BUT should not have errors
+*/
+}
+
+</style>
+<body>
+
+  <div id="chart1">
+  </div>
+
+<script src="../lib/d3.v2.js"></script>
+<script src="../nv.d3.js"></script>
+<!-- including all the components so I don't have to minify every time I test in development -->
+<script src="../src/tooltip.js"></script>
+<script src="../src/models/legend.js"></script>
+<script src="../src/models/axis.js"></script>
+<script src="../src/models/line.js"></script>
+<script src="../src/models/lineWithLegend.js"></script>
+<script src="../src/charts/lineChart.js"></script>
+<script>
+
+
+
+nv.charts.line()
+    .selector('#chart1')
+    .data(sinAndCos())
+    .y(function(d) { return d.voltage })
+    .yAxisLabel('Voltage (v)')
+    .build();
+
+
+
+
+function sinAndCos() {
+  var sin = [],
+      cos = [],
+      r1 = Math.random(),
+      r2 = Math.random();
+
+  for (var i = 0; i < 100; i++) {
+    sin.push({x: i, voltage: r2 * Math.sin(i/10)});
+    cos.push({x: i, voltage: r1 * Math.cos(i/10)});
+  }
+
+  return [
+    {
+      values: sin,
+      key: "Sine Wave",
+      color: "#ff7f0e"
+    },
+    {
+      values: cos,
+      key: "Cosine Wave",
+      color: "#2ca02c"
+    }
+  ];
+}
+
+
+</script>
