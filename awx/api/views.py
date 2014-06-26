@@ -1707,7 +1707,7 @@ class UnifiedJobStdout(RetrieveAPIView):
             dark_bg = (content_only and dark) or (not content_only and (dark or not dark_val))
             conv = Ansi2HTMLConverter(scheme=scheme, dark_bg=dark_bg,
                                       title=get_view_name(self.__class__))
-            content, start, end = unified_job.result_stdout_raw_limited(start_line, end_line)
+            content, start, end, absolute_end = unified_job.result_stdout_raw_limited(start_line, end_line)
             if content_only:
                 headers = conv.produce_headers()
                 body = conv.convert(content, full=False)
@@ -1719,7 +1719,7 @@ class UnifiedJobStdout(RetrieveAPIView):
             data = data.replace('.body_background { background-color: #AAAAAA; }',
                                 '.body_background { background-color: #f5f5f5; }')
             if request.accepted_renderer.format == 'json':
-                return Response({'range': {'start': start, 'end': end}, 'content': body})
+                return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
             return Response(data)
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
