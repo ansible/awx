@@ -723,7 +723,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     .directive('awCustomScroll', [ function() {
         return function(scope, element, attrs) {
             var theme = (attrs.scrollTheme) ? attrs.scrollTheme : 'dark-thin',
-                inertia = (attrs.scrollInertia) ? parseInt(attrs.scrollInertia,10) : 500;
+                inertia = (attrs.scrollInertia) ? parseInt(attrs.scrollInertia,10) : 500,
+                axis = ($(element).attr('data-scroll-axis')) ? $(element).attr('data-scroll-axis') : 'y';
             $(element).mCustomScrollbar({
                 advanced:{
                     updateOnContentResize: true
@@ -731,6 +732,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 scrollButtons: {
                     enable: false
                 },
+                axis: axis,
                 theme: theme,
                 mouseWheel: true,
                 scrollInertia: inertia,
@@ -740,6 +742,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     onTotalScrollBack: scope[attrs.onTotalScrollBack],
                     onTotalScrollBackOffset: attrs.onTotalScrollBackOffset,
                     onScrollStart: scope[$(element).attr('data-on-scroll-start')],
+                    whileScrolling: scope[$(element).attr('data-while-scrolling')],
                     alwaysTriggerOffsets: false
                 },
             });
