@@ -1434,6 +1434,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         source_regions = getattr(settings, 'TEST_AWS_REGIONS', 'all')
         if not all([source_username, source_password]):
             self.skipTest('no test ec2 credentials defined!')
+        self.create_test_license_file()
         credential = Credential.objects.create(kind='aws',
                                                user=self.super_django_user,
                                                username=source_username,
