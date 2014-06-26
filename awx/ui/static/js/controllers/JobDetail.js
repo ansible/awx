@@ -25,10 +25,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     scope.tasks = [];
     scope.hostResults = [];
 
-    scope.hostResultsMaxRows = 15;
-    scope.hostSummariesMaxRows = 15;
-    scope.tasksMaxRows = 15;
-    scope.playsMaxRows = 15;
+    scope.hostResultsMaxRows = 100;
+    scope.hostSummariesMaxRows = 100;
+    scope.tasksMaxRows = 100;
+    scope.playsMaxRows = 100;
 
     scope.liveEventProcessing = true;  // control play/pause state of event processing
 
@@ -126,7 +126,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             $rootScope.jobDetailInterval = setInterval(function() {
                 $log.debug('Updating the DOM...');
                 UpdateDOM({ scope: scope });
-            }, 5000);
+            }, 2500);
         }
     });
 
@@ -149,7 +149,8 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         ok: event.ok,
                         changed: event.changed,
                         unreachable: event.dark,
-                        failed: event.failures
+                        failed: event.failures,
+                        status: (event.failed) ? 'failed' : 'successful'
                     };
                 });
                 scope.$emit('InitialLoadComplete');
@@ -222,7 +223,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                     data.results.forEach(function(event, idx) {
                         var end, elapsed;
 
-                        if (!play.firstTask) {
+                        if (play.firstTask === undefined  || play.firstTask === null) {
                             play.firstTask = event.id;
                             play.hostCount = (event.host_count) ? event.host_count : 0;
                         }
@@ -341,6 +342,8 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         hostCount: 0,
                         fistTask: null,
                         playActiveClass: '',
+                        unreachableCount: (data.unreachable_count) ? data.unreachable_count : 0,
+                        status_text: status,
                         tasks: {}
                     };
 

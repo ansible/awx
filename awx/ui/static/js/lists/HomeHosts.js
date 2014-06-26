@@ -7,7 +7,7 @@
  *  on the home tab.
  *
  */
- 
+
 'use strict';
 
 angular.module('HomeHostListDefinition', [])
@@ -17,7 +17,7 @@ angular.module('HomeHostListDefinition', [])
         iterator: 'host',
         selectTitle: 'Add Existing Hosts',
         editTitle: 'Hosts',
-        index: true,
+        index: false,
         hover: true,
         well: true,
 

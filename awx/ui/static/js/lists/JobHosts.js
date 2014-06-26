@@ -16,7 +16,7 @@ angular.module('JobHostDefinition', [])
         iterator: 'jobhost',
         editTitle: 'All summaries',
         "class": "table-condensed",
-        index: true,
+        index: false,
         hover: true,
 
         navigationLinks: {

@@ -19,7 +19,7 @@ angular.module('AdminListDefinition', [])
         selectInstructions: '<p>Select existing users by clicking each user or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p>',
         base: 'users',
-        index: true,
+        index: false,
         hover: true,
 
         fields: {

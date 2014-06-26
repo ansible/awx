@@ -729,7 +729,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     updateOnContentResize: true
                 },
                 scrollButtons: {
-                    enable: true
+                    enable: false
                 },
                 theme: theme,
                 mouseWheel: true,

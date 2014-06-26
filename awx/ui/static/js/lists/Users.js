@@ -18,7 +18,7 @@ angular.module('UserListDefinition', [])
         selectInstructions: '<p>Select existing users by clicking each user or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p> <p>When available, a brand new user can be created by clicking the green ' +
             '<em>Create New</em> button.</p>',
-        index: true,
+        index: false,
         hover: true,
 
         fields: {

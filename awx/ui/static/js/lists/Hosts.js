@@ -16,7 +16,7 @@ angular.module('HostListDefinition', [])
         iterator: 'copy_host',
         selectTitle: 'Add Existing Hosts',
         editTitle: 'Hosts',
-        index: true,
+        index: false,
         well: false,
 
         fields: {

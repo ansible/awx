@@ -18,7 +18,7 @@ angular.module('CloudCredentialsListDefinition', [])
         editTitle: 'Cloud Credentials',
         selectInstructions: '<p>Select existing credentials by clicking each credential or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p> <p>Create a brand new credential by clicking the green <em>Create New</em> button.</p>',
-        index: true,
+        index: false,
         hover: true,
 
         fields: {

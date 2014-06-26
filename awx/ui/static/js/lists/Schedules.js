@@ -16,7 +16,7 @@ angular.module('SchedulesListDefinition', [])
         selectTitle: '',
         editTitle: 'Schedules',
         well: false,
-        index: true,
+        index: false,
         hover: true,
 
         fields: {

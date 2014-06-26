@@ -67,6 +67,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     elapsed: '00:00:00',
                     hostCount: 0,
                     fistTask: null,
+                    unreachableCount: 0,
+                    status_text: (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful',
                     tasks: {}
                 };
                 if (scope.activePlay) {
@@ -406,7 +408,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 ok: (status === 'successful') ? 1 : 0,
                 changed: (status === 'changed') ? 1 : 0,
                 unreachable: (status === 'unreachable') ? 1 : 0,
-                failed: (status === 'failed') ? 1 : 0
+                failed: (status === 'failed') ? 1 : 0,
+                status: (status === 'failed') ? 'failed' : 'successful'
             };
         }
 
@@ -454,6 +457,11 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             msg: msg
         };
 
+        // increment the unreachable count on the play
+        if (status === 'unreachable' && scope.jobData.plays[scope.activePlay]) {
+            scope.jobData.plays[scope.activePlay].unreachableCount++;
+        }
+
         // update the task status bar
         if (scope.jobData.plays[scope.activePlay].tasks[task_id] !== undefined) {
             task = scope.jobData.plays[scope.activePlay].tasks[task_id];
@@ -464,7 +472,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             }
 
             task.reportedHosts += 1;
-            task.failedCount += (status === 'failed' || status === 'unreachable') ? 1 : 0;
+            task.failedCount += (status === 'failed') ? 1 : 0;
             task.changedCount += (status === 'changed') ? 1 : 0;
             task.successfulCount += (status === 'successful') ? 1 : 0;
             task.skippedCount += (status === 'skipped') ? 1 : 0;
@@ -745,10 +753,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         url = scope.job.related.job_host_summaries + '?';
         url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&': '';
         url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
-        url += 'page_size=' + scope.hostSummaryTableRows + '&order_by=host__name';
+        url += 'page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
 
         scope.hosts = [];
-        scope.hostsMap = {};
 
         Rest.setUrl(url);
         Rest.get()
@@ -760,7 +767,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                         ok: event.ok,
                         changed: event.changed,
                         unreachable: event.dark,
-                        failed: event.failures
+                        failed: event.failures,
+                        status: (event.failed) ? 'failed' : 'successful'
                     });
                 });
                 $('#hosts-summary-table').mCustomScrollbar("update");
@@ -790,7 +798,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         }
         scope.host_summary.unreachable = 0;
         for (host in data.dark) {
-            scope.host_summary.dark += data.dark[host];
+            scope.host_summary.unreachable += data.dark[host];
         }
         scope.host_summary.failed = 0;
         for (host in data.failures) {

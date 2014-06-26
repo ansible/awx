@@ -16,7 +16,7 @@ angular.module('GroupListDefinition', [])
         iterator: 'copy_group',
         selectTitle: 'Copy Groups',
         editTitle: 'Groups',
-        index: true,
+        index: false,
         well: false,
 
         fields: {

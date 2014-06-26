@@ -17,7 +17,7 @@ angular.module('InventoriesListDefinition', [])
         editTitle: 'Inventories',
         selectInstructions: "Click on a row to select it, and click Finished when done. Use the green <i class=\"icon-plus\"></i> " +
             "button to create a new row.",
-        index: true,
+        index: false,
         hover: true,
 
         fields: {

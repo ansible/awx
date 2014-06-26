@@ -17,13 +17,13 @@ angular.module('OrganizationListDefinition', [])
         selectTitle: 'Add Organizations',
         editTitle: 'Organizations',
         hover: true,
-        index: true,
+        index: false,
 
         fields: {
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-sm-8 col-xs-8'
+                columnClass: 'col-lg-4 col-md-6 col-sm-8 col-xs-8'
             },
             description: {
                 label: 'Description',

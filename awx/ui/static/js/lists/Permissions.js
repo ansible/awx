@@ -18,7 +18,7 @@ angular.module('PermissionListDefinition', [])
         selectInstructions: "Click on a row to select it, and click Finished when done. Use the green <i class=\"icon-plus\"></i> " +
             "button to create a new row.",
         editTitle: 'Permissions',
-        index: true,
+        index: false,
         well: true,
 
         fields: {

@@ -16,15 +16,15 @@
 .job_summary {
     .table {
         margin-bottom: 0;
-        border: 1px solid @grey;
+        border: 1px solid @well-border;
         background-color: @white;
     }
     .table>tbody>tr>td {
-        border-top-color: @well;
+        border-top-color: @well-border;
         padding-bottom: 0;
     }
     .table>thead>tr>th {
-        border-bottom-color: @well;
+        border-bottom-color: @well-border;
         padding-bottom: 0;
         height: 22px;
     }
@@ -185,12 +185,12 @@
 .table-detail {
     overflow-x: hidden;
     overflow-y: auto;
-    border: 1px solid @grey;
+    border: 1px solid @well-border;
     border-radius: 4px;
     background-color: @white;
     /*padding-left: 3px; */
     .row {
-        border-top: 1px solid @grey;
+        border-top: 1px solid @well-border;
     }
     .row:first-child {
         border: none;
@@ -301,8 +301,8 @@ label.small-label {
     left: 0;
     #hosts-table-detail {
         padding: 3px 0 3px 5px;
-        border: 1px solid @grey;
-        border-top: 2px solid #ddd;
+        border: 1px solid @well-border;
+        border-top: 2px solid @well-border;
         height: 150px;
         background-color: @white;
         .col-lg-1, .col-md-1, .col-sm-1, .col-xs-1 {

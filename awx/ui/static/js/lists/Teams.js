@@ -17,19 +17,19 @@ angular.module('TeamsListDefinition', [])
         editTitle: 'Teams',
         selectInstructions: "Click on a row to select it, and click Finished when done. Use the green <i class=\"icon-plus\"></i> " +
             "button to create a new row.",
-        index: true,
+        index: false,
         hover: true,
 
         fields: {
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-md-4 col-sm-9 col-xs-9',
+                columnClass: 'col-lg-3 col-md-4 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-8'
             },
             description: {
                 label: 'Description',
-                columnClass: 'col-md-3 hidden-sm hidden-xs',
+                columnClass: 'col-lg-3 col-md-3 hidden-sm hidden-xs',
                 excludeModal: true
             },
             organization: {

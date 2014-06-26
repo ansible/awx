@@ -16,7 +16,7 @@ angular.module('HomeGroupListDefinition', [])
         name: 'home_groups',
         iterator: 'group',
         editTitle: 'Groups',
-        index: true,
+        index: false,
         hover: true,
         well: true,
 

@@ -168,7 +168,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                 }
 
                 if (options.mode !== 'lookup' && (list.well === undefined || list.well)) {
-                    html += "<div class=\"well\">\n";
+                    html += "<div class=\"list-well\">\n";
                 }
 
                 if (options.activityStream) {

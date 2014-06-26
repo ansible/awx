@@ -18,7 +18,7 @@ angular.module('ProjectsListDefinition', [])
         editTitle: 'Projects',
         selectInstructions: '<p>Select existing projects by clicking each project or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p> <p>Create a brand new project by clicking the green <em>Create New</em> button.</p>',
-        index: true,
+        index: false,
         hover: true,
 
         fields: {
