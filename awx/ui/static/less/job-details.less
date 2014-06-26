@@ -387,6 +387,60 @@ svg text.percent{
     font-weight: bold;
 }
 
+#event-viewer-dialog {
+    padding-bottom: 5px;
+    padding-top: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    overflow: hidden;
+    .results {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+    }
+    .spacer {
+        height: 60px;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        border-bottom: 1px solid @well-border;
+    }
+    tr {
+        border-top: 1px solid @well-border;
+        /*border-bottom: 1px solid @well-border;*/
+    }
+    tr:first-child {
+        border-top: none;
+    }
+    .key {
+        vertical-align: top;
+        padding: 3px;
+        font-weight: 600;
+    }
+    .value {
+        padding: 3px;
+        i {
+            font-size: 12px;
+        }
+    }
+    .nested-table {
+        border: none;
+        padding: 0;
+        table {
+            border-top: none;
+            border-bottom: none;
+            width: auto;
+            tr:first-child {
+                border-top: none;
+            }
+            .key {
+                font-weight: 400;
+            }
+        }
+    }
+}
+
 @media (max-width: 767px) {
     #job-detail-container {
         #job-status-form {

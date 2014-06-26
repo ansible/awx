@@ -151,10 +151,9 @@
                             <div id="hosts-table-detail" aw-custom-scroll data-on-total-scroll="HostDetailOnTotalScroll"
                                 data-on-total-scroll-back="HostDetailOnTotalScrollBack" class="table-detail">
                                 <div id="hosts-table-detail-inner">
-                                    <div class="row" ng-repeat="result in results = (hostResults | filter:{ status : searchAllStatus}) track by $index">
-                                        <!-- ng-repeat="result in results = (hostResults | filter:{ status : searchAllStatus} })" -->
+                                    <div class="row cursor-pointer" ng-repeat="result in results = (hostResults | filter:{ status : searchAllStatus}) track by $index" ng-click="viewHostResults(result.id)">
                                         <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7 status-column">
-                                            <a href="" ng-click="viewEvent(result.id)" aw-tool-tip="Event Id: {{ result.id }} Status: {{ result.status }}. Click for details" data-placement="top"><i class="fa icon-job-{{ result.status }}"></i> {{ result.name }}</a>
+                                            <a href="" aw-tool-tip="Event Id: {{ result.id }} Status: {{ result.status }}. Click for details" data-placement="top"><i class="fa icon-job-{{ result.status }}"></i> {{ result.name }}</a>
                                         </div>
                                         <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
                                             {{ result.msg }}
@@ -226,8 +225,8 @@
                             <div id="hosts-summary-table" class="table-detail" aw-custom-scroll data-on-total-scroll="HostSummaryOnTotalScroll"
                                     data-on-total-scroll-back="HostSummaryOnTotalScrollBack">
                                 <div class="row" ng-repeat="host in summaryList = (hosts | filter:{ status : searchAllStatus}) track by $index" id="{{ host.id }}">
-                                    <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6"><a href="/#/home/hosts/?id={{ host.id }}"
-                                        aw-tool-tip="Click to edit host" data-placement="top">{{ host.name }}</a>
+                                    <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6"><a ng-href="/#/job_events/{{ job.id }}/?host={{ host.name }}" target="_blank"
+                                        aw-tool-tip="View all events for this host.<br />Opens in new tab or window." data-placement="top">{{ host.name }}</a>
                                     </div>
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 badge-column">
                                         <a href="" aw-tool-tip="OK" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
@@ -257,4 +256,6 @@
 
         </div>
     </div>
+
+    <div id="event-viewer-dialog" style="display: none;"></div>
 </div>

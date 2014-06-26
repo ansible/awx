@@ -975,7 +975,8 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-success:before,
   .icon-job-successful:before,
   .icon-job-changed:before,
-  .icon-job-ok:before {
+  .icon-job-ok:before,
+  .icon-job-skipped:before {
       content: "\f111";
   }
 
@@ -991,7 +992,6 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-waiting:before,
   .icon-job-new:before,
   .icon-job-none:before,
-  .icon-job-skipped:before,
   .icon-job-no-matching-hosts:before {
       content: "\f10c";
   }
@@ -1002,6 +1002,10 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-successful,
   .icon-job-ok {
       color: @green;
+  }
+
+  .icon-job-skipped {
+      color: @skipped;
   }
 
   .icon-job-running {
@@ -1025,7 +1029,6 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-pending,
   .icon-job-waiting,
   .icon-job-new,
-  .icon-job-skipped,
   .icon-job-no-matching-hosts {
       color: @grey;
       opacity: 0.45;

@@ -9,7 +9,7 @@
 
 function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList,
-    JobIsFinished, SetTaskStyles, DigestEvent, UpdateDOM) {
+    JobIsFinished, SetTaskStyles, DigestEvent, UpdateDOM, ViewHostResults) {
 
     ClearScope();
 
@@ -182,7 +182,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         event = data.results[idx];
                         task.hostResults[event.id] = {
                             id: event.id,
-                            status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                            status: (event.event === "runner_on_skipped") ? 'skipped' : (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful',
                             host_id: event.host,
                             task_id: event.parent,
                             name: event.event_data.host,
@@ -1044,13 +1044,16 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         });
     };
 
-    scope.viewEvent = function(event_id) {
-        $log.debug(event_id);
+    scope.viewHostResults = function(id) {
+        ViewHostResults({
+            scope: scope,
+            id: id
+        });
     };
 
 }
 
 JobDetailController.$inject = [ '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'FilterAllByHostName', 'DrawGraph',
-    'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM'
+    'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'ViewHostResults'
 ];

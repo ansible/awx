@@ -37,7 +37,7 @@
 
 'use strict';
 
-angular.module('JobDetailHelper', ['Utilities', 'RestServices'])
+angular.module('JobDetailHelper', ['Utilities', 'RestServices', 'ModalDialog'])
 
 .factory('DigestEvent', ['$rootScope', '$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult',
     'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary', 'JobIsFinished', 'AddNewTask',
@@ -716,7 +716,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     data.results.forEach(function(event) {
                         scope.hostResults.push({
                             id: event.id,
-                            status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                            status: (event.event === "runner_on_skipped") ? 'skipped' : (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful',
                             host_id: event.host,
                             task_id: event.parent,
                             name: event.event_data.host,
@@ -1088,5 +1088,161 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                     msg: 'Call to ' + url + '. GET returned: ' + status });
             });
+    };
+}])
+
+.factory('ViewHostResults', ['$log', 'CreateDialog', 'Rest', 'ProcessErrors', 'Wait', function($log, CreateDialog, Rest, ProcessErrors, Wait) {
+    return function(params) {
+        var scope = params.scope,
+            my_scope = params.scope.$new(),
+            id = params.id,
+            url;
+
+        function parseJSON(obj) {
+            var html="", keys;
+            if (typeof obj === "object") {
+                html += "<table class=\"object-list\">\n";
+                html += "<tbody>\n";
+                keys = Object.keys(obj).sort();
+                keys.forEach(function(key) {
+                    if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
+                        html += "<tr><td class=\"key\">" + key + ":</td><td class=\"value";
+                        html += (key === "results" || key === "stdout" || key === "stderr") ? " mono-space" : "";
+                        html += "\">";
+                        html += (key === "status") ? "<i class=\"fa icon-job-" + obj[key] + "\"></i> " + obj[key] : obj[key];
+                        html += "</td></tr>\n";
+                    }
+                    else if (obj[key] === null || obj[key] === undefined) {
+                        // html += "<tr><td class=\"key\">" + key + ":</td><td class=\"value\">null</td></tr>\n";
+                    }
+                    else if (typeof obj[key] === "object" && Array.isArray(obj[key])) {
+                        html += "<tr><td class=\"key\">" + key + ":</td><td class=\"value";
+                        html += (key === "results" || key === "stdout" || key === "stderr") ? " mono-space" : "";
+                        html += "\">";
+                        obj[key].forEach(function(row) {
+                            html += "<p>" + row + "</p>";
+                        });
+                        html += "</td></tr>\n";
+                    }
+                    else if (typeof obj[key] === "object") {
+                        html += "<tr><td class=\"key\">" + key + ":</td><td class=\"nested-table\">\n" + parseJSON(obj[key]) + "</td></tr>\n";
+                    }
+                });
+                html += "</tbody>\n";
+                html += "</table>\n";
+            }
+            return html;
+        }
+
+        /*function parseJSON(obj) {
+            var html="", key;
+            html += "<ul class=\"object-list\">\n";
+            for(key in obj) {
+                if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
+                    html += "<li><div class=\"key\">" + key + ":</div><div class=\"value\">" + obj[key] + "</div></li>\n";
+                }
+                if (obj[key] === null || obj[key] === undefined) {
+                    html += "<li><div class=\"key\">" + key + ":</div><div class=\"value\">null</div></li>\n";
+                }
+                if (typeof obj[key] === "object") {
+                    html += "<li><div class=\"key\">" + key + ":</div>" + parseJSON(obj[key]) + "</li>\n";
+                }
+            }
+            html += "</ul>\n";
+            return html;
+        }*/
+
+        /*function parseJSON(obj) {
+            var html="", key;
+            for(key in obj) {
+                html += "<div class=\"row object-list\">\n";
+                if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
+                    html += "<div class=\"col-lg-4 col-md-4 key\">" + key + ":</div><div class=\"col-lg-8 col-md-8 value\">" + obj[key] + "</div>\n";
+                }
+                if (obj[key] === null || obj[key] === undefined) {
+                    html += "<div class=\"col-lg-4 col-md-4 key\">" + key + ":</div><div class=\"col-lg-8 col-md-8 value\">null</div>\n";
+                }
+                if (typeof obj[key] === "object") {
+                    html += "<div class=\"col-lg-4 col-md-4 key\">" + key + ":</div><div class=\"col-lg-8 col-md-8\">" + parseJSON(obj[key]) + "</div>\n";
+                }
+                html += "</div>\n";
+            }
+            return html;
+        }*/
+
+        if (my_scope.removeDataReady) {
+            my_scope.removeDataReady();
+        }
+        my_scope.removeDataReady = my_scope.$on('DataReady', function(e, event_data, host) {
+            //var html = "<div class=\"title-section\">\n";
+            //html += "<h4>" + host.name + "</h4>\n";
+            //html += (host.description && host.description !== "imported") ? "<h5>" + host.description + "</h5>" : "";
+            //html += "<p>Event " + id + " details:</p>\n";
+            //html += "</div>\n";
+            var html = "<div class=\"results\">\n";
+            event_data.host = host.name;
+            html += parseJSON(event_data);
+            html += "<div class=\"spacer\"></div>\n";
+            html += "</div>\n";
+
+            $('#event-viewer-dialog').empty().html(html);
+
+            CreateDialog({
+                scope: my_scope,
+                width: 600,
+                height: 550,
+                minWidth: 450,
+                callback: 'ModalReady',
+                id: 'event-viewer-dialog',
+                title: 'Host Results',
+                onOpen: function() {
+                    $('#dialog-ok-button').focus();
+                }
+            });
+        });
+
+        if (my_scope.removeModalReady) {
+            my_scope.removeModalReady();
+        }
+        my_scope.removeModalReady = my_scope.$on('ModalReady', function() {
+            Wait('stop');
+            $('#event-viewer-dialog').dialog('open');
+        });
+
+        url = scope.job.related.job_events + "?id=" + id;
+        Wait('start');
+        Rest.setUrl(url);
+        Rest.get()
+            .success( function(data) {
+                var key;
+                Wait('stop');
+                if (data.results.length > 0 && data.results[0].event_data.res) {
+                    for (key in data.results[0].event_data) {
+                        if (key !== "res") {
+                            data.results[0].event_data.res[key] = data.results[0].event_data[key];
+                        }
+                    }
+                    if (data.results[0].event_data.res.ansible_facts) {
+                        delete data.results[0].event_data.res.ansible_facts;
+                    }
+                    data.results[0].event_data.res.status = (data.results[0].event === "runner_on_skipped") ? 'skipped' : (data.results[0].failed) ? 'failed' :
+                        (data.results[0].changed) ? 'changed' : 'successful';
+                    my_scope.$emit('DataReady', data.results[0].event_data.res, data.results[0].summary_fields.host, data.results[0].id);
+                }
+                else {
+                    data.results[0].event_data.status = (data.results[0].event === "runner_on_skipped") ? 'skipped' : (data.results[0].failed) ? 'failed' :
+                        (data.results[0].changed) ? 'changed' : 'successful';
+                    my_scope.$emit('DataReady', data.results[0].event_data, data.results[0].summary_fields.host, data.results[0].id);
+                }
+            })
+            .error(function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+
+        scope.modalOK = function() {
+            $('#event-viewer-dialog').dialog('close');
+            my_scope.$destroy();
+        };
     };
 }]);
