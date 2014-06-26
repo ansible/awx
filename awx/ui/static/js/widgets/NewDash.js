@@ -17,11 +17,8 @@ angular.module('NewDashWidget', ['RestServices', 'Utilities'])
                 var scope = params.scope,
                     target = params.target,
                     dashboard = params.dashboard,
-                   keys = ['hosts', 'hosts.failed'
-                   // , 'teams', 'credentials', 'projects', 'inventories', 'groups', 'hosts',
-                   //      'job_templates', 'jobs'
-                    ],
-                    i, html, element;
+
+                    html, element;
 
                 html = "<div id=\"dashcontainer\" class=\"panel panel-default\">\n";
                 html += "<div class=\"panel-heading\">New Dashboard</div>\n";
@@ -48,7 +45,7 @@ angular.module('NewDashWidget', ['RestServices', 'Utilities'])
                 html += "<td class=\"h5 col-lg-1 text-center\">Users</td>\n";
                 html += "</tr>\n";
                 html += "</table>\n";
-               
+
                 html += "<br>\n";
                 html += "<hr>\n";
                 html += "<table class=\"table\">\n";
@@ -57,16 +54,16 @@ angular.module('NewDashWidget', ['RestServices', 'Utilities'])
                 html += "<td class=\"h5 col-lg-6 text-center\" style=\"border:none\">Hosts</td>\n";
                 html += "</tr>\n";
                 html += "<tr>\n";
-                //html += "<td id=\"job-status-graph-container\" style=\"border:none\">\n"; 
-                html += "<td class=\"job-status-graph\" style=\"border:none\"><svg></svg></td>\n"; 
+                //html += "<td id=\"job-status-graph-container\" style=\"border:none\">\n";
+                html += "<td class=\"job-status-graph\" style=\"border:none\"><svg></svg></td>\n";
                 // //class=\"job-status-graph col-lg-6\" style=\"border:none\">\n";
                // html += "<svg class=\"job-status-graph\" width=\"500\" height=\"200\" viewBox=\"0 0 500 200\" perserveAspectRatio=\"xMidYMid\"></td>\n";
-                html += "<td class=\"host-count-graph\" style=\"border:none\"></td>\n"; 
+                html += "<td class=\"host-count-graph\" style=\"border:none\"></td>\n";
                 //<svg class=\"host-count-graph\" width=\"500\" height=\"200\" viewBox=\"0 0 500 200\" perserveAspectRatio=\"xMidYMid\"></td>\n";
                 // html += "<td class=\"host-count-graph col-lg-6\" style=\"border:none\"></td>\n";
                 html += "</tr>\n";
-                html += "</table>\n"; 
-                
+                html += "</table>\n";
+
                 // html += "<br>\n";
                 // html += "<hr>\n";
                 html += "<table class=\"table table-bordered\">\n";
@@ -75,75 +72,104 @@ angular.module('NewDashWidget', ['RestServices', 'Utilities'])
                 html += "<td class=\"h5 col-lg-6 text-center\">Remaining licenses</td>\n";
                 html += "</tr>\n";
                 html += "<tr>\n";
-                html += "<td class=\"col-lg-8\">\n"; 
+                html += "<td class=\"col-lg-8\">\n";
 
 //---------------------------------------------------------------------------------------------------------
 
-                html += "<div class=\"col-md-6 right-side\">\n"; 
-                html += "<div class=\"jobs-list-container\">\n"; 
+                html += "<div class=\"col-md-6 right-side\">\n";
+                html += "<div class=\"jobs-list-container\">\n";
                 html += "<div class=\"row search-row\">\n";
-                html += "<div class=\"col-md-6\"><div class=\"title\">Active</div></div>\n"; 
+                html += "<div class=\"col-md-6\"><div class=\"title\">Active</div></div>\n";
                 html += "<div class=\"col-md-6\" id=\"active-jobs-search-container\"></div>\n";
-                html += "</div>\n"; 
-                html += "<div class=\"job-list\" id=\"active-jobs-container\">\n"; 
+                html += "</div>\n";
+                html += "<div class=\"job-list\" id=\"active-jobs-container\">\n";
                 html += "<div id=\"active-jobs\" class=\"job-list-target\"></div>\n";
-                html += "</div>\n"; 
-                html += "</div>\n"; 
+                html += "</div>\n";
+                html += "</div>\n";
                 html += "</div>\n";
 //---------------------------------------------------------------------------------------------------------
 
-                html += "</td>\n"; 
+                html += "</td>\n";
                 html += "<td class=\"col-lg-4 text-center\">Your license will out in <br><u> 365 </u> days</td>\n";
                 html += "</tr>\n";
-                html += "</table>\n"; 
+                html += "</table>\n";
 
                 html += "</div>\n";
                 html += "</div>\n";
                 html += "</div>\n";
 
-                var graphWidth = ($(window).width())/3; 
-                var graphHeight = ($(window).height())/3; 
-                
-                function makeGraph(){
-                    d3.json("static/js/jobstatusdata.json",function(error,data) {
-                      nv.addGraph(function() {
-                          var chart = nv.models.linePlusBarChart()
-                                .margin({top: 30, right: 60, bottom: 50, left: 70})
-                                //We can set x data accessor to use index. Reason? So the bars all appear evenly spaced.
-                                .x(function(d,i) { return i })
-                                .y(function(d,i) {return d[1] })
-                                ;
+               // var graphWidth = ($(window).width())/3;
+                // var graphHeight = ($(window).height())/3;
 
-                          chart.xAxis.tickFormat(function(d) {
-                            var dx = data[0].values[d] && data[0].values[d][0] || 0;
-                            return d3.time.format('%x')(new Date(dx))
-                          });
+                //function makeGraph(){
+                 //   d3.json("static/js/jobstatusdata.json",function(error,data) {
+                      // nv.addGraph(function() {
+                      //     var chart = nv.models.lineChart()
+                      //       .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
+                      //       .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+                      //       .transitionDuration(350)  //how fast do you want the lines to transition?
+                      //       .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+                      //       .showYAxis(true)        //Show the y-axis
+                      //       .showXAxis(true)        //Show the x-axis
 
-                          chart.y1Axis
-                              .tickFormat(d3.format(',f'));
+                      //     chart.xAxis.tickFormat(function(d) {
+                      //       var dx = data[0].values[d] && data[0].values[d][0] || 0;
+                      //       return d3.time.format('%x')(new Date(dx))
+                      //     });
 
-                          chart.y2Axis
-                              .tickFormat(function(d) { return '$' + d3.format(',f')(d) });
+                      //     chart.y1Axis
+                      //         .tickFormat(d3.format(',f'));
 
-                          chart.bars.forceY([0]);
+                      //     chart.y2Axis
+                      //         .tickFormat(function(d) { return '$' + d3.format(',f')(d) });
 
-                          d3.select('.job-status-graph svg')
-                            .datum(data)
-                            .transition()
-                            .duration(0)
-                            .call(chart);
+                      //     chart.bars.forceY([0]);
 
-                          nv.utils.windowResize(chart.update);
+                      //     d3.select('.job-status-graph svg')
+                      //      .datum(data)
+                      //       .transition()
+                      //       .duration(0)
+                      //       .call(chart);
 
-                          return chart;
-                      });
+                      //     nv.utils.windowResize(chart.update);
 
-                    });
+                      //     return chart;
+                      // });
+                //         var chart = nv.models.lineChart()
+                //                         .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
+                //                         .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+                //                         .transitionDuration(350)  //how fast do you want the lines to transition?
+                //                         .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+                //                         .showYAxis(true)        //Show the y-axis
+                //                         .showXAxis(true)        //Show the x-axis
+                //           ;
 
-                }; 
+                //           chart.xAxis     //Chart x-axis settings
+                //               .axisLabel('Time (ms)')
+                //               .tickFormat(d3.format(',r'));
+
+                //           chart.yAxis     //Chart y-axis settings
+                //               .axisLabel('Voltage (v)')
+                //               .tickFormat(d3.format('.02f'));
+
+                //           /* Done setting the chart up? Time to render it!*/
+                //           //var myData = sinAndCos();   //You need data...
+
+                //           d3.select('.job-status-graph svg')    //Select the <svg> element you want to render the chart in.
+                //               .datum(data)         //Populate the <svg> element with chart data...
+                //               .call(chart);          //Finally, render the chart!
+
+                //           //Update the chart when window resizes.
+                //           nv.utils.windowResize(function() { chart.update() });
+                //           return chart;
+                //         });
+
+                //     });
+
+                // };
 
 
-                function makeJobStatusGraph(){
+                // function makeJobStatusGraph(){
                      // Adjust the size
         // width = $('#job-summary-container .job_well').width();
         // height = $('#job-summary-container .job_well').height() - $('#summary-well-top-section').height() - $('#graph-section .header').outerHeight() - 15;
@@ -166,197 +192,197 @@ angular.module('NewDashWidget', ['RestServices', 'Utilities'])
         // }
 
 
-                    var margin = {top: 20, right: 80, bottom: 30, left: 50},
-                        width = graphWidth - margin.left - margin.right,
-                        height = graphHeight - margin.top - margin.bottom;
+                //     var margin = {top: 20, right: 80, bottom: 30, left: 50},
+                //         width = graphWidth - margin.left - margin.right,
+                //         height = graphHeight - margin.top - margin.bottom;
 
-                    var parseDate = d3.time.format("%Y%m%d").parse;
+                //     var parseDate = d3.time.format("%Y%m%d").parse;
 
-                    var x = d3.time.scale()
-                        .range([0, width]);
+                //     var x = d3.time.scale()
+                //         .range([0, width]);
 
-                    var y = d3.scale.linear()
-                        .range([height, 0]);
+                //     var y = d3.scale.linear()
+                //         .range([height, 0]);
 
-                    var color = d3.scale.category10();
+                //     var color = d3.scale.category10();
 
-                    var xAxis = d3.svg.axis()
-                        .scale(x)
-                        .orient("bottom");
+                //     var xAxis = d3.svg.axis()
+                //         .scale(x)
+                //         .orient("bottom");
 
-                    var yAxis = d3.svg.axis()
-                        .scale(y)
-                        .orient("left");
+                //     var yAxis = d3.svg.axis()
+                //         .scale(y)
+                //         .orient("left");
 
-                    var line = d3.svg.line()
-                        .interpolate("basis")
-                        .x(function(d) { return x(d.date); })
-                        .y(function(d) { return y(d.hostCount); });
+                //     var line = d3.svg.line()
+                //         .interpolate("basis")
+                //         .x(function(d) { return x(d.date); })
+                //         .y(function(d) { return y(d.hostCount); });
 
-                    var svg = d3.select(".job-status-graph").append("svg")
-                        .attr("width", width + margin.left + margin.right)
-                        .attr("height", height + margin.top + margin.bottom)
-                      .append("g")
-                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                //     var svg = d3.select(".job-status-graph").append("svg")
+                //         .attr("width", width + margin.left + margin.right)
+                //         .attr("height", height + margin.top + margin.bottom)
+                //       .append("g")
+                //         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                    d3.json("static/js/jobstatusdata.json", function(error, data) {
-                      color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
+                //     d3.json("static/js/jobstatusdata.json", function(error, data) {
+                //       color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
 
-                      data.forEach(function(d) {
-                        d.date = parseDate(d.date);
-                      });
+                //       data.forEach(function(d) {
+                //         d.date = parseDate(d.date);
+                //       });
 
-                      var status = color.domain().map(function(name) {
-                        return {
-                          name: name,
-                          values: data.map(function(d) {
-                            return {date: d.date, hostCount: +d[name]};
-                          })
-                        };
-                      });
+                //       var status = color.domain().map(function(name) {
+                //         return {
+                //           name: name,
+                //           values: data.map(function(d) {
+                //             return {date: d.date, hostCount: +d[name]};
+                //           })
+                //         };
+                //       });
 
-                      x.domain(d3.extent(data, function(d) { return d.date; }));
+                //       x.domain(d3.extent(data, function(d) { return d.date; }));
 
-                      y.domain([
-                        d3.min(status, function(c) { return d3.min(c.values, function(v) { return v.hostCount; }); }),
-                        d3.max(status, function(c) { return d3.max(c.values, function(v) { return v.hostCount; }); })
-                      ]);
+                //       y.domain([
+                //         d3.min(status, function(c) { return d3.min(c.values, function(v) { return v.hostCount; }); }),
+                //         d3.max(status, function(c) { return d3.max(c.values, function(v) { return v.hostCount; }); })
+                //       ]);
 
-                      svg.append("g")
-                          .attr("class", "x axis")
-                          .attr("transform", "translate(0," + height + ")")
-                          .call(xAxis);
+                //       svg.append("g")
+                //           .attr("class", "x axis")
+                //           .attr("transform", "translate(0," + height + ")")
+                //           .call(xAxis);
 
-                      svg.append("g")
-                          .attr("class", "y axis")
-                          .call(yAxis)
-                        .append("text")
-                          .attr("transform", "rotate(-90)")
-                          .attr("y", 6)
-                          .attr("dy", ".71em")
-                          .style("text-anchor", "end")
-                          .text("Number of hosts");
+                //       svg.append("g")
+                //           .attr("class", "y axis")
+                //           .call(yAxis)
+                //         .append("text")
+                //           .attr("transform", "rotate(-90)")
+                //           .attr("y", 6)
+                //           .attr("dy", ".71em")
+                //           .style("text-anchor", "end")
+                //           .text("Number of hosts");
 
-                      var series = svg.selectAll(".series")
-                          .data(status)
-                        .enter().append("g")
-                          .attr("class", "series");
+                //       var series = svg.selectAll(".series")
+                //           .data(status)
+                //         .enter().append("g")
+                //           .attr("class", "series");
 
-                      series.append("path")
-                          .attr("class", "line")
-                          .attr("d", function(d) { return line(d.values); })
-                          .style("stroke", function(d) { return color(d.name); });
+                //       series.append("path")
+                //           .attr("class", "line")
+                //           .attr("d", function(d) { return line(d.values); })
+                //           .style("stroke", function(d) { return color(d.name); });
 
-                      series.append("text")
-                          .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
-                          .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.hostCount) + ")"; })
-                          .attr("x", 3)
-                          .attr("dy", ".35em")
-                          .text(function(d) { return d.name; });
-                    });
+                //       series.append("text")
+                //           .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+                //           .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.hostCount) + ")"; })
+                //           .attr("x", 3)
+                //           .attr("dy", ".35em")
+                //           .text(function(d) { return d.name; });
+                //     });
 
-                };
+                // };
 
-                function makeHostCountGraph(){
-                    var margin = {top: 20, right: 80, bottom: 30, left: 50},
-                        width = graphWidth - margin.left - margin.right,
-                        height = graphHeight - margin.top - margin.bottom;
+                // function makeHostCountGraph(){
+                //     var margin = {top: 20, right: 80, bottom: 30, left: 50},
+                //         width = graphWidth - margin.left - margin.right,
+                //         height = graphHeight - margin.top - margin.bottom;
 
-                    var parseDate = d3.time.format("%Y%m%d").parse;
+                //     var parseDate = d3.time.format("%Y%m%d").parse;
 
-                    var x = d3.time.scale()
-                        .range([0, width]);
+                //     var x = d3.time.scale()
+                //         .range([0, width]);
 
-                    var y = d3.scale.linear()
-                        .range([height, 0]);
+                //     var y = d3.scale.linear()
+                //         .range([height, 0]);
 
-                    var color = d3.scale.category10();
+                //     var color = d3.scale.category10();
 
-                    var xAxis = d3.svg.axis()
-                        .scale(x)
-                        .orient("bottom");
+                //     var xAxis = d3.svg.axis()
+                //         .scale(x)
+                //         .orient("bottom");
 
-                    var yAxis = d3.svg.axis()
-                        .scale(y)
-                        .orient("left");
+                //     var yAxis = d3.svg.axis()
+                //         .scale(y)
+                //         .orient("left");
 
-                    var line = d3.svg.line()
-                        .interpolate("basis")
-                        .x(function(d) { return x(d.date); })
-                        .y(function(d) { return y(d.hostCount); });
+                //     var line = d3.svg.line()
+                //         .interpolate("basis")
+                //         .x(function(d) { return x(d.date); })
+                //         .y(function(d) { return y(d.hostCount); });
 
-                    var svg = d3.select(".host-count-graph").append("svg")
-                        .attr("width", width + margin.left + margin.right)
-                        .attr("height", height + margin.top + margin.bottom)
-                      .append("g")
-                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                //     var svg = d3.select(".host-count-graph").append("svg")
+                //         .attr("width", width + margin.left + margin.right)
+                //         .attr("height", height + margin.top + margin.bottom)
+                //       .append("g")
+                //         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                    d3.json("static/js/hostcount.json", function(error, data) {
-                      color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
+                //     d3.json("static/js/hostcount.json", function(error, data) {
+                //       color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
 
-                      data.forEach(function(d) {
-                        d.date = parseDate(d.date);
-                      });
+                //       data.forEach(function(d) {
+                //         d.date = parseDate(d.date);
+                //       });
 
-                      var status = color.domain().map(function(name) {
-                        return {
-                          name: name,
-                          values: data.map(function(d) {
-                            return {date: d.date, hostCount: +d[name]};
-                          })
-                        };
-                      });
+                //       var status = color.domain().map(function(name) {
+                //         return {
+                //           name: name,
+                //           values: data.map(function(d) {
+                //             return {date: d.date, hostCount: +d[name]};
+                //           })
+                //         };
+                //       });
 
-                      x.domain(d3.extent(data, function(d) { return d.date; }));
+                //       x.domain(d3.extent(data, function(d) { return d.date; }));
 
-                      y.domain([
-                        d3.min(status, function(c) { return d3.min(c.values, function(v) { return v.hostCount; }); }),
-                        d3.max(status, function(c) { return d3.max(c.values, function(v) { return v.hostCount; }); })
-                      ]);
+                //       y.domain([
+                //         d3.min(status, function(c) { return d3.min(c.values, function(v) { return v.hostCount; }); }),
+                //         d3.max(status, function(c) { return d3.max(c.values, function(v) { return v.hostCount; }); })
+                //       ]);
 
-                      svg.append("g")
-                          .attr("class", "x axis")
-                          .attr("transform", "translate(0," + height + ")")
-                          .call(xAxis);
+                //       svg.append("g")
+                //           .attr("class", "x axis")
+                //           .attr("transform", "translate(0," + height + ")")
+                //           .call(xAxis);
 
-                      svg.append("g")
-                          .attr("class", "y axis")
-                          .call(yAxis)
-                        .append("text")
-                          .attr("transform", "rotate(-90)")
-                          .attr("y", 6)
-                          .attr("dy", ".71em")
-                          .style("text-anchor", "end")
-                          .text("Number of hosts");
+                //       svg.append("g")
+                //           .attr("class", "y axis")
+                //           .call(yAxis)
+                //         .append("text")
+                //           .attr("transform", "rotate(-90)")
+                //           .attr("y", 6)
+                //           .attr("dy", ".71em")
+                //           .style("text-anchor", "end")
+                //           .text("Number of hosts");
 
-                      var series = svg.selectAll(".series")
-                          .data(status)
-                        .enter().append("g")
-                          .attr("class", "series");
+                //       var series = svg.selectAll(".series")
+                //           .data(status)
+                //         .enter().append("g")
+                //           .attr("class", "series");
 
-                      series.append("path")
-                          .attr("class", "line")
-                          .attr("d", function(d) { return line(d.values); })
-                          .style("stroke", function(d) { return color(d.name); });
+                //       series.append("path")
+                //           .attr("class", "line")
+                //           .attr("d", function(d) { return line(d.values); })
+                //           .style("stroke", function(d) { return color(d.name); });
 
-                      series.append("text")
-                          .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
-                          .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.hostCount) + ")"; })
-                          .attr("x", 3)
-                          .attr("dy", ".35em")
-                          .text(function(d) { return d.name; });
-                    });
+                //       series.append("text")
+                //           .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+                //           .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.hostCount) + ")"; })
+                //           .attr("x", 3)
+                //           .attr("dy", ".35em")
+                //           .text(function(d) { return d.name; });
+                //     });
 
-                };
+                // };
 
-                
+
 
                 element = angular.element(document.getElementById(target));
                 element.html(html);
                 $compile(element)(scope);
-                makeGraph(); 
-                // makeJobStatusGraph(); 
-                makeHostCountGraph(); 
+                // makeGraph();
+                // makeJobStatusGraph();
+                // makeHostCountGraph();
                 scope.$emit('WidgetLoaded');
 
             };

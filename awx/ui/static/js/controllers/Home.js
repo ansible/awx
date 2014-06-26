@@ -70,7 +70,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDa
     if ($scope.removeDashboardReady) {
         $scope.removeDashboardReady();
     }
-    $scope.removeDashboardReady = $scope.$on('dashboardReady', function (e, data) { 
+    $scope.removeDashboardReady = $scope.$on('dashboardReady', function (e, data) {
         JobStatus({
             scope: $scope,
             target: 'container1',
@@ -91,7 +91,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDa
             target: 'container3',
             dashboard: data
         });
-         NewDash({
+        NewDash({
             scope: $scope,
             target: 'container5',
             dashboard: data
@@ -123,7 +123,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDa
 }
 
 Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'NewDash', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
-    'SCMSyncStatus', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button' 
+    'SCMSyncStatus', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
 ];
 
 
