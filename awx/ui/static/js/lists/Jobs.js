@@ -1,17 +1,17 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  Jobs.js 
+ *  Jobs.js
  *  List view object for Team data model.
  *
- * 
+ *
  */
 
 'use strict';
 
 angular.module('JobsListDefinition', [])
     .value( 'JobsList', {
-        
+
         name: 'jobs',
         iterator: 'job',
         editTitle: 'Jobs',
@@ -20,10 +20,10 @@ angular.module('JobsListDefinition', [])
         hover: true,
         well: false,
         "class": 'jobs-table',
-        
+
         fields: {
             id: {
-                label: 'Job ID',
+                label: 'ID',
                 key: true,
                 desc: true,
                 searchType: 'int'
@@ -75,7 +75,7 @@ angular.module('JobsListDefinition', [])
                 dataPlacement: 'top'
             }
         },
-        
+
         actions: {
             refresh: {
                 mode: 'all',

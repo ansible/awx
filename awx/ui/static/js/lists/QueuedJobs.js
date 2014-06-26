@@ -3,14 +3,14 @@
  *
  *  QueuedJobs.js
  *
- * 
+ *
  */
 
 'use strict';
 
 angular.module('QueuedJobsDefinition', [])
     .value( 'QueuedJobsList', {
-        
+
         name: 'queued_jobs',
         iterator: 'queued_job',
         editTitle: 'Queued Jobs',
@@ -18,10 +18,10 @@ angular.module('QueuedJobsDefinition', [])
         index: false,
         hover: true,
         well: false,
-        
+
         fields: {
             id: {
-                label: 'Job ID',
+                label: 'ID',
                 ngClick:"viewJobLog(queued_job.id)",
                 key: true,
                 desc: true,

@@ -1,16 +1,16 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  CompletedJobs.js 
+ *  CompletedJobs.js
  *
- * 
+ *
  */
 
 'use strict';
 
 angular.module('CompletedJobsDefinition', [])
     .value( 'CompletedJobsList', {
-        
+
         name: 'completed_jobs',
         iterator: 'completed_job',
         editTitle: 'Completed Jobs',
@@ -18,10 +18,10 @@ angular.module('CompletedJobsDefinition', [])
         index: false,
         hover: true,
         well: false,
-        
+
         fields: {
             id: {
-                label: 'Job ID',
+                label: 'ID',
                 ngClick:"viewJobLog(completed_job.id)",
                 searchType: 'int',
                 columnClass: 'col-md-1 col-sm-2 col-xs-2',
@@ -81,7 +81,7 @@ angular.module('CompletedJobsDefinition', [])
         },
 
         actions: { },
-        
+
         fieldActions: {
             submit: {
                 icon: 'icon-rocket',

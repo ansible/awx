@@ -1,16 +1,16 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  RunningJobs.js 
+ *  RunningJobs.js
  *
- * 
+ *
  */
 
 'use strict';
 
 angular.module('RunningJobsDefinition', [])
     .value( 'RunningJobsList', {
-        
+
         name: 'running_jobs',
         iterator: 'running_job',
         editTitle: 'Completed Jobs',
@@ -18,10 +18,10 @@ angular.module('RunningJobsDefinition', [])
         index: false,
         hover: true,
         well: false,
-        
+
         fields: {
             id: {
-                label: 'Job ID',
+                label: 'ID',
                 ngClick:"viewJobLog(running_job.id)",
                 key: true,
                 desc: true,
@@ -66,7 +66,7 @@ angular.module('RunningJobsDefinition', [])
         },
 
         actions: { },
-       
+
         fieldActions: {
             submit: {
                 icon: 'icon-rocket',
