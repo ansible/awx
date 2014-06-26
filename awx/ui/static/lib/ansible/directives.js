@@ -739,6 +739,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     onTotalScrollOfset: attrs.onTotalScrollOffset,
                     onTotalScrollBack: scope[attrs.onTotalScrollBack],
                     onTotalScrollBackOffset: attrs.onTotalScrollBackOffset,
+                    onScrollStart: scope[$(element).attr('data-on-scroll-start')],
                     alwaysTriggerOffsets: false
                 },
             });

@@ -21,6 +21,7 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
         event_queue = 0,
         auto_scroll_down=true,
         live_event_processing = true,
+        should_apply_live_events = true,
         page_size = 500;
 
     event_socket = Socket({
@@ -51,7 +52,7 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
                 if ($rootScope.jobStdOutInterval) {
                     window.clearInterval($rootScope.jobStdOutInterval);
                 }
-                if (live_event_processing) {
+                if (live_event_processing && should_apply_live_events) {
                     getNextSection();
                 }
                 live_event_processing = false;
@@ -61,8 +62,8 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
 
     $rootScope.jobStdOutInterval = setInterval( function() {
         // limit the scrolling to every 5 seconds
-        $log.debug('checking for stdout...');
-        if (event_queue > 15) {
+        if (event_queue > 5) {
+            $log.debug('checking for stdout...');
             if (loaded_sections.length === 0) {
                 $log.debug('calling LoadStdout');
                 $scope.$emit('LoadStdout');
@@ -73,7 +74,7 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
             }
             event_queue = 0;
         }
-    }, 5000);
+    }, 1500);
 
     if ($scope.removeLoadStdout) {
         $scope.removeLoadStdout();
@@ -121,6 +122,9 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
             stdout_url = data.related.stdout;
             if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
                 live_event_processing = false;
+                if ($rootScope.jobStdOutInterval) {
+                    window.clearInterval($rootScope.jobStdOutInterval);
+                }
             }
             $scope.$emit('LoadStdout');
         })
@@ -190,8 +194,15 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
         }
     };
 
+    $scope.scrollStarted = function() {
+        // user touched the scroll bar. stop applying live events and forcing
+        should_apply_live_events = false;
+        $log.debug('turned off live events');
+    };
+
     function getNextSection() {
         var start = current_range.end + 1, url;
+        should_apply_live_events = true;  //user scrolled all the way to bottom. if there are live events, start applying them
         if (loaded_sections.indexOf(start) < 0) {
             url = stdout_url + '?format=json&start_line=' + start + '&end_line=' + (current_range.start + page_size);
             Wait('start');

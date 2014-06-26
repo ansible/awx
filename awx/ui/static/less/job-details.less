@@ -413,6 +413,9 @@ svg text.percent{
     tr:first-child {
         border-top: none;
     }
+    tr td:first-of-type {
+        width: 20%;
+    }
     .key {
         vertical-align: top;
         padding: 3px;
@@ -431,8 +434,11 @@ svg text.percent{
             border-top: none;
             border-bottom: none;
             width: auto;
-            tr:first-child {
+            tr {
                 border-top: none;
+            }
+            tr td:first-of-type {
+                width: auto;
             }
             .key {
                 font-weight: 400;

@@ -1134,42 +1134,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             return html;
         }
 
-        /*function parseJSON(obj) {
-            var html="", key;
-            html += "<ul class=\"object-list\">\n";
-            for(key in obj) {
-                if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
-                    html += "<li><div class=\"key\">" + key + ":</div><div class=\"value\">" + obj[key] + "</div></li>\n";
-                }
-                if (obj[key] === null || obj[key] === undefined) {
-                    html += "<li><div class=\"key\">" + key + ":</div><div class=\"value\">null</div></li>\n";
-                }
-                if (typeof obj[key] === "object") {
-                    html += "<li><div class=\"key\">" + key + ":</div>" + parseJSON(obj[key]) + "</li>\n";
-                }
-            }
-            html += "</ul>\n";
-            return html;
-        }*/
-
-        /*function parseJSON(obj) {
-            var html="", key;
-            for(key in obj) {
-                html += "<div class=\"row object-list\">\n";
-                if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
-                    html += "<div class=\"col-lg-4 col-md-4 key\">" + key + ":</div><div class=\"col-lg-8 col-md-8 value\">" + obj[key] + "</div>\n";
-                }
-                if (obj[key] === null || obj[key] === undefined) {
-                    html += "<div class=\"col-lg-4 col-md-4 key\">" + key + ":</div><div class=\"col-lg-8 col-md-8 value\">null</div>\n";
-                }
-                if (typeof obj[key] === "object") {
-                    html += "<div class=\"col-lg-4 col-md-4 key\">" + key + ":</div><div class=\"col-lg-8 col-md-8\">" + parseJSON(obj[key]) + "</div>\n";
-                }
-                html += "</div>\n";
-            }
-            return html;
-        }*/
-
         if (my_scope.removeDataReady) {
             my_scope.removeDataReady();
         }
