@@ -1587,19 +1587,6 @@ class JobJobTasksList(BaseJobEventsList):
                                     .annotate(num=Count('event'))
                                     .order_by('parent__id'))
 
-        # This is a bit of a special case for id filtering requested by the UI
-        # doing this here for the moment until/unless we need to implement more
-        # complex filtering (since we aren't under a serializer)
-
-        if "id__in" in request.QUERY_PARAMS:
-            queryset = queryset.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
-        elif "id__gt" in request.QUERY_PARAMS:
-            queryset = queryset.filter(id__gt=request.QUERY_PARAMS['id__gt'])
-        elif "id__lt" in request.QUERY_PARAMS:
-            queryset = queryset.filter(id__lt=request.QUERY_PARAMS['id__lt'])
-        if "failed" in request.QUERY_PARAMS:
-            queryset = queryset.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
-
         count = queryset.count()
 
         # The data above will come back in a list, but we are going to
@@ -1615,6 +1602,23 @@ class JobJobTasksList(BaseJobEventsList):
         # using their children.
         qs = parent_task.children.filter(event__in=STARTING_EVENTS,
                                          id__in=data.keys())
+
+        # This is a bit of a special case for id filtering requested by the UI
+        # doing this here for the moment until/unless we need to implement more
+        # complex filtering (since we aren't under a serializer)
+
+        if "id__in" in request.QUERY_PARAMS:
+            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
+        elif "id__gt" in request.QUERY_PARAMS:
+            qs = qs.filter(id__gt=request.QUERY_PARAMS['id__gt'])
+        elif "id__lt" in request.QUERY_PARAMS:
+            qs = qs.filter(id__lt=request.QUERY_PARAMS['id__lt'])
+        if "failed" in request.QUERY_PARAMS:
+            qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
+
+        if ordering is not None:
+            qs = qs.order_by(ordering)
+
         for task_start_event in qs:
             # Create initial task data.
             task_data = {
