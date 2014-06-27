@@ -50,8 +50,6 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                     list = scope.jobs;
                 }
                 job = Find({ list: list, key: 'id', val: id });
-                console.log('found job:');
-                console.log(job);
                 if (job.type === 'inventory_update') {
                     typeId = job.inventory_source;
                 }
