@@ -76,7 +76,7 @@ def notification_handler(bind_port, server):
     while True:
         message = handler_socket.recv_json()
         packet = dict(type='event', name=message['event'], endpoint=message['endpoint'], args=message)
-        for session_id, socket in server.sockets.iteritems():
+        for session_id, socket in list(server.sockets.iteritems()):
             socket.send_packet(packet)
 
 class Command(NoArgsCommand):
