@@ -709,7 +709,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url = scope.job.related.job_events + '?parent=' + scope.activeTask + '&';
             url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
             url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
-            url += 'host__isnull=false&page_size=' + scope.hostTableRows + '&order_by=host__name';
+            url += 'event__icontains=runner&page_size=' + scope.hostTableRows + '&order_by=host__name';
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
