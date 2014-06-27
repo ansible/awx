@@ -74,7 +74,6 @@ angular.module('Tower', [
     'SelectionHelper',
     'License',
     'HostGroupsFormDefinition',
-    'NewDashWidget',
     'DashboardCountsWidget',
     'DashboardChartsWidget',
     'DashboardJobsWidget',

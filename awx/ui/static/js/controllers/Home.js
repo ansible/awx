@@ -10,7 +10,7 @@
 
 'use strict';
 
-function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDash, DashboardCounts, DashboardCharts, DashboardJobs,
+function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, DashboardCounts, DashboardCharts, DashboardJobs,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button){
 
     ClearScope('home');
@@ -112,7 +112,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDa
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'NewDash', 'DashboardCounts', 'DashboardCharts', 'DashboardJobs',  'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'DashboardCounts', 'DashboardCharts', 'DashboardJobs',  'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
 ];
 
 
