@@ -670,9 +670,11 @@ class JobEvent(CreatedModifiedModel):
             try:
                 if not self.host_id and self.host_name:
                     host_qs = Host.objects.filter(inventory__jobs__id=self.job_id, name=self.host_name)
-                    self.host_id = host_qs.only('id').values_list('id', flat=True)[0]
-                    if 'host_id' not in update_fields:
-                        update_fields.append('host_id')
+                    host_id = host_qs.only('id').values_list('id', flat=True)
+                    if host_id.exists():
+                        self.host_id = host_id[0]
+                        if 'host_id' not in update_fields:
+                            update_fields.append('host_id')
             except (IndexError, AttributeError):
                 pass
             if self.parent is None:
