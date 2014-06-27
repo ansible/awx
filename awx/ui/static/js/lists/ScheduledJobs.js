@@ -1,16 +1,16 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  ScheduledJobs.js 
+ *  ScheduledJobs.js
  *
- * 
+ *
  */
 
 'use strict';
 
 angular.module('ScheduledJobsDefinition', [])
     .value( 'ScheduledJobsList', {
-        
+
         name: 'schedules',
         iterator: 'schedule',
         editTitle: 'Scheduled Jobs',
@@ -18,11 +18,11 @@ angular.module('ScheduledJobsDefinition', [])
         index: true,
         hover: true,
         well: false,
-        
+
         fields: {
             status: {
                 label: 'Status',
-                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2',
                 awToolTip: "{{ schedule.status_tip }}",
                 awTipPlacement: "top",
                 icon: 'icon-job-{{ schedule.status }}',
@@ -35,14 +35,14 @@ angular.module('ScheduledJobsDefinition', [])
                 label: 'Next Run',
                 noLink: true,
                 searchable: false,
-                columnClass: "col-md-2 hidden-xs",
+                columnClass: "col-lg-1 col-md-2 hidden-xs",
                 filter: "date:'MM/dd HH:mm:ss'",
                 key: true
             },
             type: {
                 label: 'Type',
                 noLink: true,
-                columnClass: "col-md-2 hidden-sm hidden-xs",
+                columnClass: "col-lg-1 col-md-2 hidden-sm hidden-xs",
                 sourceModel: 'unified_job_template',
                 sourceField: 'unified_job_type',
                 ngBind: 'schedule.type_label',
@@ -62,7 +62,7 @@ angular.module('ScheduledJobsDefinition', [])
         },
 
         actions: { },
-        
+
         fieldActions: {
             "play": {
                 mode: "all",

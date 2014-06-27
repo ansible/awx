@@ -20,7 +20,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
         listCount = 0,
         api_complete = false,
         event_socket,
-        event_queue = [{"status":"pending","endpoint":"/socket.io/jobs","unified_job_id":4129,"event":"status_changed"}],
+        event_queue = [],
         expecting = 0,
         max_rows;
 

@@ -46,7 +46,12 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 else if (scope.queued_jobs) {
                     list = scope.queued_jobs;
                 }
+                else if (scope.jobs) {
+                    list = scope.jobs;
+                }
                 job = Find({ list: list, key: 'id', val: id });
+                console.log('found job:');
+                console.log(job);
                 if (job.type === 'inventory_update') {
                     typeId = job.inventory_source;
                 }
@@ -80,6 +85,9 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                     }
                     else if (scope.queued_jobs) {
                         list = scope.queued_jobs;
+                    }
+                    else if (scope.jobs) {
+                        list = scope.jobs;
                     }
                     job = Find({ list: list, key: 'id', val: id });
                     if (job.type === 'job') {
@@ -431,6 +439,9 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
         }
         else if (scope.queued_jobs) {
             jobs = scope.queued_jobs;
+        }
+        else if (scope.jobs) {
+            jobs = scope.jobs;
         }
         job = Find({list: jobs, key: 'id', val: id });
 

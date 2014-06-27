@@ -2,8 +2,10 @@
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  *  Jobs.js
- *  List view object for Team data model.
+ *  List view object for job data model.
  *
+ *  Used on dashboard to provide a list of all jobs, regardless of
+ *  status.
  *
  */
 
@@ -15,112 +17,92 @@ angular.module('JobsListDefinition', [])
         name: 'jobs',
         iterator: 'job',
         editTitle: 'Jobs',
-        showTitle: false,
+        'class': 'table-condensed',
         index: false,
         hover: true,
         well: false,
-        "class": 'jobs-table',
 
         fields: {
             id: {
                 label: 'ID',
+                ngClick:"viewJobLog(job.id)",
                 key: true,
                 desc: true,
-                searchType: 'int'
-            },
-            inventory: {
-                label: 'Inventory ID',
                 searchType: 'int',
-                searchOnly: true
-            },
-            created: {
-                label: 'Create On',
-                link: false,
-                searchable: false,
-                filter: "date:'MM/dd HH:mm:ss'"
-            },
-            name: {
-                label: 'Name',
-                link: false
-            },
-            failed: {
-                label: 'Job failed?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true,
-                nosort: true
+                columnClass: 'col-md-1 col-sm-2 col-xs-2',
+                awToolTip: "{{ job.status_tip }}",
+                awTipPlacement: "top",
             },
             status: {
                 label: 'Status',
-                "class": 'job-{{ job.status }}',
+                columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2',
+                awToolTip: "{{ job.status_tip }}",
+                awTipPlacement: "top",
+                dataTitle: "{{ job.status_popover_title }}",
+                icon: 'icon-job-{{ job.status }}',
+                iconOnly: true,
+                ngClick:"viewJobLog(job.id)",
+                searchable: false
+            },
+            started: {
+                label: 'Started On',
+                noLink: true,
+                searchable: false,
+                filter: "date:'MM/dd HH:mm:ss'",
+                columnClass: "col-lg-1 col-md-2 hidden-xs"
+            },
+            type: {
+                label: 'Type',
+                ngBind: 'job.type_label',
+                link: false,
+                columnClass: "col-lg-1 col-md-2 hidden-sm hidden-xs",
+                searchable: true,
                 searchType: 'select',
-                linkTo: "{{ job.statusLinkTo }}",
-                searchOptions: [
-                    { name: "new", value: "new" },
-                    { name: "waiting", value: "waiting" },
-                    { name: "pending", value: "pending" },
-                    { name: "running", value: "running" },
-                    { name: "successful", value: "successful" },
-                    { name: "error", value: "error" },
-                    { name: "failed", value: "failed" },
-                    { name: "canceled", value: "canceled" }
-                ],
-                badgeIcon: 'fa icon-job-{{ job.status }}',
-                badgePlacement: 'left',
-                badgeToolTip: "{{ job.statusBadgeToolTip }}",
-                badgeTipPlacement: 'top',
-                badgeNgHref: "{{ job.statusLinkTo }}",
-                awToolTip: "{{ job.statusBadgeToolTip }}",
-                dataPlacement: 'top'
+                searchOptions: []    // populated via GetChoices() in controller
+            },
+            name: {
+                label: 'Name',
+                columnClass: 'col-md-3 col-xs-5',
+                ngClick: "viewJobLog(job.id, job.nameHref)",
+                defaultSearchField: true
             }
         },
 
-        actions: {
-            refresh: {
-                mode: 'all',
-                awToolTip: "Refresh the page",
-                ngClick: "refresh()"
-            }
-        },
+        actions: { },
 
         fieldActions: {
             submit: {
-                label: 'Relaunch',
-                icon: 'icon-rocket',
                 mode: 'all',
-                ngClick: 'submitJob(job.id, job.summary_fields.job_template.name)',
-                awToolTip: 'Start the job',
+                icon: 'icon-rocket',
+                ngClick: 'relaunchJob($event, job.id)',
+                awToolTip: 'Relaunch using the same parameters',
                 dataPlacement: 'top'
             },
             cancel: {
-                label: 'Stop',
                 mode: 'all',
                 ngClick: 'deleteJob(job.id)',
-                awToolTip: 'Cancel a running or pending job',
-                ngShow: "job.status == 'pending' || job.status == 'running' || job.status == 'waiting'",
-                dataPlacement: 'top'
+                awToolTip: 'Cancel the job',
+                dataPlacement: 'top',
+                ngShow: "job.status == 'running'"
             },
             "delete": {
-                label: 'Delete',
                 mode: 'all',
                 ngClick: 'deleteJob(job.id)',
                 awToolTip: 'Delete the job',
-                ngShow: "job.status != 'pending' && job.status != 'running' && job.status != 'waiting'",
+                dataPlacement: 'top',
+                ngShow: "job.status != 'running'"
+            },
+            job_details: {
+                mode: 'all',
+                href: '/#/jobs/{{ job.id }}',
+                awToolTip: 'View job details',
                 dataPlacement: 'top'
             },
-            dropdown: {
-                type: 'DropDown',
-                label: 'View',
-                icon: 'fa-search-plus',
-                'class': 'btn-default btn-xs',
-                options: [
-                    { ngClick: 'editJob(job.id, job.summary_fields.job_template.name)', label: 'Status' },
-                    { ngClick: 'viewEvents(job.id, job.summary_fields.job_template.name)', label: 'Events',
-                        ngHide: "job.status == 'new'" },
-                    { ngClick: 'viewSummary(job.id, job.summary_fields.job_template.name)', label: 'Host Summary',
-                        ngHide: "job.status == 'new'" }
-                ]
+            stdout: {
+                mode: 'all',
+                href: '/#/jobs/{{ job.id }}/stdout',
+                awToolTip: 'View standard output',
+                dataPlacement: 'top'
             }
         }
     });

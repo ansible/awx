@@ -105,20 +105,8 @@ angular.module('CompletedJobsDefinition', [])
             stdout: {
                 mode: 'all',
                 href: '/#/jobs/{{ completed_job.id }}/stdout',
-                awToolTip: 'View standard output. Opens in a new window or tab.',
+                awToolTip: 'View standard output',
                 dataPlacement: 'top'
             }
-            /*dropdown: {
-                type: 'DropDown',
-                ngShow: "completed_job.type === 'job'",
-                label: 'View',
-                icon: 'fa-search-plus',
-                'class': 'btn-default btn-xs',
-                options: [
-                    //{ ngHref: '/#/jobs/{{ completed_job.id }}', label: 'Status' },
-                    { ngHref: '/#/job_events/{{ completed_job.id }}', label: 'Events', ngHide: "completed_job.status == 'new'" },
-                    { ngHref: '/#/job_host_summaries/{{ completed_job.id }}', label: 'Host Summary' }
-                ]
-            }*/
         }
     });

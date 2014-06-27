@@ -90,7 +90,7 @@ angular.module('RunningJobsDefinition', [])
             stdout: {
                 mode: 'all',
                 href: '/#/jobs/{{ running_job.id }}/stdout',
-                awToolTip: 'View standard output. Opens in a new window or tab.',
+                awToolTip: 'View standard output',
                 dataPlacement: 'top'
             }
             /*dropdown: {
