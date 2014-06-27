@@ -48,14 +48,20 @@ textarea {
 a {
   color: @link-color;
   text-decoration: none;
+  outline: none;
+  outline-color: #fff;
 
   &:hover,
   &:focus {
     color: @link-hover-color;
     text-decoration: underline;
+    outline: none;
+    outline-color: #fff;
   }
 
   &:focus {
+    outline: none;
+    outline-color: #fff;
     .tab-focus();
   }
 }
