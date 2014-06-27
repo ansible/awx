@@ -170,7 +170,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 task = play.tasks[scope.activeTask],
                 url;
             url = scope.job.related.job_events + '?parent=' + task.id + '&';
-            url += 'host__isnull=false&page_size=' + scope.hostResultsMaxRows + '&order_by=-host__name';
+            url += 'event__icontains=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=-host__name';
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
@@ -342,21 +342,21 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         hostCount: 0,
                         fistTask: null,
                         playActiveClass: '',
-                        unreachableCount: (data.unreachable_count) ? data.unreachable_count : 0,
+                        unreachableCount: (event.unreachable_count) ? event.unreachable_count : 0,
                         status_text: status,
                         tasks: {}
                     };
 
-                    ok = (data.ok_count) ? data.ok_count : 0;
-                    changed = (data.changed_count) ? data.changed_count : 0;
-                    failed = (data.failed_count) ? data.failed_count : 0;
-                    skipped = (data.skipped_count) ? data.skipped_count : 0;
+                    ok = (event.ok_count) ? event.ok_count : 0;
+                    changed = (event.changed_count) ? event.changed_count : 0;
+                    failed = (event.failed_count) ? event.failed_count : 0;
+                    skipped = (event.skipped_count) ? event.skipped_count : 0;
 
                     scope.jobData.plays[event.id].hostCount = ok + changed + failed + skipped;
 
                     scope.host_summary.ok += ok;
                     scope.host_summary.changed += changed;
-                    scope.host_summary.unreachable += (data.unreachable_count) ? data.unreachable_count : 0;
+                    scope.host_summary.unreachable += (event.unreachable_count) ? event.unreachable_count : 0;
                     scope.host_summary.failed += failed;
                     scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
                         scope.host_summary.failed;
