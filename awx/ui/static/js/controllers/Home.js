@@ -10,7 +10,7 @@
 
 'use strict';
 
-function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDash, ObjectCount, JobStatus, InventorySyncStatus, SCMSyncStatus,
+function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDash, DashboardCounts, DashboardCharts, DashboardJobs,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button){
 
     ClearScope('home');
@@ -48,7 +48,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDa
     e.html(html);
     $compile(e)($scope);
 
-    waitCount = 4;
+    waitCount = 3;
     loadedCount = 0;
 
     if (!$routeParams.login) {
@@ -71,29 +71,19 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDa
         $scope.removeDashboardReady();
     }
     $scope.removeDashboardReady = $scope.$on('dashboardReady', function (e, data) {
-        JobStatus({
+        DashboardCounts({
             scope: $scope,
             target: 'container1',
             dashboard: data
         });
-        InventorySyncStatus({
+        DashboardCharts({
             scope: $scope,
             target: 'container2',
             dashboard: data
         });
-        SCMSyncStatus({
-            scope: $scope,
-            target: 'container4',
-            dashboard: data
-        });
-        ObjectCount({
+        DashboardJobs({
             scope: $scope,
             target: 'container3',
-            dashboard: data
-        });
-        NewDash({
-            scope: $scope,
-            target: 'container5',
             dashboard: data
         });
     });
@@ -122,8 +112,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, NewDa
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'NewDash', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
-    'SCMSyncStatus', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'NewDash', 'DashboardCounts', 'DashboardCharts', 'DashboardJobs',  'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
 ];
 
 
