@@ -577,15 +577,18 @@ class Ec2Inventory(object):
     def push(self, my_dict, key, element):
         ''' Pushed an element onto an array that may not have been defined in
         the dict '''
-
-        if key in my_dict:
-            my_dict[key].append(element);
+        group_info = my_dict.setdefault(key, [])
+        if isinstance(group_info, dict):
+            host_list = group_info.setdefault('hosts', [])
+            host_list.append(element)
         else:
-            my_dict[key] = [element]
+            group_info.append(element)
 
     def push_group(self, my_dict, key, element):
-        '''Push a group as a child of another group.'''
+        ''' Push a group as a child of another group. '''
         parent_group = my_dict.setdefault(key, {})
+        if not isinstance(parent_group, dict):
+            parent_group = my_dict[key] = {'hosts': parent_group}
         child_groups = parent_group.setdefault('children', [])
         if element not in child_groups:
             child_groups.append(element)
