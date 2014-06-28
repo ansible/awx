@@ -6,6 +6,7 @@ import datetime
 import json
 import os
 import re
+import tempfile
 
 # Django
 from django.conf import settings
@@ -1396,9 +1397,11 @@ class InventoryUpdatesTest(BaseTransactionTest):
         group.name = 'ec2'
         group.save()
         self.group = group
+        cache_path = tempfile.mkdtemp(prefix='awx_ec2_')
+        self._temp_paths.append(cache_path)
         inventory_source = self.update_inventory_source(self.group,
             source='ec2', credential=credential, source_regions=source_regions,
-            source_vars='---\n\nnested_groups: false\n')
+            source_vars='---\n\nnested_groups: false\ncache_path: %s\n' % cache_path)
         # Check first without instance_id set (to import by name only).
         with self.settings(EC2_INSTANCE_ID_VAR=''):
             self.check_inventory_source(inventory_source)
@@ -1447,11 +1450,6 @@ class InventoryUpdatesTest(BaseTransactionTest):
             source='ec2', credential=credential, source_regions=source_regions,
             source_vars='---') # nested_groups is true by default.
         self.check_inventory_source(inventory_source)
-        # Manually disable all hosts, verify a new update re-enables them.
-        for host in self.inventory.hosts.all():
-            host.enabled = False
-            host.save()
-        self.check_inventory_source(inventory_source, initial=False)
         # Verify that main group is in top level groups (hasn't been added as
         # its own child).
         self.assertTrue(self.group in self.inventory.root_groups)
