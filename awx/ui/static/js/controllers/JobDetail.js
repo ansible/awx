@@ -126,7 +126,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             $rootScope.jobDetailInterval = setInterval(function() {
                 $log.debug('Updating the DOM...');
                 UpdateDOM({ scope: scope });
-            }, 2500);
+            }, 2000);
         }
     });
 
