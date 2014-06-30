@@ -993,6 +993,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     def socketio_emit_data(self):
         if self.inventory_source.group is not None:
             return dict(group_id=self.inventory_source.group.id)
+        return {}
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
