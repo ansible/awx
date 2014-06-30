@@ -35,14 +35,14 @@ angular.module('ScheduledJobsDefinition', [])
                 label: 'Next Run',
                 noLink: true,
                 searchable: false,
-                columnClass: "col-lg-1 col-md-2 hidden-xs",
+                columnClass: "col-lg-2 col-md-2 hidden-xs",
                 filter: "date:'MM/dd HH:mm:ss'",
                 key: true
             },
             type: {
                 label: 'Type',
                 noLink: true,
-                columnClass: "col-lg-1 col-md-2 hidden-sm hidden-xs",
+                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
                 sourceModel: 'unified_job_template',
                 sourceField: 'unified_job_type',
                 ngBind: 'schedule.type_label',

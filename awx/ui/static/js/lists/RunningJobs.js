@@ -26,13 +26,13 @@ angular.module('RunningJobsDefinition', [])
                 key: true,
                 desc: true,
                 searchType: 'int',
-                columnClass: 'col-md-1 col-sm-2 col-xs-2',
+                columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2',
                 awToolTip: "{{ running_job.status_tip }}",
                 awTipPlacement: "top",
             },
             status: {
                 label: 'Status',
-                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2',
                 awToolTip: "{{ running_job.status_tip }}",
                 awTipPlacement: "top",
                 dataTitle: "{{ running_job.status_popover_title }}",
@@ -46,13 +46,13 @@ angular.module('RunningJobsDefinition', [])
                 noLink: true,
                 searchable: false,
                 filter: "date:'MM/dd HH:mm:ss'",
-                columnClass: "col-md-2 hidden-xs"
+                columnClass: "col-lg-2 col-md-2 hidden-xs"
             },
             type: {
                 label: 'Type',
                 ngBind: 'running_job.type_label',
                 link: false,
-                columnClass: "col-md-2 hidden-sm hidden-xs",
+                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
                 searchable: true,
                 searchType: 'select',
                 searchOptions: []    // populated via GetChoices() in controller

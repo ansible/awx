@@ -24,13 +24,13 @@ angular.module('CompletedJobsDefinition', [])
                 label: 'ID',
                 ngClick:"viewJobLog(completed_job.id)",
                 searchType: 'int',
-                columnClass: 'col-md-1 col-sm-2 col-xs-2',
+                columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2',
                 awToolTip: "{{ completed_job.status_tip }}",
                 dataPlacement: 'top'
             },
             status: {
                 label: 'Status',
-                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2',
                 awToolTip: "{{ completed_job.status_tip }}",
                 awTipPlacement: "top",
                 dataTitle: "{{ completed_job.status_popover_title }}",
@@ -50,7 +50,7 @@ angular.module('CompletedJobsDefinition', [])
                 noLink: true,
                 searchable: false,
                 filter: "date:'MM/dd HH:mm:ss'",
-                columnClass: "col-md-2 hidden-xs",
+                columnClass: "col-lg-2 col-md-2 hidden-xs",
                 key: true,
                 desc: true
             },
@@ -58,7 +58,7 @@ angular.module('CompletedJobsDefinition', [])
                 label: 'Type',
                 ngBind: 'completed_job.type_label',
                 link: false,
-                columnClass: "col-md-2 hidden-sm hidden-xs",
+                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
                 columnShow: "showJobType",
                 searchable: true,
                 searchType: 'select',

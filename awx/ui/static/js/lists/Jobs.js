@@ -29,7 +29,7 @@ angular.module('JobsListDefinition', [])
                 key: true,
                 desc: true,
                 searchType: 'int',
-                columnClass: 'col-md-1 col-sm-2 col-xs-2',
+                columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2',
                 awToolTip: "{{ job.status_tip }}",
                 awTipPlacement: "top",
             },
@@ -49,13 +49,13 @@ angular.module('JobsListDefinition', [])
                 noLink: true,
                 searchable: false,
                 filter: "date:'MM/dd HH:mm:ss'",
-                columnClass: "col-lg-1 col-md-2 hidden-xs"
+                columnClass: "col-lg-2 col-md-2 hidden-xs"
             },
             type: {
                 label: 'Type',
                 ngBind: 'job.type_label',
                 link: false,
-                columnClass: "col-lg-1 col-md-2 hidden-sm hidden-xs",
+                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
                 searchable: true,
                 searchType: 'select',
                 searchOptions: []    // populated via GetChoices() in controller
