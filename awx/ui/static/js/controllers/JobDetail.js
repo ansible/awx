@@ -174,15 +174,42 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    var idx, event;
+                    var idx, event, status, status_text;
                     if (data.results.length > 0) {
                         lastEventId =  data.results[0].id;
                     }
                     for (idx=data.results.length - 1; idx >= 0; idx--) {
                         event = data.results[idx];
+                        if (event.event === "runner_on_skipped") {
+                            status = 'skipped';
+                        }
+                        else if (event.event === "runner_on_unreachable") {
+                            status = 'unreachable';
+                        }
+                        else {
+                            status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                        }
+                        switch(status) {
+                            case "successful":
+                                status_text = 'OK';
+                                break;
+                            case "changed":
+                                status_text = "Changed";
+                                break;
+                            case "failed":
+                                status_text = "Failed";
+                                break;
+                            case "unreachable":
+                                status = "failed";
+                                status_text = "Unreachable";
+                                break;
+                            case "skipped":
+                                status_text = "Skipped";
+                        }
                         task.hostResults[event.id] = {
                             id: event.id,
-                            status: (event.event === "runner_on_skipped") ? 'skipped' : (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful',
+                            status: status,
+                            status_text: status_text,
                             host_id: event.host,
                             task_id: event.parent,
                             name: event.event_data.host,
@@ -221,7 +248,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         scope.activeTask = data.results[0].id;
                     }
                     data.results.forEach(function(event, idx) {
-                        var end, elapsed;
+                        var end, elapsed, status, status_text;
 
                         if (play.firstTask === undefined  || play.firstTask === null) {
                             play.firstTask = event.id;
@@ -247,11 +274,16 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             elapsed = '00:00:00';
                         }
 
+                        status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                        status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
+
                         play.tasks[event.id] = {
                             id: event.id,
                             play_id: scope.activePlay,
                             name: event.name,
-                            status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                            status: status,
+                            status_text: status_text,
+                            status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
                             created: event.created,
                             modified: event.modified,
                             finished: end,
@@ -309,9 +341,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                     scope.activePlay = data.results[0].id;
                 }
                 data.results.forEach(function(event, idx) {
-                    var status, start, end, elapsed, ok, changed, failed, skipped;
+                    var status, status_text, start, end, elapsed, ok, changed, failed, skipped;
 
                     status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                    status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
                     start = event.started;
 
                     if (idx < data.length - 1) {
@@ -338,12 +371,13 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                         created: start,
                         finished: end,
                         status: status,
+                        status_text: status_text,
+                        status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
                         elapsed: elapsed,
                         hostCount: 0,
                         fistTask: null,
                         playActiveClass: '',
                         unreachableCount: (event.unreachable_count) ? event.unreachable_count : 0,
-                        status_text: status,
                         tasks: {}
                     };
 
@@ -438,7 +472,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 scope.job_status.status = (data.status === 'waiting' || data.status === 'new') ? 'pending' : data.status;
                 scope.job_status.started = data.started;
                 scope.job_status.status_class = ((data.status === 'error' || data.status === 'failed') && data.job_explanation) ? "alert alert-danger" : "";
-                scope.job_status.finished = data.finished;
+                scope.job_status.finished = (data.status === 'successful' || data.status === 'failed' || data.status === 'error') ? data.finished : null;
                 scope.job_status.explanation = data.job_explanation;
 
                 if (data.started && data.finished) {
@@ -672,9 +706,37 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 Rest.get()
                     .success(function(data) {
                         data.results.forEach(function(row) {
+                            var status, status_text;
+                            if (row.event === "runner_on_skipped") {
+                                status = 'skipped';
+                            }
+                            else if (row.event === "runner_on_unreachable") {
+                                status = 'unreachable';
+                            }
+                            else {
+                                status = (row.failed) ? 'failed' : (row.changed) ? 'changed' : 'successful';
+                            }
+                            switch(status) {
+                                case "successful":
+                                    status_text = 'OK';
+                                    break;
+                                case "changed":
+                                    status_text = "Changed";
+                                    break;
+                                case "failed":
+                                    status_text = "Failed";
+                                    break;
+                                case "unreachable":
+                                    status = "failed";
+                                    status_text = "Unreachable";
+                                    break;
+                                case "skipped":
+                                    status_text = "Skipped";
+                            }
                             scope.hostResults.push({
                                 id: row.id,
-                                status: ( (row.failed) ? 'failed': (row.changed) ? 'changed' : 'successful' ),
+                                status: status,
+                                status_text: status_text,
                                 host_id: row.host,
                                 task_id: row.parent,
                                 name: row.event_data.host,
@@ -716,9 +778,37 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 Rest.get()
                     .success(function(data) {
                         data.results.forEach(function(row) {
+                            var status, status_text;
+                            if (row.event === "runner_on_skipped") {
+                                status = 'skipped';
+                            }
+                            else if (row.event === "runner_on_unreachable") {
+                                status = 'unreachable';
+                            }
+                            else {
+                                status = (row.failed) ? 'failed' : (row.changed) ? 'changed' : 'successful';
+                            }
+                            switch(status) {
+                                case "successful":
+                                    status_text = 'OK';
+                                    break;
+                                case "changed":
+                                    status_text = "Changed";
+                                    break;
+                                case "failed":
+                                    status_text = "Failed";
+                                    break;
+                                case "unreachable":
+                                    status = "failed";
+                                    status_text = "Unreachable";
+                                    break;
+                                case "skipped":
+                                    status_text = "Skipped";
+                            }
                             scope.hostResults.unshift({
                                 id: row.id,
-                                status: ( (row.failed) ? 'failed': (row.changed) ? 'changed' : 'successful' ),
+                                status: status,
+                                status_text: status_text,
                                 host_id: row.host,
                                 task_id: row.parent,
                                 name: row.event_data.host,
@@ -761,7 +851,8 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 Rest.get()
                     .success(function(data) {
                         data.results.forEach(function(event, idx) {
-                            var end, elapsed;
+                            var end, elapsed, status, status_text;
+
                             if (idx < data.length - 1) {
                                 // end date = starting date of the next event
                                 end = data[idx + 1].created;
@@ -785,11 +876,17 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             else {
                                 elapsed = '00:00:00';
                             }
+
+                            status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                            status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
+
                             scope.tasks.push({
                                 id: event.id,
                                 play_id: scope.activePlay,
                                 name: event.name,
-                                status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                                status: status,
+                                status_text: status_text,
+                                status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
                                 created: event.created,
                                 modified: event.modified,
                                 finished: end,
@@ -843,7 +940,8 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 Rest.get()
                     .success(function(data) {
                         data.results.forEach(function(event, idx) {
-                            var end, elapsed;
+                            var end, elapsed, status, status_text;
+
                             if (idx < data.length - 1) {
                                 // end date = starting date of the next event
                                 end = data[idx + 1].created;
@@ -867,16 +965,22 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             else {
                                 elapsed = '00:00:00';
                             }
+
+                            status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                            status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
+
                             scope.tasks.unshift({
                                 id: event.id,
                                 play_id: scope.activePlay,
                                 name: event.name,
                                 status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                                status_text: ( (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK' ),
+                                status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
                                 created: event.created,
                                 modified: event.modified,
                                 finished: end,
                                 elapsed: elapsed,
-                                hostCount: event.host_count,          // hostCount,
+                                hostCount: event.host_count,
                                 reportedHosts: event.reported_hosts,
                                 successfulCount: event.successful_count,
                                 failedCount: event.failed_count,

@@ -77,9 +77,9 @@
                                 <div class="row">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">Started</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs">Elapsed</div>
-                                    <div class="col-lg-6 col-md-6 col-sm-10 col-xs-12">Name</div>
-                                    <div class="col-lg-2 col-md-2 hidden-sm hidden-xs text-right">Reporting Hosts</div>
-                                    <div class="col-lg-2 col-md-2 hidden-sm hidden-xs text-right">Unreachable Hosts</div>
+                                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12">Name</div>
+                                    <!-- <div class="col-lg-2 col-md-2 hidden-sm hidden-xs text-right">Reporting Hosts</div>
+                                    <div class="col-lg-2 col-md-2 hidden-sm hidden-xs text-right">Unreachable Hosts</div> -->
                                 </div>
                             </div>
                             <div id="plays-table-detail" aw-custom-scroll class="table-detail">
@@ -89,12 +89,12 @@
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
                                         data-placement="top">{{ play.elapsed }}
                                     </div>
-                                    <div class="col-lg-6 col-md-6 col-sm-10 col-xs-12 status-column"
-                                        aw-tool-tip="Event Id: {{ play.id }}<br />Status: {{ play.status_text }}" data-placement="top">
+                                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 status-column"
+                                        aw-tool-tip="{{ play.status_tip }}" data-tip-watch="play.status_tip" data-placement="top">
                                         <i class="fa icon-job-{{ play.status }}"></i> {{ play.name }}</span>
                                     </div>
-                                    <div class="col-lg-2 col-md-2 hidden-sm hidden-xs text-right">{{ play.hostCount }}</div>
-                                    <div class="col-lg-2 col-md-2 hidden-sm hidden-xs text-right">{{ play.unreachableCount }}</div>
+                                    <!--<div class="col-lg-2 col-md-2 hidden-sm hidden-xs text-right">{{ play.hostCount }}</div>
+                                    <div class="col-lg-2 col-md-2 hidden-sm hidden-xs text-right">{{ play.unreachableCount }}</div>-->
                                 </div>
                                 <div class="row" ng-show="playList.length == 0">
                                     <div class="col-lg-12">
@@ -123,8 +123,8 @@
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
                                             data-placement="top">{{ task.elapsed }}
                                     </div>
-                                    <div class="col-lg-5 col-md-5 col-sm-10 col-xs-12 status-column" aw-tool-tip="Event Id: {{ task.id }} Status: {{ task.status }}"
-                                        data-placement="top">
+                                    <div class="col-lg-5 col-md-5 col-sm-10 col-xs-12 status-column" aw-tool-tip="{{ task.status_tip }}"
+                                        data-tip-watch="task.status_tip" data-placement="top">
                                         <i class="fa icon-job-{{  task.status }}"></i><span ng-show="hasRoles"> {{ task.role }} </span> {{ task.name }}
                                     </div>
                                     <div class="col-lg-5 col-md-5 hidden-sm hidden-xs">
@@ -153,7 +153,7 @@
                                 <div id="hosts-table-detail-inner">
                                     <div class="row cursor-pointer" ng-repeat="result in results = (hostResults | filter:{ status : searchAllStatus}) track by $index" ng-click="viewHostResults(result.id)">
                                         <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7 status-column">
-                                            <a href="" aw-tool-tip="Event Id: {{ result.id }} Status: {{ result.status }}. Click for details" data-placement="top"><i class="fa icon-job-{{ result.status }}"></i> {{ result.name }}</a>
+                                            <a href="" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i class="fa icon-job-{{ result.status }}"></i> {{ result.name }}</a>
                                         </div>
                                         <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
                                             {{ result.msg }}
@@ -213,7 +213,7 @@
                         <div id="hosts-summary-section" class="section job_summary">
                             <div class="header">
                                 <div class="title">Host Summary</div>
-                                <div class="legend pull-right"><i class="fa fa-circle successful-hosts-color"></i> Successful <i class="fa fa-circle changed-hosts-color"></i> Changed
+                                <div class="legend pull-right"><i class="fa fa-circle successful-hosts-color"></i> OK <i class="fa fa-circle changed-hosts-color"></i> Changed
                                 <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
                             </div>
                             <div class="table-header">
@@ -247,7 +247,7 @@
                     <div id="graph-section" class="section">
                         <div class="header">
                             <div class="title">Host Status Summary</div>
-                            <div class="legend pull-right" style="display: none;"><i class="fa fa-circle successful-hosts-color"></i> Successful <i class="fa fa-circle changed-hosts-color"></i> Changed
+                            <div class="legend pull-right" style="display: none;"><i class="fa fa-circle successful-hosts-color"></i> OK <i class="fa fa-circle changed-hosts-color"></i> Changed
                                     <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
                         </div>
                     </div><!-- graph section -->

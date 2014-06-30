@@ -46,7 +46,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
 
         var scope = params.scope,
-            event = params.event;
+            event = params.event,
+            status, status_text;
 
         $log.debug('processing event: ' + event.id);
 
@@ -59,16 +60,19 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 break;
 
             case 'playbook_on_play_start':
+                status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
                 scope.jobData.plays[event.id] = {
                     id: event.id,
                     name: event.play,
                     created: event.created,
-                    status: (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful',
+                    status: status,
+                    status_text: status_text,
                     elapsed: '00:00:00',
                     hostCount: 0,
                     fistTask: null,
                     unreachableCount: 0,
-                    status_text: (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful',
+                    status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
                     tasks: {}
                 };
                 if (scope.activePlay) {
@@ -109,7 +113,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     failed: true,
                     changed: false,
                     modified: event.modified,
-                    status_text: 'failed- no hosts matched'
+                    no_hosts: true
                 });
                 break;
 
@@ -219,13 +223,19 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 .factory('AddNewTask', ['DrawGraph', 'UpdatePlayStatus', function(DrawGraph, UpdatePlayStatus) {
     return function(params) {
         var scope = params.scope,
-            event = params.event;
+            event = params.event,
+            status, status_text;
+
+        status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+        status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
 
         scope.jobData.plays[scope.activePlay].tasks[event.id] = {
             id: event.id,
             play_id: event.parent,
             name: event.event_display,
-            status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+            status: status,
+            status_text: status_text,
+            status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
             created: event.created,
             modified: event.modified,
             hostCount: scope.jobData.plays[scope.activePlay].hostCount,
@@ -266,7 +276,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     };
 }])
 
-.factory('UpdateJobStatus', ['GetElapsed', 'Empty', function(GetElapsed, Empty) {
+.factory('UpdateJobStatus', ['GetElapsed', 'Empty', 'JobIsFinished', function(GetElapsed, Empty, JobIsFinished) {
     return function(params) {
         var scope = params.scope,
             failed = params.failed,
@@ -277,7 +287,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             scope.job_status.status !== 'canceled') {
             scope.job_status.status = 'failed';
         }
-        if (!Empty(modified)) {
+        if (JobIsFinished(scope) && !Empty(modified)) {
             scope.job_status.finished = modified;
         }
         if (!Empty(started) && Empty(scope.job_status.started)) {
@@ -301,29 +311,32 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             id = params.play_id,
             modified = params.modified,
             no_hosts = params.no_hosts,
-            status_text = params.status_text,
             play;
 
         if (scope.jobData.plays[id] !== undefined) {
             play = scope.jobData.plays[scope.activePlay];
             if (failed) {
                 play.status = 'failed';
+                play.status_text = 'Failed';
             }
             else if (play.status !== 'changed' && play.status !== 'failed') {
                 // once the status becomes 'changed' or 'failed' don't modify it
                 if (no_hosts) {
                     play.status = 'no-matching-hosts';
+                    play.status_text = 'No matching hosts';
                 }
                 else {
                     play.status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+                    play.status_text = (changed) ? 'Changed' : (failed) ? 'Failed' : 'OK';
                 }
             }
+            play.status_tip = "Event ID: " + play.id + "<br />Status: " + play.status_text;
             play.finished = modified;
             play.elapsed = GetElapsed({
                 start: play.created,
                 end: modified
             });
-            play.status_text = (status_text) ? status_text : play.status;
+            //play.status_text = (status_text) ? status_text : play.status;
         }
 
         UpdateJobStatus({
@@ -348,14 +361,18 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             task = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask];
             if (no_hosts){
                 task.status = 'no-matching-hosts';
+                task.status_text = 'No matching hosts';
             }
             else if (failed) {
                 task.status = 'failed';
+                task.status_text = 'Failed';
             }
             else if (task.status !== 'changed' && task.status !== 'failed') {
                 // once the status becomes 'changed' or 'failed' don't modify it
                 task.status = (failed) ? 'failed' : (changed) ? 'changed' : 'successful';
+                task.status_text = (failed) ? 'Failed' : (changed) ? 'Changed' : 'OK';
             }
+            task.status_tip = "Event ID: " + task.id + "<br />Status: " + task.status_text;
             task.finished = params.modified;
             task.elapsed = GetElapsed({
                 start: task.created,
@@ -445,11 +462,31 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             created = params.created,
             name = params.name,
             msg = params.message,
+            status_text = '',
             task;
+
+        switch(status) {
+            case "successful":
+                status_text = 'OK';
+                break;
+            case "changed":
+                status_text = "Changed";
+                break;
+            case "failed":
+                status_text = "Failed";
+                break;
+            case "unreachable":
+                status_text = "Unreachable";
+                status = "failed";
+                break;
+            case "skipped":
+                status_text = "Skipped";
+        }
 
         scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults[event_id] = {
             id: event_id,
             status: status,
+            status_text: status_text,
             host_id: host_id,
             task_id: task_id,
             name: name,
@@ -578,7 +615,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             Rest.get()
                 .success(function(data) {
                     data.results.forEach(function(event, idx) {
-                        var end, elapsed;
+                        var end, elapsed, status, status_text;
 
                         //if (!scope.plays[scope.playsMap[scope.activePlay]].firstTask) {
                         //    scope.plays[scope.playsMap[scope.activePlay]].firstTask = event.id;
@@ -610,11 +647,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                             elapsed = '00:00:00';
                         }
 
+                        status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                        status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
+
                         scope.tasks.push({
                             id: event.id,
                             play_id: scope.activePlay,
                             name: event.name,
-                            status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
+                            status: status,
+                            status_text: status_text,
+                            status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
                             created: event.created,
                             modified: event.modified,
                             finished: end,
@@ -714,9 +756,37 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             Rest.get()
                 .success(function(data) {
                     data.results.forEach(function(event) {
+                        var status, status_text;
+                        if (event.event === "runner_on_skipped") {
+                            status = 'skipped';
+                        }
+                        else if (event.event === "runner_on_unreachable") {
+                            status = 'unreachable';
+                        }
+                        else {
+                            status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                        }
+                        switch(status) {
+                            case "successful":
+                                status_text = 'OK';
+                                break;
+                            case "changed":
+                                status_text = "Changed";
+                                break;
+                            case "failed":
+                                status_text = "Failed";
+                                break;
+                            case "unreachable":
+                                status = "failed";
+                                status_text = "Unreachable";
+                                break;
+                            case "skipped":
+                                status_text = "Skipped";
+                        }
                         scope.hostResults.push({
                             id: event.id,
-                            status: (event.event === "runner_on_skipped") ? 'skipped' : (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful',
+                            status: status,
+                            status_text: status_text,
                             host_id: event.host,
                             task_id: event.parent,
                             name: event.event_data.host,
