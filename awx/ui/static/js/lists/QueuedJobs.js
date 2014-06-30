@@ -39,7 +39,8 @@ angular.module('QueuedJobsDefinition', [])
                 icon: 'icon-job-{{ queued_job.status }}',
                 iconOnly: true,
                 ngClick:"viewJobLog(queued_job.id)",
-                searchable: false
+                searchable: false,
+                nosort: true
             },
             created: {
                 label: 'Created On',

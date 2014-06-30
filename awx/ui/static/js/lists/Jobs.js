@@ -42,7 +42,8 @@ angular.module('JobsListDefinition', [])
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
                 ngClick:"viewJobLog(job.id)",
-                searchable: false
+                searchable: false,
+                nosort: true
             },
             started: {
                 label: 'Started On',

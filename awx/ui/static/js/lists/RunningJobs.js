@@ -39,7 +39,8 @@ angular.module('RunningJobsDefinition', [])
                 icon: 'icon-job-{{ running_job.status }}',
                 iconOnly: true,
                 ngClick:"viewJobLog(running_job.id)",
-                searchable: false
+                searchable: false,
+                nosort: true
             },
             started: {
                 label: 'Started On',
