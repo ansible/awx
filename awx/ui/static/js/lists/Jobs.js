@@ -94,7 +94,7 @@ angular.module('JobsListDefinition', [])
             },
             job_details: {
                 mode: 'all',
-                href: '/#/jobs/{{ job.id }}',
+                ngClick: "viewJobLog(job.id)",
                 awToolTip: 'View job details',
                 dataPlacement: 'top'
             },

@@ -69,34 +69,30 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
 
             };
 
-            scope.viewJobLog = function(id, url) {
+            scope.viewJobLog = function(id) {
                 var list, job;
-                if (url) {
-                    $location.url(url);
+                if (scope.completed_jobs) {
+                    list = scope.completed_jobs;
+                }
+                else if (scope.running_jobs) {
+                    list = scope.running_jobs;
+                }
+                else if (scope.queued_jobs) {
+                    list = scope.queued_jobs;
+                }
+                else if (scope.jobs) {
+                    list = scope.jobs;
+                }
+                job = Find({ list: list, key: 'id', val: id });
+                console.log('job type: ' + job.type);
+                if (job.type === 'job') {
+                    $location.url('/jobs/' + job.id);
                 }
                 else {
-                    if (scope.completed_jobs) {
-                        list = scope.completed_jobs;
-                    }
-                    else if (scope.running_jobs) {
-                        list = scope.running_jobs;
-                    }
-                    else if (scope.queued_jobs) {
-                        list = scope.queued_jobs;
-                    }
-                    else if (scope.jobs) {
-                        list = scope.jobs;
-                    }
-                    job = Find({ list: list, key: 'id', val: id });
-                    if (job.type === 'job') {
-                        $location.url('/jobs/' + job.id);
-                    }
-                    else {
-                        LogViewer({
-                            scope: scope,
-                            url: job.url
-                        });
-                    }
+                    LogViewer({
+                        scope: scope,
+                        url: job.url
+                    });
                 }
             };
         };

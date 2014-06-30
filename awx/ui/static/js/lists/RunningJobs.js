@@ -83,7 +83,7 @@ angular.module('RunningJobsDefinition', [])
             },
             job_details: {
                 mode: 'all',
-                href: '/#/jobs/{{ running_job.id }}',
+                ngClick: "viewJobLog(running_job.id)",
                 awToolTip: 'View job details',
                 dataPlacement: 'top'
             },

@@ -83,7 +83,7 @@ angular.module('QueuedJobsDefinition', [])
             },
             job_details: {
                 mode: 'all',
-                href: '/#/jobs/{{ queued_job.id }}',
+                ngClick: "viewJobLog(queued_job.id)",
                 awToolTip: 'View job details',
                 dataPlacement: 'top'
             }
