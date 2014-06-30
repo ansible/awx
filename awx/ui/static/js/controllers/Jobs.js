@@ -100,7 +100,6 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             $scope.removeListLoaded = $scope.$on('listLoaded', function() {
                 listCount++;
                 if (listCount === expecting) {
-                    //console.log('checking for more events...');
                     $scope.$emit('ProcessQueue');
                 }
             });
@@ -108,11 +107,6 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
     });
 
     LoadBreadCrumbs();
-
-    // Add breadcrumbs
-    //e = angular.element(document.getElementById('breadcrumbs'));
-    //e.html(Breadcrumbs({ list: { editTitle: 'Jobs' } , mode: 'edit' }));
-    //$compile(e)($scope);
 
     if ($scope.removeListLoaded) {
         $scope.removeListLoaded();

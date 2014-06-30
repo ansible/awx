@@ -84,7 +84,6 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                     list = scope.jobs;
                 }
                 job = Find({ list: list, key: 'id', val: id });
-                console.log('job type: ' + job.type);
                 if (job.type === 'job') {
                     $location.url('/jobs/' + job.id);
                 }

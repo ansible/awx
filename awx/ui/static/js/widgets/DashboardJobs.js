@@ -30,7 +30,14 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
         html += "href=\"#scheduled-jobs-tab\" data-toggle=\"tab\">Schedule</a></li>\n";
         html += "</ul>\n";
         html += "<div class=\"tab-content\">\n";
-        html += "<div class=\"tab-pane active\" id=\"active-jobs-tab\"></div>\n";
+        html += "<div class=\"tab-pane active\" id=\"active-jobs-tab\">\n";
+        html += "<div class=\"row search-row\">\n";
+        html += "<div class=\"col-md-4\" id=\"active-jobs-search-container\"></div>\n";
+        html += "</div>\n"; //row
+        html += "<div class=\"job-list\" id=\"active-jobs-container\">\n";
+        html += "<div id=\"active-jobs\" class=\"job-list-target\"></div>\n";
+        html += "</div>\n"; //list
+        html += "</div>\n"; //active-jobs-tab
         html += "<div class=\"tab-pane\" id=\"scheduled-jobs-tab\"></div>\n";
         html += "</div>\n";
 
@@ -61,7 +68,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
                 parent_scope: scope,
                 scope: jobs_scope,
                 list: JobsList,
-                id: 'active-jobs-tab',
+                id: 'active-jobs',
                 url: GetBasePath('unified_jobs') + '?status__in=running,completed,failed,successful,error,canceled',
                 pageSize: max_rows
             });
