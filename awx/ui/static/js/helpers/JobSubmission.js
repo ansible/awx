@@ -372,6 +372,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         return function (params) {
             var scope = params.scope,
                 id = params.id,
+                base = $location.path().replace(/^\//, '').split('/')[0],
                 url,
                 job_template,
                 new_job_id,
@@ -380,7 +381,13 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 prompt_for_vars = false,
                 passwords;
 
-            url = GetBasePath('jobs') + id + '/';
+            if (base === 'job_templates') {
+                url = GetBasePath('job_templates');
+            }
+            else {
+                url = GetBasePath('jobs');
+            }
+            url += id + '/';
 
             if (scope.removePostTheJob) {
                 scope.removePostTheJob();
