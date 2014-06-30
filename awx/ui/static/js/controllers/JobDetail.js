@@ -135,7 +135,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     }
     scope.removeHostSummaries = scope.$on('LoadHostSummaries', function() {
         var url = scope.job.related.job_host_summaries + '?';
-        url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
+        url += '&host__name__isnull=false&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
 
         scope.jobData.hostSummaries = {};
 
@@ -245,7 +245,12 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 .success(function(data) {
                     if (data.results.length > 0) {
                         lastEventId = data.results[data.results.length - 1].id;
-                        scope.activeTask = data.results[0].id;
+                        if (scope.liveEventProcessing) {
+                            scope.activeTask = data.results[data.results.length - 1].id;
+                        }
+                        else {
+                            scope.activeTask = data.results[0].id;
+                        }
                     }
                     data.results.forEach(function(event, idx) {
                         var end, elapsed, status, status_text;
@@ -294,6 +299,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             failedCount: (event.failed_count) ? event.failed_count : 0,
                             changedCount: (event.changed_count) ? event.changed_count : 0,
                             skippedCount: (event.skipped_count) ? event.skipped_count : 0,
+                            unreachableCount: (event.unreachable_count) ? event.unreachable_count : 0,
                             taskActiveClass: '',
                             hostResults: {}
                         };
@@ -338,7 +344,12 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             .success( function(data) {
                 if (data.results.length > 0) {
                     lastEventId = data.results[data.results.length - 1].id;
-                    scope.activePlay = data.results[0].id;
+                    if (scope.liveEventProcessing) {
+                        scope.activePlay = data.results[data.results.length - 1].id;
+                    }
+                    else {
+                        scope.activePlay = data.results[0].id;
+                    }
                 }
                 data.results.forEach(function(event, idx) {
                     var status, status_text, start, end, elapsed, ok, changed, failed, skipped;
@@ -472,8 +483,15 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 scope.job_status.status = (data.status === 'waiting' || data.status === 'new') ? 'pending' : data.status;
                 scope.job_status.started = data.started;
                 scope.job_status.status_class = ((data.status === 'error' || data.status === 'failed') && data.job_explanation) ? "alert alert-danger" : "";
-                scope.job_status.finished = (data.status === 'successful' || data.status === 'failed' || data.status === 'error') ? data.finished : null;
                 scope.job_status.explanation = data.job_explanation;
+
+                if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
+                    scope.job_status.finished = data.finsished;
+                    scope.liveEventProcessing = false;
+                }
+                else {
+                    scope.job_status.finished = null;
+                }
 
                 if (data.started && data.finished) {
                     scope.job_status.elapsed = GetElapsed({
@@ -484,7 +502,7 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                 else {
                     scope.job_status.elapsed = '00:00:00';
                 }
-                scope.setSearchAll('host');
+                //scope.setSearchAll('host');
                 scope.$emit('LoadPlays', data.related.job_events);
                 if (!scope.credential_name) {
                     scope.$emit('GetCredentialNames', data);
@@ -603,20 +621,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
     $(window).resize(_.debounce(function(){
         scope.adjustSize();
     }, 500));
-
-    scope.setSearchAll = function(search) {
-        if (search === 'host') {
-            scope.search_all_label = 'Host';
-            scope.searchAllDisabled = false;
-            scope.search_all_placeholder = 'Search all by host name';
-        }
-        else {
-            scope.search_all_label = 'Failures';
-            scope.search_all_placeholder = 'Show failed events';
-            scope.searchAllDisabled = true;
-            scope.search_all_placeholder = '';
-        }
-    };
 
     scope.selectPlay = function(id) {
         scope.auto_scroll_plays = false;
@@ -1139,13 +1143,15 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
             scope.searchAllStatus = '';
             nxtPlay = (scope.plays.length > 0) ? scope.plays[0].id : null;
         }
-        SelectPlay({
-            scope: scope,
-            id: nxtPlay
-        });
-        ReloadHostSummaryList({
-            scope: scope
-        });
+        if (!scope.liveEventProcessing) {
+            SelectPlay({
+                scope: scope,
+                id: nxtPlay
+            });
+            ReloadHostSummaryList({
+                scope: scope
+            });
+        }
     };
 
     scope.viewHostResults = function(id) {

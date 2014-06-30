@@ -169,20 +169,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     modified: event.modified,
                     message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
                 });
-                break;
-
-            // We will respond to the job status change event. No need to do this 2x.
-            /*case 'playbook_on_stats':
-                scope.job_status.finished = event.modified;
-                scope.job_status.elapsed = GetElapsed({
-                    start: scope.job_status.started,
-                    end: scope.job_status.finished
-                });
-                scope.job_status.status = (event.failed) ? 'failed' : 'successful';
-                scope.job_status.status_class = "";
-                //LoadHostSummary({ scope: scope, data: event.event_data });
-                //DrawGraph({ scope: scope, resize: true });
-                break;*/
         }
     };
 }])
@@ -417,6 +403,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             scope.jobData.hostSummaries[host_id].changed += (status === 'changed') ? 1 : 0;
             scope.jobData.hostSummaries[host_id].unreachable += (status === 'unreachable') ? 1 : 0;
             scope.jobData.hostSummaries[host_id].failed += (status === 'failed') ? 1 : 0;
+            if (status === 'failed' || status === 'unreachable') {
+                scope.jobData.hostSummaries[host_id].status = 'failed';
+            }
         }
         else {
             scope.jobData.hostSummaries[host_id] = {
@@ -426,7 +415,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 changed: (status === 'changed') ? 1 : 0,
                 unreachable: (status === 'unreachable') ? 1 : 0,
                 failed: (status === 'failed') ? 1 : 0,
-                status: (status === 'failed') ? 'failed' : 'successful'
+                status: (status === 'failed' || status === 'unreachable') ? 'failed' : 'successful'
             };
         }
 
@@ -503,7 +492,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         if (scope.jobData.plays[scope.activePlay].tasks[task_id] !== undefined) {
             task = scope.jobData.plays[scope.activePlay].tasks[task_id];
 
-            if (task_id === scope.jobData.plays[scope.activePlay].firstTask && status !== 'unreachable') {
+            if (task_id === scope.jobData.plays[scope.activePlay].firstTask) {
                 scope.jobData.plays[scope.activePlay].hostCount++;
                 task.hostCount++;
             }
@@ -513,6 +502,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             task.changedCount += (status === 'changed') ? 1 : 0;
             task.successfulCount += (status === 'successful') ? 1 : 0;
             task.skippedCount += (status === 'skipped') ? 1 : 0;
+            task.unreachableCount += (status === 'unreachable') ? 1 : 0;
+
             SetTaskStyles({
                 task: task
             });
@@ -525,14 +516,13 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         var task = params.task,
             diff;
 
-        //task = scope.jobData.plays[scope.activePlay].tasks[task_id];
-        //task.hostCount = task.failedCount + task.changedCount + task.skippedCount + task.successfulCount;
         task.failedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.failedCount / task.hostCount))) : 0;
         task.changedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.changedCount / task.hostCount))) : 0;
         task.skippedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.skippedCount / task.hostCount))) : 0;
         task.successfulPct = (task.hostCount > 0) ? Math.ceil((100 * (task.successfulCount / task.hostCount))) : 0;
+        task.unreachablePct = (task.hostCount > 0) ? Math.ceil((100 * (task.unreachableCount / task.hostCount))) : 0;
 
-        diff = (task.failedPct + task.changedPct + task.skippedPct + task.successfulPct) - 100;
+        diff = (task.failedPct + task.changedPct + task.skippedPct + task.successfulPct + task.unreachablePct) - 100;
         if (diff > 0) {
             if (task.failedPct > diff) {
                 task.failedPct  = task.failedPct - diff;
@@ -546,11 +536,15 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             else if (task.successfulPct > diff) {
                 task.successfulPct = task.successfulPct - diff;
             }
+            else if (task.unreachablePct > diff) {
+                task.unreachablePct = task.unreachablePct - diff;
+            }
         }
         task.successfulStyle = (task.successfulPct > 0) ? { 'display': 'inline-block', 'width': task.successfulPct + "%" } : { 'display': 'none' };
         task.changedStyle = (task.changedPct > 0) ? { 'display': 'inline-block', 'width': task.changedPct + "%" } : { 'display': 'none' };
         task.skippedStyle = (task.skippedPct > 0) ? { 'display': 'inline-block', 'width': task.skippedPct + "%" } : { 'display': 'none' };
         task.failedStyle = (task.failedPct > 0) ? { 'display': 'inline-block', 'width': task.failedPct + "%" } : { 'display': 'none' };
+        task.unreachableStyle = (task.unreachablePct > 0) ? { 'display': 'inline-block', 'width': task.unreachablePct + "%" } : { 'display': 'none' };
     };
 }])
 
@@ -667,6 +661,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                             failedCount: (event.failed_count) ? event.failed_count : 0,
                             changedCount: (event.changed_count) ? event.changed_count : 0,
                             skippedCount: (event.skipped_count) ? event.skipped_count : 0,
+                            unreachableCount: (event.unreachable_count) ? event.unreachable_count : 0,
                             taskActiveClass: ''
                         });
 
@@ -823,7 +818,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         url = scope.job.related.job_host_summaries + '?';
         url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&': '';
         url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
-        url += 'page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
+        url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
 
         scope.hosts = [];
 
@@ -904,7 +899,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             graph_data.push({
                 label: 'Unreachable',
                 value: (scope.host_summary.unreachable === scope.host_summary.total) ? 1 : scope.host_summary.unreachable,
-                color: '#A9A9A9'
+                color: '#FF3366'
             });
         }
         if (scope.host_summary.failed) {
@@ -975,7 +970,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             keys = Object.keys(tasks);
             keys.reverse();
             newKeys = [];
-            for (idx=0; idx < scope.tasksMaxRows && idx < keys.length; idx++) {
+            for (idx=0; result.length < scope.tasksMaxRows && idx < keys.length; idx++) {
                 newKeys.push(keys[idx]);
             }
             newKeys.sort();
@@ -1012,8 +1007,15 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 // a must be equal to b
                 return 0;
             });
-            while (idx < keys.length && idx < scope.hostResultsMaxRows) {
-                result.unshift(hostResults[keys[idx]]);
+            while (idx < keys.length && result.length < scope.hostResultsMaxRows) {
+                if (scope.searchAllStatus === 'failed') {
+                    if (hostResults[keys[idx]].status === 'failed') {
+                        result.unshift(hostResults[keys[idx]]);
+                    }
+                }
+                else {
+                    result.unshift(hostResults[keys[idx]]);
+                }
                 idx++;
             }
         }
@@ -1045,8 +1047,17 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 return 0;
             });
 
-            while (idx < keys.length && idx < scope.hostSummariesMaxRows) {
-                result.push(hostSummaries[keys[idx]]);
+            console.log(hostSummaries);
+
+            while (idx < keys.length && result.length < scope.hostSummariesMaxRows) {
+                if (scope.searchAllStatus === 'failed') {
+                    if (hostSummaries[keys[idx]].status === 'failed') {
+                        result.push(hostSummaries[keys[idx]]);
+                    }
+                }
+                else {
+                    result.push(hostSummaries[keys[idx]]);
+                }
                 idx++;
             }
         }

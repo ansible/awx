@@ -83,7 +83,7 @@
                                 </div>
                             </div>
                             <div id="plays-table-detail" aw-custom-scroll class="table-detail">
-                                <div class="row cursor-pointer" ng-repeat="play in playList = (plays | FilterById : search_all_plays | filter:{ status : searchAllStatus }) track by $index"
+                                <div class="row cursor-pointer" ng-repeat="play in playList = (plays | FilterById : search_all_plays | FilterFailedEvents : liveEventProcessing : searchAllStatus) track by $index"
                                         ng-class="play.playActiveClass" ng-click="selectPlay(play.id)">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ play.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
@@ -117,7 +117,7 @@
                             <div id="tasks-table-detail" class="table-detail" aw-custom-scroll data-on-total-scroll="TasksOnTotalScroll"
                                     data-on-total-scroll-back="TasksOnTotalScrollBack">
                                 <div class="row cursor-pointer"
-                                    ng-repeat="task in taskList = (tasks | FilterById : search_all_tasks | filter: { status : searchAllStatus }) track by $index"
+                                    ng-repeat="task in taskList = (tasks | FilterById : search_all_tasks | FilterFailedEvents : liveEventProcessing : searchAllStatus) track by $index"
                                     ng-class="task.taskActiveClass" ng-click="selectTask(task.id)">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ task.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
@@ -128,7 +128,7 @@
                                         <i class="fa icon-job-{{  task.status }}"></i><span ng-show="hasRoles"> {{ task.role }} </span> {{ task.name }}
                                     </div>
                                     <div class="col-lg-5 col-md-5 hidden-sm hidden-xs">
-                                        <div class="status-bar"><div class="successful-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-successful-bar" aw-tool-tip="Hosts OK" data-placement="top" ng-style="task.successfulStyle">{{ task.successfulCount }}</div><div class="changed-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-changed-bar" aw-tool-tip="Hosts Changed" data-placement="top" ng-style="task.changedStyle">{{ task.changedCount }}</div><div class="skipped-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-skipped-bar" aw-tool-tip="Hosts Skipped" data-placement="top" ng-style="task.skippedStyle">{{ task.skippedCount }}</div><div class="failed-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-failed-bar" aw-tool-tip="Hosts Failed" data-placement="top" ng-style="task.failedStyle">{{ task.failedCount }}</div><div class="no-matching-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-no-matching-hosts-bar" aw-tool-tip="No matching hosts were found" data-placement="top" style="width: 100%;" ng-show="task.status === 'no-m atching-hosts'">No matching hosts</div></div>
+                                        <div class="status-bar"><div class="successful-hosts inner-bar" id="{{ task.id }}-successful-bar" aw-tool-tip="Hosts OK" data-placement="top" ng-style="task.successfulStyle">{{ task.successfulCount }}</div><div class="changed-hosts inner-bar" id="{{ task.id }}-changed-bar" aw-tool-tip="Hosts Changed" data-placement="top" ng-style="task.changedStyle">{{ task.changedCount }}</div><div class="skipped-hosts inner-bar" id="{{ task.id }}-skipped-bar" aw-tool-tip="Hosts Skipped" data-placement="top" ng-style="task.skippedStyle">{{ task.skippedCount }}</div><div class="failed-hosts inner-bar" id="{{ task.id }}-failed-bar" aw-tool-tip="Hosts Failed" data-placement="top" ng-style="task.failedStyle">{{ task.failedCount }}</div><div class="unreachable-hosts inner-bar" id="{{ task.id }}-unreachable-hosts-bar" aw-tool-tip="Hosts Unreachable" data-placement="top" ng-style="task.unreachableStyle">{{ task.unreachableCount }}</div><div class="no-matching-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-no-matching-hosts-bar" aw-tool-tip="No matching hosts were found" data-placement="top" style="width: 100%;" ng-show="task.status === 'no-m atching-hosts'">No matching hosts</div></div>
                                     </div>
                                 </div>
                                 <div class="row" ng-show="taskList.length == 0">
@@ -153,7 +153,7 @@
                                 <div id="hosts-table-detail-inner">
                                     <div class="row cursor-pointer" ng-repeat="result in results = (hostResults | filter:{ status : searchAllStatus}) track by $index" ng-click="viewHostResults(result.id)">
                                         <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7 status-column">
-                                            <a href="" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i class="fa icon-job-{{ result.status }}"></i> {{ result.name }}</a>
+                                            <a href="" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i ng-show="result.status_text != 'Unreachable'" class="fa icon-job-{{ result.status }}"></i><i ng-show="result.status_text == 'Unreachable'" class="fa icon-job-unreachable"></i> {{ result.name }}</a>
                                         </div>
                                         <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
                                             {{ result.msg }}
@@ -189,7 +189,7 @@
                                 <div class="col-sm-7 col-xs-7 remove-left-padding">
                                     <div style="position:relative;">
                                         <input type="text" class="input-sm form-control" id="search_all_hosts_name" ng-model="search_all_hosts_name"
-                                                placeholder="Host Name" ng-disabled="searchAllDisabled" ng-keypress="allHostNameKeyPress($event)" />
+                                                placeholder="Host Name" ng-disabled="liveEventProcessing " ng-keypress="allHostNameKeyPress($event)" >
                                         <div id="search-all-input-icons">
                                             <a class="search-icon" ng-show="searchAllHostsEnabled" ng-click="searchAllByHost()"><i class="fa fa-search"></i></a>
                                             <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllByHost()"><i class="fa fa-times"></i></a>

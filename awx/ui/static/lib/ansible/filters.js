@@ -67,4 +67,24 @@ angular.module('AWFilters', [])
             }
             return input;
         };
+    }])
+
+    .filter('FilterFailedEvents', [ function() {
+        return function(input, liveEventProcessing, searchAllStatus) {
+            var results = [];
+            if (liveEventProcessing) {
+                // while live events are happening, we don't want angular to filter out anything
+                return input;
+            }
+            else if (searchAllStatus === 'failed') {
+                // filter by failed
+                input.forEach(function(row) {
+                    if (row.status === 'failed') {
+                        results.push(row);
+                    }
+                });
+                return results;
+            }
+            return input;
+        };
     }]);

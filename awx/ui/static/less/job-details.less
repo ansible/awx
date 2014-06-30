@@ -11,7 +11,7 @@
 @successful-hosts-color:    @green;
 @changed-hosts-color:       @changed;
 @skipped-hosts-color:       @skipped;
-@unreachable-hosts-color:   #A9A9A9;
+@unreachable-hosts-color:   @unreachable;
 
 .job_summary {
     .table {
@@ -73,7 +73,7 @@
     background-color: @unreachable-hosts-color;
 }
 .unreachable-hosts-color {
-    color: @grey;
+    color: @unreachable-hosts-color;
 }
 
 .job_well {
