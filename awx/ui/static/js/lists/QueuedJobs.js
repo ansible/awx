@@ -85,7 +85,8 @@ angular.module('QueuedJobsDefinition', [])
                 mode: 'all',
                 ngClick: "viewJobLog(queued_job.id)",
                 awToolTip: 'View job details',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: "queued_job.type == 'job'"
             }
         }
     });

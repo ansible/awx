@@ -91,19 +91,8 @@ angular.module('RunningJobsDefinition', [])
                 mode: 'all',
                 href: '/#/jobs/{{ running_job.id }}/stdout',
                 awToolTip: 'View standard output',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: "running_job.type == 'job'"
             }
-            /*dropdown: {
-                type: 'DropDown',
-                ngShow: "running_job.type === 'job'",
-                label: 'View',
-                icon: 'fa-search-plus',
-                'class': 'btn-default btn-xs',
-                options: [
-                    //{ ngHref: '/#/jobs/{{ running_job.id }}', label: 'Status' },
-                    { ngHref: '/#/job_events/{{ running_job.id }}', label: 'Events' },
-                    { ngHref: '/#/job_host_summaries/{{ running_job.id }}', label: 'Host Summary' }
-                ]
-            }*/
         }
     });

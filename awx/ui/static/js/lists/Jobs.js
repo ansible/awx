@@ -102,7 +102,8 @@ angular.module('JobsListDefinition', [])
                 mode: 'all',
                 href: '/#/jobs/{{ job.id }}/stdout',
                 awToolTip: 'View standard output',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: "job.type == 'job'"
             }
         }
     });

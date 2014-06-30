@@ -106,7 +106,8 @@ angular.module('CompletedJobsDefinition', [])
                 mode: 'all',
                 href: '/#/jobs/{{ completed_job.id }}/stdout',
                 awToolTip: 'View standard output',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: "completed_job.type == 'job'"
             }
         }
     });
