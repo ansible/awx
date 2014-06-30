@@ -1635,6 +1635,7 @@ class JobJobTasksList(BaseJobEventsList):
                             task_start_event.task,
                 'reported_hosts': 0,
                 'skipped_count': 0,
+                'unreachable_count': 0,
                 'successful_count': 0,
             }
 
@@ -1654,6 +1655,9 @@ class JobJobTasksList(BaseJobEventsList):
                         task_data['changed'] = True
                     else:
                         task_data['successful_count'] += child_data['num']
+                elif child_data['event'] == 'runner_on_unreachable':
+                    task_data['host_count'] += child_data['num']
+                    task_data['unreachable_count'] += child_data['num']
                 elif child_data['event'] == 'runner_on_skipped':
                     task_data['host_count'] += child_data['num']
                     task_data['reported_hosts'] += child_data['num']
