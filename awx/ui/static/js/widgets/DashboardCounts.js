@@ -20,11 +20,8 @@ angular.module('DashboardCountsWidget', ['RestServices', 'Utilities'])
 
                     html, element;
 
-                html = "<div class=\"panel panel-default\" style=\"border:none\">\n";
-                //html += "<div class=\"panel-heading\">New Dashboard</div>\n";
-                html += "<div class=\"panel-body \">\n";
+                html = "<div id=\"count-container\" class=\"panel-body\" style=\"border:none\">\n";
                 html += "<table>\n";
-
                 html += "<tr>\n";
                 html += "<td class=\"h1 col-lg-1 text-center\"><a href=/#/home/hosts>" + dashboard.hosts.total+"</a></td>\n";
                 html += "<td class=\"h1 col-lg-1-1 text-center\"><a href=/#/home/hosts>"+dashboard.hosts.failed+"</a></td>\n";
@@ -45,10 +42,8 @@ angular.module('DashboardCountsWidget', ['RestServices', 'Utilities'])
                 html += "<td class=\"h5 col-lg-1 text-center\">Users</td>\n";
                 html += "</tr>\n";
                 html += "</table>\n";
-
-
-
-
+                html += "</div>\n";
+                html += "<hr>\n";
 
                 element = angular.element(document.getElementById(target));
                 element.html(html);

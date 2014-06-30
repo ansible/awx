@@ -84,6 +84,10 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                     list = scope.jobs;
                 }
                 job = Find({ list: list, key: 'id', val: id });
+<<<<<<< HEAD
+=======
+              //  console.log('job type: ' + job.type);
+>>>>>>> added functionality for resizing graphs/jobs table, and changed dummy data to better reflect actual expected server response
                 if (job.type === 'job') {
                     $location.url('/jobs/' + job.id);
                 }

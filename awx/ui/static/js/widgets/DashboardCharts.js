@@ -20,20 +20,21 @@ angular.module('DashboardChartsWidget', ['RestServices', 'Utilities'])
 
                     html, element;
 
-                html = "<div class=\"panel panel-default\" style=\"border:none\">\n";
-                html += "<div class=\"panel-body \">\n";
+                // html = "<div class=\"panel panel-default\" style=\"border:none\">\n";
+                html = "<div id=\"graph-container\" class=\"panel-body \" style=\"border:none\">\n";
 
-                html += "<table class=\"table\">\n";
-                html += "<tr>\n";
-                html += "<td class=\"h5 col-lg-6 text-center\" style=\"border:none\">Job Status Graph</td>\n";
-                html += "<td class=\"h5 col-lg-6 text-center\" style=\"border:none\">Hosts</td>\n";
+                html += "<table class=\"table\" >\n";
+                html += "<tr> \n";
+                html += "<td class=\"h5 col-lg-6 text-center\" style=\"border:none\">Job Status</td>\n";
+                html += "<td class=\"h5 col-lg-6 text-center\" style=\"border:none\">Hosts vs License Agreement</td>\n";
                 html += "</tr>\n";
                 html += "<tr>\n";
                 html += "<td class=\"job-status-graph\" style=\"border:none\"><svg></svg></td>\n";
                 html += "<td class=\"host-count-graph\" style=\"border:none\"><svg></svg></td>\n";
                 html += "</tr>\n";
                 html += "</table>\n";
-
+                html += "</div>\n";
+                // html += "</div>\n";
 
                 function makeJobStatusGraph(){
                     d3.json("static/js/jobstatusdata.json",function(error,data) {
@@ -45,61 +46,57 @@ angular.module('DashboardChartsWidget', ['RestServices', 'Utilities'])
 
                         nv.addGraph({
                             generate: function() {
-                                var width = nv.utils.windowSize().width - 40,
-                                    height = nv.utils.windowSize().height - 40,
+                                var width = nv.utils.windowSize().width/3,
+                                    height = nv.utils.windowSize().height/4,
                                     chart = nv.models.lineChart()
-                                        // .margin({top: 20, right: 80, bottom: 50, left: 50})  //Adjust chart margins to give the x-axis some breathing room.
+                                        .margin({top: 5, right: 75, bottom: 40, left: 80})  //Adjust chart margins to give the x-axis some breathing room.
                                         .x(function(d,i) { return i; })
                                         .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                                         .transitionDuration(350)  //how fast do you want the lines to transition?
                                         .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
                                         .showYAxis(true)        //Show the y-axis
                                         .showXAxis(true)        //Show the x-axis
+                                        // .width(width)
+                                        // .height(height)
                                         ;
 
                                 chart.xAxis
-                                    .axisLabel("time")
+                                    .axisLabel("Tme").showMaxMin(true)
                                     .tickFormat(function(d) {
                                     var dx = data[0].values[d] && data[0].values[d].x || 0;
-                                    return dx ? d3.time.format('%x')(new Date(dx)) : '';
+                                    return dx ? d3.time.format('%m/%d')(new Date(dx)) : '';
                                 });
 
                                 chart.yAxis     //Chart y-axis settings
                                   .axisLabel('Jobs')
                                   .tickFormat(d3.format('.f'));
 
-                                d3.select('.job-status-graph svg')
-                                  .attr('width', width)
-                                  .attr('height', height)
-                                  .datum(data)
-                                  .call(chart);
+                                // d3.select('.job-status-graph svg')
+                                //   .attr('width', width)
+                                //   .attr('height', height)
+                                //   .datum(data)
+                                //   .call(chart);
 
+                                d3.select('.job-status-graph svg')
+                                        .datum(data).transition()
+                                        .attr('width', width)
+                                        .attr('height', height)
+                                        .duration(500)
+                                        .call(chart)
+                                        .style({
+                                            // 'width': width,
+                                            // 'height': height,
+                                    "font-family": 'Open Sans',
+                                    "font-style": "normal",
+                                    "font-weight":400,
+                                    "src": "url(/static/fonts/OpenSans-Regular.ttf)"
+                                });
+
+
+                                nv.utils.windowResize(chart.update);
                                 return chart;
                             },
-                              // callback: function(graph) {
-                              //   window.onresize = function() {
-                              //     var width = nv.utils.windowSize().width - 40,
-                              //         height = nv.utils.windowSize().height - 40,
-                              //         margin = graph.margin();
 
-
-                              //     if (width < margin.left + margin.right + 20)
-                              //       width = margin.left + margin.right + 20;
-
-                              //     if (height < margin.top + margin.bottom + 20)
-                              //       height = margin.top + margin.bottom + 20;
-
-
-                              //     graph
-                              //        .width(width)
-                              //        .height(height);
-
-                              //     d3.select('.job-status-graph svg')
-                              //       .attr('width', width)
-                              //       .attr('height', height)
-                              //       .call(graph);
-                              //   };
-                              // }
                         });
                     });
                 }
@@ -114,10 +111,10 @@ angular.module('DashboardChartsWidget', ['RestServices', 'Utilities'])
 
                         nv.addGraph({
                             generate: function() {
-                                var width = nv.utils.windowSize().width - 40,
-                                    height = nv.utils.windowSize().height - 40,
+                                    var width = nv.utils.windowSize().width/3,
+                                    height = nv.utils.windowSize().height/4,
                                     chart = nv.models.lineChart()
-                                        // .margin({top: 20, right: 80, bottom: 50, left: 50})  //Adjust chart margins to give the x-axis some breathing room.
+                                        .margin({top: 15, right: 75, bottom: 40, left: 80})
                                         .x(function(d,i) { return i ;})
                                         .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                                         .transitionDuration(350)  //how fast do you want the lines to transition?
@@ -126,93 +123,38 @@ angular.module('DashboardChartsWidget', ['RestServices', 'Utilities'])
                                         .showXAxis(true)        //Show the x-axis
                                         ;
 
-                                chart.xAxis
-                                    .axisLabel("time")
+                                    chart.xAxis
+                                    .axisLabel("Time")
                                     .tickFormat(function(d) {
-                                    var dx = data[0].values[d] && data[0].values[d].x || 0;
-                                    return dx ? d3.time.format('%x')(new Date(dx)) : '';
-                                });
+                                        var dx = data[0].values[d] && data[0].values[d].x || 0;
+                                        return dx ? d3.time.format('%m/%d')(new Date(dx)) : '';
+                                    });
 
-                                chart.yAxis     //Chart y-axis settings
-                                  .axisLabel('Jobs')
+                                    chart.yAxis     //Chart y-axis settings
+                                  .axisLabel('Hosts')
                                   .tickFormat(d3.format('.f'));
 
-                                d3.select('.host-count-graph svg')
-                                  .attr('width', width)
-                                  .attr('height', height)
-                                  .datum(data)
-                                  .call(chart);
+                                    d3.select('.host-count-graph svg')
+                                  .datum(data).transition()
+                                        .attr('width', width)
+                                        .attr('height', height)
+                                        .duration(500)
+                                        .call(chart)
+                                        .style({
+                                            // 'width': width,
+                                            // 'height': height,
+                                            "font-family": 'Open Sans',
+                                            "font-style": "normal",
+                                            "font-weight":400,
+                                            "src": "url(/static/fonts/OpenSans-Regular.ttf)"
+                                        });
+                                    nv.utils.windowResize(chart.update);
+                                    return chart;
+                                },
 
-                                return chart;
-                            },
-                              // callback: function(graph) {
-                              //   window.onresize = function() {
-                              //     var width = nv.utils.windowSize().width - 40,
-                              //         height = nv.utils.windowSize().height - 40,
-                              //         margin = graph.margin();
-
-
-                              //     if (width < margin.left + margin.right + 20)
-                              //       width = margin.left + margin.right + 20;
-
-                              //     if (height < margin.top + margin.bottom + 20)
-                              //       height = margin.top + margin.bottom + 20;
-
-
-                              //     graph
-                              //        .width(width)
-                              //        .height(height);
-
-                              //     d3.select('.job-status-graph svg')
-                              //       .attr('width', width)
-                              //       .attr('height', height)
-                              //       .call(graph);
-                              //   };
-                              // }
                         });
                     });
                 }
-                        // var chart = nv.models.lineChart()
-                        //                 // .margin({top: 20, right: 80, bottom: 50, left: 50})  //Adjust chart margins to give the x-axis some breathing room.
-                        //                 .x(function(d,i) { return i })
-                        //                 .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
-                        //                 .transitionDuration(350)  //how fast do you want the lines to transition?
-                        //                 .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
-                        //                 .showYAxis(true)        //Show the y-axis
-                        //                 .showXAxis(true)        //Show the x-axis
-                        //   ;
-
-                        // chart.width(($(window).width())/3);
-                        // chart.height(($(window).height())/3);
-                        //   chart.xAxis
-                        //         .axisLabel("time")
-                        //         .tickFormat(function(d) {
-                        //         var dx = data[0].values[d] && data[0].values[d].x || 0;
-                        //         return dx ? d3.time.format('%x')(new Date(dx)) : '';
-                        //     });
-
-                        //   chart.yAxis     //Chart y-axis settings
-                        //       .axisLabel('Jobs')
-                        //       .tickFormat(d3.format('.f'));
-
-                        //   /* Done setting the chart up? Time to render it!*/
-                        //   //var myData = sinAndCos();   //You need data...
-
-                        //   d3.select('.job-status-graph svg')    //Select the <svg> element you want to render the chart in.
-                        //       .datum(data)         //Populate the <svg> element with chart data...
-                        //       .call(chart);          //Finally, render the chart!
-
-                        //   //Update the chart when window resizes.
-                        //   nv.utils.windowResize(function() { chart.update() });
-                        //   return chart;
-                      // });
-
-                   // });
-
-                // };
-
-
-
 
                 element = angular.element(document.getElementById(target));
                 element.html(html);
