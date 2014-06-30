@@ -164,7 +164,7 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
             Rest.setUrl(defaultUrl + scope.inventory_id + '/');
             Rest.put(data)
                 .success(function (data) {
-                    if (scope.inventory_variables) {
+                    if (scope.variables) {
                         scope.$emit('UpdateInventoryVariables', data);
                     } else {
                         scope.$emit('InventorySaved');
