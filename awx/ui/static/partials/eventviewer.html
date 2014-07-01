@@ -1,0 +1,22 @@
+<div id="eventviewer-modal-dialog" title="Log View" style="display: none;">
+    <ul id="eventview-tabs" class="nav nav-tabs">
+        <li class="active"><a href="#status" id="status-link" data-toggle="tab" ng-click="toggleTab($event, 'status-link', 'eventview-tabs')">Status</a></li>
+        <li><a href="#stdout" id="stdout-link" data-toggle="tab" ng-click="toggleTab($event, 'stdout-link', 'eventview-tabs')">Standard Out</a></li>
+        <li><a href="#stderr" id="stderr-link" data-toggle="tab" ng-click="toggleTab($event, 'stderr-link', 'eventview-tabs')">Standard Error</a></li>
+        <li><a href="#traceback" id="traceback-link" data-toggle="tab" ng-click="toggleTab($event, 'traceback-link', 'eventview-tabs')">Traceback</a></li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="status">
+            <div id="status-form-container"></div>
+        </div>
+        <div class="tab-pane" id="stdout">
+            <div id="stdout-form-container"></div>
+        </div>
+        <div class="tab-pane" id="stderr">
+            <div id="stderr-form-container"></div>
+        </div>
+        <div class="tab-pane" id="traceback">
+            <div id="traceback-form-container"></div>
+        </div>
+    </div>
+</div>

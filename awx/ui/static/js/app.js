@@ -98,6 +98,7 @@ angular.module('Tower', [
     'LogViewerStatusDefinition',
     'LogViewerHelper',
     'LogViewerOptionsDefinition',
+    'EventViewerHelper',
     'JobDetailHelper',
     'SocketIO'
 ])
