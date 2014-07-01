@@ -7,9 +7,9 @@
 
 'use strict';
 
-function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
+function JobDetailController ($location, $rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList,
-    JobIsFinished, SetTaskStyles, DigestEvent, UpdateDOM, EventViewer) {
+    JobIsFinished, SetTaskStyles, DigestEvent, UpdateDOM, EventViewer, DeleteJob, PlaybookRun) {
 
     ClearScope();
 
@@ -1163,9 +1163,36 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
         });
     };
 
+    if (scope.removeDeleteFinished) {
+        scope.removeDeleteFinished();
+    }
+    scope.removeDeleteFinished = scope.$on('DeleteFinished', function(e, action) {
+        Wait('stop');
+        if (action !== 'cancel') {
+            Wait('stop');
+            $location.url('/jobs');
+        }
+    });
+
+    scope.deleteJob = function() {
+        DeleteJob({
+            scope: scope,
+            id: scope.job.id,
+            job: scope.job,
+            callback: 'DeleteFinished'
+        });
+    };
+
+    scope.relaunchJob = function() {
+        PlaybookRun({
+            scope: scope,
+            id: scope.job.id
+        });
+    };
+
 }
 
-JobDetailController.$inject = [ '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
-    'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'FilterAllByHostName', 'DrawGraph',
-    'LoadHostSummary', 'ReloadHostSummaryList', 'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer'
+JobDetailController.$inject = [ '$location', '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
+    'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'FilterAllByHostName', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
+    'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun'
 ];

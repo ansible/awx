@@ -419,24 +419,27 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
 .factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Alert',
 function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
     return function(params) {
-
         var scope = params.scope,
             id = params.id,
-            action, jobs, job, url, action_label, hdr;
+            job = params.job,
+            callback = params.callback,
+            action, jobs, url, action_label, hdr;
 
-        if (scope.completed_jobs) {
-            jobs = scope.completed_jobs;
+        if (!job) {
+            if (scope.completed_jobs) {
+                jobs = scope.completed_jobs;
+            }
+            else if (scope.running_jobs) {
+                jobs = scope.running_jobs;
+            }
+            else if (scope.queued_jobs) {
+                jobs = scope.queued_jobs;
+            }
+            else if (scope.jobs) {
+                jobs = scope.jobs;
+            }
+            job = Find({list: jobs, key: 'id', val: id });
         }
-        else if (scope.running_jobs) {
-            jobs = scope.running_jobs;
-        }
-        else if (scope.queued_jobs) {
-            jobs = scope.queued_jobs;
-        }
-        else if (scope.jobs) {
-            jobs = scope.jobs;
-        }
-        job = Find({list: jobs, key: 'id', val: id });
 
         if (job.status === 'pending' || job.status === 'running' || job.status === 'waiting') {
             url = job.related.cancel;
@@ -455,18 +458,29 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
                 Rest.post()
                     .success(function () {
                         $('#prompt-modal').modal('hide');
-                        scope.search(scope.iterator);
+                        if (callback) {
+                            scope.$emit(callback, action_label);
+                        }
+                        else {
+                            scope.search(scope.iterator);
+                        }
                     })
-                    .error(function (data, status) {
+                    .error(function() {
                         $('#prompt-modal').modal('hide');
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
-                            ' failed. POST returned status: ' + status });
+                        // Ignore the error. The job most likely already finished.
+                        // ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
+                        //    ' failed. POST returned status: ' + status });
                     });
             } else {
                 Rest.destroy()
                     .success(function () {
                         $('#prompt-modal').modal('hide');
-                        scope.refreshJobs();
+                        if (callback) {
+                            scope.$emit(callback, action_label);
+                        }
+                        else {
+                            scope.refreshJobs();
+                        }
                     })
                     .error(function (data, status) {
                         $('#prompt-modal').modal('hide');
@@ -488,9 +502,11 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
             scope.removeCancelJob();
         }
         scope.removeCancelJob = scope.$on('CancelJob', function() {
+            var body;
+            body = (action_label === 'cancel') ? "Submit the request to cancel" : "Delete";
             Prompt({
                 hdr: hdr,
-                body: "<div class=\"alert alert-info\">Submit the request to " + action_label + " job #" + id + " " + job.name  + "?</div>",
+                body: "<div class=\"alert alert-info\">" + body + " job #" + id + " " + job.name  + "?</div>",
                 action: action
             });
         });
