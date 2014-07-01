@@ -103,7 +103,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
 
             function getStatus(data) {
                 return (data.results[0].event === "runner_on_unreachable") ? "unreachable" : (data.results[0].event === "runner_on_skipped") ? 'skipped' : (data.results[0].failed) ? 'failed' :
-                            (data.results[0].changed) ? 'changed' : 'successful';
+                            (data.results[0].changed) ? 'changed' : 'ok';
             }
 
             Wait('start');
