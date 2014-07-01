@@ -792,6 +792,8 @@ angular.module('GeneratorHelpers', [])
                 iterator + "HideAllStartBtn" + modifier + "\"" +
                 "><i class=\"fa fa-search\"></i></a>\n";
 
+            html += "<div id=\"search-widget-spacer\" ng-show=\"" + iterator + "SelectShow" + modifier + "\"></div>\n";
+
             if (includeSize) {
                 html += "</div>\n";
             }
