@@ -17,19 +17,20 @@ angular.module('JobTemplatesHelper', ['Utilities'])
  */
 .factory('CallbackHelpInit', ['$location', 'GetBasePath', function($location, GetBasePath) {
     return function(params) {
-        
+
         var scope = params.scope;
-        
+
         // The form uses awPopOverWatch directive to 'watch' scope.callback_help for changes. Each time the
         // popover is activated, a function checks the value of scope.callback_help before constructing the content.
         scope.setCallbackHelp = function() {
-            scope.callback_help = "<p>With a callback URL and a host config key a host can contact Tower and request a configuration update using this job " +
+            scope.callback_help = "<p>With a provisioning callback URL and a host config key a host can contact Tower and request a configuration update using this job " +
                 "template. The request from the host must be a POST. Here is an example using curl:</p>\n" +
                 "<pre>curl --data \"host_config_key=\"" + scope.example_config_key + "\" " +
                 scope.callback_server_path + GetBasePath('job_templates') + scope.example_template_id + "/callback/</pre>\n" +
                 "<p>Note the requesting host must be defined in the inventory associated with the job template. If Tower fails to " +
                 "locate the host, the request will be denied.</p>" +
-                "<p>Successful requests create an entry on the Jobs page, where results and history can be viewed.</p>";
+                "<p>Successful requests create an entry on the Jobs page, where results and history can be viewed.</p>" +
+                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
         };
 
         // The md5 helper emits NewMD5Generated whenever a new key is available

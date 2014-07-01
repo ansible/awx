@@ -5,13 +5,13 @@
  *  Form definition for Job Template model
  *
  *  To get the JobTemplateForm object: JobTemplateForm();
- *  
+ *
  */
 
 'use strict';
 
 angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'CompletedJobsDefinition'])
-    
+
     .value ('JobTemplateFormObject', {
 
         addTitle: 'Create Job Templates',
@@ -231,7 +231,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
                 dataContainer: "body"
             },
             allow_callbacks: {
-                label: 'Allow Callbacks',
+                label: 'Allow Provisioning Callbacks',
                 type: 'checkbox',
                 addRequired: false,
                 editRequird: false,
@@ -239,14 +239,14 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
                 falseValue: 'false',
                 ngChange: "toggleCallback('host_config_key')",
                 column: 2,
-                awPopOver: "<p>Enable creation of a callback URL. With a callback URL a host can contact Tower and request a configuration update " +
+                awPopOver: "<p>Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update " +
                     "using this job template.</p>",
                 dataPlacement: 'right',
-                dataTitle: 'Allow Callbacks',
+                dataTitle: 'Allow Provisioning Callbacks',
                 dataContainer: "body"
             },
             callback_url: {
-                label: 'Callback URL',
+                label: 'Provisioning Callback URL',
                 type: 'text',
                 addRequired: false,
                 editRequired: false,
@@ -256,7 +256,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
                 awPopOver: "callback_help",
                 awPopOverWatch: "callback_help",
                 dataPlacement: 'right',
-                dataTitle: 'Callback URL',
+                dataTitle: 'Provisioning Callback URL',
                 dataContainer: "body"
             },
             host_config_key: {
@@ -274,7 +274,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
             }
         },
 
-        buttons: { //for now always generates <button> tags 
+        buttons: { //for now always generates <button> tags
             save: {
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
@@ -286,7 +286,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
         },
 
         related: {
-            
+
             schedules: {
                 include: "SchedulesList"
             },
