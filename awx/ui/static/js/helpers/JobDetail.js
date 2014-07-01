@@ -517,13 +517,15 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         var task = params.task,
             diff;
 
+        task.missingCount = task.hostCount - (task.failedCount + task.changedCount + task.skippedCount + task.successfulCount + task.unreachableCount);
+        task.missingPct = (task.hostCount > 0) ? Math.ceil((100 * (task.missingCount / task.hostCount))) : 0;
         task.failedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.failedCount / task.hostCount))) : 0;
         task.changedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.changedCount / task.hostCount))) : 0;
         task.skippedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.skippedCount / task.hostCount))) : 0;
         task.successfulPct = (task.hostCount > 0) ? Math.ceil((100 * (task.successfulCount / task.hostCount))) : 0;
         task.unreachablePct = (task.hostCount > 0) ? Math.ceil((100 * (task.unreachableCount / task.hostCount))) : 0;
 
-        diff = (task.failedPct + task.changedPct + task.skippedPct + task.successfulPct + task.unreachablePct) - 100;
+        diff = (task.failedPct + task.changedPct + task.skippedPct + task.successfulPct + task.unreachablePct + task.missingPct) - 100;
         if (diff > 0) {
             if (task.failedPct > diff) {
                 task.failedPct  = task.failedPct - diff;
@@ -540,12 +542,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             else if (task.unreachablePct > diff) {
                 task.unreachablePct = task.unreachablePct - diff;
             }
+            else if (task.missingPct > diff) {
+                task.missingPct = task.missingPct - diff;
+            }
         }
         task.successfulStyle = (task.successfulPct > 0) ? { 'display': 'inline-block', 'width': task.successfulPct + "%" } : { 'display': 'none' };
         task.changedStyle = (task.changedPct > 0) ? { 'display': 'inline-block', 'width': task.changedPct + "%" } : { 'display': 'none' };
         task.skippedStyle = (task.skippedPct > 0) ? { 'display': 'inline-block', 'width': task.skippedPct + "%" } : { 'display': 'none' };
         task.failedStyle = (task.failedPct > 0) ? { 'display': 'inline-block', 'width': task.failedPct + "%" } : { 'display': 'none' };
         task.unreachableStyle = (task.unreachablePct > 0) ? { 'display': 'inline-block', 'width': task.unreachablePct + "%" } : { 'display': 'none' };
+        task.missingStyle = (task.missingPct > 0) ? { 'display': 'inline-block', 'width': task.missingPct + "%" } : { 'display': 'none' };
     };
 }])
 
