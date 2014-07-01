@@ -1047,8 +1047,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 return 0;
             });
 
-            console.log(hostSummaries);
-
             while (idx < keys.length && result.length < scope.hostSummariesMaxRows) {
                 if (scope.searchAllStatus === 'failed') {
                     if (hostSummaries[keys[idx]].status === 'failed') {
