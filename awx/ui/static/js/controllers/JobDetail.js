@@ -200,7 +200,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                                 status_text = "Failed";
                                 break;
                             case "unreachable":
-                                status = "failed";
                                 status_text = "Unreachable";
                                 break;
                             case "skipped":
@@ -303,6 +302,10 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                             taskActiveClass: '',
                             hostResults: {}
                         };
+                        if (play.firstTask !== event.id) {
+                            // this is not the first task
+                            play.tasks[event.id].hostCount = play.tasks[play.firstTask].hostCount;
+                        }
                         SetTaskStyles({
                             task: play.tasks[event.id]
                         });
@@ -731,7 +734,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                                     status_text = "Failed";
                                     break;
                                 case "unreachable":
-                                    status = "failed";
                                     status_text = "Unreachable";
                                     break;
                                 case "skipped":
@@ -803,7 +805,6 @@ function JobDetailController ($rootScope, $scope, $compile, $routeParams, $log, 
                                     status_text = "Failed";
                                     break;
                                 case "unreachable":
-                                    status = "failed";
                                     status_text = "Unreachable";
                                     break;
                                 case "skipped":

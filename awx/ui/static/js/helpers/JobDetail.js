@@ -230,10 +230,12 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             failedCount: 0,
             changedCount: 0,
             skippedCount: 0,
+            unreachableCount: 0,
             successfulStyle: { display: 'none'},
             failedStyle: { display: 'none' },
             changedStyle: { display: 'none' },
             skippedStyle: { display: 'none' },
+            unreachableStyle: { display: 'none' },
             hostResults: {}
         };
 
@@ -466,7 +468,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 break;
             case "unreachable":
                 status_text = "Unreachable";
-                status = "failed";
                 break;
             case "skipped":
                 status_text = "Skipped";
@@ -772,7 +773,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                                 status_text = "Failed";
                                 break;
                             case "unreachable":
-                                status = "failed";
                                 status_text = "Unreachable";
                                 break;
                             case "skipped":
