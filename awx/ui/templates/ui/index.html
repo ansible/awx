@@ -194,19 +194,32 @@
                         <li id="inventories"><a href="#inventories" id="main_inventories_link">Inventories</a></li>
                         <li id="job_templates"><a href="#job_templates" id="main_job_templates_link">Job Templates</a></li>
                         <li id="jobs"><a href="#jobs" id="main_jobs_link">Jobs</a></li>
+                        <li class="collapsed-option"><a href="#/login" id="main_login_link" ng-show="!current_user.username">Login</a></li>
+                        <li ng-show="current_user.username" class="collapsed-option">
+                            <a href="" id="account-menu-link">Hello, <span ng-bind="current_user.username"></span> <span class="caret"></span></a>
+                            <ul class="nav navbar-nav" id="account-submenu">
+                               <li><a id="main_view_user" href="" ng-click="viewCurrentUser()">Account Settings</a></li>
+                               <li><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
+                               <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a></li>
+                               <li class="divider"></li>
+                               <li><a id="main_logout" href="#/logout">Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                        <!--
                         <li class="collapsed-option" ng-show="current_user.username != null && current_user.username != undefined">
                                    <a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
                         <li class="collapsed-option"><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
                         <li class="collapsed-option"><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a></li>
                         <li class="collapsed-option"><a id="main_logout" href="#/logout">Logout</a></li>
-                    </ul>
+                         -->
                     <ul class="nav navbar-nav navbar-right" id="account-menu">
                         <li id="socket-beacon-li"></li>
-                        <li class="dropdown">
-                            <a href="" id="account-menu-link" class="dropdown-toggle" data-toggle="dropdown">Account <span class="caret"></span></a>
-                            <ul class="dropdown-menu" id="account-submenu">
-                               <li ng-show="current_user.username != null && current_user.username != undefined">
-                                   <a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
+                        <li><a href="#/login" id="main_login_link" ng-show="!current_user.username">Login</a></li>
+                        <li class="dropdown" ng-show="current_user.username">
+                            <a href="" id="account-menu-link" class="dropdown-toggle" data-toggle="dropdown">Hello, <span ng-bind="current_user.username"></span> <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu" id="account-submenu">
+                               <li><a id="main_view_user" href="" ng-click="viewCurrentUser()">Account Settings</a></li>
                                <li><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
                                <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a></li>
                                <li class="divider"></li>
