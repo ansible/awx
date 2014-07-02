@@ -40,19 +40,25 @@
     padding: 5px;
     margin-bottom: 15px;
 }
-
+.count-container{
+    border: 1px solid @grey;
+    border-radius: 4px;
+    padding: 5px;
+    margin-bottom: 15px;
+}
 .carousel-control.left, .carousel-control.right {
     background-image: none
 }
 
- .left-side {
-      padding-right: 7px;
-  }
+ @media (min-width: 1024px) {
+        .left-side {
+            padding-right: 7px;
+        }
 
-  .right-side {
-      padding-left: 7px;
-  }
-
+        .right-side {
+            padding-left: 7px;
+        }
+}
     .custon-carousel{
         width:150px;
       height:200px;

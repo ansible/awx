@@ -21,10 +21,49 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                     html, element;
 
                 html = "<div class=\"graph-container\">\n";
+
                 html +="<div class=\"row\">\n";
-                html += "<div class=\"h6 col-lg-12 text-center\">Job Status</div>\n";
+                html += "<div class=\"h6 col-xs-8 text-center\"><b>Job Status</b></div>\n";
+
+                html += "<div class=\"h6 col-xs-2 \">\n";
+                html += "<div class=\"dropdown\">\n";
+                html += "<a id=\"dLabel\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
+                html += "Job Type<span class=\"caret\"></span>\n";
+                html += "  </a>\n";
+
+                html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
+                html += "<li><a href=\"#\">All</a></li>\n";
+                html += "<li><a href=\"#\">Inventory Sync</a></li>\n";
+                html += "<li><a href=\"#\">SCM Update</a></li>\n";
+                html += "<li><a href=\"#\">Playbook Runs</a></li>\n";
+                html += "</ul>\n";
+                html += "</div>\n";
+
+                html += "</div>\n"; //end of filter div
+
+                html += "<div class=\"h6 col-xs-2 \">\n";
+                html += "<div class=\"dropdown\">\n";
+                html += "<a id=\"dLabel\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
+                html += "Period<span class=\"caret\"></span>\n";
+                html += "  </a>\n";
+
+                html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
+                html += "<li><a href=\"#\">Past Day</a></li>\n";
+                html += "<li><a href=\"#\">Past Week</a></li>\n";
+                html += "<li><a href=\"#\">Past Month</a></li>\n";
+                html += "</ul>\n";
+                html += "</div>\n";
+                html += "</div>\n"; //end of filter div
+
+                html += "</div>\n"; // end of row
+
+                html +="<div class=\"row\">\n";
                 html += "<div class=\"job-status-graph\"><svg></svg></div>\n";
                 html += "</div>\n";
+
+                //
+                // html += "</div>\n";
+
                 html += "</div>\n";
 
 
@@ -53,7 +92,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                         ;
 
                                 chart.xAxis
-                                    .axisLabel("Tme").showMaxMin(true)
+                                    .axisLabel("Time").showMaxMin(true)
                                     .tickFormat(function(d) {
                                     var dx = data[0].values[d] && data[0].values[d].x || 0;
                                     return dx ? d3.time.format('%m/%d')(new Date(dx)) : '';
