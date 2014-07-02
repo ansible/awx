@@ -151,6 +151,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
                     event_data.host_name = data.results[0].host_name;
                     event_data.id = data.results[0].id;
                     event_data.parent = data.results[0].parent;
+                    event_data.event = (data.results[0].event_display) ? data.results[0].event_display : data.results[0].event;
                     scope.$emit('EventReady', event_data);
                 })
                 .error(function(data, status) {
