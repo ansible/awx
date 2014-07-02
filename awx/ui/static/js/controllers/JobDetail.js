@@ -25,9 +25,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.tasks = [];
     scope.hostResults = [];
 
-    scope.hostResultsMaxRows = 100;
+    scope.hostResultsMaxRows = 10;
     scope.hostSummariesMaxRows = 100;
-    scope.tasksMaxRows = 100;
+    scope.tasksMaxRows = 20;
     scope.playsMaxRows = 100;
 
     scope.liveEventProcessing = true;  // control play/pause state of event processing
@@ -533,36 +533,6 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         }
     });
 
-    if (scope.removeFixPlaysScroll) {
-        scope.removeFixPlaysScroll();
-    }
-    scope.removeFixPlaysScroll = scope.$on('FixPlaysScroll', function() {
-        $('#plays-table-detail').mCustomScrollbar("update");
-        setTimeout( function() {
-            $('#plays-table-detail').mCustomScrollbar("scrollTo", "bottom");
-        }, 500);
-    });
-
-    if (scope.removeFixTasksScroll) {
-        scope.removeFixTasksScroll();
-    }
-    scope.removeFixTasksScroll = scope.$on('FixTasksScroll', function() {
-        $('#tasks-table-detail').mCustomScrollbar("update");
-        setTimeout( function() {
-            $('#tasks-table-detail').mCustomScrollbar("scrollTo", "bottom");
-        }, 500);
-    });
-
-    if (scope.removeFixHostResultsScroll) {
-        scope.removeFixHostResultsScroll();
-    }
-    scope.removeFixHostResultsScroll = scope.$on('FixHostResultsScroll', function() {
-        $('#hosts-table-detail').mCustomScrollbar("update");
-        setTimeout( function() {
-            $('#hosts-table-detail').mCustomScrollbar("scrollTo", "bottom");
-        }, 500);
-    });
-
     scope.adjustSize = function() {
         var height, ww = $(window).width();
         if (ww < 1240) {
@@ -593,28 +563,25 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
         // Detail table height adjusting. First, put page height back to 'normal'.
         $('#plays-table-detail').height(80);
-        $('#plays-table-detail').mCustomScrollbar("update");
+        //$('#plays-table-detail').mCustomScrollbar("update");
         $('#tasks-table-detail').height(120);
-        $('#tasks-table-detail').mCustomScrollbar("update");
+        //$('#tasks-table-detail').mCustomScrollbar("update");
         $('#hosts-table-detail').height(150);
-        $('#hosts-table-detail').mCustomScrollbar("update");
+        //$('#hosts-table-detail').mCustomScrollbar("update");
         height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#breadcrumb-container').outerHeight() -
-            $('#job-detail-container').outerHeight() - 20;
+            $('#job-detail-container').outerHeight() - $('#job-detail-footer').outerHeight() - 20;
         if (height > 15) {
             // there's a bunch of white space at the bottom, let's use it
             $('#plays-table-detail').height(80 + (height * 0.10));
-            $('#plays-table-detail').mCustomScrollbar("update");
             $('#tasks-table-detail').height(120 + (height * 0.20));
-            $('#tasks-table-detail').mCustomScrollbar("update");
             $('#hosts-table-detail').height(150 + (height * 0.70));
-            $('#hosts-table-detail').mCustomScrollbar("update");
         }
         // Summary table height adjusting.
         height = ($('#job-detail-container').height() / 2) - $('#hosts-summary-section .header').outerHeight() -
             $('#hosts-summary-section .table-header').outerHeight() -
             $('#summary-search-section').outerHeight() - 20;
         $('#hosts-summary-table').height(height);
-        $('#hosts-summary-table').mCustomScrollbar("update");
+        //$('#hosts-summary-table').mCustomScrollbar("update");
         scope.$emit('RefreshCompleted');
     };
 
@@ -665,7 +632,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 $('#hosts-summary-section .header').outerHeight() -
                 $('#hosts-summary-section .legend').outerHeight();
             $('#hosts-summary-table').height(height - 50);
-            $('#hosts-summary-table').mCustomScrollbar("update");
+            //$('#hosts-summary-table').mCustomScrollbar("update");
 
             $('#hide-summary-button').show();
 
@@ -696,406 +663,6 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
     scope.toggleLessStatus = function() {
         scope.lessStatus = (scope.lessStatus) ? false : true;
-    };
-
-    scope.HostDetailOnTotalScroll = _.debounce(function() {
-        // Called when user scrolls down (or forward in time)
-        var url, mcs = arguments[0];
-        scope.$apply(function() {
-            if ((!scope.liveEventProcessing) && scope.activeTask && scope.hostResults.length) {
-                scope.auto_scroll = true;
-                url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
-                url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
-                url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
-                url += 'host__name__gt=' + scope.hostResults[scope.hostResults.length - 1].name + '&host__isnull=false&page_size=' + scope.hostResultsMaxRows + '&order_by=host__name';
-                Wait('start');
-                Rest.setUrl(url);
-                Rest.get()
-                    .success(function(data) {
-                        data.results.forEach(function(row) {
-                            var status, status_text;
-                            if (row.event === "runner_on_skipped") {
-                                status = 'skipped';
-                            }
-                            else if (row.event === "runner_on_unreachable") {
-                                status = 'unreachable';
-                            }
-                            else {
-                                status = (row.failed) ? 'failed' : (row.changed) ? 'changed' : 'successful';
-                            }
-                            switch(status) {
-                                case "successful":
-                                    status_text = 'OK';
-                                    break;
-                                case "changed":
-                                    status_text = "Changed";
-                                    break;
-                                case "failed":
-                                    status_text = "Failed";
-                                    break;
-                                case "unreachable":
-                                    status_text = "Unreachable";
-                                    break;
-                                case "skipped":
-                                    status_text = "Skipped";
-                            }
-                            scope.hostResults.push({
-                                id: row.id,
-                                status: status,
-                                status_text: status_text,
-                                host_id: row.host,
-                                task_id: row.parent,
-                                name: row.event_data.host,
-                                created: row.created,
-                                msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
-                            });
-                            if (scope.hostResults.length > scope.hostResultsMaxRows) {
-                                scope.hostResults.shift();
-                            }
-                        });
-                        if (data.next) {
-                            // there are more rows. move dragger up, letting user know.
-                            setTimeout(function() { $('#hosts-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop - 15) + 'px'}); }, 700);
-                        }
-                        scope.auto_scroll = false;
-                        //rebuildHostResultsMap();
-                        Wait('stop');
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + '. GET returned: ' + status });
-                    });
-            }
-        });
-    }, 300);
-
-    scope.HostDetailOnTotalScrollBack = _.debounce(function() {
-        // Called when user scrolls up (or back in time)
-        var url, mcs = arguments[0];
-        scope.$apply(function() {
-            if ((!scope.liveEventProcessing) && scope.activeTask && scope.hostResults.length) {
-                scope.auto_scroll = true;
-                url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
-                url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
-                url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
-                url += 'host__name__lt=' + scope.hostResults[0].name + '&host__isnull=false&page_size=' + scope.hostResultsMaxRows + '&order_by=-host__name';
-                Wait('start');
-                Rest.setUrl(url);
-                Rest.get()
-                    .success(function(data) {
-                        data.results.forEach(function(row) {
-                            var status, status_text;
-                            if (row.event === "runner_on_skipped") {
-                                status = 'skipped';
-                            }
-                            else if (row.event === "runner_on_unreachable") {
-                                status = 'unreachable';
-                            }
-                            else {
-                                status = (row.failed) ? 'failed' : (row.changed) ? 'changed' : 'successful';
-                            }
-                            switch(status) {
-                                case "successful":
-                                    status_text = 'OK';
-                                    break;
-                                case "changed":
-                                    status_text = "Changed";
-                                    break;
-                                case "failed":
-                                    status_text = "Failed";
-                                    break;
-                                case "unreachable":
-                                    status_text = "Unreachable";
-                                    break;
-                                case "skipped":
-                                    status_text = "Skipped";
-                            }
-                            scope.hostResults.unshift({
-                                id: row.id,
-                                status: status,
-                                status_text: status_text,
-                                host_id: row.host,
-                                task_id: row.parent,
-                                name: row.event_data.host,
-                                created: row.created,
-                                msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
-                            });
-                            if (scope.hostResults.length > scope.hostResultsMaxRows) {
-                                scope.hostResults.pop();
-                            }
-                        });
-                        if (data.next) {
-                            // there are more rows. move dragger down, letting user know.
-                            setTimeout(function() { $('#hosts-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop + 15) + 'px' }); }, 700);
-                        }
-                        //rebuildHostResultsMap();
-                        Wait('stop');
-                        scope.auto_scroll = false;
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + '. GET returned: ' + status });
-                    });
-            }
-        });
-    }, 300);
-
-
-    scope.TasksOnTotalScroll = _.debounce(function() {
-        // Called when user scrolls down (or forward in time)
-        var url, mcs = arguments[0];
-        scope.$apply(function() {
-            if ((!scope.liveEventProcessing) && scope.activePlay && scope.tasks.length) {
-                scope.auto_scroll = true;
-                url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
-                url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
-                url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
-                url += '&id__gt=' + scope.tasks[scope.tasks.length - 1].id + '&page_size=' + scope.tasksMaxRows + '&order_by=id';
-                Wait('start');
-                Rest.setUrl(url);
-                Rest.get()
-                    .success(function(data) {
-                        data.results.forEach(function(event, idx) {
-                            var end, elapsed, status, status_text;
-
-                            if (idx < data.length - 1) {
-                                // end date = starting date of the next event
-                                end = data[idx + 1].created;
-                            }
-                            else {
-                                // no next event (task), get the end time of the play
-                                scope.plays.every(function(p, j) {
-                                    if (p.id === scope.activePlay) {
-                                        end = scope.plays[j].finished;
-                                        return false;
-                                    }
-                                    return true;
-                                });
-                            }
-                            if (end) {
-                                elapsed = GetElapsed({
-                                    start: event.created,
-                                    end: end
-                                });
-                            }
-                            else {
-                                elapsed = '00:00:00';
-                            }
-
-                            status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
-                            status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
-
-                            scope.tasks.push({
-                                id: event.id,
-                                play_id: scope.activePlay,
-                                name: event.name,
-                                status: status,
-                                status_text: status_text,
-                                status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
-                                created: event.created,
-                                modified: event.modified,
-                                finished: end,
-                                elapsed: elapsed,
-                                hostCount: event.host_count,          // hostCount,
-                                reportedHosts: event.reported_hosts,
-                                successfulCount: event.successful_count,
-                                failedCount: event.failed_count,
-                                changedCount: event.changed_count,
-                                skippedCount: event.skipped_count,
-                                taskActiveClass: ''
-                            });
-                            SetTaskStyles({
-                                task: scope.tasks[scope.tasks.length - 1]
-                            });
-                            if (scope.tasks.length > scope.tasksMaxRows) {
-                                scope.tasks.shift();
-                            }
-                        });
-                        if (data.next) {
-                            // there are more rows. move dragger up, letting user know.
-                            setTimeout(function() { $('#tasks-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop - 15) + 'px'}); }, 700);
-                        }
-                        scope.auto_scroll = false;
-                        //rebuildTasksMap();
-                        Wait('stop');
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + '. GET returned: ' + status });
-                    });
-            }
-            else {
-                scope.auto_scroll_tasks = false;
-            }
-        });
-    }, 300);
-
-    scope.TasksOnTotalScrollBack = _.debounce(function() {
-        // Called when user scrolls up (or back in time)
-        var url, mcs = arguments[0];
-        scope.$apply(function() {
-            if ((!scope.liveEventProcessing) && scope.activePlay && scope.tasks.length) {
-                scope.auto_scroll = true;
-                url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
-                url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
-                url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
-                url += '&id__lt=' + scope.tasks[0].id + '&page_size=' + scope.tasksMaxRows + '&order_by=-id';
-                Wait('start');
-                Rest.setUrl(url);
-                Rest.get()
-                    .success(function(data) {
-                        data.results.forEach(function(event, idx) {
-                            var end, elapsed, status, status_text;
-
-                            if (idx < data.length - 1) {
-                                // end date = starting date of the next event
-                                end = data[idx + 1].created;
-                            }
-                            else {
-                                // no next event (task), get the end time of the play
-                                scope.plays.every(function(p, j) {
-                                    if (p.id === scope.activePlay) {
-                                        end = scope.plays[j].finished;
-                                        return false;
-                                    }
-                                    return true;
-                                });
-                            }
-                            if (end) {
-                                elapsed = GetElapsed({
-                                    start: event.created,
-                                    end: end
-                                });
-                            }
-                            else {
-                                elapsed = '00:00:00';
-                            }
-
-                            status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
-                            status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
-
-                            scope.tasks.unshift({
-                                id: event.id,
-                                play_id: scope.activePlay,
-                                name: event.name,
-                                status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
-                                status_text: ( (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK' ),
-                                status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
-                                created: event.created,
-                                modified: event.modified,
-                                finished: end,
-                                elapsed: elapsed,
-                                hostCount: event.host_count,
-                                reportedHosts: event.reported_hosts,
-                                successfulCount: event.successful_count,
-                                failedCount: event.failed_count,
-                                changedCount: event.changed_count,
-                                skippedCount: event.skipped_count,
-                                taskActiveClass: ''
-                            });
-                            SetTaskStyles({
-                                task: scope.tasks[0]
-                            });
-                            if (scope.tasks.length > scope.tasksMaxRows) {
-                                scope.tasks.pop();
-                            }
-                        });
-                        if (data.next) {
-                            // there are more rows. move dragger up, letting user know.
-                            setTimeout(function() { $('#tasks-table-detail .mCSB_dragger').css({ top: (mcs.draggerTop + 15) + 'px'}); }, 700);
-                        }
-                        scope.auto_scroll = false;
-                        //rebuildTasksMap();
-                        Wait('stop');
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + '. GET returned: ' + status });
-                    });
-            }
-        });
-    }, 300);
-
-    scope.HostSummaryOnTotalScroll = function(mcs) {
-        var url;
-        if ((!scope.liveEventProcessing) && scope.hosts) {
-            url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
-            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
-            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
-            url += 'host__name__gt=' + scope.hosts[scope.hosts.length - 1].name + '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
-            Wait('start');
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    setTimeout(function() {
-                        scope.$apply(function() {
-                            data.results.forEach(function(row) {
-                                scope.hosts.push({
-                                    id: row.host,
-                                    name: row.summary_fields.host.name,
-                                    ok: row.ok,
-                                    changed: row.changed,
-                                    unreachable: row.dark,
-                                    failed: row.failures
-                                });
-                                if (scope.hosts.length > scope.hostSummariesMaxRows) {
-                                    scope.hosts.shift();
-                                }
-                            });
-                            if (data.next) {
-                                // there are more rows. move dragger up, letting user know.
-                                setTimeout(function() { $('#hosts-summary-table .mCSB_dragger').css({ top: (mcs.draggerTop - 15) + 'px'}); }, 700);
-                            }
-                        });
-                    }, 100);
-                    Wait('stop');
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        }
-    };
-
-    scope.HostSummaryOnTotalScrollBack = function(mcs) {
-        var url;
-        if ((!scope.liveEventProcessing) && scope.hosts) {
-            url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
-            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
-            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
-            url += 'host__name__lt=' + scope.hosts[0].name + '&page_size=' + scope.hostSummariesMaxRows + '&order_by=-host__name';
-            Wait('start');
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    setTimeout(function() {
-                        scope.$apply(function() {
-                            data.results.forEach(function(row) {
-                                scope.hosts.unshift({
-                                    id: row.host,
-                                    name: row.summary_fields.host.name,
-                                    ok: row.ok,
-                                    changed: row.changed,
-                                    unreachable: row.dark,
-                                    failed: row.failures
-                                });
-                                if (scope.hosts.length > scope.hostSummariesMaxRows) {
-                                    scope.hosts.pop();
-                                }
-                            });
-                            if (data.next) {
-                                // there are more rows. move dragger down, letting user know.
-                                setTimeout(function() { $('#hosts-summary-table .mCSB_dragger').css({ top: (mcs.draggerTop + 15) + 'px' }); }, 700);
-                            }
-                        });
-                    }, 100);
-                    Wait('stop');
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        }
     };
 
     scope.searchAllByHost = function() {
@@ -1188,6 +755,170 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
             scope: scope,
             id: scope.job.id
         });
+    };
+
+    scope.tasksScrollDown = function() {
+        // check for more hosts when user scrolls down on host results list...
+        if ((!scope.liveEventProcessing) && scope.activePlay && scope.tasks.length) {
+            var url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
+            url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
+            url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
+            url += '&id__gt=' + scope.tasks[scope.tasks.length - 1].id; //+ '&page_size=' + scope.tasksMaxRows + '&order_by=id';
+            $('#tasksMoreRows').fadeIn();
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    data.results.forEach(function(event, idx) {
+                        var end, elapsed, status, status_text;
+                        if (idx < data.length - 1) {
+                            // end date = starting date of the next event
+                            end = data[idx + 1].created;
+                        }
+                        else {
+                            // no next event (task), get the end time of the play
+                            scope.plays.every(function(p, j) {
+                                if (p.id === scope.activePlay) {
+                                    end = scope.plays[j].finished;
+                                    return false;
+                                }
+                                return true;
+                            });
+                        }
+                        if (end) {
+                            elapsed = GetElapsed({
+                                start: event.created,
+                                end: end
+                            });
+                        }
+                        else {
+                            elapsed = '00:00:00';
+                        }
+
+                        status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                        status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
+
+                        scope.tasks.push({
+                            id: event.id,
+                            play_id: scope.activePlay,
+                            name: event.name,
+                            status: status,
+                            status_text: status_text,
+                            status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
+                            created: event.created,
+                            modified: event.modified,
+                            finished: end,
+                            elapsed: elapsed,
+                            hostCount: event.host_count,          // hostCount,
+                            reportedHosts: event.reported_hosts,
+                            successfulCount: event.successful_count,
+                            failedCount: event.failed_count,
+                            changedCount: event.changed_count,
+                            skippedCount: event.skipped_count,
+                            taskActiveClass: ''
+                        });
+                        SetTaskStyles({
+                            task: scope.tasks[scope.tasks.length - 1]
+                        });
+                    });
+                    $('#tasksMoreRows').fadeOut(400);
+                })
+                .error(function(data, status) {
+                    $('#tasksMoreRows').fadeOut(400);
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
+        }
+    };
+
+    scope.hostResultsScrollDown = function() {
+        // check for more hosts when user scrolls down on host results list...
+        if ((!scope.liveEventProcessing) && scope.activeTask && scope.hostResults.length) {
+            var url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
+            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
+            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
+            url += 'host__name__gt=' + scope.hostResults[scope.hostResults.length - 1].name + '&host__isnull=false&page_size=' +
+                scope.hostResultsMaxRows + '&order_by=host__name';
+            $('#hostResultsMoreRows').fadeIn();
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    data.results.forEach(function(row) {
+                        var status, status_text;
+                        if (row.event === "runner_on_skipped") {
+                            status = 'skipped';
+                        }
+                        else if (row.event === "runner_on_unreachable") {
+                            status = 'unreachable';
+                        }
+                        else {
+                            status = (row.failed) ? 'failed' : (row.changed) ? 'changed' : 'successful';
+                        }
+                        switch(status) {
+                            case "successful":
+                                status_text = 'OK';
+                                break;
+                            case "changed":
+                                status_text = "Changed";
+                                break;
+                            case "failed":
+                                status_text = "Failed";
+                                break;
+                            case "unreachable":
+                                status_text = "Unreachable";
+                                break;
+                            case "skipped":
+                                status_text = "Skipped";
+                        }
+                        scope.hostResults.push({
+                            id: row.id,
+                            status: status,
+                            status_text: status_text,
+                            host_id: row.host,
+                            task_id: row.parent,
+                            name: row.event_data.host,
+                            created: row.created,
+                            msg: ( (row.event_data && row.event_data.res) ? row.event_data.res.msg : '' )
+                        });
+                    });
+                    $('#hostResultsMoreRows').fadeOut(400);
+                })
+                .error(function(data, status) {
+                    $('#hostResultsMoreRows').fadeOut(400);
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
+        }
+    };
+
+    scope.hostSummariesScrollDown = function() {
+        // check for more hosts when user scrolls down on host summaries list...
+        if ((!scope.liveEventProcessing) && scope.hosts) {
+            var url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
+            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
+            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
+            url += 'host__name__gt=' + scope.hosts[scope.hosts.length - 1].name + '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
+            $('#hostSummariesMoreRows').fadeIn();
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    data.results.forEach(function(row) {
+                        scope.hosts.push({
+                            id: row.host,
+                            name: row.summary_fields.host.name,
+                            ok: row.ok,
+                            changed: row.changed,
+                            unreachable: row.dark,
+                            failed: row.failures
+                        });
+                    });
+                    $('#hostSummariesMoreRows').fadeOut();
+                })
+                .error(function(data, status) {
+                    $('#hostSummariesMoreRows').fadeOut();
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
+        }
     };
 
 }

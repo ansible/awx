@@ -48,6 +48,18 @@
     line-height: normal;
 }
 
+.scroll-spinner {
+    display: none;
+    background-color: transparent;
+    color:#000;
+    float:right;
+}
+#hostResultsMoreRows.scroll-spinner {
+    padding-top: 0;
+    position: relative;
+    top: 12px;
+}
+
 .failed-hosts {
     background-color: @failed-hosts-color;
 }
@@ -448,6 +460,10 @@ svg text.percent{
             }
         }
     }
+}
+
+.footer-row {
+    height: 20px;
 }
 
 @media (max-width: 767px) {

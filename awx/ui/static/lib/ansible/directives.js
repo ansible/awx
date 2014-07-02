@@ -720,11 +720,13 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
+/*
     .directive('awCustomScroll', [ function() {
         return function(scope, element, attrs) {
             var theme = (attrs.scrollTheme) ? attrs.scrollTheme : 'dark-thin',
-                //inertia = (attrs.scrollInertia) ? parseInt(attrs.scrollInertia,10) : 500,
+                //inertia = (attrs.scrollInertia) ? parseInt(attrs.scrollInertia,10) : 1000,
                 axis = ($(element).attr('data-scroll-axis')) ? $(element).attr('data-scroll-axis') : 'y';
+             //   console.log('setting inertia: ' + inertia);
             $(element).mCustomScrollbar({
                 advanced:{
                     updateOnContentResize: true
@@ -734,14 +736,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 },
                 axis: axis,
                 theme: theme,
+                //scrollInertia: inertia,
                 mouseWheel: {
-                    enable: true,
-                    preventDefault: true,
-                    normalizeDelta: false
-                },
-                keyboard: {
-                    enable: true,
-                    scrollAmount: 20
+                    enable: true
                 },
                 callbacks: {
                     onTotalScroll: scope[attrs.onTotalScroll],
@@ -754,7 +751,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 },
             });
         };
-    }])
+    }]) */
 
     // Toggle switch inspired by http://www.bootply.com/92189
     .directive('awToggleButton', [ function() {
