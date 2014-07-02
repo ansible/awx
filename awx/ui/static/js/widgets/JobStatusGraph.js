@@ -21,10 +21,10 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                     html, element;
 
                 html = "<div class=\"graph-container\">\n";
-                        html +="<div class=\"row\">\n";
-                                html += "<div class=\"h6 col-lg-12 text-center\">Job Status</div>\n";
-                                 html += "<div class=\"job-status-graph\"><svg></svg></div>\n";
-                        html += "</div>\n";
+                html +="<div class=\"row\">\n";
+                html += "<div class=\"h6 col-lg-12 text-center\">Job Status</div>\n";
+                html += "<div class=\"job-status-graph\"><svg></svg></div>\n";
+                html += "</div>\n";
                 html += "</div>\n";
 
 
@@ -98,7 +98,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 element.html(html);
                 $compile(element)(scope);
                 makeJobStatusGraph();
-               scope.$emit('WidgetLoaded');
+                scope.$emit('WidgetLoaded');
 
             };
         }

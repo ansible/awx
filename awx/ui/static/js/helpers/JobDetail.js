@@ -947,7 +947,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             newKeys = [],
             plays = JSON.parse(JSON.stringify(scope.jobData.plays)),
             keys = Object.keys(plays);
-        keys.reverse();
+        keys.sort().reverse();
         for (idx=0; idx < scope.playsMaxRows && idx < keys.length; idx++) {
             newKeys.push(keys[idx]);
         }
@@ -973,7 +973,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         if (scope.activePlay) {
             tasks = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks));
             keys = Object.keys(tasks);
-            keys.reverse();
+            keys.sort().reverse();
             newKeys = [];
             for (idx=0; result.length < scope.tasksMaxRows && idx < keys.length; idx++) {
                 newKeys.push(keys[idx]);
