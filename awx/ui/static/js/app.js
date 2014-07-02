@@ -460,6 +460,11 @@ angular.module('Tower', [
                     $(this).removeClass('active');
                 });
                 $('#ansible-main-menu #' + base).addClass('active');
+                // Apply to mobile menu as well
+                $('#ansible-mobile-menu a').each(function() {
+                    $(this).removeClass('active');
+                });
+                $('#ansible-mobile-menu a[href="#' + base + '"]').addClass('active');
             }
 
             $rootScope.browser = detectBrowser();

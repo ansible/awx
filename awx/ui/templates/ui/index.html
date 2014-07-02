@@ -171,12 +171,30 @@
 
 </head>
 <body>
+
+    <nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right" id="ansible-mobile-menu">
+        <h3>Hello, <span ng-bind="current_user.username"></span></h3>
+        <a href="#home" id="main_home_link" >Dashboard</a></li>
+        <a href="#organizations" id="main_organizations_link">Organizations</a></li>
+        <a href="#users" id="main_users_link">Users</a></li>
+        <a href="#teams" id="main_teams_link">Teams</a></li>
+        <a href="#credentials" id="main_credentials_link">Credentials</a></li>
+        <a href="#projects" id="main_projects_link">Projects</a></li>
+        <a href="#inventories" id="main_inventories_link">Inventories</a></li>
+        <a href="#job_templates" id="main_job_templates_link">Job Templates</a></li>
+        <a href="#jobs" id="main_jobs_link">Jobs</a></li>
+        <a href="" id="main_view_user" ng-click="viewCurrentUser()">Account Settings</a></li>
+        <a href="" id="main_view_license" ng-click="viewLicense()">View License</a></li>
+        <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" id="main_contact_support" target="_blank">Contact Support</a></li>
+        <a href="#/logout" id="main_logout">Logout</a>
+    </nav>
+
     <div id="main-menu-container">
         <div class="navbar navbar-default navbar-fixed-top" role="navigation">
             <div class="container-fluid">
                 <div class="navbar-header">
                     <div id="socket-beacon-div"></div>
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar-collapse">
+                    <button type="button" class="navbar-toggle toggle-menu menu-right" id="main-menu-toggle-button">
                       <span class="sr-only">Toggle navigation</span>
                       <span class="icon-bar"></span>
                       <span class="icon-bar"></span>
@@ -425,6 +443,11 @@
   <script src="{{ STATIC_URL }}lib/d3js/build/d3.v3.min.js"></script>
   <script src="{{ STATIC_URL }}lib/novus-nvd3/nv.d3.min.js"></script>
   <script src="{{ STATIC_URL }}lib/d3Donut/d3Donut.js"></script>
+  <script src="{{ STATIC_URL }}lib/jPushMenu/jPushMenu.js"></script>
+
+  <script>
+      $('#main-menu-toggle-button').jPushMenu();
+  </script>
 
 </body>
 </html>
