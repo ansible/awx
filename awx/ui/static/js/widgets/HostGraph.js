@@ -68,11 +68,11 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                     });
 
                                     chart.yAxis     //Chart y-axis settings
-                                  .axisLabel('Hosts')
-                                  .tickFormat(d3.format('.f'));
+                                    .axisLabel('Hosts')
+                                    .tickFormat(d3.format('.f'));
 
                                     d3.select('.host-count-graph svg')
-                                  .datum(data).transition()
+                                    .datum(data).transition()
                                         .attr('width', width)
                                         .attr('height', height)
                                         .duration(500)
@@ -86,9 +86,9 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                             "src": "url(/static/fonts/OpenSans-Regular.ttf)"
                                         });
 
-                                        d3.selectAll(".nv-line").on("click", function () {
-                                            alert("clicked");
-                                        });
+                                    d3.selectAll(".nv-line").on("click", function () {
+                                        alert("clicked");
+                                    });
 
                                     nv.utils.windowResize(chart.update);
                                     return chart;

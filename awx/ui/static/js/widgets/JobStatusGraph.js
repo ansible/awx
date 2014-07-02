@@ -101,7 +101,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                     });
                 }
 
-                function makeHostCountGraph(){
+                /*function makeHostCountGraph(){
                     d3.json("static/js/hostcount.json",function(error,data) {
 
                         data.map(function(series) {
@@ -149,9 +149,9 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                             "src": "url(/static/fonts/OpenSans-Regular.ttf)"
                                         });
 
-                                        d3.selectAll(".nv-line").on("click", function () {
-                                            alert("clicked");
-                                        });
+                                    d3.selectAll(".nv-line").on("click", function () {
+                                        alert("clicked");
+                                    });
 
                                     nv.utils.windowResize(chart.update);
                                     return chart;
@@ -160,6 +160,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                         });
                     });
                 }
+                */
 
                 element = angular.element(document.getElementById(target));
                 element.html(html);

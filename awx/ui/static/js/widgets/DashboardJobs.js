@@ -23,6 +23,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
             html, e;
 
         html = '';
+        html += "<div class=\"dashboard-jobs-list-container\">\n";
         html += "<ul id=\"job_status_tabs\" class=\"nav nav-tabs\">\n";
         html += "<li class=\"active\"><a id=\"active_jobs_link\" ng-click=\"toggleTab($event, 'active_jobs_link', 'job_status_tabs')\"\n";
         html += " href=\"#active-jobs-tab\" data-toggle=\"tab\">Jobs</a></li>\n";
@@ -39,6 +40,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
         html += "</div>\n"; //list
         html += "</div>\n"; //active-jobs-tab
         html += "<div class=\"tab-pane\" id=\"scheduled-jobs-tab\"></div>\n";
+        html += "</div>\n"; // jobs-list-container
         html += "</div>\n";
 
         e = angular.element(document.getElementById(target));

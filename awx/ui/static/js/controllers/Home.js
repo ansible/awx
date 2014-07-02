@@ -81,7 +81,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             target: 'container2',
             dashboard: data
         });
-         HostGraph({
+        HostGraph({
             scope: $scope,
             target: 'container3',
             dashboard: data
