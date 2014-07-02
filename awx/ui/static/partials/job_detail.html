@@ -225,8 +225,10 @@
                             </div>
                             <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="hostSummariesScrollDown" scroll-threshold="10" time-threshold="500">
                                 <div class="row" ng-repeat="host in summaryList = (hosts | filter:{ status : searchAllStatus}) track by $index" id="{{ host.id }}">
-                                    <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6"><a ng-href="/#/job_events/{{ job.id }}/?host={{ host.name }}" target="_blank"
+                                    <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <a ng-show="host.name != '<deleted host>'" ng-href="/#/job_events/{{ job.id }}/?host={{ host.name }}" target="_blank"
                                         aw-tool-tip="View all events for this host.<br />Opens in new tab or window." data-placement="top">{{ host.name }}</a>
+                                        <span ng-show="host.name == '<deleted host>'">{{ host.name }}</span>
                                     </div>
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 badge-column">
                                         <a href="" aw-tool-tip="OK" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
