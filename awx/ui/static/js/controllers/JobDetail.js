@@ -135,7 +135,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     }
     scope.removeHostSummaries = scope.$on('LoadHostSummaries', function() {
         var url = scope.job.related.job_host_summaries + '?';
-        url += '&host__name__isnull=false&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
+        url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
 
         scope.jobData.hostSummaries = {};
 
@@ -143,9 +143,16 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         Rest.get()
             .success(function(data) {
                 data.results.forEach(function(event) {
+                    var name;
+                    if (event.summary_fields.host && event.summary_fields.host.name) {
+                        name = event.summary_fields.host.name;
+                    }
+                    else {
+                        name = "<deleted host>";
+                    }
                     scope.jobData.hostSummaries[event.id] = {
                         id: event.host,
-                        name: event.summary_fields.host.name,
+                        name: name,
                         ok: event.ok,
                         changed: event.changed,
                         unreachable: event.dark,
@@ -761,8 +768,73 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         });
     };
 
+    scope.playsScrollDown = function() {
+        // check for more plays when user scrolls to bottom of play list...
+        if ((!scope.liveEventProcessing) && scope.plays.length) {
+
+            var url = scope.job.url  + 'job_plays/?';
+            url += '&id__gt=' + scope.plays[scope.plays.length - 1].id + '&page_size=' + scope.playsMaxRows + '&order_by=id';
+
+            Rest.setUrl(url);
+            Rest.get()
+                .success( function(data) {
+                    data.results.forEach(function(event, idx) {
+                        var status, status_text, start, end, elapsed, ok, changed, failed, skipped;
+
+                        status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                        status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
+                        start = event.started;
+
+                        if (idx < data.length - 1) {
+                            // end date = starting date of the next event
+                            end = data[idx + 1].started;
+                        }
+                        else if (JobIsFinished(scope)) {
+                            // this is the last play and the job already finished
+                            end = scope.job_status.finished;
+                        }
+                        if (end) {
+                            elapsed = GetElapsed({
+                                start: start,
+                                end: end
+                            });
+                        }
+                        else {
+                            elapsed = '00:00:00';
+                        }
+
+                        scope.plays.push({
+                            id: event.id,
+                            name: event.play,
+                            created: start,
+                            finished: end,
+                            status: status,
+                            status_text: status_text,
+                            status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
+                            elapsed: elapsed,
+                            hostCount: 0,
+                            fistTask: null,
+                            playActiveClass: '',
+                            unreachableCount: (event.unreachable_count) ? event.unreachable_count : 0,
+                        });
+
+                        ok = (event.ok_count) ? event.ok_count : 0;
+                        changed = (event.changed_count) ? event.changed_count : 0;
+                        failed = (event.failed_count) ? event.failed_count : 0;
+                        skipped = (event.skipped_count) ? event.skipped_count : 0;
+
+                        scope.plays[scope.plays.length - 1].hostCount = ok + changed + failed + skipped;
+                    });
+                })
+                .error( function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                });
+        }
+    };
+
     scope.tasksScrollDown = function() {
-        // check for more hosts when user scrolls down on host results list...
+        // check for more tasks when user scrolls to bottom of task list...
         if ((!scope.liveEventProcessing) && scope.activePlay && scope.tasks.length) {
             var url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
             url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
@@ -835,12 +907,12 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     };
 
     scope.hostResultsScrollDown = function() {
-        // check for more hosts when user scrolls down on host results list...
+        // check for more hosts when user scrolls to bottom of host results list...
         if ((!scope.liveEventProcessing) && scope.activeTask && scope.hostResults.length) {
             var url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
             url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
             url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
-            url += 'host__name__gt=' + scope.hostResults[scope.hostResults.length - 1].name + '&host__isnull=false&page_size=' +
+            url += 'host__name__gt=' + scope.hostResults[scope.hostResults.length - 1].name + '&page_size=' +
                 scope.hostResultsMaxRows + '&order_by=host__name';
             $('#hostResultsMoreRows').fadeIn();
             Rest.setUrl(url);
@@ -895,7 +967,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     };
 
     scope.hostSummariesScrollDown = function() {
-        // check for more hosts when user scrolls down on host summaries list...
+        // check for more hosts when user scrolls to bottom of host summaries list...
         if ((!scope.liveEventProcessing) && scope.hosts) {
             var url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
             url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
@@ -906,9 +978,16 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
             Rest.get()
                 .success(function(data) {
                     data.results.forEach(function(row) {
+                        var name;
+                        if (event.summary_fields.host && event.summary_fields.host.name) {
+                            name = event.summary_fields.host.name;
+                        }
+                        else {
+                            name = "<deleted host>";
+                        }
                         scope.hosts.push({
                             id: row.host,
-                            name: row.summary_fields.host.name,
+                            name: name,
                             ok: row.ok,
                             changed: row.changed,
                             unreachable: row.dark,

@@ -832,9 +832,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         Rest.get()
             .success(function(data) {
                 data.results.forEach(function(event) {
+                    var name;
+                    if (event.summary_fields.host && event.summary_fields.host.name) {
+                        name = event.summary_fields.host.name;
+                    }
+                    else {
+                        name = "<deleted host>";
+                    }
                     scope.hosts.push({
                         id: event.host,
-                        name: event.summary_fields.host.name,
+                        name: name,
                         ok: event.ok,
                         changed: event.changed,
                         unreachable: event.dark,
@@ -842,7 +849,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                         status: (event.failed) ? 'failed' : 'successful'
                     });
                 });
-                //$('#hosts-summary-table').mCustomScrollbar("update");
                 if (callback) {
                     scope.$emit(callback);
                 }
