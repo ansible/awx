@@ -19,7 +19,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
             listCount = 0,
             jobs_scope = scope.$new(true),
             scheduled_scope = scope.$new(true),
-            max_rows,
+            max_rows=10,
             html, e;
 
         html = '';

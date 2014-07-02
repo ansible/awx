@@ -16,7 +16,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 var scope = params.scope,
                     target = params.target,
-                    //dashboard = params.dashboard,
+                    dashboard = params.dashboard,
 
                     html, element;
 
@@ -69,7 +69,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 function makeJobStatusGraph(){
                     d3.json("static/js/jobstatusdata.json",function(error,data) {
-
+                    // d3.json(dashboard.graphs, function(error,data) {
                         data.map(function(series) {
                             series.values = series.values.map(function(d) { return {x: d[0], y: d[1] }; });
                             return series;
