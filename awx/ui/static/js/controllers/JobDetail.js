@@ -593,19 +593,23 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     }, 500));
 
     scope.selectPlay = function(id) {
-        scope.auto_scroll_plays = false;
-        SelectPlay({
-            scope: scope,
-            id: id
-        });
+        if (!scope.liveEventProcessing) {
+            scope.auto_scroll_plays = false;
+            SelectPlay({
+                scope: scope,
+                id: id
+            });
+        }
     };
 
     scope.selectTask = function(id) {
-        scope.auto_scroll_tasks = false;
-        SelectTask({
-            scope: scope,
-            id: id
-        });
+        if (!scope.liveEventProcessing) {
+            scope.auto_scroll_tasks = false;
+            SelectTask({
+                scope: scope,
+                id: id
+            });
+        }
     };
 
     scope.toggleSummary = function(hide) {

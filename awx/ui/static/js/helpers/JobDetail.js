@@ -968,7 +968,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         }
         scope.plays = result;
         if (scope.liveEventProcessing) {
-            scope.$emit('FixPlaysScroll');
+            $('#plays-table-detail').scrollTop($('#plays-table-detail').prop("scrollHeight"));
         }
     };
 }])
@@ -1005,7 +1005,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
         scope.tasks = result;
         if (scope.liveEventProcessing) {
-            scope.$emit('FixTasksScroll');
+            $('#tasks-table-detail').scrollTop($('#tasks-table-detail').prop("scrollHeight"));
         }
     };
 }])
@@ -1043,7 +1043,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         }
         scope.hostResults = result;
         if (scope.liveEventProcessing) {
-            scope.$emit('FixHostResultsScroll');
+            $('#hosts-table-detail').scrollTop($('#hosts-table-detail').prop("scrollHeight"));
         }
     };
 }])
