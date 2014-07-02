@@ -3,6 +3,8 @@
 
 # Python
 import datetime
+import dateutil
+import time
 import re
 import socket
 import sys
@@ -11,7 +13,7 @@ import sys
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -33,6 +35,9 @@ from rest_framework import status
 # Ansi2HTML
 from ansi2html import Ansi2HTMLConverter
 from ansi2html.style import SCHEME
+
+# QSStats
+import qsstats
 
 # AWX
 from awx.main.task_engine import TaskSerializer
@@ -147,7 +152,6 @@ class DashboardView(APIView):
 
     def get(self, request, format=None):
         ''' Show Dashboard Details '''
-
         data = SortedDict()
         user_inventory = get_user_queryset(request.user, Inventory)
         inventory_with_failed_hosts = user_inventory.filter(hosts_with_active_failures__gt=0)
@@ -244,6 +248,57 @@ class DashboardView(APIView):
         data['job_templates'] = {'url': reverse('api:job_template_list'),
                                  'total': job_template_list.count()}
         return Response(data)
+
+class DashboardGraphView(APIView):
+
+    view_name = "Dashboard Graphs"
+    new_in_20 = True
+
+    def get(self, request, format=None):
+        period = request.QUERY_PARAMS.get('period', 'month')
+        job_type = request.QUERY_PARAMS.get('job_type', 'all')
+
+        # Working around a django 1.5 bug:
+        # https://code.djangoproject.com/ticket/17260
+        settings.USE_TZ = False
+
+        qs = User.objects.all()
+        user_unified_jobs = get_user_queryset(request.user, UnifiedJob)
+        user_hosts = get_user_queryset(request.user, Host)
+
+        success_qss = qsstats.QuerySetStats(user_unified_jobs.filter(status='successful'), 'finished')
+        failed_qss = qsstats.QuerySetStats(user_unified_jobs.filter(status='failed'), 'finished')
+
+        created_hosts = qsstats.QuerySetStats(user_hosts, 'created')
+        count_hosts = user_hosts.all().count()
+
+        start_date = datetime.datetime.now()
+        if period == 'month':
+            end_date = start_date - dateutil.relativedelta.relativedelta(months=1)
+            interval = 'days'
+        elif period == 'week':
+            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=1)
+            interval = 'days'
+        elif period == 'day':
+            end_date = start_date - dateutil.relativedelta.relativedelta(days=1)
+            interval = 'hours'
+
+        dashboard_data = {"jobs": {"successful": [], "failed": []}, "hosts": []}
+        for element in success_qss.time_series(end_date, start_date, interval=interval):
+            dashboard_data['jobs']['successful'].append([time.mktime(element[0].timetuple()),
+                                                         element[1]])
+        for element in failed_qss.time_series(end_date, start_date, interval=interval):
+            dashboard_data['jobs']['failed'].append([time.mktime(element[0].timetuple()),
+                                                     element[1]])
+        last_delta = 0
+        host_data = []
+        for element in created_hosts.time_series(end_date, start_date, interval=interval)[::-1]:
+            host_data.append([time.mktime(element[0].timetuple()),
+                                            count_hosts - last_delta])
+            count_hosts -= last_delta
+            last_delta = element[1]
+        dashboard_data['hosts'] = host_data[::-1]
+        return Response(dashboard_data)
 
 class ScheduleList(ListAPIView):
 
