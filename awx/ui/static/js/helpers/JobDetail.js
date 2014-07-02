@@ -957,7 +957,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             result.push(plays[newKeys[idx]]);
             idx++;
         }
-
         scope.plays = result;
         if (scope.liveEventProcessing) {
             scope.$emit('FixPlaysScroll');

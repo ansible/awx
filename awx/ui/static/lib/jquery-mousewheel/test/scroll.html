@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Scroll Test</title>
+    <style>
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+      #emulated, #native {
+        width: 40%;
+        height: 100%;
+      }
+      #emulated { float: left; overflow: hidden; }
+      #native { float: right; overflow: auto; }
+    </style>
+    <script>
+      (function() {
+        var verMatch = /v=([\w\.]+)/.exec(location.search),
+            version = verMatch && verMatch[1],
+            src;
+        if (version)
+          src = 'code.jquery.com/jquery-' + version;
+        else
+          src = 'code.jquery.com/jquery-git';
+        document.write('<script src="http://' + src + '.js"><\/script>');
+      })();
+    </script>
+    <script src="../jquery.mousewheel.js"></script>
+    <script>
+      var lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus rhoncus nibh ac ultricies blandit. Nunc blandit blandit lobortis. Maecenas id dolor scelerisque, facilisis dolor eu, interdum urna. Nullam consectetur lectus quis mi interdum accumsan. Nulla malesuada est nec neque suscipit pulvinar. Vivamus sagittis, nunc a porttitor tempus, mi neque eleifend diam, nec porttitor metus dui a orci. Cras tempus lobortis nisl ut sagittis. Maecenas semper in magna mollis venenatis. Vestibulum fermentum tincidunt fringilla.';
+      $(function() {
+        for (var i=0; i<30; i++) {
+          var html = '<p>' + i + ' ' + lorem + '</p>';
+          $('#emulated').append(html);
+          $('#native').append(html);
+        }
+        $('#emulated').bind('mousewheel', function(event) {
+          event.preventDefault();
+          var scrollTop = this.scrollTop;
+          this.scrollTop = (scrollTop + ((event.deltaY * event.deltaFactor) * -1));
+          //console.log(event.deltaY, event.deltaFactor, event.originalEvent.deltaMode, event.originalEvent.wheelDelta);
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="emulated"></div>
+    <div id="native"></div>
+  </body>
+</html>
