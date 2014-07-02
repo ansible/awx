@@ -25,10 +25,10 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.tasks = [];
     scope.hostResults = [];
 
-    scope.hostResultsMaxRows = 10;
-    scope.hostSummariesMaxRows = 100;
-    scope.tasksMaxRows = 20;
-    scope.playsMaxRows = 100;
+    scope.hostResultsMaxRows = 200;
+    scope.hostSummariesMaxRows = 200;
+    scope.tasksMaxRows = 200;
+    scope.playsMaxRows = 200;
 
     scope.liveEventProcessing = true;  // control play/pause state of event processing
 
