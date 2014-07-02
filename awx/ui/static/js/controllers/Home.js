@@ -10,7 +10,7 @@
 
 'use strict';
 
-function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, DashboardCounts, DashboardCharts, DashboardJobs,
+function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, DashboardCounts, HostGraph, JobStatusGraph, DashboardJobs,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button){
 
     ClearScope('home');
@@ -76,14 +76,20 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             target: 'container1',
             dashboard: data
         });
-        DashboardCharts({
+        JobStatusGraph({
             scope: $scope,
             target: 'container2',
             dashboard: data
         });
-        DashboardJobs({
+         HostGraph({
             scope: $scope,
             target: 'container3',
+            dashboard: data
+        });
+
+        DashboardJobs({
+            scope: $scope,
+            target: 'container4',
             dashboard: data
         });
     });
@@ -112,7 +118,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'DashboardCounts', 'DashboardCharts', 'DashboardJobs',  'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'DashboardCounts', 'HostGraph','JobStatusGraph', 'DashboardJobs',  'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
 ];
 
 

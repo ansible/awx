@@ -129,7 +129,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
                 search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
                 page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
                 header = Math.max($('#completed_jobs_table thead').height(), 41);
-                height = Math.floor(available_height) - header - page_row  - 15;
+                height = Math.floor(available_height) - header - page_row ;
                 row_height = (docw < 1415) ? 47 : 27;
                 //$('.jobs-list-container tbody tr:eq(0)').height();  <-- only works if data is loaded
                 max_rows = Math.floor(height / row_height);
