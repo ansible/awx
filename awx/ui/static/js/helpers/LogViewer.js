@@ -20,7 +20,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 scope = parent_scope.$new(true),
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 pieces;
-            
+
             if (scope.removeModalReady) {
                 scope.removeModalReady();
             }
@@ -34,7 +34,6 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
             }
             scope.removeJobReady = scope.$on('JobReady', function(e, data) {
                 var key, resizeText, elem;
-                
                 $('#status-form-container').empty();
                 $('#options-form-container').empty();
                 $('#stdout-form-container').empty();
@@ -45,7 +44,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 $('#logview-tabs li:eq(2)').hide();
                 $('#logview-tabs li:eq(4)').hide();
                 $('#logview-tabs li:eq(5)').hide();
-                
+
                 // Make sure subsequenct scope references don't bubble up to the parent
                 for (key in LogViewerStatusForm.fields) {
                     scope[key] = '';
@@ -59,7 +58,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 }
                 scope.created_by = '';
                 scope.job_template = '';
-                
+
                 if (data.related.created_by) {
                     pieces = data.related.created_by.replace(/^\//,'').replace(/\/$/,'').split('/');
                     scope.created_by = parseInt(pieces[pieces.length - 1],10);
@@ -69,7 +68,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         url: GetBasePath('users') + scope.created_by + '/'
                     });
                 }
-                
+
                 // For jobs link the name to the job parent
                 if (base === 'jobs') {
                     if (data.type === 'job') {
@@ -90,7 +89,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
 
                 AddTable({ scope: scope, form: LogViewerStatusForm, id: 'status-form-container', getIcon: getIcon });
                 AddTable({ scope: scope, form: LogViewerOptionsForm, id: 'options-form-container', getIcon: getIcon });
-                
+
                 if (data.result_stdout) {
                     $('#logview-tabs li:eq(1)').show();
                     AddPreFormattedText({
@@ -98,7 +97,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         val: data.result_stdout
                     });
                 }
-                
+
                 if (data.result_traceback) {
                     $('#logview-tabs li:eq(2)').show();
                     AddPreFormattedText({
@@ -106,14 +105,14 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         val: data.result_traceback
                     });
                 }
-                
+
                 /*if (data.job_env) {
                     EnvTable({
                         id: 'env-form-container',
                         vars: data.job_env
                     });
                 }*/
-                
+
                 if (data.extra_vars) {
                     $('#logview-tabs li:eq(4)').show();
                     AddTextarea({
@@ -122,7 +121,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         val: ParseVariableString(data.extra_vars)
                     });
                 }
-                
+
                 if (data.source_vars) {
                     $('#logview-tabs li:eq(5)').show();
                     AddTextarea({
@@ -131,7 +130,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                         val: ParseVariableString(data.source_vars)
                     });
                 }
-               
+
                 if (!Empty(scope.source)) {
                     if (scope.removeChoicesReady) {
                         scope.removeChoicesReady();
@@ -295,7 +294,6 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                     { "variable": "job_template", "url": "/#/job_templates/" },
                     { "variable": "created_by", "url": "/#/users/" }
                 ];
-
             html = "<table class=\"table logviewer-status\">\n";
             for (fld in form.fields) {
                 if (!Empty(scope[fld])) {

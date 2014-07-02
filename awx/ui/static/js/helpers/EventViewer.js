@@ -9,8 +9,8 @@
 
 angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
 
-    .factory('EventViewer', ['$compile', 'CreateDialog', 'GetEvent', 'Wait', 'AddTable', 'GetBasePath', 'LookUpName', 'Empty', 'AddPreFormattedText',
-    function($compile, CreateDialog, GetEvent, Wait, AddTable, GetBasePath, LookUpName, Empty, AddPreFormattedText) {
+    .factory('EventViewer', ['$compile', 'CreateDialog', 'GetEvent', 'Wait', 'EventAddTable', 'GetBasePath', 'LookUpName', 'Empty', 'EventAddPreFormattedText',
+    function($compile, CreateDialog, GetEvent, Wait, EventAddTable, GetBasePath, LookUpName, Empty, EventAddPreFormattedText) {
         return function(params) {
             var parent_scope = params.scope,
                 url = params.url,
@@ -39,11 +39,11 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
                 $('#eventview-tabs li:eq(2)').hide();
                 $('#eventview-tabs li:eq(3)').hide();
 
-                AddTable({ scope: scope, id: 'status-form-container', event: data });
+                EventAddTable({ scope: scope, id: 'status-form-container', event: data });
 
                 if (data.stdout) {
                     $('#eventview-tabs li:eq(1)').show();
-                    AddPreFormattedText({
+                    EventAddPreFormattedText({
                         id: 'stdout-form-container',
                         val: data.stdout
                     });
@@ -51,7 +51,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
 
                 if (data.stderr) {
                     $('#eventview-tabs li:eq(2)').show();
-                    AddPreFormattedText({
+                    EventAddPreFormattedText({
                         id: 'stderr-form-container',
                         val: data.stderr
                     });
@@ -59,7 +59,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
 
                 if (data.traceback) {
                     $('#eventview-tabs li:eq(3)').show();
-                    AddPreFormattedText({
+                    EventAddPreFormattedText({
                         id: 'traceback-form-container',
                         val: data.traceback
                     });
@@ -160,33 +160,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
         };
     }])
 
-    .factory('LookUpName', ['Rest', 'ProcessErrors', 'Empty', function(Rest, ProcessErrors, Empty) {
-        return function(params) {
-            var url = params.url,
-                scope_var = params.scope_var,
-                scope = params.scope;
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    if (scope_var === 'inventory_source') {
-                        scope[scope_var + '_name'] = data.summary_fields.group.name;
-                    }
-                    else if (!Empty(data.name)) {
-                        scope[scope_var + '_name'] = data.name;
-                    }
-                    if (!Empty(data.group)) {
-                        // Used for inventory_source
-                        scope.group = data.group;
-                    }
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to retrieve ' + url + '. GET returned: ' + status });
-                });
-        };
-    }])
-
-    .factory('AddTable', ['$compile', '$filter', 'Empty', function($compile, $filter, Empty) {
+    .factory('EventAddTable', ['$compile', '$filter', 'Empty', function($compile, $filter, Empty) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -274,7 +248,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
         };
     }])
 
-    .factory('AddTextarea', [ function() {
+    .factory('EventAddTextarea', [ function() {
         return function(params) {
             var container_id = params.container_id,
                 val = params.val,
@@ -287,7 +261,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
         };
     }])
 
-    .factory('AddPreFormattedText', [function() {
+    .factory('EventAddPreFormattedText', [function() {
         return function(params) {
             var id = params.id,
                 val = params.val,
