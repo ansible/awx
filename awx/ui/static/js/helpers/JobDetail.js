@@ -939,7 +939,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     };
 }])
 
-.factory('DrawPlays', ['$log', function($log) {
+.factory('DrawPlays', [function() {
     return function(params) {
         var scope = params.scope,
             idx = 0,
@@ -947,18 +947,25 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             newKeys = [],
             plays = JSON.parse(JSON.stringify(scope.jobData.plays)),
             keys = Object.keys(plays);
-        keys.sort().reverse();
+
+        function listSort(a,b) {
+            if (parseInt(a,10) < parseInt(b,10))
+                return -1;
+            if (parseInt(a,10) > parseInt(b,10))
+                return 1;
+            return 0;
+        }
+
+        keys.sort(function(a,b) { return listSort(a,b); }).reverse();
         for (idx=0; idx < scope.playsMaxRows && idx < keys.length; idx++) {
             newKeys.push(keys[idx]);
         }
-        newKeys.sort();
+        newKeys.sort(function(a,b) { return listSort(a,b); });
         idx = 0;
         while (idx < newKeys.length) {
             result.push(plays[newKeys[idx]]);
             idx++;
         }
-        $log.debug('setting plays to:');
-        $log.debug(result);
         scope.plays = result;
         if (scope.liveEventProcessing) {
             scope.$emit('FixPlaysScroll');
@@ -972,15 +979,23 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             result = [],
             idx, keys, newKeys, tasks;
 
+        function listSort(a,b) {
+            if (parseInt(a,10) < parseInt(b,10))
+                return -1;
+            if (parseInt(a,10) > parseInt(b,10))
+                return 1;
+            return 0;
+        }
+
         if (scope.activePlay) {
             tasks = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks));
             keys = Object.keys(tasks);
-            keys.sort().reverse();
+            keys.sort(function(a,b) { return listSort(a,b); }).reverse();
             newKeys = [];
             for (idx=0; result.length < scope.tasksMaxRows && idx < keys.length; idx++) {
                 newKeys.push(keys[idx]);
             }
-            newKeys.sort();
+            newKeys.sort(function(a,b) { return listSort(a,b); });
             idx = 0;
             while (idx < newKeys.length) {
                 result.push(tasks[newKeys[idx]]);
