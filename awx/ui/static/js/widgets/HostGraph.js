@@ -20,23 +20,13 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
 
                     html, element;
 
-                // html = "<div class=\"panel panel-default\" style=\"border:none\">\n";
-                html = "<div id=\"graph-container\" class=\"panel-body \" style=\"border:none\">\n";
 
-                html += "<table class=\"table\" >\n";
-                html += "<tr> \n";
-                // html += "<td class=\"h5 col-lg-6 text-center\" style=\"border:none\">Job Status</td>\n";
-                html += "<td class=\"h6 text-center\" style=\"border:none\">Hosts vs License Agreement</td>\n";
-                html += "</tr>\n";
-                html += "<tr>\n";
-                // html += "<td class=\"job-status-graph\" style=\"border:none\"><svg></svg></td>\n";
-                html += "<td class=\"host-count-graph\" style=\"border:none\"><svg></svg></td>\n";
-                html += "</tr>\n";
-                html += "</table>\n";
+                html = "<div class=\"graph-container\">\n";
+                        html +="<div class=\"row\">\n";
+                                html += "<div class=\"h6 col-lg-12 text-center\">Hosts vs License Agreement</div>\n";
+                                 html += "<div class=\"host-count-graph\"><svg></svg></div>\n";
+                        html += "</div>\n";
                 html += "</div>\n";
-                // html += "</div>\n";
-
-
 
                 function makeHostCountGraph(){
                     d3.json("static/js/hostcount.json",function(error,data) {
@@ -49,9 +39,9 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                         nv.addGraph({
                             generate: function() {
                                     var width = nv.utils.windowSize().width/3,
-                                    height = nv.utils.windowSize().height/4,
+                                    height = nv.utils.windowSize().height/5,
                                     chart = nv.models.lineChart()
-                                        .margin({top: 15, right: 75, bottom: 40, left: 80})
+                                        .margin({top: 15, right: 75, bottom: 40, left: 85})
                                         .x(function(d,i) { return i ;})
                                         .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                                         .transitionDuration(350)  //how fast do you want the lines to transition?
