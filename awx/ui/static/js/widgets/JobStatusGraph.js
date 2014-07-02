@@ -16,8 +16,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 var scope = params.scope,
                     target = params.target,
-                    dashboard = params.dashboard,
-
+                    // dashboard = params.dashboard,
                     html, element;
 
                 html = "<div class=\"graph-container\">\n";

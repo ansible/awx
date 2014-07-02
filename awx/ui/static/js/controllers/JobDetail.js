@@ -763,7 +763,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
             var url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
             url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
             url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
-            url += '&id__gt=' + scope.tasks[scope.tasks.length - 1].id; //+ '&page_size=' + scope.tasksMaxRows + '&order_by=id';
+            url += '&id__gt=' + scope.tasks[scope.tasks.length - 1].id + '&page_size=' + scope.tasksMaxRows + '&order_by=id';
             $('#tasksMoreRows').fadeIn();
             Rest.setUrl(url);
             Rest.get()

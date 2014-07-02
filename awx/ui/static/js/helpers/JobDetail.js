@@ -939,7 +939,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     };
 }])
 
-.factory('DrawPlays', [ function() {
+.factory('DrawPlays', ['$log', function($log) {
     return function(params) {
         var scope = params.scope,
             idx = 0,
@@ -957,6 +957,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             result.push(plays[newKeys[idx]]);
             idx++;
         }
+        $log.debug('setting plays to:');
+        $log.debug(result);
         scope.plays = result;
         if (scope.liveEventProcessing) {
             scope.$emit('FixPlaysScroll');
