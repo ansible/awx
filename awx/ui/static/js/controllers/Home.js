@@ -623,6 +623,10 @@ function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, 
 
     LoadBreadCrumbs();
 
+    $scope.refreshHosts = function() {
+        $scope.search(list.iterator);
+    };
+
     $scope.viewJob = function(id) {
         ViewJob({ scope: $scope, id: id });
     };
@@ -649,7 +653,7 @@ function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, 
         });
         if (host) {
             HostsEdit({
-                scope: $scope,
+                host_scope: $scope,
                 host_id: host_id,
                 inventory_id: host.inventory,
                 group_id: null,
