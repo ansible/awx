@@ -6,12 +6,33 @@
  */
 
  #jobs-stdout {
+    margin-bottom: 20px;
+
     #job-status {
         label {
             margin-right: 15px;
         }
         margin-bottom: 15px;
     }
+
+    .scroll-spinner {
+        display: none;
+        background-color: transparent;
+        color:#000;
+    }
+    #stdoutMoreRowsTop {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+    }
+    #stdoutMoreRowsBottom {
+        float: right;
+    }
+    #pre-container {
+        overflow-x: scroll;
+        overflow-y: auto;
+    }
+
  }
 
 .body_foreground { color: #AAAAAA; }

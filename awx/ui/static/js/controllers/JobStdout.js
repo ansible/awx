@@ -16,37 +16,23 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
         stdout_url,
         current_range,
         event_socket,
-        first_time_up = 0,
-        first_time_down = 0,
+        status_socket,
         loaded_sections = [],
         event_queue = 0,
         auto_scroll_down=true,  // programmatic scroll to bottom
         live_event_processing = true,
         should_apply_live_events = true,
-        prior_mcs,
-        page_size = 500;
+        page_size = 500,
+        lastScrollTop = 0,
+        st,
+        direction;
 
-    event_socket = Socket({
+    status_socket = Socket({
         scope: $scope,
-        endpoint: "job_events"
+        endpoint: "jobs"
     });
-
-    Wait('start');
-
-    event_socket.init();
-
-    event_socket.on("job_events-" + job_id, function() {
-        if (api_complete) {
-            event_queue++;
-        }
-    });
-
-    if ($rootScope.removeJobStatusChange) {
-        $rootScope.removeJobStatusChange();
-    }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
-        // if we receive a status change event for the current job indicating the job
-        // is finished, stop event queue processing and reload
+    status_socket.init();
+    status_socket.on("status_changed", function(data) {
         if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10) && $scope.job) {
             $scope.job.status = data.status;
             if (data.status === 'failed' || data.status === 'canceled' ||
@@ -55,10 +41,26 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
                     window.clearInterval($rootScope.jobStdOutInterval);
                 }
                 if (live_event_processing) {
-                    getNextSection();
+                    if (loaded_sections.length === 0) {
+                        $scope.$emit('LoadStdout');
+                    }
+                    else {
+                        getNextSection();
+                    }
                 }
                 live_event_processing = false;
             }
+        }
+    });
+
+    event_socket = Socket({
+        scope: $scope,
+        endpoint: "job_events"
+    });
+    event_socket.init();
+    event_socket.on("job_events-" + job_id, function() {
+        if (api_complete) {
+            event_queue++;
         }
     });
 
@@ -94,9 +96,8 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
                         start: (data.range.start < 0) ? 0 : data.range.start,
                         end: data.range.end
                     });
-                    setTimeout(function() {
-                        $('#pre-container').mCustomScrollbar("scrollTo", "bottom");
-                    }, 300);
+                    $('#pre-container').scrollTop($('#pre-container').prop("scrollHeight"));
+                    //console.log($('#pre-container-content').prop("scrollHeight"));
                 }
                 else {
                     api_complete = true;
@@ -108,17 +109,33 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
             });
     });
 
+    function detectDirection() {
+        st = $('#pre-container').scrollTop();
+        if (st > lastScrollTop) {
+            direction = "down";
+        } else {
+            direction = "up";
+        }
+        lastScrollTop = st;
+        return  direction;
+    }
+
     function resizeToFit() {
         available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#job-status').outerHeight() -
-            $('#breadcrumb-container').outerHeight() - 30;
+            $('#breadcrumb-container').outerHeight() - 60;
         $('#pre-container').height(available_height);
-        $('#pre-container').mCustomScrollbar("update");
     }
     resizeToFit();
 
     $(window).resize(_.debounce(function() {
         resizeToFit();
     }, 500));
+
+    $('#pre-container').bind('scroll', function() {
+        if (detectDirection() === "up") {
+            should_apply_live_events = false;
+        }
+    });
 
     Rest.setUrl(GetBasePath('jobs') + job_id + '/');
     Rest.get()
@@ -139,56 +156,7 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
         });
 
 
-    $scope.onTotalScroll = function() {
-        // scroll forward or into the future toward the end of the file
-        var start, url;
-        if ((live_event_processing === false || (live_event_processing && should_apply_live_events === false)) &&
-            auto_scroll_down === false) {
-
-            if (loaded_sections.length > 0) {
-                start = loaded_sections[loaded_sections.length - 1].end + 1;
-            }
-            else {
-                start = 0;
-            }
-            url = stdout_url + '?format=json&start_line=' + start + '&end_line=' + (start + page_size);
-            first_time_down++;
-            Wait('start');
-            Rest.setUrl(url);
-            Rest.get()
-                .success( function(data) {
-                    Wait('stop');
-                    if (loaded_sections.indexOf(start) < 0) {
-                        if (data.content) {
-                            $('#pre-container-content').append(data.content);
-                            loaded_sections.push({
-                                start: (data.range.start < 0) ? 0 : data.range.start,
-                                end: data.range.end
-                            });
-                            current_range = data.range;
-                        }
-                    }
-                    if (data.range.end === data.range.absolute_end) {
-                        should_apply_live_events = true;   //we're at the bottom
-                        $log.debug('at the end. turned on live events');
-                    }
-                    auto_scroll_down = true;
-                    if (first_time_down === 1) {
-                        $('#pre-container').mCustomScrollbar("update");
-                    }
-                    $("#pre-container").mCustomScrollbar("scrollTo", "bottom", {scrollInertia:0});
-                })
-                .error(function(data, status) {
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to retrieve stdout for job: ' + job_id + '. GET returned: ' + status });
-                });
-        }
-        else {
-            auto_scroll_down = false;
-        }
-    };
-
-    $scope.onTotalScrollBack = function() {
+    $scope.stdOutScrollToTop = function() {
         // scroll up or back in time toward the beginning of the file
         var start, end, url;
         if (loaded_sections.length > 0 && loaded_sections[0].start > 0) {
@@ -200,26 +168,26 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
             end = page_size;
         }
         if (start !== undefined  && end !== undefined) {
+            $('#stdoutMoreRowsTop').fadeIn();
             url = stdout_url + '?format=json&start_line=' + start + '&end_line=' + end;
-            first_time_up++;
-            Wait('start');
             Rest.setUrl(url);
             Rest.get()
                 .success( function(data) {
-                    Wait('stop');
-                    var oldContentHeight, heightDiff;
-                    oldContentHeight=$("#pre-container .mCSB_container").innerHeight();
+                    //var currentPos = $('#pre-container').scrollTop();
+                    var newSH, oldSH = $('#pre-container').prop('scrollHeight'),
+                        st = $('#pre-container').scrollTop();
+
                     $('#pre-container-content').prepend(data.content);
+
+                    newSH = $('#pre-container').prop('scrollHeight');
+                    $('#pre-container').scrollTop(newSH - oldSH + st);
+
                     loaded_sections.unshift({
                         start: (data.range.start < 0) ? 0 : data.range.start,
                         end: data.range.end
                     });
                     current_range = data.range;
-                    heightDiff=$("#pre-container .mCSB_container").innerHeight() - oldContentHeight;
-                    if (first_time_up === 1) {
-                        $('#pre-container').mCustomScrollbar("update");
-                    }
-                    $("#pre-container").mCustomScrollbar("scrollTo", heightDiff, {scrollInertia:0});
+                    $('#stdoutMoreRowsTop').fadeOut(400);
                 })
                 .error(function(data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -228,42 +196,11 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
         }
     };
 
-    $scope.whileScrolling = function(mcs) {
-        var direction;
-        if (prior_mcs !== undefined) {
-            if (mcs.topPct < prior_mcs.topPct && prior_mcs.topPct !== 100) {
-                direction = "up";
-            }
-            else if (mcs.topPct > prior_mcs.topPct) {
-                direction = "down";
-            }
-            else {
-                direction = "none";
-            }
-        }
-        prior_mcs = mcs;
-        if (direction === "up") {
-            // user is scrollin up or back in time
-            $log.debug('user scrolled up. turned off live events.');
-            should_apply_live_events = false;
-        }
-    };
-
-    $scope.scrollStarted = function() {
-        // user touched the scroll bar. stop applying live events and forcing
-        //if (auto_scroll_down === false) {
-        //    should_apply_live_events = false;
-        //    $log.debug('turned off live events');
-        //}
-        //else {
-        //    auto_scroll_down = false;
-        //}
-    };
-
     function getNextSection() {
         // get the next range of data from the API
         var start = loaded_sections[loaded_sections.length - 1].end + 1, url;
         url = stdout_url + '?format=json&start_line=' + start + '&end_line=' + (start + page_size);
+        $('#stdoutMoreRowsBottom').fadeIn();
         Rest.setUrl(url);
         Rest.get()
             .success( function(data) {
@@ -276,12 +213,9 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
                     // if user has not disabled live event view by scrolling upward, then scroll down to the new content
                     current_range = data.range;
                     auto_scroll_down = true; // prevent auto load from happening
-                    first_time_down++;
-                    if (first_time_down === 1) {
-                        $('#pre-container').mCustomScrollbar("update");
-                    }
-                    $("#pre-container").mCustomScrollbar("scrollTo", "bottom", {scrollInertia:0});
+                    $('#pre-container-content').scrollTop($('#pre-container-content').prop("scrollHeight"));
                 }
+                $('#stdoutMoreRowsBottom').fadeOut(400);
             })
             .error(function(data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!',
