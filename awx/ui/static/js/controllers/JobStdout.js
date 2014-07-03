@@ -213,7 +213,7 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
                     // if user has not disabled live event view by scrolling upward, then scroll down to the new content
                     current_range = data.range;
                     auto_scroll_down = true; // prevent auto load from happening
-                    $('#pre-container-content').scrollTop($('#pre-container-content').prop("scrollHeight"));
+                    $('#pre-container').scrollTop($('#pre-container').prop("scrollHeight"));
                 }
                 $('#stdoutMoreRowsBottom').fadeOut(400);
             })
