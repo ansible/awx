@@ -10,15 +10,15 @@
 'use strict';
 
 angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
-    .factory('HostGraph', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
-        function ($rootScope, $compile) {
+    .factory('HostGraph', ['$rootScope', '$compile', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
+        function ($rootScope, $compile,  $location, Rest, GetBasePath, ProcessErrors, Wait) {
             return function (params) {
 
                 var scope = params.scope,
                     target = params.target,
                     //dashboard = params.dashboard,
 
-                    html, element;
+                    html, element, url, license;
 
 
                 html = "<div class=\"graph-container\">\n";
@@ -28,12 +28,66 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                 html += "</div>\n";
                 html += "</div>\n";
 
-                function makeHostCountGraph(){
-                    d3.json("static/js/hostcount.json",function(error,data) {
 
-                        data.map(function(series) {
-                            series.values = series.values.map(function(d) { return {x: d[0], y: d[1] }; });
+                function getLicenseNumber(){
+                    Rest.setUrl(GetBasePath('config'));
+                    Rest.get()
+                        .success(function (data) {
+                            //$scope.$emit('dashboardReady', data);
+                            // console.log(data);
+                            license = data.license_info.available_instances;
+                            makeHostCountGraph(license);
+
+                        })
+                        .error(function (data, status) {
+                            //Wait('stWaitop');
+                            ProcessErrors(null, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
+                        });
+
+                        //return license;
+                };
+
+
+                function makeHostCountGraph(license){
+                     url = GetBasePath('dashboard')+'graphs/';
+                    var graphData = [];
+
+                     //d3.json("static/js/jobstatusdata.json",function(error,data) {
+                    d3.json(url, function(error,data) {
+                       // console.log(data);
+                      graphData = [
+                            {
+                                "key" : "Hosts" ,
+                                "color" : "#1778c3",
+                                "values": data.hosts
+                            },
+                            {
+                                "key" : "License" ,
+                                "color" : "#171717",
+                                "values": data.hosts
+                            }
+                        ];
+
+                        graphData.map(function(series) {
+                            if(series.key==="Hosts"){
+                                series.values = series.values.map(function(d) {
+                                    return {
+                                        x: d[0],
+                                        y: d[1]
+                                    };
+                                });
+                            }
+                            if(series.key==="License"){
+                                series.values = series.values.map(function(d) {
+                                    return {
+                                        x: d[0],
+                                        y: license
+                                    };
+                                });
+
+                            }
                             return series;
+
                         });
 
                         nv.addGraph({
@@ -53,8 +107,8 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                     chart.xAxis
                                     .axisLabel("Time")
                                     .tickFormat(function(d) {
-                                        var dx = data[0].values[d] && data[0].values[d].x || 0;
-                                        return dx ? d3.time.format('%m/%d')(new Date(dx)) : '';
+                                        var dx = graphData[0].values[d] && graphData[0].values[d].x || 0;
+                                        return dx ? d3.time.format('%m/%d')(new Date(Number(dx+'000'))) : '';
                                     });
 
                                     chart.yAxis     //Chart y-axis settings
@@ -62,7 +116,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                     .tickFormat(d3.format('.f'));
 
                                     d3.select('.host-count-graph svg')
-                                    .datum(data).transition()
+                                    .datum(graphData).transition()
                                         .attr('width', width)
                                         .attr('height', height)
                                         .duration(500)
@@ -91,8 +145,8 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                 element = angular.element(document.getElementById(target));
                 element.html(html);
                 $compile(element)(scope);
-                // makeJobStatusGraph();
-                makeHostCountGraph();
+                getLicenseNumber();
+               // makeHostCountGraph(license);
                 scope.$emit('WidgetLoaded');
 
             };

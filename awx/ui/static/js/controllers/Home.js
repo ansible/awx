@@ -101,7 +101,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
     };
 
     $scope.refresh = function () {
-        ('start');
+        Wait('start');
         loadedCount = 0;
         Rest.setUrl(GetBasePath('dashboard'));
         Rest.get()

@@ -11,7 +11,7 @@
 
 angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
     .factory('JobStatusGraph', ['$rootScope', '$compile', '$location' , 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
-        function ($rootScope, $compile, $location, Rest, GetBasePath, ProcessErrors, Wait) {
+        function ($rootScope, $compile , $location, Rest, GetBasePath, ProcessErrors, Wait) {
             return function (params) {
 
                 var scope = params.scope,
@@ -72,7 +72,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                     //d3.json("static/js/jobstatusdata.json",function(error,data) {
                     d3.json(url, function(error,data) {
-                       console.log(data);
+                       //console.log(data);
                       graphData = [
                             {
                                 "color": "#1778c3",
