@@ -11,7 +11,7 @@
 
 angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
     .factory('HostGraph', ['$rootScope', '$compile', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
-        function ($rootScope, $compile,  $location, Rest, GetBasePath, ProcessErrors, Wait) {
+        function ($rootScope, $compile,  $location, Rest, GetBasePath, ProcessErrors) {
             return function (params) {
 
                 var scope = params.scope,
@@ -45,53 +45,53 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                         });
 
                         //return license;
-                };
+                }
 
 
                 function makeHostCountGraph(license){
-                     url = GetBasePath('dashboard')+'graphs/';
-                    var graphData = [];
+                        url = GetBasePath('dashboard')+'graphs/';
+                        var graphData = [];
 
                      //d3.json("static/js/jobstatusdata.json",function(error,data) {
-                    d3.json(url, function(error,data) {
-                       // console.log(data);
-                      graphData = [
-                            {
-                                "key" : "Hosts" ,
-                                "color" : "#1778c3",
-                                "values": data.hosts
-                            },
-                            {
-                                "key" : "License" ,
-                                "color" : "#171717",
-                                "values": data.hosts
-                            }
-                        ];
+                        d3.json(url, function(error,data) {
 
-                        graphData.map(function(series) {
-                            if(series.key==="Hosts"){
-                                series.values = series.values.map(function(d) {
-                                    return {
-                                        x: d[0],
-                                        y: d[1]
-                                    };
-                                });
-                            }
-                            if(series.key==="License"){
-                                series.values = series.values.map(function(d) {
-                                    return {
-                                        x: d[0],
-                                        y: license
-                                    };
-                                });
+                            graphData = [
+                                {
+                                    "key" : "Hosts" ,
+                                    "color" : "#1778c3",
+                                    "values": data.hosts
+                                },
+                                {
+                                    "key" : "License" ,
+                                    "color" : "#171717",
+                                    "values": data.hosts
+                                }
+                            ];
 
-                            }
-                            return series;
+                            graphData.map(function(series) {
+                                if(series.key==="Hosts"){
+                                    series.values = series.values.map(function(d) {
+                                        return {
+                                            x: d[0],
+                                            y: d[1]
+                                        };
+                                    });
+                                }
+                                if(series.key==="License"){
+                                    series.values = series.values.map(function(d) {
+                                        return {
+                                            x: d[0],
+                                            y: license
+                                        };
+                                    });
 
-                        });
+                                }
+                                return series;
 
-                        nv.addGraph({
-                            generate: function() {
+                            });
+
+                            nv.addGraph({
+                                generate: function() {
                                     var width = nv.utils.windowSize().width/3,
                                     height = nv.utils.windowSize().height/5,
                                     chart = nv.models.lineChart()
@@ -138,9 +138,9 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                     return chart;
                                 },
 
+                            });
                         });
-                    });
-                }
+                    }
 
                 element = angular.element(document.getElementById(target));
                 element.html(html);
