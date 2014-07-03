@@ -3,7 +3,7 @@
  *
  * Dashboard.js
  *
- * The new dashboard
+ * The dashboard widget with stats across the top
  *
  */
 

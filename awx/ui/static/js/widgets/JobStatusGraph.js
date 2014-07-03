@@ -10,14 +10,14 @@
 'use strict';
 
 angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
-    .factory('JobStatusGraph', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
-        function ($rootScope, $compile) {
+    .factory('JobStatusGraph', ['$rootScope', '$compile', '$location' , 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
+        function ($rootScope, $compile, $location, Rest, GetBasePath, ProcessErrors, Wait) {
             return function (params) {
 
                 var scope = params.scope,
                     target = params.target,
                     // dashboard = params.dashboard,
-                    html, element;
+                    html, element, url;
 
                 html = "<div class=\"graph-container\">\n";
 
@@ -67,10 +67,32 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
 
                 function makeJobStatusGraph(){
-                    d3.json("static/js/jobstatusdata.json",function(error,data) {
-                    // d3.json(dashboard.graphs, function(error,data) {
-                        data.map(function(series) {
-                            series.values = series.values.map(function(d) { return {x: d[0], y: d[1] }; });
+                    url = GetBasePath('dashboard')+'graphs/';
+                    var graphData = [];
+
+                    //d3.json("static/js/jobstatusdata.json",function(error,data) {
+                    d3.json(url, function(error,data) {
+                       console.log(data);
+                      graphData = [
+                            {
+                                "color": "#1778c3",
+                                "key": "Successful",
+                                "values": data.jobs.successful
+                            },
+                            {
+                                "key" : "Failed" ,
+                                "color" : "#aa0000",
+                                "values": data.jobs.failed
+                            }
+                        ];
+
+                        graphData.map(function(series) {
+                            series.values = series.values.map(function(d) {
+                                return {
+                                    x: d[0],
+                                    y: d[1]
+                                };
+                            });
                             return series;
                         });
 
@@ -93,8 +115,8 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                 chart.xAxis
                                     .axisLabel("Time").showMaxMin(true)
                                     .tickFormat(function(d) {
-                                    var dx = data[0].values[d] && data[0].values[d].x || 0;
-                                    return dx ? d3.time.format('%m/%d')(new Date(dx)) : '';
+                                    var dx = graphData[0].values[d] && graphData[0].values[d].x || 0;
+                                    return dx ? d3.time.format('%m/%d')(new Date(Number(dx+'000'))) : '';
                                 });
 
                                 chart.yAxis     //Chart y-axis settings
@@ -108,7 +130,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                 //   .call(chart);
 
                                 d3.select('.job-status-graph svg')
-                                        .datum(data).transition()
+                                        .datum(graphData).transition()
                                         .attr('width', width)
                                         .attr('height', height)
                                         .duration(500)

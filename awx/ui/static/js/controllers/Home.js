@@ -101,7 +101,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
     };
 
     $scope.refresh = function () {
-        Wait('start');
+        ('start');
         loadedCount = 0;
         Rest.setUrl(GetBasePath('dashboard'));
         Rest.get()
@@ -109,7 +109,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
                 $scope.$emit('dashboardReady', data);
             })
             .error(function (data, status) {
-                Wait('stop');
+                Wait('stWaitop');
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
             });
     };
