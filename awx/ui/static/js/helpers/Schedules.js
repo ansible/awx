@@ -11,11 +11,11 @@
 
 angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
     'GeneratorHelpers'])
-  
+
     .factory('ShowSchedulerModal', ['Wait', 'CreateDialog', function(Wait, CreateDialog) {
         return function(params) {
             // Set modal dimensions based on viewport width
-            
+
             var buttons,
                 scope = params.scope,
                 callback = params.callback;
@@ -73,7 +73,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 callback = params.callback,
                 schedule, scheduler,
                 url = GetBasePath('schedules') + id + '/';
-                
+
             if (scope.removeDialogReady) {
                 scope.removeDialogReady();
             }
@@ -230,7 +230,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 schedule = (params.schedule) ? params.schedule : {},
                 callback = params.callback,
                 newSchedule, rrule;
-                
+
             if (scheduler.isValid()) {
                 Wait('start');
                 newSchedule = scheduler.getValue();
@@ -277,17 +277,17 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
     }])
 
     /**
-     * Inject the scheduler_dialog.html wherever needed 
+     * Inject the scheduler_dialog.html wherever needed
      */
     .factory('LoadDialogPartial', ['Rest', '$compile', 'ProcessErrors', function(Rest, $compile, ProcessErrors) {
         return function(params) {
-            
+
             var scope = params.scope,
                 element_id = params.element_id,
                 callback = params.callback,
                 url;
 
-            // Add the schedule_dialog.html partial 
+            // Add the schedule_dialog.html partial
             url = '/static/partials/schedule_dialog.html';
             Rest.setUrl(url);
             Rest.get()
@@ -320,7 +320,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 id = params.id,
                 callback = params.callback,
                 url = GetBasePath('schedules') + id +'/';
-            
+
             // Perform the update
             if (scope.removeScheduleFound) {
                 scope.removeScheduleFound();
@@ -538,7 +538,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
     }])
 
     /**
-     * 
+     *
      *  Called from a controller to setup the scope for a schedules list
      *
      */
@@ -578,7 +578,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                     id: id,
                     breadCrumbs: false,
                     scope: scope,
-                    searchSize: 'col-lg-4 col-md-6 col-sm-12 col-xs-12',
+                    searchSize: 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
                     showSearch: true
                 });
             }

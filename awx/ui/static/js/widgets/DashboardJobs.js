@@ -33,7 +33,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
         html += "<div class=\"tab-content\">\n";
         html += "<div class=\"tab-pane active\" id=\"active-jobs-tab\">\n";
         html += "<div class=\"row search-row\">\n";
-        html += "<div class=\"col-md-4\" id=\"active-jobs-search-container\"></div>\n";
+        html += "<div class=\"col-lg-6 col-md-6 col-sm-6\" id=\"active-jobs-search-container\"></div>\n";
         html += "</div>\n"; //row
         html += "<div class=\"job-list\" id=\"active-jobs-container\">\n";
         html += "<div id=\"active-jobs\" class=\"job-list-target\"></div>\n";

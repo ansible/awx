@@ -51,6 +51,19 @@
     background-image: none
 }
 
+.dashboard-jobs-list-container {
+    #jobs_table,
+    #schedules_table {
+        table-layout:fixed;
+    }
+    #jobs_table .name-column,
+    #schedules_table .name-column {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
  @media (min-width: 1024px) {
         .left-side {
             padding-right: 7px;
