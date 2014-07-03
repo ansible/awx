@@ -354,6 +354,7 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                 catch(err) {
                     // ignore
                 }
+                parent_scope.$emit('RefreshInventories');
                 scope.$destroy();
             });
 
@@ -382,8 +383,7 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
 
             scope.saveModal = function () {
                 scope.inventory_id = inventory_id;
-                parent_scope.inventory_name = scope.inventory_name;
-                SaveInventory({ scope: scope });
+                SaveInventory({ scope: scope, parent_scope: parent_scope });
             };
 
         };
