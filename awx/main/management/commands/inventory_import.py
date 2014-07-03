@@ -748,7 +748,7 @@ class Command(NoArgsCommand):
                 mem_instance_ids = all_mem_instance_ids[offset:(offset + self._batch_size)]
                 for db_host_pk in db_hosts.filter(instance_id__in=mem_instance_ids).values_list('pk', flat=True):
                     del_host_pks.discard(db_host_pk)
-            all_db_host_pks = [v for k,v in self.db_instance_id_map.items() if k in mem_instance_ids]
+            all_db_host_pks = [v for k,v in self.db_instance_id_map.items() if k in all_mem_instance_ids]
             for db_host_pk in all_db_host_pks:
                 del_host_pks.discard(db_host_pk)
             del_host_pks = list(del_host_pks)
