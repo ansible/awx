@@ -169,7 +169,6 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
     }
     $scope.removeRefreshInventories = $scope.$on('RefreshInventories', function () {
         // Reflect changes after inventory properties edit completes
-        console.log('here!!');
         $scope.search(list.iterator);
     });
 

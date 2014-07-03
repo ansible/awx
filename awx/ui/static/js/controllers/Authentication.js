@@ -140,7 +140,7 @@ function Authenticate($cookieStore, $compile, $window, $scope, $rootScope, $loca
                     $rootScope.sessionTimer = Timer.init();
                     scope.$emit('AuthorizationGetUser');
                 })
-                .error(function (data, status) {
+                .error(function (data) {
                     var hdr, msg, key;
                     Wait('stop');
                     if (data.non_field_errors && data.non_field_errors.length === 0) {
@@ -152,9 +152,11 @@ function Authenticate($cookieStore, $compile, $window, $scope, $rootScope, $loca
                         if (data.non_field_errors && data.non_field_errors.length > 0) {
                             hdr = 'Error';
                             msg = data.non_field_errors[0];
-                        } else {
+                        }
+                        else {
                             hdr = 'Error';
-                            msg = 'The login attempt failed with a status of: ' + status;
+                            msg = 'The login attempt failed. The Tower server is not responding. Check that the Tower server processes are running' +
+                            ' and accessible.';
                         }
                         scope.reset();
                         Alert(hdr, msg, 'alert-danger', setLoginFocus);
