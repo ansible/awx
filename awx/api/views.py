@@ -14,8 +14,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Sum
-
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.utils.datastructures import SortedDict
 from django.utils.timezone import now
@@ -1268,14 +1267,17 @@ class JobTemplateCallback(GenericAPIView):
         # Find the list of remote host names/IPs to check.
         remote_hosts = set()
         for header in settings.REMOTE_HOST_HEADERS:
-            value = self.request.META.get(header, '').strip()
-            if value:
-                remote_hosts.add(value)
+            for value in self.request.META.get(header, '').split(','):
+                value = value.strip()
+                if value:
+                    remote_hosts.add(value)
         # Add the reverse lookup of IP addresses.
         for rh in list(remote_hosts):
             try:
                 result = socket.gethostbyaddr(rh)
             except socket.herror:
+                continue
+            except socket.gaierror:
                 continue
             remote_hosts.add(result[0])
             remote_hosts.update(result[1])
@@ -1336,9 +1338,35 @@ class JobTemplateCallback(GenericAPIView):
         return Response(data)
 
     def post(self, request, *args, **kwargs):
-        job_template = self.get_object()
         # Permission class should have already validated host_config_key.
+        job_template = self.get_object()
+        # Attempt to find matching hosts based on remote address.
         matching_hosts = self.find_matching_hosts()
+        # If refresh_inventory flag is provided and the host is not found,
+        # update the inventory before trying to match the host.
+        refresh_inventory = request.DATA.get('refresh_inventory', '')
+        refresh_inventory = bool(refresh_inventory and refresh_inventory[0].lower() in ('t', 'y', '1'))
+        inventory_sources_already_updated = []
+        if refresh_inventory and len(matching_hosts) != 1:
+            inventory_sources = job_template.inventory.inventory_sources.filter(active=True, update_on_launch=True)
+            inventory_update_pks = set()
+            for inventory_source in inventory_sources:
+                if inventory_source.needs_update_on_launch:
+                    # FIXME: Doesn't check for any existing updates.
+                    inventory_update = inventory_source.create_inventory_update(launch_type='callback')
+                    inventory_update.signal_start()
+                    inventory_update_pks.add(inventory_update.pk)
+            inventory_update_qs = InventoryUpdate.objects.filter(pk__in=inventory_update_pks, status__in=('pending', 'waiting', 'running'))
+            # Poll for the inventory updates we've started to complete.
+            while inventory_update_qs.count():
+                time.sleep(1.0)
+                transaction.commit()
+            # Ignore failed inventory updates here, only add successful ones
+            # to the list to be excluded when running the job.
+            for inventory_update in InventoryUpdate.objects.filter(pk__in=inventory_update_pks, status='successful'):
+                inventory_sources_already_updated.append(inventory_update.inventory_source_id)
+            matching_hosts = self.find_matching_hosts()
+        # Check matching hosts.
         if not matching_hosts:
             data = dict(msg='No matching host could be found!')
             # FIXME: Log!
@@ -1355,7 +1383,7 @@ class JobTemplateCallback(GenericAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         limit = ':&'.join(filter(None, [job_template.limit, host.name]))
         job = job_template.create_job(limit=limit, launch_type='callback')
-        result = job.signal_start()
+        result = job.signal_start(inventory_sources_already_updated=inventory_sources_already_updated)
         if not result:
             data = dict(msg='Error starting job!')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)

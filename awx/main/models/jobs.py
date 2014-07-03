@@ -323,6 +323,18 @@ class Job(UnifiedJob, JobOptions):
             if type(obj) == InventoryUpdate:
                 if obj.inventory_source in inventory_sources:
                     inventory_sources_found.append(obj.inventory_source)
+        # Skip updating any inventory sources that were already updated before
+        # running this job (via callback inventory refresh).
+        try:
+            start_args = json.loads(decrypt_field(self, 'start_args'))
+        except Exception, e:
+            start_args = None
+        start_args = start_args or {}
+        inventory_sources_already_updated = start_args.get('inventory_sources_already_updated', [])
+        if inventory_sources_already_updated:
+            for source in inventory_sources.filter(pk__in=inventory_sources_already_updated):
+                if source not in inventory_sources_found:
+                    inventory_sources_found.append(source)
         if not project_found and self.project.needs_update_on_launch:
             dependencies.append(self.project.create_project_update(launch_type='dependency'))
         if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
