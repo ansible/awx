@@ -11,7 +11,7 @@
 
 angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
     .factory('JobStatusGraph', ['$rootScope', '$compile', '$location' , 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
-        function ($rootScope, $compile , $location, Rest, GetBasePath) {
+        function ($rootScope, $compile , $location, Rest, GetBasePath, ProcessErrors) {
             return function (params) {
 
                 var scope = params.scope,
@@ -47,7 +47,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 html += "  </a>\n";
 
                 html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
-                html += "<li><a href=\"#\">Past Day</a></li>\n";
+                html += "<li><a href=\"#\">Past 24 Hours</a></li>\n";
                 html += "<li><a href=\"#\">Past Week</a></li>\n";
                 html += "<li><a href=\"#\">Past Month</a></li>\n";
                 html += "</ul>\n";
@@ -65,15 +65,36 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 html += "</div>\n";
 
+                function createGraph(){
+                        url = GetBasePath('dashboard')+'graphs/';
+                        Rest.setUrl(url);
+                        Rest.get()
+                        .success(function (data) {
+                            //$scope.$emit('dashboardReady', data);
+                            // console.log(data);
+                           // license = data.license_info.available_instances;
+                            makeJobStatusGraph(data);
 
-                function makeJobStatusGraph(){
-                    url = GetBasePath('dashboard')+'graphs/';
+                        })
+                        .error(function (data, status) {
+                            //Wait('stWaitop');
+                            ProcessErrors(null, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
+                        });
+
+                        //return license;
+                    }
+
+
+                //function makeHostCountGraph(license){
+
+                function makeJobStatusGraph(data){
+
                     var graphData = [];
 
                     //d3.json("static/js/jobstatusdata.json",function(error,data) {
-                    d3.json(url, function(error,data) {
+                  //  d3.json(url, function(error,data) {
                        //console.log(data);
-                        graphData = [
+                    graphData = [
                             {
                                 "color": "#1778c3",
                                 "key": "Successful",
@@ -86,7 +107,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                             }
                         ];
 
-                        graphData.map(function(series) {
+                    graphData.map(function(series) {
                             series.values = series.values.map(function(d) {
                                 return {
                                     x: d[0],
@@ -96,7 +117,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                             return series;
                         });
 
-                        nv.addGraph({
+                    nv.addGraph({
                             generate: function() {
                                 var width = nv.utils.windowSize().width/3,
                                     height = nv.utils.windowSize().height/5,
@@ -150,14 +171,15 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                             },
 
                         });
-                    });
+                  //  });
                 }
 
 
                 element = angular.element(document.getElementById(target));
                 element.html(html);
                 $compile(element)(scope);
-                makeJobStatusGraph();
+                createGraph();
+                //makeJobStatusGraph();
                 scope.$emit('WidgetLoaded');
 
             };

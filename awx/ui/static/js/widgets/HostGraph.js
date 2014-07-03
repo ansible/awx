@@ -36,7 +36,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                             //$scope.$emit('dashboardReady', data);
                             // console.log(data);
                             license = data.license_info.available_instances;
-                            makeHostCountGraph(license);
+                            createGraph(license);
 
                         })
                         .error(function (data, status) {
@@ -47,15 +47,33 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                         //return license;
                 }
 
+                function createGraph(license){
+                    Rest.setUrl(GetBasePath('dashboard')+'graphs/');
+                    Rest.get()
+                        .success(function (data) {
+                            //$scope.$emit('dashboardReady', data);
+                            // console.log(data);
+                            //license = data.license_info.available_instances;
 
-                function makeHostCountGraph(license){
+                            makeHostCountGraph(license, data);
+
+                        })
+                        .error(function (data, status) {
+                            //Wait('stWaitop');
+                            ProcessErrors(null, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
+                        });
+
+                        //return license;
+                }
+
+                function makeHostCountGraph(license, data){
                         url = GetBasePath('dashboard')+'graphs/';
                         var graphData = [];
 
                      //d3.json("static/js/jobstatusdata.json",function(error,data) {
-                        d3.json(url, function(error,data) {
+                        //d3.json(url, function(error,data) {
 
-                            graphData = [
+                        graphData = [
                                 {
                                     "key" : "Hosts" ,
                                     "color" : "#1778c3",
@@ -68,7 +86,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                 }
                             ];
 
-                            graphData.map(function(series) {
+                        graphData.map(function(series) {
                                 if(series.key==="Hosts"){
                                     series.values = series.values.map(function(d) {
                                         return {
@@ -90,7 +108,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
 
                             });
 
-                            nv.addGraph({
+                        nv.addGraph({
                                 generate: function() {
                                     var width = nv.utils.windowSize().width/3,
                                     height = nv.utils.windowSize().height/5,
@@ -139,7 +157,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                 },
 
                             });
-                        });
+                        //});
                     }
 
                 element = angular.element(document.getElementById(target));
