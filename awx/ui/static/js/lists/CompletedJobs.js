@@ -14,7 +14,6 @@ angular.module('CompletedJobsDefinition', [])
         name: 'completed_jobs',
         iterator: 'completed_job',
         editTitle: 'Completed Jobs',
-        'class': 'table-condensed',
         index: false,
         hover: true,
         well: false,
@@ -67,7 +66,7 @@ angular.module('CompletedJobsDefinition', [])
             },
             name: {
                 label: 'Name',
-                columnClass: 'col-md-3 col-xs-5',
+                columnClass: 'col-md-3 col-sm-4 col-xs-4',
                 ngClick: "viewJobLog(completed_job.id, completed_job.nameHref)",
                 defaultSearchField: true
             },

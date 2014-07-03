@@ -41,6 +41,22 @@
         font-size: 13px;
     }
 
+    #completed_jobs_table,
+    #schedules_table,
+    #running_jobs_table,
+    #queued_jobs_table {
+        table-layout:fixed;
+    }
+    #completed_jobs_table .name-column,
+    #schedules_table .name-column,
+    #running_jobs_table .name-column,
+    #queued_jobs_table .name-column,
+     {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     .title {
         font-weight: bold;
         margin-top: 5px;
@@ -57,7 +73,7 @@
 
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1201px) {
     #jobs-page {
         .left-side {
             padding-right: 7px;
@@ -73,7 +89,7 @@
     }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1200px) {
     #jobs-page .jobs-list-container {
         margin-top: 15px;
     }
@@ -82,5 +98,13 @@
     }
     .title{
         margin-bottom: 8px;
+    }
+    #jobs-page {
+        .left-side {
+            padding-right: 15px;
+        }
+        .right-side {
+            padding-left: 15px;
+        }
     }
 }

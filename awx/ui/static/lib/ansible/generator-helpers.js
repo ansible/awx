@@ -501,6 +501,7 @@ angular.module('GeneratorHelpers', [])
             html += (field.dataPlacement) ? "data-placement=\"" + field.dataPlacement + "\" " : "";
         }
         html += (field.ngClass) ? Attr(field, 'ngClass') : '';
+        html += (field.ngEllipsis) ? "data-ng-bind=\"" + list.iterator + "." + fld + "\" data-ellipsis " : "";
         html += ">";
 
         // Add icon:
@@ -511,7 +512,7 @@ angular.module('GeneratorHelpers', [])
         }
 
         // Add data binds
-        if (!field.ngBindHtml && !field.iconOnly && (field.showValue === undefined || field.showValue === true)) {
+        if (!field.ngBindHtml && !field.iconOnly && !field.ngEllipsis && (field.showValue === undefined || field.showValue === true)) {
             if (field.ngBind) {
                 html += "{{ " + field.ngBind;
             } else {
@@ -566,6 +567,7 @@ angular.module('GeneratorHelpers', [])
                 html += (field.columnShow) ? Attr(field, 'columnShow') : "";
                 html += (field.ngBindHtml) ? "ng-bind-html=\"" + field.ngBindHtml + "\" " : "";
                 html += (field.columnClick) ? "ng-click=\"" + field.columnClick + "\" " : "";
+                html += (field.awEllipsis) ? "aw-ellipsis " : "";
                 html += ">\n";
 
                 // Add ngShow
@@ -628,7 +630,7 @@ angular.module('GeneratorHelpers', [])
                         if (field.ngBind) {
                             html += "{{ " + field.ngBind;
                         } else {
-                            html += "{{" + list.iterator + "." + fld;
+                            html += "{{ " + list.iterator + "." + fld;
                         }
                         if (field.filter) {
                             html += " | " + field.filter + " }}";

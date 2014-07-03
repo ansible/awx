@@ -234,7 +234,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             //doch = $(window).height(),
             available_height,
             search_row, page_row, height, header, row_height;
-        if (docw > 1000) {
+        if (docw > 1200) {
             // customize the container height and # of rows based on available viewport height
             available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - 80;
             $('.jobs-list-container').each(function() {
@@ -242,10 +242,9 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             });
             search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
             page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
-            header = Math.max($('#completed_jobs_table thead').height(), 41);
-            height = Math.floor(available_height / 2) - header - page_row - search_row - 15;
+            header = Math.max($('#completed_jobs_table thead').height(), 24);
+            height = Math.floor(available_height / 2) - header - page_row - search_row - 30;
             row_height = (docw < 1415) ? 47 : 27;
-            //$('.jobs-list-container tbody tr:eq(0)').height();  <-- only works if data is loaded
             max_rows = Math.floor(height / row_height);
         }
         else {

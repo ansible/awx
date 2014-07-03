@@ -720,39 +720,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
-/*
-    .directive('awCustomScroll', [ function() {
-        return function(scope, element, attrs) {
-            var theme = (attrs.scrollTheme) ? attrs.scrollTheme : 'dark-thin',
-                //inertia = (attrs.scrollInertia) ? parseInt(attrs.scrollInertia,10) : 1000,
-                axis = ($(element).attr('data-scroll-axis')) ? $(element).attr('data-scroll-axis') : 'y';
-             //   console.log('setting inertia: ' + inertia);
-            $(element).mCustomScrollbar({
-                advanced:{
-                    updateOnContentResize: true
-                },
-                scrollButtons: {
-                    enable: false
-                },
-                axis: axis,
-                theme: theme,
-                //scrollInertia: inertia,
-                mouseWheel: {
-                    enable: true
-                },
-                callbacks: {
-                    onTotalScroll: scope[attrs.onTotalScroll],
-                    onTotalScrollOfset: attrs.onTotalScrollOffset,
-                    onTotalScrollBack: scope[attrs.onTotalScrollBack],
-                    onTotalScrollBackOffset: attrs.onTotalScrollBackOffset,
-                    onScrollStart: scope[$(element).attr('data-on-scroll-start')],
-                    whileScrolling: scope[$(element).attr('data-while-scrolling')],
-                    alwaysTriggerOffsets: false
-                },
-            });
-        };
-    }]) */
-
     // Toggle switch inspired by http://www.bootply.com/92189
     .directive('awToggleButton', [ function() {
         return function(scope, element) {
@@ -788,21 +755,3 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             });
         };
     }]);
-
-    /*
-    .directive('awWatch', [ function() {
-        return {
-            require: 'ngModel',
-            link: function(scope, element, attrs, ngModel) {
-                $(element).change(function() {
-                    console.log('here');
-                    //var newVal = element.val();
-                    //if (newVal && ngModel.$pristine && ngModel.$viewValue !== newVal) {
-                    //    console.log('setting value');
-                    //    return ngModel.$setViewValue(newVal);
-                    //}
-                });
-            }
-        };
-    }]);
-    */

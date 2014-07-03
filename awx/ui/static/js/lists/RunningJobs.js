@@ -60,7 +60,7 @@ angular.module('RunningJobsDefinition', [])
             },
             name: {
                 label: 'Name',
-                columnClass: 'col-md-3 col-xs-5',
+                columnClass: 'col-md-3 col-sm-4 col-xs-4',
                 ngClick: "viewJobLog(running_job.id, running_job.nameHref)",
                 defaultSearchField: true
             }

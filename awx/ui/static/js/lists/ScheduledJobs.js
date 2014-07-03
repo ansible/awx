@@ -14,7 +14,6 @@ angular.module('ScheduledJobsDefinition', [])
         name: 'schedules',
         iterator: 'schedule',
         editTitle: 'Scheduled Jobs',
-        'class': 'table-condensed',
         index: true,
         hover: true,
         well: false,
@@ -51,7 +50,7 @@ angular.module('ScheduledJobsDefinition', [])
             },
             name: {
                 label: 'Name',
-                columnClass: "col-md-3 col-xs-5",
+                columnClass: 'col-md-3 col-sm-4 col-xs-4',
                 sourceModel: 'unified_job_template',
                 sourceField: 'name',
                 ngClick: "editSchedule(schedule.id)",

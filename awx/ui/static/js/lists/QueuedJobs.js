@@ -60,7 +60,7 @@ angular.module('QueuedJobsDefinition', [])
             },
             name: {
                 label: 'Name',
-                columnClass: 'col-md-3 col-sm-3 col-xs-5',
+                columnClass: 'col-md-3 col-sm-4 col-xs-4',
                 ngClick: "viewJobLog(queued_job.id, queued_job.nameHref)",
                 defaultSearchField: true
             }

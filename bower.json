@@ -22,11 +22,9 @@
     "select2": "~3.4.5",
     "sizzle": "1.10.16",
     "d3js": "*",
-    "angular-tz-extensions": "~0.3.10",
-    "malihu-custom-scrollbar-plugin": "2.8.4",
-    "jQuery.dotdotdot": "~1.6.14"
+    "angular-tz-extensions": "~0.3.10"
   },
   "resolutions": {
-    "angular": "1.2.15-build.2398+sha.4bab3d8"
+    "angular": "1.2.19"
   }
 }
