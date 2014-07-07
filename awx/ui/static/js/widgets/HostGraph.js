@@ -34,7 +34,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                 element.html(html);
                 $compile(element)(scope);
                 
-                url = GetBasePath('config');
+                /*url = GetBasePath('config');
 
                 Rest.setUrl(url);
                 Rest.get()
@@ -45,8 +45,9 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                     .error(function (data, status) {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                             msg: 'Failed to get: ' + url + ' GET returned: ' + status });
-                    });
+                    });*/
 
+                scope.$emit('licenseCountReady', 10);
 
                 if (scope.removeLicenseCountReady) {
                     scope.removeLicenseCountReady();
