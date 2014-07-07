@@ -78,8 +78,8 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                         })
                         .error(function (data, status) {
-                            //Wait('stWaitop');
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Failed to get: ' + url + ' GET returned: ' + status });
                         });
                 }
 
@@ -88,9 +88,6 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 $compile(element)(scope);
 
                 createGraph();
-
-
-
 
 
                 if (scope.removeGraphDataReady) {
