@@ -11,8 +11,8 @@
 
 angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
 
-    .factory('HostEventsViewer', ['$compile', 'CreateDialog', 'GetEvent', 'Wait', 'GetBasePath', 'LookUpName', 'Empty', 'GetEvents',
-    function($compile, CreateDialog, GetEvent, Wait, GetBasePath, LookUpName, Empty, GetEvents) {
+    .factory('HostEventsViewer', ['$compile', 'CreateDialog', 'Wait', 'GetBasePath', 'Empty', 'GetEvents',
+    function($compile, CreateDialog, Wait, GetBasePath, Empty, GetEvents) {
         return function(params) {
             var parent_scope = params.scope,
                 url = params.url,

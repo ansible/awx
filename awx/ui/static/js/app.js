@@ -100,10 +100,10 @@ angular.module('Tower', [
     'LogViewerHelper',
     'LogViewerOptionsDefinition',
     'EventViewerHelper',
+    'HostEventsViewerHelper',
     'JobDetailHelper',
     'SocketIO',
-    'lrInfiniteScroll',
-    'HostEventsViewer'
+    'lrInfiniteScroll'
 ])
 
     .constant('AngularScheduler.partials', $basePath + 'lib/angular-scheduler/lib/')
