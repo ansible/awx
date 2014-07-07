@@ -122,7 +122,8 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'DashboardCounts', 'HostGraph','JobStatusGraph', 'DashboardJobs',  'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'DashboardCounts', 'HostGraph','JobStatusGraph', 'DashboardJobs',
+    'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
 ];
 
 

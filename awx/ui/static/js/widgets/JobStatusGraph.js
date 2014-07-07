@@ -72,15 +72,15 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                     url = GetBasePath('dashboard')+'graphs/?period='+period+'&type='+job_type;
                     Rest.setUrl(url);
                     Rest.get()
-                    .success(function (data){
-                        scope.$emit('graphDataReady', data);
-                        return job_type, period;
+                        .success(function (data){
+                            scope.$emit('graphDataReady', data);
+                            return job_type, period;
 
-                    })
-                    .error(function (data, status) {
-                        //Wait('stWaitop');
-                        ProcessErrors(null, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
-                    });
+                        })
+                        .error(function (data, status) {
+                            //Wait('stWaitop');
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
+                        });
                 }
 
                 element = angular.element(document.getElementById(target));

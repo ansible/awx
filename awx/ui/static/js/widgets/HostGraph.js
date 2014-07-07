@@ -42,9 +42,9 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
 
                     })
                     .error(function (data, status) {
-                    //Wait('stWaitop');
-                    ProcessErrors(null, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
-                });
+                        //Wait('stWaitop');
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
+                    });
 
 
                 if (scope.removeLicenseCountReady) {
@@ -55,11 +55,10 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                     Rest.get()
                         .success(function (data) {
                             scope.$emit('hostDataReady', data, license);
-
                         })
                         .error(function (data, status) {
                             //Wait('stWaitop');
-                            ProcessErrors(null, data, status, null, { hdr: 'Error!', msg: 'Failed to get license info ' + status });
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get license info ' + status });
                         });
 
                 });
