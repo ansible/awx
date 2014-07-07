@@ -48,7 +48,7 @@ clean:
 	rm -rf build rpm-build *.egg-info
 	rm -rf debian deb-build
 	rm -f awx/ui/static/{js,css}/awx*.{js,css}
-	rm -rf node_modules package.json
+	rm -rf node_modules package.json GruntFile.js bower.json
 	find . -type f -regex ".*\.py[co]$$" -delete
 
 # Fetch from origin, rebase local commits on top of origin commits.
@@ -178,11 +178,17 @@ test_tox:
 test_jenkins:
 	$(PYTHON) manage.py jenkins -v2
 
+GruntFile.js:
+	cp packaging/grunt/$@ $@
+
+bower.json:
+	cp packaging/grunt/$@ $@
+
 package.json:
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' packaging/grunt/package.template > $@
 
 # Update local npm install
-node_modules: package.json
+node_modules: GruntFile.js package.json
 	npm install
 
 # Build minified JS/CSS.

@@ -29,6 +29,8 @@ pep8.txt
 .tower_cycle
 nohup.out
 reports
-package.json
 tools/vagrant/local.yml
 *~
+/GruntFile.js
+/bower.json
+/package.json
