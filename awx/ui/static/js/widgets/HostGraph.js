@@ -18,7 +18,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                     target = params.target,
                     //dashboard = params.dashboard,
 
-                    html, element, url, license;
+                    html, element, url, license, url;
 
 
                 html = "<div class=\"graph-container\">\n";
@@ -33,17 +33,18 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                 element = angular.element(document.getElementById(target));
                 element.html(html);
                 $compile(element)(scope);
+                
+                url = GetBasePath('config');
 
-                Rest.setUrl(GetBasePath('config'));
+                Rest.setUrl(url);
                 Rest.get()
                     .success(function (data){
                         license = data.license_info.available_instances;
                         scope.$emit('licenseCountReady', license);
-
                     })
                     .error(function (data, status) {
-                        //Wait('stWaitop');
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to get: ' + url + ' GET returned: ' + status });
                     });
 
 
@@ -51,14 +52,15 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                     scope.removeLicenseCountReady();
                 }
                 scope.removeLicenseCountReady = scope.$on('licenseCountReady', function (e, license) {
-                    Rest.setUrl(GetBasePath('dashboard')+'graphs/');
+                    url = GetBasePath('dashboard')+'graphs/';
+                    Rest.setUrl(url);
                     Rest.get()
                         .success(function (data) {
                             scope.$emit('hostDataReady', data, license);
                         })
                         .error(function (data, status) {
-                            //Wait('stWaitop');
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get license info ' + status });
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Failed to get: ' + url + ' GET returned: ' + status });
                         });
 
                 });
@@ -68,7 +70,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                 }
                 scope.removeHostDataReady = scope.$on('hostDataReady', function (e, data, license) {
 
-                        url = GetBasePath('dashboard')+'graphs/';
+                        //url = GetBasePath('dashboard')+'graphs/';
                         var graphData = [
                                 {
                                     "key" : "Hosts" ,
