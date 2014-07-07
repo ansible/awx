@@ -282,7 +282,8 @@ class DashboardGraphView(APIView):
             end_date = start_date - dateutil.relativedelta.relativedelta(days=1)
             interval = 'hours'
 
-        dashboard_data = {"jobs": {"successful": [], "failed": []}, "hosts": []}
+        dashboard_data = {"jobs": {"successful": [], "failed": []}, "hosts": [],
+                          "inventory": []}
         for element in success_qss.time_series(end_date, start_date, interval=interval):
             dashboard_data['jobs']['successful'].append([time.mktime(element[0].timetuple()),
                                                          element[1]])
@@ -297,6 +298,29 @@ class DashboardGraphView(APIView):
             count_hosts -= last_delta
             last_delta = element[1]
         dashboard_data['hosts'] = host_data[::-1]
+
+        hosts_by_inventory = user_hosts.all().values('inventory__id', 'inventory__name', 'has_active_failures', 'inventory_sources__id').annotate(Count("id"))
+        inventories = {}
+        for aggreg in hosts_by_inventory:
+            if (aggreg['inventory__id'], aggreg['inventory__name']) not in inventories:
+                inventories[(aggreg['inventory__id'], aggreg['inventory__name'])] = {}
+            if aggreg['inventory_sources__id'] not in inventories[(aggreg['inventory__id'], aggreg['inventory__name'])]:
+                inventories[(aggreg['inventory__id'], aggreg['inventory__name'])][aggreg['inventory_sources__id']] = {'successful': 0, 'failed': 0}
+            if aggreg['has_active_failures']:
+                inventories[(aggreg['inventory__id'], aggreg['inventory__name'])][aggreg['inventory_sources__id']]['failed'] = aggreg['id__count']
+            else:
+                inventories[(aggreg['inventory__id'], aggreg['inventory__name'])][aggreg['inventory_sources__id']]['successful'] = aggreg['id__count']
+        for inventory_id, inventory_name in inventories:
+            this_inventory = {'id': inventory_id, 'name': inventory_name, 'sources': []}
+            for source_id in inventories[(inventory_id, inventory_name)]:
+                if source_id is None:
+                    continue
+                i = InventorySource.objects.get(id=source_id)
+                this_source = {'name': i.name, 'source': i.source,
+                               'successful': inventories[(inventory_id, inventory_name)][source_id]['successful'],
+                               'failed': inventories[(inventory_id, inventory_name)][source_id]['failed']}
+                this_inventory['sources'].append(this_source)
+            dashboard_data['inventory'].append(this_inventory)
 
         # Setting it back
         settings.USE_TZ = True
