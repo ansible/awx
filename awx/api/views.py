@@ -297,6 +297,10 @@ class DashboardGraphView(APIView):
             count_hosts -= last_delta
             last_delta = element[1]
         dashboard_data['hosts'] = host_data[::-1]
+
+        # Setting it back
+        settings.USE_TZ = True
+
         return Response(dashboard_data)
 
 class ScheduleList(ListAPIView):
