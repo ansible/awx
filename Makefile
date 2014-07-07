@@ -11,6 +11,7 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 NAME=ansible-tower
 VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
 RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[1])")
+GIT_REMOTE_URL=$(shell git config --get remote.origin.url)
 
 # Allow AMI license customization
 AWS_INSTANCE_COUNT ?= 10
@@ -178,7 +179,7 @@ test_jenkins:
 	$(PYTHON) manage.py jenkins -v2
 
 package.json:
-	sed -e 's/%NAME%/$(NAME)/;s/%VERSION%/$(VERSION)/' packaging/grunt/package.template > $@
+	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' packaging/grunt/package.template > $@
 
 # Update local npm install
 node_modules: package.json
