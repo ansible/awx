@@ -9,7 +9,7 @@
 
 function JobDetailController ($location, $rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList,
-    JobIsFinished, SetTaskStyles, DigestEvent, UpdateDOM, EventViewer, DeleteJob, PlaybookRun) {
+    JobIsFinished, SetTaskStyles, DigestEvent, UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer) {
 
     ClearScope();
 
@@ -1004,9 +1004,17 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         }
     };
 
+    scope.hostEventsViewer = function(id, name) {
+        HostEventsViewer({
+            id: id,
+            name: name,
+            url: scope.job.related.job_events + '?event__icontains=runner'
+        });
+    }
+
 }
 
 JobDetailController.$inject = [ '$location', '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'FilterAllByHostName', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
-    'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun'
+    'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer'
 ];

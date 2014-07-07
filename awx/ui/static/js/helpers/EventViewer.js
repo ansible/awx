@@ -1,7 +1,7 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  LogViewer.js
+ *  EventsViewer.js
  *
  */
 

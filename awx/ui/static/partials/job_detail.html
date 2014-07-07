@@ -226,9 +226,8 @@
                             <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="hostSummariesScrollDown" scroll-threshold="10" time-threshold="500">
                                 <div class="row" ng-repeat="host in summaryList = (hosts | filter:{ status : searchAllStatus}) track by $index" id="{{ host.id }}">
                                     <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                        <a ng-show="host.name != '<deleted host>'" ng-href="/#/job_events/{{ job.id }}/?host={{ host.name }}" target="_blank"
-                                        aw-tool-tip="View all events for this host.<br />Opens in new tab or window." data-placement="top">{{ host.name }}</a>
-                                        <span ng-show="host.name == '<deleted host>'">{{ host.name }}</span>
+                                        <a ng-click="hostEventsViewer(host.id, host.name)" target="_blank" aw-tool-tip="View all events for this host"
+                                            data-placement="top">{{ host.name }}</a>
                                     </div>
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 badge-column">
                                         <a href="" aw-tool-tip="OK" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
@@ -262,5 +261,33 @@
     </div>
 
     <div ng-include="'/static/partials/eventviewer.html'"></div>
+    
+    <div id="host-events-modal-dialog">
+        <form class="form-inline">
+            <div class="form-group">
+                <label>Search</label>
+                <input type="text" class="form-control" id="host-events-search-name" id="host_events_search_name" ng-model="host-events-search-name" placeholder="Host name" >
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="host-events-search-status" ng-model="host_events_search_status" name="host-events-search-name">
+                    <option value="all">All</option>
+                    <option value="failed">Failed</option>
+                    <option value="changed">Changed</option>
+                    <option value="ok">OK</option>
+                    <option value="unreachable">Unreachable</option>
+                </select>
+            </div>
+        </form>
+        <div id="host-events-table" lr-infinite-scroll="hostEventsTable" scroll-threshold="10" time-threshold="500">
+            <div class="row">
+                <div class="col-md-2"><i class="fa icon-job{{ host_events.status }}"></i></div>
+                <div class="col-md-2">{{ host_events.play }}</div>
+                <div class="col-md-2">{{ host_events.role }}</div>
+                <div class="col-md-2">{{ host_events.task }}</div>
+                <div class="col-md-2">{{ host_events.msg }}</div>
+            </div>
+        </div>
+    </div>
 
 </div>
