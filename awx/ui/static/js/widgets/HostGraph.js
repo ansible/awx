@@ -29,51 +29,48 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                 html += "</div>\n";
 
 
-                function getLicenseNumber(){
-                    Rest.setUrl(GetBasePath('config'));
-                    Rest.get()
-                        .success(function (data) {
-                            //$scope.$emit('dashboardReady', data);
-                            // console.log(data);
-                            license = data.license_info.available_instances;
-                            createGraph(license);
 
-                        })
-                        .error(function (data, status) {
-                            //Wait('stWaitop');
-                            ProcessErrors(null, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
-                        });
+                element = angular.element(document.getElementById(target));
+                element.html(html);
+                $compile(element)(scope);
 
-                        //return license;
+                Rest.setUrl(GetBasePath('config'));
+                Rest.get()
+                    .success(function (data){
+                        license = data.license_info.available_instances;
+                        scope.$emit('licenseCountReady', license);
+
+                    })
+                    .error(function (data, status) {
+                    //Wait('stWaitop');
+                    ProcessErrors(null, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
+                });
+
+
+                if (scope.removeLicenseCountReady) {
+                    scope.removeLicenseCountReady();
                 }
-
-                function createGraph(license){
+                scope.removeLicenseCountReady = scope.$on('licenseCountReady', function (e, license) {
                     Rest.setUrl(GetBasePath('dashboard')+'graphs/');
                     Rest.get()
                         .success(function (data) {
-                            //$scope.$emit('dashboardReady', data);
-                            // console.log(data);
-                            //license = data.license_info.available_instances;
-
-                            makeHostCountGraph(license, data);
+                            scope.$emit('hostDataReady', data, license);
 
                         })
                         .error(function (data, status) {
                             //Wait('stWaitop');
-                            ProcessErrors(null, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard graph data: ' + status });
+                            ProcessErrors(null, data, status, null, { hdr: 'Error!', msg: 'Failed to get license info ' + status });
                         });
 
-                        //return license;
+                });
+
+                if (scope.removeHostDataReady) {
+                    scope.removeHostDataReady();
                 }
+                scope.removeHostDataReady = scope.$on('hostDataReady', function (e, data, license) {
 
-                function makeHostCountGraph(license, data){
                         url = GetBasePath('dashboard')+'graphs/';
-                        var graphData = [];
-
-                     //d3.json("static/js/jobstatusdata.json",function(error,data) {
-                        //d3.json(url, function(error,data) {
-
-                        graphData = [
+                        var graphData = [
                                 {
                                     "key" : "Hosts" ,
                                     "color" : "#1778c3",
@@ -153,19 +150,15 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                     });
 
                                     nv.utils.windowResize(chart.update);
+                                    scope.$emit('WidgetLoaded');
                                     return chart;
                                 },
 
                             });
                         //});
-                    }
+                    });
 
-                element = angular.element(document.getElementById(target));
-                element.html(html);
-                $compile(element)(scope);
-                getLicenseNumber();
-               // makeHostCountGraph(license);
-                scope.$emit('WidgetLoaded');
+
 
             };
         }

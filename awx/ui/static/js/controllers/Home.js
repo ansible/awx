@@ -44,6 +44,10 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         toolbar: true
     });
 
+    String.prototype.capitalize = function() {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    };
+
     e = angular.element(document.getElementById('home-list-actions'));
     e.html(html);
     $compile(e)($scope);
