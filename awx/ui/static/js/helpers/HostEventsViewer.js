@@ -16,6 +16,8 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
         return function(params) {
             var parent_scope = params.scope,
                 url = params.url,
+                host_id = params.id,
+                host_name = params.name,
                 title = params.title, //optional
                 scope = parent_scope.$new(true);
 

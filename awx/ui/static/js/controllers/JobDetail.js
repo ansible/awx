@@ -1006,6 +1006,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
     scope.hostEventsViewer = function(id, name) {
         HostEventsViewer({
+            scope: scope,
             id: id,
             name: name,
             url: scope.job.related.job_events + '?event__icontains=runner'

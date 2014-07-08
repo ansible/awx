@@ -226,7 +226,7 @@
                             <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="hostSummariesScrollDown" scroll-threshold="10" time-threshold="500">
                                 <div class="row" ng-repeat="host in summaryList = (hosts | filter:{ status : searchAllStatus}) track by $index" id="{{ host.id }}">
                                     <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                        <a ng-click="hostEventsViewer(host.id, host.name)" target="_blank" aw-tool-tip="View all events for this host"
+                                        <a href="" ng-click="hostEventsViewer(host.id, host.name)" aw-tool-tip="View all events for this host" 
                                             data-placement="top">{{ host.name }}</a>
                                     </div>
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 badge-column">
