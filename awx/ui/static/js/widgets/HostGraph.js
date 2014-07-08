@@ -37,7 +37,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                 Rest.setUrl(url);
                 Rest.get()
                     .success(function (data){
-                        license = data.license_info.available_instances;
+                        license = data.license_info.instance_count;
                         scope.$emit('licenseCountReady', license);
                     })
                     .error(function (data, status) {
@@ -143,9 +143,9 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                             "src": "url(/static/fonts/OpenSans-Regular.ttf)"
                                         });
 
-                                    d3.selectAll(".nv-line").on("click", function () {
-                                        alert("clicked");
-                                    });
+                                    // d3.selectAll(".nv-line").on("click", function () {
+                                    //     alert("clicked");
+                                    // });
 
                                     nv.utils.windowResize(chart.update);
                                     scope.$emit('WidgetLoaded');

@@ -48,7 +48,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 html += "Period<span class=\"caret\"></span>\n";
                 html += "  </a>\n";
 
-                html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
+                html += "<ul class=\"dropdown-menu period-dropdown\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
                 html += "<li><div class=\"n\" id=\"day\" >Past 24 Hours </div></li>\n";
                 html += "<li><div class=\"n\" id=\"week\">Past Week</div></li>\n";
                 html += "<li><div class=\"n\" id=\"month\">Past Month</div></li>\n";
