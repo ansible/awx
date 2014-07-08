@@ -226,7 +226,7 @@
                             <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="hostSummariesScrollDown" scroll-threshold="10" time-threshold="500">
                                 <div class="row" ng-repeat="host in summaryList = (hosts | filter:{ status : searchAllStatus}) track by $index" id="{{ host.id }}">
                                     <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                        <a href="" ng-click="hostEventsViewer(host.id, host.name)" aw-tool-tip="View all events for this host" 
+                                        <a href="" ng-click="hostEventsViewer(host.id, host.name)" aw-tool-tip="View all events for this host"
                                             data-placement="top">{{ host.name }}</a>
                                     </div>
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 badge-column">
@@ -257,12 +257,8 @@
             </div><!-- col-md-5 -->
 
         </div>
-    <div id="job-detail-footer" class="footer-row"></div>
-    </div>
 
-    <div ng-include="'/static/partials/eventviewer.html'"></div>
-    
-    <div id="host-events-modal-dialog">
+        <div id="host-events-modal-dialog" style="display:none;">
         <form class="form-inline">
             <div class="form-group">
                 <label>Search</label>
@@ -288,6 +284,12 @@
                 <div class="col-md-2">{{ event.msg }}</div>
             </div>
         </div>
+
+        <div id="job-detail-footer" class="footer-row"></div>
+    </div>
+
+    <div ng-include="'/static/partials/eventviewer.html'"></div>
+
     </div>
 
 </div>
