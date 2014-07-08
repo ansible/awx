@@ -188,7 +188,7 @@ package.json:
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' packaging/grunt/package.template > $@
 
 # Update local npm install
-node_modules: GruntFile.js package.json
+node_modules: GruntFile.js bower.json package.json
 	npm install
 
 # Build minified JS/CSS.
