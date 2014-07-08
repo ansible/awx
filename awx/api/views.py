@@ -263,14 +263,14 @@ class DashboardJobsGraphView(APIView):
         failed_query = user_unified_jobs.filter(status='failed')
 
         if job_type == 'inv_sync':
-            success_query.filter(instance_of=InventoryUpdate)
-            failed_query.filter(instance_of=InventoryUpdate)
+            success_query = success_query.filter(instance_of=InventoryUpdate)
+            failed_query = failed_query.filter(instance_of=InventoryUpdate)
         elif job_type == 'playbook_run':
-            success_query.filter(instance_of=Job)
-            failed_query.filter(instance_of=Job)
+            success_query = success_query.filter(instance_of=Job)
+            failed_query = failed_query.filter(instance_of=Job)
         elif job_type == 'scm_update':
-            success_query.filter(instance_of=ProjectUpdate)
-            failed_query.filter(instance_of=ProjectUpdate)
+            success_query = success_query.filter(instance_of=ProjectUpdate)
+            failed_query = failed_query.filter(instance_of=ProjectUpdate)
 
         success_qss = qsstats.QuerySetStats(success_query, 'finished')
         failed_qss = qsstats.QuerySetStats(failed_query, 'finished')
