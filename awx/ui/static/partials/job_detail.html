@@ -258,38 +258,36 @@
 
         </div>
 
-        <div id="host-events-modal-dialog" style="display:none;">
-        <form class="form-inline">
-            <div class="form-group">
+        <div id="job-detail-footer" class="footer-row"></div>
+
+    </div>
+
+    <div ng-include="'/static/partials/eventviewer.html'"></div>
+
+    <div id="host-events-modal-dialog" style="display:none;">
+        <form id="search-form" class="form-inline">
+            <div class="form-group" style="position:relative;">
                 <label>Search</label>
-                <input type="text" class="form-control" id="host-events-search-name" ng-model="host_events_search_name" placeholder="Host name" >
+                <input type="text" class="form-control input-sm" id="host-events-search-name" ng-model="host_events_search_name" placeholder="Host name" >
+                <div id="search-form-input-icons">
+                    <a class="search-icon" ng-show="!eventsSearchActive" ng-click="searchEvents()"><i class="fa fa-search"></i></a>
+                    <a class="search-icon" ng-show="eventsSearchActive" ng-click="host_events_search_name=''; searchEvents()"><i class="fa fa-times"></i></a>
+                </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="status-field">
                 <label>Status</label>
-                <select id="host-events-search-status" ng-model="host_events_search_status" name="host-events-search-name">
+                <select id="host-events-search-status" class="form-control input-sm" ng-model="host_events_search_status" name="host-events-search-name">
                     <option value="all">All</option>
-                    <option value="failed">Failed</option>
                     <option value="changed">Changed</option>
+                    <option value="failed">Failed</option>
                     <option value="ok">OK</option>
                     <option value="unreachable">Unreachable</option>
                 </select>
             </div>
         </form>
         <div id="host-events-table" lr-infinite-scroll="hostEventsTable" scroll-threshold="10" time-threshold="500">
-            <div class="row" ng-repeat="event in host_events">
-                <div class="col-md-2"><i class="fa icon-job{{ event.status }}"></i></div>
-                <div class="col-md-2">{{ event.play }}</div>
-                <div class="col-md-2">{{ event.role }}</div>
-                <div class="col-md-2">{{ event.task }}</div>
-                <div class="col-md-2">{{ event.msg }}</div>
-            </div>
+            <div id="host-events"></div>
         </div>
-
-        <div id="job-detail-footer" class="footer-row"></div>
-    </div>
-
-    <div ng-include="'/static/partials/eventviewer.html'"></div>
-
     </div>
 
 </div>
