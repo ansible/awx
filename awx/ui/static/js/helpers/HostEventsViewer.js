@@ -11,8 +11,8 @@
 
 angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
 
-    .factory('HostEventsViewer', ['$compile', 'CreateDialog', 'Wait', 'GetBasePath', 'Empty', 'GetEvents',
-    function($compile, CreateDialog, Wait, GetBasePath, Empty, GetEvents) {
+    .factory('HostEventsViewer', ['$log', '$compile', 'CreateDialog', 'Wait', 'GetBasePath', 'Empty', 'GetEvents',
+    function($log, $compile, CreateDialog, Wait, GetBasePath, Empty, GetEvents) {
         return function(params) {
             var parent_scope = params.scope,
                 url = params.url,
@@ -20,6 +20,8 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
                 host_name = params.name,
                 title = params.title, //optional
                 scope = parent_scope.$new(true);
+
+            $log.debug('host_id: ' + host_id + ' host_name: ' + host_name);
 
             if (scope.removeModalReady) {
                 scope.removeModalReady();
@@ -33,12 +35,12 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
                 scope.removeJobReady();
             }
             scope.removeEventReady = scope.$on('EventsReady', function(e, data) {
-                var elem;
+                //var elem;
 
                 scope.host_events = data.results;
                 
-                elem = angular.element(document.getElementById('host-events-modal-dialog'));
-                $compile(elem)(scope);
+                //elem = angular.element(document.getElementById('host-events-modal-dialog'));
+                //$compile(elem)(scope);
 
                 CreateDialog({
                     scope: scope,
@@ -46,7 +48,7 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
                     height: 600,
                     minWidth: 450,
                     callback: 'ModalReady',
-                    id: 'eventviewer-modal-dialog',
+                    id: 'host-events-modal-dialog',
                     // onResizeStop: resizeText,
                     title: ( (title) ? title : 'Event Details' ),
                     onOpen: function() {
@@ -61,7 +63,7 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
             });
 
             scope.modalOK = function() {
-                $('#eventviewer-modal-dialog').dialog('close');
+                $('#host-events-modal-dialog').dialog('close');
                 scope.$destroy();
             };
         };

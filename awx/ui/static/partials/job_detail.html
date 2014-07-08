@@ -266,7 +266,7 @@
         <form class="form-inline">
             <div class="form-group">
                 <label>Search</label>
-                <input type="text" class="form-control" id="host-events-search-name" id="host_events_search_name" ng-model="host-events-search-name" placeholder="Host name" >
+                <input type="text" class="form-control" id="host-events-search-name" ng-model="host_events_search_name" placeholder="Host name" >
             </div>
             <div class="form-group">
                 <label>Status</label>
@@ -280,12 +280,12 @@
             </div>
         </form>
         <div id="host-events-table" lr-infinite-scroll="hostEventsTable" scroll-threshold="10" time-threshold="500">
-            <div class="row">
-                <div class="col-md-2"><i class="fa icon-job{{ host_events.status }}"></i></div>
-                <div class="col-md-2">{{ host_events.play }}</div>
-                <div class="col-md-2">{{ host_events.role }}</div>
-                <div class="col-md-2">{{ host_events.task }}</div>
-                <div class="col-md-2">{{ host_events.msg }}</div>
+            <div class="row" ng-repeat="event in host_events">
+                <div class="col-md-2"><i class="fa icon-job{{ event.status }}"></i></div>
+                <div class="col-md-2">{{ event.play }}</div>
+                <div class="col-md-2">{{ event.role }}</div>
+                <div class="col-md-2">{{ event.task }}</div>
+                <div class="col-md-2">{{ event.msg }}</div>
             </div>
         </div>
     </div>
