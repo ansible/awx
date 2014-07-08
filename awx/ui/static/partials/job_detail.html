@@ -268,7 +268,7 @@
         <form id="search-form" class="form-inline">
             <div class="form-group" style="position:relative;">
                 <label>Search</label>
-                <input type="text" class="form-control input-sm" id="host-events-search-name" ng-model="host_events_search_name" placeholder="Host name" >
+                <input type="text" class="form-control input-sm" id="host-events-search-name" ng-model="host_events_search_name" placeholder="Host name" ng-keypress="searchEventKeyPress($event)" >
                 <div id="search-form-input-icons">
                     <a class="search-icon" ng-show="!eventsSearchActive" ng-click="searchEvents()"><i class="fa fa-search"></i></a>
                     <a class="search-icon" ng-show="eventsSearchActive" ng-click="host_events_search_name=''; searchEvents()"><i class="fa fa-times"></i></a>
@@ -276,7 +276,7 @@
             </div>
             <div class="form-group" id="status-field">
                 <label>Status</label>
-                <select id="host-events-search-status" class="form-control input-sm" ng-model="host_events_search_status" name="host-events-search-name">
+                <select id="host-events-search-status" class="form-control input-sm" ng-model="host_events_search_status" name="host-events-search-name" ng-change="searchEvents()">
                     <option value="all">All</option>
                     <option value="changed">Changed</option>
                     <option value="failed">Failed</option>
@@ -285,9 +285,19 @@
                 </select>
             </div>
         </form>
-        <div id="host-events-table" lr-infinite-scroll="hostEventsTable" scroll-threshold="10" time-threshold="500">
+        <!-- lr-infinite-scroll="hostEventsTable" scroll-threshold="10" time-threshold="500" -->
+        <div id="host-events-table">
+            <table id="fixed-table-header" class="table">
+                <thead>
+                    <tr><th class="col-md-3">Status</th>
+                        <th class="col-md-3">Play</th>
+                        <th class="col-md-3">Task</th>
+                        <th class="col-md-3">Result</th>
+                    </tr>
+                </thead>
+            </table>
             <div id="host-events"></div>
         </div>
-    </div>
+   </div>
 
 </div>

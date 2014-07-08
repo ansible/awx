@@ -15,17 +15,22 @@
 
 
 #host-events-modal-dialog {
+    overflow: hidden;
+    i {
+        font-size: 12px;
+        vertical-align: middle;
+    }
     #search-form {
         margin-left: 7px;
     }
     #host-events-search-name {
         width: 200px;
+        padding-right: 15px;
     }
     #search-form-input-icons {
         position: absolute;
-        right: 3px;
         top: 5px;
-        z-index: 100;
+        left: 235px;
         a {
             color: #a9a9a9;
         }
@@ -36,9 +41,37 @@
     #status-field {
         margin-left: 15px;
     }
-
-    table {
+    #host-events-table {
         margin-top: 15px;
+    }
+    #host-events {
+        height: 200px;
+        overflow: scroll;
+        tr:first-of-type {
+            border-top-color: @white;
+            td {
+                border-top-color: @white;
+            }
+        }
+    }
+    #fixed-table-header {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    #host-events-modal-dialog {
+        #search-form-input-icons {
+            position: absolute;
+            top: 30px;
+            left: 185px;
+        }
+        #status-field {
+            margin-left: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
     }
 }
 
