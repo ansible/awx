@@ -62,12 +62,6 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 html += "<div class=\"job-status-graph\"><svg></svg></div>\n";
                 html += "</div>\n";
 
-                function success(){
-                    alert('success');
-                }
-                //
-                // html += "</div>\n";
-
                 html += "</div>\n";
 
                 function createGraph(){

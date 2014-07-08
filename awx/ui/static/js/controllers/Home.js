@@ -10,7 +10,7 @@
 
 'use strict';
 
-function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, DashboardCounts, HostGraph, JobStatusGraph, DashboardJobs,
+function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, DashboardCounts, HostGraph, JobStatusGraph, HostPieChart, DashboardJobs,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button){
 
     ClearScope('home');
@@ -96,6 +96,11 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             target: 'container4',
             dashboard: data
         });
+        HostPieChart({
+            scope: $scope,
+            target: 'container5',
+            dashboard: data
+        });
     });
 
     $scope.showActivity = function () {
@@ -122,7 +127,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'DashboardCounts', 'HostGraph','JobStatusGraph', 'DashboardJobs',
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'DashboardCounts', 'HostGraph','JobStatusGraph', 'HostPieChart', 'DashboardJobs',
     'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
 ];
 

@@ -21,7 +21,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
 
                 html = "<div class=\"graph-container\">\n";
                 html +="<div class=\"row\">\n";
-                html += "<div class=\"h6 col-lg-12 text-center\"><b>Hosts vs License Agreement</b></div>\n";
+                html += "<div class=\"h6 col-xs-8 text-center\"><b>Hosts Count</b></div>\n";
                 html += "<div class=\"host-count-graph\"><svg></svg></div>\n";
                 html += "</div>\n";
                 html += "</div>\n";
