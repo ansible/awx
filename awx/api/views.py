@@ -1401,12 +1401,10 @@ class JobTemplateCallback(GenericAPIView):
         job_template = self.get_object()
         # Attempt to find matching hosts based on remote address.
         matching_hosts = self.find_matching_hosts()
-        # If refresh_inventory flag is provided and the host is not found,
-        # update the inventory before trying to match the host.
-        refresh_inventory = request.DATA.get('refresh_inventory', '')
-        refresh_inventory = bool(refresh_inventory and refresh_inventory[0].lower() in ('t', 'y', '1'))
+        # If the host is not found, update the inventory before trying to
+        # match again.
         inventory_sources_already_updated = []
-        if refresh_inventory and len(matching_hosts) != 1:
+        if len(matching_hosts) != 1:
             inventory_sources = job_template.inventory.inventory_sources.filter(active=True, update_on_launch=True)
             inventory_update_pks = set()
             for inventory_source in inventory_sources:
