@@ -310,6 +310,10 @@ ANSIBLE_HOST_KEY_CHECKING = False
 # slow.
 ANSIBLE_PARAMIKO_RECORD_HOST_KEYS = False
 
+# Force ansible in color even if we don't have a TTY so we can properly colorize
+# output
+ANSIBLE_FORCE_COLOR = True
+
 # Additional environment variables to be passed to the subprocess started by
 # the celery task.
 AWX_TASK_ENV = {}
