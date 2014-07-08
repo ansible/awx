@@ -257,10 +257,6 @@ class DashboardGraphView(APIView):
         period = request.QUERY_PARAMS.get('period', 'month')
         job_type = request.QUERY_PARAMS.get('job_type', 'all')
 
-        # Working around a django 1.5 bug:
-        # https://code.djangoproject.com/ticket/17260
-        settings.USE_TZ = False
-
         qs = User.objects.all()
         user_unified_jobs = get_user_queryset(request.user, UnifiedJob)
         user_hosts = get_user_queryset(request.user, Host)
@@ -321,9 +317,6 @@ class DashboardGraphView(APIView):
                                'failed': inventories[(inventory_id, inventory_name)][source_id]['failed']}
                 this_inventory['sources'].append(this_source)
             dashboard_data['inventory'].append(this_inventory)
-
-        # Setting it back
-        settings.USE_TZ = True
 
         return Response(dashboard_data)
 

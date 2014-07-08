@@ -122,6 +122,12 @@ class QuerySetStats(object):
 
         stat_list = []
         dt = start
+        try:
+            from django.utils.timezone import utc
+            dt = dt.replace(tzinfo=utc)
+            end = end.replace(tzinfo=utc)
+        except ImportError:
+            pass
         while dt < end:
             idx = 0
             value = 0
