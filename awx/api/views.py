@@ -248,24 +248,32 @@ class DashboardView(APIView):
                                  'total': job_template_list.count()}
         return Response(data)
 
-class DashboardGraphView(APIView):
+class DashboardJobsGraphView(APIView):
 
-    view_name = "Dashboard Graphs"
+    view_name = "Dashboard Jobs Graphs"
     new_in_20 = True
 
     def get(self, request, format=None):
         period = request.QUERY_PARAMS.get('period', 'month')
         job_type = request.QUERY_PARAMS.get('job_type', 'all')
 
-        qs = User.objects.all()
         user_unified_jobs = get_user_queryset(request.user, UnifiedJob)
-        user_hosts = get_user_queryset(request.user, Host)
 
-        success_qss = qsstats.QuerySetStats(user_unified_jobs.filter(status='successful'), 'finished')
-        failed_qss = qsstats.QuerySetStats(user_unified_jobs.filter(status='failed'), 'finished')
+        success_query = user_unified_jobs.filter(status='successful')
+        failed_query = user_unified_jobs.filter(status='failed')
 
-        created_hosts = qsstats.QuerySetStats(user_hosts, 'created')
-        count_hosts = user_hosts.all().count()
+        if job_type == 'inv_sync':
+            success_query.filter(instance_of=InventoryUpdate)
+            failed_query.filter(instance_of=InventoryUpdate)
+        elif job_type == 'playbook_run':
+            success_query.filter(instance_of=Job)
+            failed_query.filter(instance_of=Job)
+        elif job_type == 'scm_update':
+            success_query.filter(instance_of=ProjectUpdate)
+            failed_query.filter(instance_of=ProjectUpdate)
+
+        success_qss = qsstats.QuerySetStats(success_query, 'finished')
+        failed_qss = qsstats.QuerySetStats(failed_query, 'finished')
 
         start_date = datetime.datetime.now()
         if period == 'month':
@@ -277,15 +285,44 @@ class DashboardGraphView(APIView):
         elif period == 'day':
             end_date = start_date - dateutil.relativedelta.relativedelta(days=1)
             interval = 'hours'
+        else:
+            return Response({'error': 'Unknown period "%s"' % str(period)}, status=status.HTTP_400_BAD_REQUEST)
 
-        dashboard_data = {"jobs": {"successful": [], "failed": []}, "hosts": [],
-                          "inventory": []}
+        dashboard_data = {"jobs": {"successful": [], "failed": []}}
         for element in success_qss.time_series(end_date, start_date, interval=interval):
             dashboard_data['jobs']['successful'].append([time.mktime(element[0].timetuple()),
                                                          element[1]])
         for element in failed_qss.time_series(end_date, start_date, interval=interval):
             dashboard_data['jobs']['failed'].append([time.mktime(element[0].timetuple()),
                                                      element[1]])
+        return Response(dashboard_data)
+
+class DashboardInventoryGraphView(APIView):
+
+    view_name = "Dashboard Inventory Graphs"
+    new_in_20 = True
+
+    def get(self, request, format=None):
+        period = request.QUERY_PARAMS.get('period', 'month')
+
+        start_date = datetime.datetime.now()
+        if period == 'month':
+            end_date = start_date - dateutil.relativedelta.relativedelta(months=1)
+            interval = 'days'
+        elif period == 'week':
+            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=1)
+            interval = 'days'
+        elif period == 'day':
+            end_date = start_date - dateutil.relativedelta.relativedelta(days=1)
+            interval = 'hours'
+        else:
+            return Response({'error': 'Unknown period "%s"' % str(period)}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_hosts = get_user_queryset(request.user, Host)
+        created_hosts = qsstats.QuerySetStats(user_hosts, 'created')
+        count_hosts = user_hosts.all().count()
+
+        dashboard_data = {'hosts': [], 'inventory': []}
         last_delta = 0
         host_data = []
         for element in created_hosts.time_series(end_date, start_date, interval=interval)[::-1]:
@@ -293,6 +330,7 @@ class DashboardGraphView(APIView):
                                             count_hosts - last_delta])
             count_hosts -= last_delta
             last_delta = element[1]
+
         dashboard_data['hosts'] = host_data[::-1]
 
         hosts_by_inventory = user_hosts.all().values('inventory__id', 'inventory__name', 'has_active_failures', 'inventory_sources__id').annotate(Count("id"))
