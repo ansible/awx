@@ -76,6 +76,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             target: 'container1',
             dashboard: data
         });
+
         JobStatusGraph({
             scope: $scope,
             target: 'container2',

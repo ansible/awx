@@ -76,6 +76,7 @@ angular.module('Tower', [
     'HostGroupsFormDefinition',
     'DashboardCountsWidget',
     'JobStatusGraphWidget',
+    'HostPieChartWidget',
     'HostGraphWidget',
     'DashboardJobsWidget',
     'StreamWidget',

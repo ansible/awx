@@ -32,11 +32,11 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 html += "Job Type<span class=\"caret\"></span>\n";
                 html += "  </a>\n";
 
-                html += "<ul class=\"dropdown-menu status-dropdown\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
-                html += "<li><div class=\"m\" id=\"all\">All</span></div></li>\n";
-                html += "<li><div class=\"m\" id=\"inv_sync\">Inventory Sync</div></li>\n";
-                html += "<li><div class=\"m\" id=\"scm_update\">SCM Update</div></li>\n";
-                html += "<li><div class=\"m\" id=\"playbook_run\">Playbook Run</div></li>\n";
+                html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
+                html += "<li><a class=\"m\" id=\"all\">All</a></li>\n";
+                html += "<li><a class=\"m\" id=\"inv_sync\">Inventory Sync</a></li>\n";
+                html += "<li><a class=\"m\" id=\"scm_update\">SCM Update</a></li>\n";
+                html += "<li><a class=\"m\" id=\"playbook_run\">Playbook Run</a></li>\n";
                 html += "</ul>\n";
                 html += "</div>\n";
 
@@ -48,10 +48,10 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 html += "Period<span class=\"caret\"></span>\n";
                 html += "  </a>\n";
 
-                html += "<ul class=\"dropdown-menu period-dropdown\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
-                html += "<li><div class=\"n\" id=\"day\" >Past 24 Hours </div></li>\n";
-                html += "<li><div class=\"n\" id=\"week\">Past Week</div></li>\n";
-                html += "<li><div class=\"n\" id=\"month\">Past Month</div></li>\n";
+                html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
+                html += "<li><a class=\"n\" id=\"day\" >Past 24 Hours </a></li>\n";
+                html += "<li><a class=\"n\" id=\"week\">Past Week</a></li>\n";
+                html += "<li><a class=\"n\" id=\"month\">Past Month</a></li>\n";
                 html += "</ul>\n";
                 html += "</div>\n";
                 html += "</div>\n"; //end of filter div
@@ -62,6 +62,9 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 html += "<div class=\"job-status-graph\"><svg></svg></div>\n";
                 html += "</div>\n";
 
+                function success(){
+                    alert('success');
+                }
                 //
                 // html += "</div>\n";
 
@@ -69,7 +72,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 function createGraph(){
 
-                    url = GetBasePath('dashboard')+'graphs/?period='+period+'&type='+job_type;
+                    url = GetBasePath('dashboard')+'graphs/jobs/?period='+period+'&job_type='+job_type;
                     Rest.setUrl(url);
                     Rest.get()
                         .success(function (data){

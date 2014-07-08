@@ -31,7 +31,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                 element = angular.element(document.getElementById(target));
                 element.html(html);
                 $compile(element)(scope);
-                
+
                 url = GetBasePath('config');
 
                 Rest.setUrl(url);
@@ -49,7 +49,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                     scope.removeLicenseCountReady();
                 }
                 scope.removeLicenseCountReady = scope.$on('licenseCountReady', function (e, license) {
-                    url = GetBasePath('dashboard')+'graphs/';
+                    url = GetBasePath('dashboard')+'graphs/inventory/';
                     Rest.setUrl(url);
                     Rest.get()
                         .success(function (data) {
