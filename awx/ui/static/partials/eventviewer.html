@@ -1,6 +1,8 @@
 <div id="eventviewer-modal-dialog" title="Log View" style="display: none;">
     <ul id="eventview-tabs" class="nav nav-tabs">
-        <li class="active"><a href="#status" id="status-link" data-toggle="tab" ng-click="toggleTab($event, 'status-link', 'eventview-tabs')">Status</a></li>
+        <li class="active"><a href="#status" id="status-link" data-toggle="tab" ng-click="toggleTab($event, 'status-link', 'eventview-tabs')">Event</a></li>
+        <li><a href="#results" id="results-link" data-toggle="tab" ng-click="toggleTab($event, 'results-link', 'eventview-tabs')">Results</a></li>
+        <li><a href="#timing" id="timing-link" data-toggle="tab" ng-click="toggleTab($event, 'timing-link', 'eventview-tabs')">Timing</a></li>
         <li><a href="#stdout" id="stdout-link" data-toggle="tab" ng-click="toggleTab($event, 'stdout-link', 'eventview-tabs')">Standard Out</a></li>
         <li><a href="#stderr" id="stderr-link" data-toggle="tab" ng-click="toggleTab($event, 'stderr-link', 'eventview-tabs')">Standard Error</a></li>
         <li><a href="#traceback" id="traceback-link" data-toggle="tab" ng-click="toggleTab($event, 'traceback-link', 'eventview-tabs')">Traceback</a></li>
@@ -8,6 +10,12 @@
     <div class="tab-content">
         <div class="tab-pane active" id="status">
             <div id="status-form-container"></div>
+        </div>
+        <div class="tab-pane" id="results">
+            <div id="results-form-container"></div>
+        </div>
+        <div class="tab-pane" id="timing">
+            <div id="timing-form-container"></div>
         </div>
         <div class="tab-pane" id="stdout">
             <div id="stdout-form-container"></div>

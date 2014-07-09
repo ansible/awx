@@ -60,14 +60,9 @@ angular.module('Tower', [
     'CompletedJobsDefinition',
     'RunningJobsDefinition',
     'JobFormDefinition',
-    'JobEventsListDefinition',
-    'JobEventDataDefinition',
-    'JobEventsFormDefinition',
-    'JobHostDefinition',
     'JobSummaryDefinition',
     'ParseHelper',
     'ChildrenHelper',
-    'EventsHelper',
     'ProjectPathHelper',
     'md5Helper',
     'AccessHelper',
@@ -132,21 +127,6 @@ angular.module('Tower', [
                 controller: 'JobStdoutController'
             }).
 
-            when('/job_events/:id', {
-                templateUrl: urlPrefix + 'partials/job_events.html',
-                controller: 'JobEventsList'
-            }).
-
-            when('/job_host_summaries/:id', {
-                templateUrl: urlPrefix + 'partials/job_host_summaries.html',
-                controller: 'JobHostSummaryList'
-            }).
-
-            when('/jobs/:job_id/job_events/:event_id', {
-                templateUrl: urlPrefix + 'partials/jobs.html',
-                controller: 'JobEventsEdit'
-            }).
-
             when('/job_templates', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: 'JobTemplatesList'
@@ -195,11 +175,6 @@ angular.module('Tower', [
             when('/projects/:project_id/organizations/add', {
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: 'OrganizationsAdd'
-            }).
-
-            when('/hosts/:id/job_host_summaries', {
-                templateUrl: urlPrefix + 'partials/jobs.html',
-                controller: 'JobHostSummaryList'
             }).
 
             when('/inventories', {

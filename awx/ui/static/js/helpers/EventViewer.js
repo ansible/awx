@@ -7,7 +7,7 @@
 
 'use strict';
 
-angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsViewerHelper'])
+angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFormDefinition'])
 
     .factory('EventViewer', ['$compile', 'CreateDialog', 'GetEvent', 'Wait', 'EventAddTable', 'GetBasePath', 'LookUpName', 'Empty', 'EventAddPreFormattedText',
     function($compile, CreateDialog, GetEvent, Wait, EventAddTable, GetBasePath, LookUpName, Empty, EventAddPreFormattedText) {
@@ -32,17 +32,29 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsView
                 var elem;
 
                 $('#status-form-container').empty();
+                $('#results-form-container').empty();
+                $('#timing-form-container').empty();
                 $('#stdout-form-container').empty();
                 $('#stderr-form-container').empty();
                 $('#traceback-form-container').empty();
                 $('#eventview-tabs li:eq(1)').hide();
                 $('#eventview-tabs li:eq(2)').hide();
                 $('#eventview-tabs li:eq(3)').hide();
+                $('#eventview-tabs li:eq(4)').hide();
+                $('#eventview-tabs li:eq(5)').hide();
 
-                EventAddTable({ scope: scope, id: 'status-form-container', event: data });
+                EventAddTable({ scope: scope, id: 'status-form-container', event: data, section: 'Event' });
+
+                if (EventAddTable({ scope: scope, id: 'results-form-container', event: data, section: 'Results'})) {
+                    $('#eventview-tabs li:eq(1)').show();
+                }
+
+                if (EventAddTable({ scope: scope, id: 'timing-form-container', event: data, section: 'Timing' })) {
+                    $('#eventview-tabs li:eq(2)').show();
+                }
 
                 if (data.stdout) {
-                    $('#eventview-tabs li:eq(1)').show();
+                    $('#eventview-tabs li:eq(3)').show();
                     EventAddPreFormattedText({
                         id: 'stdout-form-container',
                         val: data.stdout
@@ -50,7 +62,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsView
                 }
 
                 if (data.stderr) {
-                    $('#eventview-tabs li:eq(2)').show();
+                    $('#eventview-tabs li:eq(4)').show();
                     EventAddPreFormattedText({
                         id: 'stderr-form-container',
                         val: data.stderr
@@ -58,7 +70,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsView
                 }
 
                 if (data.traceback) {
-                    $('#eventview-tabs li:eq(3)').show();
+                    $('#eventview-tabs li:eq(5)').show();
                     EventAddPreFormattedText({
                         id: 'traceback-form-container',
                         val: data.traceback
@@ -120,6 +132,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsView
                         }
                         if (data.results[0].event_data.res.ansible_facts) {
                             // don't show fact gathering results
+                            data.results[0].event_data.res.task = "Gathering Facts";
                             delete data.results[0].event_data.res.ansible_facts;
                         }
                         data.results[0].event_data.res.status = getStatus(data);
@@ -143,13 +156,17 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsView
                         }
                         delete event_data.invocation;
                     }
-                    event_data.parent = data.results[0].parent;
                     event_data.play = data.results[0].play;
-                    event_data.task = data.results[0].task;
+                    if (data.results[0].task) {
+                        event_data.task = data.results[0].task;
+                    }
                     event_data.created = data.results[0].created;
                     event_data.role = data.results[0].role;
                     event_data.host_id = data.results[0].host;
                     event_data.host_name = data.results[0].host_name;
+                    if (event_data.host) {
+                        delete event_data.host;
+                    }
                     event_data.id = data.results[0].id;
                     event_data.parent = data.results[0].parent;
                     event_data.event = (data.results[0].event_display) ? data.results[0].event_display : data.results[0].event;
@@ -162,61 +179,47 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsView
         };
     }])
 
-    .factory('EventAddTable', ['$compile', '$filter', 'Empty', function($compile, $filter, Empty) {
+    .factory('EventAddTable', ['$compile', '$filter', 'Empty', 'EventsViewerForm', function($compile, $filter, Empty, EventsViewerForm) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
                 event = params.event,
+                section = params.section,
                 html = '', e;
 
-            function keyToLabel(key) {
-                var label = '';
-                switch(key) {
-                    case "id":
-                        label = "Event ID";
-                        break;
-                    case "parent":
-                        label = "Parent Event ID";
-                        break;
-                    case "rc":
-                        label = "Return Code";
-                        break;
-                    default:
-                        label = key.charAt(0).toUpperCase() + key.slice(1);
-                        label = label.replace(/(\_.)/g, function(match) {
-                                    var res;
-                                    res = match.replace(/\_/,'');
-                                    res = ' ' + res.toUpperCase();
-                                    return res;
-                                });
-                }
-                return label;
-            }
-
             function parseJSON(obj) {
-                var html = '', keys;
+                var html = '', keys, found = false;
                 if (typeof obj === "object") {
                     html += "<table class=\"table eventviewer-status\">\n";
                     html += "<tbody>\n";
                     keys = Object.keys(obj).sort();
                     keys.forEach(function(key) {
                         var label;
-                        if (key !== "stdout" && key !== "stderr" && key !== "traceback" && key !== "host_id" && key !== "host") {
-                            label = keyToLabel(key);
+                        if (EventsViewerForm.fields[key] && EventsViewerForm.fields[key].section === section) {
+                            label = EventsViewerForm.fields[key].label;
                             if (Empty(obj[key])) {
                                 // exclude empty items
                             }
                             else if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
+                                found = true;
                                 html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">";
                                 if (key === "status") {
                                     html += "<i class=\"fa icon-job-" + obj[key] + "\"></i> " + obj[key];
                                 }
                                 else if (key === "start" || key === "end" || key === "created") {
-                                    html += $filter('date')(obj[key], 'MM/dd/yy HH:mm:ss');
+                                    if (!/Z$/.test(obj[key])) {
+                                        //sec = parseInt(obj[key].substr(obj[key].length - 6, 6),10) / 1000);
+                                        //obj[key] = obj[key].replace(/\d{6}$/,sec) + 'Z';
+                                        obj[key] = obj[key].replace(/\ /,'T') + 'Z';
+                                        html += $filter('date')(obj[key], 'MM/dd/yy HH:mm:ss.sss');
+                                    }
+                                    else {
+                                        html += $filter('date')(obj[key], 'MM/dd/yy HH:mm:ss');
+                                    }
                                 }
                                 else if (key === "host_name") {
                                     html += "<a href=\"#/home/hosts/?id=" + obj.host_id + "\" target=\"_blank\" " +
-                                        "aw-tool-tip=\"Click to view host.<br />Opens in new tab or window.\" data-placement=\"right\" " +
+                                        "aw-tool-tip=\"Click to edit host.\" data-placement=\"right\" " +
                                         "ng-click=\"modalOK()\">" + obj[key] + "</a>";
                                 }
                                 else {
@@ -226,6 +229,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsView
                                 html += "</td></tr>\n";
                             }
                             else if (typeof obj[key] === "object" && Array.isArray(obj[key])) {
+                                found = true;
                                 html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">";
                                 obj[key].forEach(function(row) {
                                     html += "[" + row + "],";
@@ -234,6 +238,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsView
                                 html += "</td></tr>\n";
                             }
                             else if (typeof obj[key] === "object") {
+                                found = true;
                                 html += "<tr><td class=\"key\">" + label + ":</td><td class=\"nested-table\">\n" + parseJSON(obj[key]) + "</td></tr>\n";
                             }
                         }
@@ -241,12 +246,16 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsView
                     html += "</tbody>\n";
                     html += "</table>\n";
                 }
-                return html;
+                return (found) ? html : '';
             }
             html = parseJSON(event);
             e = angular.element(document.getElementById(id));
-            e.empty().html(html);
-            $compile(e)(scope);
+            e.empty();
+            if (html) {
+                e.html(html);
+                $compile(e)(scope);
+            }
+            return (html) ? true : false;
         };
     }])
 
