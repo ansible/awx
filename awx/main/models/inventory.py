@@ -919,6 +919,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         if new_instance and self.inventory and replace_text in self.name:
             self.name = self.name.replace(replace_text, str(self.pk))
             self.save(update_fields=['name'])
+        self.inventory.update_computed_fields()
 
     def _get_current_status(self):
         if self.source:
