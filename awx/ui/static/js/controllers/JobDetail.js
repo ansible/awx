@@ -656,7 +656,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 top: 0,
                 right: 0,
                 width: slide_width,
-                'z-index': 2000,
+                'z-index': 1090,
                 'padding-right': '15px',
                 'padding-left': '15px'
             }).show('slide', {'direction': 'right'});
