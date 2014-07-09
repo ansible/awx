@@ -89,6 +89,14 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                     id: 'eventviewer-modal-dialog',
                     // onResizeStop: resizeText,
                     title: ( (title) ? title : 'Event Details' ),
+                    onClose: function() {
+                        try {
+                            scope.$destroy();
+                        }
+                        catch(e) {
+                            //ignore
+                        }
+                    },
                     onOpen: function() {
                         $('#eventview-tabs a:first').tab('show');
                         $('#dialog-ok-button').focus();

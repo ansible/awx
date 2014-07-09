@@ -75,7 +75,33 @@
 
                     <div id="job-detail-tables">
                         <div id="play-section" class="section">
-                            <h5>Plays</h5>
+
+                            <div class="row title-row">
+                                <div class="col-lg-1 col-md-2 col-sm-2 title">Plays</div>
+                                <div class="col-lg-11 col-md-10 col-sm-10" style="text-align:right;">
+                                    <form id="play-search-form" class="search-form form-inline">
+                                        <div class="form-group">
+                                            <label>Search</label>
+                                            <div class="search-name" style="display:inline-block; position:relative;">
+                                                <input type="text" class="input-xs form-control" id="search_play_name" ng-model="search_play_name"
+                                                        placeholder="Play Name" ng-keypress="searchPlaysKeyPress($event)" >
+                                                <div id="search-all-input-icons">
+                                                    <a class="search-icon" ng-show="searchPlaysEnabled" ng-click="searchPlays()"><i class="fa fa-search"></i></a>
+                                                    <a class="search-icon" ng-show="!searchPlaysEnabled" ng-click="search_play_name=''; searchPlays()"><i class="fa fa-times"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
+                                                <button class="btn btn-xs btn-primary active">All</button>
+                                                <button class="btn btn-xs btn-default">Failed</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
                             <div class="table-header">
                                 <div class="row">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">Started</div>
@@ -106,7 +132,33 @@
                         </div><!-- section -->
 
                         <div id="task-section" class="section" tasks=>
-                            <h5>Tasks</h5>
+
+                            <div class="row title-row">
+                                <div class="col-lg-1 col-md-2 col-sm-2 title">Tasks</div>
+                                <div class="col-lg-11 col-md-10 col-sm-10" style="text-align:right;">
+                                    <form id="task-search-form" class="search-form form-inline">
+                                        <div class="form-group">
+                                            <label>Search</label>
+                                            <div class="search-name" style="display:inline-block; position:relative;">
+                                                <input type="text" class="input-xs form-control" id="search_task_name" ng-model="search_task_name"
+                                                        placeholder="Task Name" ng-keypress="searchTasksKeyPress($event)" >
+                                                <div id="search-all-input-icons">
+                                                    <a class="search-icon" ng-show="searchTasksEnabled" ng-click="searchTasks()"><i class="fa fa-search"></i></a>
+                                                    <a class="search-icon" ng-show="!searchTasksEnabled" ng-click="search_task_name=''; searchTasks()"><i class="fa fa-times"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
+                                                <button class="btn btn-xs btn-primary active">All</button>
+                                                <button class="btn btn-xs btn-default">Failed</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
                             <div class="table-header">
                                 <div class="row">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">Started</div>
@@ -142,14 +194,33 @@
                         </div><!-- section -->
 
                         <div id="task-hosts-section" class="section">
-                            <div class="header">
-                                <div class="title">Hosts</div>
-                                <!-- <div class="search-field">
-                                    <input type="text" ng-model="task_host_name" placeholder="Host Name" ng-keypress="taskHostNameKeyPress($event)" />
-                                    <a class="search-icon" ng-show="searchTaskHostsEnabled" ng-click="searchTaskHosts()"><i class="fa fa-search"></i></a>
-                                    <a class="search-icon" ng-show="!searchTaskHostsEnabled" ng-click="task_host_name=''; searchTaskHosts()"><i class="fa fa-times"></i></a>
-                                </div>!-->
+
+                            <div class="row title-row">
+                                <div class="col-lg-1 col-md-2 col-sm-2 title">Hosts</div>
+                                <div class="col-lg-11 col-md-10 col-sm-10" style="text-align:right;">
+                                    <form id="host-search-form" class="search-form form-inline">
+                                        <div class="form-group">
+                                            <label>Search</label>
+                                            <div class="search-name" style="display:inline-block; position:relative;">
+                                                <input type="text" class="input-xs form-control" id="search_host_name" ng-model="search_host_name"
+                                                        placeholder="Host Name" ng-keypress="searchHostsKeyPress($event)" >
+                                                <div id="search-all-input-icons">
+                                                    <a class="search-icon" ng-show="searchHostsEnabled" ng-click="searchHosts()"><i class="fa fa-search"></i></a>
+                                                    <a class="search-icon" ng-show="!searchHostsEnabled" ng-click="search_host_name=''; searchHosts()"><i class="fa fa-times"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
+                                                <button class="btn btn-xs btn-primary active">All</button>
+                                                <button class="btn btn-xs btn-default">Failed</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
+
                             <div id="hosts-table-detail" class="table-detail" lr-infinite-scroll="hostResultsScrollDown" scroll-threshold="10" time-threshold="500">
                                 <div id="hosts-table-detail-inner">
                                     <div class="row cursor-pointer" ng-repeat="result in results = (hostResults | filter:{ status : searchAllStatus}) track by $index" ng-click="viewHostResults(result.id)">
@@ -182,41 +253,41 @@
                             <a href="" class="btn btn-xs btn-primary" ng-click="toggleSummary('hide')" aw-tool-tip="Hide summary" data-placement="top"><i class="fa fa-arrow-circle-right fa-lg"></i></a>
                         </div>
 
-                        <div id="summary-search-section" class="section">
-                            <div class="header">
-                                <div class="title">Filter</div>
-                            </div>
-                            <form class="form-inline" id="job-filter-form">
-                                <div class="col-sm-7 col-xs-7 remove-left-padding">
-                                    <div style="position:relative;">
-                                        <input type="text" class="input-sm form-control" id="search_all_hosts_name" ng-model="search_all_hosts_name"
-                                                placeholder="Host Name" ng-disabled="liveEventProcessing " ng-keypress="allHostNameKeyPress($event)" >
-                                        <div id="search-all-input-icons">
-                                            <a class="search-icon" ng-show="searchAllHostsEnabled" ng-click="searchAllByHost()"><i class="fa fa-search"></i></a>
-                                            <a class="search-icon" ng-show="!searchAllHostsEnabled" ng-click="search_all_hosts_name=''; searchAllByHost()"><i class="fa fa-times"></i></a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-5 col-xs-5 remove-left-padding">
-                                    <label>Status</label>
-                                    <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
-                                        <button class="btn btn-xs btn-primary active">All</button>
-                                        <button class="btn btn-xs btn-default">Failed</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div style="display:block; clear:both; width:100%; height:1px; margin-top:55px; margin-bottom:20px;">
-                            <hr>
-                        </div>
-
                         <div id="hosts-summary-section" class="section job_summary">
-                            <div class="header">
-                                <div class="title">Host Summary</div>
-                                <div class="legend pull-right"><i class="fa fa-circle successful-hosts-color"></i> OK <i class="fa fa-circle changed-hosts-color"></i> Changed
-                                <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
+
+                            <div class="row title-row">
+                                <div class="col-lg-1 col-md-2 col-sm-2 title">Summary</div>
+                                <div class="col-lg-10 col-md-8 col-sm-8" style="text-align:right;">
+                                    <form id="task-search-form" class="search-form form-inline">
+                                        <div class="form-group">
+                                            <label>Search</label>
+                                            <div class="search-name" style="display:inline-block; position:relative;">
+                                                <input type="text" class="input-xs form-control" id="search_taks_name" ng-model="search_task_name"
+                                                        placeholder="Task Name" ng-keypress="searchTasksKeyPress($event)" >
+                                                <div id="search-all-input-icons">
+                                                    <a class="search-icon" ng-show="searchTasksEnabled" ng-click="searchTasks()"><i class="fa fa-search"></i></a>
+                                                    <a class="search-icon" ng-show="!searchTasksEnabled" ng-click="search_task_name=''; searchTasks()"><i class="fa fa-times"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
+                                                <button class="btn btn-xs btn-primary active">All</button>
+                                                <button class="btn btn-xs btn-default">Failed</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
+
+                            <div class="row legend-row">
+                                <div class="col-md-12">
+                                    <div class="legend"><i class="fa fa-circle successful-hosts-color"></i> OK <i class="fa fa-circle changed-hosts-color"></i> Changed
+                                <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
+                                </div>
+                            </div>
+
                             <div class="table-header">
                                 <div class="row">
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">Host</div>
@@ -248,8 +319,8 @@
 
                     <div id="graph-section" class="section">
                         <div class="header">
-                            <div class="title">Host Status Summary</div>
-                            <div class="legend pull-right" style="display: none;"><i class="fa fa-circle successful-hosts-color"></i> OK <i class="fa fa-circle changed-hosts-color"></i> Changed
+                            <div class="title">Status Summary</div>
+                            <div class="legend" style="display: none;"><i class="fa fa-circle successful-hosts-color"></i> OK <i class="fa fa-circle changed-hosts-color"></i> Changed
                                     <i class="fa fa-circle unreachable-hosts-color"></i> Unreachable <i class="fa fa-circle failed-hosts-color"></i> Failed</div>
                         </div>
                     </div><!-- graph section -->

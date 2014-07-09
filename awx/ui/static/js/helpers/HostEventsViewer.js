@@ -56,6 +56,14 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
                     id: 'host-events-modal-dialog',
                     onResizeStop: fixHeight,
                     title: ( (title) ? title : 'Host Events' ),
+                    onClose: function() {
+                        try {
+                            scope.$destroy();
+                        }
+                        catch(e) {
+                            //ignore
+                        }
+                    },
                     onOpen: function() {
                         fixHeight();
                     }
