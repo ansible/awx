@@ -678,7 +678,16 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     };
 
     scope.toggleLessStatus = function() {
-        scope.lessStatus = (scope.lessStatus) ? false : true;
+        if (!scope.lessStatus) {
+            console.log('hide');
+            $('#job-status-form .toggle-show').hide(400);
+            scope.lessStatus = true;
+        }
+        else {
+            console.log('show');
+            $('#job-status-form .toggle-show').show(400);
+            scope.lessStatus = false;
+        }
     };
 
     scope.filterPlayStatus = function() {

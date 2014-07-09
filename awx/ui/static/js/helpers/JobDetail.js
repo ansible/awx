@@ -656,7 +656,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
         var scope = params.scope,
             callback = params.callback,
-            url;
+            url, play;
 
         scope.tasks = [];
         scope.tasksMap = {};
@@ -667,11 +667,24 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
             url += '&page_size=' + scope.tasksMaxRows + '&order_by=id';
 
+            scope.plays.every(function(p, idx) {
+                if (p.id === scope.activePlay) {
+                    play = scope.plays[idx];
+                    return false;
+                }
+                return true;
+            });
+
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
                     data.results.forEach(function(event, idx) {
                         var end, elapsed, status, status_text;
+
+                        if (play.firstTask === undefined  || play.firstTask === null) {
+                            play.firstTask = event.id;
+                            play.hostCount = (event.host_count) ? event.host_count : 0;
+                        }
 
                         if (idx < data.length - 1) {
                             // end date = starting date of the next event
@@ -721,6 +734,11 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                             unreachableCount: (event.unreachable_count) ? event.unreachable_count : 0,
                             taskActiveClass: ''
                         });
+
+                        if (play.firstTask !== event.id) {
+                            // this is not the first task
+                            scope.tasks[scope.tasks.length - 1].hostCount = play.hostCount;
+                        }
 
                         SetTaskStyles({
                             task: scope.tasks[scope.tasks.length - 1]
@@ -1131,7 +1149,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 filteredListA = hostResults;
             }
 
-            if (scope.search_host_status === 'failed') {
+            if (scope.search_host_status === 'failed' || scope.search_host_status === 'unreachable') {
                 for (key in filteredListA) {
                     if (filteredListA[key].status === 'failed') {
                         filteredListB[key] = filteredListA[key];
@@ -1190,7 +1208,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
             if (scope.search_host_summary_status === 'failed') {
                 for (key in filteredListA) {
-                    if (filteredListA[key].status === 'failed') {
+                    if (filteredListA[key].status === 'failed' || filteredListA[key].status === 'unreachable') {
                         filteredListB[key] = filteredListA[key];
                     }
                 }
