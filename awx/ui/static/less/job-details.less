@@ -263,6 +263,12 @@
     .table-header {
         font-weight: bold;
         font-size: 12px;
+        .table>thead>tr>th {
+            border-bottom-color: @white;
+        }
+        .table {
+            margin-bottom: 0;
+        }
     }
 
     .table-detail {
@@ -281,6 +287,13 @@
         .loading-info {
             padding-top: 5px;
             padding-left: 3px;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table-condensed > tbody > tr > td {
+            padding-top: 0;
+            padding-bottom: 0;
         }
     }
 
@@ -412,7 +425,6 @@
         }
         .table-header {
             font-size: 12px;
-            padding-right: 18px;
         }
         .table-detail {
             height: 200px;
