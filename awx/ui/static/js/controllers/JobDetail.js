@@ -8,8 +8,8 @@
 'use strict';
 
 function JobDetailController ($location, $rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
-    ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, FilterAllByHostName, DrawGraph, LoadHostSummary, ReloadHostSummaryList,
-    JobIsFinished, SetTaskStyles, DigestEvent, UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer) {
+    ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
+    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts) {
 
     ClearScope();
 
@@ -32,14 +32,19 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
     scope.liveEventProcessing = true;  // control play/pause state of event processing
 
-    scope.search_all_tasks = [];
-    scope.search_all_plays = [];
     scope.job_status = {};
     scope.job_id = job_id;
     scope.auto_scroll = false;
-    scope.searchTaskHostsEnabled = true;
-    scope.searchSummaryHostsEnabled = true;
-    scope.searchAllHostsEnabled = true;
+
+    scope.searchPlaysEnabled = true;
+    scope.searchTasksEnabled = true;
+    scope.searchHostsEnabled = true;
+    scope.searchHostSummaryEnabled = true;
+    scope.search_play_status = 'all';
+    scope.search_task_status = 'all';
+    scope.search_host_status = 'all';
+    scope.search_host_summary_status = 'all';
+
     scope.haltEventQueue = false;
     scope.processing = false;
     scope.lessStatus = true;
@@ -676,57 +681,120 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         scope.lessStatus = (scope.lessStatus) ? false : true;
     };
 
-    scope.searchAllByHost = function() {
-        if (scope.search_all_hosts_name) {
-            FilterAllByHostName({
-                scope: scope,
-                host: scope.search_all_hosts_name
+    scope.filterPlayStatus = function() {
+        scope.search_play_status = (scope.search_play_status === 'all') ? 'failed' : 'all';
+        if (!scope.liveEventProcessing) {
+            LoadPlays({
+                scope: scope
             });
-            scope.searchAllHostsEnabled = false;
-        }
-        else {
-            scope.search_all_tasks = [];
-            scope.search_all_plays = [];
-            scope.searchAllHostsEnabled = true;
-            SelectPlay({
-                scope: scope,
-                id: (scope.plays.length > 0) ? scope.plays[0].id : null
-            });
-
-        }
-        ReloadHostSummaryList({
-            scope: scope
-        });
-    };
-
-    scope.allHostNameKeyPress = function(e) {
-        if (e.keyCode === 13) {
-            scope.searchAllByHost();
         }
     };
 
-    scope.filterByStatus = function(choice) {
-        var nxtPlay;
-        if (choice === 'Failed') {
-            scope.searchAllStatus = 'failed';
-            nxtPlay = null;
-            scope.plays.every(function(play) {
-                if (play.status === 'failed') {
-                    nxtPlay = play.id;
-                    return false;
-                }
-                return true;
-            });
+    scope.searchPlays = function() {
+        if (scope.search_play_name) {
+            scope.searchPlaysEnabled = false;
         }
         else {
-            scope.searchAllStatus = '';
-            nxtPlay = (scope.plays.length > 0) ? scope.plays[0].id : null;
+            scope.searchPlaysEnabled = true;
         }
         if (!scope.liveEventProcessing) {
-            SelectPlay({
-                scope: scope,
-                id: nxtPlay
+            LoadPlays({
+                scope: scope
             });
+        }
+    };
+
+    scope.searchPlaysKeyPress = function(e) {
+        if (e.keyCode === 13) {
+            scope.searchPlays();
+            e.stopPropagation();
+        }
+    };
+
+    scope.searchTasks = function() {
+        if (scope.search_task_name) {
+            scope.searchTasksEnabled = false;
+        }
+        else {
+            scope.searchTasksEnabled = true;
+        }
+        if (!scope.liveEventProcessing) {
+            LoadTasks({
+                scope: scope
+            });
+        }
+    };
+
+    scope.searchTasksKeyPress = function(e) {
+        if (e.keyCode === 13) {
+            scope.searchTasks();
+            e.stopPropagation();
+        }
+    };
+
+    scope.searchHosts = function() {
+        if (scope.search_host_name) {
+            scope.searchHostsEnabled = false;
+        }
+        else {
+            scope.searchHostsEnabled = true;
+        }
+        if (!scope.liveEventProcessing) {
+            LoadHosts({
+                scope: scope
+            });
+        }
+    };
+
+    scope.searchHostsKeyPress = function(e) {
+        if (e.keyCode === 13) {
+            scope.searchHosts();
+            e.stopPropagation();
+        }
+    };
+
+    scope.searchHostSummary = function() {
+        if (scope.search_host_summary_name) {
+            scope.searchHostSummaryEnabled = false;
+        }
+        else {
+            scope.searchHostSummaryEnabled = true;
+        }
+        if (!scope.liveEventProcessing) {
+            ReloadHostSummaryList({
+                scope: scope
+            });
+        }
+    };
+
+    scope.searchHostSummaryKeyPress = function(e) {
+        if (e.keyCode === 13) {
+            scope.searchHostSummary();
+            e.stopPropagation();
+        }
+    };
+
+    scope.filterTaskStatus = function() {
+        scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
+        if (!scope.liveEventProcessing) {
+            LoadTasks({
+                scope: scope
+            });
+        }
+    };
+
+    scope.filterHostStatus = function() {
+        scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
+        if (!scope.liveEventProcessing) {
+            LoadHosts({
+                scope: scope
+            });
+        }
+    };
+
+    scope.filterHostSummaryStatus = function() {
+        scope.search_host_summary_status = (scope.search_host_summary_status === 'all') ? 'failed' : 'all';
+        if (!scope.liveEventProcessing) {
             ReloadHostSummaryList({
                 scope: scope
             });
@@ -772,8 +840,10 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         // check for more plays when user scrolls to bottom of play list...
         if ((!scope.liveEventProcessing) && scope.plays.length) {
 
-            var url = scope.job.url  + 'job_plays/?';
-            url += '&id__gt=' + scope.plays[scope.plays.length - 1].id + '&page_size=' + scope.playsMaxRows + '&order_by=id';
+            var url = scope.job.url  + 'job_plays/?id__gt=' + scope.plays[scope.plays.length - 1].id;
+            url += (scope.search_play_name) ? '&play__icontains=' + scope.search_play_name : '';
+            url += (scope.search_play_status === 'failed') ? '&failed=true' : '';
+            url += + '&page_size=' + scope.playsMaxRows + '&order_by=id';
 
             Rest.setUrl(url);
             Rest.get()
@@ -837,8 +907,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         // check for more tasks when user scrolls to bottom of task list...
         if ((!scope.liveEventProcessing) && scope.activePlay && scope.tasks.length) {
             var url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
-            url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
-            url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
+            url += (scope.search_task_name) ? '&name__icontains=' + scope.search_task_name : '';
+            url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
             url += '&id__gt=' + scope.tasks[scope.tasks.length - 1].id + '&page_size=' + scope.tasksMaxRows + '&order_by=id';
             $('#tasksMoreRows').fadeIn();
             Rest.setUrl(url);
@@ -910,8 +980,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         // check for more hosts when user scrolls to bottom of host results list...
         if ((!scope.liveEventProcessing) && scope.activeTask && scope.hostResults.length) {
             var url = GetBasePath('jobs') + job_id + '/job_events/?parent=' + scope.activeTask + '&';
-            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
-            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
+            url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
+            url += (scope.search_host_status === 'failed') ? '&failed=true' : '';
             url += 'host__name__gt=' + scope.hostResults[scope.hostResults.length - 1].name + '&page_size=' +
                 scope.hostResultsMaxRows + '&order_by=host__name';
             $('#hostResultsMoreRows').fadeIn();
@@ -970,8 +1040,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         // check for more hosts when user scrolls to bottom of host summaries list...
         if ((!scope.liveEventProcessing) && scope.hosts) {
             var url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
-            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
-            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
+            url += (scope.search_host_summary_name) ? 'host__name__icontains=' + scope.search_host_summary_name + '&' : '';
+            url += (scope.search_host_summary_status === 'failed') ? 'failed=true&' : '';
             url += 'host__name__gt=' + scope.hosts[scope.hosts.length - 1].name + '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
             $('#hostSummariesMoreRows').fadeIn();
             Rest.setUrl(url);
@@ -1017,6 +1087,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 }
 
 JobDetailController.$inject = [ '$location', '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
-    'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'FilterAllByHostName', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
-    'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer'
+    'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
+    'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer', 'LoadPlays', 'LoadTasks',
+    'LoadHosts'
 ];

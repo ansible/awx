@@ -15,26 +15,26 @@
                 <div class="job_well">
                     <div class="row">
                         <div class="col-md-12 text-right">
-                            <a href="/#/jobs/{{ job_id }}/stdout" id="view-stdout-button" target="_blank" type="button" class="btn btn-primary btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top"><i class="fa fa-lg fa-external-link"></i></a>
-                            <a href="" ng-click="deleteJob()" id="cancel-job-button" ng-show="job_status.status == 'running'" type="button" class="btn btn-primary btn-xs" aw-tool-tip="Cancel" data-placement="top"><i class="fa fa-lg fa-minus-circle"></i></a>
-                            <a href="" ng-click="deleteJob()" id="delete-job-button" ng-show="job_status.status != 'running'" type="button" class="btn btn-primary btn-xs" aw-tool-tip="Delete" data-placement="top"><i class="fa fa-lg fa-trash-o"></i></a>
-                            <a href="" ng-click="relaunchJob()" id="relaunch-job-button" type="button" class="btn btn-primary btn-xs" aw-tool-tip="Relaunch using the same parameters" data-placement="top"><i class="fa fa-lg fa-rocket"></i></a>
-                            <button type="button" id="summary-button" class="btn btn-primary btn-xs" ng-click="toggleSummary()" aw-tool-tip="View summary" data-placement="top"><i class="fa fa-lg fa-arrow-circle-left fa-lg"></i></button>
+                            <a href="/#/jobs/{{ job_id }}/stdout" id="view-stdout-button" target="_blank" type="button" class="btn btn-primary btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top"><i class="fa fa-external-link"></i></a>
+                            <a href="" ng-click="deleteJob()" id="cancel-job-button" ng-show="job_status.status == 'running'" type="button" class="btn btn-primary btn-xs" aw-tool-tip="Cancel" data-placement="top"><i class="fa fa-minus-circle"></i></a>
+                            <a href="" ng-click="deleteJob()" id="delete-job-button" ng-show="job_status.status != 'running'" type="button" class="btn btn-primary btn-xs" aw-tool-tip="Delete" data-placement="top"><i class="fa fa-trash-o"></i></a>
+                            <a href="" ng-click="relaunchJob()" id="relaunch-job-button" type="button" class="btn btn-primary btn-xs" aw-tool-tip="Relaunch using the same parameters" data-placement="top"><i class="fa fa-rocket"></i></a>
+                            <button type="button" id="summary-button" class="btn btn-primary btn-xs" ng-click="toggleSummary()" aw-tool-tip="View summary" data-placement="top"><i class="fa fa-arrow-circle-left"></i></button>
                         </div>
                     </div>
 
                     <div class="form-horizontal" role="form" id="job-status-form">
 
                         <div class="form-group">
-                            <label class="col-lg-1 col-md-2 col-sm-2 col-xs-3 control-label">Status</label>
-                            <div class="col-lg-11 col-md-10 col-sm-10 col-xs-9">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Status</label>
+                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
                                 <i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }} {{ job_status.explanation }}
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="col-lg-1 col-md-2 col-sm-2 col-xs-3 control-label">Started</label>
-                            <div class="col-lg-11 col-md-10 col-sm-10 col-xs-9">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Started</label>
+                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
                                 <div ng-show="job_status.started" id="started-time">{{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</div>
                                 <div ng-show="job_status.finished" id="finished-time">Finished &nbsp;{{ job_status.finished | date:'MM/dd/yy HH:mm:ss' }}</div>
                                 <div ng-show="job_status.finished" id="elapsed-time">Elapsed &nbsp;{{ job_status.elapsed }}</div>
@@ -42,22 +42,22 @@
                         </div>
 
                         <div class="form-group" ng-show="!lessStatus">
-                            <label class="col-lg-1 col-md-2 col-sm-2 col-xs-3 control-label">Template</label>
-                            <div class="col-lg-11 col-md-10 col-sm-10 col-xs-9">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Template</label>
+                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ job_template_url }}" aw-tool-tip="Edit the job template" data-placement="top">{{ job_template_name }}</a>
                             </div>
                         </div>
 
                         <div class="form-group" ng-show="!lessStatus">
-                            <label class="col-lg-1 col-md-2 col-sm-2 col-xs-3 control-label">Project</label>
-                            <div class="col-lg-11 col-md-10 col-sm-10 col-xs-9">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Project</label>
+                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ project_url }}" aw-tool-tip="Edit the project" data-placement="top">{{ project_name }}</a>
                             </div>
                         </div>
 
                         <div class="form-group" ng-show="!lessStatus">
-                            <label class="col-lg-1 col-md-2 col-sm-2 col-xs-3 control-label">Inventory</label>
-                            <div class="col-lg-11 col-md-10 col-sm-10 col-xs-9">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Inventory</label>
+                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ inventory_url }}" aw-tool-tip="Edit the inventory" data-placement="top">{{ inventory_name }}</a>
                             </div>
                         </div>
@@ -79,7 +79,7 @@
                             <div class="row title-row">
                                 <div class="col-lg-1 col-md-2 col-sm-2 title">Plays</div>
                                 <div class="col-lg-11 col-md-10 col-sm-10" style="text-align:right;">
-                                    <form id="play-search-form" class="search-form form-inline">
+                                    <div id="play-search-form" class="search-form form-inline">
                                         <div class="form-group">
                                             <label>Search</label>
                                             <div class="search-name" style="display:inline-block; position:relative;">
@@ -93,12 +93,12 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Status</label>
-                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
+                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterPlayStatus">
                                                 <button class="btn btn-xs btn-primary active">All</button>
                                                 <button class="btn btn-xs btn-default">Failed</button>
                                             </div>
                                         </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
 
@@ -111,8 +111,7 @@
                             </div>
                             <div id="plays-table-detail" class="table-detail" lr-infinite-scroll="playsScrollDown"
                                 scroll-threshold="10" time-threshold="500">
-                                <div class="row cursor-pointer" ng-repeat="play in playList = (plays | FilterById : search_all_plays | FilterFailedEvents : liveEventProcessing : searchAllStatus) track by $index"
-                                        ng-class="play.playActiveClass" ng-click="selectPlay(play.id)">
+                                <div class="row cursor-pointer" ng-repeat="play in plays" ng-class="play.playActiveClass" ng-click="selectPlay(play.id, $event)">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ play.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
                                         data-placement="top">{{ play.elapsed }}
@@ -136,7 +135,7 @@
                             <div class="row title-row">
                                 <div class="col-lg-1 col-md-2 col-sm-2 title">Tasks</div>
                                 <div class="col-lg-11 col-md-10 col-sm-10" style="text-align:right;">
-                                    <form id="task-search-form" class="search-form form-inline">
+                                    <div id="task-search-form" class="search-form form-inline">
                                         <div class="form-group">
                                             <label>Search</label>
                                             <div class="search-name" style="display:inline-block; position:relative;">
@@ -150,12 +149,12 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Status</label>
-                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
+                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterTaskStatus">
                                                 <button class="btn btn-xs btn-primary active">All</button>
                                                 <button class="btn btn-xs btn-default">Failed</button>
                                             </div>
                                         </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
 
@@ -170,7 +169,7 @@
                             <div id="tasks-table-detail" class="table-detail" lr-infinite-scroll="tasksScrollDown"
                                 scroll-threshold="10" time-threshold="500">
                                 <div class="row cursor-pointer"
-                                    ng-repeat="task in taskList = (tasks | FilterById : search_all_tasks | FilterFailedEvents : liveEventProcessing : searchAllStatus) track by $index"
+                                    ng-repeat="task in taskList = (tasks) track by $index"
                                     ng-class="task.taskActiveClass" ng-click="selectTask(task.id)">
                                     <div class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ task.created | date: 'HH:mm:ss' }}</div>
                                     <div class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
@@ -198,7 +197,7 @@
                             <div class="row title-row">
                                 <div class="col-lg-1 col-md-2 col-sm-2 title">Hosts</div>
                                 <div class="col-lg-11 col-md-10 col-sm-10" style="text-align:right;">
-                                    <form id="host-search-form" class="search-form form-inline">
+                                    <div id="host-search-form" class="search-form form-inline">
                                         <div class="form-group">
                                             <label>Search</label>
                                             <div class="search-name" style="display:inline-block; position:relative;">
@@ -212,18 +211,18 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Status</label>
-                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
+                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterHostStatus">
                                                 <button class="btn btn-xs btn-primary active">All</button>
                                                 <button class="btn btn-xs btn-default">Failed</button>
                                             </div>
                                         </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
 
                             <div id="hosts-table-detail" class="table-detail" lr-infinite-scroll="hostResultsScrollDown" scroll-threshold="10" time-threshold="500">
                                 <div id="hosts-table-detail-inner">
-                                    <div class="row cursor-pointer" ng-repeat="result in results = (hostResults | filter:{ status : searchAllStatus}) track by $index" ng-click="viewHostResults(result.id)">
+                                    <div class="row cursor-pointer" ng-repeat="result in results = (hostResults) track by $index" ng-click="viewHostResults(result.id)">
                                         <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7 status-column">
                                             <a href="" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i ng-show="result.status_text != 'Unreachable'" class="fa icon-job-{{ result.status }}"></i><i ng-show="result.status_text == 'Unreachable'" class="fa icon-job-unreachable"></i> {{ result.name }}</a>
                                         </div>
@@ -250,7 +249,7 @@
                 <div class="job_well">
                     <div id="summary-well-top-section">
                         <div id="hide-summary-button" style="display: hidden;">
-                            <a href="" class="btn btn-xs btn-primary" ng-click="toggleSummary('hide')" aw-tool-tip="Hide summary" data-placement="top"><i class="fa fa-arrow-circle-right fa-lg"></i></a>
+                            <a href="" class="btn btn-xs btn-primary" ng-click="toggleSummary('hide')" aw-tool-tip="Hide summary" data-placement="top"><i class="fa fa-arrow-circle-right"></i></a>
                         </div>
 
                         <div id="hosts-summary-section" class="section job_summary">
@@ -258,26 +257,26 @@
                             <div class="row title-row">
                                 <div class="col-lg-1 col-md-2 col-sm-2 title">Summary</div>
                                 <div class="col-lg-10 col-md-8 col-sm-8" style="text-align:right;">
-                                    <form id="task-search-form" class="search-form form-inline">
+                                    <div id="task-search-form" class="search-form form-inline">
                                         <div class="form-group">
                                             <label>Search</label>
                                             <div class="search-name" style="display:inline-block; position:relative;">
-                                                <input type="text" class="input-xs form-control" id="search_taks_name" ng-model="search_task_name"
-                                                        placeholder="Task Name" ng-keypress="searchTasksKeyPress($event)" >
+                                                <input type="text" class="input-xs form-control" id="search_host_summary_name" ng-model="search_host_summary_name"
+                                                        placeholder="Host Name" ng-keypress="searchHostSummaryKeyPress($event)" >
                                                 <div id="search-all-input-icons">
-                                                    <a class="search-icon" ng-show="searchTasksEnabled" ng-click="searchTasks()"><i class="fa fa-search"></i></a>
-                                                    <a class="search-icon" ng-show="!searchTasksEnabled" ng-click="search_task_name=''; searchTasks()"><i class="fa fa-times"></i></a>
+                                                    <a class="search-icon" ng-show="searchHostSummaryEnabled" ng-click="searchHostSummary()"><i class="fa fa-search"></i></a>
+                                                    <a class="search-icon" ng-show="!searchHostSummaryEnabled" ng-click="search_host_summary_name=''; searchHostSummary()"><i class="fa fa-times"></i></a>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label>Status</label>
-                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterByStatus">
+                                            <div class="btn-group" aw-toggle-button data-after-toggle="filterHostSummaryStatus">
                                                 <button class="btn btn-xs btn-primary active">All</button>
                                                 <button class="btn btn-xs btn-default">Failed</button>
                                             </div>
                                         </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
 
@@ -295,7 +294,7 @@
                                 </div>
                             </div>
                             <div id="hosts-summary-table" class="table-detail" lr-infinite-scroll="hostSummariesScrollDown" scroll-threshold="10" time-threshold="500">
-                                <div class="row" ng-repeat="host in summaryList = (hosts | filter:{ status : searchAllStatus}) track by $index" id="{{ host.id }}">
+                                <div class="row" ng-repeat="host in summaryList = (hosts) track by $index" id="{{ host.id }}">
                                     <div class="name col-lg-6 col-md-6 col-sm-6 col-xs-6">
                                         <a href="" ng-click="hostEventsViewer(host.id, host.name)" aw-tool-tip="View all events for this host"
                                             data-placement="top">{{ host.name }}</a>

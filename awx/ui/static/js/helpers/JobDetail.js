@@ -555,21 +555,83 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     };
 }])
 
+.factory('LoadPlays', ['Rest', 'ProcessErrors', 'GetElapsed', 'SelectPlay', 'JobIsFinished',
+    function(Rest, ProcessErrors, GetElapsed, SelectPlay, JobIsFinished) {
+    return function(params) {
+        var scope = params.scope,
+            callback = params.callback,
+            url;
+
+        scope.plays = [];
+
+        url = scope.job.url + 'job_plays/?page_size=' + scope.playsMaxRows + '&order_by=id';
+        url += (scope.search_play_name) ? '&play__icontains=' + scope.search_play_name : '';
+        url += (scope.search_play_status === 'failed') ? '&failed=true' : '';
+
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                data.results.forEach(function(event, idx) {
+                    var status, status_text, start, end, elapsed;
+
+                    status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                    status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
+                    start = event.started;
+
+                    if (idx < data.length - 1) {
+                        // end date = starting date of the next event
+                        end = data[idx + 1].started;
+                    }
+                    else if (JobIsFinished(scope)) {
+                        // this is the last play and the job already finished
+                        end = scope.job_status.finished;
+                    }
+                    if (end) {
+                        elapsed = GetElapsed({
+                            start: start,
+                            end: end
+                        });
+                    }
+                    else {
+                        elapsed = '00:00:00';
+                    }
+
+                    scope.plays.push({
+                        id: event.id,
+                        name: event.play,
+                        created: start,
+                        finished: end,
+                        status: status,
+                        status_text: status_text,
+                        status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
+                        elapsed: elapsed,
+                        hostCount: 0,
+                        fistTask: null,
+                        playActiveClass: '',
+                        unreachableCount: (event.unreachable_count) ? event.unreachable_count : 0,
+                    });
+                });
+
+                // set the active task
+                SelectPlay({
+                    scope: scope,
+                    id: (scope.plays.length > 0) ? scope.plays[0].id : null,
+                    callback: callback
+                });
+            })
+            .error(function(data) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+    };
+}])
+
 // Call SelectPlay whenever the the activePlay needs to change
 .factory('SelectPlay', ['SelectTask', 'LoadTasks', function(SelectTask, LoadTasks) {
     return function(params) {
         var scope = params.scope,
             id = params.id,
-            callback = params.callback,
-            clear = false;
-
-        // Determine if the tasks and hostResults arrays should be initialized
-        if (scope.search_all_hosts_name || scope.searchAllStatus === 'failed') {
-            clear = true;
-        }
-        else {
-            clear = (scope.activePlay === id) ? false : true;  //are we moving to a new play?
-        }
+            callback = params.callback;
 
         scope.activePlay = id;
         scope.plays.forEach(function(play, idx) {
@@ -581,14 +643,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             }
         });
 
-        setTimeout(function() {
-            scope.$apply(function() {
-                LoadTasks({
-                    scope: scope,
-                    callback: callback,
-                    clear: true
-                });
-            });
+        LoadTasks({
+            scope: scope,
+            callback: callback,
+            clear: true
         });
 
     };
@@ -598,18 +656,15 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
         var scope = params.scope,
             callback = params.callback,
-            clear = params.clear,
             url;
 
-        if (clear) {
-            scope.tasks = [];
-            scope.tasksMap = {};
-        }
+        scope.tasks = [];
+        scope.tasksMap = {};
 
         if (scope.activePlay) {
             url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
-            url += (scope.search_all_tasks.length > 0) ? '&id__in=' + scope.search_all_tasks.join() : '';
-            url += (scope.searchAllStatus === 'failed') ? '&failed=true' : '';
+            url += (scope.search_task_name) ? '&name__icontains=' + scope.search_task_name : '';
+            url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
             url += '&page_size=' + scope.tasksMaxRows + '&order_by=id';
 
             Rest.setUrl(url);
@@ -617,11 +672,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 .success(function(data) {
                     data.results.forEach(function(event, idx) {
                         var end, elapsed, status, status_text;
-
-                        //if (!scope.plays[scope.playsMap[scope.activePlay]].firstTask) {
-                        //    scope.plays[scope.playsMap[scope.activePlay]].firstTask = event.id;
-                        //    scope.plays[scope.playsMap[scope.activePlay]].hostCount = (event.host_count) ? event.host_count : 0;
-                        //}
 
                         if (idx < data.length - 1) {
                             // end date = starting date of the next event
@@ -684,7 +734,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                         callback: callback
                     });
 
-                    //$('#tasks-table-detail').mCustomScrollbar("update");
                 })
                 .error(function(data) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -707,15 +756,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
         var scope = params.scope,
             id = params.id,
-            callback = params.callback,
-            clear=false;
-
-        if (scope.search_all_hosts_name || scope.searchAllStatus === 'failed') {
-            clear = true;
-        }
-        else {
-            clear = (scope.activeTask === id) ? false : true;
-        }
+            callback = params.callback;
 
         scope.activeTask = id;
         scope.tasks.forEach(function(task, idx) {
@@ -740,19 +781,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
         var scope = params.scope,
             callback = params.callback,
-            clear = params.clear,
             url;
 
-        if (clear) {
-            scope.hostResults = [];
-            scope.hostResultsMap = {};
-        }
+        scope.hostResults = [];
+        scope.hostResultsMap = {};
 
         if (scope.activeTask) {
             // If we have a selected task, then get the list of hosts
             url = scope.job.related.job_events + '?parent=' + scope.activeTask + '&';
-            url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&' : '';
-            url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
+            url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
+            url += (scope.search_host_status === 'failed') ? 'failed=true&' : '';
             url += 'event__icontains=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=host__name';
             Rest.setUrl(url);
             Rest.get()
@@ -798,7 +836,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     if (callback) {
                         scope.$emit(callback);
                     }
-                    //$('#hosts-table-detail').mCustomScrollbar("update");
                 })
                 .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -822,8 +859,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url;
 
         url = scope.job.related.job_host_summaries + '?';
-        url += (scope.search_all_hosts_name) ? 'host__name__icontains=' + scope.search_all_hosts_name + '&': '';
-        url += (scope.searchAllStatus === 'failed') ? 'failed=true&' : '';
+        url += (scope.search_host_summary_name) ? 'host__name__icontains=' + scope.search_host_summary_name + '&': '';
+        url += (scope.search_host_summary_status === 'failed') ? 'failed=true&' : '';
         url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
 
         scope.hosts = [];
@@ -952,7 +989,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             result = [],
             newKeys = [],
             plays = JSON.parse(JSON.stringify(scope.jobData.plays)),
-            keys = Object.keys(plays);
+            filteredListA = [],
+            filteredListB = [],
+            key,
+            keys;
 
         function listSort(a,b) {
             if (parseInt(a,10) < parseInt(b,10))
@@ -962,6 +1002,29 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             return 0;
         }
 
+        if (scope.search_play_name) {
+            for (key in plays) {
+                if (plays[key].name.indexOf(scope.search_play_name) > 0) {
+                    filteredListA[key] = plays[key];
+                }
+            }
+        }
+        else {
+            filteredListA = plays;
+        }
+
+        if (scope.search_play_status === 'failed') {
+            for (key in filteredListA) {
+                if (filteredListA[key].status === 'failed') {
+                    filteredListB[key] = plays[key];
+                }
+            }
+        }
+        else {
+            filteredListB = filteredListA;
+        }
+
+        keys = Object.keys(filteredListB);
         keys.sort(function(a,b) { return listSort(a,b); }).reverse();
         for (idx=0; idx < scope.playsMaxRows && idx < keys.length; idx++) {
             newKeys.push(keys[idx]);
@@ -969,7 +1032,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         newKeys.sort(function(a,b) { return listSort(a,b); });
         idx = 0;
         while (idx < newKeys.length) {
-            result.push(plays[newKeys[idx]]);
+            result.push(filteredListB[newKeys[idx]]);
             idx++;
         }
         scope.plays = result;
@@ -983,7 +1046,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
         var scope = params.scope,
             result = [],
-            idx, keys, newKeys, tasks;
+            filteredListA = [],
+            filteredListB = [],
+            idx, key, keys, newKeys, tasks;
 
         function listSort(a,b) {
             if (parseInt(a,10) < parseInt(b,10))
@@ -994,8 +1059,32 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         }
 
         if (scope.activePlay) {
+
             tasks = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks));
-            keys = Object.keys(tasks);
+
+            if (scope.search_task_name) {
+                for (key in tasks) {
+                    if (tasks[key].name.indexOf(scope.search_task_name) > 0) {
+                        filteredListA[key] = tasks[key];
+                    }
+                }
+            }
+            else {
+                filteredListA = tasks;
+            }
+
+            if (scope.search_task_status === 'failed') {
+                for (key in filteredListA) {
+                    if (filteredListA[key].status === 'failed') {
+                        filteredListB[key] = tasks[key];
+                    }
+                }
+            }
+            else {
+                filteredListB = filteredListA;
+            }
+
+            keys = Object.keys(filteredListB);
             keys.sort(function(a,b) { return listSort(a,b); }).reverse();
             newKeys = [];
             for (idx=0; result.length < scope.tasksMaxRows && idx < keys.length; idx++) {
@@ -1004,7 +1093,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             newKeys.sort(function(a,b) { return listSort(a,b); });
             idx = 0;
             while (idx < newKeys.length) {
-                result.push(tasks[newKeys[idx]]);
+                result.push(filteredListB[newKeys[idx]]);
                 idx++;
             }
         }
@@ -1020,30 +1109,50 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
         var scope = params.scope,
             result = [],
+            filteredListA = [],
+            filteredListB = [],
             idx = 0,
             hostResults,
+            key,
             keys;
 
         if (scope.activePlay && scope.activeTask) {
+
             hostResults = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults));
-            keys = Object.keys(hostResults);
+
+            if (scope.search_host_name) {
+                for (key in hostResults) {
+                    if (hostResults[key].name.indexOf(scope.search_host_name) > 0) {
+                        filteredListA[key] = hostResults[key];
+                    }
+                }
+            }
+            else {
+                filteredListA = hostResults;
+            }
+
+            if (scope.search_host_status === 'failed') {
+                for (key in filteredListA) {
+                    if (filteredListA[key].status === 'failed') {
+                        filteredListB[key] = filteredListA[key];
+                    }
+                }
+            }
+            else {
+                filteredListB = filteredListA;
+            }
+
+            keys = Object.keys(filteredListB);
             keys.sort(function(a,b) {
-                if (hostResults[a].name > hostResults[b].name)
+                if (filteredListB[a].name > filteredListB[b].name)
                     return -1;
-                if (hostResults[a].name < hostResults[b].name)
+                if (filteredListB[a].name < filteredListB[b].name)
                     return 1;
                 // a must be equal to b
                 return 0;
             });
             while (idx < keys.length && result.length < scope.hostResultsMaxRows) {
-                if (scope.searchAllStatus === 'failed') {
-                    if (hostResults[keys[idx]].status === 'failed') {
-                        result.unshift(hostResults[keys[idx]]);
-                    }
-                }
-                else {
-                    result.unshift(hostResults[keys[idx]]);
-                }
+                result.unshift(filteredListB[keys[idx]]);
                 idx++;
             }
         }
@@ -1058,42 +1167,57 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
         var scope = params.scope,
             result = [],
+            filteredListA = [],
+            filteredListB = [],
             idx = 0,
             hostSummaries,
+            key,
             keys;
 
         if (scope.activePlay && scope.activeTask) {
             hostSummaries = JSON.parse(JSON.stringify(scope.jobData.hostSummaries));
-            keys = Object.keys(hostSummaries);
+
+            if (scope.search_host_summary_name) {
+                for (key in hostSummaries) {
+                    if (hostSummaries[key].name.indexOf(scope.search_host_summary_name) > 0) {
+                        filteredListA[key] = hostSummaries[key];
+                    }
+                }
+            }
+            else {
+                filteredListA = hostSummaries;
+            }
+
+            if (scope.search_host_summary_status === 'failed') {
+                for (key in filteredListA) {
+                    if (filteredListA[key].status === 'failed') {
+                        filteredListB[key] = filteredListA[key];
+                    }
+                }
+            }
+            else {
+                filteredListB = filteredListA;
+            }
+
+            keys = Object.keys(filteredListB);
 
             keys.sort(function(a,b) {
-                if (hostSummaries[a].name > hostSummaries[b].name)
+                if (filteredListB[a].name > filteredListB[b].name)
                     return 1;
-                if (hostSummaries[a].name < hostSummaries[b].name)
+                if (filteredListB[a].name < filteredListB[b].name)
                     return -1;
                 // a must be equal to b
                 return 0;
             });
 
             while (idx < keys.length && result.length < scope.hostSummariesMaxRows) {
-                if (scope.searchAllStatus === 'failed') {
-                    if (hostSummaries[keys[idx]].status === 'failed') {
-                        result.push(hostSummaries[keys[idx]]);
-                    }
-                }
-                else {
-                    result.push(hostSummaries[keys[idx]]);
-                }
+                result.push(filteredListB[keys[idx]]);
                 idx++;
             }
         }
         scope.hosts = result;
-        if (scope.liveEventProcessing) {
-            scope.$emit('FixHostSummariesScroll');
-        }
     };
 }])
-
 
 .factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults', 'DrawHostSummaries', 'DrawGraph',
     function(DrawPlays, DrawTasks, DrawHostResults, DrawHostSummaries, DrawGraph) {
@@ -1108,92 +1232,5 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         if (scope.host_summary.total > 0) {
             DrawGraph({ scope: scope, resize: true });
         }
-    };
-}])
-
-.factory('FilterAllByHostName', ['Rest', 'GetBasePath', 'ProcessErrors', 'SelectPlay', function(Rest, GetBasePath, ProcessErrors, SelectPlay) {
-    return function(params) {
-        var scope = params.scope,
-            host = params.host,
-            newActivePlay,
-            url = scope.job.related.job_events + '?event__icontains=runner&host_name__icontains=' + host + '&parent__isnull=false';
-
-        scope.search_all_tasks = [];
-        scope.search_all_plays = [];
-
-        if (scope.removeAllPlaysReady) {
-            scope.removeAllPlaysReady();
-        }
-        scope.removeAllPlaysReady = scope.$on('AllPlaysReady', function() {
-            if (scope.activePlay) {
-                setTimeout(function() {
-                    SelectPlay({
-                        scope: scope,
-                        id: newActivePlay
-                    });
-                }, 500);
-            }
-            else {
-                scope.tasks = [];
-                scope.hostResults = [];
-            }
-        });
-
-        if (scope.removeAllTasksReady) {
-            scope.removeAllTasksReady();
-        }
-        scope.removeAllTasksReady = scope.$on('AllTasksReady', function() {
-            if (scope.search_all_tasks.length > 0) {
-                url = scope.job.related.job_events + '?id__in=' + scope.search_all_tasks.join();
-                Rest.setUrl(url);
-                Rest.get()
-                    .success(function(data) {
-                        if (data.count > 0) {
-                            data.results.forEach(function(row) {
-                                if (row.parent && scope.search_all_plays.indexOf(row.parent) < 0) {
-                                    scope.search_all_plays.push(row.parent);
-                                }
-                            });
-                            if (scope.search_all_plays.length > 0) {
-                                scope.search_all_plays.sort();
-                                newActivePlay = scope.search_all_plays[0];
-                            }
-                            else {
-                                newActivePlay = null;
-                            }
-                        }
-                        scope.$emit('AllPlaysReady');
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + '. GET returned: ' + status });
-                    });
-            }
-            else {
-                newActivePlay = null;
-                scope.search_all_plays.push(0);
-                scope.$emit('AllPlaysReady');
-            }
-        });
-
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                if (data.count > 0) {
-                    data.results.forEach(function(row) {
-                        if (scope.search_all_tasks.indexOf(row.parent) < 0) {
-                            scope.search_all_tasks.push(row.parent);
-                        }
-                    });
-                    if (scope.search_all_tasks.length > 0) {
-                        scope.search_all_tasks.sort();
-                    }
-                }
-                scope.$emit('AllTasksReady');
-            })
-            .error(function(data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + '. GET returned: ' + status });
-            });
     };
 }]);
