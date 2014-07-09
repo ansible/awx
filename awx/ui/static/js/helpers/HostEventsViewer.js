@@ -9,19 +9,22 @@
 
 'use strict';
 
-angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
+angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventViewerHelper'])
 
-    .factory('HostEventsViewer', ['$log', '$compile', 'CreateDialog', 'Wait', 'GetBasePath', 'Empty', 'GetEvents',
-    function($log, $compile, CreateDialog, Wait, GetBasePath, Empty, GetEvents) {
+    .factory('HostEventsViewer', ['$log', '$compile', 'CreateDialog', 'Wait', 'GetBasePath', 'Empty', 'GetEvents', 'EventViewer',
+    function($log, $compile, CreateDialog, Wait, GetBasePath, Empty, GetEvents, EventViewer) {
         return function(params) {
             var parent_scope = params.scope,
                 scope = parent_scope.$new(true),
+                job_id = params.job_id,
                 url = params.url,
                 title = params.title, //optional
                 fixHeight, buildTable;
 
             scope.host_events_search_name = params.name;
-            scope.host_events_search_status = 'all';
+            scope.host_events_search_status = (params.status) ?  params.status : 'all';
+
+            $log.debug('job_id: ' + job_id + ' url: ' + url + ' title: ' + title + ' name: ' + name + ' status: ' + status);
 
             scope.eventsSearchActive = (scope.host_events_search_name) ? true : false;
 
@@ -29,7 +32,7 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
                 scope.removeModalReady();
             }
             scope.removeModalReady = scope.$on('ModalReady', function() {
-                Wait('stop');
+                scope.hostViewSearching = false;
                 $('#host-events-modal-dialog').dialog('open');
             });
 
@@ -65,9 +68,9 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
             scope.removeRefreshHTML = scope.$on('RefreshHTML', function(e, data) {
                 var elem, html = buildTable(data);
                 $('#host-events').html(html);
+                scope.hostViewSearching = false;
                 elem = angular.element(document.getElementById('host-events'));
                 $compile(elem)(scope);
-                Wait('stop');
             });
 
             buildTable = function(data) {
@@ -99,7 +102,7 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
                         status = 'changed';
                         status_text = 'Changed';
                     }
-                    html += "<tr ng-click=\"showDetails()\" class=\"cursor-pointer\" aw-tool-tip=\"Click to view details\" data-placement=\"top\">\n";
+                    html += "<tr ng-click=\"showDetails(" + result.id + ")\" class=\"cursor-pointer\" aw-tool-tip=\"Click to view details\" data-placement=\"top\">\n";
                     html += "<td class=\"col-md-3\"><i class=\"fa icon-job-" + status + "\"></i> <a href=\"\">" + status_text + "</a></td>\n";
                     html += "<td class=\"col-md-3\"><a href=\"\">" + result.play + "</a></td>\n";
                     html += "<td class=\"col-md-3\"><a href=\"\">" + result.task + "</a></td>\n";
@@ -143,10 +146,17 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
                 }
             };
 
+            scope.showDetails = function(id) {
+                EventViewer({
+                    scope: parent_scope,
+                    url: GetBasePath('jobs') + job_id + '/job_events/?id=' + id,
+                });
+            };
+
         };
     }])
 
-    .factory('GetEvents', ['Wait', 'Rest', 'ProcessErrors', function(Wait, Rest, ProcessErrors) {
+    .factory('GetEvents', ['Rest', 'ProcessErrors', function(Rest, ProcessErrors) {
         return function(params) {
             var url = params.url,
                 scope = params.scope,
@@ -175,13 +185,15 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities'])
                 url += '&event__icontains=runner&not__event=runner_on_skipped';
             }
 
-            Wait('start');
+            scope.hostViewSearching = true;
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
+                    scope.hostViewSearching = false;
                     scope.$emit(callback, data);
                 })
                 .error(function(data, status) {
+                    scope.hostViewSearching = false;
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                         msg: 'Failed to get events ' + url + '. GET returned: ' + status });
                 });

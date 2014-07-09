@@ -7,7 +7,7 @@
 
 'use strict';
 
-angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
+angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'HostEventsViewerHelper'])
 
     .factory('EventViewer', ['$compile', 'CreateDialog', 'GetEvent', 'Wait', 'EventAddTable', 'GetBasePath', 'LookUpName', 'Empty', 'EventAddPreFormattedText',
     function($compile, CreateDialog, GetEvent, Wait, EventAddTable, GetBasePath, LookUpName, Empty, EventAddPreFormattedText) {
@@ -93,6 +93,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities'])
                 $('#eventviewer-modal-dialog').dialog('close');
                 scope.$destroy();
             };
+
         };
     }])
 

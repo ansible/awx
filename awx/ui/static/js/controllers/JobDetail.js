@@ -1004,15 +1004,16 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         }
     };
 
-    scope.hostEventsViewer = function(id, name) {
+    scope.hostEventsViewer = function(id, name, status) {
         HostEventsViewer({
             scope: scope,
             id: id,
             name: name,
-            url: scope.job.related.job_events
+            url: scope.job.related.job_events,
+            job_id: scope.job.id,
+            status: status
         });
     };
-
 }
 
 JobDetailController.$inject = [ '$location', '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',

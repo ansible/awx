@@ -230,10 +230,10 @@
                                             data-placement="top">{{ host.name }}</a>
                                     </div>
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 badge-column">
-                                        <a href="" aw-tool-tip="OK" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
-                                        <a href="" aw-tool-tip="Changed" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
-                                        <a href="" aw-tool-tip="Unreachable" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
-                                        <a href="" aw-tool-tip="Failed" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
+                                        <a href="" ng-click="hostEventsViewer(host.id, host.name, 'ok')" aw-tool-tip="OK" data-placement="top" ng-hide="host.ok == 0"><span class="badge successful-hosts">{{ host.ok }}</span></a>
+                                        <a href="" ng-click="hostEventsViewer(host.id, host.name, 'changed')" aw-tool-tip="Changed" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
+                                        <a href="" ng-click="hostEventsViewer(host.id, host.name, 'unreachable')" aw-tool-tip="Unreachable" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
+                                        <a href="" ng-click="hostEventsViewer(host.id, host.name, 'failed')" aw-tool-tip="Failed" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a>
                                     </div>
                                 </div>
                                 <div class="row" ng-show="summaryList.length === 0">
@@ -284,6 +284,7 @@
                     <option value="unreachable">Unreachable</option>
                 </select>
             </div>
+            <div class="form-group" id="search-indicator" ng-show="hostViewSearching"><i class="fa fa-lg fa-spin fa-cog"></i></div>
         </form>
         <!-- lr-infinite-scroll="hostEventsTable" scroll-threshold="10" time-threshold="500" -->
         <div id="host-events-table">
