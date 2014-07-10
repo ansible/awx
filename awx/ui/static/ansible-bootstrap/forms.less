@@ -335,7 +335,8 @@ input[type="checkbox"],
 .form-inline {
 
   // Kick in the inline
-  @media (min-width: @screen-sm-min) {
+  // CLH 7-9-14 start inline at xs rather sm
+  @media (min-width: @screen-xs-min) {
     // Inline-block all the things for "inline"
     .form-group {
       display: inline-block;

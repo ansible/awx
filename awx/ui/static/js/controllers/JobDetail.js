@@ -547,7 +547,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
     scope.adjustSize = function() {
         var height, ww = $(window).width();
-        if (ww < 1240) {
+        if (ww < 1024) {
             $('#job-summary-container').hide();
             $('#job-detail-container').css({ "width": "100%", "padding-right": "15px" });
             $('#summary-button').show();

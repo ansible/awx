@@ -77,8 +77,8 @@
                         <div id="play-section" class="section">
 
                             <div class="row title-row">
-                                <div class="col-lg-1 col-md-2 col-sm-2 title">Plays</div>
-                                <div class="col-lg-11 col-md-10 col-sm-10" style="text-align:right;">
+                                <div class="col-lg-1 col-md-2 col-sm-2 col-xs-1 title">Plays</div>
+                                <div class="col-lg-11 col-md-10 col-sm-10 col-xs-11" style="text-align:right;">
                                     <div id="play-search-form" class="search-form form-inline">
                                         <div class="form-group">
                                             <label>Search</label>
@@ -103,27 +103,27 @@
                             </div>
 
                             <div class="table-header">
-                                <table class="table table-condensed">
+                                <table class="table table-condensed" style="table-layout:fixed;">
                                     <thead>
                                         <tr>
-                                            <td class="col-lg-1 col-md-1 col-sm-2 hidden-xs">Started</td>
-                                            <td class="col-lg-1 col-md-1 hidden-sm hidden-xs">Elapsed</td>
-                                            <td class="col-lg-1 col-md-1 col-sm-2 col-xs-2 status-column">Status</td>
-                                            <td class="col-lg-9 col-md-9 col-sm-8 col-xs-10">Name</td>
+                                            <th class="col-lg-1 col-md-2 col-sm-2 col-xs-3">Started</th>
+                                            <th class="col-lg-1 col-md-2 col-sm-2 col-xs-3">Elapsed</th>
+                                            <th class="col-lg-1 col-md-2 col-sm-2 col-xs-2 status-column">Status</th>
+                                            <th class="col-lg-9 col-md-6 col-sm-6 col-xs-4">Name</th>
                                         </tr>
                                     </thead>
                                 </table>
                             </div>
                             <div id="plays-table-detail" class="table-detail" lr-infinite-scroll="playsScrollDown"
                                 scroll-threshold="10" time-threshold="500">
-                                <table class="table table-condensed">
+                                <table class="table table-condensed" style="table-layout:fixed;">
                                     <tbody>
-                                        <tr ng-repeat="play in plays" ng-class="play.playActiveClass" ng-click="selectPlay(play.id, $event)">
-                                            <td class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ play.created | date: 'HH:mm:ss' }}</td>
-                                            <td class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
+                                        <tr class="cursor-pointer" ng-repeat="play in plays" ng-class="play.playActiveClass" ng-click="selectPlay(play.id, $event)">
+                                            <td class="col-lg-1 col-md-2 col-sm-2 col-xs-3">{{ play.created | date: 'HH:mm:ss' }}</td>
+                                            <td class="col-lg-1 col-md-2 col-sm-2 col-xs-3" aw-tool-tip="Completed at {{ play.finished | date:'HH:mm:ss' }}"
                                                 data-placement="top">{{ play.elapsed }}</td>
-                                            <td class="col-lg-1 col-md-1 col-sm-2 col-xs-2 status-column" aw-tool-tip="{{ play.status_tip }}" data-tip-watch="play.status_tip" data-placement="top"><i class="fa icon-job-{{ play.status }}"></i></td>
-                                            <td class="col-lg-9 col-md-9 col-sm-8 col-xs-10">{{ play.name }}</td>
+                                            <td class="col-lg-1 col-md-2 col-sm-2 col-xs-2 status-column" aw-tool-tip="{{ play.status_tip }}" data-tip-watch="play.status_tip" data-placement="top"><i class="fa icon-job-{{ play.status }}"></i></td>
+                                            <td class="col-lg-9 col-md-6 col-sm-6 col-xs-4">{{ play.name }}</td>
                                         </tr>
                                         <tr ng-show="plays.length === 0">
                                             <td colspan="4" class="col-lg-12 loading-info">No matching plays</td>
@@ -163,32 +163,30 @@
                             </div>
 
                             <div class="table-header">
-                                <table class="table table-condensed">
+                                <table class="table table-condensed" style="table-layout:fixed;">
                                     <thead>
                                         <tr>
-                                            <th class="col-lg-1 col-md-1 col-sm-2 hidden-xs">Started</th>
-                                            <th class="col-lg-1 col-md-1 hidden-sm hidden-xs">Elapsed</th>
-                                            <th class="col-lg-1 col-md-1 col-sm-2 col-xs-2 status-column">Status</th>
-                                            <th class="col-lg-4 col-md-4 col-sm-8 col-xs-1o">Name</div>
-                                            <th class="col-lg-5 col-md-5 hidden-xs hidden-sm">Host Status</th>
+                                            <th class="col-lg-1 col-md-2 col-sm-2 col-xs-3">Started</th>
+                                            <th class="col-lg-1 col-md-2 col-sm-2 col-xs-3">Elapsed</th>
+                                            <th class="col-lg-1 col-md-2 col-sm-2 col-xs-2 status-column">Status</th>
+                                            <th class="col-lg-4 col-md-3 col-sm-6 col-xs-4">Name</div>
+                                            <th class="col-lg-5 col-md-3 hidden-xs hidden-sm">Host Status</th>
                                         </tr>
                                     </thead>
                                 </table>
                             </div>
                             <div id="tasks-table-detail" class="table-detail" lr-infinite-scroll="tasksScrollDown"
                                 scroll-threshold="10" time-threshold="500">
-                                <table class="table table-condensed">
+                                <table class="table table-condensed" style="table-layout:fixed;">
                                     <tbody>
                                         <tr class="cursor-pointer" ng-repeat="task in taskList = (tasks) track by $index" ng-class="task.taskActiveClass" ng-click="selectTask(task.id)">
-                                            <td class="col-lg-1 col-md-1 col-sm-2 hidden-xs">{{ task.created | date: 'HH:mm:ss' }}</td>
-                                            <td class="col-lg-1 col-md-1 hidden-sm hidden-xs" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
+                                            <td class="col-lg-1 col-md-2 col-sm-2 col-xs-3">{{ task.created | date: 'HH:mm:ss' }}</td>
+                                            <td class="col-lg-1 col-md-2 col-sm-2 col-xs-3" aw-tool-tip="Completed at {{ task.finished | date:'HH:mm:ss' }}"
                                                     data-placement="top">{{ task.elapsed }}</td>
-                                            <td class="col-lg-1 col-md-1 col-sm-2 col-xs-2 status-column" aw-tool-tip="{{ task.status_tip }}"
+                                            <td class="col-lg-1 col-md-2 col-sm-2 col-xs-2 status-column" aw-tool-tip="{{ task.status_tip }}"
                                                 data-tip-watch="task.status_tip" data-placement="top"><i class="fa icon-job-{{  task.status }}"></i></td>
-                                            <td class="col-lg-4 col-md-4 col-sm-8 col-xs-10"><span ng-show="hasRoles">{{ task.role }}</span> {{ task.name }}</td>
-                                            <td class="col-lg-5 col-md-5 hidden-sm hidden-xs">
-                                                <div class="status-bar"><div class="successful-hosts inner-bar" id="{{ task.id }}-successful-bar" aw-tool-tip="Hosts OK" data-placement="top" ng-style="task.successfulStyle">{{ task.successfulCount }}</div><div class="changed-hosts inner-bar" id="{{ task.id }}-changed-bar" aw-tool-tip="Hosts Changed" data-placement="top" ng-style="task.changedStyle">{{ task.changedCount }}</div><div class="skipped-hosts inner-bar" id="{{ task.id }}-skipped-bar" aw-tool-tip="Hosts Skipped" data-placement="top" ng-style="task.skippedStyle">{{ task.skippedCount }}</div><div class="failed-hosts inner-bar" id="{{ task.id }}-failed-bar" aw-tool-tip="Hosts Failed" data-placement="top" ng-style="task.failedStyle">{{ task.failedCount }}</div><div class="unreachable-hosts inner-bar" id="{{ task.id }}-unreachable-hosts-bar" aw-tool-tip="Hosts Unreachable" data-placement="top" ng-style="task.unreachableStyle">{{ task.unreachableCount }}</div><div class="missing-hosts inner-bar" id="{{ task.id }}-misssing-hosts-bar" ng-style="task.missingStyle">{{ task.missingCount }}</div><div class="no-matching-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-no-matching-hosts-bar" aw-tool-tip="No matching hosts were found" data-placement="top" style="width: 100%;" ng-show="task.status === 'no-matching-hosts'">No matching hosts</div></div>
-                                            </td>
+                                            <td class="col-lg-4 col-md-3 col-sm-6 col-xs-4"><span ng-show="hasRoles">{{ task.role }}</span> {{ task.name }}</td>
+                                            <td class="col-lg-5 col-md-3 hidden-sm hidden-xs"><div class="status-bar"><div class="successful-hosts inner-bar" id="{{ task.id }}-successful-bar" aw-tool-tip="Hosts OK" data-placement="top" ng-style="task.successfulStyle">{{ task.successfulCount }}</div><div class="changed-hosts inner-bar" id="{{ task.id }}-changed-bar" aw-tool-tip="Hosts Changed" data-placement="top" ng-style="task.changedStyle">{{ task.changedCount }}</div><div class="skipped-hosts inner-bar" id="{{ task.id }}-skipped-bar" aw-tool-tip="Hosts Skipped" data-placement="top" ng-style="task.skippedStyle">{{ task.skippedCount }}</div><div class="failed-hosts inner-bar" id="{{ task.id }}-failed-bar" aw-tool-tip="Hosts Failed" data-placement="top" ng-style="task.failedStyle">{{ task.failedCount }}</div><div class="unreachable-hosts inner-bar" id="{{ task.id }}-unreachable-hosts-bar" aw-tool-tip="Hosts Unreachable" data-placement="top" ng-style="task.unreachableStyle">{{ task.unreachableCount }}</div><div class="missing-hosts inner-bar" id="{{ task.id }}-misssing-hosts-bar" ng-style="task.missingStyle">{{ task.missingCount }}</div><div class="no-matching-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-no-matching-hosts-bar" aw-tool-tip="No matching hosts were found" data-placement="top" style="width: 100%;" ng-show="task.status === 'no-matching-hosts'">No matching hosts</div></div></td>
                                         </tr>
                                         <tr ng-show="taskList.length === 0">
                                             <td colspan="5" class="col-lg-12 loading-info">No matching tasks</td>
