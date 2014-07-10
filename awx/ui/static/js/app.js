@@ -392,6 +392,20 @@ angular.module('Tower', [
             });
         }
     ])
+
+    .config(function($provide) {
+        $provide.decorator('$log', function($delegate) {
+            var _debug = $delegate.debug;
+            $delegate.debug = function(msg) {
+                // only show debug messages when debug_mode set to true in config
+                if ($AnsibleConfig.debug_mode) {
+                    _debug(msg);
+                }
+            }
+            return $delegate;
+        });
+    })
+
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'ViewLicense',
         'Timer', 'ClearScope', 'HideStream', 'Socket',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
