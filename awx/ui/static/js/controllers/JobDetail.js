@@ -1093,7 +1093,6 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     };
 
     scope.editHost = function(id) {
-        console.log('clicked edit for host: ' + id);
         HostsEdit({
             host_scope: scope,
             group_scope: null,
