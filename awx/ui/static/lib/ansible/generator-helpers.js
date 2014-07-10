@@ -742,7 +742,7 @@ angular.module('GeneratorHelpers', [])
 
             if (includeSize) {
                 html += "<div class=\"";
-                html += (size) ? size : "col-lg-4 col-md-6";
+                html += (size) ? size : "col-lg-4 col-md-6 col-sm-8 col-xs-9";
                 html += "\" id=\"search-widget-container" + modifier + "\">\n";
             }
 

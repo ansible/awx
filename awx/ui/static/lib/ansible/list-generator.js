@@ -228,7 +228,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                         } else if (options.id !== undefined) {
                             html += "col-lg-4";
                         } else {
-                            html += "col-lg-8 col-md-6";
+                            html += "col-lg-8 col-md-6 col-sm-4 col-xs-3";
                         }
                         html += "\">\n";
 
