@@ -10,7 +10,7 @@
 
 'use strict';
 
-function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope, LoadJobsScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
+function JobsListController ($log, $scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope, LoadJobsScope, RunningJobsList, CompletedJobsList, QueuedJobsList,
     ScheduledJobsList, GetChoices, GetBasePath, Wait, Socket) {
 
     ClearScope();
@@ -234,9 +234,11 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             //doch = $(window).height(),
             available_height,
             search_row, page_row, height, header, row_height;
+        $log.debug('docw: ' + docw);
         if (docw > 1200) {
             // customize the container height and # of rows based on available viewport height
             available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - 80;
+            $log.debug('available_height: ' + available_height);
             $('.jobs-list-container').each(function() {
                 $(this).height(Math.floor(available_height / 2));
             });
@@ -244,7 +246,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
             header = Math.max($('#completed_jobs_table thead').height(), 24);
             height = Math.floor(available_height / 2) - header - page_row - search_row - 30;
-            row_height = (docw < 1415) ? 47 : 27;
+            row_height = (docw < 1350) ? 47 : 27;
             max_rows = Math.floor(height / row_height);
         }
         else {
@@ -254,6 +256,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
             });
             max_rows = 5;
         }
+        $log.debug('max_rows: ' + max_rows);
     }
 
     // Set container height and return the number of allowed rows
@@ -270,7 +273,7 @@ function JobsListController ($scope, $compile, $routeParams, ClearScope, Breadcr
     }
 }
 
-JobsListController.$inject = [ '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope', 'RunningJobsList', 'CompletedJobsList',
+JobsListController.$inject = [ '$log', '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope', 'RunningJobsList', 'CompletedJobsList',
     'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'Socket' ];
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,

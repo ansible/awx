@@ -38,7 +38,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                 // Returns scope of form.
                 //
 
-                var element, fld, set, show;
+                var element, fld, set, show, self = this;
 
                 if (options.modal) {
                     if (options.modal_body_id) {
@@ -190,13 +190,15 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                     });
                 }
 
-                if (!this.scope.$$phase) {
+                if (self.scope && !self.scope.$$phase) {
                     setTimeout(function() {
-                        this.scope.$digest();
+                        if (self.scope) {
+                            self.scope.$digest();
+                        }
                     }, 100);
                 }
 
-                return this.scope;
+                return self.scope;
 
             },
 

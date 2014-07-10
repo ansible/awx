@@ -7,7 +7,7 @@
 
 'use strict';
 
-angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFormDefinition'])
+angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFormDefinition', 'HostsHelper'])
 
     .factory('EventViewer', ['$compile', 'CreateDialog', 'GetEvent', 'Wait', 'EventAddTable', 'GetBasePath', 'LookUpName', 'Empty', 'EventAddPreFormattedText',
     function($compile, CreateDialog, GetEvent, Wait, EventAddTable, GetBasePath, LookUpName, Empty, EventAddPreFormattedText) {
@@ -225,10 +225,10 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                                         html += $filter('date')(obj[key], 'MM/dd/yy HH:mm:ss');
                                     }
                                 }
-                                else if (key === "host_name") {
-                                    html += "<a href=\"#/home/hosts/?id=" + obj.host_id + "\" target=\"_blank\" " +
-                                        "aw-tool-tip=\"Click to edit host.\" data-placement=\"right\" " +
-                                        "ng-click=\"modalOK()\">" + obj[key] + "</a>";
+                                else if (key === "host_name" && obj.host_id) {
+                                    html += "<a href=\"/#/home/hosts/?id=" + obj.host_id + "\" target=\"_blank\" " +
+                                        "aw-tool-tip=\"View host. Opens in new tab or window.\" data-placement=\"top\" " +
+                                        ">" + obj[key] + "</a>";
                                 }
                                 else {
                                     html += obj[key];
