@@ -20,6 +20,8 @@
                     handler = ng.noop;
                 }
 
+                $log.debug('lrInfiniteScroll: ' + attr.lrInfiniteScroll);
+
                 element.bind('scroll', function () {
                     var remaining = (direction === 'down') ? element[0].scrollHeight - (element[0].clientHeight + element[0].scrollTop) : element[0].scrollTop;
                     // if we have reached the threshold and we scroll down

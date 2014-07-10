@@ -19,7 +19,8 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
                 job_id = params.job_id,
                 url = params.url,
                 title = params.title, //optional
-                fixHeight, buildTable;
+                fixHeight, buildTable,
+                lastID, setStatus, buildRow;
 
             scope.host_events_search_name = params.name;
             scope.host_events_search_status = (params.status) ?  params.status : 'all';
@@ -39,9 +40,10 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
             if (scope.removeJobReady) {
                 scope.removeJobReady();
             }
-            scope.removeEventReady = scope.$on('EventsReady', function(e, data) {
+            scope.removeEventReady = scope.$on('EventsReady', function(e, data, maxID) {
                 var elem, html;
 
+                lastID = maxID;
                 html = buildTable(data);
                 $('#host-events').html(html);
                 elem = angular.element(document.getElementById('host-events-modal-dialog'));
@@ -81,41 +83,52 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
                 $compile(elem)(scope);
             });
 
+            setStatus = function(result) {
+                var msg = '', status = 'ok', status_text = 'OK';
+                if (!result.task && result.event_data && result.event_data.res && result.event_data.res.ansible_facts) {
+                    result.task = "Gathering Facts";
+                }
+                if (result.event === "runner_on_no_hosts") {
+                    msg = "No hosts remaining";
+                }
+                if (result.event === 'runner_on_unreachable') {
+                    status = 'unreachable';
+                    status_text = 'Unreachable';
+                }
+                else if (result.failed) {
+                    status = 'failed';
+                    status_text = 'Failed';
+                }
+                else if (result.changed) {
+                    status = 'changed';
+                    status_text = 'Changed';
+                }
+                if (result.event_data.res && result.event_data.res.msg) {
+                    msg = result.event_data.res.msg;
+                }
+                result.msg = msg;
+                result.status = status;
+                result.status_text = status_text;
+                return result;
+            };
+
+            buildRow = function(res) {
+                var html = '';
+                html += "<tr ng-click=\"showDetails(" + res.id + ")\" class=\"cursor-pointer\" aw-tool-tip=\"Click to view details\" data-placement=\"top\">\n";
+                html += "<td class=\"col-md-3\"><i class=\"fa icon-job-" + res.status + "\"></i> <a href=\"\">" + res.status_text + "</a></td>\n";
+                html += "<td class=\"col-md-3\"><a href=\"\">" + res.play + "</a></td>\n";
+                html += "<td class=\"col-md-3\"><a href=\"\">" + res.task + "</a></td>\n";
+                html += "<td class=\"col-md-3\"><a href=\"\">" + res.msg + "</a></td>";
+                html += "</tr>";
+                return html;
+            };
+
             buildTable = function(data) {
                 var html = "<table class=\"table\">\n";
                 html += "<tbody>\n";
                 data.results.forEach(function(result) {
-                    var msg = '',
-                        status = 'ok',
-                        status_text = 'OK';
-
-                    if (result.event_data.res && result.event_data.res.msg) {
-                        msg = result.event_data.res.msg;
-                    }
-                    if (!result.task && result.event_data.res.ansible_facts) {
-                        result.task = "Gathering Facts";
-                    }
-                    if (result.event === "runner_on_no_hosts") {
-                        msg = "No hosts remaining";
-                    }
-                    if (result.event === 'runner_on_unreachable') {
-                        status = 'unreachable';
-                        status_text = 'Unreachable';
-                    }
-                    else if (result.failed) {
-                        status = 'failed';
-                        status_text = 'Failed';
-                    }
-                    else if (result.changed) {
-                        status = 'changed';
-                        status_text = 'Changed';
-                    }
-                    html += "<tr ng-click=\"showDetails(" + result.id + ")\" class=\"cursor-pointer\" aw-tool-tip=\"Click to view details\" data-placement=\"top\">\n";
-                    html += "<td class=\"col-md-3\"><i class=\"fa icon-job-" + status + "\"></i> <a href=\"\">" + status_text + "</a></td>\n";
-                    html += "<td class=\"col-md-3\"><a href=\"\">" + result.play + "</a></td>\n";
-                    html += "<td class=\"col-md-3\"><a href=\"\">" + result.task + "</a></td>\n";
-                    html += "<td class=\"col-md-3\"><a href=\"\">" + msg + "</a></td>";
-                    html += "</tr>";
+                    var res = setStatus(result);
+                    html += buildRow(res);
                 });
                 html += "</tbody>\n";
                 html += "</table>\n";
@@ -168,6 +181,32 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
                 });
             };
 
+            if (scope.removeEventsScrollDownBuild) {
+                scope.removeEventsScrollDownBuild();
+            }
+            scope.removeEventsScrollDownBuild = scope.$on('EventScrollDownBuild', function(e, data, maxID) {
+                var elem, html = '';
+                lastID = maxID;
+                data.results.forEach(function(result) {
+                    var res = setStatus(result);
+                    html += buildRow(res);
+                });
+                if (html) {
+                    $('#host-events table tbody').append(html);
+                    elem = angular.element(document.getElementById('host-events'));
+                    $compile(elem)(scope);
+                }
+            });
+
+            scope.hostEventsScrollDown = function() {
+                GetEvents({
+                    scope: scope,
+                    url: url,
+                    gt: lastID,
+                    callback: 'EventScrollDownBuild'
+                });
+            };
+
         };
     }])
 
@@ -175,6 +214,7 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
         return function(params) {
             var url = params.url,
                 scope = params.scope,
+                gt = params.gt,
                 callback = params.callback;
 
             if (scope.host_events_search_name) {
@@ -200,12 +240,23 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
                 url += '&event__icontains=runner&not__event=runner_on_skipped';
             }
 
+            if (gt) {
+                // used for endless scroll
+                url += '&id__gt=' + gt;
+            }
+
+            url += '&page_size=50&order=id';
+
             scope.hostViewSearching = true;
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
+                    var lastID;
                     scope.hostViewSearching = false;
-                    scope.$emit(callback, data);
+                    if (data.results.length > 0) {
+                        lastID = data.results[data.results.length - 1].id;
+                    }
+                    scope.$emit(callback, data, lastID);
                 })
                 .error(function(data, status) {
                     scope.hostViewSearching = false;

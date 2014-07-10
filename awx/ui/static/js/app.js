@@ -401,7 +401,7 @@ angular.module('Tower', [
                 if ($AnsibleConfig.debug_mode) {
                     _debug(msg);
                 }
-            }
+            };
             return $delegate;
         });
     })
