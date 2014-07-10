@@ -651,7 +651,7 @@ function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, 
         ToggleHostEnabled({
             host_id: id,
             external_source: sources,
-            scope: $scope
+            host_scope: $scope
         });
     };
 
