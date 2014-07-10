@@ -135,6 +135,10 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
         if (detectDirection() === "up") {
             should_apply_live_events = false;
         }
+
+        if ($(this).scrollTop() + $(this).height() === $(this).prop("scrollHeight")) {
+            should_apply_live_events = true;
+        }
     });
 
     Rest.setUrl(GetBasePath('jobs') + job_id + '/');
