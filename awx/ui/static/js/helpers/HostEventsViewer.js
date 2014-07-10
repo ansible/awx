@@ -126,6 +126,13 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
                 var available_height = $('#host-events-modal-dialog').height() - $('#host-events-modal-dialog #search-form').height() - $('#host-events-modal-dialog #fixed-table-header').height();
                 $('#host-events').height(available_height);
                 $log.debug('set height to: ' + available_height);
+                // Check width and reset search fields
+                if ($('#host-events-modal-dialog').width() <= 450) {
+                    $('#host-events-modal-dialog #status-field').css({'margin-left': '7px'});
+                }
+                else {
+                    $('#host-events-modal-dialog #status-field').css({'margin-left': '15px'});
+                }
             };
 
             GetEvents({

@@ -9,7 +9,7 @@
 
 function JobDetailController ($location, $rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
-    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts) {
+    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit) {
 
     ClearScope();
 
@@ -1091,10 +1091,22 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
             status: status
         });
     };
+
+    scope.editHost = function(id) {
+        console.log('clicked edit for host: ' + id);
+        HostsEdit({
+            host_scope: scope,
+            group_scope: null,
+            host_id: id,
+            inventory_id: scope.job.inventory,
+            mode: 'edit',  // 'add' or 'edit'
+            selected_group_id: null
+        });
+    };
 }
 
 JobDetailController.$inject = [ '$location', '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
     'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer', 'LoadPlays', 'LoadTasks',
-    'LoadHosts'
+    'LoadHosts', 'HostsEdit'
 ];

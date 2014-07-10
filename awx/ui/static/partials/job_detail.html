@@ -228,11 +228,11 @@
                             <div id="hosts-table-detail" class="table-detail" lr-infinite-scroll="hostResultsScrollDown" scroll-threshold="10" time-threshold="500">
                                 <table class="table table-condensed">
                                     <tbody>
-                                        <tr ng-repeat="result in results = (hostResults) track by $index" ng-click="viewHostResults(result.id)">
-                                            <td class="col-lg-1 col-md-1 col-sm1 colxs-2 status-column"><a href="" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i ng-show="result.status_text != 'Unreachable'" class="fa icon-job-{{ result.status }}"></i><i ng-show="result.status_text == 'Unreachable'" class="fa icon-job-unreachable"></i></a></td>
-                                            <td class="col-lg-6 col-md-6 col-sm-6 col-xs-6 status-column"><a href="" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top">{{ result.name }}</a></td>
+                                        <tr ng-repeat="result in results = (hostResults) track by $index">
+                                            <td class="col-lg-1 col-md-1 col-sm1 colxs-2 status-column"><a href="" ng-click="viewHostResults(result.id)" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i ng-show="result.status_text != 'Unreachable'" class="fa icon-job-{{ result.status }}"></i><i ng-show="result.status_text == 'Unreachable'" class="fa icon-job-unreachable"></i></a></td>
+                                            <td class="col-lg-6 col-md-6 col-sm-6 col-xs-6 status-column"><a href="" ng-click="viewHostResults(result.id)" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top">{{ result.name }}</a></td>
                                             <td class="col-lg-4 col-md-4 col-sm-4 col-xs-3">{{ result.msg }}</td>
-                                            <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1"><a href="" aw-tool-tip="Edit host" data-placement="top"><i class="fa fa-pencil"></i></a></td>
+                                            <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1"><a href="" ng-click="editHost(result.host_id)" aw-tool-tip="Edit host" data-placement="top"><i class="fa fa-pencil"></i></a></td>
                                         </tr>
                                         <tr ng-show="results.length === 0">
                                             <td colspan="4" class="col-lg-12 loading-info">No matching hosts</td>
@@ -311,7 +311,7 @@
                                                 <a href="" ng-click="hostEventsViewer(host.id, host.name, 'changed')" aw-tool-tip="Changed" data-placement="top" ng-hide="host.changed == 0"><span class="badge changed-hosts">{{ host.changed }}</span></a>
                                                 <a href="" ng-click="hostEventsViewer(host.id, host.name, 'unreachable')" aw-tool-tip="Unreachable" data-placement="top" ng-hide="host.unreachable == 0"><span class="badge unreachable-hosts">{{ host.unreachable }}</span></a>
                                                 <a href="" ng-click="hostEventsViewer(host.id, host.name, 'failed')" aw-tool-tip="Failed" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a></td>
-                                            <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1"><a href="" aw-tool-tip="Edit host" data-placement="top"><i class="fa fa-pencil"></i></a></td>
+                                            <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1"><a href="" ng-click="editHost(host.id)" aw-tool-tip="Edit host" data-placement="top"><i class="fa fa-pencil"></i></a></td>
                                         </tr>
                                         <tr ng-show="summaryList.length === 0">
                                             <td colspan="2" class="col-lg-12 loading-info">No matching hosts</td>
@@ -342,13 +342,15 @@
     <div ng-include="'/static/partials/eventviewer.html'"></div>
 
     <div id="host-events-modal-dialog" style="display:none;">
-        <form id="search-form" class="form-inline">
+        <div id="search-form" class="form-inline">
             <div class="form-group" style="position:relative;">
                 <label>Search</label>
-                <input type="text" class="form-control input-sm" id="host-events-search-name" ng-model="host_events_search_name" placeholder="Host name" ng-keypress="searchEventKeyPress($event)" >
-                <div id="search-form-input-icons">
-                    <a class="search-icon" ng-show="!eventsSearchActive" ng-click="searchEvents()"><i class="fa fa-search"></i></a>
-                    <a class="search-icon" ng-show="eventsSearchActive" ng-click="host_events_search_name=''; searchEvents()"><i class="fa fa-times"></i></a>
+                <div class="search-name" style="display:inline-block; position:relative;">
+                    <input type="text" class="form-control input-sm" id="host-events-search-name" ng-model="host_events_search_name" placeholder="Host name" ng-keypress="searchEventKeyPress($event)" >
+                    <div id="search-all-input-icons">
+                        <a class="search-icon" ng-show="!eventsSearchActive" ng-click="searchEvents()"><i class="fa fa-search"></i></a>
+                        <a class="search-icon" ng-show="eventsSearchActive" ng-click="host_events_search_name=''; searchEvents()"><i class="fa fa-times"></i></a>
+                    </div>
                 </div>
             </div>
             <div class="form-group" id="status-field">
@@ -362,7 +364,7 @@
                 </select>
             </div>
             <div class="form-group" id="search-indicator" ng-show="hostViewSearching"><i class="fa fa-lg fa-spin fa-cog"></i></div>
-        </form>
+        </div>
         <!-- lr-infinite-scroll="hostEventsTable" scroll-threshold="10" time-threshold="500" -->
         <div id="host-events-table">
             <table id="fixed-table-header" class="table">
@@ -377,5 +379,7 @@
             <div id="host-events"></div>
         </div>
    </div>
+
+   <div id="host-modal-dialog" style="display: none;" class="dialog-content"></div>
 
 </div>
