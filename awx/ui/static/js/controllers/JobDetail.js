@@ -217,16 +217,18 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             case "skipped":
                                 status_text = "Skipped";
                         }
-                        task.hostResults[event.id] = {
-                            id: event.id,
-                            status: status,
-                            status_text: status_text,
-                            host_id: event.host,
-                            task_id: event.parent,
-                            name: event.event_data.host,
-                            created: event.created,
-                            msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
-                        };
+                        if (event.event !== "runner_on_no_hosts") {
+                            task.hostResults[event.id] = {
+                                id: event.id,
+                                status: status,
+                                status_text: status_text,
+                                host_id: event.host,
+                                task_id: event.parent,
+                                name: event.event_data.host,
+                                created: event.created,
+                                msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
+                            };
+                        }
                     }
                     scope.$emit('LoadHostSummaries');
                 })
