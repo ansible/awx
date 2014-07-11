@@ -392,6 +392,8 @@ class JobHostSummary(CreatedModifiedModel):
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
+        if self.host is not None:
+            self.host_name = self.host.name
         update_fields = kwargs.get('update_fields', [])
         self.failed = bool(self.dark or self.failures)
         update_fields.append('failed')
