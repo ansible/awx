@@ -1300,7 +1300,7 @@ class JobHostSummarySerializer(BaseSerializer):
 
     class Meta:
         model = JobHostSummary
-        fields = ('*', '-name', '-description', 'job', 'host', 'changed',
+        fields = ('*', '-name', '-description', 'job', 'host', 'host_name', 'changed',
                   'dark', 'failures', 'ok', 'processed', 'skipped', 'failed')
 
     def get_related(self, obj):

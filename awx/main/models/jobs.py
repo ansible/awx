@@ -367,6 +367,12 @@ class JobHostSummary(CreatedModifiedModel):
         editable=False,
     )
 
+    host_name = models.CharField(
+        max_length=1024,
+        default='',
+        editable=False,
+    )
+
     changed = models.PositiveIntegerField(default=0, editable=False)
     dark = models.PositiveIntegerField(default=0, editable=False)
     failures = models.PositiveIntegerField(default=0, editable=False)
