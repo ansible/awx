@@ -24,6 +24,10 @@ angular.module('EventsViewerFormDefinition', [])
                 label: 'Host',
                 section: 'Event'
             },
+            role: {
+                label: 'Role',
+                section: 'Event'
+            },
             play: {
                 label: 'Play',
                 type: 'text',
@@ -33,8 +37,12 @@ angular.module('EventsViewerFormDefinition', [])
                 label: 'Task',
                 section: 'Event'
             },
-            role: {
-                label: 'Role',
+            module_name: {
+                label: 'Module',
+                section: 'Event'
+            },
+            module_args: {
+                label: 'Arguments',
                 section: 'Event'
             },
             rc: {
@@ -60,14 +68,6 @@ angular.module('EventsViewerFormDefinition', [])
             delta: {
                 label: 'Elapsed',
                 section: 'Timing'
-            },
-            module_name: {
-                label: 'Name',
-                section: 'Module'
-            },
-            module_args: {
-                label: 'Arguments',
-                section: 'Module'
             }
         }
     });

@@ -154,7 +154,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     msg += 'Please contact your system administrator.';
                 }
                 Alert(defaultMsg.hdr, msg);
-            } else if ((status === 401 && data.detail && data.detail === 'Token is expired') ||
+            } else if ((status === 'Token is expired') || (status === 401 && data.detail && data.detail === 'Token is expired') ||
                 (status === 401 && data.detail && data.detail === 'Invalid token')) {
                 $rootScope.sessionTimer.expireSession();
                 $location.url('/login');

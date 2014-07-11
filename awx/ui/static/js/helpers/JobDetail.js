@@ -40,9 +40,9 @@
 angular.module('JobDetailHelper', ['Utilities', 'RestServices', 'ModalDialog'])
 
 .factory('DigestEvent', ['$rootScope', '$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult',
-    'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary', 'JobIsFinished', 'AddNewTask',
+    'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary', 'JobIsFinished', 'AddNewTask', 'AddNewPlay',
 function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, GetElapsed,
-    UpdateTaskStatus, DrawGraph, LoadHostSummary, JobIsFinished, AddNewTask) {
+    UpdateTaskStatus, DrawGraph, LoadHostSummary, JobIsFinished, AddNewTask, AddNewPlay) {
     return function(params) {
 
         var scope = params.scope,
@@ -60,27 +60,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 break;
 
             case 'playbook_on_play_start':
-                status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
-                status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
-                scope.jobData.plays[event.id] = {
-                    id: event.id,
-                    name: event.play,
-                    created: event.created,
-                    status: status,
-                    status_text: status_text,
-                    elapsed: '00:00:00',
-                    hostCount: 0,
-                    fistTask: null,
-                    unreachableCount: 0,
-                    status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
-                    tasks: {}
-                };
-                if (scope.activePlay) {
-                    scope.jobData.plays[scope.activePlay].tasks = {};
-                    scope.jobData.plays[scope.activePlay].playActiveClass = '';
-                }
-                scope.activePlay = event.id;
-                scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
+                AddNewPlay({ scope: scope, event: event });
                 break;
 
             case 'playbook_on_setup':
@@ -206,19 +186,65 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     };
 }])
 
-.factory('AddNewTask', ['DrawGraph', 'UpdatePlayStatus', function(DrawGraph, UpdatePlayStatus) {
+.factory('AddNewPlay', [ function() {
     return function(params) {
         var scope = params.scope,
             event = params.event,
-            status, status_text;
+            status, status_text, activeList, newActivePlay, key;
 
         status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
         status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
 
-        scope.jobData.plays[scope.activePlay].tasks[event.id] = {
+        scope.jobData.plays[event.id] = {
+            id: event.id,
+            name: event.play,
+            created: event.created,
+            status: status,
+            status_text: status_text,
+            elapsed: '00:00:00',
+            hostCount: 0,
+            taskCount: 0,
+            fistTask: null,
+            unreachableCount: 0,
+            status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
+            tasks: {}
+        };
+
+        //find the most recent task in the list of 'active' tasks
+        activeList = [];
+        for (key in scope.jobData.play) {
+            if (scope.jobData.plays[key].taskCount > 0) {
+                activeList.push(key);
+            }
+        };
+
+        //find the most recent play in the list of 'active' plays
+        if (scope.activeList.length > 0) {
+            newActivePlay = scope.plays[scope.activeList[scope.activeList.length - 1]].id;
+            if (scope.activePlay && newActivePlay !== scope.activePlay) {
+                scope.jobData.plays[scope.activePlay].tasks = {};
+                scope.jobData.plays[scope.activePlay].playActiveClass = '';
+            }
+            scope.activePlay = newActivePlay;
+            scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
+        }
+    };
+}])
+
+.factory('AddNewTask', ['DrawGraph', 'UpdatePlayStatus', function(DrawGraph, UpdatePlayStatus) {
+    return function(params) {
+        var scope = params.scope,
+            event = params.event,
+            status, status_text,
+            activeList, newActiveTask, key;
+
+        status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+        status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
+
+        scope.jobData.plays[event.parent].tasks[event.id] = {
             id: event.id,
             play_id: event.parent,
-            name: event.event_display,
+            name: event.task,
             status: status,
             status_text: status_text,
             status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
@@ -243,12 +269,24 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             scope.jobData.plays[scope.activePlay].firstTask = event.id;
         }
 
-        if (scope.activeTask && scope.jobData.plays[scope.activePlay].tasks[scope.activeTask] !== undefined) {
-            scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = '';
-            scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults = {};
+        //find the most recent task in the list of 'active' tasks
+        activeList = [];
+        for (key in scope.jobData.plays[scope.activePlay].tasks) {
+            if (scope.jobData.plays[scope.activePlay].tasks[key].reportedHosts > 0 || scope.jobData.plays[scope.activePlay].tasks[key].status === 'no-matching-hosts') {
+                activeList.push(key);
+            }
+        };
+        if (scope.activeList.length > 0) {
+            newActiveTask = scope.jobData.plays[scope.activePlay].tasks[scope.acitveList[scope.activeList.length - 1]].id
+            if (scope.activeTask && newActiveTask !== scope.activeTask) {
+                if (scope.activeTask && scope.jobData.plays[scope.activePlay].tasks[scope.activeTask] !== undefined) {
+                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = '';
+                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults = {};
+                }
+            }
+            scope.activeTask = newActiveTask;
+            scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
         }
-        scope.activeTask = event.id;
-        scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
 
         UpdatePlayStatus({
             scope: scope,
@@ -257,10 +295,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             changed: event.changed,
             modified: event.modified
         });
-
-        /*if (scope.host_summary.total > 0) {
-            DrawGraph({ scope: scope, resize: true });
-        }*/
     };
 }])
 
@@ -318,6 +352,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     play.status_text = (changed) ? 'Changed' : (failed) ? 'Failed' : 'OK';
                 }
             }
+            play.taskCount++;
             play.status_tip = "Event ID: " + play.id + "<br />Status: " + play.status_text;
             play.finished = modified;
             play.elapsed = GetElapsed({
@@ -612,6 +647,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     });
                 });
 
+                if (scope.liveEventProcessing) {
+
+                }
                 // set the active task
                 SelectPlay({
                     scope: scope,

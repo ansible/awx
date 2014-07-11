@@ -322,9 +322,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             task: play.tasks[event.id]
                         });
                     });
-                    if (scope.activeTask) {
-                        scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
-                    }
+                    //if (scope.activeTask) {
+                    //    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
+                    //}
                     scope.$emit('LoadHosts');
                 })
                 .error(function(data) {
