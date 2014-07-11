@@ -7,9 +7,7 @@
  *
  */
 
-#sync-failure {
-	color:red;
-}
+
 
 .job-status-graph, .host-count-graph{
   font: 10px sans-serif;
@@ -32,6 +30,7 @@
     border: 1px solid @grey;
     border-radius: 4px;
     padding: 5px;
+
 }
 
 .graph-container{
@@ -47,8 +46,20 @@
     margin-right: 0px;
     margin-bottom: 15px;
 }
-.carousel-control.left, .carousel-control.right {
-    background-image: none
+
+
+#dashboard-tab-content{
+  padding-top: 5px;
+}
+
+#dashboard-tab-content .search-row #active-jobs-search-container{
+  height: 35px;
+}
+
+
+
+#dashboard-tab-content table{
+  margin-bottom: 10px;
 }
 
 .dashboard-jobs-list-container {
@@ -64,27 +75,20 @@
     }
 }
 
+#container4{
+  padding-bottom: 15px;
+}
+
  @media (min-width: 1024px) {
-        .left-side {
-            padding-right: 7px;
-        }
+      .left-side {
+          padding-right: 7px;
+      }
 
-        .right-side {
-            padding-left: 7px;
-        }
+      .right-side {
+          padding-left: 7px;
+      }
 }
 
-
-.period-dropdown{
-  height: 75px;
-  width: 100px;
-  cursor: pointer;
-}
-.status-dropdown{
-  height: 100px;
-  width: 100px;
-  cursor:pointer;
-}
 .m, .n{
   cursor:pointer;
 }

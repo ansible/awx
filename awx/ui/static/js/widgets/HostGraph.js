@@ -21,9 +21,11 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
 
                 html = "<div class=\"graph-container\">\n";
                 html +="<div class=\"row\">\n";
-                html += "<div class=\"h6 col-xs-8 text-center\"><b>Hosts Count</b></div>\n";
-                html += "<div class=\"host-count-graph\"><svg></svg></div>\n";
+                html += "<div class=\"h6 col-xs-8 text-center\"><b>Host Count</b></div>\n";
                 html += "</div>\n";
+                html +="<div class=\"row\">\n";
+                html += "<div class=\"host-count-graph\"><svg></svg></div>\n";
+
                 html += "</div>\n";
 
 
@@ -105,8 +107,8 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
 
                         nv.addGraph({
                                 generate: function() {
-                                    var width = nv.utils.windowSize().width/3,
-                                    height = nv.utils.windowSize().height/5,
+                                    var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
+                                    height = $('.graph-container').height()*0.8, //nv.utils.windowSize().height/5,
                                     chart = nv.models.lineChart()
                                         .margin({top: 15, right: 75, bottom: 40, left: 85})
                                         .x(function(d,i) { return i ;})
@@ -150,6 +152,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                     nv.utils.windowResize(chart.update);
                                     scope.$emit('WidgetLoaded');
                                     return chart;
+
                                 },
 
                             });

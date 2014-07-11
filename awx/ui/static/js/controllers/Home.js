@@ -101,7 +101,20 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             target: 'container5',
             dashboard: data
         });
+        setDashboardHeights();
+
     });
+
+
+
+    function setDashboardHeights(){
+        //var winWidth = $(window).width(),
+        var winHeight = $(window).height(),
+        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
+        //console.log("available_height: " + available_height);
+        $('.graph-container').height(available_height/2);
+       // console.log("graph-container height: "+$('.graph-container').height());
+    }
 
     $scope.showActivity = function () {
         Stream({

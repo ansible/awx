@@ -24,21 +24,6 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                 html +="<div class=\"row\">\n";
                 html += "<div id=\"job-status-title\" class=\"h6 col-xs-8 text-center\"><b>Host Status</b></div>\n";
                 html += "</div>\n";
-                // html += "<div class=\"h6 col-xs-2 \">\n";
-                // html += "<div class=\"dropdown\">\n";
-                // html += "<a id=\"dLabel\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
-                // html += "Filter<span class=\"caret\"></span>\n";
-                // html += "  </a>\n";
-
-                // html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
-                // html += "<li><a class=\"j\" id=\"all\">Source</a></li>\n";
-                // html += "<li><a class=\"j\" id=\"inv_sync\">Inventory</a></li>\n";
-                // html += "</ul>\n";
-                // html += "</div>\n";
-
-                // html += "</div>\n"; //end of filter div
-
-
 
                 html +="<div class=\"row\">\n";
                 html += "<div class=\"host-pie-chart\"><svg></svg></div>\n";
@@ -86,9 +71,10 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                 scope.removeCreateHostPieChart = scope.$on('createHostPieChart', function (e, data) {
                     data = exampleData();
                     nv.addGraph(function() {
-                        var width = nv.utils.windowSize().width/3,
-                        height = nv.utils.windowSize().height/5,
+                        var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
+                        height = $('.graph-container').height()*0.85, //nv.utils.windowSize().height/5,
                         chart = nv.models.pieChart()
+                          .margin({top: 5, right: 75, bottom: 40, left: 85})
                           .x(function(d) { return d.label; })
                           .y(function(d) { return d.value; })
                           .showLabels(true);

@@ -24,15 +24,15 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 html = "<div class=\"graph-container\">\n";
 
                 html +="<div class=\"row\">\n";
-                html += "<div id=\"job-status-title\" class=\"h6 col-xs-8 text-center\"><b>Job Status for All Jobs, Past Month</b></div>\n";
+                html += "<div id=\"job-status-title\" class=\"h6 col-xs-8 text-center\"><b>Job Status</b></div>\n";  // for All Jobs, Past Month
 
                 html += "<div class=\"h6 col-xs-2 \">\n";
                 html += "<div class=\"dropdown\">\n";
-                html += "<a id=\"dLabel\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
+                html += "<a id=\"type-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
                 html += "Job Type<span class=\"caret\"></span>\n";
                 html += "  </a>\n";
 
-                html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
+                html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"type-dropdown\">\n";
                 html += "<li><a class=\"m\" id=\"all\">All</a></li>\n";
                 html += "<li><a class=\"m\" id=\"inv_sync\">Inventory Sync</a></li>\n";
                 html += "<li><a class=\"m\" id=\"scm_update\">SCM Update</a></li>\n";
@@ -44,11 +44,11 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 html += "<div class=\"h6 col-xs-2 \">\n";
                 html += "<div class=\"dropdown\">\n";
-                html += "<a id=\"dLabel\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
+                html += "<a id=\"period-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
                 html += "Period<span class=\"caret\"></span>\n";
                 html += "  </a>\n";
 
-                html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dLabel\">\n";
+                html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"period-dropdown\">\n";
                 html += "<li><a class=\"n\" id=\"day\" >Past 24 Hours </a></li>\n";
                 html += "<li><a class=\"n\" id=\"week\">Past Week</a></li>\n";
                 html += "<li><a class=\"n\" id=\"month\">Past Month</a></li>\n";
@@ -91,6 +91,8 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                     scope.removeGraphDataReady();
                 }
                 scope.removeGraphDataReady = scope.$on('graphDataReady', function (e, data) {
+
+
                     var timeFormat, graphData = [
                         {
                             "color": "#1778c3",
@@ -122,17 +124,17 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                     nv.addGraph({
                         generate: function() {
-                                    var width = nv.utils.windowSize().width/3,
-                                        height = nv.utils.windowSize().height/5,
+                                    var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
+                                        height = $('.graph-container').height()*0.8, //nv.utils.windowSize().height/5,
                                         chart = nv.models.lineChart()
-                                            .margin({top: 5, right: 75, bottom: 40, left: 85})  //Adjust chart margins to give the x-axis some breathing room.
+                                           .margin({top: 5, right: 75, bottom: 40, left: 85})  //Adjust chart margins to give the x-axis some breathing room.
                                             .x(function(d,i) { return i; })
                                             .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                                             .transitionDuration(350)  //how fast do you want the lines to transition?
                                             .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
                                             .showYAxis(true)        //Show the y-axis
                                             .showXAxis(true)        //Show the x-axis
-                                            // .width(width)
+                                            //  .width(width)
                                             // .height(height)
                                             ;
 
@@ -168,18 +170,27 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                         "src": "url(/static/fonts/OpenSans-Regular.ttf)"
                                     });
 
+                                    nv.utils.windowResize(function(){
 
-                                    nv.utils.windowResize(chart.update);
+                                        // var winWidth = $(window).width(),
+                                        var winHeight = $(window).height(),
+                                        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
+                                        // console.log("available_height: " + available_height);
+                                        $('.graph-container').height(available_height/2);
+                                        // console.log("graph-container height: "+$('.graph-container').height());
+                                        chart.update();
+                                    });
+                                    //nv.utils.windowResize(chart.update);
 
 
                                     //On click, update with new data
                                     d3.selectAll(".n")
                                         .on("click", function() {
                                             period = this.getAttribute("id");
-                                           // console.log(period);
-                                            var title = $('#job-status-title').text(),
-                                            str = title.slice(0,title.search(","))+", "+this.innerHTML;
-                                            $('#job-status-title').html("<b>"+str+" </b>");
+                                            $('#period-dropdown').text(this.text);
+                                            // var title = $('#job-status-title').text(),
+                                            // str = title.slice(0,title.search(","))+", "+this.innerHTML;
+                                            // $('#job-status-title').html("<b>"+str+" </b>");
                                             createGraph();
                                         });
 
@@ -187,10 +198,10 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                     d3.selectAll(".m")
                                         .on("click", function() {
                                             job_type = this.getAttribute("id");
-                                            //console.log(job_type);
-                                            var title = $('#job-status-title').text(),
-                                            str = title.slice(title.search(","));
-                                            $('#job-status-title').html("<b>Job Status for "+this.innerHTML+" Jobs"+str+" </b>");
+                                            $('#type-dropdown').text(this.text);
+                                            // var title = $('#job-status-title').text(),
+                                            // str = title.slice(title.search(","));
+                                            // $('#job-status-title').html("<b>Job Status for "+this.innerHTML+" Jobs"+str+" </b>");
                                             createGraph();
                                         });
 
@@ -198,6 +209,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                     return chart;
 
                                 },
+
 
                     });
 

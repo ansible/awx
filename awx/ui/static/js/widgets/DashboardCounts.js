@@ -116,13 +116,13 @@ angular.module('DashboardCountsWidget', ['RestServices', 'Utilities'])
                 element.html(html);
                 $compile(element)(scope);
                 if(dashboard.hosts.failed>0 ){
-                    $('#failed-hosts').html("<a style=\"color:red\" href=/#/home/hosts id=\"failed-hosts\">"+dashboard.hosts.failed+"</a>");
+                    $('#failed-hosts').html("<a style=\"color:#aa0000\" href=/#/home/hosts id=\"failed-hosts\">"+dashboard.hosts.failed+"</a>");
                 }
                 if(dashboard.inventories.inventory_failed>0 ){
-                    $('#failed-inventories').html("<a style=\"color:red\" href=/#/inventories/?inventory_sources_with_failures id=\"failed-inventories\">"+dashboard.inventories.inventory_failed+"</a>");
+                    $('#failed-inventories').html("<a style=\"color:#aa0000\" href=/#/inventories/?inventory_sources_with_failures id=\"failed-inventories\">"+dashboard.inventories.inventory_failed+"</a>");
                 }
                 if(dashboard.projects.failed>0 ){
-                    $('#failed-projects').html("<a style=\"color:red\" href=/#/projects id=\"failed-projects\">"+dashboard.projects.failed+"</a>");
+                    $('#failed-projects').html("<a style=\"color:#aa0000\" href=/#/projects id=\"failed-projects\">"+dashboard.projects.failed+"</a>");
                 }
                 scope.$emit('WidgetLoaded');
 
