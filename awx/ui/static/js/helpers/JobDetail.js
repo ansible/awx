@@ -46,8 +46,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
 
         var scope = params.scope,
-            event = params.event,
-            status, status_text;
+            event = params.event;
 
         $log.debug('processing event: ' + event.id);
 
@@ -216,7 +215,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             if (scope.jobData.plays[key].taskCount > 0) {
                 activeList.push(key);
             }
-        };
+        }
 
         //find the most recent play in the list of 'active' plays
         if (scope.activeList.length > 0) {
@@ -275,9 +274,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             if (scope.jobData.plays[scope.activePlay].tasks[key].reportedHosts > 0 || scope.jobData.plays[scope.activePlay].tasks[key].status === 'no-matching-hosts') {
                 activeList.push(key);
             }
-        };
+        }
+
         if (scope.activeList.length > 0) {
-            newActiveTask = scope.jobData.plays[scope.activePlay].tasks[scope.acitveList[scope.activeList.length - 1]].id
+            newActiveTask = scope.jobData.plays[scope.activePlay].tasks[scope.acitveList[scope.activeList.length - 1]].id;
             if (scope.activeTask && newActiveTask !== scope.activeTask) {
                 if (scope.activeTask && scope.jobData.plays[scope.activePlay].tasks[scope.activeTask] !== undefined) {
                     scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = '';
@@ -647,9 +647,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     });
                 });
 
-                if (scope.liveEventProcessing) {
-
-                }
                 // set the active task
                 SelectPlay({
                     scope: scope,
@@ -701,7 +698,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
         if (scope.activePlay) {
             url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
-            url += (scope.search_task_name) ? '&name__icontains=' + scope.search_task_name : '';
+            url += (scope.search_task_name) ? '&task__icontains=' + scope.search_task_name : '';
             url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
             url += '&page_size=' + scope.tasksMaxRows + '&order_by=id';
 
@@ -926,8 +923,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             .success(function(data) {
                 data.results.forEach(function(event) {
                     var name;
-                    if (event.summary_fields.host && event.summary_fields.host.name) {
-                        name = event.summary_fields.host.name;
+                    if (event.host_name) {
+                        name = event.host_name;
                     }
                     else {
                         name = "<deleted host>";
@@ -1228,11 +1225,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             idx = 0,
             hostSummaries,
             key,
-            keys;
-
-        if (scope.activePlay && scope.activeTask) {
+            keys = Object.keys(scope.jobData.hostSummaries);
+        if (keys.length > 0) {
             hostSummaries = JSON.parse(JSON.stringify(scope.jobData.hostSummaries));
-
             if (scope.search_host_summary_name) {
                 for (key in hostSummaries) {
                     if (hostSummaries[key].name.indexOf(scope.search_host_summary_name) > 0) {

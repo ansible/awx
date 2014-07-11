@@ -149,8 +149,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
             .success(function(data) {
                 data.results.forEach(function(event) {
                     var name;
-                    if (event.summary_fields.host && event.summary_fields.host.name) {
-                        name = event.summary_fields.host.name;
+                    if (event.host_name) {
+                        name = event.host_name;
                     }
                     else {
                         name = "<deleted host>";
@@ -236,8 +236,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 });
         }
         else {
-            scope.jobData.hostSummaries = {};
-            scope.$emit('InitialLoadComplete');
+            scope.$emit('LoadHostSummaries');
         }
     });
 
@@ -322,9 +321,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             task: play.tasks[event.id]
                         });
                     });
-                    //if (scope.activeTask) {
-                    //    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
-                    //}
+                    if (scope.activeTask) {
+                        scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
+                    }
                     scope.$emit('LoadHosts');
                 })
                 .error(function(data) {
@@ -333,8 +332,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 });
         }
         else {
-            scope.jobData.hostSummaries = {};
-            scope.$emit('InitialLoadComplete');
+            scope.$emit('LoadHostSummaries');
         }
     });
 
@@ -425,7 +423,6 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
                 }
                 scope.$emit('LoadTasks', events_url);
-                //scope.$emit('FixPlaysScroll');
             })
             .error( function(data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -850,8 +847,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
             var url = scope.job.url  + 'job_plays/?id__gt=' + scope.plays[scope.plays.length - 1].id;
             url += (scope.search_play_name) ? '&play__icontains=' + scope.search_play_name : '';
             url += (scope.search_play_status === 'failed') ? '&failed=true' : '';
-            url += + '&page_size=' + scope.playsMaxRows + '&order_by=id';
-
+            url += '&page_size=' + scope.playsMaxRows + '&order_by=id';
+            $('#playsMoreRows').fadeIn();
             Rest.setUrl(url);
             Rest.get()
                 .success( function(data) {
@@ -902,6 +899,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
                         scope.plays[scope.plays.length - 1].hostCount = ok + changed + failed + skipped;
                     });
+                    $('#playsMoreRows').fadeOut(400);
                 })
                 .error( function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -914,7 +912,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         // check for more tasks when user scrolls to bottom of task list...
         if ((!scope.liveEventProcessing) && scope.activePlay && scope.tasks.length) {
             var url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
-            url += (scope.search_task_name) ? '&name__icontains=' + scope.search_task_name : '';
+            url += (scope.search_task_name) ? '&task__icontains=' + scope.search_task_name : '';
             url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
             url += '&id__gt=' + scope.tasks[scope.tasks.length - 1].id + '&page_size=' + scope.tasksMaxRows + '&order_by=id';
             $('#tasksMoreRows').fadeIn();
@@ -1056,8 +1054,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 .success(function(data) {
                     data.results.forEach(function(row) {
                         var name;
-                        if (event.summary_fields.host && event.summary_fields.host.name) {
-                            name = event.summary_fields.host.name;
+                        if (event.host_name) {
+                            name = event.host_name;
                         }
                         else {
                             name = "<deleted host>";
