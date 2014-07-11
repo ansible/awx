@@ -393,8 +393,8 @@ angular.module('Tower', [
         }
     ])
 
-    .config(function($provide) {
-        $provide.decorator('$log', function($delegate) {
+    .config(['$provide', function($provide) {
+        $provide.decorator('$log', ['$delegate', function($delegate) {
             var _debug = $delegate.debug;
             $delegate.debug = function(msg) {
                 // only show debug messages when debug_mode set to true in config
@@ -403,8 +403,8 @@ angular.module('Tower', [
                 }
             };
             return $delegate;
-        });
-    })
+        }]);
+    }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'ViewLicense',
         'Timer', 'ClearScope', 'HideStream', 'Socket',
