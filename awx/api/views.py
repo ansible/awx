@@ -1635,7 +1635,7 @@ class JobJobPlaysList(BaseJobEventsList):
         if ordering is not None:
             qs = qs.order_by(ordering)
 
-        # This is a bit of a special case for id filtering requested by the UI
+        # This is a bit of a special case for filtering requested by the UI
         # doing this here for the moment until/unless we need to implement more
         # complex filtering (since we aren't under a serializer)
 
@@ -1647,6 +1647,8 @@ class JobJobPlaysList(BaseJobEventsList):
             qs = qs.filter(id__lt=request.QUERY_PARAMS['id__lt'])
         if "failed" in request.QUERY_PARAMS:
             qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
+        if "play__icontains" in request.QUERY_PARAMS:
+            qs = qs.filter(play__icontains=request.QUERY_PARAMS['play__icontains'])
 
         count = qs.count()
 
@@ -1755,6 +1757,8 @@ class JobJobTasksList(BaseJobEventsList):
             qs = qs.filter(id__lt=request.QUERY_PARAMS['id__lt'])
         if "failed" in request.QUERY_PARAMS:
             qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
+        if "task__icontains" in request.QUERY_PARAMS:
+            qs = qs.filter(task__icontains=request.QUERY_PARAMS['task__icontains'])
 
         if ordering is not None:
             qs = qs.order_by(ordering)
