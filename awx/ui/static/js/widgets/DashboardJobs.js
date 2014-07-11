@@ -120,35 +120,20 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
      // Set the height of each container and calc max number of rows containers can hold
         function setDashboardJobsHeight() {
             var docw = $(window).width(),
-            //     //doch = $(window).height(),
-                available_height,
-                search_row, page_row, height, header, row_height;
-            if (docw > 1000) {
-            //     // customize the container height and # of rows based on available viewport height
-            //     available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
+            available_height, search_row, page_row, height, header, row_height;
 
-            //     available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#graph-container').outerHeight() - $('#count-container').outerHeight() - 80;
-            //     $('.jobs-list-container').each(function() {
-            //         $(this).height(Math.floor(available_height / 2));
-            //     });
+            available_height = Math.floor(($(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93)/2);
+            $('.dashboard-jobs-list-container').height(available_height);
+            search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
+            page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
+            header = Math.max($('#completed_jobs_table thead').height(), 41);
+            height = Math.floor(available_height) - header - page_row - search_row -30 ;
+            row_height = (docw < 1415) ? 47 : 27;
+            max_rows = Math.floor(height / row_height);
 
-                available_height = 500; // $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
-               // console.log("available_height: " + available_height);
-                $('.dashboard-jobs-list-container').height(500);
-                //console.log("dashboard-jobs-list-container height: "+$('.dashboard-jobs-list-container').height());
-                search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
-                page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
-                header = Math.max($('#completed_jobs_table thead').height(), 41);
-                height = Math.floor(available_height) - header - page_row -search_row-30 ;
-                row_height = (docw < 1415) ? 47 : 27;
-                //$('.jobs-list-container tbody tr:eq(0)').height();  <-- only works if data is loaded
-                max_rows = Math.floor(height / row_height);
-            }
-            else {
-                // when width < 1240px || height < 800px put things back to their default state
-                $('.jobs-list-container').each(function() {
-                    $(this).css({ 'height': 'auto' });
-                });
+            if(max_rows<5){
+                $('.dashboard-jobs-list-container').height(header+page_row+search_row+30+(5*row_height));
+                // $('.dashboard-jobs-list-container').height(500);
                 max_rows = 5;
             }
         }

@@ -150,7 +150,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                     // });
 
                                     nv.utils.windowResize(chart.update);
-                                    scope.$emit('WidgetLoaded');
+
                                     return chart;
 
                                 },

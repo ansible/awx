@@ -95,7 +95,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                     var timeFormat, graphData = [
                         {
-                            "color": "#1778c3",
+                            "color": "#00aa00",
                             "key": "Successful",
                             "values": data.jobs.successful
                         },
@@ -180,14 +180,15 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                         // console.log("graph-container height: "+$('.graph-container').height());
                                         chart.update();
                                     });
-                                    //nv.utils.windowResize(chart.update);
+                                    // nv.utils.windowResize(chart.update);
 
 
                                     //On click, update with new data
                                     d3.selectAll(".n")
                                         .on("click", function() {
                                             period = this.getAttribute("id");
-                                            $('#period-dropdown').text(this.text);
+                                            $('#period-dropdown').replaceWith("<a id=\"period-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+"<span class=\"caret\"><span>\n");
+                                            //$('#period-dropdown').text(this.text);
                                             // var title = $('#job-status-title').text(),
                                             // str = title.slice(0,title.search(","))+", "+this.innerHTML;
                                             // $('#job-status-title').html("<b>"+str+" </b>");
@@ -198,7 +199,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                     d3.selectAll(".m")
                                         .on("click", function() {
                                             job_type = this.getAttribute("id");
-                                            $('#type-dropdown').text(this.text);
+                                            $('#type-dropdown').replaceWith("<a id=\"type-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+"<span class=\"caret\"><span>\n");
                                             // var title = $('#job-status-title').text(),
                                             // str = title.slice(title.search(","));
                                             // $('#job-status-title').html("<b>Job Status for "+this.innerHTML+" Jobs"+str+" </b>");

@@ -45,9 +45,6 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
 
                 }
 
-
-
-
                 element = angular.element(document.getElementById(target));
                 element.html(html);
                 $compile(element)(scope);
@@ -86,6 +83,7 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                             .transition().duration(350)
                             .call(chart);
                         nv.utils.windowResize(chart.update);
+                        scope.$emit('WidgetLoaded');
                         return chart;
                     });
                 });

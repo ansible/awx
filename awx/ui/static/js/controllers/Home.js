@@ -48,7 +48,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
     e.html(html);
     $compile(e)($scope);
 
-    waitCount = 3;
+    waitCount = 4;
     loadedCount = 0;
 
     if (!$routeParams.login) {
@@ -63,6 +63,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         // Once all the widgets report back 'loaded', turn off Wait widget
         loadedCount++;
         if (loadedCount === waitCount) {
+            $(window).resize();
             Wait('stop');
         }
     });
@@ -90,6 +91,10 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
                 dashboard: data
             });
         }
+        else{
+            $('#container4').replaceWith("<div id='container4' class='left-side col-sm-12 col-xs-12'></div>");
+        }
+
 
         DashboardJobs({
             scope: $scope,
@@ -101,20 +106,8 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             target: 'container5',
             dashboard: data
         });
-        setDashboardHeights();
 
     });
-
-
-
-    function setDashboardHeights(){
-        //var winWidth = $(window).width(),
-        var winHeight = $(window).height(),
-        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
-        //console.log("available_height: " + available_height);
-        $('.graph-container').height(available_height/2);
-       // console.log("graph-container height: "+$('.graph-container').height());
-    }
 
     $scope.showActivity = function () {
         Stream({
