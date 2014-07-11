@@ -48,7 +48,7 @@ angular.module('DashboardCountsWidget', ['RestServices', 'Utilities'])
 
                 html = "<div id=\"count-container\" class=\"count-container row\">\n";
                 html += "<div class=\"h2 col-xs-4 col-sm-2 text-center\"><a href=/#/home/hosts>" + dashboard.hosts.total+"</a><br><h6>Hosts</h6></div>\n";
-                html += "<div class=\"h2 col-xs-4 col-sm-2 text-center\"><a href=/#/home/hosts id=\"failed-hosts\">"+dashboard.hosts.failed+"</a><br><h6>Failed Hosts</h6></div>\n";
+                html += "<div class=\"h2 col-xs-4 col-sm-2 text-center\"><a href=\"/#/home/hosts/?has_active_failures=true\" id=\"failed-hosts\">"+dashboard.hosts.failed+"</a><br><h6>Failed Hosts</h6></div>\n";
                 html += "<div class=\"h2 col-xs-4 col-sm-2 text-center\"><a href=/#/inventories>"+dashboard.inventories.total+"</a><br><h6>Inventories</h6></div>\n";
                 html += "<div class=\"h2 col-xs-4 col-sm-2 text-center\"><a href=/#/inventories/?inventory_sources_with_failures id=\"failed-inventories\">"+dashboard.inventories.inventory_failed+"</a><br><h6>Inventory Sync Failures</h6></div>\n";
                 html += "<div class=\"h2 col-xs-4 col-sm-2 text-center\"><a href=/#/projects>"+dashboard.projects.total+"</a><br><h6>Projects</h6></div>\n";
@@ -116,13 +116,13 @@ angular.module('DashboardCountsWidget', ['RestServices', 'Utilities'])
                 element.html(html);
                 $compile(element)(scope);
                 if(dashboard.hosts.failed>0 ){
-                    $('#failed-hosts').html("<a style=\"color:#aa0000\" href=/#/home/hosts id=\"failed-hosts\">"+dashboard.hosts.failed+"</a>");
+                    $('#failed-hosts').html("<a style=\"color:#aa0000\" href=\"/#/home/hosts/?has_active_failures=true\" id=\"failed-hosts\">"+dashboard.hosts.failed+"</a>");
                 }
                 if(dashboard.inventories.inventory_failed>0 ){
                     $('#failed-inventories').html("<a style=\"color:#aa0000\" href=/#/inventories/?inventory_sources_with_failures id=\"failed-inventories\">"+dashboard.inventories.inventory_failed+"</a>");
                 }
                 if(dashboard.projects.failed>0 ){
-                    $('#failed-projects').html("<a style=\"color:#aa0000\" href=/#/projects id=\"failed-projects\">"+dashboard.projects.failed+"</a>");
+                    $('#failed-projects').html("<a style=\"color:#aa0000\" href=\"/#/projects/?status=failed\" id=\"failed-projects\">"+dashboard.projects.failed+"</a>");
                 }
                 scope.$emit('WidgetLoaded');
 

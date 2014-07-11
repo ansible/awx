@@ -11,9 +11,9 @@
 
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
-        'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon',
+        'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon', 'Breadcrumbs',
     function ($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink,
-        Button, SelectIcon) {
+        Button, SelectIcon, Breadcrumbs) {
         return {
 
             setList: function (list) {
@@ -146,12 +146,12 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     html += "</li>\n</ul>\n</div>\n";
                 }
                 //else if (options.mode !== 'lookup' && (options.breadCrumbs === undefined || options.breadCrumbs)) {
-                    //Breadcrumbs
-                //    html += Breadcrumbs({
-                //        list: list,
-                //        mode: options.mode
-                //    });
-                //}
+                else if (options.breadCrumbs) {
+                    html += Breadcrumbs({
+                        list: list,
+                        mode: options.mode
+                    });
+                }
 
                 if (options.mode === 'edit' && list.editInstructions) {
                     html += "<div class=\"alert alert-info alert-block\">\n";

@@ -160,7 +160,7 @@ function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, Lo
         opt, PreviousSearchParams,
         io;
 
-    generator.inject(list, { mode: 'edit', scope: scope });
+    generator.inject(list, { mode: 'edit', scope: scope, breadCrumbs: true });
 
     function ellipsis(a) {
         if (a.length > 20) {
@@ -601,7 +601,7 @@ function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, 
             });
         }
 
-        generator.inject(list, { mode: 'edit', scope: $scope });
+        generator.inject(list, { mode: 'edit', scope: $scope, breadCrumbs: true });
 
     });
 
