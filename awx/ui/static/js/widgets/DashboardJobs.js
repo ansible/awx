@@ -132,7 +132,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
             max_rows = Math.floor(height / row_height);
 
             if(max_rows<5){
-                $('.dashboard-jobs-list-container').height(header+page_row+search_row+30+(5*row_height));
+                $('.dashboard-jobs-list-container').height(header+page_row+search_row+40+(5*row_height));
                 // $('.dashboard-jobs-list-container').height(500);
                 max_rows = 5;
             }
@@ -141,10 +141,6 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
         // Set container height and return the number of allowed rows
         function resizeDashboardJobsWidget() {
             setDashboardJobsHeight();
-            // completed_scope[CompletedJobsList.iterator + '_page_size'] = max_rows;
-            // completed_scope.changePageSize(CompletedJobsList.name, CompletedJobsList.iterator);
-            // running_scope[RunningJobsList.iterator + '_page_size'] = max_rows;
-            // running_scope.changePageSize(RunningJobsList.name, RunningJobsList.iterator);
             jobs_scope[JobsList.iterator + '_page_size'] = max_rows;
             jobs_scope.changePageSize(JobsList.name, JobsList.iterator);
             scheduled_scope[ScheduledJobsList.iterator + '_page_size'] = max_rows;

@@ -171,14 +171,15 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                     });
 
                                     nv.utils.windowResize(function(){
-
-                                        // var winWidth = $(window).width(),
-                                        var winHeight = $(window).height(),
-                                        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
-                                        // console.log("available_height: " + available_height);
-                                        $('.graph-container').height(available_height/2);
-                                        // console.log("graph-container height: "+$('.graph-container').height());
-                                        chart.update();
+                                        if($(window).width()<500){
+                                            $('.graph-container').height(300);
+                                        }
+                                        else{
+                                            var winHeight = $(window).height(),
+                                            available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
+                                            $('.graph-container').height(available_height/2);
+                                            chart.update();
+                                        }
                                     });
                                     // nv.utils.windowResize(chart.update);
 

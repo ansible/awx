@@ -10,14 +10,17 @@
 'use strict';
 
 angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
-    .factory('HostPieChart', ['$rootScope', '$compile', '$location' , 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
-        function ($rootScope, $compile , $location, Rest, GetBasePath, ProcessErrors) {
+    .factory('HostPieChart', ['$rootScope', '$compile',
+            //'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
+        function ($rootScope, $compile){
+            //, Rest, GetBasePath, ProcessErrors) {
             return function (params) {
 
                 var scope = params.scope,
                     target = params.target,
                     dashboard = params.dashboard,
-                    html, element, url;
+                    html, element, data,
+                    canvas, context, winHeight, available_height;
 
                 html = "<div class=\"graph-container\">\n";
 
@@ -26,55 +29,42 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                 html += "</div>\n";
 
                 html +="<div class=\"row\">\n";
-                html += "<div class=\"host-pie-chart\"><svg></svg></div>\n";
+                html += "<div class=\"host-pie-chart text-center\"><svg></svg></div>\n";
                 html += "</div>\n";
 
                 html += "</div>\n";
 
-                function exampleData() {
-                    return [
-                        {
-                            "label": "Successful",
-                            "value" : dashboard.hosts.total
-                        } ,
-                        {
-                            "label": "Failed",
-                            "value" : dashboard.hosts.failed
-                        }
-                    ];
 
-                }
 
                 element = angular.element(document.getElementById(target));
                 element.html(html);
                 $compile(element)(scope);
 
-                url = GetBasePath('dashboard')+'graphs/inventory/';
-                Rest.setUrl(url);
-                Rest.get()
-                        .success(function (data){
-                            scope.$emit('createHostPieChart', data.inventory);
+                if(dashboard.hosts.total+dashboard.hosts.failed>0){
+                    data = [
+                        {
+                            "label": "Successful",
+                            "color": "#00aa00",
+                            "value" : dashboard.hosts.total
+                        } ,
+                        {
+                            "label": "Failed",
+                            "color" : "#aa0000",
+                            "value" : dashboard.hosts.failed
+                        }
+                    ];
 
-
-                        })
-                        .error(function (data, status) {
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Failed to get: ' + url + ' GET returned: ' + status });
-                        });
-
-                if (scope.removeCreateHostPieChart) {
-                    scope.removeCreateHostPieChart();
-                }
-                scope.removeCreateHostPieChart = scope.$on('createHostPieChart', function (e, data) {
-                    data = exampleData();
                     nv.addGraph(function() {
                         var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
-                        height = $('.graph-container').height()*0.85, //nv.utils.windowSize().height/5,
+                        height = $('.graph-container').height(), //nv.utils.windowSize().height/5,
                         chart = nv.models.pieChart()
                           .margin({top: 5, right: 75, bottom: 40, left: 85})
                           .x(function(d) { return d.label; })
                           .y(function(d) { return d.value; })
-                          .showLabels(true);
+                          .showLabels(true)
+                          .color(['#00aa00', '#aa0000']);
+
+                        chart.pie.pieLabelsOutside(true).labelType("percent");
 
                         d3.select(".host-pie-chart svg")
                             .datum(data)
@@ -86,7 +76,25 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                         scope.$emit('WidgetLoaded');
                         return chart;
                     });
-                });
+                }
+                else{
+                    winHeight = $(window).height();
+                    available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
+                    $('.graph-container:eq(1)').height(available_height/2);
+                    $('.host-pie-chart svg').replaceWith('<canvas id="circlecanvas" width="100" height="100"></canvas>');
+
+                    canvas = document.getElementById("circlecanvas");
+                    context = canvas.getContext("2d");
+                    context.arc(50, 50, 50, 0, Math.PI * 2, false);
+                    //context.beginPath();
+                    context.globalAlpha = 0.4;
+                    context.fillStyle = '#A9A9A9';
+                    context.fill();
+                    context.lineWidth = 1;
+                    context.strokeStyle = '#1778c3';
+                    context.stroke();
+                    scope.$emit('WidgetLoaded');
+                }
             };
         }
     ]);
