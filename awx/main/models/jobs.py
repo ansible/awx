@@ -351,7 +351,7 @@ class JobHostSummary(CreatedModifiedModel):
 
     class Meta:
         app_label = 'main'
-        unique_together = [('job', 'host')]
+        unique_together = [('job', 'host_name')]
         verbose_name_plural = _('job host summaries')
         ordering = ('-pk',)
 
@@ -363,7 +363,9 @@ class JobHostSummary(CreatedModifiedModel):
     )
     host = models.ForeignKey('Host',
         related_name='job_host_summaries',
-        on_delete=models.CASCADE,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
         editable=False,
     )
 
@@ -402,6 +404,8 @@ class JobHostSummary(CreatedModifiedModel):
 
     def update_host_last_job_summary(self):
         update_fields = []
+        if self.host is None:
+            return
         if self.host.last_job_id != self.job_id:
             self.host.last_job_id = self.job_id
             update_fields.append('last_job_id')
@@ -759,14 +763,19 @@ class JobEvent(CreatedModifiedModel):
             qs = Host.objects.filter(inventory__jobs__id=self.job_id,
                                      name__in=hostnames)
             job = self.job
-            for host in qs.only('id', 'name'):
+            #for host in qs.only('id', 'name'):
+            for host in hostnames:
                 host_stats = {}
                 for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
                     try:
-                        host_stats[stat] = self.event_data.get(stat, {}).get(host.name, 0)
+                        host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
                     except AttributeError: # in case event_data[stat] isn't a dict.
                         pass
-                host_summary, created = job.job_host_summaries.get_or_create(host=host, defaults=host_stats)
+                if qs.filter(name=host).exists():
+                    host_actual = qs.get(name=host)
+                    host_summary, created = job.job_host_summaries.get_or_create(host=host_actual, host_name=host_actual.name, defaults=host_stats)
+                else:
+                    host_summary, created = job.job_host_summaries.get_or_create(host_name=host, defaults=host_stats)
                 if not created:
                     update_fields = []
                     for stat, value in host_stats.items():

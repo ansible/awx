@@ -1306,9 +1306,11 @@ class JobHostSummarySerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(JobHostSummarySerializer, self).get_related(obj)
         res.update(dict(
-            job=reverse('api:job_detail', args=(obj.job.pk,)),
-            host=reverse('api:host_detail', args=(obj.host.pk,))
-        ))
+            job=reverse('api:job_detail', args=(obj.job.pk,))))
+        if obj.host is not None:
+            res.update(dict(
+                host=reverse('api:host_detail', args=(obj.host.pk,))
+            ))
         return res
 
     def get_summary_fields(self, obj):
