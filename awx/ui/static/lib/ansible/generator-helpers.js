@@ -499,6 +499,7 @@ angular.module('GeneratorHelpers', [])
         if (field.awPopOver) {
             html += "aw-pop-over=\"" + field.awPopOver + "\" ";
             html += (field.dataPlacement) ? "data-placement=\"" + field.dataPlacement + "\" " : "";
+            html += (field.dataTitle) ? "data-title=\"" + field.dataTitle + "\" " : "";
         }
         html += (field.ngClass) ? Attr(field, 'ngClass') : '';
         html += (field.ngEllipsis) ? "data-ng-bind=\"" + list.iterator + "." + fld + "\" data-ellipsis " : "";

@@ -46,7 +46,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
             // close any lingering tool tipss
             $(this).hide();
         });
-        elem.attr({ "aw-pop-over": html, "data-title": title, "data-placement": "right" });
+        elem.attr({ "aw-pop-over": html, "data-popover-title": title, "data-placement": "right" });
         $compile(elem)($scope);
         elem.on('shown.bs.popover', function() {
             $('.popover').each(function() {
@@ -185,7 +185,6 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
             html += "<tr>";
             html += "<th>Status</th>";
             html += "<th>Finished</th>";
-            html += "<th>View</th>";
             html += "<th>Name</th>";
             html += "</tr>\n";
             html += "</thead>\n";
@@ -193,13 +192,11 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $com
 
             data.results.forEach(function(row) {
                 html += "<tr>\n";
-                html += "<td><a ng-click=\"viewJob('" + row.url + "')\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
-                    ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" +
-                    row.status + "\"></i></a></td>\n";
+                html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                    ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>\n";
                 html += "<td>" + ($filter('date')(row.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
-                html += "<td><a href=\"/#/job_events/" + row.id + "\">Events</a><br />" +
-                    "<a href=\"/#/job_host_summaries/" + row.id + "\">Hosts</a></td>";
-                html += "<td><a href=\"\" ng-click=\"viewJob('" + row.url + "')\" >" + ellipsis(row.name) + "</a></td>";
+                html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                    ". Click for details\" aw-tip-placement=\"top\">" + ellipsis(row.name) + "</a></td>";
                 html += "</tr>\n";
             });
             html += "</tbody>\n";

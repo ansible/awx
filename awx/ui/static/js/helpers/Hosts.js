@@ -56,7 +56,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     };
 }])
 
-.factory('SetStatus', ['SetEnabledMsg', 'Empty', function(SetEnabledMsg, Empty) {
+.factory('SetStatus', ['$filter', 'SetEnabledMsg', 'Empty', function($filter, SetEnabledMsg, Empty) {
     return function(params) {
 
         var scope = params.scope,
@@ -100,7 +100,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     html += "<thead>\n";
                     html += "<tr>\n";
                     html += "<th>Status</th>\n";
-                    html += "<th>View</th>\n";
+                    html += "<th>Finished</th>\n";
                     html += "<th>Name</th>\n";
                     html += "</tr>\n";
                     html += "</thead>\n";
@@ -108,13 +108,18 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     for (j=0; j < jobs.length; j++) {
                         job = jobs[j];
                         html += "<tr>\n";
-                        html += "<td><a ng-click=\"viewJob(" + job.id + ")\" " +
+
+                        html += "<td><a href=\"#/jobs/" + job.id + "\" " +
                             "aw-tool-tip=\"" + job.status.charAt(0).toUpperCase() + job.status.slice(1) +
                             ". Click for details\" data-placement=\"top\"><i class=\"fa icon-job-" +
                             job.status + "\"></i></a></td>\n";
-                        html += "<td><a href=\"/#/job_events/" + job.id + "/?host=" + encodeURI(host.name) + "\">Events</a><br />" +
-                            "<a href=\"/#/job_host_summaries/" + job.id + "/?host_name=" + encodeURI(host.name) + "\">Hosts</a></td>\n";
-                        html += "<td class=\"break\">" + ellipsis(job.name) + "</td>\n";
+
+                        html += "<td>" + ($filter('date')(job.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>\n";
+
+                        html += "<td class=\"break\"><a href=\"#/jobs/" + job.id + "\" " +
+                            "aw-tool-tip=\"" + job.status.charAt(0).toUpperCase() + job.status.slice(1) +
+                            ". Click for details\" data-placement=\"top\">" + ellipsis(job.name) + "</a></td>\n";
+
                         html += "</tr>\n";
                     }
                     html += "</tbody>\n";

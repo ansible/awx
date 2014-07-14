@@ -179,7 +179,7 @@ function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, Lo
             // close any lingering tool tipss
             $(this).hide();
         });
-        elem.attr({ "aw-pop-over": html, "data-title": title, "data-placement": "right" });
+        elem.attr({ "aw-pop-over": html, "data-popover-title": title, "data-placement": "right" });
         $compile(elem)(scope);
         elem.on('shown.bs.popover', function() {
             $('.popover').each(function() {
@@ -428,27 +428,26 @@ function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, Lo
         scope.removeHostSummaryReady();
     }
     scope.removeHostSummaryReady = scope.$on('HostSummaryReady', function(e, event, data) {
-        var html, title = "Recent Jobs", url = GetBasePath('jobs');
+        var html, title = "Recent Jobs";
         Wait('stop');
         if (data.length > 0) {
             html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
             html += "<thead>\n";
             html += "<tr>";
             html += "<th>Status</th>";
-            html += "<th>View</th>";
+            html += "<th>Finished</th>";
             html += "<th>Name</th>";
             html += "</tr>\n";
             html += "</thead>\n";
             html += "<tbody>\n";
             data.forEach(function(row) {
                 html += "<tr>\n";
-                html += "<td><a ng-click=\"viewJob('" + url + row.id + "/')\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                     ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" +
                     row.status + "\"></i></a></td>\n";
-                //html += "<td>" + ($filter('date')(row.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
-                html += "<td><a href=\"/#/job_events/" + row.id + "\">Events</a><br />" +
-                    "<a href=\"/#/job_host_summaries/" + row.id + "\">Hosts</a></td>";
-                html += "<td><a href=\"\" ng-click=\"viewJob('" + url + row.id + "/')\" >" + ellipsis(row.name) + "</a></td>";
+                html += "<td>" + ($filter('date')(row.finished,'MM/dd HH:mm:ss')).replace(/ /,'<br />') + "</td>";
+                html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                    ". Click for details\" aw-tip-placement=\"top\">" + ellipsis(row.name) + "</a></td>";
                 html += "</tr>\n";
             });
             html += "</tbody>\n";
@@ -536,7 +535,8 @@ function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, Lo
                             jobs.push({
                                 id: host.last_job,
                                 status: host.summary_fields.last_job.status,
-                                name: host.summary_fields.last_job.name
+                                name: host.summary_fields.last_job.name,
+                                finished: host.summary_fields.last_job.finished
                             });
                         }
                     });
