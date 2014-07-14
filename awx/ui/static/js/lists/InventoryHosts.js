@@ -98,6 +98,12 @@ angular.module('InventoryHostsDefinition', [])
                 ngHide: '!selected_group_id', //disable when 'All Hosts' selected
                 awToolTip: "Create a new host"
             },
+            refresh: {
+                mode: 'all',
+                awToolTip: "Refresh the page",
+                ngClick: "refreshGroups()",
+                ngShow: "socketStatus == 'error'"
+            },
             stream: {
                 ngClick: "showHostActivity()",
                 awToolTip: "View Activity Stream",

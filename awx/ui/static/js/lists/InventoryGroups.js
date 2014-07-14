@@ -78,6 +78,12 @@ angular.module('InventoryGroupsDefinition', [])
                 awToolTip: "Edit inventory properties",
                 ngClick: 'editInventoryProperties()'
             },
+            refresh: {
+                mode: 'all',
+                awToolTip: "Refresh the page",
+                ngClick: "refreshGroups()",
+                ngShow: "socketStatus == 'error'"
+            },
             stream: {
                 ngClick: "showGroupActivity()",
                 awToolTip: "View Activity Stream",
