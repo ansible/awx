@@ -205,6 +205,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             if (newActivePlay && scope.activePlay && newActivePlay !== scope.activePlay) {
                 scope.jobData.plays[scope.activePlay].tasks = {};
                 scope.jobData.plays[scope.activePlay].playActiveClass = '';
+                scope.activeTask = null;
             }
             if (newActivePlay) {
                 scope.activePlay = newActivePlay;
@@ -284,7 +285,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         scope.jobData.plays[event.parent].tasks[event.id] = {
             id: event.id,
             play_id: event.parent,
-            name: event.task,
+            name: (event.task) ? event.task : event.event_display,
             status: status,
             status_text: status_text,
             status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
@@ -378,7 +379,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     play.status_text = (changed) ? 'Changed' : (failed) ? 'Failed' : 'OK';
                 }
             }
-            play.taskCount++;
             play.status_tip = "Event ID: " + play.id + "<br />Status: " + play.status_text;
             play.finished = modified;
             play.elapsed = GetElapsed({
@@ -404,10 +404,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             id = params.task_id,
             modified = params.modified,
             no_hosts = params.no_hosts,
-            task;
+            play, task;
 
-        if (scope.jobData.plays[scope.activePlay].tasks[id] !== undefined) {
-            task = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask];
+        // find the task in our hierarchy
+        for (play in scope.jobData.plays) {
+            if (scope.jobData.plays[play].tasks[id]) {
+                task = scope.jobData.plays[play].tasks[id];
+            }
+        }
+
+        if (task) {
             if (no_hosts){
                 task.status = 'no-matching-hosts';
                 task.status_text = 'No matching hosts';
@@ -545,8 +551,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             msg: msg
         };
 
-        SetActiveTask({ scope: scope });
-
         // increment the unreachable count on the play
         if (status === 'unreachable' && scope.jobData.plays[scope.activePlay]) {
             scope.jobData.plays[scope.activePlay].unreachableCount++;
@@ -571,6 +575,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             SetTaskStyles({
                 task: task
             });
+
+            SetActiveTask({ scope: scope });
         }
     };
 }])

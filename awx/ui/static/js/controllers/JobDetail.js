@@ -88,6 +88,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10)) {
             if (data.status === 'failed' || data.status === 'canceled' ||
                     data.status === 'error' || data.status === 'successful') {
+                $scope.liveEventProcessing = false;
                 if ($rootScope.jobDetailInterval) {
                     window.clearInterval($rootScope.jobDetailInterval);
                 }
@@ -319,6 +320,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             // this is not the first task
                             play.tasks[event.id].hostCount = play.tasks[play.firstTask].hostCount;
                         }
+                        play.taskCount++;
                         SetTaskStyles({
                             task: play.tasks[event.id]
                         });
@@ -402,6 +404,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                         elapsed: elapsed,
                         hostCount: 0,
                         fistTask: null,
+                        taskCount: 0,
                         playActiveClass: '',
                         unreachableCount: (event.unreachable_count) ? event.unreachable_count : 0,
                         tasks: {}
@@ -413,6 +416,11 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     skipped = (event.skipped_count) ? event.skipped_count : 0;
 
                     scope.jobData.plays[event.id].hostCount = ok + changed + failed + skipped;
+
+                    if (scope.jobData.plays[event.id].hostCount > 0) {
+                        // force the play to be on the 'active' list
+                        scope.jobData.plays[event.id].taskCount = 1;
+                    }
 
                     scope.host_summary.ok += ok;
                     scope.host_summary.changed += changed;
