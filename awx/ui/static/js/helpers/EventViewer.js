@@ -196,14 +196,19 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 html = '', e;
 
             function parseJSON(obj) {
-                var html = '', keys, found = false;
+                var html = '', key, keys, found = false;
                 if (typeof obj === "object") {
                     html += "<table class=\"table eventviewer-status\">\n";
                     html += "<tbody>\n";
-                    keys = Object.keys(obj).sort();
+                    keys = [];
+                    for (key in EventsViewerForm.fields) {
+                        if (EventsViewerForm.fields[key].section === section) {
+                            keys.push(key);
+                        }
+                    }
                     keys.forEach(function(key) {
                         var label;
-                        if (EventsViewerForm.fields[key] && EventsViewerForm.fields[key].section === section) {
+                        //if (EventsViewerForm.fields[key] && EventsViewerForm.fields[key].section === section) {
                             label = EventsViewerForm.fields[key].label;
                             if (Empty(obj[key])) {
                                 // exclude empty items
@@ -249,7 +254,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                                 found = true;
                                 html += "<tr><td class=\"key\">" + label + ":</td><td class=\"nested-table\">\n" + parseJSON(obj[key]) + "</td></tr>\n";
                             }
-                        }
+                        //}
                     });
                     html += "</tbody>\n";
                     html += "</table>\n";

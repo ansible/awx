@@ -45,6 +45,10 @@ angular.module('EventsViewerFormDefinition', [])
                 label: 'Arguments',
                 section: 'Event'
             },
+            item: {
+                label: 'Item',
+                section: 'Event'
+            },
             rc: {
                 label: 'Return Code',
                 section: 'Results'
