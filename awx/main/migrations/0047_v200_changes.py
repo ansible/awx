@@ -8,15 +8,12 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        idx = 0
-        for jhs in orm.JobHostSummary.objects.all():
-            print "JHS: Host: " + str(jhs.host)
+        for idx, jhs in enumerate(orm.JobHostSummary.objects.all()):
             if jhs.host is not None and jhs.host.active:
                 jhs.host_name = jhs.host.name
             else:
-                jhs.host_name = "tower_deleted_host-%s" % str(idx)
+                jhs.host_name = "tower_deleted_host-%s" % unicode(idx)
             jhs.save()
-            idx += 1
 
     def backwards(self, orm):
         print("Not reversing jobhoststatus host_name field")
