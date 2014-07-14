@@ -24,6 +24,7 @@ function JobsListController ($log, $scope, $compile, $routeParams, ClearScope, B
         expecting = 0,
         max_rows;
 
+
     event_socket =  Socket({
         scope: $scope,
         endpoint: "jobs"
@@ -274,7 +275,7 @@ function JobsListController ($log, $scope, $compile, $routeParams, ClearScope, B
 }
 
 JobsListController.$inject = [ '$log', '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope', 'RunningJobsList', 'CompletedJobsList',
-    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'Socket' ];
+    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'Socket'];
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,

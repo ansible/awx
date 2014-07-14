@@ -62,6 +62,10 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                           .x(function(d) { return d.label; })
                           .y(function(d) { return d.value; })
                           .showLabels(true)
+                          .labelThreshold(0.01)
+                          .tooltipContent(function(x, y) {
+                                return '<b>'+x+'</b>'+ '<p>' +  Math.floor(y) + ' hosts ' +  '</p>';
+                            })
                           .color(['#00aa00', '#aa0000']);
 
                         chart.pie.pieLabelsOutside(true).labelType("percent");
@@ -71,7 +75,13 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                             .attr('width', width)
                             .attr('height', height)
                             .transition().duration(350)
-                            .call(chart);
+                            .call(chart)
+                             .style({
+                            "font-family": 'Open Sans',
+                            "font-style": "normal",
+                            "font-weight":400,
+                            "src": "url(/static/fonts/OpenSans-Regular.ttf)"
+                        });
                         nv.utils.windowResize(chart.update);
                         scope.$emit('WidgetLoaded');
                         return chart;
@@ -86,13 +96,12 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                     canvas = document.getElementById("circlecanvas");
                     context = canvas.getContext("2d");
                     context.arc(50, 50, 50, 0, Math.PI * 2, false);
-                    //context.beginPath();
-                    context.globalAlpha = 0.4;
-                    context.fillStyle = '#A9A9A9';
-                    context.fill();
                     context.lineWidth = 1;
                     context.strokeStyle = '#1778c3';
                     context.stroke();
+                    context.font = "12px Open Sans";
+                    context.fillText("No Host data",10,50);
+
                     scope.$emit('WidgetLoaded');
                 }
             };

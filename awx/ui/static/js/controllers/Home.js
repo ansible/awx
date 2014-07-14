@@ -74,36 +74,36 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
     $scope.removeDashboardReady = $scope.$on('dashboardReady', function (e, data) {
         DashboardCounts({
             scope: $scope,
-            target: 'container1',
+            target: 'dash-counts',
             dashboard: data
         });
 
         JobStatusGraph({
             scope: $scope,
-            target: 'container2',
+            target: 'dash-job-status-graph',
             dashboard: data
         });
 
         if ($rootScope.user_is_superuser === true) {
             HostGraph({
                 scope: $scope,
-                target: 'container3',
+                target: 'dash-host-count-graph',
                 dashboard: data
             });
         }
         else{
-            $('#container4').replaceWith("<div id='container4' class='left-side col-sm-12 col-xs-12'></div>");
+            $('#dash-host-count-graph').replaceWith("<div id='dash-host-count-graph' class='left-side col-sm-12 col-xs-12'></div>");
         }
 
 
         DashboardJobs({
             scope: $scope,
-            target: 'container4',
+            target: 'dash-jobs-list',
             dashboard: data
         });
         HostPieChart({
             scope: $scope,
-            target: 'container5',
+            target: 'dash-host-status-graph',
             dashboard: data
         });
 
