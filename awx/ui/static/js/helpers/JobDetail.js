@@ -948,9 +948,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url;
 
         url = scope.job.related.job_host_summaries + '?';
-        url += (scope.search_host_summary_name) ? 'host__name__icontains=' + scope.search_host_summary_name + '&': '';
+        url += (scope.search_host_summary_name) ? 'host_name__icontains=' + scope.search_host_summary_name + '&': '';
         url += (scope.search_host_summary_status === 'failed') ? 'failed=true&' : '';
-        url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
+        url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host_name';
 
         scope.hosts = [];
 

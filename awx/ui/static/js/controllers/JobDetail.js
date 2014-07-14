@@ -141,7 +141,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     }
     scope.removeHostSummaries = scope.$on('LoadHostSummaries', function() {
         var url = scope.job.related.job_host_summaries + '?';
-        url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
+        url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host_name';
 
         scope.jobData.hostSummaries = {};
 
@@ -1055,9 +1055,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         // check for more hosts when user scrolls to bottom of host summaries list...
         if ((!scope.liveEventProcessing) && scope.hosts) {
             var url = GetBasePath('jobs') + job_id + '/job_host_summaries/?';
-            url += (scope.search_host_summary_name) ? 'host__name__icontains=' + scope.search_host_summary_name + '&' : '';
+            url += (scope.search_host_summary_name) ? 'host_name__icontains=' + scope.search_host_summary_name + '&' : '';
             url += (scope.search_host_summary_status === 'failed') ? 'failed=true&' : '';
-            url += 'host__name__gt=' + scope.hosts[scope.hosts.length - 1].name + '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host__name';
+            url += 'host_name__gt=' + scope.hosts[scope.hosts.length - 1].name + '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host_name';
             $('#hostSummariesMoreRows').fadeIn();
             Rest.setUrl(url);
             Rest.get()
