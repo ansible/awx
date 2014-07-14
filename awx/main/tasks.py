@@ -806,6 +806,8 @@ class RunInventoryUpdate(BaseTask):
             ec2_opts.setdefault('destination_variable', 'public_dns_name')
             ec2_opts.setdefault('vpc_destination_variable', 'ip_address')
             ec2_opts.setdefault('route53', 'False')
+            ec2_opts.setdefault('all_instances', 'True')
+            ec2_opts.setdefault('all_rds_instances', 'False')
             ec2_opts.setdefault('nested_groups', 'True')
             ec2_opts.setdefault('cache_path', tempfile.mkdtemp(prefix='awx_ec2_'))
             ec2_opts.setdefault('cache_max_age', '300')
