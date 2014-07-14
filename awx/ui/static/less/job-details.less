@@ -411,13 +411,20 @@
         position: relative;
         top: 0;
         left: 0;
+        #hosts-table-header table {
+            table-layout: fixed;
+        }
         #hosts-table-detail {
-            padding: 3px 0 3px 5px;
             height: 150px;
             background-color: @white;
-            .col-lg-1, .col-md-1, .col-sm-1, .col-xs-1 {
-                width: 3%;
-            }
+        }
+        #hosts-table-detail table {
+            table-layout: fixed;
+        }
+        #hosts-table-detail td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     }
 

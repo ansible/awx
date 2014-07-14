@@ -200,8 +200,8 @@
                         <div id="task-hosts-section" class="section">
 
                             <div class="row title-row">
-                                <div class="col-lg-1 col-md-2 col-sm-2 title">Hosts</div>
-                                <div class="col-lg-11 col-md-10 col-sm-10" style="text-align:right;">
+                                <div class="col-lg-2 col-md-2 col-sm-2 title">Host Events</div>
+                                <div class="col-lg-10 col-md-10 col-sm-10" style="text-align:right;">
                                     <div id="host-search-form" class="search-form form-inline">
                                         <div class="form-group">
                                             <label>Search</label>
@@ -225,17 +225,32 @@
                                 </div>
                             </div>
 
+                            <div class="table-header" id="hosts-table-header">
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-lg-1 col-md-1 col-sm-2 col-xs-2 status-column">Status</th>
+                                            <th class="col-lg-3 col-md-3 col-sm-3 col-xs-3">Host</th>
+                                            <th class="col-lg-4 col-md-4 col-sm-3 col-xs-3">Item</th>
+                                            <th class="col-lg-4 col-md-4 col-sm-3 col-xs-3">Message</th>
+                                            <th class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
                             <div id="hosts-table-detail" class="table-detail" lr-infinite-scroll="hostResultsScrollDown" scroll-threshold="10" time-threshold="500">
                                 <table class="table table-condensed">
                                     <tbody>
                                         <tr ng-repeat="result in results = (hostResults) track by $index">
-                                            <td class="col-lg-1 col-md-1 col-sm1 colxs-2 status-column"><a href="" ng-click="viewHostResults(result.id)" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i ng-show="result.status_text != 'Unreachable'" class="fa icon-job-{{ result.status }}"></i><i ng-show="result.status_text == 'Unreachable'" class="fa icon-job-unreachable"></i></a></td>
-                                            <td class="col-lg-6 col-md-6 col-sm-6 col-xs-6 status-column"><a href="" ng-click="viewHostResults(result.id)" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top">{{ result.name }}</a></td>
-                                            <td class="col-lg-4 col-md-4 col-sm-4 col-xs-3">{{ result.msg }}</td>
+                                            <td class="col-lg-1 col-md-1 col-sm-2 col-xs-2 status-column"><a href="" ng-click="viewHostResults(result.id)" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top"><i ng-show="result.status_text != 'Unreachable'" class="fa icon-job-{{ result.status }}"></i><i ng-show="result.status_text == 'Unreachable'" class="fa icon-job-unreachable"></i></a></td>
+                                            <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3"><a href="" ng-click="viewHostResults(result.id)" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top">{{ result.name }}</a></td>
+                                            <td class="col-lg-4 col-md-4 col-sm-3 col-xs-3 item-column">{{ result.item }}</td>
+                                            <td class="col-lg-4 col-md-4 col-sm-3 col-xs-3">{{ result.msg }}</td>
                                             <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1"><a href="" ng-click="editHost(result.host_id)" aw-tool-tip="Edit host" data-placement="top"><i class="fa fa-pencil"></i></a></td>
                                         </tr>
                                         <tr ng-show="results.length === 0">
-                                            <td colspan="4" class="col-lg-12 loading-info">No matching hosts</td>
+                                            <td colspan="5" class="col-lg-12 loading-info">No matching hosts</td>
                                         </tr>
                                     </tbody>
                                 </table>

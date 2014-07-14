@@ -81,7 +81,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     id: event.id,
                     created: event.created,
                     modified: event.modified,
-                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
+                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '',
+                    item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
                 break;
 
@@ -106,7 +107,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     id: event.id,
                     created: event.created,
                     modified: event.modified,
-                    message: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
+                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '',
+                    item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
                 break;
 
@@ -121,7 +123,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     id: event.id,
                     created: event.created,
                     modified: event.modified,
-                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
+                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '',
+                    item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
                 break;
 
@@ -146,7 +149,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     id: event.id,
                     created: event.created,
                     modified: event.modified,
-                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : ''
+                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '',
+                    item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
         }
     };
@@ -458,7 +462,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             task_id = params.task_id,
             modified = params.modified,
             created = params.created,
-            msg = params.message;
+            msg = params.message,
+            item = params.item;
 
         scope.host_summary.ok += (status === 'successful') ? 1 : 0;
         scope.host_summary.changed += (status === 'changed') ? 1 : 0;
@@ -504,7 +509,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             status: status,
             name: name,
             created: created,
-            message: msg
+            message: msg,
+            item: item
         });
     };
 }])
@@ -520,6 +526,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             created = params.created,
             name = params.name,
             msg = params.message,
+            item = params.item,
             status_text = '',
             task;
 
@@ -540,24 +547,32 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 status_text = "Skipped";
         }
 
-        scope.jobData.plays[scope.activePlay].tasks[task_id].hostResults[event_id] = {
-            id: event_id,
-            status: status,
-            status_text: status_text,
-            host_id: host_id,
-            task_id: task_id,
-            name: name,
-            created: created,
-            msg: msg
-        };
-
-        // increment the unreachable count on the play
-        if (status === 'unreachable' && scope.jobData.plays[scope.activePlay]) {
-            scope.jobData.plays[scope.activePlay].unreachableCount++;
+        if (typeof item === "object") {
+            item = JSON.stringify(item);
         }
 
-        // update the task status bar
-        if (scope.jobData.plays[scope.activePlay].tasks[task_id] !== undefined) {
+        if (scope.jobData.plays[scope.activePlay].tasks[task_id].hostResults[event_id]) {
+            // host already exists. do nothing.
+        }
+        else {
+            scope.jobData.plays[scope.activePlay].tasks[task_id].hostResults[event_id] = {
+                id: event_id,
+                status: status,
+                status_text: status_text,
+                host_id: host_id,
+                task_id: task_id,
+                name: name,
+                created: created,
+                msg: msg,
+                item: item
+            };
+
+            // increment the unreachable count on the play
+            if (status === 'unreachable' && scope.jobData.plays[scope.activePlay]) {
+                scope.jobData.plays[scope.activePlay].unreachableCount++;
+            }
+
+            // update the task status bar
             task = scope.jobData.plays[scope.activePlay].tasks[task_id];
 
             if (task_id === scope.jobData.plays[scope.activePlay].firstTask) {
@@ -883,7 +898,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             Rest.get()
                 .success(function(data) {
                     data.results.forEach(function(event) {
-                        var status, status_text;
+                        var status, status_text, item;
                         if (event.event === "runner_on_skipped") {
                             status = 'skipped';
                         }
@@ -909,6 +924,15 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                             case "skipped":
                                 status_text = "Skipped";
                         }
+
+                        if (event.event_data && event.event_data.res) {
+                            item = event.event_data.res.item;
+                            if (typeof item === "object") {
+                                item = JSON.stringify(item);
+                                item = item.replace(/\"/g,'').replace(/:/g,': ').replace(/,/g,', ');
+                            }
+                        }
+
                         if (event.event !== "runner_on_no_hosts") {
                             scope.hostResults.push({
                                 id: event.id,
@@ -918,7 +942,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                                 task_id: event.parent,
                                 name: event.event_data.host,
                                 created: event.created,
-                                msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
+                                msg: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '',
+                                item: item
                             });
                         }
                     });

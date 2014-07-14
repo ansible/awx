@@ -187,7 +187,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    var idx, event, status, status_text;
+                    var idx, event, status, status_text, item;
                     if (data.results.length > 0) {
                         lastEventId =  data.results[0].id;
                     }
@@ -218,6 +218,14 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             case "skipped":
                                 status_text = "Skipped";
                         }
+
+                        if (event.event_data && event.event_data.res) {
+                            item = event.event_data.res.item;
+                            if (typeof item === "object") {
+                                item = JSON.stringify(item);
+                            }
+                        }
+
                         if (event.event !== "runner_on_no_hosts") {
                             task.hostResults[event.id] = {
                                 id: event.id,
@@ -227,7 +235,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                                 task_id: event.parent,
                                 name: event.event_data.host,
                                 created: event.created,
-                                msg: ( (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' )
+                                msg: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' ,
+                                item: item
                             };
                         }
                     }
