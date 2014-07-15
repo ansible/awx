@@ -1,3 +1,4 @@
+# Tower
 awx/settings/local_settings.py*
 awx/*.sqlite3
 awx/job_status
@@ -10,27 +11,43 @@ awx/ui/static/css/awx.min.css
 awx/main/fixtures
 awx/tower_warnings.log
 celerybeat-schedule
-env/*
-node_modules/**
+
+# Python & setuptools
+__pycache__
 build
 deb-build
-/dist
-htmlcov
 rpm-build
-*.DS_Store
+/dist
 *.egg-info
 *.py[c,o]
-*.swp
-.coverage
-coverage.xml
-pep8.txt
-.vagrant*
-.tox
-.tower_cycle
-nohup.out
-reports
-tools/vagrant/local.yml
-*~
+
+# JavaScript
 /GruntFile.js
 /bower.json
 /package.json
+node_modules/**
+
+# Testing
+.coverage
+.tox
+coverage.xml
+htmlcov
+pep8.txt
+
+# Mac OS X
+*.DS_Store
+
+# Editors
+*.swp
+*~
+
+# Vagrant
+/Vagrantfile
+tools/vagrant/local.yml
+.vagrant*
+
+# Other
+.tower_cycle
+env/*
+nohup.out
+reports
