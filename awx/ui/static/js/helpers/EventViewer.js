@@ -197,18 +197,18 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
 
             function parseObject(obj) {
                 // parse nested JSON objects. a mini version of parseJSON without references to the event form object.
-                var key, html = '';
+                var i, key, html = '';
                 for (key in obj) {
                     if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
                         html += "<tr><td class=\"key\">" + key + ":</td><td class=\"value\">" + obj[key] + "</td></tr>";
                     }
                     else if (typeof obj[key] === "object" && Array.isArray(obj[key])) {
-                        html += "<tr><td class=\"key\">" + key + ":</td><td class=\"value\">";
-                        obj[key].forEach(function(row) {
-                            html += "[" + row + "],";
-                        });
+                        html += "<tr><td class=\"key\">" + key + ":</td><td class=\"value\">[";
+                        for (i = 0; i < obj[key].length; i++) {
+                            html += obj[key][i] + ",";
+                        }
                         html = html.replace(/,$/,'');
-                        html += "</td></tr>\n";
+                        html += "]</td></tr>\n";
                     }
                     else if (typeof obj[key] === "object") {
                         html += "<tr><td class=\"key\">" + key + ":</td><td class=\"nested-table\"><table>\n<tbody>\n" + parseObject(obj[key]) + "</tbody>\n</table>\n</td></tr>\n";
@@ -229,7 +229,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                         }
                     }
                     keys.forEach(function(key) {
-                        var label;
+                        var i, label;
                         //if (EventsViewerForm.fields[key] && EventsViewerForm.fields[key].section === section) {
                         label = EventsViewerForm.fields[key].label;
                         if (Empty(obj[key])) {
@@ -265,12 +265,12 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                         }
                         else if (typeof obj[key] === "object" && Array.isArray(obj[key])) {
                             found = true;
-                            html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">";
-                            obj[key].forEach(function(row) {
-                                html += "[" + row + "],";
-                            });
+                            html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">[";
+                            for (i = 0; i < obj[key].length; i++) {
+                                html += obj[key][i] + ",";
+                            }
                             html = html.replace(/,$/,'');
-                            html += "</td></tr>\n";
+                            html += "]</td></tr>\n";
                         }
                         else if (typeof obj[key] === "object") {
                             found = true;
