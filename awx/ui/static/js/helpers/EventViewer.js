@@ -209,51 +209,51 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                     keys.forEach(function(key) {
                         var label;
                         //if (EventsViewerForm.fields[key] && EventsViewerForm.fields[key].section === section) {
-                            label = EventsViewerForm.fields[key].label;
-                            if (Empty(obj[key])) {
-                                // exclude empty items
+                        label = EventsViewerForm.fields[key].label;
+                        if (Empty(obj[key])) {
+                            // exclude empty items
+                        }
+                        else if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
+                            found = true;
+                            html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">";
+                            if (key === "status") {
+                                html += "<i class=\"fa icon-job-" + obj[key] + "\"></i> " + obj[key];
                             }
-                            else if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
-                                found = true;
-                                html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">";
-                                if (key === "status") {
-                                    html += "<i class=\"fa icon-job-" + obj[key] + "\"></i> " + obj[key];
-                                }
-                                else if (key === "start" || key === "end" || key === "created") {
-                                    if (!/Z$/.test(obj[key])) {
-                                        //sec = parseInt(obj[key].substr(obj[key].length - 6, 6),10) / 1000);
-                                        //obj[key] = obj[key].replace(/\d{6}$/,sec) + 'Z';
-                                        obj[key] = obj[key].replace(/\ /,'T') + 'Z';
-                                        html += $filter('date')(obj[key], 'MM/dd/yy HH:mm:ss.sss');
-                                    }
-                                    else {
-                                        html += $filter('date')(obj[key], 'MM/dd/yy HH:mm:ss');
-                                    }
-                                }
-                                else if (key === "host_name" && obj.host_id) {
-                                    html += "<a href=\"/#/home/hosts/?id=" + obj.host_id + "\" target=\"_blank\" " +
-                                        "aw-tool-tip=\"View host. Opens in new tab or window.\" data-placement=\"top\" " +
-                                        ">" + obj[key] + "</a>";
+                            else if (key === "start" || key === "end" || key === "created") {
+                                if (!/Z$/.test(obj[key])) {
+                                    //sec = parseInt(obj[key].substr(obj[key].length - 6, 6),10) / 1000);
+                                    //obj[key] = obj[key].replace(/\d{6}$/,sec) + 'Z';
+                                    obj[key] = obj[key].replace(/\ /,'T') + 'Z';
+                                    html += $filter('date')(obj[key], 'MM/dd/yy HH:mm:ss.sss');
                                 }
                                 else {
-                                    html += obj[key];
+                                    html += $filter('date')(obj[key], 'MM/dd/yy HH:mm:ss');
                                 }
+                            }
+                            else if (key === "host_name" && obj.host_id) {
+                                html += "<a href=\"/#/home/hosts/?id=" + obj.host_id + "\" target=\"_blank\" " +
+                                    "aw-tool-tip=\"View host. Opens in new tab or window.\" data-placement=\"top\" " +
+                                    ">" + obj[key] + "</a>";
+                            }
+                            else {
+                                html += obj[key];
+                            }
 
-                                html += "</td></tr>\n";
-                            }
-                            else if (typeof obj[key] === "object" && Array.isArray(obj[key])) {
-                                found = true;
-                                html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">";
-                                obj[key].forEach(function(row) {
-                                    html += "[" + row + "],";
-                                });
-                                html = html.replace(/,$/,'');
-                                html += "</td></tr>\n";
-                            }
-                            else if (typeof obj[key] === "object") {
-                                found = true;
-                                html += "<tr><td class=\"key\">" + label + ":</td><td class=\"nested-table\">\n" + parseJSON(obj[key]) + "</td></tr>\n";
-                            }
+                            html += "</td></tr>\n";
+                        }
+                        else if (typeof obj[key] === "object" && Array.isArray(obj[key])) {
+                            found = true;
+                            html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">";
+                            obj[key].forEach(function(row) {
+                                html += "[" + row + "],";
+                            });
+                            html = html.replace(/,$/,'');
+                            html += "</td></tr>\n";
+                        }
+                        else if (typeof obj[key] === "object") {
+                            found = true;
+                            html += "<tr><td class=\"key\">" + label + ":</td><td class=\"nested-table\">\n" + parseJSON(obj[key]) + "</td></tr>\n";
+                        }
                         //}
                     });
                     html += "</tbody>\n";
