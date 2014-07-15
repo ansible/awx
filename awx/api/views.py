@@ -275,7 +275,7 @@ class DashboardJobsGraphView(APIView):
         success_qss = qsstats.QuerySetStats(success_query, 'finished')
         failed_qss = qsstats.QuerySetStats(failed_query, 'finished')
 
-        start_date = datetime.datetime.now()
+        start_date = datetime.datetime.utcnow()
         if period == 'month':
             end_date = start_date - dateutil.relativedelta.relativedelta(months=1)
             interval = 'days'
