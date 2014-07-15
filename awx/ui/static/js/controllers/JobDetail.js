@@ -32,6 +32,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.playsMaxRows = 200;
 
     scope.liveEventProcessing = true;  // control play/pause state of event processing
+    scope.pauseLiveEvents = false;
 
     scope.job_status = {};
     scope.job_id = job_id;
@@ -653,23 +654,23 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     }, 500));
 
     scope.selectPlay = function(id) {
-        if (!scope.liveEventProcessing) {
-            scope.auto_scroll_plays = false;
-            SelectPlay({
-                scope: scope,
-                id: id
-            });
+        if (scope.liveEventProcessing) {
+            scope.pauseLiveEvents = true;
         }
+        SelectPlay({
+            scope: scope,
+            id: id
+        });
     };
 
     scope.selectTask = function(id) {
-        if (!scope.liveEventProcessing) {
-            scope.auto_scroll_tasks = false;
-            SelectTask({
-                scope: scope,
-                id: id
-            });
+        if (scope.liveEventProcessing) {
+            scope.pauseLiveEvents = true;
         }
+        SelectTask({
+            scope: scope,
+            id: id
+        });
     };
 
     scope.toggleSummary = function(hide) {
@@ -893,7 +894,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
     scope.playsScrollDown = function() {
         // check for more plays when user scrolls to bottom of play list...
-        if ((!scope.liveEventProcessing) && scope.next_plays) {
+        if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_plays) {
             $('#playsMoreRows').fadeIn();
             Rest.setUrl(scope.next_plays);
             Rest.get()
@@ -950,14 +951,14 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 })
                 .error( function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                        msg: 'Call to ' + scope.next_plays + '. GET returned: ' + status });
                 });
         }
     };
 
     scope.tasksScrollDown = function() {
         // check for more tasks when user scrolls to bottom of task list...
-        if ((!scope.liveEventProcessing) && scope.next_tasks) {
+        if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_tasks) {
             $('#tasksMoreRows').fadeIn();
             Rest.setUrl(scope.next_tasks);
             Rest.get()
@@ -1020,14 +1021,14 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 .error(function(data, status) {
                     $('#tasksMoreRows').fadeOut(400);
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                        msg: 'Call to ' + scope.next_tasks + '. GET returned: ' + status });
                 });
         }
     };
 
     scope.hostResultsScrollDown = function() {
         // check for more hosts when user scrolls to bottom of host results list...
-        if (!scope.liveEventProcessing && scope.next_host_results) {
+        if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_host_results) {
             $('#hostResultsMoreRows').fadeIn();
             Rest.setUrl(scope.next_host_results);
             Rest.get()
@@ -1083,14 +1084,14 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 .error(function(data, status) {
                     $('#hostResultsMoreRows').fadeOut(400);
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                        msg: 'Call to ' + scope.next_host_results + '. GET returned: ' + status });
                 });
         }
     };
 
     scope.hostSummariesScrollDown = function() {
         // check for more hosts when user scrolls to bottom of host summaries list...
-        if ((!scope.liveEventProcessing) && scope.next_host_summaries) {
+        if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_host_summaries) {
             Rest.setUrl(scope.next_host_summaries);
             Rest.get()
                 .success(function(data) {
@@ -1117,7 +1118,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 .error(function(data, status) {
                     $('#hostSummariesMoreRows').fadeOut();
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                        msg: 'Call to ' + scope.next_host_summaries + '. GET returned: ' + status });
                 });
         }
     };

@@ -1142,7 +1142,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 filteredListX[key] = plays[key];
             }
         }
-
         if (scope.search_play_name) {
             for (key in plays) {
                 if (filteredListX[key].name.indexOf(scope.search_play_name) > 0) {
@@ -1176,10 +1175,14 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             result.push(filteredListB[newKeys[idx]]);
             idx++;
         }
-        scope.plays = result;
-        if (scope.liveEventProcessing) {
-            $('#plays-table-detail').scrollTop($('#plays-table-detail').prop("scrollHeight"));
-        }
+        setTimeout( function() {
+            scope.$apply( function() {
+                scope.plays = result;
+                if (scope.liveEventProcessing) {
+                    $('#plays-table-detail').scrollTop($('#plays-table-detail').prop("scrollHeight"));
+                }
+            });
+        });
     };
 }])
 
@@ -1247,10 +1250,15 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             }
         }
 
-        scope.tasks = result;
-        if (scope.liveEventProcessing) {
-            $('#tasks-table-detail').scrollTop($('#tasks-table-detail').prop("scrollHeight"));
-        }
+        setTimeout( function() {
+            scope.$apply( function() {
+                scope.tasks = result;
+                if (scope.liveEventProcessing) {
+                    $('#tasks-table-detail').scrollTop($('#tasks-table-detail').prop("scrollHeight"));
+                }
+            });
+        });
+
     };
 }])
 
@@ -1305,10 +1313,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 idx++;
             }
         }
-        scope.hostResults = result;
-        if (scope.liveEventProcessing) {
-            $('#hosts-table-detail').scrollTop($('#hosts-table-detail').prop("scrollHeight"));
-        }
+
+        setTimeout( function() {
+            scope.$apply( function() {
+                scope.hostResults = result;
+                if (scope.liveEventProcessing) {
+                    $('#hosts-table-detail').scrollTop($('#hosts-table-detail').prop("scrollHeight"));
+                }
+            });
+        });
+
     };
 }])
 
@@ -1362,7 +1376,11 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 idx++;
             }
         }
-        scope.hosts = result;
+        setTimeout( function() {
+            scope.$apply( function() {
+                scope.hosts = result;
+            });
+        });
     };
 }])
 
@@ -1371,9 +1389,12 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
         var scope = params.scope;
 
-        DrawPlays({ scope: scope });
-        DrawTasks({ scope: scope });
-        DrawHostResults({ scope: scope });
+        if (!scope.pauseLiveEvents) {
+            DrawPlays({ scope: scope });
+            DrawTasks({ scope: scope });
+            DrawHostResults({ scope: scope });
+        }
+
         DrawHostSummaries({ scope: scope });
 
         if (scope.host_summary.total > 0) {
