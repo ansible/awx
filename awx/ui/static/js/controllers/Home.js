@@ -75,7 +75,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         nv.dev=false;
 
         var winHeight = $(window).height(),
-        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
+        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 80;
         $('.graph-container').height(available_height/2);
         // chart.update();
 

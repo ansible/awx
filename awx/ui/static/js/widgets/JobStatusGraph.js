@@ -125,7 +125,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                     nv.addGraph({
                         generate: function() {
                                     var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
-                                        height = $('.graph-container').height()*0.8, //nv.utils.windowSize().height/5,
+                                        height = $('.graph-container').height()*0.6, //nv.utils.windowSize().height/5,
                                         chart = nv.models.lineChart()
                                            .margin({top: 5, right: 75, bottom: 40, left: 85})  //Adjust chart margins to give the x-axis some breathing room.
                                             .x(function(d,i) { return i; })

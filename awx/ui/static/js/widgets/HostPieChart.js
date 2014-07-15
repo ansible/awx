@@ -56,7 +56,7 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
 
                     nv.addGraph(function() {
                         var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
-                        height = $('.graph-container').height()*0.8, //nv.utils.windowSize().height/5,
+                        height = $('.graph-container').height()*0.7, //nv.utils.windowSize().height/5,
                         chart = nv.models.pieChart()
                           .margin({top: 5, right: 75, bottom: 40, left: 85})
                           .x(function(d) { return d.label; })

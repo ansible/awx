@@ -108,7 +108,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                         nv.addGraph({
                                 generate: function() {
                                     var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
-                                    height = $('.graph-container').height()*0.8, //nv.utils.windowSize().height/5,
+                                    height = $('.graph-container').height()*0.6, //nv.utils.windowSize().height/5,
                                     chart = nv.models.lineChart()
                                         .margin({top: 15, right: 75, bottom: 40, left: 85})
                                         .x(function(d,i) { return i ;})
