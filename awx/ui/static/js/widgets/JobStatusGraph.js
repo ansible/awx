@@ -21,9 +21,9 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                     period="month",
                     job_type="all";
 
-                html = "<div class=\"graph-container\">\n";
+                // html = "<div class=\"graph-container\">\n";
 
-                html +="<div class=\"row\">\n";
+                html = "<div class=\"row\">\n";
                 html += "<div id=\"job-status-title\" class=\"h6 col-xs-8 text-center\"><b>Job Status</b></div>\n";  // for All Jobs, Past Month
 
                 html += "<div class=\"h6 col-xs-2 \">\n";
@@ -62,7 +62,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 html += "<div class=\"job-status-graph\"><svg></svg></div>\n";
                 html += "</div>\n";
 
-                html += "</div>\n";
+                // html += "</div>\n";
 
                 function createGraph(){
 

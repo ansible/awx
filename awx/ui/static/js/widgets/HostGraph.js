@@ -19,14 +19,14 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                     html, element, url, license;
 
 
-                html = "<div class=\"graph-container\">\n";
-                html +="<div class=\"row\">\n";
+               // html = "<div class=\"graph-container\">\n";
+                html ="<div class=\"row\">\n";
                 html += "<div class=\"h6 col-xs-8 text-center\"><b>Host Count</b></div>\n";
                 html += "</div>\n";
                 html +="<div class=\"row\">\n";
                 html += "<div class=\"host-count-graph\"><svg></svg></div>\n";
 
-                html += "</div>\n";
+               // html += "</div>\n";
 
 
 
