@@ -669,6 +669,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         Rest.setUrl(url);
         Rest.get()
             .success(function(data) {
+                scope.next_plays = data.next;
                 data.results.forEach(function(event, idx) {
                     var status, status_text, start, end, elapsed;
 
@@ -776,6 +777,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
+                    scope.next_tasks = data.next;
                     data.results.forEach(function(event, idx) {
                         var end, elapsed, status, status_text;
 
@@ -908,9 +910,11 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
             url += (scope.search_host_status === 'failed') ? 'failed=true&' : '';
             url += 'event__icontains=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=host__name';
+
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
+                    scope.next_host_results = data.next;
                     data.results.forEach(function(event) {
                         var status, status_text, item;
                         if (event.event === "runner_on_skipped") {
@@ -996,6 +1000,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         Rest.setUrl(url);
         Rest.get()
             .success(function(data) {
+                scope.next_host_summaries = data.next;
                 data.results.forEach(function(event) {
                     var name;
                     if (event.host_name) {
@@ -1288,9 +1293,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
             keys = Object.keys(filteredListB);
             keys.sort(function(a,b) {
-                if (filteredListB[a].name > filteredListB[b].name)
+                if (filteredListB[a].name + filteredListB[a].item > filteredListB[b].name + filteredListB[b].item)
                     return -1;
-                if (filteredListB[a].name < filteredListB[b].name)
+                if (filteredListB[a].name + filteredListB[a].item < filteredListB[b].name + filteredListB[b].item)
                     return 1;
                 // a must be equal to b
                 return 0;
