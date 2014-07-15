@@ -43,28 +43,80 @@
 
                         <div class="form-group toggle-show" style="display:none;">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Template</label>
-                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ job_template_url }}" aw-tool-tip="Edit the job template" data-placement="top">{{ job_template_name }}</a>
                             </div>
                         </div>
 
                         <div class="form-group toggle-show" style="display:none;">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Job Type</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job_type }}</div>
+                        </div>
+
+                        <div class="form-group toggle-show" style="display:none;">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Inventory</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                                <a href="{{ inventory_url }}" aw-tool-tip="Edit the inventory" data-placement="top">{{ inventory_name }}</a>
+                            </div>
+                        </div>
+
+                        <div class="form-group toggle-show" style="display:none;">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Project</label>
-                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ project_url }}" aw-tool-tip="Edit the project" data-placement="top">{{ project_name }}</a>
                             </div>
                         </div>
 
                         <div class="form-group toggle-show" style="display:none;">
-                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Inventory</label>
-                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
-                                <a href="{{ inventory_url }}" aw-tool-tip="Edit the inventory" data-placement="top">{{ inventory_name }}</a>
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Playbook</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.playbook }}</div>
+                        </div>
+
+                        <div class="form-group toggle-show" style="display:none;" ng-show="credential_name">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Machine Credential</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                                <a href="{{ credential_url }}" aw-tool-tip="Edit the credential" data-placement="top">{{ credential_name }}</a>
+                            </div>
+                        </div>
+
+                        <div class="form-group toggle-show" style="display:none;" ng-show="cloud_credential_name">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Cloud Credential</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                                <a href="{{ cloud_credential_url }}" aw-tool-tip="Edit the credential" data-placement="top">{{ cloud_credential_name }}</a>
+                            </div>
+                        </div>
+
+                        <div class="form-group toggle-show" style="display:none;" ng-show="job.forms">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Forks</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.forks }}</div>
+                        </div>
+
+                        <div class="form-group toggle-show" style="display:none;" ng-show="job.limit">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Limit</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.limit }}</div>
+                        </div>
+
+                        <div class="form-group toggle-show" style="display:none;" ng-show="job.verbosity">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Verbosity</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ verbosity }}</div>
+                        </div>
+
+                        <div class="form-group toggle-show" style="display:none;" ng-show="job.job_tags">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Job Tags</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.job_tags }}</div>
+                        </div>
+
+                        <div class="form-group toggle-show" style="display:none;" ng-show="job.extra_vars">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Extra Variables</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                                <div id="pre-formatted-variables">{{ variables }}</div>
+                                <!-- <pre>{{ variables }}</pre> -->
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-sm-12 more-or-less">
-                                <a ng-show="lessStatus" href="" ng-click="toggleLessStatus()">more...</a>
+                                <a ng-show="lessStatus" href="" ng-click="toggleLessStatus()">more <i class="fa fa-angle-down"></i></a>
                                 <a ng-show="!lessStatus" href="" ng-click="toggleLessStatus()">less <i class="fa fa-angle-up"></i></a>
                             </div>
                         </div>

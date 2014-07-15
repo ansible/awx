@@ -9,7 +9,7 @@
 
 function JobDetailController ($location, $rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
-    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit) {
+    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString) {
 
     ClearScope();
 
@@ -18,7 +18,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         scope = $scope,
         api_complete = false,
         refresh_count = 0,
-        lastEventId = 0;
+        lastEventId = 0,
+        verbosity_options, job_type_options;
 
     scope.plays = [];
     scope.hosts = [];
@@ -57,6 +58,17 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.host_summary.total = 0;
 
     scope.jobData = {};
+
+    verbosity_options = [
+        { value: 0, label: 'Default' },
+        { value: 1, label: 'Verbose' },
+        { value: 3, label: 'Debug' }
+    ];
+
+    job_type_options = [
+        { value: 'run', label: 'Run' },
+        { value: 'check', label: 'Check' }
+    ];
 
     scope.eventsHelpText = "<p><i class=\"fa fa-circle successful-hosts-color\"></i> Successful</p>\n" +
         "<p><i class=\"fa fa-circle changed-hosts-color\"></i> Changed</p>\n" +
@@ -469,7 +481,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 });
         }
         if (data.cloud_credential) {
-            url = GetBasePath('credentials') + data.credential + '/';
+            url = GetBasePath('credentials') + data.cloud_credential + '/';
             Rest.setUrl(url);
             Rest.get()
                 .success( function(data) {
@@ -483,7 +495,6 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         }
     });
 
-
     if (scope.removeLoadJob) {
         scope.removeLoadJob();
     }
@@ -493,6 +504,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         Rest.setUrl(GetBasePath('jobs') + job_id + '/');
         Rest.get()
             .success(function(data) {
+                var i;
                 scope.job = data;
                 scope.job_template_name = data.name;
                 scope.project_name = (data.summary_fields.project) ? data.summary_fields.project.name : '';
@@ -500,7 +512,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 scope.job_template_url = '/#/job_templates/' + data.unified_job_template;
                 scope.inventory_url = (scope.inventory_name && data.inventory) ? '/#/inventories/' + data.inventory : '';
                 scope.project_url = (scope.project_name && data.project) ? '/#/projects/' + data.project : '';
-                scope.job_type = data.job_type;
+                scope.credential_url = (data.credential) ? '/#/credentials/' + data.credential : '';
+                scope.cloud_credential_url = (data.cloud_credential) ? '/#/credentials/' + data.cloud_credential : '';
                 scope.playbook = data.playbook;
                 scope.credential = data.credential;
                 scope.cloud_credential = data.cloud_credential;
@@ -508,6 +521,19 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 scope.limit = data.limit;
                 scope.verbosity = data.verbosity;
                 scope.job_tags = data.job_tags;
+                scope.variables = ParseVariableString(data.extra_vars);
+
+                for (i=0; i < verbosity_options.length; i++) {
+                    if (verbosity_options[i].value === data.verbosity) {
+                        scope.verbosity = verbosity_options[i].label;
+                    }
+                }
+
+                for (i=0; i < job_type_options.length; i++) {
+                    if (job_type_options[i].value === data.job_type) {
+                        scope.job_type = job_type_options[i].label;
+                    }
+                }
 
                 // In the case the job is already completed, or an error already happened,
                 // populate scope.job_status info
@@ -1124,5 +1150,5 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 JobDetailController.$inject = [ '$location', '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
     'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer', 'LoadPlays', 'LoadTasks',
-    'LoadHosts', 'HostsEdit'
+    'LoadHosts', 'HostsEdit', 'ParseVariableString'
 ];
