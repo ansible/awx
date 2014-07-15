@@ -152,6 +152,8 @@ class DashboardView(APIView):
     def get(self, request, format=None):
         ''' Show Dashboard Details '''
         data = SortedDict()
+        data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view'),
+                           'inventory_graph': reverse('api:dashboard_inventory_graph_view')}
         user_inventory = get_user_queryset(request.user, Inventory)
         inventory_with_failed_hosts = user_inventory.filter(hosts_with_active_failures__gt=0)
         user_inventory_external = user_inventory.filter(has_inventory_sources=True)
@@ -251,7 +253,7 @@ class DashboardView(APIView):
 class DashboardJobsGraphView(APIView):
 
     view_name = "Dashboard Jobs Graphs"
-    new_in_20 = True
+    new_in_200 = True
 
     def get(self, request, format=None):
         period = request.QUERY_PARAMS.get('period', 'month')
@@ -300,7 +302,7 @@ class DashboardJobsGraphView(APIView):
 class DashboardInventoryGraphView(APIView):
 
     view_name = "Dashboard Inventory Graphs"
-    new_in_20 = True
+    new_in_200 = True
 
     def get(self, request, format=None):
         period = request.QUERY_PARAMS.get('period', 'month')
