@@ -195,6 +195,28 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 section = params.section,
                 html = '', e;
 
+            function parseObject(obj) {
+                // parse nested JSON objects. a mini version of parseJSON without references to the event form object.
+                var key, html = '';
+                for (key in obj) {
+                    if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
+                        html += "<tr><td class=\"key\">" + key + ":</td><td class=\"value\">" + obj[key] + "</td></tr>";
+                    }
+                    else if (typeof obj[key] === "object" && Array.isArray(obj[key])) {
+                        html += "<tr><td class=\"key\">" + key + ":</td><td class=\"value\">";
+                        obj[key].forEach(function(row) {
+                            html += "[" + row + "],";
+                        });
+                        html = html.replace(/,$/,'');
+                        html += "</td></tr>\n";
+                    }
+                    else if (typeof obj[key] === "object") {
+                        html += "<tr><td class=\"key\">" + key + ":</td><td class=\"nested-table\"><table>\n<tbody>\n" + parseObject(obj[key]) + "</tbody>\n</table>\n</td></tr>\n";
+                    }
+                }
+                return html;
+            }
+
             function parseJSON(obj) {
                 var html = '', key, keys, found = false;
                 if (typeof obj === "object") {
@@ -252,9 +274,8 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                         }
                         else if (typeof obj[key] === "object") {
                             found = true;
-                            html += "<tr><td class=\"key\">" + label + ":</td><td class=\"nested-table\">\n" + parseJSON(obj[key]) + "</td></tr>\n";
+                            html += "<tr><td class=\"key\">" + label + ":</td><td class=\"nested-table\"><table>\n<tbody>\n" + parseObject(obj[key]) + "</tbody>\n</table>\n</td></tr>\n";
                         }
-                        //}
                     });
                     html += "</tbody>\n";
                     html += "</table>\n";

@@ -828,7 +828,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         EventViewer({
             scope: scope,
             url: scope.job.related.job_events + '?id=' + id,
-            title: 'Host Result'
+            title: 'Host Event'
         });
     };
 

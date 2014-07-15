@@ -295,7 +295,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
             created: event.created,
             modified: event.modified,
-            hostCount: (scope.activePlay && scope.jobData.plays[scope.activePlay]) ? scope.jobData.plays[scope.activePlay].hostCount : 0,
+            hostCount: (scope.jobData.plays[event.parent]) ? scope.jobData.plays[event.parent].hostCount : 0,
             reportedHosts: 0,
             successfulCount: 0,
             failedCount: 0,
@@ -451,8 +451,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 }])
 
 // Each time a runner event is received update host summary totals and the parent task
-.factory('UpdateHostStatus', ['UpdateTaskStatus', 'AddHostResult',
-    function(UpdateTaskStatus, AddHostResult) {
+.factory('UpdateHostStatus', ['UpdateTaskStatus', 'AddHostResult', function(UpdateTaskStatus, AddHostResult) {
     return function(params) {
         var scope = params.scope,
             status = params.status,  // successful, changed, unreachable, failed, skipped
@@ -516,7 +515,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 }])
 
 // Add a new host result
-.factory('AddHostResult', ['SetTaskStyles', 'SetActiveTask', function(SetTaskStyles, SetActiveTask) {
+.factory('AddHostResult', ['SetTaskStyles', 'SetActivePlay', 'SetActiveTask', function(SetTaskStyles, SetActivePlay, SetActiveTask) {
     return function(params) {
         var scope = params.scope,
             task_id = params.task_id,
@@ -528,7 +527,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             msg = params.message,
             item = params.item,
             status_text = '',
-            task;
+            task, play, play_id;
 
         switch(status) {
             case "successful":
@@ -551,11 +550,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             item = JSON.stringify(item);
         }
 
-        if (scope.jobData.plays[scope.activePlay].tasks[task_id].hostResults[event_id]) {
-            // host already exists. do nothing.
+        for (play in scope.jobData.plays) {
+            for (task in scope.jobData.plays[play].tasks) {
+                if (parseInt(task,10) === parseInt(task_id,10)) {
+                    play_id = parseInt(play,10);
+                }
+            }
         }
-        else {
-            scope.jobData.plays[scope.activePlay].tasks[task_id].hostResults[event_id] = {
+
+        if (play_id) {
+            scope.jobData.plays[play_id].tasks[task_id].hostResults[event_id] = {
                 id: event_id,
                 status: status,
                 status_text: status_text,
@@ -568,15 +572,15 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             };
 
             // increment the unreachable count on the play
-            if (status === 'unreachable' && scope.jobData.plays[scope.activePlay]) {
-                scope.jobData.plays[scope.activePlay].unreachableCount++;
+            if (status === 'unreachable') {
+                scope.jobData.plays[play_id].unreachableCount++;
             }
 
             // update the task status bar
-            task = scope.jobData.plays[scope.activePlay].tasks[task_id];
+            task = scope.jobData.plays[play_id].tasks[task_id];
 
-            if (task_id === scope.jobData.plays[scope.activePlay].firstTask) {
-                scope.jobData.plays[scope.activePlay].hostCount++;
+            if (task_id === scope.jobData.plays[play_id].firstTask) {
+                scope.jobData.plays[play_id].hostCount++;
                 task.hostCount++;
             }
 
@@ -590,6 +594,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             SetTaskStyles({
                 task: task
             });
+
+            SetActivePlay({ scope: scope });
 
             SetActiveTask({ scope: scope });
         }
@@ -608,6 +614,14 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         task.skippedPct = (task.hostCount > 0) ? Math.ceil((100 * (task.skippedCount / task.hostCount))) : 0;
         task.successfulPct = (task.hostCount > 0) ? Math.ceil((100 * (task.successfulCount / task.hostCount))) : 0;
         task.unreachablePct = (task.hostCount > 0) ? Math.ceil((100 * (task.unreachableCount / task.hostCount))) : 0;
+
+        // cap % at 100
+        task.missingPct = (task.missingPct > 100) ? 100 : task.missingPct;
+        task.failedPct = (task.failedPct > 100) ? 100 : task.failedPct;
+        task.changedPct = (task.changedPct > 100) ? 100 : task.changedPct;
+        task.skippedPct = (task.skippedPct  > 100) ? 100 : task.skippedPct;
+        task.successfulPct = ( task.successfulPct > 100) ? 100 :  task.successfulPct;
+        task.unreachablePct = (task.unreachablePct > 100) ? 100 : task.unreachablePct;
 
         diff = (task.failedPct + task.changedPct + task.skippedPct + task.successfulPct + task.unreachablePct + task.missingPct) - 100;
         if (diff > 0) {

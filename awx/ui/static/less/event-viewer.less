@@ -31,3 +31,30 @@ table.eventviewer-status {
         font-size: 12px;
     }
 }
+
+.nested-table {
+    border: none;
+    padding: 0;
+    table {
+        border-top: none;
+        border-bottom: none;
+        width: auto;
+        td {
+            vertical-align: top;
+            padding: 0 3px 3px 3px;
+        }
+        tr {
+            border-top: none;
+            border-bottom: 1px solid #ddd;
+        }
+        /*tr td:first-of-type {
+            width: auto;
+        }*/
+        tr:last-of-type {
+            border-bottom: none;
+        }
+        .key {
+            font-weight: 400;
+        }
+    }
+}

@@ -37,16 +37,16 @@ angular.module('EventsViewerFormDefinition', [])
                 label: 'Task',
                 section: 'Event'
             },
+            item: {
+                label: 'Item',
+                section: 'Event'
+            },
             module_name: {
                 label: 'Module',
                 section: 'Event'
             },
             module_args: {
                 label: 'Arguments',
-                section: 'Event'
-            },
-            item: {
-                label: 'Item',
                 section: 'Event'
             },
             rc: {

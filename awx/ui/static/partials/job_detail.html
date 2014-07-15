@@ -81,7 +81,6 @@
                                 <div class="col-lg-11 col-md-10 col-sm-10 col-xs-11" style="text-align:right;">
                                     <div id="play-search-form" class="search-form form-inline">
                                         <div class="form-group">
-                                            <label>Search</label>
                                             <div class="search-name" style="display:inline-block; position:relative;">
                                                 <input type="text" class="input-xs form-control" id="search_play_name" ng-model="search_play_name"
                                                         placeholder="Play Name" ng-keypress="searchPlaysKeyPress($event)" >
@@ -92,7 +91,6 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Status</label>
                                             <div class="btn-group" aw-toggle-button data-after-toggle="filterPlayStatus">
                                                 <button class="btn btn-xs btn-primary active">All</button>
                                                 <button class="btn btn-xs btn-default">Failed</button>
@@ -141,7 +139,6 @@
                                 <div class="col-lg-11 col-md-10 col-sm-10" style="text-align:right;">
                                     <div id="task-search-form" class="search-form form-inline">
                                         <div class="form-group">
-                                            <label>Search</label>
                                             <div class="search-name" style="display:inline-block; position:relative;">
                                                 <input type="text" class="input-xs form-control" id="search_task_name" ng-model="search_task_name"
                                                         placeholder="Task Name" ng-keypress="searchTasksKeyPress($event)" >
@@ -152,7 +149,6 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Status</label>
                                             <div class="btn-group" aw-toggle-button data-after-toggle="filterTaskStatus">
                                                 <button class="btn btn-xs btn-primary active">All</button>
                                                 <button class="btn btn-xs btn-default">Failed</button>
@@ -204,7 +200,6 @@
                                 <div class="col-lg-10 col-md-10 col-sm-10" style="text-align:right;">
                                     <div id="host-search-form" class="search-form form-inline">
                                         <div class="form-group">
-                                            <label>Search</label>
                                             <div class="search-name" style="display:inline-block; position:relative;">
                                                 <input type="text" class="input-xs form-control" id="search_host_name" ng-model="search_host_name"
                                                         placeholder="Host Name" ng-keypress="searchHostsKeyPress($event)" >
@@ -215,7 +210,6 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Status</label>
                                             <div class="btn-group" aw-toggle-button data-after-toggle="filterHostStatus">
                                                 <button class="btn btn-xs btn-primary active">All</button>
                                                 <button class="btn btn-xs btn-default">Failed</button>
@@ -277,7 +271,6 @@
                                 <div class="col-lg-10 col-md-10 col-sm-10" style="text-align:right;">
                                     <div id="task-search-form" class="search-form form-inline">
                                         <div class="form-group">
-                                            <label>Search</label>
                                             <div class="search-name" style="display:inline-block; position:relative;">
                                                 <input type="text" class="input-xs form-control" id="search_host_summary_name" ng-model="search_host_summary_name"
                                                         placeholder="Host Name" ng-keypress="searchHostSummaryKeyPress($event)" >
@@ -288,7 +281,6 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Status</label>
                                             <div class="btn-group" aw-toggle-button data-after-toggle="filterHostSummaryStatus">
                                                 <button class="btn btn-xs btn-primary active">All</button>
                                                 <button class="btn btn-xs btn-default">Failed</button>
@@ -385,9 +377,9 @@
             <table id="fixed-table-header" class="table">
                 <thead>
                     <tr><th class="col-md-3">Status</th>
+                        <th class="col-md-3">Host</th>
                         <th class="col-md-3">Play</th>
                         <th class="col-md-3">Task</th>
-                        <th class="col-md-3">Result</th>
                     </tr>
                 </thead>
             </table>
