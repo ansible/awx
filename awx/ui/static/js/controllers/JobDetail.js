@@ -198,7 +198,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 url;
 
             url = scope.job.related.job_events + '?parent=' + task.id + '&';
-            url += 'event__icontains=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=-host__name';
+            url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=-host__name';
 
             Rest.setUrl(url);
             Rest.get()
@@ -860,8 +860,10 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.viewHostResults = function(id) {
         EventViewer({
             scope: scope,
-            url: scope.job.related.job_events + '?id=' + id,
-            title: 'Host Event'
+            url: scope.job.related.job_events,
+            parent_id: scope.activeTask,
+            event_id: id,
+            title: 'Host Events'
         });
     };
 

@@ -909,7 +909,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url = scope.job.related.job_events + '?parent=' + scope.activeTask + '&';
             url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
             url += (scope.search_host_status === 'failed') ? 'failed=true&' : '';
-            url += 'event__icontains=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=host__name';
+            url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=host__name';
 
             Rest.setUrl(url);
             Rest.get()
