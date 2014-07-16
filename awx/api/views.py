@@ -1630,7 +1630,10 @@ class JobJobPlaysList(BaseJobEventsList):
     @paginated
     def get(self, request, limit, offset, ordering, *args, **kwargs):
         all_plays = []
-        job = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        job = Job.objects.filter(pk=self.kwargs['pk'])
+        if not job.exists():
+            return ({'detail': 'job not found'}, -1, status.HTTP_404_NOT_FOUND)
+        job = job[0]
 
         # Put together a queryset for relevant job events.
         qs = job.job_events.filter(event='playbook_on_play_start')
@@ -1686,7 +1689,7 @@ class JobJobPlaysList(BaseJobEventsList):
             all_plays.append(play_details)
 
         # Done; return the plays and the total count.
-        return all_plays, count
+        return all_plays, count, None
 
 
 class JobJobTasksList(BaseJobEventsList):
@@ -1709,11 +1712,18 @@ class JobJobTasksList(BaseJobEventsList):
 
         # Get the job and the parent task.
         # If there's no event ID specified, this will return a 404.
-        # FIXME: Make this a good error message.
-        job = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        parent_task = get_object_or_404(job.job_events,
-            pk=int(request.QUERY_PARAMS.get('event_id', -1)),
-        )
+        job = Job.objects.filter(pk=self.kwargs['pk'])
+        if not job.exists():
+            return ({'detail': 'job not found'}, -1, status.HTTP_404_NOT_FOUND)
+        job = job[0]
+
+        if 'event_id' not in request.QUERY_PARAMS:
+            return ({'detail': '"event_id" not provided'}, -1, status.HTTP_400_BAD_REQUEST)
+
+        parent_task = job.job_events.filter(pk=int(request.QUERY_PARAMS.get('event_id', -1)))
+        if not parent_task.exists():
+            return ({'detail': 'parent event not found'}, -1, status.HTTP_404_NOT_FOUND)
+        parent_task = parent_task[0]
 
         # Some events correspond to a playbook or task starting up,
         # and these are what we're interested in here.
@@ -1818,7 +1828,7 @@ class JobJobTasksList(BaseJobEventsList):
             results.append(task_data)
 
         # Done; return the results and count.
-        return results, count
+        return (results, count, None)
 
 
 class UnifiedJobTemplateList(ListAPIView):

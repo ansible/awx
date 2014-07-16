@@ -7,6 +7,7 @@ import functools
 
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from rest_framework import status
 
 def paginated(method):
     """Given an method with a Django REST Framework API method signature
@@ -46,29 +47,34 @@ def paginated(method):
         kwargs['ordering'] = ordering
 
         # Okay, call the underlying method.
-        results, count = method(self, request, *args, **kwargs)
+        results, count, stat = method(self, request, *args, **kwargs)
+        if stat is None:
+            stat = status.HTTP_200_OK
 
-        # Determine the next and previous pages, if any.
-        prev, next_ = None, None
-        if page > 1:
-            get_copy = copy.copy(request.GET)
-            get_copy['page'] = page - 1
-            prev = '%s?%s' % (request.path, get_copy.urlencode())
-        if count > offset + limit:
-            get_copy = copy.copy(request.GET)
-            get_copy['page'] = page + 1
-            next_ = '%s?%s' % (request.path, get_copy.urlencode())
+        if stat == status.HTTP_200_OK:
+            # Determine the next and previous pages, if any.
+            prev, next_ = None, None
+            if page > 1:
+                get_copy = copy.copy(request.GET)
+                get_copy['page'] = page - 1
+                prev = '%s?%s' % (request.path, get_copy.urlencode())
+            if count > offset + limit:
+                get_copy = copy.copy(request.GET)
+                get_copy['page'] = page + 1
+                next_ = '%s?%s' % (request.path, get_copy.urlencode())
 
-        # Compile the results into a dictionary with pagination
-        # information.
-        answer = collections.OrderedDict((
-            ('count', count),
-            ('next', next_),
-            ('previous', prev),
-            ('results', results),
-        ))
+            # Compile the results into a dictionary with pagination
+            # information.
+            answer = collections.OrderedDict((
+                ('count', count),
+                ('next', next_),
+                ('previous', prev),
+                ('results', results),
+            ))
+        else:
+            answer = results
 
         # Okay, we're done; return response data.
-        return Response(answer)
+        return Response(answer, status=stat)
     return func
 
