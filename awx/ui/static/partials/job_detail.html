@@ -41,33 +41,33 @@
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;">
+                        <div class="form-group toggle-show" style="display:none;" ng-show="job_template_name">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Template</label>
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ job_template_url }}" aw-tool-tip="Edit the job template" data-placement="top">{{ job_template_name }}</a>
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;">
+                        <div class="form-group toggle-show" style="display:none;" ng-show="job_type">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Job Type</label>
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job_type }}</div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;">
+                        <div class="form-group toggle-show" style="display:none;" ng-show="inventory_name">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Inventory</label>
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ inventory_url }}" aw-tool-tip="Edit the inventory" data-placement="top">{{ inventory_name }}</a>
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;">
+                        <div class="form-group toggle-show" style="display:none;" ng-show="project_name">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Project</label>
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
                                 <a href="{{ project_url }}" aw-tool-tip="Edit the project" data-placement="top">{{ project_name }}</a>
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;">
+                        <div class="form-group toggle-show" style="display:none;" ng-show="job.playbook">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Playbook</label>
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.playbook }}</div>
                         </div>
@@ -86,7 +86,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="job.forms">
+                        <div class="form-group toggle-show" style="display:none;" ng-show="job.forks">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Forks</label>
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.forks }}</div>
                         </div>
@@ -96,7 +96,7 @@
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.limit }}</div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="job.verbosity">
+                        <div class="form-group toggle-show" style="display:none;" ng-show="verbosity">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Verbosity</label>
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ verbosity }}</div>
                         </div>
@@ -106,7 +106,7 @@
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job.job_tags }}</div>
                         </div>
 
-                        <div class="form-group toggle-show" style="display:none;" ng-show="job.extra_vars">
+                        <div class="form-group toggle-show" style="display:none;" ng-show="variables">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Extra Variables</label>
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
                                 <div id="pre-formatted-variables">{{ variables }}</div>
