@@ -1741,8 +1741,6 @@ class JobJobTasksList(BaseJobEventsList):
                                     .annotate(num=Count('event'))
                                     .order_by('parent__id'))
 
-        count = queryset.count()
-
         # The data above will come back in a list, but we are going to
         # want to access it based on the parent id, so map it into a
         # dictionary.
@@ -1775,6 +1773,7 @@ class JobJobTasksList(BaseJobEventsList):
         if ordering is not None:
             qs = qs.order_by(ordering)
 
+        count = 0
         for task_start_event in qs:
             # Create initial task data.
             task_data = {
@@ -1825,6 +1824,7 @@ class JobJobTasksList(BaseJobEventsList):
                     task_data['failed_count'] += child_data['num']
                 elif child_data['event'] == 'runner_on_no_hosts':
                     task_data['host_count'] += child_data['num']
+            count += 1
             results.append(task_data)
 
         # Done; return the results and count.
