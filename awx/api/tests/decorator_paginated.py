@@ -25,7 +25,7 @@ class PaginatedDecoratorTests(TestCase):
             permission_classes = (AllowAny,)
             @paginated
             def get(self, request, limit, ordering, offset):
-                return ['a', 'b', 'c', 'd', 'e'], 26
+                return ['a', 'b', 'c', 'd', 'e'], 26, None
         self.view = View.as_view()
 
     def test_implicit_first_page(self):
