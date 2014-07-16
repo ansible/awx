@@ -89,18 +89,20 @@ angular.module('CredentialFormDefinition', [])
                 helpCollapse: [{
                     hdr: 'Select a Credential Type',
                     content: '<dl>\n' +
-                        '<dt>AWS</dt>\n' +
-                        '<dd>Access keys for Amazon Web Services used for inventory management or deployment.</dd>\n' +
                         '<dt>Machine</dt>\n' +
                         '<dd>Authentication for remote machine access. This can include SSH keys, usernames, passwords, ' +
                         'and sudo information. Machine credentials are used when submitting jobs to run playbooks against ' +
                         'remote hosts.</dd>' +
-                        '<dt>Rackspace</dt>\n' +
-                        '<dd>Access information for Rackspace Cloud used for inventory management or deployment.</dd>\n' +
-                        '<dt>SCM</dt>\n' +
+                        '<dt>Source Control</dt>\n' +
                         '<dd>Used to check out and synchronize playbook repositories with a remote source control ' +
                         'management system such as Git, Subversion (svn), or Mercurial (hg). These credentials are ' +
                         'used on the Projects tab.</dd>\n' +
+                        '<dt>Amazon Web Services</dt>\n' +
+                        '<dd>Access keys for Amazon Web Services used for inventory management or deployment.</dd>\n' +
+                        '<dt>Rackspace</dt>\n' +
+                        '<dd>Access information for Rackspace Cloud used for inventory management or deployment.</dd>\n' +
+                        '<dt>VMWare</dt>\n' +
+                        '<dd>Access information for VMWare vSphere used for inventory management or deployment.</dd>\n' +
                         '</dl>\n'
                 }]
             },
@@ -128,6 +130,12 @@ angular.module('CredentialFormDefinition', [])
                 clear: false,
                 apiField: 'passwowrd'
             },
+            "host": {
+                label: 'Host',
+                type: 'text',
+                ngShow: "kind.value == 'vmware'",
+                autocomplete: false
+            },
             "username": {
                 labelBind: 'usernameLabel',
                 type: 'text',
@@ -154,7 +162,7 @@ angular.module('CredentialFormDefinition', [])
             "password": {
                 label: 'Password',
                 type: 'password',
-                ngShow: "kind.value == 'scm'",
+                ngShow: "kind.value == 'scm' || kind.value == 'vmware'",
                 addRequired: false,
                 editRequired: false,
                 ngChange: "clearPWConfirm('password_confirm')",
@@ -166,7 +174,7 @@ angular.module('CredentialFormDefinition', [])
             "password_confirm": {
                 label: 'Confirm Password',
                 type: 'password',
-                ngShow: "kind.value == 'scm'",
+                ngShow: "kind.value == 'scm' || kind.value == 'vmware'",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,

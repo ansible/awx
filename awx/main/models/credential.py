@@ -31,6 +31,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         ('scm', _('Source Control')),
         ('aws', _('Amazon Web Services')),
         ('rax', _('Rackspace')),
+        ('vmware', _('VMWare')),
     ]
 
     PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock',
@@ -64,6 +65,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     cloud = models.BooleanField(
         default=False,
         editable=False,
+    )
+    host = models.CharField(
+        blank=True,
+        default='',
+        max_length=1024,
+        verbose_name=_('Host'),
+        help_text=_('The hostname or IP address to use.'),
     )
     username = models.CharField(
         blank=True,
@@ -150,20 +158,34 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:credential_detail', args=(self.pk,))
 
+    def clean_host(self):
+        """Ensure that if this is a type of credential that requires a
+        `host`, that a host is provided.
+        """
+        host = self.host or ''
+        if not host and self.kind == 'vmware':
+            raise ValidationError('Host required for VMWare credential.')
+        return host
+
     def clean_username(self):
         username = self.username or ''
         if not username and self.kind == 'aws':
-            raise ValidationError('Access key required for "aws" credential')
+            raise ValidationError('Access key required for AWS credential.')
         if not username and self.kind == 'rax':
-            raise ValidationError('Username required for "rax" credential')
+            raise ValidationError('Username required for Rackspace '
+                                  'credential.')
+        if not username and self.kind == 'vmware':
+            raise ValidationError('Username required for VMWare credential.')
         return username
 
     def clean_password(self):
         password = self.password or ''
         if not password and self.kind == 'aws':
-            raise ValidationError('Secret key required for "aws" credential')
+            raise ValidationError('Secret key required for AWS credential.')
         if not password and self.kind == 'rax':
-            raise ValidationError('API key required for "rax" credential')
+            raise ValidationError('API key required for Rackspace credential.')
+        if not password and self.kind == 'vmware':
+            raise ValidationError('Password required for VMWare credential.')
         return password
 
     def _validate_ssh_private_key(self, data):
