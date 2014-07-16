@@ -1681,6 +1681,8 @@ class JobJobPlaysList(BaseJobEventsList):
                     ok_count = change_aggregate['id__count']
                 else:
                     changed_count = change_aggregate['id__count']
+            play_details['related'] = {'job_event': reverse('api:job_event_detail', args=(play_event.pk,))}
+            play_details['type'] = 'job_event'
             play_details['ok_count'] = ok_count
             play_details['failed_count'] = failed_count
             play_details['changed_count'] = changed_count
@@ -1777,6 +1779,8 @@ class JobJobTasksList(BaseJobEventsList):
         for task_start_event in qs:
             # Create initial task data.
             task_data = {
+                'related': {'job_event': reverse('api:job_event_detail', args=(task_start_event.pk,))},
+                'type': 'job_event',
                 'changed': task_start_event.changed,
                 'changed_count': 0,
                 'created': task_start_event.created,
