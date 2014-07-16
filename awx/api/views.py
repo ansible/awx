@@ -1625,7 +1625,7 @@ class JobJobPlaysList(BaseJobEventsList):
     authentication_classes = [JobTaskAuthentication] + \
                              api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
-    new_in_150 = True
+    new_in_200 = True
 
     @paginated
     def get(self, request, limit, offset, ordering, *args, **kwargs):
@@ -1700,7 +1700,7 @@ class JobJobTasksList(BaseJobEventsList):
     authentication_classes = [JobTaskAuthentication] + \
                              api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
-    new_in_150 = True
+    new_in_200 = True
 
     @paginated
     def get(self, request, limit, offset, ordering, *args, **kwargs):
