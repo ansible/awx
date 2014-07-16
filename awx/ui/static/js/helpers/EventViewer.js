@@ -20,10 +20,43 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 scope = parent_scope.$new(true),
                 current_event;
 
+            if (scope.removeShowNextEvent) {
+                scope.removeShowNextEvent();
+            }
+            scope.removeShowNextEvent = scope.$on('ShowNextEvent', function(e, data, show_event) {
+                scope.events = data;
+                $('#event-next-spinner').hide(400);
+                if (show_event === 'prev') {
+                    showEvent(scope.events.length - 1);
+                }
+                else if (show_event === 'next') {
+                    showEvent(0);
+                }
+            });
 
             // show scope.events[idx]
             function showEvent(idx) {
-                var show_tabs = false, elem, data = scope.events[idx];
+                var show_tabs = false, elem, data;
+
+                if (idx > scope.events.length - 1) {
+                    GetEvent({
+                        scope: scope,
+                        url: scope.next_event_set,
+                        show_event: 'next'
+                    });
+                    return;
+                }
+
+                if (idx < 0) {
+                    GetEvent({
+                        scope: scope,
+                        url: scope.prev_event_set,
+                        show_event: 'prev'
+                    });
+                    return;
+                }
+
+                data = scope.events[idx];
                 current_event = idx;
 
                 $('#status-form-container').empty();
@@ -86,8 +119,17 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
             }
 
             function setButtonMargin() {
-                var width = ($('.ui-dialog[aria-describedby=["eventviewer-modal-dialog"] .ui-dialog-buttonpane').innerWidth() / 2) - $('#events-next-button').outerWidth();
-                console.log('width: ' + width);
+                var width = ($('.ui-dialog[aria-describedby="eventviewer-modal-dialog"] .ui-dialog-buttonpane').innerWidth() / 2) - $('#events-next-button').outerWidth() - 73;
+                $('#events-next-button').css({'margin-right': width + 'px'});
+            }
+
+            function addSpinner() {
+                var position;
+                if ($('#event-next-spinner').length > 0) {
+                    $('#event-next-spinner').remove();
+                }
+                position = $('#events-next-button').position();
+                $('#events-next-button').after('<i class="fa fa-cog fa-spin" id="event-next-spinner" style="display:none; position:absolute; top:' + (position.top + 15) + 'px; left:' + (position.left + 75) + 'px;"></i>');
             }
 
             if (scope.removeModalReady) {
@@ -102,8 +144,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 scope.removeJobReady();
             }
             scope.removeEventReady = scope.$on('EventReady', function(e, data) {
-                var elem, btns;
-
+                var btns;
                 scope.events = data;
 
                 // find and show the selected event
@@ -121,7 +162,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                     btns.push({
                         label: "Prev",
                         onClick: function () {
-                            if (current_event - 1 === 0) {
+                            if (current_event - 1 === 0 && !scope.prev_event_set) {
                                 $('#events-prev-button').prop('disabled', true);
                             }
                             if (current_event - 1 < scope.events.length - 1) {
@@ -139,7 +180,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                             if (current_event + 1 > 0) {
                                 $('#events-prev-button').prop('disabled', false);
                             }
-                            if (current_event + 1 >= scope.events.length - 1) {
+                            if (current_event + 1 >= scope.events.length - 1 && !scope.next_event_set) {
                                 $('#events-next-button').prop('disabled', true);
                             }
                             showEvent(current_event + 1);
@@ -170,6 +211,10 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                     title: ( (title) ? title : 'Event Details' ),
                     buttons: btns,
                     closeOnEscape: true,
+                    onResizeStop: function() {
+                        setButtonMargin();
+                        addSpinner();
+                    },
                     onClose: function() {
                         try {
                             scope.$destroy();
@@ -182,8 +227,12 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                         $('#eventview-tabs a:first').tab('show');
                         $('#dialog-ok-button').focus();
                         if (scope.events.length > 1 && current_event === 0) {
-                            console.log('disabling prev button');
                             $('#events-prev-button').prop('disabled', true);
+                        }
+
+                        if (scope.events.length > 1) {
+                            setButtonMargin();
+                            addSpinner();
                         }
                     }
                 });
@@ -206,20 +255,26 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
         return function(params) {
             var url = params.url,
                 scope = params.scope,
+                show_event = params.show_event,
                 results= [];
+
+            if (show_event) {
+                $('#event-next-spinner').show();
+            }
+            else {
+                Wait('start');
+            }
 
             function getStatus(data) {
                 return (data.results[0].event === "runner_on_unreachable") ? "unreachable" : (data.results[0].event === "runner_on_skipped") ? 'skipped' : (data.results[0].failed) ? 'failed' :
                             (data.results[0].changed) ? 'changed' : 'ok';
             }
-            console.log('url: ' + url);
-            Wait('start');
+
             Rest.setUrl(url);
             Rest.get()
                 .success( function(data) {
                     scope.next_event_set = data.next;
-                    scope.prev_event_set = data.prev;
-                    console.log(data.results);
+                    scope.prev_event_set = data.previous;
                     data.results.forEach(function(event) {
                         var key, event_data = {};
                         if (event.event_data.res) {
@@ -270,8 +325,12 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                         event_data.event = (event.event_display) ? event.event_display : event.event;
                         results.push(event_data);
                     });
-
-                    scope.$emit('EventReady', results);
+                    if (show_event) {
+                        scope.$emit('ShowNextEvent', results, show_event);
+                    }
+                    else {
+                        scope.$emit('EventReady', results);
+                    }
                 })
                 .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
