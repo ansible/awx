@@ -1622,6 +1622,7 @@ class JobJobEventsList(BaseJobEventsList):
 class JobJobPlaysList(BaseJobEventsList):
 
     parent_model = Job
+    view_name = 'Job Plays List'
     authentication_classes = [JobTaskAuthentication] + \
                              api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
@@ -1702,6 +1703,7 @@ class JobJobTasksList(BaseJobEventsList):
     authentication_classes = [JobTaskAuthentication] + \
                              api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
+    view_name = 'Job Play Tasks List'
     new_in_200 = True
 
     @paginated
