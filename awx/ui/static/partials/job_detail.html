@@ -27,9 +27,8 @@
 
                         <div class="form-group">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Status</label>
-                            <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
-                                <i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }} {{ job_status.explanation }}
-                            </div>
+                            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
+                            <div class="col-lg-8 col-md-7 col-sm-6 col-xs-5">{{ job_status.explanation }}</div>
                         </div>
 
                         <div class="form-group">
@@ -293,7 +292,7 @@
                                             <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3"><a href="" ng-click="viewHostResults(result.id)" aw-tool-tip="Event ID: {{ result.id }}<br \>Status: {{ result.status_text }}. Click for details" data-placement="top">{{ result.name }}</a></td>
                                             <td class="col-lg-4 col-md-4 col-sm-3 col-xs-3 item-column">{{ result.item }}</td>
                                             <td class="col-lg-4 col-md-4 col-sm-3 col-xs-3">{{ result.msg }}</td>
-                                            <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1"><a href="" ng-click="editHost(result.host_id)" aw-tool-tip="Edit host" data-placement="top"><i class="fa fa-pencil"></i></a></td>
+                                            <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1"><a ng-show="result.host_id" href="" ng-click="editHost(result.host_id)" aw-tool-tip="Edit host" data-placement="top"><i class="fa fa-pencil"></i></a></td>
                                         </tr>
                                         <tr ng-show="results.length === 0">
                                             <td colspan="5" class="col-lg-12 loading-info">No matching hosts</td>
