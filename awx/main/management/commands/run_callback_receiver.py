@@ -20,6 +20,7 @@ from django.contrib.auth.models import User
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now, is_aware, make_aware
 from django.utils.tzinfo import FixedOffset
+from django.db import connection 
 
 # AWX
 from awx.main.models import *
@@ -56,7 +57,7 @@ class CallbackReceiver(object):
         worker_queues = []
 
         if use_workers:
-
+            connection.close()
             for idx in range(WORKERS):
                 queue_port_actual = queue_port + "-%s" % str(idx)
                 queue_context = zmq.Context()
@@ -121,6 +122,7 @@ class CallbackReceiver(object):
                         queue_actual[0] = 0
                         print("Recycling worker process")
                         queue_actual[2].join()
+                        connection.close()
                         w = Process(target=self.callback_worker, args=(queue_port + "-%s" % str(total_messages % WORKERS),))
                         w.daemon = True
                         w.start()
