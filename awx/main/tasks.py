@@ -837,19 +837,27 @@ class RunInventoryUpdate(BaseTask):
         if credential:
             passwords['source_username'] = credential.username
             passwords['source_password'] = decrypt_field(credential, 'password')
+            passwords['source_host'] = credential.host
         return passwords
 
     def build_env(self, inventory_update, **kwargs):
-        '''
-        Build environment dictionary for inventory import.
-        '''
-        env = super(RunInventoryUpdate, self).build_env(inventory_update, **kwargs)
+        """Build environment dictionary for inventory import.
+
+        This is the mechanism by which any data that needs to be passed
+        to the inventory update script is set up. In particular, this is how
+        inventory update is aware of its proper credentials.
+        """
+        env = super(RunInventoryUpdate, self).build_env(inventory_update,
+                                                        **kwargs)
+
         # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
+
         # Set environment variables specific to each source.
+        passwords = kwargs.get('passwords', {})
         if inventory_update.source == 'ec2':
-            env['AWS_ACCESS_KEY_ID'] = kwargs.get('passwords', {}).get('source_username', '')
-            env['AWS_SECRET_ACCESS_KEY'] = kwargs.get('passwords', {}).get('source_password', '')
+            env['AWS_ACCESS_KEY_ID'] = passwords.get('source_username', '')
+            env['AWS_SECRET_ACCESS_KEY'] = passwords.get('source_password', '')
             env['EC2_INI_PATH'] = kwargs.get('private_data_file', '')
         elif inventory_update.source == 'rax':
             env['RAX_CREDS_FILE'] = kwargs.get('private_data_file', '')
@@ -857,48 +865,81 @@ class RunInventoryUpdate(BaseTask):
             # Set this environment variable so the vendored package won't
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
+        elif inventory_update.source == 'vmware':
+            env['VMWARE_HOST'] = passwords.get('source_host', '')
+            env['VMWARE_USER'] = passwords.get('source_username', '')
+            env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
+
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
         return env
 
     def build_args(self, inventory_update, **kwargs):
-        '''
-        Build command line argument list for running inventory import.
-        '''
+        """Build the command line argument list for running an inventory
+        import.
+        """
+        # Get the inventory source and inventory.
         inventory_source = inventory_update.inventory_source
         inventory = inventory_source.group.inventory
+
+        # Piece together the initial command to run via. the shell.
         args = ['awx-manage', 'inventory_import']
         args.extend(['--inventory-id', str(inventory.pk)])
+
+        # Add appropriate arguments for overwrite if the inventory_update
+        # object calls for it.
         if inventory_update.overwrite:
             args.append('--overwrite')
         if inventory_update.overwrite_vars:
             args.append('--overwrite-vars')
         args.append('--source')
-        if inventory_update.source == 'ec2':
-            ec2_path = self.get_path_to('..', 'plugins', 'inventory', 'ec2.py')
-            args.append(ec2_path)
-            args.extend(['--enabled-var', settings.EC2_ENABLED_VAR])
-            args.extend(['--enabled-value', settings.EC2_ENABLED_VALUE])
-            args.extend(['--group-filter', settings.EC2_GROUP_FILTER])
-            args.extend(['--host-filter', settings.EC2_HOST_FILTER])
-            if settings.EC2_EXCLUDE_EMPTY_GROUPS:
+
+        # If this is a cloud-based inventory (e.g. from AWS, Rackspace, etc.)
+        # then we need to set some extra flags based on settings in
+        # Tower.
+        #
+        # These settings are "per-cloud-provider"; it's entirely possible that
+        # they will be different between cloud providers if a Tower user
+        # actively uses more than one.
+        if inventory_update.source in ('ec2', 'rax', 'vmware'):
+            # We need to reference the source's code frequently, assign it
+            # to a shorter variable. :)
+            src = inventory_update.source
+
+            # Get the path to the inventory plugin, and append it to our
+            # arguments.
+            plugin_path = self.get_path_to('..', 'plugins', 'inventory',
+                                           '%s.py' % src)
+            args.append(plugin_path)
+
+            # Add several options to the shell arguments based on the
+            # cloud-provider-specific setting in the Tower configuration.
+            args.extend(['--enabled-var',
+                         getattr(settings, '%s_ENABLED_VAR' % src.upper())])
+            args.extend(['--enabled-value',
+                         getattr(settings, '%s_ENABLED_VALUE' % src.upper())])
+            args.extend(['--group-filter',
+                         getattr(settings, '%s_GROUP_FILTER' % src.upper())])
+            args.extend(['--host-filter',
+                         getattr(settings, '%s_HOST_FILTER' % src.upper())])
+
+            # We might have a flag set to exclude empty groups; if we do,
+            # add that flag to the shell arguments.
+            if getattr(settings, '%s_EXCLUDE_EMPTY_GROUPS' % src.upper()):
                 args.append('--exclude-empty-groups')
-            if settings.EC2_INSTANCE_ID_VAR:
-                args.extend(['--instance-id-var', settings.EC2_INSTANCE_ID_VAR])
-        elif inventory_update.source == 'rax':
-            rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
-            args.append(rax_path)
-            args.extend(['--enabled-var', settings.RAX_ENABLED_VAR])
-            args.extend(['--enabled-value', settings.RAX_ENABLED_VALUE])
-            args.extend(['--group-filter', settings.RAX_GROUP_FILTER])
-            args.extend(['--host-filter', settings.RAX_HOST_FILTER])
-            if settings.RAX_EXCLUDE_EMPTY_GROUPS:
-                args.append('--exclude-empty-groups')
-            if settings.RAX_INSTANCE_ID_VAR:
-                args.extend(['--instance-id-var', settings.RAX_INSTANCE_ID_VAR])
+
+            # We might have a flag for an instance ID variable; if we do,
+            # add it to the shell arguments.
+            if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()):
+                args.extend([
+                    '--instance-id-var',
+                    getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()),
+                ])
+
         elif inventory_update.source == 'file':
             args.append(inventory_update.source_path)
+            
         verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)
         args.append('-v%d' % verbosity)
         if settings.DEBUG:

@@ -347,6 +347,10 @@ RAX_GROUP_FILTER = r'^(?!instance-.+).+$'
 RAX_HOST_FILTER = r'^.+$'
 RAX_EXCLUDE_EMPTY_GROUPS = True
 
+# ----------------
+# -- Amazon EC2 --
+# ----------------
+
 # AWS does not appear to provide pretty region names via any API, so store the
 # list of names here.  The available region IDs will be pulled from boto.
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
@@ -381,6 +385,31 @@ EC2_GROUP_FILTER = r'^(?!i-[a-f0-9]{8,}).+$'
 EC2_HOST_FILTER = r'^.+(?<!rds\.amazonaws\.com)$'
 EC2_EXCLUDE_EMPTY_GROUPS = True
 
+
+# ------------
+# -- VMWare --
+# ------------
+VMWARE_REGION_NAMES = {}
+VMWARE_REGIONS_BLACKLIST = []
+
+# Inventory variable name/values for determining whether a host is
+# active in vSphere.
+VMWARE_ENABLED_VAR = 'status' 
+VMWARE_ENABLED_VALUE = 'POWERED ON'
+
+# Inventory variable name containing the unique instance ID.
+VMWARE_INSTANCE_ID_VAR = 'guest_id'
+
+# Filter for allowed group and host names when importing inventory
+# from EC2.
+VMWARE_GROUP_FILTER = r'^.+$'
+VMWARE_HOST_FILTER = r'^.+$'
+VMWARE_EXCLUDE_EMPTY_GROUPS = True
+
+
+# ---------------------
+# -- Activity Stream --
+# ---------------------
 # Defaults for enabling/disabling activity stream.
 ACTIVITY_STREAM_ENABLED = True
 ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
