@@ -33,7 +33,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
         html += "<div  id=\"dashboard-tab-content\" class=\"tab-content \">\n";
         html += "<div class=\"tab-pane active\" id=\"active-jobs-tab\">\n";
         html += "<div class=\"row search-row\">\n";
-        html += "<div class=\"col-lg-6 col-md-6 col-sm-6\" id=\"active-jobs-search-container\"></div>\n";
+        html += "<div class=\"col-lg-6 col-md-6\" id=\"active-jobs-search-container\"></div>\n";
         html += "</div>\n"; //row
         html += "<div class=\"job-list\" id=\"active-jobs-container\">\n";
         html += "<div id=\"active-jobs\" class=\"job-list-target\"></div>\n";
@@ -120,7 +120,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
      // Set the height of each container and calc max number of rows containers can hold
         function setDashboardJobsHeight() {
             var docw = $(window).width(),
-            available_height, search_row, page_row, height, header, row_height;
+                box_height, available_height, search_row, page_row, height, header, row_height;
 
             available_height = Math.floor(($(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93)/2);
             $('.dashboard-jobs-list-container').height(available_height);
@@ -128,12 +128,31 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
             page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
             header = Math.max($('#completed_jobs_table thead').height(), 41);
             height = Math.floor(available_height) - header - page_row - search_row -30 ;
-            row_height = (docw < 1415) ? 47 : 27;
+            if (docw < 765 && docw >= 493) {
+                row_height = 27;
+            }
+            else if (docw < 493) {
+                row_height = 47;
+            }
+            else if (docw < 865) {
+                row_height = 87;
+            }
+            else if (docw < 925) {
+                row_height = 67;
+            }
+            else if (docw < 1415) {
+                row_height = 47;
+            }
+            else {
+                row_height = 27;
+            }
             max_rows = Math.floor(height / row_height);
-
-            if(max_rows<5){
-                $('.dashboard-jobs-list-container').height(header+page_row+search_row+40+(5*row_height));
-                // $('.dashboard-jobs-list-container').height(500);
+            if (max_rows < 5){
+                box_height = header+page_row + search_row + 40 + (5 * row_height);
+                if (docw < 1140) {
+                    box_height += 40;
+                }
+                $('.dashboard-jobs-list-container').height(box_height);
                 max_rows = 5;
             }
         }

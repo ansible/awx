@@ -23,7 +23,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
 
             // show scope.events[idx]
             function showEvent(idx) {
-                var elem, data = scope.events[idx];
+                var show_tabs = false, elem, data = scope.events[idx];
                 current_event = idx;
 
                 $('#status-form-container').empty();
@@ -41,14 +41,17 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 EventAddTable({ scope: scope, id: 'status-form-container', event: data, section: 'Event' });
 
                 if (EventAddTable({ scope: scope, id: 'results-form-container', event: data, section: 'Results'})) {
+                    show_tabs = true;
                     $('#eventview-tabs li:eq(1)').show();
                 }
 
                 if (EventAddTable({ scope: scope, id: 'timing-form-container', event: data, section: 'Timing' })) {
+                    show_tabs = true;
                     $('#eventview-tabs li:eq(2)').show();
                 }
 
                 if (data.stdout) {
+                    show_tabs = true;
                     $('#eventview-tabs li:eq(3)').show();
                     EventAddPreFormattedText({
                         id: 'stdout-form-container',
@@ -57,6 +60,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 }
 
                 if (data.stderr) {
+                    show_tabs = true;
                     $('#eventview-tabs li:eq(4)').show();
                     EventAddPreFormattedText({
                         id: 'stderr-form-container',
@@ -65,6 +69,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 }
 
                 if (data.traceback) {
+                    show_tabs = true;
                     $('#eventview-tabs li:eq(5)').show();
                     EventAddPreFormattedText({
                         id: 'traceback-form-container',
@@ -72,8 +77,17 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                     });
                 }
 
+                if (!show_tabs) {
+                    $('#eventview-tabs').hide();
+                }
+
                 elem = angular.element(document.getElementById('eventviewer-modal-dialog'));
                 $compile(elem)(scope);
+            }
+
+            function setButtonMargin() {
+                var width = ($('.ui-dialog[aria-describedby=["eventviewer-modal-dialog"] .ui-dialog-buttonpane').innerWidth() / 2) - $('#events-next-button').outerWidth();
+                console.log('width: ' + width);
             }
 
             if (scope.removeModalReady) {
