@@ -47,8 +47,8 @@ if 'django_jenkins' in INSTALLED_APPS:
     JSHINT_CHECKED_FILES = [os.path.join(BASE_DIR, 'ui/static/js'),
                             os.path.join(BASE_DIR, 'ui/static/lib/ansible'),]
 
-# If there is an `/etc/awx/settings.py`, include it.
-include(optional('/etc/awx/settings.py'), scope=locals())
+# If there is an `/etc/tower/settings.py`, include it.
+include(optional('/etc/tower/settings.py'), scope=locals())
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using
