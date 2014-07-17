@@ -19,7 +19,6 @@ function JobsListController ($log, $scope, $compile, $routeParams, ClearScope, B
         choicesCount = 0,
         listCount = 0,
         api_complete = false,
-        event_socket,
         schedule_socket,
         job_socket,
         event_queue = [],
@@ -48,9 +47,9 @@ function JobsListController ($log, $scope, $compile, $routeParams, ClearScope, B
     });
 
     schedule_socket.init();
-    schedule_socket.on("status_change", function(data) {
+    schedule_socket.on("status_change", function() {
         if (api_complete) {
-            schedule_scope.search('schedule');
+            scheduled_scope.search('schedule');
         }
     });
 

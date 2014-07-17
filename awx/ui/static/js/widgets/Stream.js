@@ -331,12 +331,13 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 view = GenerateList,
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 parent_scope = params.scope,
+                scope = parent_scope.$new(),
                 search_iterator = params.search_iterator, // use to get correct current_search_params from local store
                 PreviousSearchParams = (search_iterator) ? Store(search_iterator + '_current_search_params') : Store('CurrentSearchParams'),
                 inventory_name = (params && params.inventory_name) ? params.inventory_name : null,
                 onClose = params.onClose, // optional callback to $emit after AS closes
                 url = (params && params.url) ? params.url : null,
-                type, paths, itm, scope;
+                type, paths, itm;
 
             $rootScope.flashMessage = null;
 
@@ -364,7 +365,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             }
 
             // Add a container for the stream widget
-            $('#tab-content-container').append("<div id=\"stream-container\"><div id=\"stream-content\"></div></div><!-- Stream widget -->");
+            $('#main-view').append("<div id=\"stream-container\"><div id=\"stream-content\"></div></div><!-- Stream widget -->");
 
             StreamBreadCrumbs();
 
@@ -379,7 +380,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             ShowStream();
 
             // Generate the list
-            scope = view.inject(list, { mode: 'edit', id: 'stream-content', searchSize: 'col-lg-3', secondWidget: true, activityStream: true });
+            view.inject(list, { mode: 'edit', id: 'stream-content', searchSize: 'col-lg-3', secondWidget: true, activityStream: true, scope: scope });
 
             // descriptive title describing what AS is showing
             scope.streamTitle = (params && params.title) ? params.title : null;

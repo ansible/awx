@@ -141,9 +141,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     html += "<ul class=\"ansible-breadcrumb\">\n";
                     html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" " + "ng-click=\"closeStream(crumb.path)\">" +
                         "{{ crumb.title }}</a></li>\n";
-                    html += "<li class=\"active\">";
+                    html += "<li class=\"active\"><a href=\"\">";
                     html += list.editTitle;
-                    html += "</li>\n</ul>\n</div>\n";
+                    html += "</a></li>\n</ul>\n</div>\n";
                 }
                 //else if (options.mode !== 'lookup' && (options.breadCrumbs === undefined || options.breadCrumbs)) {
                 else if (options.breadCrumbs) {

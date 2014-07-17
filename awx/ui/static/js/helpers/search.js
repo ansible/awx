@@ -327,7 +327,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                     } else {
                                         scope[iterator + 'SearchParams'] += '&' +
                                             list.fields[scope[iterator + 'SearchField' + modifier]].searchObject +
-                                            '__name__icontains=' +
+                                            ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchObject === 'user') ? '__username__icontains=' : '__name__icontains=' ) +
                                             scope[iterator + 'SearchValue' + modifier];
                                     }
                                 } else {
