@@ -160,6 +160,9 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             }
                         });
                     });
+                },
+                getUrl: function() {
+                    return url;
                 }
             };
         };

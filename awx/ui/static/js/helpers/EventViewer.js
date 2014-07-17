@@ -226,10 +226,12 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                     onOpen: function() {
                         $('#eventview-tabs a:first').tab('show');
                         $('#dialog-ok-button').focus();
-                        if (scope.events.length > 1 && current_event === 0) {
+                        if (scope.events.length > 1 && current_event === 0 && !scope.prev_event_set) {
                             $('#events-prev-button').prop('disabled', true);
                         }
-
+                        if ((current_event === scope.events.length - 1) && !scope.next_event_set) {
+                            $('#events-next-button').prop('disabled', true);
+                        }
                         if (scope.events.length > 1) {
                             setButtonMargin();
                             addSpinner();

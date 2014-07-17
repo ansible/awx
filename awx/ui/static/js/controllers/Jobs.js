@@ -20,24 +20,37 @@ function JobsListController ($log, $scope, $compile, $routeParams, ClearScope, B
         listCount = 0,
         api_complete = false,
         event_socket,
+        schedule_socket,
+        job_socket,
         event_queue = [],
         expecting = 0,
         max_rows;
 
-
-    event_socket =  Socket({
+    job_socket = Socket({
         scope: $scope,
         endpoint: "jobs"
     });
 
-    event_socket.init();
+    job_socket.init();
 
-    event_socket.on("status_changed", function(data) {
+    job_socket.on("status_changed", function(data) {
         if (api_complete) {
             processEvent(data);
         }
         else {
             event_queue.push(data);
+        }
+    });
+
+    schedule_socket = Socket({
+        scope: $scope,
+        endpoint: "schedules"
+    });
+
+    schedule_socket.init();
+    schedule_socket.on("status_change", function(data) {
+        if (api_complete) {
+            schedule_scope.search('schedule');
         }
     });
 

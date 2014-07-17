@@ -8,6 +8,10 @@ angular.module('EventsViewerFormDefinition', [])
     .value('EventsViewerForm', {
 
         fields: {
+            host_name: {
+                label: 'Host',
+                section: 'Event'
+            },
             status: {
                 label: 'Status',
                 section: 'Event'
@@ -18,10 +22,6 @@ angular.module('EventsViewerFormDefinition', [])
             },
             created: {
                 label: 'Created On',
-                section: 'Event'
-            },
-            host_name: {
-                label: 'Host',
                 section: 'Event'
             },
             role: {
