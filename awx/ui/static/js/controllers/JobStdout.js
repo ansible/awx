@@ -68,7 +68,7 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
         if (event_queue > 0) {
             // events happened since the last check
             $log.debug('checking for stdout...');
-            if (loaded_sections.length === 0) {
+            if (loaded_sections.length === 0) { ////this if statement for refresh
                 $log.debug('calling LoadStdout');
                 $scope.$emit('LoadStdout');
             }
@@ -159,6 +159,16 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
                 msg: 'Failed to retrieve job: ' + job_id + '. GET returned: ' + status });
         });
 
+    $scope.refresh = function(){
+        if (loaded_sections.length === 0) { ////this if statement for refresh
+            $log.debug('calling LoadStdout');
+            $scope.$emit('LoadStdout');
+        }
+        else if (live_event_processing) {
+            $log.debug('calling getNextSection');
+            getNextSection();
+        }
+    };
 
     $scope.stdOutScrollToTop = function() {
         // scroll up or back in time toward the beginning of the file

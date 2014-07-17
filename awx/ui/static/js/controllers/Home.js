@@ -23,13 +23,14 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         refresh: {
             mode: 'all',
             awToolTip: "Refresh the page",
-            ngClick: "refresh()"
-        },
-        stream: {
-            ngClick: "showActivity()",
-            awToolTip: "View Activity Stream",
-            mode: 'all'
+            ngClick: "refresh()",
+            ngShow:"socketStatus == 'error'"
         }
+        // stream: {
+        //     ngClick: "showActivity()",
+        //     awToolTip: "View Activity Stream",
+        //     mode: 'all'
+        // }
     };
 
     html = Button({
@@ -38,11 +39,11 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         toolbar: true
     });
 
-    html += Button({
-        btn: buttons.stream,
-        action: 'stream',
-        toolbar: true
-    });
+    // html += Button({
+    //     btn: buttons.stream,
+    //     action: 'stream',
+    //     toolbar: true
+    // });
 
     e = angular.element(document.getElementById('home-list-actions'));
     e.html(html);
@@ -75,7 +76,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         nv.dev=false;
 
         var winHeight = $(window).height(),
-        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 80;
+        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
         $('.graph-container').height(available_height/2);
         // chart.update();
 
@@ -99,7 +100,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             });
         }
         else{
-            $('#dash-host-count-graph').replaceWith("<div id='dash-host-count-graph' class='left-side col-sm-12 col-xs-12'></div>");
+            $('#dash-host-count-graph').remove(); //replaceWith("<div id='dash-host-count-graph' class='left-side col-sm-12 col-xs-12'></div>");
         }
 
 

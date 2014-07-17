@@ -105,7 +105,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 if ($rootScope.jobDetailInterval) {
                     window.clearInterval($rootScope.jobDetailInterval);
                 }
-                $scope.$emit('LoadJob');
+                $scope.$emit('LoadJob'); //this is what is used for the refresh
             }
         }
     });
@@ -1134,6 +1134,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
             job_id: scope.job.id,
             status: status
         });
+    };
+    scope.refresh = function(){
+        $scope.$emit('LoadJob');
     };
 
     scope.editHost = function(id) {

@@ -139,7 +139,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                             ;
 
                                     chart.xAxis
-                                        .axisLabel("Time").showMaxMin(true)
+                                        .axisLabel("Time")//.showMaxMin(true)
                                         .tickFormat(function(d) {
                                         var dx = graphData[0].values[d] && graphData[0].values[d].x || 0;
                                         return dx ? d3.time.format(timeFormat)(new Date(Number(dx+'000'))) : '';
@@ -159,7 +159,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                             .datum(graphData).transition()
                                             .attr('width', width)
                                             .attr('height', height)
-                                            .duration(500)
+                                            .duration(1000)
                                             .call(chart)
                                             .style({
                                                 // 'width': width,

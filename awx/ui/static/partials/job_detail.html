@@ -16,6 +16,7 @@
                     <div class="row">
                         <div class="col-md-12 text-right">
                             <a href="/#/jobs/{{ job_id }}/stdout" id="view-stdout-button" target="_blank" type="button" class="btn btn-primary btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top"><i class="fa fa-external-link"></i></a>
+                            <button type="button" class="btn btn-xs btn-primary ng-hide" ng-click="refresh()" id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" ng-show="socketStatus == 'error'" data-original-title="" title=""><i class="fa fa-refresh fa-lg"></i> </button>
                             <a href="" ng-click="deleteJob()" id="cancel-job-button" ng-show="job_status.status == 'running'" type="button" class="btn btn-primary btn-xs" aw-tool-tip="Cancel" data-placement="top"><i class="fa fa-minus-circle"></i></a>
                             <a href="" ng-click="deleteJob()" id="delete-job-button" ng-show="job_status.status != 'running'" type="button" class="btn btn-primary btn-xs" aw-tool-tip="Delete" data-placement="top"><i class="fa fa-trash-o"></i></a>
                             <a href="" ng-click="relaunchJob()" id="relaunch-job-button" type="button" class="btn btn-primary btn-xs" aw-tool-tip="Relaunch using the same parameters" data-placement="top"><i class="fa fa-rocket"></i></a>
