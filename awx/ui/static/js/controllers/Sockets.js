@@ -91,7 +91,7 @@ function SocketsController ($scope, $compile, ClearScope, Socket) {
         test_scope.messages.push(data);
     });
 
-    schedules_socket.on("status_changed", function(data) {
+    schedules_socket.on("schedule_changed", function(data) {
         schedules_scope.messages.push(data);
     });
 

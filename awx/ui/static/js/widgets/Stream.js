@@ -19,9 +19,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             // Try not to overlap footer. Because stream is positioned absolute, the parent
             // doesn't resize correctly when stream is loaded.
             var sheight = $('#stream-content').height(),
-                theight = parseInt($('#tab-content-container').css('min-height').replace(/px/, '')),
+                theight = parseInt($('#main-view').css('min-height').replace(/px/, '')),
                 height = (theight < sheight) ? sheight : theight;
-            $('#tab-content-container').css({
+            $('#main-view').css({
                 "min-height": height
             });
         };
@@ -79,7 +79,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 stream.detach();
                 stream.empty();
                 stream.unbind();
-                $('#tab-content-container').css({
+                $('#main-view').css({
                     'min-height': 0
                 }); //let the parent height go back to normal
             }, 500);
