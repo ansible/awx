@@ -188,12 +188,12 @@ function JobsListController ($log, $scope, $compile, $routeParams, ClearScope, B
             pageSize: max_rows
         });
 
-        /*$scope.refreshJobs = function() {
+        $scope.refreshJobs = function() {
             queued_scope.search('queued_job');
             running_scope.search('running_job');
             completed_scope.search('completed_job');
             scheduled_scope.search('schedule');
-        };*/
+        };
 
         $(window).resize(_.debounce(function() {
             resizeContainers();
