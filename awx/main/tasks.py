@@ -869,6 +869,9 @@ class RunInventoryUpdate(BaseTask):
             env['VMWARE_HOST'] = passwords.get('source_host', '')
             env['VMWARE_USER'] = passwords.get('source_username', '')
             env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
+        elif inventory_update.source == 'gce':
+            pass
+            # env['GCE_USER']
 
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
@@ -902,7 +905,7 @@ class RunInventoryUpdate(BaseTask):
         # These settings are "per-cloud-provider"; it's entirely possible that
         # they will be different between cloud providers if a Tower user
         # actively uses more than one.
-        if inventory_update.source in ('ec2', 'rax', 'vmware'):
+        if inventory_update.source in ('ec2', 'rax', 'vmware', 'gce'):
             # We need to reference the source's code frequently, assign it
             # to a shorter variable. :)
             src = inventory_update.source

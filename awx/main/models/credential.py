@@ -27,11 +27,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     '''
 
     KIND_CHOICES = [
-        ('ssh', _('Machine')),
-        ('scm', _('Source Control')),
-        ('aws', _('Amazon Web Services')),
-        ('rax', _('Rackspace')),
+        ('ssh',    _('Machine')),
+        ('scm',    _('Source Control')),
+        ('aws',    _('Amazon Web Services')),
+        ('rax',    _('Rackspace')),
         ('vmware', _('VMWare')),
+        ('gce',    _('Google Compute Engine')),
     ]
 
     PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock',

@@ -389,7 +389,6 @@ EC2_EXCLUDE_EMPTY_GROUPS = True
 # ------------
 # -- VMWare --
 # ------------
-VMWARE_REGION_NAMES = {}
 VMWARE_REGIONS_BLACKLIST = []
 
 # Inventory variable name/values for determining whether a host is
@@ -405,6 +404,36 @@ VMWARE_INSTANCE_ID_VAR = 'guest_id'
 VMWARE_GROUP_FILTER = r'^.+$'
 VMWARE_HOST_FILTER = r'^.+$'
 VMWARE_EXCLUDE_EMPTY_GROUPS = True
+
+
+# ---------------------------
+# -- Google Compute Engine --
+# ---------------------------
+
+# It's not possible to get zones in GCE without authenticating, so we
+# provide a list here.
+# Source: https://developers.google.com/compute/docs/zones
+GCE_REGION_CHOICES = [
+    ('us-central1-a', 'US Central (A)'),
+    ('us-central1-b', 'US Central (B)'),
+    ('us-central1-f', 'US Central (F)'),
+    ('europe-west1-a', 'Europe West (A)'),
+    ('europe-west1-b', 'Europe West (B)')
+    ('asia-east1-a', 'Asia East (A)'),
+    ('asia-east1-b', 'Asia East (B)'),
+]
+GCE_REGIONS_BLACKLIST = []
+
+# Inventory variable name/value for determining whether a host is active
+# in Google Compute Engine.
+GCE_ENABLED_VAR = 'status'
+GCE_ENABLED_VALUE = '<???>'
+
+# Filter for allowed group and host names when importing inventory from
+# Google Compute Engine.
+GCE_GROUP_FILTER = r'^.+$'
+GCE_HOST_FILTER = r'^.+$'
+GCE_EXCLUDE_EMPTY_GROUPS = True
 
 
 # ---------------------
