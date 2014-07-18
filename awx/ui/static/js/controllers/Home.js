@@ -25,12 +25,12 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             awToolTip: "Refresh the page",
             ngClick: "refresh()",
             ngShow:"socketStatus == 'error'"
+        },
+        stream: {
+            ngClick: "showActivity()",
+            awToolTip: "View Activity Stream",
+            mode: 'all'
         }
-        // stream: {
-        //     ngClick: "showActivity()",
-        //     awToolTip: "View Activity Stream",
-        //     mode: 'all'
-        // }
     };
 
     html = Button({
@@ -39,11 +39,11 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         toolbar: true
     });
 
-    // html += Button({
-    //     btn: buttons.stream,
-    //     action: 'stream',
-    //     toolbar: true
-    // });
+    html += Button({
+        btn: buttons.stream,
+        action: 'stream',
+        toolbar: true
+    });
 
     e = angular.element(document.getElementById('home-list-actions'));
     e.html(html);

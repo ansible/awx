@@ -183,6 +183,7 @@
         <a href="" id="main_view_user" ng-click="viewCurrentUser()">Account Settings</a></li>
         <a href="" id="main_view_license" ng-click="viewLicense()">View License</a></li>
         <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" id="main_contact_support" target="_blank">Contact Support</a></li>
+        <a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="http://munin-monitoring.org/">Monitor Tower</a></li>
         <a href="#/logout" id="main_logout">Logout</a>
     </nav>
 
@@ -217,6 +218,7 @@
                                <li><a id="main_view_user" href="" ng-click="viewCurrentUser()">Account Settings</a></li>
                                <li><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
                                <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a></li>
+                               <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="http://munin-monitoring.org/">Monitor Tower</a></li>
                                <li class="divider"></li>
                                <li><a id="main_logout" href="#/logout">Logout</a></li>
                             </ul>
@@ -231,6 +233,7 @@
                                <li><a id="main_view_user" href="" ng-click="viewCurrentUser()">Account Settings</a></li>
                                <li><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
                                <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a></li>
+                               <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="http://munin-monitoring.org/">Monitor Tower</a></li>
                                <li class="divider"></li>
                                <li><a id="main_logout" href="#/logout">Logout</a></li>
                             </ul>
