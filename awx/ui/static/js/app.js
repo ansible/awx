@@ -411,7 +411,7 @@ angular.module('Tower', [
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
             Timer, ClearScope, HideStream, Socket) {
 
-            var e, html, sock;
+            var e, html, sock, checkCount;
 
             LoadBasePaths();
 
@@ -468,12 +468,16 @@ angular.module('Tower', [
                     HideStream();
                 }
 
+                // remove any lingering intervals
                 if ($rootScope.jobDetailInterval) {
                     window.clearInterval($rootScope.jobDetailInterval);
                 }
-
                 if ($rootScope.jobStdOutInterval) {
                     window.clearInterval($rootScope.jobStdOutInterval);
+                }
+                if ($rootScope.checkSocketConnectionInterval) {
+                    // use to monitor and restart socket connections
+                    window.clearInterval($rootScope.checkSocketConnectionInterval);
                 }
 
                 // On each navigation request, check that the user is logged in
@@ -541,33 +545,37 @@ angular.module('Tower', [
             function openSocket() {
                 sock = Socket({ scope: $rootScope, endpoint: "jobs" });
                 sock.init();
-                setTimeout(function() {
-                    $rootScope.$apply(function() {
-                        sock.checkStatus();
-                        $log.debug('socket status: ' + $rootScope.socketStatus);
-                    });
-                },2000);
                 sock.on("status_changed", function(data) {
                     $log.debug('Job ' + data.unified_job_id + ' status changed to ' + data.status);
                     $rootScope.$emit('JobStatusChange', data);
                 });
             }
+
             openSocket();
-            /*
-            $rootScope.socketToggle = function() {
-                switch($rootScope.socketStatus) {
-                    case 'ok':
-                    case 'connecting':
-                        sock = null;
-                        $rootScope.socketStatus = 'error';
-                        $rootScope.socketTip = 'Disconnected. Click to connect.';
-                        break;
-                    case 'error':
-                        sock = null;
-                        $rootScope.socketStatus = '';
-                        $rootScope.socketTip = '';
-                        setTimeout(openSocket, 500);
+
+            setTimeout(function() {
+                $rootScope.$apply(function() {
+                    sock.checkStatus();
+                    $log.debug('socket status: ' + $rootScope.socketStatus);
+                });
+            },2000);
+
+            // monitor socket status
+            checkCount = 0;
+            setInterval(function() {
+                if (sock.checkStatus() === 'error' || checkCount > 2) {
+                    // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
+                    sock = null;
+                    $log.debug('attempting new socket connection');
+                    openSocket();
+                    checkCount = 0;
                 }
-            };*/
+                else if (sock.checkStatus() === 'connecting') {
+                    checkCount++;
+                }
+                else {
+                    checkCount = 0;
+                }
+            }, 3000);
         }
     ]);

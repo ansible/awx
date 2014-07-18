@@ -16,30 +16,30 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  *  Place to remove things that might be lingering from a prior tab or view.
  *  This used to destroy the scope, but that causes issues in angular 1.2.x
  */
-.factory('ClearScope', [
-    function () {
-        return function () {
+.factory('ClearScope', [ '$rootScope', function ($rootScope) {
+    return function () {
 
-            $('#form-modal .modal-body').empty();
-            $('#form-modal2 .modal-body').empty();
+        $rootScope.flashMessage = null;
 
-            $('.tooltip').each(function () {
-                $(this).remove();
-            });
+        $('#form-modal .modal-body').empty();
+        $('#form-modal2 .modal-body').empty();
 
-            $('.popover').each(function () {
-                $(this).remove();
-            });
+        $('.tooltip').each(function () {
+            $(this).remove();
+        });
 
-            try {
-                $('#help-modal').dialog('close');
-            } catch (e) {
-                // ignore
-            }
-            $(window).unbind('resize');
-        };
-    }
-])
+        $('.popover').each(function () {
+            $(this).remove();
+        });
+
+        try {
+            $('#help-modal').dialog('close');
+        } catch (e) {
+            // ignore
+        }
+        $(window).unbind('resize');
+    };
+}])
 
 
 /* Empty()

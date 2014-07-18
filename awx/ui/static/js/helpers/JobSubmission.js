@@ -551,15 +551,14 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
                 // Refresh the project list after update request submitted
-                if (scope.refreshJobs) {
-                    Wait('stop');
+                Wait('stop');
+                if (scope.socketStatus === 'error') {
                     Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
-                    'To monitor the update status, refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info');
-                    scope.refreshJobs();
+                        'To monitor the update status, refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info');
+                    if (scope.refresh) {
+                        scope.refresh();
+                    }
                 }
-                //else if (scope.refresh) {
-                //    scope.refresh();
-                //}
             });
 
             if (scope.removePromptForPasswords) {
@@ -619,8 +618,17 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function () {
                 Wait('stop');
-                // No need to do anything else. The caller should be connected to the socket server and
-                // handling real-time updates
+                if (scope.socketStatus === 'error') {
+                    Alert('Sync Started', 'The request to start the inventory sync process was submitted. ' +
+                        'To monitor the status refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info');
+                    if (scope.refreshGroups) {
+                        // inventory detail page
+                        scope.refreshGroups();
+                    }
+                    else if (scope.refresh) {
+                        scope.refresh();
+                    }
+                }
             });
 
             if (scope.removePromptForPasswords) {

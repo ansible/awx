@@ -63,7 +63,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                     if (type.value === project.scm_type) {
                         $scope.projects[i].scm_type = type.label;
                         if (type.label === 'Manual') {
-                            $scope.projects[i].scm_update_tooltip = 'Manaul projects do not require an SCM update';
+                            $scope.projects[i].scm_update_tooltip = 'Manual projects do not require an SCM update';
                             $scope.projects[i].scm_schedule_tooltip = 'Manual projects do not require a schedule';
                             $scope.projects[i].scm_type_class = 'btn-disabled';
                             $scope.projects[i].statusTip = 'Not configured for SCM';
@@ -284,7 +284,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         Rest.setUrl(url);
         Rest.post()
             .success(function () {
-                Alert('SCM Update Cancel', 'Your request to cancel the update was submitted to the task maanger.', 'alert-info');
+                Alert('SCM Update Cancel', 'Your request to cancel the update was submitted to the task manager.', 'alert-info');
                 $scope.refresh();
             })
             .error(function (data, status) {

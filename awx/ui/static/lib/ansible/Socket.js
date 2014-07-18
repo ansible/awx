@@ -127,15 +127,12 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                     // Check connection status
                     var self = this;
                     if (self.socket.socket.connected) {
-                        $log.debug('Socket connected');
                         self.scope.socketStatus = 'ok';
                     }
                     else if (self.socket.socket.connecting || self.socket.socket.reconnecting) {
-                        $log.debug('Socket connecting...');
                         self.scope.socketStatus = 'connecting';
                     }
                     else {
-                        $log.debug('Socket error: connection refused');
                         self.scope.socketStatus = 'error';
                     }
                     self.scope.socketTip = getSocketTip(self.scope.socketStatus);
