@@ -34,8 +34,6 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
 
                 // html += "</div>\n";
 
-
-
                 element = angular.element(document.getElementById(target));
                 element.html(html);
                 $compile(element)(scope);
@@ -89,7 +87,7 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                 }
                 else{
                     winHeight = $(window).height();
-                    available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
+                    available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
                     $('.graph-container:eq(1)').height(available_height/2);
                     $('.host-pie-chart svg').replaceWith('<canvas id="circlecanvas" width="100" height="100"></canvas>');
 

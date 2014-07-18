@@ -15,7 +15,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
 
     ClearScope('home');
 
-    var buttons, html, e, waitCount, loadedCount;
+    var buttons, html, e, waitCount, loadedCount,borderStyles;
 
     // Add buttons to the top of the Home page. We're using lib/ansible/generator_helpers.js-> Buttons()
     // to build buttons dynamically and insure all styling and icons match the rest of the application.
@@ -75,10 +75,17 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
     $scope.removeDashboardReady = $scope.$on('dashboardReady', function (e, data) {
         nv.dev=false;
 
+
+        borderStyles = {"border": "1px solid #A9A9A9",
+            "border-radius": "4px",
+            "padding": "5px",
+            "margin-bottom": "15px"};
+        $('.graph-container').css(borderStyles);
+
         var winHeight = $(window).height(),
-        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93;
+        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
         $('.graph-container').height(available_height/2);
-        // chart.update();
+        // // chart.update();
 
         DashboardCounts({
             scope: $scope,

@@ -122,7 +122,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
             var docw = $(window).width(),
                 box_height, available_height, search_row, page_row, height, header, row_height;
 
-            available_height = Math.floor(($(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 93)/2);
+            available_height = Math.floor(($(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120)/2);
             $('.dashboard-jobs-list-container').height(available_height);
             search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
             page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
