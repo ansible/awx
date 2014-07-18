@@ -418,7 +418,7 @@ GCE_REGION_CHOICES = [
     ('us-central1-b', 'US Central (B)'),
     ('us-central1-f', 'US Central (F)'),
     ('europe-west1-a', 'Europe West (A)'),
-    ('europe-west1-b', 'Europe West (B)')
+    ('europe-west1-b', 'Europe West (B)'),
     ('asia-east1-a', 'Asia East (A)'),
     ('asia-east1-b', 'Asia East (B)'),
 ]
@@ -427,7 +427,7 @@ GCE_REGIONS_BLACKLIST = []
 # Inventory variable name/value for determining whether a host is active
 # in Google Compute Engine.
 GCE_ENABLED_VAR = 'status'
-GCE_ENABLED_VALUE = '<???>'
+GCE_ENABLED_VALUE = 'running'
 
 # Filter for allowed group and host names when importing inventory from
 # Google Compute Engine.

@@ -4,6 +4,8 @@
 # Django
 from django.db import models
 from django.db.models.fields.related import SingleRelatedObjectDescriptor
+from django.utils.translation import ugettext_lazy as _
+
 
 # South
 from south.modelsinspector import add_introspection_rules
@@ -38,3 +40,57 @@ class AutoOneToOneField(models.OneToOneField):
 
 add_introspection_rules([([AutoOneToOneField], [], {})],
                         [r'^awx\.main\.fields\.AutoOneToOneField'])
+
+
+# Copied, flat out, from Django 1.6.
+# Vendored here because Tower is run against Django 1.5.
+#
+# Original:
+#   github.com/django/django/blob/master/django/db/models/fields/__init__.py
+#
+# Django is:
+#   Copyright (c) Django Software Foundation and individual contributors.
+#   All rights reserved.
+#
+# Used under license:
+#   github.com/django/django/blob/master/LICENSE
+class BinaryField(models.Field):
+    description = _("Raw binary data")
+    empty_values = [None, b'']
+
+    def __init__(self, *args, **kwargs):
+        kwargs['editable'] = False
+        super(BinaryField, self).__init__(*args, **kwargs)
+        if self.max_length is not None:
+            self.validators.append(validators.MaxLengthValidator(self.max_length))
+
+    def get_internal_type(self):
+        return "BinaryField"
+
+    def get_default(self):
+        if self.has_default() and not callable(self.default):
+            return self.default
+        default = super(BinaryField, self).get_default()
+        if default == '':
+            return b''
+        return default
+
+    def get_db_prep_value(self, value, connection, prepared=False):
+        value = super(BinaryField, self).get_db_prep_value(value, connection, prepared)
+        if value is not None:
+            return connection.Database.Binary(value)
+        return value
+
+    def value_to_string(self, obj):
+        """Binary data is serialized as base64"""
+        return b64encode(force_bytes(self._get_val_from_obj(obj))).decode('ascii')
+
+    def to_python(self, value):
+        # If it's a string, it should be base64-encoded data
+        if isinstance(value, six.text_type):
+            return six.memoryview(b64decode(force_bytes(value)))
+        return value
+
+
+add_introspection_rules([([BinaryField], [], {})],
+                        [r'^awx\.main\.fields\.BinaryField'])

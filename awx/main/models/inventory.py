@@ -810,6 +810,17 @@ class InventorySourceOptions(BaseModel):
         regions.insert(0, ('ALL', 'All'))
         return regions
 
+    @classmethod
+    def get_gce_region_choices(self):
+        """Return a complete list of regions in GCE, as a list of
+        two-tuples.
+        """
+        # It's not possible to get a list of regions from GCE without
+        # authenticating first.  Therefore, use a list from settings.
+        regions = list(getattr(settings, 'GCE_REGION_CHOICES', []))
+        regions.insert(0, ('all', 'All'))
+        return regions
+
     def clean_credential(self):
         if not self.source:
             return None

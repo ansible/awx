@@ -13,10 +13,25 @@ from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
 
 # AWX
+from awx.main import storage
+from awx.main.fields import BinaryField
 from awx.main.utils import decrypt_field
 from awx.main.models.base import *
 
 __all__ = ['Credential']
+
+
+class PEM(models.Model):
+    """Model representing a PEM p12 private key created with openssl.
+
+    These are notably used as credentials for authenticating to Google
+    services, and Tower uses them for Google Compute Engine.
+    """
+    filename = models.CharField(max_length=100, unique=True)
+    contents = BinaryField()
+
+    class Meta:
+        app_label = 'main'
 
 
 class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
@@ -36,7 +51,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     ]
 
     PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock',
-                       'sudo_password', 'vault_password')
+                       'sudo_password', 'vault_password', 'pem_file')
 
     class Meta:
         app_label = 'main'
@@ -121,6 +136,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         blank=True,
         default='',
         help_text=_('Vault password (or "ASK" to prompt the user).'),
+    )
+    pem_file = models.FileField(
+        blank=True,
+        null=True,
+        upload_to='irrelevant',
+        storage=storage.DatabaseStorage(PEM),
     )
 
     @property
@@ -304,7 +325,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         # If update_fields has been specified, add our field names to it,
         # if hit hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        cloud = self.kind in ('aws', 'rax')
+        cloud = self.kind in ('aws', 'rax', 'gce', 'vmware', 'azure')
         if self.cloud != cloud:
             self.cloud = cloud
             if 'cloud' not in update_fields:
