@@ -797,13 +797,16 @@ class InventoryTest(BaseTest):
         h_c.groups.add(g_c)
         h_d = i_a.hosts.create(name='d', variables=json.dumps({'d-vars': 'ddd'}))
         h_d.groups.add(g_d)
-        
+        # Add another host not in any groups.
+        h_z = i_a.hosts.create(name='z', variables=json.dumps({'z-vars': 'zzz'}))
+
         # Old, slow 1.2 way.
         url = reverse('api:inventory_script_view', args=(i_a.pk,))
         with self.current_user(self.super_django_user):
             response = self.get(url, expect=200)
         self.assertTrue('all' in response)
         self.assertEqual(response['all']['vars'], i_a.variables_dict)
+        self.assertEqual(response['all']['hosts'], ['z'])
         for g in i_a.groups.all():
             self.assertTrue(g.name in response)
             self.assertEqual(response[g.name]['vars'], g.variables_dict)
@@ -818,11 +821,17 @@ class InventoryTest(BaseTest):
                 response = self.get(h_url, expect=200)
             self.assertEqual(response, h.variables_dict)
 
+        # Now add localhost to the inventory.
+        h_l = i_a.hosts.create(name='localhost', variables=json.dumps({'ansible_connection': 'local'}))
+
         # New 1.3 way.
         url = reverse('api:inventory_script_view', args=(i_a.pk,))
         url = '%s?hostvars=1' % url
         with self.current_user(self.super_django_user):
             response = self.get(url, expect=200)
+        self.assertTrue('all' in response)
+        self.assertEqual(response['all']['vars'], i_a.variables_dict)
+        self.assertEqual(response['all']['hosts'], ['localhost', 'z'])
         self.assertTrue('_meta' in response)
         self.assertTrue('hostvars' in response['_meta'])
         for h in i_a.hosts.all():

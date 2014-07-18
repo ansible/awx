@@ -1070,8 +1070,15 @@ class InventoryScriptView(RetrieveAPIView):
         else:
             data = SortedDict()
             if self.object.variables_dict:
-                data['all'] = SortedDict()
-                data['all']['vars'] = self.object.variables_dict
+                all_group = data.setdefault('all', SortedDict())
+                all_group['vars'] = self.object.variables_dict
+
+            # Add hosts without a group to the all group.
+            groupless_hosts_qs = self.object.hosts.filter(groups__isnull=True, **hosts_q).order_by('name')
+            groupless_hosts = list(groupless_hosts_qs.values_list('name', flat=True))
+            if groupless_hosts:
+                all_group = data.setdefault('all', SortedDict())
+                all_group['hosts'] = groupless_hosts
 
             # Build in-memory mapping of groups and their hosts.
             group_hosts_kw = dict(group__inventory_id=self.object.id, group__active=True,
@@ -1120,8 +1127,10 @@ class InventoryScriptView(RetrieveAPIView):
                                                      **hosts_q)
             localhosts = list(localhosts_qs.values_list('name', flat=True))
             if localhosts:
-                data.setdefault('all', SortedDict())
-                data['all']['hosts'] = localhosts
+                all_group = data.setdefault('all', SortedDict())
+                all_group_hosts = all_group.get('hosts', [])
+                all_group_hosts.extend(localhosts)
+                all_group['hosts'] = sorted(set(all_group_hosts))
 
         return Response(data)
 
