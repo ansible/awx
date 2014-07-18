@@ -105,7 +105,7 @@ class Schedule(CommonModel):
             self.dtend = make_aware(datetime.datetime.strptime(until_date, "%Y%m%dT%H%M%SZ"), get_default_timezone())
         if 'count' in self.rrule.lower():
             self.dtend = future_rs[-1]
-        emit_websocket_notification('/socket.io/schedules', 'schedule_change', dict(id=self.id))
+        emit_websocket_notification('/socket.io/schedules', 'schedule_changed', dict(id=self.id))
         with ignore_inventory_computed_fields():
             self.unified_job_template.update_computed_fields()
 
