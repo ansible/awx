@@ -198,11 +198,11 @@
                       <span class="icon-bar"></span>
                       <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#home"><img id="ansible-brand-logo" src="{{ STATIC_URL }}img/tower_console_bug_black.png" /></a>
+                    <a class="navbar-brand" href="#home"><img id="ansible-brand-logo" src="{{ STATIC_URL }}img/tower2-logominimal.png" /></a>
                 </div>
                 <div class="navbar-collapse collapse" id="main-navbar-collapse">
                     <ul class="nav navbar-nav" id="ansible-main-menu">
-                        <li id="home" class="active"><a href="#home" id="main_home_link" >Home</a></li>
+                        <!--<li id="home" class="active"><a href="#home" id="main_home_link" >Home</a></li>-->
                         <li id="organizations"><a href="#organizations" id="main_organizations_link">Organizations</a></li>
                         <li id="users"><a href="#users" id="main_users_link">Users</a></li>
                         <li id="teams"><a href="#teams" id="main_teams_link">Teams</a></li>
@@ -263,8 +263,8 @@
                   <div class="login-alert" ng-show="(sessionExpired == true)">Your session timed out due to inactivity. Please sign in.</div>
                   <form id="login-form" name="loginForm" class="form-horizontal" autocomplete="off" novalidate >
                       <div class="form-group">
-                          <label class="control-label col-lg-3 col-md-3 col-sm-3 prepend-asterisk">Username</label>
-                          <div class="col-lg-9 col-md-9 col-sm-9">
+                          <label class="control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk">Username</label>
+                          <div class="col-md-8 col-sm-8 col-xs-9">
                               <input type="text" name="login_username" class="form-control" ng-model="login_username"
                                   id="login-username" autocomplete="off" required>
                               <div class="error" ng-show="loginForm.login_username.$dirty && loginForm.login_username.$error.required">A value is required!</div>
@@ -272,8 +272,8 @@
                           </div>
                       </div>
                       <div class="form-group">
-                          <label class="control-label col-md-3 col-sm-3 prepend-asterisk">Password</label>
-                          <div class="col-md-9 col-sm-9">
+                          <label class="control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk">Password</label>
+                          <div class="col-md-8 col-sm-8 col-xs-9">
                               <input type="password" name="login_password" id="login-password" class="form-control"
                                   ng-model="login_password" required autocomplete="off">
                               <div class="error" ng-show="loginForm.login_password.$dirty && loginForm.login_password.$error.required">A value is required!</div>
@@ -436,7 +436,7 @@
   <script src="{{ STATIC_URL }}lib/codemirror/addon/edit/matchbrackets.js"></script>
   <script src="{{ STATIC_URL }}lib/codemirror/addon/selection/active-line.js"></script>
   <script src="{{ STATIC_URL }}lib/scrollto/lib/jquery-scrollto.js"></script>
-  <script src="{{ STATIC_URL }}lib/socket.io-client/dist/socket.io.js"></script>
+  <script src="{{ STATIC_URL }}lib/socket.io-client/dist/socket.io.min.js"></script>
   <script src="{{ STATIC_URL }}lib/d3js/build/d3.v3.min.js"></script>
   <script src="{{ STATIC_URL }}lib/novus-nvd3/nv.d3.min.js"></script>
   <script src="{{ STATIC_URL }}lib/d3Donut/d3Donut.js"></script>
