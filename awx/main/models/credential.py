@@ -14,24 +14,10 @@ from django.core.urlresolvers import reverse
 
 # AWX
 from awx.main import storage
-from awx.main.fields import BinaryField
 from awx.main.utils import decrypt_field
 from awx.main.models.base import *
 
 __all__ = ['Credential']
-
-
-class PEM(models.Model):
-    """Model representing a PEM p12 private key created with openssl.
-
-    These are notably used as credentials for authenticating to Google
-    services, and Tower uses them for Google Compute Engine.
-    """
-    filename = models.CharField(max_length=100, unique=True)
-    contents = BinaryField()
-
-    class Meta:
-        app_label = 'main'
 
 
 class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
@@ -51,7 +37,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     ]
 
     PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock',
-                       'sudo_password', 'vault_password', 'pem_file')
+                       'sudo_password', 'vault_password')
 
     class Meta:
         app_label = 'main'
@@ -136,12 +122,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         blank=True,
         default='',
         help_text=_('Vault password (or "ASK" to prompt the user).'),
-    )
-    pem_file = models.FileField(
-        blank=True,
-        null=True,
-        upload_to='irrelevant',
-        storage=storage.DatabaseStorage(PEM),
     )
 
     @property
