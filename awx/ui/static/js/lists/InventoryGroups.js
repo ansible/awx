@@ -22,7 +22,7 @@ angular.module('InventoryGroupsDefinition', [])
                 key: true,
                 ngClick: "groupSelect(group.id)",
                 columnClick: "groupSelect(group.id)",
-                columnClass: 'col-lg-10 col-md-10 col-sm-10 col-xs-7'
+                columnClass: 'col-lg-8 col-md-8 col-sm-8 col-xs-6'
             },
             source: {
                 label: 'Source',
@@ -99,7 +99,7 @@ angular.module('InventoryGroupsDefinition', [])
 
         fieldActions: {
 
-            columnClass: 'col-lg-2 col-md-2 col-sm-2 col-xs-5',
+            columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6 text-right',
             label: false,
 
             sync_status: {
