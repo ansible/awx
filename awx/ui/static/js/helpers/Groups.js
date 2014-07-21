@@ -1027,6 +1027,15 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 callback: 'choicesReadyGroup'
             });
 
+            GetChoices({
+                scope: sources_scope,
+                url: GetBasePath('inventory_sources'),
+                field: 'source_regions',
+                variable: 'gce_regions',
+                choice_name: 'gce_region_choices',
+                callback: 'choicesReadyGroup'
+            });
+
             Wait('start');
 
             if (parent_scope.removeAddTreeRefreshed) {

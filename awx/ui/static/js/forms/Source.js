@@ -47,7 +47,7 @@ angular.module('SourceFormDefinition', [])
             source_regions: {
                 label: 'Regions',
                 type: 'text',
-                ngShow: "source && (source.value == 'rax' || source.value == 'ec2')",
+                ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce')",
                 addRequired: false,
                 editRequired: false,
                 awMultiselect: 'source_region_choices',

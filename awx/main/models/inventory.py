@@ -736,6 +736,7 @@ class InventorySourceOptions(BaseModel):
         ('file', _('Local File, Directory or Script')),
         ('rax', _('Rackspace Cloud Servers')),
         ('ec2', _('Amazon EC2')),
+        ('gce', _('Google Compute Engine')),
     ]
 
     class Meta:
@@ -826,13 +827,15 @@ class InventorySourceOptions(BaseModel):
             return None
         cred = self.credential
         if cred:
-            if self.source == 'ec2' and cred.kind != 'aws':
-                raise ValidationError('Credential kind must be "aws" for an '
-                                      '"ec2" source')
-            if self.source == 'rax' and cred.kind != 'rax':
-                raise ValidationError('Credential kind must be "rax" for a '
-                                    '"rax" source')
-        elif self.source in ('ec2', 'rax'):
+            # If a credential was provided, it's important that it matches
+            # the actual inventory source being used (Amazon requires Amazon
+            # credentials; Rackspace requires Rackspace credentials; etc...)
+            if self.source.replace('ec2', 'awx') != cred.kind:
+                raise ValidationError(
+                    'Cloud-based inventory sources (such as %s) require '
+                    'credentials for the matching cloud service.' % self.source
+                )
+        elif self.source in ('ec2', 'rax', 'gce'):
             raise ValidationError('Credential is required for a cloud source')
         return cred
 
