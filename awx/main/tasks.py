@@ -828,16 +828,20 @@ class RunInventoryUpdate(BaseTask):
             return f.getvalue()
 
     def build_passwords(self, inventory_update, **kwargs):
-        '''
-        Build a dictionary of passwords inventory sources.
-        '''
+        """Build a dictionary of authentication/credential information for
+        an inventory source.
+
+        This dictionary is used by `build_env`, below.
+        """
         passwords = super(RunInventoryUpdate, self).build_passwords(inventory_update,
                                                                     **kwargs)
         credential = inventory_update.credential
         if credential:
-            passwords['source_username'] = credential.username
-            passwords['source_password'] = decrypt_field(credential, 'password')
-            passwords['source_host'] = credential.host
+            for subkey in ('username', 'host', 'project'):
+                passwords['source_%s' % subkey] = getattr(credential, subkey)
+            for passkey in ('password', 'ssh_key_data'):
+                k = 'source_%s' % subkey
+                passwords[k] = decrypt_field(credential, subkey)
         return passwords
 
     def build_env(self, inventory_update, **kwargs):
@@ -854,6 +858,13 @@ class RunInventoryUpdate(BaseTask):
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
 
         # Set environment variables specific to each source.
+        #
+        # These are set here and then read in by the various Ansible inventory
+        # modules, which will actually do the inventory sync.
+        #
+        # The inventory modules are vendored in Tower in the
+        # `awx/plugins/inventory` directory; those files should be kept in
+        # sync with those in Ansible core at all times.
         passwords = kwargs.get('passwords', {})
         if inventory_update.source == 'ec2':
             env['AWS_ACCESS_KEY_ID'] = passwords.get('source_username', '')
@@ -870,9 +881,41 @@ class RunInventoryUpdate(BaseTask):
             env['VMWARE_USER'] = passwords.get('source_username', '')
             env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
         elif inventory_update.source == 'gce':
-            pass
-            # env['GCE_USER']
+            env['GCE_EMAIL'] = passwords.get('source_username', '')
+            env['GCE_PROJECT'] = passwords.get('source_project', '')
 
+            # I am intentionally misnaming this environment variable here.
+            #
+            # Here's what is going on:
+            # The GCE driver provided by libcloud takes two positional
+            # arguments that are usually a bogus "email address" provided
+            # by Google Developer Center, followed by a path to a PEM key
+            # that you create by downloading a P12 file, performing an 
+            # ancient druidic ritual at Stonehenge in the light of a full
+            # moon, memorizing Beowulf in Middle English, and then standing
+            # on your head, Cheshire-Cat-style, for 42 minutes.
+            #
+            # We're not going to use PEM files in Tower, because we don't
+            # want to do the file upload for them (and because I left my copy
+            # of Middle English Beowulf in my other laptop bag...hate it when
+            # that happens...).
+            #
+            # It turns out that you can also send an RSA private key, which
+            # is perfect for us, because we already have that concept for
+            # our credentials. You simply provide the RSA key in lieu of the
+            # path to the PEM file, and everything in libcloud just works.
+            # Naturally, libcloud doesn't actually document this (I determined
+            # it by spelunking in its code).
+            #
+            # So, why the misnamed environment variable? Because the Ansible
+            # inventory module expects a PEM key path, and I don't necessarily
+            # want to introduce this epic confusion into a public module.
+            # The path of least resistance is simply to use a misleading
+            # environment variable at this point and call it out, and all
+            # the subsequent steps will just work. Users of just the inventory
+            # module can provide a PEM file path to the environment variable
+            # as expected.
+            env['GCE_PEM_FILE_PATH'] = passwords.get('source_ssh_key_data', '')
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
