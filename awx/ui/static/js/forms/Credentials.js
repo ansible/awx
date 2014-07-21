@@ -265,6 +265,14 @@ angular.module('CredentialFormDefinition', [])
                 associated: 'sudo_password',
                 autocomplete: false
             },
+            "project": {
+                label: "Project",
+                type: 'text',
+                ngShow: "kind.value == 'gce'",
+                addRequired: false,
+                editRequired: false,
+                autocomplete: false
+            },
             "vault_password": {
                 label: "Vault Password",
                 type: 'password',
