@@ -193,9 +193,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
 
     def _validate_ssh_private_key(self, data):
         validation_error = ValidationError('Invalid SSH private key')
-        begin_re = re.compile(r'^(-{4,})\s*?BEGIN\s([A-Z0-9]+?)\sPRIVATE\sKEY\s*?(-{4,})$')
+        begin_re = re.compile(r'^(-{4,})\s*BEGIN\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})$')
         header_re = re.compile(r'^(.+?):\s*?(.+?)(\\??)$')
-        end_re = re.compile(r'^(-{4,})\s*?END\s([A-Z0-9]+?)\sPRIVATE\sKEY\s*?(-{4,})$')
+        end_re = re.compile(r'^(-{4,})\s*END\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})$')
         lines = data.strip().splitlines()
         if not lines:
             raise validation_error

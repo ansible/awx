@@ -208,7 +208,7 @@ angular.module('CredentialFormDefinition', [])
             "ssh_key_data": {
                 labelBind: 'sshKeyDataLabel',
                 type: 'textarea',
-                ngShow: "kind.value == 'ssh' || kind.value == 'scm'",
+                ngShow: "kind.value == 'ssh' || kind.value == 'scm' || kind.value == 'gce'",
                 addRequired: false,
                 editRequired: false,
                 'class': 'ssh-key-field',
