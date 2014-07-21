@@ -91,6 +91,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         help_text=_('Password for this credential (or "ASK" to prompt the '
                     'user for machine credentials).'),
     )
+    project = models.CharField(
+        blank=True,
+        default='',
+        max_length=100,
+        verbose_name=_('Project'),
+        help_text=_('The identifier for the project.'),
+    )
     ssh_key_data = models.TextField(
         blank=True,
         default='',
