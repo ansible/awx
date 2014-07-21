@@ -3,7 +3,7 @@
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-import os, datetime, glob, sys
+import os, datetime, glob, sys, shutil
 from distutils import log
 from setuptools import setup, find_packages
 from setuptools.command.sdist import sdist as _sdist
@@ -18,8 +18,10 @@ homedir = "/var/lib/awx"
 sharedir = "/usr/share/awx"
 if os.path.exists("/etc/debian_version"):
     webconfig  = "/etc/apache2/conf.d"
+    shutil.copy("config/awx-munin-ubuntu.conf", "config/awx-munin.conf")
 else:
     webconfig  = "/etc/httpd/conf.d"
+    shutil.copy("config/awx-munin-el.conf", "config/awx-munin.conf")
 
 #####################################################################
 # Helper Functions
@@ -194,6 +196,7 @@ setup(
                                     ]),
             ("%s" % webconfig,      ["config/awx-httpd-80.conf",
                                      "config/awx-httpd-443.conf",
+                                     "config/awx-munin.conf",
                                     ]),
             ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh"]),
         ]
