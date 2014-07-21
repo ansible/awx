@@ -25,44 +25,65 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
         page_size = 500,
         lastScrollTop = 0,
         st,
-        direction;
+        direction,
+        checkCount = 0;;
 
-    status_socket = Socket({
-        scope: $scope,
-        endpoint: "jobs"
-    });
-    status_socket.init();
-    status_socket.on("status_changed", function(data) {
-        if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10) && $scope.job) {
-            $scope.job.status = data.status;
-            if (data.status === 'failed' || data.status === 'canceled' ||
-                    data.status === 'error' || data.status === 'successful') {
-                if ($rootScope.jobStdOutInterval) {
-                    window.clearInterval($rootScope.jobStdOutInterval);
-                }
-                if (live_event_processing) {
-                    if (loaded_sections.length === 0) {
-                        $scope.$emit('LoadStdout');
+
+    function openSockets() {
+        status_socket = Socket({
+            scope: $scope,
+            endpoint: "jobs"
+        });
+        status_socket.init();
+        status_socket.on("status_changed", function(data) {
+            if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10) && $scope.job) {
+                $scope.job.status = data.status;
+                if (data.status === 'failed' || data.status === 'canceled' ||
+                        data.status === 'error' || data.status === 'successful') {
+                    if ($rootScope.jobStdOutInterval) {
+                        window.clearInterval($rootScope.jobStdOutInterval);
                     }
-                    else {
-                        getNextSection();
+                    if (live_event_processing) {
+                        if (loaded_sections.length === 0) {
+                            $scope.$emit('LoadStdout');
+                        }
+                        else {
+                            getNextSection();
+                        }
                     }
+                    live_event_processing = false;
                 }
-                live_event_processing = false;
             }
-        }
-    });
+        });
+        event_socket = Socket({
+            scope: $scope,
+            endpoint: "job_events"
+        });
+        event_socket.init();
+        event_socket.on("job_events-" + job_id, function() {
+            if (api_complete) {
+                event_queue++;
+            }
+        });
+    }
+    openSockets();
 
-    event_socket = Socket({
-        scope: $scope,
-        endpoint: "job_events"
-    });
-    event_socket.init();
-    event_socket.on("job_events-" + job_id, function() {
-        if (api_complete) {
-            event_queue++;
+    $rootScope.checkSocketConnectionInterval = setInterval(function() {
+        if (status_socket.checkStatus() === 'error' || checkCount > 2) {
+            // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
+            $log.debug('stdout page: initializing and restarting socket connections');
+            status_socket = null;
+            event_socket = null;
+            openSockets();
+            checkCount = 0;
         }
-    });
+        else if (status_socket.checkStatus() === 'connecting') {
+            checkCount++;
+        }
+        else {
+            checkCount = 0;
+        }
+    }, 3000);
 
     $rootScope.jobStdOutInterval = setInterval( function() {
         if (event_queue > 0) {

@@ -21,7 +21,7 @@ function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, C
         api_complete = false,
         schedule_socket,
         job_socket,
-        max_rows, checkCount;
+        max_rows, checkCount=0;
 
     function openSockets() {
         job_socket = Socket({

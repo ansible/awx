@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/lib/codemirror.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/theme/elegant.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.css" />
-  <!-- link rel="stylesheet" href="{{ STATIC_URL }}lib/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.css" -->
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/novus-nvd3/nv.d3.css"  type="text/css">
 
   {% if settings.USE_MINIFIED_JS %}
@@ -199,10 +198,11 @@
                       <span class="icon-bar"></span>
                     </button>
                     <a class="navbar-brand" href="#home"><img id="ansible-brand-logo" src="{{ STATIC_URL }}img/tower2-logominimal.png" /></a>
+                    <div id="ansible-list-title"></div> <!-- title to show on list pages when menu collapses. value set in app.js -->
                 </div>
                 <div class="navbar-collapse collapse" id="main-navbar-collapse">
                     <ul class="nav navbar-nav" id="ansible-main-menu">
-                        <!--<li id="home" class="active"><a href="#home" id="main_home_link" >Home</a></li>-->
+                        <!-- <li id="home" class="active"><a href="#home" id="main_home_link" >Home</a></li> -->
                         <li id="organizations"><a href="#organizations" id="main_organizations_link">Organizations</a></li>
                         <li id="users"><a href="#users" id="main_users_link">Users</a></li>
                         <li id="teams"><a href="#teams" id="main_teams_link">Teams</a></li>

@@ -442,13 +442,23 @@ angular.module('Tower', [
 
             function activateTab() {
                 // Make the correct tab active
-                var base = $location.path().replace(/^\//, '').split('/')[0];
+                var base = $location.path().replace(/^\//, '').split('/')[0],
+                    urlDepth = $location.path().replace(/^\//, '').split('/').length;
+
                 if (base === '') {
                     base = 'home';
                 } else {
                     //base.replace(/\_/g, ' ');
                     base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
                 }
+
+                if (urlDepth === 1 && base !== 'home') {
+                    $('#ansible-list-title').html('<strong>' + base.replace(/\_/,' ') + '</strong>');
+                }
+                else {
+                    $('#ansible-list-title').empty();
+                }
+
                 $('#ansible-main-menu li').each(function() {
                     $(this).removeClass('active');
                 });

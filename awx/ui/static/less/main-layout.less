@@ -16,7 +16,7 @@ html {
 body {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
-    padding-top: 60px;
+    padding-top: 75px;
     color: @black;
 }
 
@@ -46,6 +46,10 @@ body {
     }
 }
 
+#ansible-list-title {
+    display: none;
+}
+
 #content-container {
     margin-top: 40px;
 }
@@ -72,6 +76,14 @@ body {
         .collapsed-option {
             display: block;
         }
+    }
+    #ansible-list-title {
+        display: inline-block;
+        position: relative;
+        top: 1px;
+        left: 10px;
+        color: @black;
+        text-transform:capitalize;
     }
     #account-menu {
         display: none;
