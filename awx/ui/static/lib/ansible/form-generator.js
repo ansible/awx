@@ -1281,7 +1281,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                                 // Set default color and label for Save and Reset
                                 if (btn === 'save') {
                                     button.label = 'Save';
-                                    button['class'] = 'btn-success';
+                                    button['class'] = 'btn-primary';
                                 }
                                 if (btn === 'reset') {
                                     button.label = 'Reset';
