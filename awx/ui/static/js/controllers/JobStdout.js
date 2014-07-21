@@ -26,7 +26,7 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
         lastScrollTop = 0,
         st,
         direction,
-        checkCount = 0;;
+        checkCount = 0;
 
 
     function openSockets() {
