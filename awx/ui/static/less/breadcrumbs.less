@@ -5,10 +5,7 @@
  *
  *  custom breadcrumbs
  *
- * JT-- 7/21/14 -- I've changed the breadcrumbs to a grey scheme.
- * I used the grey defined in ansible-ui.less and used a lighter shade
- * of the grey for the  active breadcrumbs and an even lighter shade
- * for the other breadcrumbs. Active= #C3C3C3; Other B.C's = #EEEEEE;
+ * JT-- 7/22/14 -- changed the breadcrumbs to be all white with grey outline
  *
  */
 
@@ -29,21 +26,19 @@
     font-weight: normal;
     text-decoration: none;
     padding: 3px 8px 3px 20px;
-    background: #EEEEEE;                   /* fallback color */
+    background: @white;                   /* fallback color */
 
     position: relative;
     left: 0;
     top: 0;
     display: block;
-    /*
     border-style: solid;
     border-color: @grey;
     border-width: thin;
-    */
     float: left;
 }
 .ansible-breadcrumb li.active a {
-    background: #C3C3C3;
+    background: @white;
     color: @black;
     font-weight: normal;
 }
@@ -54,7 +49,7 @@
     height: 0;
     border-top: 13px dashed transparent;           /* Go big on the size, and let overflow hide */
     border-bottom: 13px dashed transparent;
-    border-left: 10px solid #EEEEEE;
+    border-left: 10px solid @white;
     position: absolute;
     top: 50%;
     margin-top: -13px;
@@ -62,7 +57,7 @@
     z-index: 2;
 }
 .ansible-breadcrumb li.active a:after {
-    border-left: 13px solid #C3C3C3
+    border-left: 10px solid @white
 }
 .ansible-breadcrumb li a:before {
     content: " ";
@@ -71,7 +66,7 @@
     height: 0;
     border-top: 13px dashed transparent;
     border-bottom: 13px dashed transparent;
-    border-left: 11px solid @white;
+    border-left: 11px solid @grey;
     position: absolute;
     top: 50%;
     margin-top: -13px;
