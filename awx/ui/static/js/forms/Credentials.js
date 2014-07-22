@@ -143,7 +143,7 @@ angular.module('CredentialFormDefinition', [])
                 type: 'text',
                 ngShow: "kind.value && kind.value !== 'aws'",
                 awRequiredWhen: {
-                    variable: 'rackspace_required',
+                    variable: 'username_required',
                     init: false
                 },
                 autocomplete: false
@@ -209,6 +209,10 @@ angular.module('CredentialFormDefinition', [])
                 labelBind: 'sshKeyDataLabel',
                 type: 'textarea',
                 ngShow: "kind.value == 'ssh' || kind.value == 'scm' || kind.value == 'gce'",
+                awRequiredWhen: {
+                    variable: 'key_required',
+                    init: true
+                },
                 addRequired: false,
                 editRequired: false,
                 'class': 'ssh-key-field',
@@ -269,6 +273,10 @@ angular.module('CredentialFormDefinition', [])
                 label: "Project",
                 type: 'text',
                 ngShow: "kind.value == 'gce'",
+                awRequiredWhen: {
+                    variable: 'project_required',
+                    init: false
+                },
                 addRequired: false,
                 editRequired: false,
                 autocomplete: false

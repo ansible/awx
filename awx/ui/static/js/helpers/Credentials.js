@@ -24,6 +24,9 @@ angular.module('CredentialsHelper', ['Utilities'])
             scope.aws_required = false;
             scope.rackspace_required = false;
             scope.sshKeyDataLabel = 'SSH Private Key';
+            scope.username_required = false;                        // JT-- added username_required b/c mutliple 'kinds' need username to be required (GCE)
+            scope.key_required = false;                                 // JT -- doing the same for key and project
+            scope.project_required = false;
 
             if (!Empty(scope.kind)) {
                 // Apply kind specific settings
@@ -33,6 +36,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                     break;
                 case 'rax':
                     scope.rackspace_required = true;
+                    scope.username_required = true;
                     break;
                 case 'ssh':
                     scope.usernameLabel = 'SSH Username';
@@ -43,6 +47,9 @@ angular.module('CredentialsHelper', ['Utilities'])
                 case 'gce':
                     scope.usernameLabel = 'Email Address';
                     scope.sshKeyDataLabel = 'RSA Private Key';
+                    scope.username_required = true;
+                    scope.key_required = true;
+                    scope.project_required = true;
                     break;
                 }
             }
