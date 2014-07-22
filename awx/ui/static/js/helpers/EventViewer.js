@@ -146,7 +146,6 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
             scope.removeEventReady = scope.$on('EventReady', function(e, data) {
                 var btns;
                 scope.events = data;
-
                 // find and show the selected event
                 data.every(function(row, idx) {
                     if (parseInt(row.id,10) === parseInt(event_id,10)) {
@@ -412,7 +411,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                                     ">" + obj[key] + "</a>";
                             }
                             else {
-                                html += obj[key];
+                                html += "<span ng-non-bindable>" + obj[key] + "</span>";
                             }
 
                             html += "</td></tr>\n";
@@ -454,7 +453,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 fld_id = params.fld_id,
                 html;
             html = "<div class=\"form-group\">\n" +
-                "<textarea id=\"" + fld_id + "\" class=\"form-control mono-space\" rows=\"12\" readonly>" + val + "</textarea>" +
+                "<textarea ng-non-bindable id=\"" + fld_id + "\" class=\"form-control mono-space\" rows=\"12\" readonly>" + val + "</textarea>" +
                 "</div>\n";
             $('#' + container_id).empty().html(html);
         };
@@ -465,7 +464,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
             var id = params.id,
                 val = params.val,
                 html;
-            html = "<pre>" + val + "</pre>\n";
+            html = "<pre ng-non-bindable>" + val + "</pre>\n";
             $('#' + id).empty().html(html);
         };
     }]);

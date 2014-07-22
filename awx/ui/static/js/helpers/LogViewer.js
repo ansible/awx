@@ -346,7 +346,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
                 fld_id = params.fld_id,
                 html;
             html = "<div class=\"form-group\">\n" +
-                "<textarea id=\"" + fld_id + "\" class=\"form-control mono-space\" rows=\"12\" readonly>" + val + "</textarea>" +
+                "<textarea id=\"" + fld_id + "\" ng-non-bindable class=\"form-control mono-space\" rows=\"12\" readonly>" + val + "</textarea>" +
                 "</div>\n";
             $('#' + container_id).empty().html(html);
         };
@@ -357,7 +357,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
             var id = params.id,
                 val = params.val,
                 html;
-            html = "<pre>" + val + "</pre>\n";
+            html = "<pre ng-non-bindable>" + val + "</pre>\n";
             $('#' + id).empty().html(html);
         };
     }])
@@ -370,7 +370,7 @@ angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 
             html = "<table class=\"table logviewer-status\">\n";
             for (key in vars) {
                 html += "<tr><td class=\"fld-label col-md-4 col-sm-3 col-xs-3 break\">" + key + "</td>" +
-                    "<td class=\"break\">" + vars[key] + "</td></tr>\n";
+                    "<td ng-non-bindable class=\"break\">" + vars[key] + "</td></tr>\n";
             }
             html += "</table>\n";
             $('#' + id).empty().html(html);
