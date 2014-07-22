@@ -847,6 +847,9 @@ class InventorySourceOptions(BaseModel):
         elif self.source == 'rax':
             valid_regions = [x[0] for x in self.get_rax_region_choices()]
             region_transform = lambda x: x.strip().upper()
+        elif self.source == 'gce':
+            valid_regions = [x[0] for x in self.get_gce_region_choices()]
+            region_transform = lambda x: x.strip().lower()
         else:
             return ''
         all_region = region_transform('all')
