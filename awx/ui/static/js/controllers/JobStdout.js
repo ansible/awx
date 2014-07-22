@@ -117,6 +117,10 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
                         start: (data.range.start < 0) ? 0 : data.range.start,
                         end: data.range.end
                     });
+
+                    //console.log('loaded start: ' + data.range.start + ' end: ' + data.range.end);
+                    //console.log(data.content);
+
                     $('#pre-container').scrollTop($('#pre-container').prop("scrollHeight"));
                     //console.log($('#pre-container-content').prop("scrollHeight"));
                 }
@@ -244,6 +248,8 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
                     start: (data.range.start < 0) ? 0 : data.range.start,
                     end: data.range.end
                 });
+                //console.log('loaded start: ' + data.range.start + ' end: ' + data.range.end);
+                //console.log(data.content);
                 if (should_apply_live_events) {
                     // if user has not disabled live event view by scrolling upward, then scroll down to the new content
                     current_range = data.range;

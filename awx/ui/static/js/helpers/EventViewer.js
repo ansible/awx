@@ -266,9 +266,9 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 Wait('start');
             }
 
-            function getStatus(data) {
-                return (data.results[0].event === "runner_on_unreachable") ? "unreachable" : (data.results[0].event === "runner_on_skipped") ? 'skipped' : (data.results[0].failed) ? 'failed' :
-                            (data.results[0].changed) ? 'changed' : 'ok';
+            function getStatus(e) {
+                return (e.event === "runner_on_unreachable") ? "unreachable" : (e.event === "runner_on_skipped") ? 'skipped' : (e.failed) ? 'failed' :
+                            (e.changed) ? 'changed' : 'ok';
             }
 
             Rest.setUrl(url);
@@ -289,11 +289,11 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                                 event.event_data.res.task = "Gathering Facts";
                                 delete event.event_data.res.ansible_facts;
                             }
-                            event.event_data.res.status = getStatus(data);
+                            event.event_data.res.status = getStatus(event);
                             event_data = event.event_data.res;
                         }
                         else {
-                            event.event_data.status = getStatus(data);
+                            event.event_data.status = getStatus(event);
                             event_data = event.event_data;
                         }
                         // convert results to stdout
