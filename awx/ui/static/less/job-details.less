@@ -306,6 +306,23 @@
         font-size: 12px;
     }
 
+    #plays-table-header table,
+    #plays-table-detail table,
+    #tasks-table-detail table,
+    #tasks-table-header table,
+    #tasks-table-detail table {
+        table-layout:fixed;
+    }
+
+    #plays-table-detail td,
+    #plays-table-header td,
+    #tasks-table-detail td,
+    #tasks-table-header td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     #tasks-table-detail {
         height: 150px;
     }
