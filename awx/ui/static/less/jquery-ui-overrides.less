@@ -90,6 +90,9 @@ table.ui-datepicker-calendar {
 }
 
 .ui-widget-content {
+    background-image: none;
+    background-color: transparent;
+
     a,
     a:visited,
     a:active {
@@ -119,6 +122,17 @@ table.ui-datepicker-calendar {
             color: @white;
         }
     }
+}
+
+.ui-state-active,
+.ui-state-default {
+    background-image: none;
+    background-color: transparent;
+    border: 1px solid @well-border;
+}
+
+.ui-widget-content {
+    border: 1px solid @well-border;
 }
 
 .ui-spinner a.ui-spinner-button {

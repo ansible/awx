@@ -1132,7 +1132,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                 // Start the well
                 if (!this.modal && this.form.well) {
                     if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
-                        html += "<div class=\"well\">\n";
+                        html += "<div class=\"aw-form-well\">\n";
                     }
                 }
 
