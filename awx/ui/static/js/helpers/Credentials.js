@@ -40,6 +40,10 @@ angular.module('CredentialsHelper', ['Utilities'])
                 case 'scm':
                     scope.sshKeyDataLabel = 'SCM Private Key';
                     break;
+                case 'gce':
+                    scope.usernameLabel = 'Email Address';
+                    scope.sshKeyDataLabel = 'RSA Private Key';
+                    break;
                 }
             }
 

@@ -101,8 +101,8 @@ angular.module('CredentialFormDefinition', [])
                         '<dd>Access keys for Amazon Web Services used for inventory management or deployment.</dd>\n' +
                         '<dt>Rackspace</dt>\n' +
                         '<dd>Access information for Rackspace Cloud used for inventory management or deployment.</dd>\n' +
-                        '<dt>Google Compute Engine</dt>\n' + 
-                        '<dd>Credentials for Google Compute Engine, used for inventory management or deployment.</dd>\n' + 
+                        '<dt>Google Compute Engine</dt>\n' +
+                        '<dd>Credentials for Google Compute Engine, used for inventory management or deployment.</dd>\n' +
                         '<dt>VMWare</dt>\n' +
                         '<dd>Access information for VMWare vSphere used for inventory management or deployment.</dd>\n' +
                         '</dl>\n'
