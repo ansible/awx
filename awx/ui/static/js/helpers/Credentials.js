@@ -149,6 +149,9 @@ angular.module('CredentialsHelper', ['Utilities'])
             case 'rax':
                 data.password = scope.api_key;
                 break;
+            case 'gce':
+                data.username = scope.email_address;
+                data.project = scope.project;
             }
 
             if (Empty(data.team) && Empty(data.user)) {

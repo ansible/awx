@@ -141,7 +141,17 @@ angular.module('CredentialFormDefinition', [])
             "username": {
                 labelBind: 'usernameLabel',
                 type: 'text',
-                ngShow: "kind.value && kind.value !== 'aws'",
+                ngShow: "kind.value && kind.value !== 'aws' && kind.value!=='gce'",
+                awRequiredWhen: {
+                    variable: 'aws_required',
+                    init: false
+                },
+                autocomplete: false
+            },
+            "email_address": {
+                labelBind: 'usernameLabel',
+                type: 'email',
+                ngShow: "kind.value === 'gce'",
                 awRequiredWhen: {
                     variable: 'username_required',
                     init: false
@@ -159,7 +169,7 @@ angular.module('CredentialFormDefinition', [])
                 autocomplete: false,
                 ask: false,
                 clear: false,
-                apiField: 'passwowrd'
+                // apiField: 'passwowrd'
             },
             "password": {
                 label: 'Password',

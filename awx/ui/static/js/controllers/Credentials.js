@@ -393,6 +393,9 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
                     $scope.api_key = data.password;
                     master.api_key = $scope.api_key;
                     break;
+                case 'gce':
+                    $scope.email_address = data.username;
+                    $scope.project = data.project;
                 }
 
                 $scope.$emit('credentialLoaded');
