@@ -4,12 +4,14 @@
             <div class="col-md-12" id="breadcrumbs"></div>
         </div>
 
-        <div id="refresh-row" class="row">
+        <div id="refresh-row" class="row" ng-show="socketStatus == 'error'">
             <div class="col-lg-12">
-            <div id="home-list-actions" class="list-actions pull-right">
-                <button type="button" class="btn btn-xs btn-primary ng-hide" ng-click="refreshJobs()" id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" ng-show="socketStatus == 'error'" data-original-title="" title=""><i class="fa fa-refresh fa-lg"></i> </button></div>
-         </div>
-      </div>
+                <div id="home-list-actions" class="list-actions pull-right">
+                    <button type="button" class="btn btn-xs btn-primary" ng-click="refreshJobs()" id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top"
+                        data-original-title="" title=""><i class="fa fa-refresh fa-lg"></i></button>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-lg-6 left-side">

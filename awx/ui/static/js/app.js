@@ -455,9 +455,6 @@ angular.module('Tower', [
                 if (urlDepth === 1 && base !== 'home') {
                     $('#ansible-list-title').html('<strong>' + base.replace(/\_/,' ') + '</strong>');
                 }
-                else {
-                    $('#ansible-list-title').empty();
-                }
 
                 $('#ansible-main-menu li').each(function() {
                     $(this).removeClass('active');
