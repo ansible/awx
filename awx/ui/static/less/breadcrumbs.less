@@ -27,7 +27,6 @@
     text-decoration: none;
     padding: 3px 8px 3px 20px;
     background: @white;                   /* fallback color */
-
     position: relative;
     left: 0;
     top: 0;
@@ -37,6 +36,11 @@
     border-width: thin;
     float: left;
 }
+.ansible-breadcrumb li:first-child a{
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
 .ansible-breadcrumb li.active a {
     background: @white;
     color: @black;
