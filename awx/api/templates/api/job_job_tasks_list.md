@@ -8,7 +8,7 @@ This endpoints supports a limited filtering subset:
 
     ?id__in=1,2,3
 
-Will show only the given ids.
+Will show only the given task ids under the play given by `event_id`.
 
     ?id__gt=1
 
