@@ -434,6 +434,7 @@ GCE_ENABLED_VALUE = 'running'
 GCE_GROUP_FILTER = r'^.+$'
 GCE_HOST_FILTER = r'^.+$'
 GCE_EXCLUDE_EMPTY_GROUPS = True
+GCE_INSTANCE_ID_VAR = None
 
 
 # ---------------------

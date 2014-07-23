@@ -1227,4 +1227,4 @@ class Command(NoArgsCommand):
         if exc and isinstance(exc, CommandError):
             sys.exit(1)
         elif exc:
-            raise exc
+            raise

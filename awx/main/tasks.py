@@ -840,8 +840,8 @@ class RunInventoryUpdate(BaseTask):
             for subkey in ('username', 'host', 'project'):
                 passwords['source_%s' % subkey] = getattr(credential, subkey)
             for passkey in ('password', 'ssh_key_data'):
-                k = 'source_%s' % subkey
-                passwords[k] = decrypt_field(credential, subkey)
+                k = 'source_%s' % passkey
+                passwords[k] = decrypt_field(credential, passkey)
         return passwords
 
     def build_env(self, inventory_update, **kwargs):
@@ -977,7 +977,7 @@ class RunInventoryUpdate(BaseTask):
 
             # We might have a flag for an instance ID variable; if we do,
             # add it to the shell arguments.
-            if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()):
+            if getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper(), False):
                 args.extend([
                     '--instance-id-var',
                     getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()),

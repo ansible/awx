@@ -60,7 +60,7 @@ PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_CHECK, _('Deploy To Inventory (Dry Run)')),
 ]
 
-CLOUD_INVENTORY_SOURCES = ['ec2', 'rax']
+CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure']
 
 
 class VarsDictProperty(object):
