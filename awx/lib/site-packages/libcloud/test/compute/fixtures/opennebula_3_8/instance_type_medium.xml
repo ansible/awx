@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<INSTANCE_TYPE href="http://www.opennebula.org/instance_type/medium">
+    <NAME>medium</NAME>
+    <CPU>4</CPU>
+    <MEMORY>4096</MEMORY>
+</INSTANCE_TYPE>

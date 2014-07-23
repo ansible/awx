@@ -1,0 +1,27 @@
+{
+    "objects": [
+        {
+            "meta": {},
+            "name": "test policy 2",
+            "owner": {
+                "resource_uri": "/api/2.0/user/69fcfc03-d635-4f99-a8b3-e1b73637cb5d/",
+                "uuid": "69fcfc03-d635-4f99-a8b3-e1b73637cb5d"
+            },
+            "resource_uri": "/api/2.0/fwpolicies/324819a5-7a5b-4231-957d-662a7429fb8c/",
+            "rules": [
+                {
+                    "action": "accept",
+                    "comment": null,
+                    "direction": "out",
+                    "dst_ip": "127.0.0.1/32",
+                    "dst_port": null,
+                    "ip_proto": "tcp",
+                    "src_ip": "127.0.0.1/32",
+                    "src_port": null
+                }
+            ],
+            "servers": [],
+            "uuid": "324819a5-7a5b-4231-957d-662a7429fb8c"
+        }
+    ]
+}

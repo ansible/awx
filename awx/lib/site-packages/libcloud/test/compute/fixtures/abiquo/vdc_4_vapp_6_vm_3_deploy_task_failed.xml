@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<task>
+    <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/virtualappliances/6/virtualmachines/3/tasks" rel="parent"/>
+    <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/virtualappliances/6/virtualmachines/3/tasks/b44fe278-6b0f-4dfb-be81-7c03006a93cb" rel="self"/>
+    <jobs>
+        <job>
+            <description>Deploy task's configure on virtual machine with id 3</description>
+            <id>b44fe278-6b0f-4dfb-be81-7c03006a93cb.a04623bd-7b2c-4c23-9441-aeaa39dd4893</id>
+            <parentTaskId>b44fe278-6b0f-4dfb-be81-7c03006a93cb</parentTaskId>
+            <rollbackState>UNKNOWN</rollbackState>
+            <state>DONE</state>
+            <timestamp>1357872859</timestamp>
+            <type>CONFIGURE</type>
+        </job>
+        <job>
+            <description>Deploy task's power on on virtual machine with id 3</description>
+            <id>b44fe278-6b0f-4dfb-be81-7c03006a93cb.2fdee19a-4fad-4040-bc94-7acfd6fedc48</id>
+            <parentTaskId>b44fe278-6b0f-4dfb-be81-7c03006a93cb</parentTaskId>
+            <rollbackState>UNKNOWN</rollbackState>
+            <state>DONE</state>
+            <timestamp>1357872859</timestamp>
+            <type>POWER_ON</type>
+        </job>
+    </jobs>
+    <ownerId>3</ownerId>
+    <state>ABORTED</state>
+    <taskId>b44fe278-6b0f-4dfb-be81-7c03006a93cb</taskId>
+    <timestamp>1357872859</timestamp>
+    <type>DEPLOY</type>
+    <userId>user</userId>
+</task>

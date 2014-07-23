@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<limits xmlns="http://docs.rackspacecloud.com/servers/api/v1.0">
+	<rate>
+		<limit URI="*changes-since*" regex="changes-since" remaining="3" resetTime="1288636970" unit="MINUTE" value="3" verb="GET"/>
+		<limit URI="*" regex=".*" remaining="10" resetTime="1288636970" unit="MINUTE" value="10" verb="PUT"/>
+		<limit URI="*" regex=".*" remaining="10" resetTime="1288636970" unit="MINUTE" value="10" verb="POST"/>
+		<limit URI="*" regex=".*" remaining="600" resetTime="1288636970" unit="MINUTE" value="600" verb="DELETE"/>
+		<limit URI="/servers*" regex="^/servers" remaining="500" resetTime="1288636970" unit="DAY" value="500" verb="POST"/>
+	</rate>
+	<absolute>
+		<limit name="maxIPGroupMembers" value="25"/>
+		<limit name="maxIPGroups" value="25"/>
+		<limit name="maxTotalRAMSize" value="921600"/>
+	</absolute>
+</limits>

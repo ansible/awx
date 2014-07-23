@@ -1,0 +1,4 @@
+<DetachNetworkInterfaceResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>1a683cd6-58ea-4b93-a6e9-a23b56afddf0</requestId>
+    <return>true</return>
+</DetachNetworkInterfaceResponse>

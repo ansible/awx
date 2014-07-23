@@ -1,0 +1,1 @@
+{ "queryasyncjobresultresponse" : {"accountid":"dcfd4b83-2ae6-43d1-a2eb-af87066ecbc9","userid":"c3d3cb3c-0f13-429a-b900-5bacc346df32","cmd":"com.cloud.api.commands.DeleteTagsCmd","jobstatus":1,"jobprocstatus":0,"jobresultcode":0,"jobresulttype":"object","jobresult":{"success":true},"created":"2014-02-08T13:43:24+0100","jobid":"02425faf-4cf4-44c2-9241-cb8b1eabc957"} }

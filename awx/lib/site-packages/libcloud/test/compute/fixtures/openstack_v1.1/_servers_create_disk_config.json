@@ -1,0 +1,17 @@
+{
+    "server": {
+        "OS-DCF:diskConfig": "MANUAL",
+        "id": "26f7fbee-8ce1-4c28-887a-bfe8e4bb10fe",
+        "links": [
+            {
+                "href": "http://127.0.0.1/v1.1/68/servers/26f7fbee-8ce1-4c28-887a-bfe8e4bb10fe",
+                "rel": "self"
+            },
+            {
+                "href": "http://127.0.0.1/68/servers/26f7fbee-8ce1-4c28-887a-bfe8e4bb10fe",
+                "rel": "bookmark"
+            }
+        ],
+        "adminPass": "racktestvJq7d3"
+    }
+}

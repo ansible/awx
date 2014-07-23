@@ -1,0 +1,7 @@
+<CatalogItem name="VMMasterTemplate" id="urn:vcloud:catalogitem:3132e037-759b-4627-9056-ca66466fa607" type="application/vnd.vmware.vcloud.catalogItem+xml" href="https://vm-vcloud/api/catalogItem/3132e037-759b-4627-9056-ca66466fa607" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.41.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <Link rel="up" type="application/vnd.vmware.vcloud.catalog+xml" href="https://vm-vcloud/api/catalog/cddb3cb2-3394-4b14-b831-11fbc4028da4"/>
+   <Link rel="down" type="application/vnd.vmware.vcloud.metadata+xml" href="https://vm-vcloud/api/catalogItem/3132e037-759b-4627-9056-ca66466fa607/metadata"/>
+   <Link rel="edit" type="application/vnd.vmware.vcloud.catalogItem+xml" href="https://vm-vcloud/api/catalogItem/3132e037-759b-4627-9056-ca66466fa607"/>
+   <Link rel="remove" href="https://vm-vcloud/api/catalogItem/3132e037-759b-4627-9056-ca66466fa607"/>
+   <Entity type="application/vnd.vmware.vcloud.vAppTemplate+xml" name="ScrumVM_Master" href="https://vm-vcloud/api/vAppTemplate/vappTemplate-ac1bc027-bf8c-4050-8643-4971f691c158"/>
+</CatalogItem>

@@ -1,0 +1,10 @@
+<Task status="running" startTime="2011-12-20T15:39:53.270-05:00" operationName="[my power operation]"
+      operation="Power On/Power Off/Reset/Suspend Virtual Application (0d647cbf-867e-442d-8d2d-d0c2d235fbdf)" expiryTime="2012-03-19T15:39:53.270-04:00"
+      name="task" id="urn:vcloud:task:b034df55-fe81-4798-bc81-1f0fd0ead450"
+      type="application/vnd.vmware.vcloud.task+xml"
+      href="https://vm-vcloud/api/task/b034df55-fe81-4798-bc81-1f0fd0ead450" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.41.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <Link rel="task:cancel" href="https://vm-vcloud/api/task/b034df55-fe81-4798-bc81-1f0fd0ead450/action/cancel"/>
+   <Owner type="application/vnd.vmware.vcloud.vApp+xml" name="" href="https://vm-vcloud/api/vApp/vapp-0d647cbf-867e-442d-8d2d-d0c2d235fbdf"/>
+   <User type="application/vnd.vmware.admin.user+xml" name="labmanapi" href="https://vm-vcloud/api/admin/user/46f62cc3-65e0-4417-967a-a538ec6caea3"/>
+   <Organization type="application/vnd.vmware.vcloud.org+xml" name="MyOrg" href="https://vm-vcloud/api/org/96726c78-4ae3-402f-b08b-7a78c6903d2a"/>
+</Task>

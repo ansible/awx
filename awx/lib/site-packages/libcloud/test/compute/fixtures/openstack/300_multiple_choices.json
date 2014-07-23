@@ -1,0 +1,7 @@
+{"choices": [{"status": "CURRENT", "media-types": [{"base":
+"application/xml", "type":
+"application/vnd.openstack.compute+xml;version=2"}, {"base":
+"application/json", "type":
+"application/vnd.openstack.compute+json;version=2"}], "id": "v2.0",
+"links": [{"href": "http://50.56.213.226:8774/v2/v2.0/images/detail",
+"rel": "self"}]}]}

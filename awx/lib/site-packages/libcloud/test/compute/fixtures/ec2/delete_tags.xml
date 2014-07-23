@@ -1,0 +1,4 @@
+<DeleteTagsResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>7a297da7-3ecb-4156-8bcb-3be73896cc14</requestId>
+    <return>true</return>
+</DeleteTagsResponse>

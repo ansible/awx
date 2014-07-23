@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<enterprise>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/appslib/templateDefinitionLists" type="application/vnd.abiquo.templatedefinitionlists+xml" rel="appslib/templateDefinitionLists"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/appslib/templateDefinitions" type="application/vnd.abiquo.templatedefinitions+xml" rel="appslib/templateDefinitions"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/action/virtualdatacenters" type="application/vnd.abiquo.virtualdatacenters+xml" rel="cloud/virtualdatacenters"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1" type="application/vnd.abiquo.enterprise+xml" rel="edit"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/action/externalnetworks" type="application/vnd.abiquo.vlans+xml" rel="externalnetworks"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/action/ips" rel="ips" title="ips"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/limits" type="application/vnd.abiquo.limits+xml" rel="limits"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/reservedmachines" type="application/vnd.abiquo.machines+xml" rel="reservedmachines"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/users" type="application/vnd.abiquo.users+xml" rel="users"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/action/virtualappliances" type="application/vnd.abiquo.virtualappliances+xml; version=2.0" rel="virtualappliances"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/action/virtualappliances" rel="virtualappliances" title="virtualappliances"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/action/virtualmachines" type="application/vnd.abiquo.virtualmachines+xml" rel="virtualmachines"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/action/volumes" type="application/vnd.abiquo.iscsivolumes+xml" rel="volumes"/>
+    <cpuHard>0</cpuHard>
+    <cpuSoft>0</cpuSoft>
+    <hdHard>0</hdHard>
+    <hdSoft>0</hdSoft>
+    <publicIpsHard>0</publicIpsHard>
+    <publicIpsSoft>0</publicIpsSoft>
+    <ramHard>0</ramHard>
+    <ramSoft>0</ramSoft>
+    <storageHard>0</storageHard>
+    <storageSoft>0</storageSoft>
+    <vlansHard>0</vlansHard>
+    <vlansSoft>0</vlansSoft>
+    <id>1</id>
+    <isReservationRestricted>false</isReservationRestricted>
+    <name>Abiquo</name>
+    <repositoryHard>0</repositoryHard>
+    <repositorySoft>0</repositorySoft>
+</enterprise>

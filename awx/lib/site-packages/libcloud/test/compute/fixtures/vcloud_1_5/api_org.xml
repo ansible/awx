@@ -1,0 +1,3 @@
+<OrgList type="application/vnd.vmware.vcloud.orgList+xml" href="https://vm-vcloud/api/org/" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.41.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <Org type="application/vnd.vmware.vcloud.org+xml" name="MyOrg" href="https://vm-vcloud/api/org/96726c78-4ae3-402f-b08b-7a78c6903d2a"/>
+</OrgList>

@@ -1,0 +1,6 @@
+<Task xmlns="http://www.vmware.com/vcloud/v1.5" status="running" startTime="2013-04-18T07:25:00.227-07:00" operationName="metadataUpdate" operation="Updating metadata for Virtual Application (2e0d3db0-1d5d-4d9f-a885-8f81e929db7c)" expiryTime="2013-07-17T07:25:00.227-07:00" name="task" id="urn:vcloud:task:7bcb14c1-0455-4169-ac0e-c951b941c4be" type="application/vnd.vmware.vcloud.task+xml" href="https://vm-vcloud/api/task/b034df55-fe81-4798-bc81-1f0fd0ead450" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://172.17.64.41/api/v1.5/schema/master.xsd">
+    <Link rel="task:cancel" href="https://vcd-director/api/task/7bcb14c1-0455-4169-ac0e-c951b941c4be/action/cancel"/>
+    <Owner type="application/vnd.vmware.vcloud.vApp+xml" name="" href="https://vcd-director/api/vApp/vapp-2e0d3db0-1d5d-4d9f-a885-8f81e929db7c"/>
+    <User type="application/vnd.vmware.admin.user+xml" name="msamia" href="https://vcd-director/api/admin/user/4106b68d-4d8b-4dce-9aa0-d61548910b83"/>
+    <Organization type="application/vnd.vmware.vcloud.org+xml" name="NetSuite" href="https://vcd-director/api/org/118a31f4-134c-490f-b4d9-0bedcd2c7ada"/>
+</Task>

@@ -1,0 +1,155 @@
+
+[
+    {
+        "account": {
+            "id": "acc-tqs4c", 
+            "name": "bbctest", 
+            "resource_type": "account", 
+            "status": "active", 
+            "url": "https://api.gb1.brightbox.com/1.0/account"
+        }, 
+        "cloud_ips": [
+            {
+                "id": "cip-tlrp3", 
+                "public_ip": "109.107.35.16", 
+                "resource_type": "cloud_ip", 
+                "reverse_dns": "cip-109-107-35-16.gb1.brightbox.com", 
+                "status": "mapped", 
+                "url": "https://api.gb1.brightbox.com/1.0/cloud_ips/cip-tlrp3"
+            }
+        ], 
+        "created_at": "2010-10-14T10:02:38Z", 
+        "deleted_at": null, 
+        "fqdn": "srv-xvpn7.gb1.brightbox.com", 
+        "hostname": "srv-xvpn7", 
+        "id": "srv-xvpn7", 
+        "image": {
+            "arch": "i686", 
+            "created_at": "2010-10-11T15:23:51Z", 
+            "description": "", 
+            "id": "img-arm8f", 
+            "name": "Snapshot of srv-vf2a4 11 Oct 15:23", 
+            "owner": "acc-tqs4c", 
+            "resource_type": "image", 
+            "source": "srv-vf2a4", 
+            "status": "deleted", 
+            "url": "https://api.gb1.brightbox.com/1.0/images/img-arm8f", 
+            "username": null
+        }, 
+        "interfaces": [
+            {
+                "id": "int-519up", 
+                "ipv4_address": "10.74.210.210", 
+                "mac_address": "02:24:19:4a:d2:d2", 
+                "resource_type": "interface", 
+                "url": "https://api.gb1.brightbox.com/1.0/interfaces/int-519up"
+            }
+        ], 
+        "name": "Ubuntu Image Builder Box", 
+        "resource_type": "server", 
+        "server_groups": [
+            {
+                "created_at": "2011-08-24T08:41:56Z", 
+                "default": true, 
+                "description": "All new servers are added to this group unless specified otherwise.", 
+                "id": "grp-irgkb", 
+                "name": "default", 
+                "resource_type": "server_group", 
+                "url": "https://api.gb1.brightbox.com/1.0/server_groups/grp-irgkb"
+            }
+        ], 
+        "server_type": {
+            "cores": 4, 
+            "disk_size": 81920, 
+            "handle": "small", 
+            "id": "typ-urtky", 
+            "name": "Brightbox Small Instance", 
+            "ram": 2048, 
+            "resource_type": "server_type", 
+            "status": "available", 
+            "url": "https://api.gb1.brightbox.com/1.0/server_types/typ-urtky"
+        }, 
+        "snapshots": [], 
+        "started_at": "2012-03-28T15:25:56Z", 
+        "status": "active", 
+        "url": "https://api.gb1.brightbox.com/1.0/servers/srv-xvpn7", 
+        "zone": {
+            "handle": "gb1-a", 
+            "id": "zon-6mxqw", 
+            "resource_type": "zone", 
+            "url": "https://api.gb1.brightbox.com/1.0/zones/zon-6mxqw"
+        }
+    }, 
+    {
+        "account": {
+            "id": "acc-tqs4c", 
+            "name": "bbctest", 
+            "resource_type": "account", 
+            "status": "active", 
+            "url": "https://api.gb1.brightbox.com/1.0/account"
+        }, 
+        "cloud_ips": [], 
+        "created_at": "2012-01-30T14:42:28Z", 
+        "deleted_at": null, 
+        "fqdn": "srv-742vn.gb1.brightbox.com", 
+        "hostname": "srv-742vn", 
+        "id": "srv-742vn", 
+        "image": {
+            "arch": "x86_64", 
+            "created_at": "2012-01-30T13:25:09Z", 
+            "description": "", 
+            "id": "img-j93gd", 
+            "name": "Snapshot of srv-k0pug 30 Jan 13:25", 
+            "owner": "acc-tqs4c", 
+            "resource_type": "image", 
+            "source": "srv-k0pug", 
+            "status": "available", 
+            "url": "https://api.gb1.brightbox.com/1.0/images/img-j93gd", 
+            "username": null
+        }, 
+        "interfaces": [
+            {
+                "id": "int-ztqbx", 
+                "ipv4_address": "10.240.228.234", 
+                "ipv6_address": "2a02:1348:14c:393a:24:19ff:fef0:e4ea", 
+                "mac_address": "02:24:19:f0:e4:ea", 
+                "resource_type": "interface", 
+                "url": "https://api.gb1.brightbox.com/1.0/interfaces/int-ztqbx"
+            }
+        ], 
+        "name": "Kernel builder", 
+        "resource_type": "server", 
+        "server_groups": [
+            {
+                "created_at": "2011-08-24T08:41:56Z", 
+                "default": true, 
+                "description": "All new servers are added to this group unless specified otherwise.", 
+                "id": "grp-irgkb", 
+                "name": "default", 
+                "resource_type": "server_group", 
+                "url": "https://api.gb1.brightbox.com/1.0/server_groups/grp-irgkb"
+            }
+        ], 
+        "server_type": {
+            "cores": 8, 
+            "disk_size": 163840, 
+            "handle": "medium", 
+            "id": "typ-qdiwq", 
+            "name": "Brightbox Medium Instance", 
+            "ram": 4096, 
+            "resource_type": "server_type", 
+            "status": "available", 
+            "url": "https://api.gb1.brightbox.com/1.0/server_types/typ-qdiwq"
+        }, 
+        "snapshots": [], 
+        "started_at": "2012-03-28T15:26:43Z", 
+        "status": "active", 
+        "url": "https://api.gb1.brightbox.com/1.0/servers/srv-742vn", 
+        "zone": {
+            "handle": "gb1-a", 
+            "id": "zon-6mxqw", 
+            "resource_type": "zone", 
+            "url": "https://api.gb1.brightbox.com/1.0/zones/zon-6mxqw"
+        }
+    }
+]

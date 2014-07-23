@@ -1,0 +1,1 @@
+{"quota_set": {"metadata_items": 10, "injected_file_content_bytes": 1000, "injected_files": 10, "volumes": 0, "instances": 25, "gigabytes": 500, "cores": 50, "ram": 102400, "id": "aTenantId", "floating_ips": 10}}

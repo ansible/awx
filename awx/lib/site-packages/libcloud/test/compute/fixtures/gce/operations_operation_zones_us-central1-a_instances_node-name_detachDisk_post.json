@@ -1,0 +1,16 @@
+{
+  "endTime": "2013-06-26T16:48:41.278-07:00",
+  "id": "3921383727105838816",
+  "insertTime": "2013-06-26T16:48:35.357-07:00",
+  "kind": "compute#operation",
+  "name": "operation-zones_us-central1-a_instances_node-name_detachDisk_post",
+  "operationType": "detachDisk",
+  "progress": 100,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/operations/operation-zones_us-central1-a_instances_node-name_detachDisk_post",
+  "startTime": "2013-06-26T16:48:35.398-07:00",
+  "status": "DONE",
+  "targetId": "1845312225624811608",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/instances/node-name",
+  "user": "897001307951@developer.gserviceaccount.com",
+  "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a"
+}

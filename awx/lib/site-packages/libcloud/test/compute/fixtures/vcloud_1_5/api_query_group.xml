@@ -1,0 +1,5 @@
+<QueryResultRecords total="1" pageSize="100" page="1" name="group" type="application/vnd.vmware.vcloud.query.records+xml" href="https://vm-vcloud/api/query?type=group&amp;page=1&amp;pageSize=100&amp;format=records&amp;filter=(name==MyGroup)" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://66.67.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Link rel="alternate" type="application/vnd.vmware.vcloud.query.references+xml" href="https://vm-vcloud/api/query?type=group&amp;page=1&amp;pageSize=100&amp;format=references&amp;filter=(name==MyGroup)"/>
+    <Link rel="alternate" type="application/vnd.vmware.vcloud.query.idrecords+xml" href="https://vm-vcloud/api/query?type=group&amp;page=1&amp;pageSize=100&amp;format=idrecords&amp;filter=(name==MyGroup)"/>
+    <GroupRecord roleName="Viewer" name="MyGroup" isReadOnly="false" href="https://vm-vcloud/api/admin/group/b8202c48-7151-4e61-9a6c-155474c7d413" isSync="true"/>
+</QueryResultRecords>

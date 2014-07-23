@@ -1,0 +1,10 @@
+{
+  "creationTimestamp": "2013-02-05T16:19:23.269-08:00",
+  "description": "us-central1-a",
+  "id": "13462829244527433283",
+  "kind": "compute#zone",
+  "name": "us-central1-a",
+  "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a",
+  "status": "UP"
+}

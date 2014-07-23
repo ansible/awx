@@ -1,0 +1,15 @@
+{
+  "id": "1815686149437875016",
+  "insertTime": "2013-09-03T01:28:53.049-07:00",
+  "kind": "compute#operation",
+  "name": "operation-regions_us-central1_targetPools_lctargetpool_removeInstance_post",
+  "operationType": "removeInstance",
+  "progress": 0,
+  "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/operations/operation-regions_us-central1_targetPools_lctargetpool_removeInstance_post",
+  "startTime": "2013-09-03T01:28:53.109-07:00",
+  "status": "PENDING",
+  "targetId": "16862638289615591831",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/targetPools/lctargetpool",
+  "user": "user@gserviceaccount.com"
+}

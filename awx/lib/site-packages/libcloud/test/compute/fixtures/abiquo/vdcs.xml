@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<virtualDatacenters>
+    <virtualDatacenter>
+        <link href="http://10.60.12.7:80/api/admin/datacenters/2" type="application/vnd.abiquo.datacenter+xml" rel="datacenter"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/privatenetworks/2" type="application/vnd.abiquo.vlan+xml" rel="defaultnetwork"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/action/dhcpinfo" type="text/plain" rel="dhcpinfo"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/disks" type="application/vnd.abiquo.harddisks+xml" rel="disks"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4" type="application/vnd.abiquo.virtualdatacenter+xml" rel="edit"/>
+        <link href="http://10.60.12.7:80/api/admin/enterprises/1" type="application/vnd.abiquo.enterprise+xml" rel="enterprise"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/action/ips" type="application/vnd.abiquo.ip+xml" rel="ips"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/privatenetworks" type="application/vnd.abiquo.vlans+xml" rel="privatenetworks"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/publicips/purchased" type="application/vnd.abiquo.ips+xml" rel="purchased"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/volumes/action/statefulcandidates" type="application/vnd.abiquo.iscsivolumes+xml" rel="statefulcandidates"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/tiers" type="application/vnd.abiquo.tiers+xml" rel="tiers"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/publicips/topurchase" type="application/vnd.abiquo.ips+xml" rel="topurchase"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/virtualappliances" type="application/vnd.abiquo.virtualappliances+xml" rel="virtualappliances"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/volumes" type="application/vnd.abiquo.iscsivolumes+xml" rel="volumes"/>
+        <cpuHard>0</cpuHard>
+        <cpuSoft>0</cpuSoft>
+        <hdHard>0</hdHard>
+        <hdSoft>0</hdSoft>
+        <publicIpsHard>0</publicIpsHard>
+        <publicIpsSoft>0</publicIpsSoft>
+        <ramHard>0</ramHard>
+        <ramSoft>0</ramSoft>
+        <storageHard>0</storageHard>
+        <storageSoft>0</storageSoft>
+        <vlansHard>0</vlansHard>
+        <vlansSoft>0</vlansSoft>
+        <hypervisorType>KVM</hypervisorType>
+        <id>4</id>
+        <name>vdc_kvm</name>
+        <network>
+            <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4" type="application/vnd.abiquo.virtualdatacenter+xml" rel="virtualdatacenter"/>
+            <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/privatenetworks/2" type="application/vnd.abiquo.vlan+xml" rel="edit"/>
+            <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/privatenetworks/2/ips" type="application/vnd.abiquo.ip+xml" rel="ips"/>
+            <address>192.168.0.0</address>
+            <dhcpOptions/>
+            <gateway>192.168.0.1</gateway>
+            <id>2</id>
+            <mask>24</mask>
+            <name>default_private_network</name>
+            <primaryDNS></primaryDNS>
+            <secondaryDNS></secondaryDNS>
+            <sufixDNS></sufixDNS>
+            <type>INTERNAL</type>
+        </network>
+    </virtualDatacenter>
+</virtualDatacenters>

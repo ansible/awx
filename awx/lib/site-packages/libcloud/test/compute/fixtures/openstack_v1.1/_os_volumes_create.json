@@ -1,0 +1,17 @@
+{
+    "volume": {
+        "attachments": [
+            {}
+        ],
+        "availabilityZone": "nova",
+        "createdAt": "2013-06-28T12:22:39.616660",
+        "displayDescription": null,
+        "displayName": "test",
+        "id": "43b7db44-0497-40fa-b817-c906f13bbea3",
+        "metadata": {},
+        "size": 1,
+        "snapshotId": null,
+        "status": "creating",
+        "volumeType": "None"
+    }
+}

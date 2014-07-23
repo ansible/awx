@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<methodResponse>
+    <params>
+        <param>
+            <value>
+                <array>
+                    <data>
+                        <value>
+                            <struct>
+                                <member>
+                                    <name>country</name>
+                                    <value><string>France</string></value>
+                                </member>
+                                <member>
+                                    <name>iso</name>
+                                    <value><string>FR</string></value>
+                                </member>
+                                <member>
+                                    <name>id</name>
+                                    <value><int>1</int></value>
+                                </member>
+                                <member>
+                                    <name>name</name>
+                                    <value><string>Equinix Paris</string></value>
+                                </member>
+                            </struct>
+                        </value>
+                        <value>
+                            <struct>
+                                <member>
+                                    <name>country</name>
+                                    <value><string>United States of America</string></value>
+                                </member>
+                                <member>
+                                    <name>iso</name>
+                                    <value><string>US</string></value>
+                                </member>
+                                <member>
+                                    <name>id</name>
+                                    <value><int>2</int></value>
+                                </member>
+                                <member>
+                                    <name>name</name>
+                                    <value><string>Level3 Baltimore</string></value>
+                                </member>
+                            </struct>
+                        </value>
+                    </data>
+                </array>
+            </value>
+        </param>
+    </params>
+</methodResponse>

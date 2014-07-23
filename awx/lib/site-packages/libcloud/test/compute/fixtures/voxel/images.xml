@@ -1,0 +1,19 @@
+<rsp stat="ok">
+    <images>
+      <image id="3" summary="CentOS 5, 32-bit, base install">
+        <operating_system>
+          <architecture>32</architecture>
+          <family>Linux</family>
+          <version>2.6.18</version>
+          <product_family>CentOS</product_family>
+          <product_version>5.1</product_version>
+          <admin_username>root</admin_username>
+        </operating_system>
+        <filesystem>
+          <type>ext3</type>
+          <size units="MB">880</size>
+        </filesystem>
+        <description>Base install of CentOS 5.1 i386.</description>
+      </image>
+    </images>
+</rsp>

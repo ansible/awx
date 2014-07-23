@@ -1,0 +1,11 @@
+<CreateSubnetResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>e94b315e-6424-4536-b48d-0dfb47732c72</requestId>
+    <subnet>
+        <subnetId>subnet-ce0e7ce6</subnetId>
+        <state>pending</state>
+        <vpcId>vpc-532135d1</vpcId>
+        <cidrBlock>192.168.51.128/26</cidrBlock>
+        <availableIpAddressCount>59</availableIpAddressCount>
+        <availabilityZone>us-east-1b</availabilityZone>
+    </subnet>
+</CreateSubnetResponse>

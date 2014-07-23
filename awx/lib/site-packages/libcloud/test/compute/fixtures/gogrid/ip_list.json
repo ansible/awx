@@ -1,0 +1,69 @@
+{
+    "list": [
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 5348099, 
+            "ip": "192.168.75.66", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "192.168.75.64/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 5348100, 
+            "ip": "192.168.75.67", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is reserved or in use", 
+                "id": 2, 
+                "name": "Assigned", 
+                "object": "option"
+            }, 
+            "subnet": "192.168.75.64/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 5348101, 
+            "ip": "192.168.75.68", 
+            "object": "ip", 
+            "public": false, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "192.168.75.64/255.255.255.240"
+        }
+    ], 
+    "method": "/grid/ip/list", 
+    "status": "success", 
+    "summary": {
+        "numpages": 0, 
+        "returned": 3, 
+        "start": 0, 
+        "total": 3
+    }
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+    <Name>test_container</Name>
+    <Prefix></Prefix>
+    <Marker></Marker>
+    <MaxKeys>1000</MaxKeys>
+    <IsTruncated>true</IsTruncated>
+    <Contents>
+        <Key>1.zip</Key>
+        <LastModified>2011-04-09T19:05:18.000Z</LastModified>
+        <ETag>"4397da7a7649e8085de9916c240e8166"</ETag>
+        <Size>1234567</Size>
+        <Owner>
+            <ID>65a011niqo39cdf8ec533ec3d1ccaafsa932</ID>
+        </Owner>
+        <StorageClass>STANDARD</StorageClass>
+    </Contents>
+    <Contents>
+        <Key>2.zip</Key>
+        <LastModified>2011-04-09T19:05:18.000Z</LastModified>
+        <ETag>"4397da7a7649e8085de9916c240e8166"</ETag>
+        <Size>1234567</Size>
+        <Owner>
+            <ID>65a011niqo39cdf8ec533ec3d1ccaafsa932</ID>
+        </Owner>
+        <StorageClass>STANDARD</StorageClass>
+    </Contents>
+    <Contents>
+        <Key>3.zip</Key>
+        <LastModified>2011-04-09T19:05:18.000Z</LastModified>
+        <ETag>"4397da7a7649e8085de9916c240e8166"</ETag>
+        <Size>1234567</Size>
+        <Owner>
+            <ID>65a011niqo39cdf8ec533ec3d1ccaafsa932</ID>
+        </Owner>
+        <StorageClass>STANDARD</StorageClass>
+    </Contents>
+</ListBucketResult>

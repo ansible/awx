@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<flavors xmlns="http://docs.rackspacecloud.com/servers/api/v1.0">
+  <flavor disk="10" ram="256" name="256 slice" id="1"/>
+  <flavor disk="20" ram="512" name="512 slice" id="2"/>
+  <flavor disk="40" ram="1024" name="1GB slice" id="3"/>
+  <flavor disk="80" ram="2048" name="2GB slice" id="4"/>
+  <flavor disk="160" ram="4096" name="4GB slice" id="5"/>
+  <flavor disk="320" ram="8192" name="8GB slice" id="6"/>
+  <flavor disk="620" ram="15872" name="15.5GB slice" id="7"/>
+</flavors>

@@ -1,0 +1,15 @@
+{
+ "kind": "compute#operation",
+ "id": "10762099380229198553",
+ "name": "operation-global_images_debian7_delete",
+ "operationType": "delete",
+ "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/images/debian-7-wheezy-v20130617",
+ "targetId": "14881612020726561163",
+ "status": "PENDING",
+ "user": "user@developer.gserviceaccount.com",
+ "progress": 0,
+ "insertTime": "2014-03-11T14:37:48.075-07:00",
+ "startTime": "2014-03-11T14:37:48.158-07:00",
+ "endTime": "2014-03-11T14:37:48.634-07:00",
+ "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/operations/operation-global_images_debian7_delete"
+}

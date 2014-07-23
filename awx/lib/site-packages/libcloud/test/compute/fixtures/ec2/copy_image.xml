@@ -1,0 +1,4 @@
+<CopyImageResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>7b7d87d5-c045-4c2c-a2c4-b538debe14b2</requestId>
+    <imageId>ami-4db38224</imageId>
+</CopyImageResponse>

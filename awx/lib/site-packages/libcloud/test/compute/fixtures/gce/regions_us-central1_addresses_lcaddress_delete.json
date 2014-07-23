@@ -1,0 +1,15 @@
+{
+  "id": "7128783508312083402",
+  "insertTime": "2013-06-26T12:21:44.075-07:00",
+  "kind": "compute#operation",
+  "name": "operation-regions_us-central1_addresses_lcaddress_delete",
+  "operationType": "delete",
+  "progress": 0,
+  "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/operations/operation-regions_us-central1_addresses_lcaddress_delete",
+  "startTime": "2013-06-26T12:21:44.110-07:00",
+  "status": "PENDING",
+  "targetId": "01531551729918243104",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/addresses/lcaddress",
+  "user": "897001307951@developer.gserviceaccount.com"
+}

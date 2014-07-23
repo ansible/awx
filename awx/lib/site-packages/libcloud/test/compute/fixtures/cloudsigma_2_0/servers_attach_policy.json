@@ -1,0 +1,43 @@
+{
+    "context": true,
+    "cpu": 2000,
+    "cpu_model": null,
+    "cpus_instead_of_cores": false,
+    "drives": [],
+    "enable_numa": false,
+    "hv_relaxed": false,
+    "hv_tsc": false,
+    "mem": 536870912,
+    "meta": {},
+    "name": "test_server_updated",
+    "nics": [
+        {
+            "boot_order": null,
+            "firewall_policy": {
+                "resource_uri": "/api/2.0/fwpolicies/461dfb8c-e641-43d7-a20e-32e2aa399086/",
+                "uuid": "461dfb8c-e641-43d7-a20e-32e2aa399086"
+            },
+            "ip_v4_conf": {
+                "conf": "dhcp",
+                "ip": null
+            },
+            "ip_v6_conf": null,
+            "mac": "22:58:83:c4:07:fc",
+            "model": "virtio",
+            "runtime": null,
+            "vlan": null
+        }
+    ],
+    "owner": {
+        "resource_uri": "/api/2.0/user/5b4a69a3-8e78-4c45-a8ba-8b13f0895e23/",
+        "uuid": "5b4a69a3-8e78-4c45-a8ba-8b13f0895e23"
+    },
+    "requirements": [],
+    "resource_uri": "/api/2.0/servers/d6bde7f2-69ca-4825-909b-fcc08ea928ef/",
+    "runtime": null,
+    "smp": 1,
+    "status": "stopped",
+    "tags": [],
+    "uuid": "d6bde7f2-69ca-4825-909b-fcc08ea928ef",
+    "vnc_password": "updated_password"
+}

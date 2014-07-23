@@ -1,0 +1,1 @@
+{ "createloadbalancerruleresponse" :  { "loadbalancer" : {"id":2253,"name":"fake","publicipid":34000,"publicip":"1.1.1.49","publicport":"80","privateport":"80","algorithm":"roundrobin","account":"fakeaccount","domainid":801,"domain":"AA000062-libcloud-dev","state":"Add"} }  }

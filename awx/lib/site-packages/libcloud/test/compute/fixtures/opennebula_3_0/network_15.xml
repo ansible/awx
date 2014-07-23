@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NETWORK>
+    <ID>15</ID>
+    <NAME>Network 15</NAME>
+    <ADDRESS>192.168.1.0</ADDRESS>
+    <SIZE>256</SIZE>
+    <PUBLIC>NO</PUBLIC>
+</NETWORK>

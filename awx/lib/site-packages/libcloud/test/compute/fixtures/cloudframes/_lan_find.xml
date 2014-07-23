@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+<methodResponse>
+<params>
+<param>
+<value><struct>
+<member>
+<name>jobguid</name>
+<value><nil/></value></member>
+<member>
+<name>result</name>
+<value><array><data>
+<value><string>8d6a8b91-22fc-4be4-863b-11dc4456b315</string></value>
+</data></array></value>
+</member>
+</struct></value>
+</param>
+</params>
+</methodResponse>

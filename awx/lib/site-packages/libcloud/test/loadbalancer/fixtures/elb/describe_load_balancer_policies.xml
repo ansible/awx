@@ -1,0 +1,29 @@
+<DescribeLoadBalancerPoliciesResponse xmlns="http://elasticloadbalancing.amazonaws.com/doc/2012-06-01/">
+  <DescribeLoadBalancerPoliciesResult>
+    <PolicyDescriptions>
+      <member>
+        <PolicyName>MyDurationStickyPolicy</PolicyName>
+        <PolicyTypeName>LBCookieStickinessPolicyType</PolicyTypeName>
+        <PolicyAttributeDescriptions>
+          <member>
+            <AttributeName>CookieExpirationPeriod</AttributeName>
+            <AttributeValue>60</AttributeValue>
+          </member>
+        </PolicyAttributeDescriptions>
+      </member>
+      <member>
+        <PolicyName>MyAppStickyPolicy</PolicyName>
+        <PolicyTypeName>AppCookieStickinessPolicyType</PolicyTypeName>
+        <PolicyAttributeDescriptions>
+          <member>
+            <AttributeName>CookieName</AttributeName>
+            <AttributeValue>MyAppCookie</AttributeValue>
+          </member>
+        </PolicyAttributeDescriptions>
+      </member>
+    </PolicyDescriptions>
+  </DescribeLoadBalancerPoliciesResult>
+<ResponseMetadata>
+    <RequestId>83c88b9d-12b7-11e3-8b82-87b12EXAMPLE</RequestId>
+</ResponseMetadata>
+</DescribeLoadBalancerPoliciesResponse>

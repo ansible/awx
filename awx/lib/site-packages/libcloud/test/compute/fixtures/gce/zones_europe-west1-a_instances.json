@@ -1,0 +1,169 @@
+{
+  "id": "projects/project_name/zones/europe-west1-a/instances",
+  "items": [
+    {
+      "canIpForward": false,
+      "creationTimestamp": "2013-12-13T10:43:58.782-08:00",
+      "disks": [
+        {
+          "boot": true,
+          "deviceName": "libcloud-demo-europe-multiple-nodes-000",
+          "index": 0,
+          "kind": "compute#attachedDisk",
+          "mode": "READ_WRITE",
+          "source": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/disks/libcloud-demo-europe-multiple-nodes-000",
+          "type": "PERSISTENT"
+        }
+      ],
+      "id": "10947706194464948790",
+      "kind": "compute#instance",
+      "machineType": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-1",
+      "metadata": {
+        "fingerprint": "42WmSpB8rSM=",
+        "kind": "compute#metadata"
+      },
+      "name": "libcloud-demo-europe-multiple-nodes-000",
+      "networkInterfaces": [
+        {
+          "accessConfigs": [
+            {
+              "kind": "compute#accessConfig",
+              "name": "External NAT",
+              "natIP": "192.158.28.252",
+              "type": "ONE_TO_ONE_NAT"
+            }
+          ],
+          "name": "nic0",
+          "network": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/default",
+          "networkIP": "10.240.122.85"
+        }
+      ],
+      "scheduling": {
+        "automaticRestart": true,
+        "onHostMaintenance": "MIGRATE"
+      },
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/instances/libcloud-demo-europe-multiple-nodes-000",
+      "status": "RUNNING",
+      "tags": {
+        "fingerprint": "W7t6ZyTyIrc=",
+        "items": [
+          "libcloud"
+        ]
+      },
+      "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a"
+    },
+    {
+      "canIpForward": false,
+      "creationTimestamp": "2013-12-13T10:43:12.706-08:00",
+      "disks": [
+        {
+          "boot": true,
+          "deviceName": "libcloud-demo-europe-np-node",
+          "index": 0,
+          "kind": "compute#attachedDisk",
+          "mode": "READ_WRITE",
+          "source": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/disks/libcloud-demo-europe-np-node",
+          "type": "PERSISTENT"
+        },
+        {
+          "deviceName": "libcloud-demo-europe-attach-disk",
+          "index": 1,
+          "kind": "compute#attachedDisk",
+          "mode": "READ_WRITE",
+          "source": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/disks/libcloud-demo-europe-attach-disk",
+          "type": "PERSISTENT"
+        }
+      ],
+      "id": "3421745795082776097",
+      "kind": "compute#instance",
+      "machineType": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-1",
+      "metadata": {
+        "fingerprint": "42WmSpB8rSM=",
+        "kind": "compute#metadata"
+      },
+      "name": "libcloud-demo-europe-np-node",
+      "networkInterfaces": [
+        {
+          "accessConfigs": [
+            {
+              "kind": "compute#accessConfig",
+              "name": "External NAT",
+              "natIP": "23.251.128.10",
+              "type": "ONE_TO_ONE_NAT"
+            }
+          ],
+          "name": "nic0",
+          "network": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/default",
+          "networkIP": "10.240.221.125"
+        }
+      ],
+      "scheduling": {
+        "automaticRestart": true,
+        "onHostMaintenance": "MIGRATE"
+      },
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/instances/libcloud-demo-europe-np-node",
+      "status": "RUNNING",
+      "tags": {
+        "fingerprint": "W7t6ZyTyIrc=",
+        "items": [
+          "libcloud"
+        ]
+      },
+      "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a"
+    },
+    {
+      "canIpForward": false,
+      "creationTimestamp": "2013-12-13T10:43:37.267-08:00",
+      "disks": [
+        {
+          "boot": true,
+          "deviceName": "libcloud-demo-europe-boot-disk",
+          "index": 0,
+          "kind": "compute#attachedDisk",
+          "mode": "READ_WRITE",
+          "source": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/disks/libcloud-demo-europe-boot-disk",
+          "type": "PERSISTENT"
+        }
+      ],
+      "id": "517678477070693411",
+      "kind": "compute#instance",
+      "machineType": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-1",
+      "metadata": {
+        "fingerprint": "42WmSpB8rSM=",
+        "kind": "compute#metadata"
+      },
+      "name": "libcloud-demo-europe-persist-node",
+      "networkInterfaces": [
+        {
+          "accessConfigs": [
+            {
+              "kind": "compute#accessConfig",
+              "name": "External NAT",
+              "natIP": "23.251.128.32",
+              "type": "ONE_TO_ONE_NAT"
+            }
+          ],
+          "name": "nic0",
+          "network": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/default",
+          "networkIP": "10.240.240.204"
+        }
+      ],
+      "scheduling": {
+        "automaticRestart": true,
+        "onHostMaintenance": "MIGRATE"
+      },
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/instances/libcloud-demo-europe-persist-node",
+      "status": "RUNNING",
+      "tags": {
+        "fingerprint": "EbZdwVRtKyg=",
+        "items": [
+          "libcloud",
+          "newtag"
+        ]
+      },
+      "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a"
+    }
+  ],
+  "kind": "compute#instanceList",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/instances"
+}

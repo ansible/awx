@@ -1,0 +1,366 @@
+{
+    "images": [
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-06T18:14:02Z",
+            "name": "Windows 2008 SP2 x86 (B24)",
+            "server" : {
+                "id": "52415800-8b69-11e0-9b19-734f335aa7b3",
+                "name": "test-server",
+                "links": [
+                    {
+                        "rel": "self",
+                        "href": "http://servers.api.openstack.org/v1.1/1234/servers/52415800-8b69-11e0-9b19-734f335aa7b3"
+                    },
+                    {
+                        "rel": "bookmark",
+                        "href": "http://servers.api.openstack.org/1234/servers/52415800-8b69-11e0-9b19-734f335aa7b3"
+                    }
+                ]
+            },
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/13",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/13",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/13",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-06T18:13:11Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "13",
+            "metadata": {
+                "os_type": "windows"
+            }
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-06T18:13:11Z",
+            "name": "Windows 2003 R2 x86 (B24)",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/12",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/12",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/12",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-06T18:12:33Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "12",
+            "metadata": {
+                "os_type": "windows"
+            }
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-06T16:27:56Z",
+            "name": "Windows 2008 SP2 x64 (B24)",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/11",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/11",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/11",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-06T16:26:15Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "11",
+            "metadata": {
+                "os_type": "windows"
+            }
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-06T16:26:14Z",
+            "name": "Windows 2008 R2 x64 (B24)",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/10",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/10",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/10",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-06T16:24:51Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "10",
+            "metadata": {
+                "os_type": "windows"
+            }
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-06T16:24:51Z",
+            "name": "Windows 2003 R2 x64 (B24)",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/9",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/9",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/9",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-06T16:23:52Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "9",
+            "metadata": {
+                "os_type": "windows"
+            }
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-05T22:58:29Z",
+            "name": "Ubuntu Natty (11.04)",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/8",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/8",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/8",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-05T22:58:20Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "8",
+            "metadata": {}
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-05T22:58:19Z",
+            "name": "Ubuntu Lucid (10.04)",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/7",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/7",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/7",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-05T22:58:14Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "7",
+            "metadata": {}
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-05T22:58:14Z",
+            "name": "Fedora 15",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/6",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/6",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/6",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-05T22:58:01Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "6",
+            "metadata": {}
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-05T22:58:00Z",
+            "name": "Fedora 14",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/5",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/5",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/5",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-05T22:57:47Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "5",
+            "metadata": {}
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-05T22:57:47Z",
+            "name": "Debian Squeeze (6.0)",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/4",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/4",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/4",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-05T22:57:41Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "4",
+            "metadata": {}
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-05T22:57:40Z",
+            "name": "Debian Lenny (5.0)",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/3",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/3",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/3",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-05T22:57:30Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "3",
+            "metadata": {}
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-05T22:57:30Z",
+            "name": "CentOS 6.0",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/2",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/2",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/2",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-05T22:57:20Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "2",
+            "metadata": {}
+        },
+        {
+            "status": "ACTIVE",
+            "updated": "2011-08-05T22:56:20Z",
+            "name": "CentOS 5.6",
+            "links": [
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/images/1",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/images/1",
+                    "rel": "bookmark"
+                },
+                {
+                    "href": "http://10.13.136.170:9292/rs-reach-project/images/1",
+                    "type": "application/vnd.openstack.image",
+                    "rel": "alternate"
+                }
+            ],
+            "created": "2011-08-05T22:56:03Z",
+            "minDisk": 0,
+            "progress": 100,
+            "minRam": 0,
+            "id": "1",
+            "metadata": {}
+        }
+    ]
+}

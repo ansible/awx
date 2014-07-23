@@ -1,0 +1,1735 @@
+type cdrom
+size 1073741824
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description Yoper is a multipurpose high performance operating system which has been carefully optimised for PC&#39;s with either 686 or higher processor types. The binaries that come with Yoper have been built from scratch using the original sources combined with the best features of major distros, measuring up to the demanding proliferation of network communications and more intensive digital multimedia, graphics and audio capabilities which are ushering in a new era of business productivity enabled by a new generation of sophisticated microprocessors, and business application tools.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 102401
+name Yoper 2010 Linux with XFCE Install CD
+url http://yoper-linux.org/
+read:bytes 4096
+claim:type shared
+drive 7e3e7628-d1e6-47c6-858d-7b54aac5c916
+write:bytes 419434496
+read:requests 1
+os linux
+
+type cdrom
+size 2621440000
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description Ultimate Edition, first released in December 2006, is a fork of Ubuntu. The goal of the project is to create a complete, seamlessly integrated, visually stimulating, and easy-to-install operating system. Single-button upgrade is one of several special characteristics of this distribution. Other main features include custom desktop and theme with 3D effects, support for a wide range of networking options, including WiFi and Bluetooth, and integration of many extra applications and package repositories.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 640001
+name Ultimate 2.6 Linux 64bit Install CD
+url http://ultimateedition.info/
+read:bytes 440279040
+claim:type shared
+drive 526ed5cb-6fbe-46fb-a064-7707c844d774
+write:bytes 2621444096
+read:requests 107490
+os linux
+
+type cdrom
+size 1073741824
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description FreeBSD is a UN*X-like operating system for the i386, IA-64, PC-98, Alpha/AXP, and UltraSPARC platforms based on U.C. Berkeley&#39;s &quot;4.4BSD-Lite&quot; release, with some &quot;4.4BSD-Lite2&quot; enhancements. It is also based indirectly on William Jolitz&#39;s port of U.C. Berkeley&#39;s &quot;Net/2&quot; to the i386, known as &quot;386BSD&quot;, though very little of the 386BSD code remains. FreeBSD is used by companies, Internet Service Providers, researchers, computer professionals, students and home users all over the world in their work, education and recreation.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 168961
+name FreeBSD 8.0 Linux 64bit Install CD
+url http://www.freebsd.org/
+read:bytes 479866880
+claim:type shared
+drive 95380e4c-4f69-432d-be2b-1965a282bdb9
+write:bytes 692064256
+read:requests 117155
+os other
+
+type cdrom
+size 218103808
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description The Fedora 13 x86_64 (64bit) network installation CD
+favourite true
+install_notes The Fedora 13 network installaton cd will install, through the network, the latest Fedora packages; since it includes the &quot;updates&quot; repo.\n\nThe minimal install option offers great ground to build on top of a very nice base. This configuration is recommended for most servers.\n\nBuild your own and share them wth us!
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 53249
+name Fedora 13 Linux x86 64bit netinst Install CD
+url http://fedoraproject.org/
+read:bytes 1444963840
+claim:type shared
+drive 14b1e97f-5bba-4cf1-aec4-7b7b573826c2
+write:bytes 218107904
+read:requests 352119
+os linux
+
+type cdrom
+size 452984832
+use security
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description The Untangle Lite package offers a collection of free, open-source software applications to run on the Untangle Server.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.\n
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 110593
+name Untangle 7.4 Linux 64bit Install CD
+url http://www.untangle.com/
+read:bytes 4096
+claim:type shared
+drive 06c39099-9f75-40f4-b2e1-6012c87f3579
+write:bytes 452988928
+read:requests 1
+os linux
+
+type cdrom
+size 138412032
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type preinstalled
+status active
+description Puppy Linux is extraordinarily small, yet quite full featured. Puppy boots into a 64MB ramdisk, and that&#39;s it, the whole caboodle runs in RAM. Unlike live CD distributions that have to keep pulling stuff off the CD, Puppy in its entirety loads into RAM. This means that all applications start in the blink of an eye and respond to user input instantly. Puppy Linux has the ability to boot off a flash card or any USB memory device, CDROM, Zip disk or LS/120/240 Superdisk, floppy disks, internal hard drive. It can even use a multisession formatted CD-R/DVD-R to save everything back to the CD/DVD with no hard drive required at all!
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 33793
+name Puppy 5.1 Linux Install CD
+url www.puppylinux.org
+read:bytes 276828160
+claim:type shared
+drive 60111502-6ff3-43e1-9485-5be775f81657
+write:bytes 138416128
+read:requests 67585
+os linux
+
+type cdrom
+size 171966464
+use router,general,networking
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type preinstalled
+status active
+description Vyatta project is a Linux-based router and firewall offering a free community edition and two commercial editions with support. Vyatta has changed the networking world by developing the first commercially supported, open-source router &amp; firewall solution. Vyatta combines the features, performance and reliability of an enterprise router &amp; firewall with the cost savings, flexibility and security of open source.
+favourite true
+install_notes \nCD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 41985
+name Vyatta 6.1 Live CD
+url www.yyatta.com
+read:bytes 687869952
+claim:type shared
+drive 8159ab9b-9703-48f6-a206-ac26efe8fdc2
+write:bytes 171970560
+read:requests 167937
+os linux
+
+type cdrom
+size 721420288
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description ZenLive Linux is a live cd derived from Zenwalk distribution.  Zenwalk Linux (formerly Minislack) is a Slackware-based Linux distribution with focus on Internet applications, multimedia and programming tools.  ZenLive Linux LiveCD is a complete system with software for Internet browsing, mail, chat, multimedia and office, as well as for programming in C, Perl, Python and Ruby.  The main objectives of Zenwalk Linux are to be simple and fast, provide one application per task, be a complete development and desktop environment and to be small enough to fit on a 400MB ISO image.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n3. Start the server.\n4. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n5. You will be able to start using your new server via VNC.
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 176129
+name Zenlive 6.4 Linux Install CD
+url http://www.zenwalk.org/
+read:bytes 721424384
+claim:type shared
+drive fcc2aa68-24ce-438e-8386-1d4e66336155
+write:bytes 721424384
+read:requests 176129
+os linux
+
+type cdrom
+claimed 00059836-5512-4ce2-bf66-4daab2d994e4:guest:2e82c87e-61a1-443c-bc81-5c3167df5c11:ide:0:0 0014dbec-e818-4cf4-b467-d4f0dad10246:guest:3234b1fc-415f-4019-ada1-27781aea8750:ide:0:0
+size 4198498304
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description CentOS as a group is a community of open source contributors and users. Typical CentOS users are organisations and individuals that do not need strong commercial support in order to achieve successful operation. CentOS is 100% compatible rebuild of the Red Hat Enterprise Linux, in full compliance with Red Hat&#39;s redistribution requirements. CentOS is for people who need an enterprise class operating system stability without the cost of certification and support.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 1025025
+name CentOS 5.5 Linux 32bit Install DVD
+url http://www.centos.org
+read:bytes 16706375680
+claim:type shared
+drive 6e0e2282-c29a-4d19-97e6-7ddb7cdf0dd2
+write:bytes 4198502400
+read:requests 4078705
+os linux
+
+type cdrom
+size 1073741824
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd,livecd
+status active
+description Ubuntu is a complete desktop Linux operating system, freely available with both community and professional support. The Ubuntu community is built on the ideas enshrined in the Ubuntu Manifesto: that software should be available free of charge, that software tools should be usable by people in their local language and despite any disabilities, and that people should have the freedom to customise and alter their software in whatever way they see fit.&quot;Ubuntu&amp;quot; is an ancient African word, meaning&quot;humanity to others&amp;quot;. The Ubuntu distribution brings the spirit of Ubuntu to the software world.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 179201
+name Ubuntu 10.04 Linux 32bit Install CD
+url http://www.ubuntu.com/
+read:bytes 1298436608
+claim:type shared
+drive 0e305bb9-f512-4d4a-894c-4a733cae570f
+write:bytes 734007296
+read:requests 295036
+os linux
+
+type cdrom
+size 1073741824
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd,livecd
+status active
+description Chakra is a user-friendly and powerful distribution and live CD based on Arch Linux. It features a graphical installer, automatic hardware detection and configuration, the latest KDE desktop, and a variety of tools and extras.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend using it as an installation CD and not just a live CD.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 204801
+name Chakra Alpha 5 Linux 64bit Install and Live CD
+url http://chakra-project.org/
+read:bytes 185200640
+claim:type shared
+drive c0856590-c2b1-4725-9448-bba7c74d35dc
+write:bytes 838864896
+read:requests 45215
+os linux
+
+type cdrom
+claimed 00043e69-ac57-45b1-8692-75db24064fb9:guest:4c014a4e-615e-489e-b22a-bf966bce83d7:ide:0:0 00016115-af87-452b-a3bf-3affc8a7d934:guest:0a9d4833-fc5f-4825-9626-5a3e6555d329:ide:0:0 0014dbec-e818-4cf4-b467-d4f0dad10246:guest:71d09667-fd6b-491a-949f-6a7ab9c70907:ide:0:0 0008d252-5102-43a0-82c6-18e8e2dd2bff:guest:c8264872-67a1-4452-a736-8dc6ef9eb07d:ide:0:0 00016115-af87-452b-a3bf-3affc8a7d934:guest:6efe92c3-0126-4ddb-9140-73706c804c3b:ide:0:0 000932a7-c74f-4de3-bfc4-227435f78998:guest:158c515f-1649-44f0-895c-f0de39575a1c:ide:0:0 00079b57-1b29-4a89-a8d0-1d648fc20804:guest:7d62f26e-2062-469e-846a-b926dffb00b1:ide:0:0
+size 4697620480
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description -
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 1146881
+name Debian Linux 5.0 Install CD
+url http://www.debian.org/
+read:bytes 4612921344
+claim:type shared
+drive 794a068d-228c-4758-81f0-e1bc955a6cce
+write:bytes 4697624576
+read:requests 985768
+os linux
+
+type cdrom
+size 2751463424
+use dev,general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type livecd
+status active
+description Scientific Linux is a recompiled Red Hat Enterprise Linux put together by various labs and universities around the world.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n3. Start the server.\n4. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n5. You will be able to start using your new server via VNC.\n
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 674125
+name Scientific Linux 5.5 64bit Live CD
+url https://www.scientificlinux.org/
+read:bytes 10903552
+claim:type shared
+drive 7aa74ca3-4c64-4b08-9972-eddeb38a650d
+write:bytes 2761216000
+read:requests 2662
+os linux
+
+type cdrom
+size 612368384
+use networking,other
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description Nexenta OS is a free and open source operating system combining the OpenSolaris kernel with GNU application userland. Nexenta OS runs on Intel/AMD 32-/64-bit hardware and is distributed as a single installable CD. Upgrades and binary packages not included on the CD can be installed from Nexenta OS repository using Advanced Packaging Tool. In addition, source based software components can be downloaded from network repositories available at Debian/GNU Linux and Ubuntu Linux.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 149357
+name NexentaStor 3.0.3 Linux 32bit/64bit Install CD
+url http://www.nexenta.org/
+read:bytes 2822144
+claim:type shared
+drive 2c3369a5-22eb-4462-8137-35a62b7a93cf
+write:bytes 611766272
+read:requests 689
+os other
+
+type cdrom
+size 301989888
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description Zenwalk Linux (formerly Minislack) is a Slackware-based GNU/Linux operating system with a goal of being slim and fast by using only one application per task and with focus on graphical desktop and multimedia usage. Zenwalk features the latest Linux technology along with a complete programming environment and libraries to provide an ideal platform for application programmers. Zenwalk&#39;s modular approach also provides a simple way to convert Zenwalk Linux into a finely-tuned modern server (e.g. LAMP, messaging, file sharing).
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 73342
+name Zenwalk Core 6.4 Install CD
+url http://yoper-linux.org/
+read:bytes 1576960
+claim:type shared
+drive 3d58f1c6-9ec4-4963-917e-9917d39e5003
+write:bytes 300408832
+read:requests 385
+os linux
+
+type cdrom
+size 67108864
+use general,security
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type preinstalled
+status active
+description IPFire is a linux-distribution that focusses on easy setup, good handling and a high niveau of security. It is operable via an intuitive webinterface, which offers a lot of playground for beginners and even experienced administrators. IPFire is maintained by experienced developers, who are really concerned about security and regulary updates to keep it secure.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 16385
+name IPFire 2.7 Core 40 Linux 32bit Install CD
+url http://www.ipfire.org/
+read:bytes 4096
+claim:type shared
+drive 231aa9af-f2ef-407c-9374-76a1215b94d3
+write:bytes 67112960
+read:requests 1
+os linux
+
+type cdrom
+size 734003200
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description Legacy OS (formerly TEENpup Linux) is a distribution based on Puppy Linux. Although the original concept was to create a flavour of Puppy Linux with more applications and a more appealing desktop aimed at teenage users, Legacy OS has now grown to become a general purpose distribution. It comes with a large number of applications, browser plugins and media codecs as standard software. Despite these enhancements Legacy OS is still perfectly suitable for installation on older and low-resource computers, as well as modern hardware.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n3. Start the server.\n4. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n5. You will be able to start using your new server via VNC.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 179201
+name Legacy OS Linux 32bit Install CD
+url http://pupweb.org/wikka/TeenPup
+read:bytes 4096
+claim:type shared
+drive 39f24226-dc6c-40e2-abc8-e8f2da976671
+write:bytes 734007296
+read:requests 1
+os linux
+
+type cdrom
+size 209715200
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description Yohsuke Ooi has announced the release of Momonga Linux 7, a Japanese community distribution loosely modelled on Fedora.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 51201
+name Momonga 7 Linux 64bit Net Install CD
+url http://www.momonga-linux.org/
+read:bytes 4096
+claim:type shared
+drive f424888b-e66e-43f4-99c1-2991a5b82894
+write:bytes 209719296
+read:requests 1
+os linux
+
+type cdrom
+size 713031680
+use general,security,systemrecovery
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type livecd
+status active
+description CAINE (Computer Aided INvestigative Environment) is an Ubuntu-based GNU/Linux live distribution created as a project of Digital Forensics for Interdepartmental Centre for Research on Security (CRIS), supported by the University of Modena and Reggio Emilia in Italy. The CAINE forensic framework contains a collection of tools wrapped up into a user-friendly environment. It introduces novel features - it aims to fill the interoperability gap across different forensic tools, it provides a homogeneous GUI that guides digital investigators during the acquisition and analysis of electronic evidence, and it offers a semi-automatic process for the documentation and report compilation.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n3. Start the server.\n4. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n5. You will be able to start using your new server via VNC.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 174081
+name Caine 2.0 Linux 32bit Live CD
+url http://www.caine-live.net/
+read:bytes 4096
+claim:type shared
+drive 9768a0d1-e90c-44eb-8da7-06bca057cb93
+write:bytes 713035776
+read:requests 1
+os linux
+
+type cdrom
+size 708837376
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description Kongoni GNU/Linux is a Slackware-based, desktop-oriented GNU/Linux distribution and live CD. Its main features include a graphical installer, a Kongoni Integrated Setup System (KISS), and an easy-to-use Ports Installation GUI (PIG). The distribution&#39;s package management borrows its main concepts from BSD ports, with an intuitive graphical package installer that compiles and installs programs from source code on the user&#39;s system. Kongoni, which means gnu (also known as wildebeest) in Shona, includes only software that complies with Free Software Foundation&#39;s definition of software freedom.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 173057
+name Kongoni 1.12.3 Linux 32bit Live CD
+url http://www.kongoni.org/
+read:bytes 4096
+claim:type shared
+drive 6ac51b9d-a1db-44fc-b325-30bdefd0dd0a
+write:bytes 708841472
+read:requests 1
+os linux
+
+type cdrom
+size 1073741824
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type livecd
+status active
+description Debris Linux is a minimalist, desktop-oriented distribution and live CD based on Ubuntu. It includes the GNOME desktop and a small set of popular desktop applications, such as GNOME Office, Firefox web browser, Pidgin instant messenger, and ufw firewall manager. Debris Linux ships with a custom kernel, a custom system installer called DebI, and a script that makes it easy to save and restore any customisations made while in live mode.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n3. Start the server.\n4. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n5. You will be able to start using your new server via VNC.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Debris 2.0 Linux Live CD
+url http://debrislinux.org/
+read:bytes 0
+claim:type shared
+drive 258e1026-36bf-4368-ba7c-52836de4f757
+write:bytes 0
+read:requests 0
+os linux
+
+type cdrom
+size 1887436800
+use systemrecovery,general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type livecd
+status active
+description Toorox is a Linux Live-DVD based on Gentoo that starts as a bootable media using KNOPPIX technology.  While the system is booting, all necessary drivers will be included automatically (lshwd). Toorox is only using the memory and an existing swap partition at runtime, so your hard disks won&#39;t be touched by default.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.\n
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Toorox 05.2010 Linux 64bit Live CD
+url http://toorox.de/
+read:bytes 0
+claim:type shared
+drive 8fa3bc29-47e8-496a-89c6-02872a0d2642
+write:bytes 0
+read:requests 0
+os linux
+
+type cdrom
+size 2516582400
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description FreeBSD is a UN*X-like operating system for the i386, IA-64, PC-98, Alpha/AXP, and UltraSPARC platforms based on U.C. Berkeley&#39;s&quot;4.4BSD-Lite&amp;quot; release, with some&quot;4.4BSD-Lite2&amp;quot; enhancements. It is also based indirectly on William Jolitz&#39;s port of U.C. Berkeley&#39;s&quot;Net/2&amp;quot; to the i386, known as&quot;386BSD&amp;quot;, though very little of the 386BSD code remains. FreeBSD is used by companies, Internet Service Providers, researchers, computer professionals, students and home users all over the world in their work, education and recreation.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name FreeBSD 7.3 Linux 64bit Install CD
+url http://www.freebsd.org/
+read:bytes 13836288
+claim:type shared
+drive 92444414-dc65-451d-9018-2b1ab8db4ceb
+write:bytes 0
+read:requests 3378
+os other
+
+type cdrom
+size 1073741824
+use systemrecovery,security
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd,livecd
+status active
+description KANOTIX is a Linux distribution based on the latest stable release of Debian GNU/Linux. It is built on top of a latest kernel which is carefully patched with fixes and drivers for most modern hardware. Although it can be used as a live CD, it also includes a graphical installer for hard disk installation. The user-friendly nature of the distribution is further enhanced by a custom-built control centre and specialist scripts.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend using it as an installation CD and not just a live CD.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Kanotix 4-2.6 Linux with KDE 64bit Install and Live CD
+url http://www.kanotix.com/
+read:bytes 232169472
+claim:type shared
+drive c7c33c07-5e28-42c8-9800-eb40e2aef287
+write:bytes 0
+read:requests 56682
+os linux
+
+type cdrom
+size 1073741824
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description TinyMe is a Unity Linux-based mini-distribution. It exists to ease installation of Unity Linux on older computers, to provide a minimal installation for developers, and to deliver a fast Linux installation for where only the bare essentials are needed.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name TinyMe 2010 Linux Install CD
+url http://tinymelinux.com/
+read:bytes 0
+claim:type shared
+drive 87b3f98c-c95c-454d-a002-bef63f5bbc1a
+write:bytes 0
+read:requests 0
+os linux
+
+type cdrom
+size 1073741824
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description moonOS is a complete, Ubuntu-based distribution featuring the LXDE and Enlightenment 17 desktop managers and imaginative, original artwork. A project created and designed by Cambodian artist Chanrithy Thim, moonOS is intended as an operating system for any desktop, laptop or virtual machine.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name MoonOS 3 Linux 32bit Install CD
+url http://www.moonos.org/
+read:bytes 0
+claim:type shared
+drive d2651d5b-3760-41be-a8b0-6fe5ca208825
+write:bytes 0
+read:requests 0
+os linux
+
+type cdrom
+size 1073741824
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description -
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Yoper 2010 Linux with KDE3 Install CD
+url http://yoper-linux.org/
+read:bytes 0
+claim:type shared
+drive 50e0ca32-c04a-47e3-be37-1cd6f0ad9ff8
+write:bytes 0
+read:requests 0
+os linux
+
+type cdrom
+size 1073741824
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description Easy Peasy is an Ubuntu based operating system for netbooks. It&#39;s optimized for netbooks and favors the best software available by delivering Firefox with Flash and Java, Skype, Google Picasa, Songbird etc. out of the box.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name EasyPeasy 1.6 Linux Install CD
+url http://www.geteasypeasy.com/
+read:bytes 195153920
+claim:type shared
+drive daac6531-8f59-4c96-baa0-6545350d5a5e
+write:bytes 0
+read:requests 47645
+os linux
+
+type cdrom
+size 1572864000
+use email,general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description Calculate Linux is a Gentoo-based family of three distinguished distributions. Calculate Directory Server (CDS) is a solution that supports Windows and Linux clients via LDAP + SAMBA, providing proxy, mail and Jabbers servers with streamlined user management. Calculate Linux Desktop (CLD) is a workstation and client distribution with KDE, GNOME or Xfce desktop that includes a wizard to configure a connection to Calculate Directory Server. Calculate Linux Scratch (CLS) is live CD with a build framework for creating a custom distribution.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Calculate 10.4 Linux 64bit Install CD
+url http://www.calculate-linux.org/
+read:bytes 16932864
+claim:type shared
+drive 20f5b0dd-5c63-40aa-97b8-5b34e5107a25
+write:bytes 0
+read:requests 4134
+os linux
+
+type cdrom
+size 734003200
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description KahelOS is a Linux distribution based on Arch Linux. Its desktop edition comes with pre-configured GNOME as the default desktop environment, GNOME Office productivity suite, Epiphany web browser, GIMP image manipulation program, and other popular GTK+ and GNOME applications. Like Arch Linux, KahelOS maintains a rolling-release model of updating software packages using its parent&#39;s repositories. A server edition is also available. Both the desktop and server editions come in the form of installation CDs with text-based installers, but no live media.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name KahelOS 05-01-2010 Linux 64bit Install CD
+url http://www.kahelos.org/
+read:bytes 0
+claim:type shared
+drive 1ddaedbf-ceb8-43b5-a587-e9e635d97f50
+write:bytes 0
+read:requests 0
+os linux
+
+type cdrom
+size 524288000
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd,livecd
+status active
+description PCLinuxOS is a user-friendly, Mandriva-based Linux distribution with out-of-the-box support for many popular graphics and sound cards, as well as other peripheral devices. The bootable live CD provides an easy-to-use graphical installer and the distribution sports a wide range of popular applications for the typical desktop user, including browser plugins and full multimedia playback. The intuitive system configuration tools include Synaptic for package management, Addlocale to add support to many languages, Getopenoffice to install the latest OpenOffice.org, and Mylivecd to create a customised live CD.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend using it as an installation CD and not just a live CD.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name PCLinuxOS 2010.1 Linux with KDE Install and Live CD
+url http://www.pc-os.org/
+read:bytes 0
+claim:type shared
+drive 3e0f427e-10eb-4277-bc3b-48f054908a09
+write:bytes 0
+read:requests 0
+os linux
+
+type cdrom
+size 524288000
+use multimedia,general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type livecd
+status active
+description Peppermint was designed for enhanced mobility, efficiency and ease of use. While other operating systems are taking 10 minutes to load, you are already connected, communicating and getting things done. And, unlike other operating systems, Peppermint is ready to use out of the box.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n3. Start the server.\n4. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n5. You will be able to start using your new server via VNC.\n
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Peppermint 1.0 Linux Live CD
+url http://peppermintos.com/
+read:bytes 0
+claim:type shared
+drive 92ffa2f6-f663-49d9-98ec-dc0b474369c4
+write:bytes 0
+read:requests 0
+os linux
+
+type cdrom
+size 419430400
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type livecd
+status active
+description PureOS and PureOSlight are GNU/Linux live CDs based on Debian&#39;s testing repository. These are desktop distributions that can be used as live media (CD or USB) or as full-featured operating systems installed on a hard disk. PureOS is a 700 MB live CD with KDE, Iceweasel, Icedove, OpenOffice.org, Songbird, VLC and K3B. PureOSlight is a small 300 MB live CD with Xfce, Iceweasel, Icedove, AbiWord, Gnumeric and Exaile.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n3. Start the server.\n4. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n5. You will be able to start using your new server via VNC.\n
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name PureOS 2.0 Linux Live CD
+url http://www.pureos.org/
+read:bytes 100663296
+claim:type shared
+drive ed6421b5-41c2-4ba3-a3c9-7c330d36e5b3
+write:bytes 0
+read:requests 24576
+os linux
+
+type cdrom
+size 104857600
+use dev,general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description ReactOS® is a free, modern operating system based on the design of Windows® XP/2003. Written completely from scratch, it aims to follow the Windows-NT® architecture designed by Microsoft from the hardware level right through to the application level. This is not a Linux based system, and shares none of the unix architecture.  The main goal of the ReactOS project is to provide an operating system which is binary compatible with Windows. This will allow your Windows applications and drivers to run as they would on your Windows system. Additionally, the look and feel of the Windows operating system is used, such that people accustomed to the familiar user interface of Windows® would find using ReactOS straightforward. The ultimate goal of ReactOS is to allow you to remove Windows® and install ReactOS without the end user noticing the change.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name ReactOS 0.3.11 Alpha Install CD
+url http://www.reactos.org/
+read:bytes 0
+claim:type shared
+drive 327fd7dd-a2ca-4437-b87e-7610fccc3202
+write:bytes 0
+read:requests 0
+os other
+
+type cdrom
+size 1887436800
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description Ubuntu Studio is a variant of Ubuntu aimed at the GNU/Linux audio, video and graphic enthusiast as well as professional. The distribution provides a collection of open-source applications available for multimedia creation.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Ubuntu Studio 10.04 Linux 32bit Install CD
+url http://www.ubuntu.com/
+read:bytes 499675136
+claim:type shared
+drive c6a368d1-cae6-43d9-8af6-b42142aed4b9
+write:bytes 0
+read:requests 121991
+os linux
+
+type cdrom
+size 1073741824
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+bits 32
+drive_type livecd
+status active
+description Vector Linux is a small, fast, Intel based Linux operating system for PC style computers. The creators of Vector Linux had a single credo: keep it simple, keep it small and let the end user decide what their operating system is going to be. What has evolved from this concept is perhaps the best little Linux operating system available anywhere. For the casual computer user you have a lightening fast desktop with graphical programs to handle your daily activities from web surfing, sending and receiving email, chatting on ICQ or IRC to running an ftp server. The power user will be pleased because all the tools are there to compile their own programs, use the system as a server or perhaps the gateway for their home or office computer network. Administrators will be equally as pleased because the small size and memory requirements of the operating system can be deployed on older machines maybe long forgotten.
+favourite true
+free true
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Vector 6.0 Linux with KDE Live CD
+url http://www.vectorlinux.com/
+read:bytes 0
+claim:type shared
+drive 0aa0b75d-ce40-4877-9882-8a81443911fe
+write:bytes 0
+read:requests 0
+os linux
+
+type cdrom
+size 713031680
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description Greenie Linux is an Ubuntu-based distribution customised for Slovak and Czech users.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Greenie 7 Linux 32bit Install CD
+url http://www.greenie.sk/
+read:bytes 0
+claim:type shared
+drive bdddc973-e84f-4cbc-a2c9-a9fce73bc462
+write:bytes 0
+read:requests 0
+os linux
+
+type cdrom
+size 67108864
+use networking,gateway
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd,livecd
+status active
+description pfSense is a free, open source customized distribution of FreeBSD tailored for use as a firewall and router. In addition to being a powerful, flexible firewalling and routing platform, it includes a long list of related features and a package system allowing further expandability without adding bloat and potential security vulnerabilities to the base distribution. pfSense is a popular project with more than 1 million downloads since its inception, and proven in countless installations ranging from small home networks protecting a PC and an Xbox to large corporations, universities and other organizations protecting thousands of network devices. 
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend using it as an installation CD and not just a live CD.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name PfSense 1.2.3 Linux 32bit Live and Install CD
+url http://www.pfsense.org
+read:bytes 68657152
+claim:type shared
+drive db46ea0d-26f3-4cd0-8a55-54da2af10363
+write:bytes 0
+read:requests 16762
+os linux
+
+type cdrom
+size 46137344
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type installcd
+status active
+description Mandrake Linux was created in 1998 with the goal of making Linux easier to use for everyone. At that time, Linux was already well-known as a powerful and stable operating system that demanded strong technical knowledge and extensive use of the &quot;command line&quot;; MandrakeSoft saw this as an opportunity to integrate the best graphical desktop environments and contribute its own graphical configuration utilities and quickly became famous for setting the standard in ease-of-use and functionality. Mandriva Linux, formerly known as Mandrakelinux, is a friendly Linux Operating System which specializes in ease-of-use for both servers and the home/office. It is freely available in many languages throughout the world.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend to use this as an installation and not live CD only.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Mandriva Spring 2010 Linux 64bit Net Install CD
+url http://mandriva.com/
+read:bytes 19488768
+claim:type shared
+drive 857456e4-e16c-4a6f-9bfc-f5be3e58bde5
+write:bytes 0
+read:requests 4758
+os linux
+
+type cdrom
+size 1606418432
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description UHU-Linux is the leading distribution of Linux in Hungary. It is primarily intended for Hungarian users, thus special care is taken to support the Hungarian language as much as possible. Ease of installation and sane default settings both help new users of Linux and make veterans feel comfortable. Usability as the main goal involves having all the cutting-edge yet stable releases of Open Source packages, with dpkg as the package manager. Development is completely open and everyone is invited to join.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 392193
+name Uhu Linux 2.2 32bit Install CD
+url http://uhulinux.hu/
+read:bytes 354873344
+claim:type shared
+drive 9d99705b-818a-49f8-8c77-0cd4a42cdea6
+write:bytes 1606422528
+read:requests 86639
+os linux
+
+type cdrom
+size 734003200
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description Chakra, a fast, user-friendly and extremely powerful Live CD and/or distrolet based on the award winning KDE Software Compilation and on the GNU/Linux distribution for connoisseurs: Arch Linux.  Currently in alpha stage, it features a graphical installer, automatic hardware configuration, and of course some more tools and extras.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n3. Start the server.\n4. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n5. You will be able to start using your new server via VNC.
+volume 00106cda-0e17-40c8-a576-b516f0eb67bc
+host 00109617-2c6b-424b-9cfa-5b572c17bafe
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 179201
+name Chakra 2.0 Linux Live CD
+url http://www.chakra-project.org/
+read:bytes 4096
+claim:type shared
+drive fdfa8104-05fb-4210-aba5-fe78c4e6ee8c
+write:bytes 734007296
+read:requests 1
+os linux
+
+type cdrom
+size 662700032
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 32
+drive_type installcd
+status active
+description UberStudent (&quot;uber&quot; meaning &quot;productive&quot; in Latin) is an Ubuntu-based distribution on a DVD designed for learning and teaching academic computing at the higher education and advanced secondary levels. UberStudent comes with software for everyday computing tasks, plus a core set of programs and features designed to teach and make easier the tasks and habits common to high-performing students of all academic disciplines. Lifelong learners, as well as any sort of knowledge worker, will equally benefit. UberStudent is supported by a free Moodle virtual learning environment.
+favourite true
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0013fc75-b170-4d62-abaf-804b8fc466cc
+host 001318df-35c6-439f-8e72-8d57c36ca86b
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 161793
+name UberStudent 1.0 Linux with LXDE 32bit Install CD
+url http://www.uberstudent.org/
+read:bytes 4096
+claim:type shared
+drive 854a9706-fb14-4868-80df-53d712f1531a
+write:bytes 662704128
+read:requests 1
+os linux
+
+type disk
+size 3221225472
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type preinstalled
+status active
+description This is a pre-installed ready Fedora system that can be deployed to your account instantly. Please refer to the install notes for a full guide to initial configuration. The Fedora Project is an openly-developed project designed by Red Hat, open for general participation, led by a meritocracy, following a set of project objectives. The goal of The Fedora Project is to work with the Linux community to build a complete, general purpose operating system exclusively from open source software. Development will be done in a public forum. The project will produce time-based releases of Fedora about 2-3 times a year, with a public release schedule. The Red Hat engineering team will continue to participate in building Fedora and will invite and encourage more outside participation than in past releases. By using this more open process, we hope to provide an operating system more in line with the ideals of free software and more appealing to the open source community.
+favourite true
+install_notes ***You must update the default root/superuser password for Fedora 13 on first login.***\n\nPre-installed Fedora 13 64bit Linux on 24/07/2010\n============================================================\n\n1. Minimum Hardware Requirements\n--------------------------------------------------\n\nThe recommended minimum hardware requirements based on user feedback are:\n\nCPU: 1GHz\nRAM: 1GHz\n\nWe recommend specifying a larger size for a better user experience.\n\n\n2. Access your server for the first time using VNC\n----------------------------------------------------\nInitially you will need to access your server via VNC to complete the setup. \n\na) Start up your new server.\n\nb) Please use one of the recommended VNC clients, you will find a full list by following the &#39;Connect to your server via VNC now&#39; link on general tab of the server detail window.\n\nb) Use the IP address and VNC password as provided on the general tab of the server detail window.\n\nc) After a few seconds you should see your server appear.\n\n\n3. Complete the personalisation of your new server\n---------------------------------------------------------------------\nUpon first start-up you should be presented with the welcome screen after the initial boot process has completed. You will now have the opportunity to personalise your system installation. \na) Click the &#39;forward&#39; button to get started.\n\nb) You will now see the license information for this system. Fedora 13 has an open source GNU license. Assuming this is acceptable you should click the &#39;forward&#39; button again.\n\nc) You can now create your own user account, enter your name and set the password. Please note:\n\nTHIS IS NOT THE ADMINISTRATIVE ACCOUNT. YOU SHOULD RESET THE ROOT/SUPERUSER PASSWORD AS OUTLINED IN STEP 4 BELOW AFTER COMPLETING STEP 3.\n\nd) After clicking forward again you will have the opportunity to set the time servers that will set your servers time. You can just leave the default values unless you have some specific needs. Once you are happy please click the &#39;forward&#39; button.\n\ne) Finally you have the option to submit your hardware profile to the Fedora Project to help with their development. This is entirely your personal choice. Either way once you are ready click the &#39;finish&#39; button.\n\n4. Update your root/superuser password\n----------------------------------------------------\n\nThe default account is: cloudsigma\nThe default root/superuser password is set to: cloudsigma .\n\nPlease CHANGE this IMMEDIATELY after first connecting with VNC.\n\na) Open a terminal or use the command line.\n\nb) Type the command:\n\nsu root\n\nWhen prompted use the password &#39;cloudsigma&#39; (don&#39;t type the quote marks). The prompt should change to show you now using the root/superuser account.\n\nc) Now type the command:\n\npasswd\n\nd) When prompted enter a new password. We recommend a password of at least 8 characters including upper case and lower case letters as well as numbers.\n\ne) CoudSigma does not have access to your server account passwords. It is imperative that you securely store and manage your own passwords for your servers.\n\nf) Please note your root/superuser password is different from your VNC password. You can change your VNC password from the web console at any time.\n\n\n5. Expanding your drive\n--------------------------------\n\nThe system is fully installed and designed to expand to fill the initial size of the drive. After first login you should find that the system has used the full disk size as its partition.\n\n\n6. Enabling Remote Access\n--------------------------------------\n\nVNC access is always enabled in our cloud allowing emergency recovery. We recommend using SSH to access your server for command line actions. By default this is turned off initially for security reasons. You will need to enable and install SSH if you wish to use it for access moving forward.\n\n\n7. Networking\n-------------------------\na) IP networking can be left as DHCP. Even if you are using a static IP address with this server our management layer will apply the same IP address via DHCP. Using DHCP ensures you will have no issues receiving the correct networking settings. We recommend using DHCP initially if only to receive all the correct networking settings.\n\nb) CloudSigma employs an open networking infrastructure. All ports are open for inbound and outbound traffic with the exception of port 25 (SMTP) which is blocked for trial users.\n\nIt is important that you secure access to your server according to your needs.
+volume 0003ca60-6b03-4da9-a409-84d8d7afa738
+host 00031836-a624-4b22-bc7d-41ff8977087b
+user 00000000-0000-0000-0000-000000000001
+autoexpanding true
+write:requests 786433
+name Fedora 13 Linux 64bit Preinstalled System
+url http://fedoraproject.org/
+read:bytes 40962080768
+claim:type shared
+drive d18119ce-7afa-474a-9242-e0384b160220
+write:bytes 3221229568
+read:requests 10000508
+os linux
+
+type disk
+size 4294967296
+use dbserver,webserver,email,general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type preinstalled
+status active
+favourite true
+install_notes ***You must update the default root/superuser password for Debian 5.0 on first login.***\n\nPre-installed Debian 5.0 64bit Linux on 02/08/2010\n========================================\n\n1. Minimum Hardware Requirements\n--------------------------------------------------\n\nThe recommended minimum hardware requirements based on user feedback are:\n\nCPU: 1GHz\nRAM: 1GHz\n\nWe recommend specifying a larger size for a better user experience.\n\n\n2. Access your server for the first time using VNC\n------------------------------------------------------------------\nInitially you will need to access your server via VNC to complete the setup. \n\na) Start up your new server.\n\nb) Please use one of the recommended VNC clients, you will find a full list by following the &#39;Connect to your server via VNC now&#39; link on general tab of the server detail window.\n\nb) Use the IP address and VNC password as provided on the general tab of the server detail window.\n\nc) After a few seconds you should see your server appear.\n\n\n3. Update your root/superuser password\n-------------------------------------------------------\n\nThe default accounta are: root and cloudsigma\nThe default passwords for both accounts is set to: cloudsigma .\n\nPlease CHANGE this IMMEDIATELY after first connecting with VNC.\n\na) Open a terminal or use the command line.\n\nb) Type the command:\n\npasswd\n\nc) When prompted enter the password &#39;cloudsigma&#39; (no quotes should be typed) again and press return. You will then be prompted to enter a new password. We recommend a password of at least 8 characters including upper case and lower case letters as well as numbers.\n\nd) CloudSigma does not have access to your server account passwords. It is imperative that you securely store and manage your own passwords for your servers.\n\ne) Please note your root/superuser password is different from your VNC password. You can change your VNC password from the web console at any time.\n\n\n4. Expanding your drive\n--------------------------------\n\nThe system is fully installed, but you will need to extend the disk partition to cover the whole of your drive if you chose a disk size greater than 20GB. There are a number of tools which you can use to achieve this included GParted, the CD of which is also available in the drives library.\n\n\n4. Enabling Remote Access\n--------------------------------------\n\nVNC access is always enabled in our cloud allowing emergency recovery. We recommend using SSH to access your server for command line actions. By default this is turned off initially for security reasons. You will need to enable and install SSH if you wish to use it for access moving forward.\n\n\n5. Networking\n-------------------\na) IP networking can be left as DHCP. Even if you are using a static IP address with this server our management layer will apply the same IP address via DHCP. Using DHCP ensures you will have no issues receiving the correct networking settings. We recommend using DHCP initially if only to receive all the correct networking settings.\n\nb) CloudSigma employs an open networking infrastructure. All ports are open for inbound and outbound traffic with the exception of port 25 (SMTP) which is blocked for trial users.\n\nIt is important that you secure access to your server according to your needs.
+volume 0003ca60-6b03-4da9-a409-84d8d7afa738
+host 00031836-a624-4b22-bc7d-41ff8977087b
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 1048577
+name Debian 5.0 Preinstalled without X
+url www.debian.org
+read:bytes 35180666880
+claim:type shared
+drive fd49670e-17e8-4b0e-b03e-d6a65c138445
+write:bytes 4294971392
+read:requests 8589030
+os linux
+
+type disk
+size 21474836480
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type preinstalled
+status active
+description This is a pre-installed ready CentOS system that can be deployed to your account instantly. Please refer to the install notes for a full guide to initial configuration. CentOS is an Enterprise-class Linux Distribution derived from sources freely provided to the public by a prominent North American Enterprise Linux vendor. CentOS conforms fully with the upstream vendors redistribution policy and aims to be 100% binary compatible.
+favourite true
+install_notes ***You must update the default root/superuser password for CentOS 5.5 on first login.***\n\nPre-installed CentOS 5.5 64bit Linux on 24/07/2010\n============================================================\n\n1. Minimum Hardware Requirements\n--------------------------------------------------\n\nThe recommended minimum hardware requirements based on user feedback are:\n\nCPU: 1GHz\nRAM: 1GHz\n\nWe recommend specifying a larger size for a better user experience.\n\n\n2. Access your server for the first time using VNC\n----------------------------------------------------\nInitially you will need to access your server via VNC to complete the setup. \n\na) Start up your new server.\n\nb) Please use one of the recommended VNC clients, you will find a full list by following the &#39;Connect to your server via VNC now&#39; link on general tab of the server detail window.\n\nb) Use the IP address and VNC password as provided on the general tab of the server detail window.\n\nc) After a few seconds you should see your server appear.\n\n\n3. Update your root/superuser password\n----------------------------------------------------\n\nThe default account is: root\nThe default root/superuser password is set to: CloudSigma .\n\nPlease CHANGE this IMMEDIATELY after first connecting with VNC.\n\na) Open a terminal or use the command line.\n\nb) Type the command:\n\npasswd\n\nc) When prompted enter the password &#39;CloudSigma&#39; (no quotes should be typed) again and press return. You will then be prompted to enter a new password. We recommend a password of at least 8 characters including upper case and lower case letters as well as numbers.\n\nd) CloudSigma does not have access to your server account passwords. It is imperative that you securely store and manage your own passwords for your servers.\n\ne) Please note your root/superuser password is different from your VNC password. You can change your VNC password from the web console at any time.\n\n\n4. Expanding your drive\n--------------------------------\n\nThe system is fully installed, but you will need to extend the disk partition to cover the whole of your drive if you chose a disk size greater than 20GB. There are a number of tools which you can use to achieve this included GParted, the CD of which is also available in the drives library.\n\n\n4. Enabling Remote Access\n--------------------------------------\n\nVNC access is always enabled in our cloud allowing emergency recovery. We recommend using SSH to access your server for command line actions. By default this is turned off initially for security reasons. You will need to enable and install SSH if you wish to use it for access moving forward.\n\n\n5. Networking\n-------------------------\na) IP networking can be left as DHCP. Even if you are using a static IP address with this server our management layer will apply the same IP address via DHCP. Using DHCP ensures you will have no issues receiving the correct networking settings. We recommend using DHCP initially if only to receive all the correct networking settings.\n\nb) CloudSigma employs an open networking infrastructure. All ports are open for inbound and outbound traffic with the exception of port 25 (SMTP) which is blocked for trial users.\n\nIt is important that you secure access to your server according to your needs.
+volume 000431a5-46d9-4a67-9c03-3c3402a41992
+host 00043e69-ac57-45b1-8692-75db24064fb9
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 5242881
+name CentOS 5.5 Linux 64bit Preinstalled System
+url http://www.centos.org/
+read:bytes 251925499904
+claim:type shared
+drive 1ea7dead-9d52-4e79-9a9b-435db7cc972c
+write:bytes 21474840576
+read:requests 61505249
+os linux
+
+type disk
+size 2684354560
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type preinstalled
+status active
+description This is a pre-installed ready Ubuntu system that can be deployed to your account instantly. Please refer to the install notes for a full guide to initial configuration.  Ubuntu Linux is a complete desktop Linux operating system, freely available with both community and professional support. The Ubuntu community is built on the ideas enshrined in the Ubuntu Manifesto: that software should be available free of charge, that software tools should be usable by people in their local language and despite any disabilities, and that people should have the freedom to customise and alter their software in whatever way they see fit. &quot;Ubuntu&quot; is an ancient African word, meaning &quot;humanity to others&quot;. The Ubuntu Linux distribution brings the spirit of Ubuntu to the software world.
+favourite true
+install_notes ***You must update the default root/superuser password for Ubuntu 10.04 on first login.***\n\nPre-installed Ubuntu 10.04 64bit Linux on 24/07/2010\n============================================================\n\n1. Minimum Hardware Requirements\n--------------------------------------------------\n\nThe recommended minimum hardware requirements based on user feedback are:\n\nCPU: 1GHz\nRAM: 1GHz\n\nWe recommend specifying a larger size for a better user experience.\n\n\n2. Access your server for the first time using VNC\n----------------------------------------------------\nInitially you will need to access your server via VNC to complete the setup. \n\na) Start up your new server.\n\nb) Please use one of the recommended VNC clients, you will find a full list by following the &#39;Connect to your server via VNC now&#39; link on general tab of the server detail window.\n\nb) Use the IP address and VNC password as provided on the general tab of the server detail window.\n\nc) After a few seconds you should see your server appear.\n\n\n3. Update your root/superuser password\n----------------------------------------------------\n\nThe default account is: cloudsigma\nThe default root/superuser password is set to: cloudsigma .\n\nPlease CHANGE this IMMEDIATELY after first connecting with VNC.\n\na) Open a terminal or use the command line.\n\nb) Type the command:\n\nsudo su\n\nWhen prompted use the password &#39;cloudsigma&#39; (don&#39;t type the quote marks). The prompt should change to show you now using the root/superuser account.\n\nc) Now type the command:\n\npasswd\n\nd) When prompted enter a new password. We recommend a password of at least 8 characters including upper case and lower case letters as well as numbers.\n\ne) CoudSigma does not have access to your server account passwords. It is imperative that you securely store and manage your own passwords for your servers.\n\nf) Please note your root/superuser password is different from your VNC password. You can change your VNC password from the web console at any time.\n\n\n4. Expanding your drive\n--------------------------------\n\nThe system is fully installed and designed to expand to fill the initial size of the drive. After first login you should find that the system has used the full disk size as its partition.\n\n\n4. Enabling Remote Access\n--------------------------------------\n\nVNC access is always enabled in our cloud allowing emergency recovery. We recommend using SSH to access your server for command line actions. By default this is turned off initially for security reasons. You will need to enable and install SSH if you wish to use it for access moving forward.\n\n\n5. Networking\n-------------------------\na) IP networking can be left as DHCP. Even if you are using a static IP address with this server our management layer will apply the same IP address via DHCP. Using DHCP ensures you will have no issues receiving the correct networking settings. We recommend using DHCP initially if only to receive all the correct networking settings.\n\nb) CloudSigma employs an open networking infrastructure. All ports are open for inbound and outbound traffic with the exception of port 25 (SMTP) which is blocked for trial users.\n\nIt is important that you secure access to your server according to your needs.
+volume 00059deb-640a-464e-9509-6a3ec6cfd549
+host 00059836-5512-4ce2-bf66-4daab2d994e4
+user 00000000-0000-0000-0000-000000000001
+autoexpanding true
+write:requests 655361
+name Ubuntu Linux 10.04 Desktop 64bit Preinstalled System
+url http://www.ubuntu.com/
+read:bytes 24617140224
+claim:type shared
+drive 99a75966-209f-41d5-817c-7a3916354540
+write:bytes 2684358656
+read:requests 6010044
+os linux
+
+type disk
+size 8589934592
+use dbserver,webserver,email,general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type preinstalled
+status active
+favourite true
+install_notes ***You must update the default root/superuser password for Ubuntu 10.04 on first login.***\n\nPre-installed Ubuntu 10.04 64bit Linux on 01/09/2010\n============================================================\n\n1. Minimum Hardware Requirements\n--------------------------------------------------\n\nThe recommended minimum hardware requirements based on user feedback are:\n\nCPU: 1GHz\nRAM: 1GHz\n\nWe recommend specifying a larger size for a better user experience.\n\n\n2. Access your server for the first time using VNC\n----------------------------------------------------\nInitially you will need to access your server via VNC to complete the setup. \n\na) Start up your new server.\n\nb) Please use one of the recommended VNC clients, you will find a full list by following the &#39;Connect to your server via VNC now&#39; link on general tab of the server detail window.\n\nb) Use the IP address and VNC password as provided on the general tab of the server detail window.\n\nc) After a few seconds you should see your server appear.\n\n\n3. Update your root/superuser password\n----------------------------------------------------\n\nThe default account is: cloudsigma\nThe default root/superuser password is set to: cloudsigma .\n\nPlease CHANGE this IMMEDIATELY after first connecting with VNC.\n\na) Open a terminal or use the command line.\n\nb) Type the command:\n\nsudo su\n\nWhen prompted use the password &#39;cloudsigma&#39; (don&#39;t type the quote marks). The prompt should change to show you now using the root/superuser account.\n\nc) Now type the command:\n\npasswd\n\nd) When prompted enter a new password. We recommend a password of at least 8 characters including upper case and lower case letters as well as numbers.\n\ne) CoudSigma does not have access to your server account passwords. It is imperative that you securely store and manage your own passwords for your servers.\n\nf) Please note your root/superuser password is different from your VNC password. You can change your VNC password from the web console at any time.\n\n\n4. Expanding your drive\n--------------------------------\n\nThe system is fully installed and designed to expand to fill the initial size of the drive. After first login you should find that the system has used the full disk size as its partition.\n\n\n4. Enabling Remote Access\n--------------------------------------\n\nVNC access is always enabled in our cloud allowing emergency recovery. We recommend using SSH to access your server for command line actions. By default this is turned off initially for security reasons. You will need to enable and install SSH if you wish to use it for access moving forward.\n\n\n5. Networking\n-------------------------\na) IP networking can be left as DHCP. Even if you are using a static IP address with this server our management layer will apply the same IP address via DHCP. Using DHCP ensures you will have no issues receiving the correct networking settings. We recommend using DHCP initially if only to receive all the correct networking settings.\n\nb) CloudSigma employs an open networking infrastructure. All ports are open for inbound and outbound traffic with the exception of port 25 (SMTP) which is blocked for trial users.\n\nIt is important that you secure access to your server according to your needs.
+volume 000848ef-af56-4fe4-b724-5338a9fa6aa6
+host 0008d252-5102-43a0-82c6-18e8e2dd2bff
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 2097153
+name Ubuntu 10.04 Server Edition Linux 64bit
+url http://www.ubuntu.com/server
+read:bytes 71391387648
+claim:type shared
+drive 0b060e09-d98b-44cc-95a4-7e3a22ba1b53
+write:bytes 8589938688
+read:requests 17429538
+os linux
+
+type disk
+size 21474836480
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type preinstalled
+status active
+description This is a pre-installed ready CentOS system including AppFirst monitoring software that can be deployed to your account instantly.  Please refer to the install notes for a full guide to initial configuration.  CentOS is an Enterprise-class Linux Distribution derived from sources freely provided to the public by a prominent North American Enterprise Linux vendor. CentOS conforms fully with the upstream vendors redistribution policy and aims to be 100% binary compatible.
+favourite true
+install_notes ***You must update the default root/superuser password for CentOS 5.5 on first login.***\n\nPre-installed CentOS 5.5 64bit Linux with AppFirst Monitoring on 24/07/2010\n============================================================\n\n1. Minimum Hardware Requirements\n--------------------------------------------------\n\nThe recommended minimum hardware requirements based on user feedback are:\n\nCPU: 1GHz\nRAM: 1GHz\n\nWe recommend specifying a larger size for a better user experience.\n\n\n2. Access your server for the first time using VNC\n----------------------------------------------------\nInitially you will need to access your server via VNC to complete the setup. \n\na) Start up your new server.\n\nb) Please use one of the recommended VNC clients, you will find a full list by following the &#39;Connect to your server via VNC now&#39; link on general tab of the server detail window.\n\nb) Use the IP address and VNC password as provided on the general tab of the server detail window.\n\nc) After a few seconds you should see your server appear.\n\n\n3. Update your root/superuser password\n----------------------------------------------------\n\nThe default account is: root\nThe default root/superuser password is set to: CloudSigma .\n\nPlease CHANGE this IMMEDIATELY after first connecting with VNC.\n\na) Open a terminal or use the command line.\n\nb) Type the command:\n\npasswd\n\ne) When prompted enter the password &#39;CloudSigma&#39; (no quotes should be typed) again and press return. You will then be prompted to enter a new password. We recommend a password of at least 8 characters including upper case and lower case letters as well as numbers.\n\nf) CloudSigma does not have access to your server account passwords. It is imperative that you securely store and manage your own passwords for your servers.\n\ng) Please note your root/superuser password is different from your VNC password. You can change your VNC password from the web console at any time.\n\n\n4. Expanding your drive\n--------------------------------\n\nThe system is fully installed, but you will need to extend the disk partition to cover the whole of your drive if you chose a disk size greater than 20GB. There are a number of tools which you can use to achieve this included GParted, the CD of which is also available in the drives library.\n\n\n4. Enabling Remote Access\n--------------------------------------\n\nVNC access is always enabled in our cloud allowing emergency recovery. We recommend using SSH to access your server for command line actions. By default this is turned off initially for security reasons. You will need to enable and install SSH if you wish to use it for access moving forward.\n\n\n5. Networking\n-------------------------\na) IP networking can be left as DHCP. Even if you are using a static IP address with this server our management layer will apply the same IP address via DHCP. Using DHCP ensures you will have no issues receiving the correct networking settings. We recommend using DHCP initially if only to receive all the correct networking settings.\n\nb) CloudSigma employs an open networking infrastructure. All ports are open for inbound and outbound traffic with the exception of port 25 (SMTP) which is blocked for trial users.\n\nIt is important that you secure access to your server according to your needs.\n\n\n6. AppFirst\n-------------------------\nThis disk image includes AppFirst monitoring software already installed. This software is able to provide in-depth server and application performance feedback. In order to take advantage of this software you need to have an AppFirst account.\n\nFull details of AppFirst&#39;s services including a 14-day free trial are available at http://www.appfirst.com .
+volume 00106cda-0e17-40c8-a576-b516f0eb67bc
+host 00109617-2c6b-424b-9cfa-5b572c17bafe
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 5242881
+name CentOS 5.5 Linux 64bit Preinstalled System with AppFirst Monitoring
+read:bytes 838707331072
+claim:type shared
+drive c157e1eb-aa9c-4dd7-80b8-6fd4a238f2a9
+write:bytes 21474840576
+read:requests 204762532
+os linux
+
+type disk
+size 8589934592
+use dbserver,webserver,email,general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free true
+bits 64
+drive_type preinstalled
+status active
+favourite true
+install_notes ***You must update the default root/superuser password for Debian 5.0 on first login.***\n\nPre-installed Debian 5.0 64bit Linux on 02/08/2010\n========================================\n\n1. Minimum Hardware Requirements\n--------------------------------------------------\n\nThe recommended minimum hardware requirements based on user feedback are:\n\nCPU: 1GHz\nRAM: 1GHz\n\nWe recommend specifying a larger size for a better user experience.\n\n\n2. Access your server for the first time using VNC\n------------------------------------------------------------------\nInitially you will need to access your server via VNC to complete the setup. \n\na) Start up your new server.\n\nb) Please use one of the recommended VNC clients, you will find a full list by following the &#39;Connect to your server via VNC now&#39; link on general tab of the server detail window.\n\nb) Use the IP address and VNC password as provided on the general tab of the server detail window.\n\nc) After a few seconds you should see your server appear.\n\n\n3. Update your root/superuser password\n-------------------------------------------------------\n\nThe default accounta are: root and cloudsigma\nThe default passwords for both accounts is set to: cloudsigma .\n\nPlease CHANGE this IMMEDIATELY after first connecting with VNC.\n\na) Open a terminal or use the command line.\n\nb) Type the command:\n\npasswd\n\nc) When prompted enter the password &#39;cloudsigma&#39; (no quotes should be typed) again and press return. You will then be prompted to enter a new password. We recommend a password of at least 8 characters including upper case and lower case letters as well as numbers.\n\nd) CloudSigma does not have access to your server account passwords. It is imperative that you securely store and manage your own passwords for your servers.\n\ne) Please note your root/superuser password is different from your VNC password. You can change your VNC password from the web console at any time.\n\n\n4. Expanding your drive\n--------------------------------\n\nThe system is fully installed, but you will need to extend the disk partition to cover the whole of your drive if you chose a disk size greater than 20GB. There are a number of tools which you can use to achieve this included GParted, the CD of which is also available in the drives library.\n\n\n4. Enabling Remote Access\n--------------------------------------\n\nVNC access is always enabled in our cloud allowing emergency recovery. We recommend using SSH to access your server for command line actions. By default this is turned off initially for security reasons. You will need to enable and install SSH if you wish to use it for access moving forward.\n\n\n5. Networking\n-------------------\na) IP networking can be left as DHCP. Even if you are using a static IP address with this server our management layer will apply the same IP address via DHCP. Using DHCP ensures you will have no issues receiving the correct networking settings. We recommend using DHCP initially if only to receive all the correct networking settings.\n\nb) CloudSigma employs an open networking infrastructure. All ports are open for inbound and outbound traffic with the exception of port 25 (SMTP) which is blocked for trial users.\n\nIt is important that you secure access to your server according to your needs.
+volume 001118bb-dbdb-4ab0-b7db-d4cceb160098
+host 00115b1d-6fe9-40b2-a013-426a6a584ff7
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 2097153
+name Debian 5.0 Preinstalled
+url www.debian.org
+read:bytes 71179878400
+claim:type shared
+drive 9b732c4e-32a3-4369-b5f7-9a0325195baa
+write:bytes 8589938688
+read:requests 17377900
+os linux
+
+type cdrom
+claimed 0002c6df-a1d2-4d1d-96f0-f95405a28183:guest:7055acf3-8d9a-4a99-a24f-dda1aaf37944:ide:0:0 00115b1d-6fe9-40b2-a013-426a6a584ff7:guest:0a486768-08c1-419d-ad9c-1c8143df3496:ide:0:0
+size 2248146944
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+bits 64
+email drives@elastichosts.com
+drive_type installcd
+status active
+description -
+favourite false
+free false
+volume 0007aee7-bd5b-4551-9d8f-a958051235a9
+host 00079b57-1b29-4a89-a8d0-1d648fc20804
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Windows Web Server 2008 Trial Install CD
+url http://www.microsoft.com
+read:bytes 55097581056
+claim:type shared
+drive 7aead6d3-c3e6-4940-85c7-f5ee61f6ef2b
+write:bytes 0
+read:requests 22364695
+os windows
+
+type cdrom
+claimed 0014dbec-e818-4cf4-b467-d4f0dad10246:guest:6100e29c-708d-4a5b-821b-6a9faa3ba013:ide:0:1 00031836-a624-4b22-bc7d-41ff8977087b:guest:fcde7569-e034-452c-9909-7c485f5d168f:ide:0:0 00154bbf-adf4-475d-9fe6-71c1e987d1bd:guest:1ac4641e-aa67-47f2-a77d-e9c5982d68b2:ide:0:0 0012c12d-72b1-4dfc-ae0f-aeab09881545:guest:300989f8-da5c-42a6-91f8-97e87b85b748:ide:0:1 00016115-af87-452b-a3bf-3affc8a7d934:guest:f679b4ba-a4de-4254-90d1-27396aac8712:ide:0:0 00016115-af87-452b-a3bf-3affc8a7d934:guest:65e59c8b-579b-4977-b60c-b3b7eb404026:ide:0:0 00016115-af87-452b-a3bf-3affc8a7d934:guest:76eaf2fe-554a-4d3f-a3ef-a1214e878793:ide:0:0 00154bbf-adf4-475d-9fe6-71c1e987d1bd:guest:030cfdda-9c6c-4622-a68c-2e3588fbe828:ide:0:0 00109617-2c6b-424b-9cfa-5b572c17bafe:guest:64a5375a-31cc-414f-9e14-006b5c39b51f:ide:0:0 00059836-5512-4ce2-bf66-4daab2d994e4:guest:83da4fb5-037f-4985-a0f6-f696fa7ff727:ide:0:0 0014dbec-e818-4cf4-b467-d4f0dad10246:guest:90f4a2d3-9b76-4444-a1b2-72bbd06fe3e2:ide:0:0 0002c6df-a1d2-4d1d-96f0-f95405a28183:guest:cbb4ecc9-654f-4410-aeb4-b9ca602faa01:ide:0:0 0008d252-5102-43a0-82c6-18e8e2dd2bff:guest:e7ea14b2-aaa0-48b4-b1ac-7c8351c2edf4:ide:0:0 001318df-35c6-439f-8e72-8d57c36ca86b:guest:67f96fa3-8d41-4f8b-8199-4111617d3150:ide:0:1 000663ee-9fb6-4461-90f6-01327a4aff07:guest:245dd0b0-18eb-4e24-b219-9549bafdea87:ide:0:0 000663ee-9fb6-4461-90f6-01327a4aff07:guest:b52e106f-f14c-4312-8597-bcfedf4b0e70:ide:0:0
+size 2663383040
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free false
+bits 64
+email drives@elastichosts.com
+drive_type installcd
+status active
+description -
+favourite false
+install_notes pass:123456
+volume 0007aee7-bd5b-4551-9d8f-a958051235a9
+host 00079b57-1b29-4a89-a8d0-1d648fc20804
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Windows Server 2008 Trial Install CD
+url http://www.microsoft.com/windowsserver2008/en/us/default.aspx
+read:bytes 78315713024
+claim:type shared
+drive f89af28e-ff00-4fc9-a7ed-22e7fa5a88db
+write:bytes 0
+read:requests 32289210
+os windows
+
+status active
+name Gentoo Install Minimal amd64 20100408
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 437561856
+write:bytes 119558144
+claim:type shared
+drive 73162606-78ca-4b0a-8f7a-70aa70563d90
+free none
+volume 00018aab-c080-4ed3-b52f-459933d34ec9
+host 00016115-af87-452b-a3bf-3affc8a7d934
+os linux
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 79760
+claimed 00154bbf-adf4-475d-9fe6-71c1e987d1bd:guest:d74c8d2b-a169-486c-adbd-89ca50dccafa:ide:0:1
+type cdrom
+write:requests 29189
+size 209715200
+
+status active
+name Peppermint Ice Linux 32bit Install CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 1986560
+description Peppermint OS is an Ubuntu-based Linux distribution that aims to be lightning fast and easy on system resources. By employing Mozilla&#39;s Prism technology Peppermint integrates seamlessly with Cloud and web-based applications. The distribution&#39;s other features include automatic updates, easy step-by-step installation, sleek and user-friendly interface, and increased mobility by integrating directly with Cloud-based applications.
+write:bytes 437698560
+claim:type shared
+drive f9d92afc-27ff-4139-84c7-ac6655e6f6f1
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend to use this as an installation and not live CD only.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00018aab-c080-4ed3-b52f-459933d34ec9
+host 00016115-af87-452b-a3bf-3affc8a7d934
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 485
+free none
+type cdrom
+write:requests 106860
+size 436207616
+
+status active
+name Super Gamer Linux 32bit and 64bit Install CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 137039872
+description SuperGamer is a live DVD based on VectorLinux, intended to showcase gaming on Linux. The distribution is optimised for a gaming computer environment, with some tweaks to help speed up running from the live DVD. Extra games are added along with some demo editions of proprietary games. All games are native Linux games, but users wishing to run Windows games may install WINE or a related emulator, such as Cedega.
+write:bytes 8446324736
+claim:type shared
+drive d72701b2-01b9-4ac3-9afa-d0afdb6bcf2f
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend to use this as an installation and not live CD only.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00018aab-c080-4ed3-b52f-459933d34ec9
+host 00016115-af87-452b-a3bf-3affc8a7d934
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 33457
+free none
+type cdrom
+write:requests 2062091
+size 8413773824
+
+status active
+name ZeroShell 1.3 Linux Install CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 856064
+description Zeroshell is a Linux distribution for servers and embedded devices aimed at providing the main network services a LAN requires. It is available in the form of Live CD or Compact Flash image and you can configure and administer it using your web browser.
+write:bytes 153247744
+claim:type shared
+drive 44358ce4-0f30-4e48-86d1-e93330961a8a
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n3. Start the server.\n4. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n5. You will be able to start using your new server via VNC.\n
+volume 00023324-4c49-4567-a017-c85c8a6b8313
+host 0002c6df-a1d2-4d1d-96f0-f95405a28183
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 209
+free none
+type cdrom
+write:requests 37414
+size 155189248
+
+status active
+name Astaro Security Gateway Firewall Server 8.0 Linux Install CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 365871104
+description Astaro offers an integrated software solution that provides superior performance in an all-in-one firewall. Its hardened operating system, stateful packet inspection, content filtering (virus &amp; surf protection), application proxies and IPsec based VPN provides a powerful solution to today&#39;s security issues. It is designed to maximize your networks security without compromising its performance enabling telecommuters, branch offices, customers and suppliers to safely share critical business information. Our proprietary user interface, WebAdmin allows ease of use and manageability of all open source firewall components, as well as the Up2Date service via the Internet. It is easy to install with all components on one CD achieving simple implementation and integration to existing network environments.
+write:bytes 369696768
+claim:type shared
+drive 916b0e39-b234-407b-89ab-e8108f05726f
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend to use this as an installation and not live CD only.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00023324-4c49-4567-a017-c85c8a6b8313
+host 0002c6df-a1d2-4d1d-96f0-f95405a28183
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 89324
+claimed 000096ce-ff07-413d-912a-aa1a33963802:guest:20911753-98a6-4951-af34-89e157452c84:ide:0:0 00115b1d-6fe9-40b2-a013-426a6a584ff7:guest:75a96f35-c3fd-492a-a48b-34dcd10987d6:ide:0:0
+free none
+type cdrom
+write:requests 90258
+size 369098752
+
+status active
+name Chakra 0.2.2 Linux 64bit Install and Live CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 5451776
+description Chakra GNU/Linux is a user-friendly and powerful distribution and live CD based on Arch Linux. It features a graphical installer, automatic hardware detection and configuration, the latest KDE desktop, and a variety of tools and extras.
+write:bytes 724774912
+claim:type shared
+drive 0e8c8ac2-f791-4764-a964-c6d2679ae49a
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend using it as an installation CD and not just a live CD.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 0000acbf-fa0a-44a6-8018-2f106f96a45f
+host 000096ce-ff07-413d-912a-aa1a33963802
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 1331
+free none
+type cdrom
+write:requests 176947
+size 721420288
+
+status active
+name Clonezilla Live 1.2.6 64bit
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 876544
+description Clonezilla Live is a Debian-based live CD containing Clonezilla, a partition and disk cloning software similar to Norton Ghost. It saves and restores only used blocks in hard drive. With Clonezilla, one can clone a 5 GB system to 40 clients in about 10 minutes.
+write:bytes 134045696
+claim:type shared
+drive cec8330f-59c7-4e20-9577-54df28d598e7
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n3. Start the server.\n4. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n5. You will be able to start using your new server via VNC.
+volume 0000acbf-fa0a-44a6-8018-2f106f96a45f
+host 000096ce-ff07-413d-912a-aa1a33963802
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 214
+free none
+type cdrom
+write:requests 32726
+size 134217728
+
+status active
+name Absolute Linux 13.1.2 Install CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 93573632
+description Absolute Linux is a light-weight modification of Slackware Linux. It includes several utilities that make configuration and maintenance easier and it has many common desktop and Internet applications installed and configured with tight integration of menus, applications and MIME types. Absolute Linux uses IceWM and ROX for its window and file managers.
+write:bytes 728211456
+claim:type shared
+drive b745638c-87ff-4836-8623-e48e67286494
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 000431a5-46d9-4a67-9c03-3c3402a41992
+host 00043e69-ac57-45b1-8692-75db24064fb9
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 39232
+free none
+type cdrom
+write:requests 177786
+size 725614592
+
+status active
+name Sabayon_Linux_5.4_amd64_K.iso
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 12877824
+write:bytes 2160496640
+claim:type shared
+drive 75119285-7c20-43f4-9d3b-e6af3f1823e3
+free none
+volume 000431a5-46d9-4a67-9c03-3c3402a41992
+host 00043e69-ac57-45b1-8692-75db24064fb9
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 3144
+type cdrom
+write:requests 527465
+size 2151677952
+
+status active
+name FreeBSD 8.1 Linux 64bit Install CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 60035072
+description About FreeBSD FreeBSD is a UN*X-like operating system for the i386, IA-64, PC-98, Alpha/AXP, and UltraSPARC platforms based on U.C. Berkeley&#39;s &quot;4.4BSD-Lite&quot; release, with some &quot;4.4BSD-Lite2&quot; enhancements. It is also based indirectly on William Jolitz&#39;s port of U.C. Berkeley&#39;s &quot;Net/2&quot; to the i386, known as &quot;386BSD&quot;, though very little of the 386BSD code remains. FreeBSD is used by companies, Internet Service Providers, researchers, computer professionals, students and home users all over the world in their work, education and recreation.
+write:bytes 2315309056
+claim:type shared
+drive fb940d5b-b9a0-4f9c-8cb7-94c3378d1676
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend to use this as an installation and not live CD only.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00059deb-640a-464e-9509-6a3ec6cfd549
+host 00059836-5512-4ce2-bf66-4daab2d994e4
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 14657
+free none
+type cdrom
+write:requests 565261
+size 2306867200
+
+status active
+name BackTrack 4 Release 1 Linux Live CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 4008857600
+description A SLAX-based live CD with a comprehensive collection of security and forensics tools  BackTrack 4 R1, a Linux-based penetration testing arsenal for security professionals.
+write:bytes 2023919616
+claim:type shared
+drive ef152c9c-1460-44f5-b192-8e0524909709
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00059deb-640a-464e-9509-6a3ec6cfd549
+host 00059836-5512-4ce2-bf66-4daab2d994e4
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 978725
+free none
+type cdrom
+write:requests 494121
+size 2017460224
+
+status active
+name Vector 6.0 Linux 32bit Install CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 3035136
+description VECTORLINUX is a small, fast, Intel Linux operating system based on one of the original Linux distributions, Slackware. The enormously popular Slackware is the true &quot;Unix&quot; of Linux distributions and is used by major corporations, universities and home users alike. It&#39;s popularity stems from the fact that it is a robust, versatile and almost unbreakable system. Slackware has been traditionally known to be about as user friendly as a coiled rattlesnake and that&#39;s where Vector Linux comes into play. We have produced a bloat free, easy to install, configure and maintain Slackware based system that is second to none.
+write:bytes 729059328
+claim:type shared
+drive c2a757b9-dfd0-432c-bb29-b380b4dd6fb6
+free none
+volume 00059deb-640a-464e-9509-6a3ec6cfd549
+host 00059836-5512-4ce2-bf66-4daab2d994e4
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 741
+type cdrom
+write:requests 177993
+size 729808896
+
+status active
+name PCBSD 8.1 Linux 64bit Install CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 15228928
+description PC-BSD has as its goals to be an easy-to-install-and-use desktop operating system, based on FreeBSD. To accomplish this, it currently has a graphical installation, which will enable even UNIX novices to easily install and get it running. It will also come with KDE pre-built, so that the desktop can be used immediately. Currently in development is a graphical software installation program, which will make installing pre-built software as easy as other popular operating systems.
+write:bytes 3794726912
+claim:type shared
+drive 802fbcab-2723-469c-b775-6fdeb21287da
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend to use this as an installation and not live CD only.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 3718
+free none
+type cdrom
+write:requests 926447
+size 3783262208
+
+status active
+name nst-2.13.0.x86_64.iso
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 7503872
+write:bytes 1436717056
+claim:type shared
+drive 9d04c648-712d-4076-bd99-70088d85fe01
+free none
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 1832
+type cdrom
+write:requests 350761
+size 1430257664
+
+status active
+name Peppermint-Ice-10012010.iso
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 2613248
+write:bytes 452710400
+claim:type shared
+drive 2e79eeee-b4ad-4dcf-a072-86dcede6af1b
+free none
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 638
+type cdrom
+write:requests 110525
+size 452984832
+
+status active
+name Sabayon_Linux_5.4_amd64_K.iso
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 14082048
+write:bytes 2161713152
+claim:type shared
+drive 07e2a6df-8389-4130-a003-edacc19a9ee3
+free none
+volume 00065289-b9c8-4548-8d83-e1891f831f51
+host 000663ee-9fb6-4461-90f6-01327a4aff07
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 3438
+type cdrom
+write:requests 527762
+size 2151677952
+
+type cdrom
+claimed 00031836-a624-4b22-bc7d-41ff8977087b:guest:ffe02269-b653-47ad-ab21-a02805b24904:ide:0:0 000096ce-ff07-413d-912a-aa1a33963802:guest:1f378a18-1b59-40e7-8e9a-7f81d7eda6b8:ide:0:0 00079b57-1b29-4a89-a8d0-1d648fc20804:guest:8c13b69d-6d11-4151-975b-a2f084c7ada7:ide:0:0 00166b98-6431-40ad-94b0-244881ff87d5:guest:1705b116-aac2-449a-b0de-3dd4ab7e765f:ide:0:0 000932a7-c74f-4de3-bfc4-227435f78998:guest:30d887ee-ed96-4c32-a1a8-5ab49abd2a7e:ide:0:1 00154bbf-adf4-475d-9fe6-71c1e987d1bd:guest:bcea8695-baeb-476e-8089-475ce8948646:ide:0:1 0002c6df-a1d2-4d1d-96f0-f95405a28183:guest:df1368af-05a3-4ad5-8017-54be3ea70232:ide:0:0 00109617-2c6b-424b-9cfa-5b572c17bafe:guest:3569d646-7ae5-410f-b66e-64bba1381cba:ide:0:0
+size 2663383040
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+bits 64
+drive_type installcd
+status active
+description -
+favourite false
+free false
+volume 0009c669-9ea6-4825-b788-b40902bb1902
+host 000932a7-c74f-4de3-bfc4-227435f78998
+encryption:cipher aes-xts-plain
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 0
+name Windows Server 2008 Trial Install CD
+url http://www.microsoft.com/windowsserver2008/en/us/default.aspx
+read:bytes 5261708288
+claim:type shared
+drive 7e23b099-dd35-446b-8d90-2953643b664f
+write:bytes 0
+read:requests 1883649
+os windows
+
+status active
+name Unity Linux 64bit Install and Live CD
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+favourite none
+read:bytes 147034112
+description The community-oriented Unity Linux is a minimalist distribution and live CD based on Mandriva Linux. The project&#39;s main goal is to create a base operating system from which more complete, user-oriented distribution can easily be built - either by other distribution projects or by the users themselves. Unity Linux uses Openbox as the default window manager. Its package management is handled via Smart and RPM 5 which can download and install additional software packages from the project&#39;s online repository.
+write:bytes 290488320
+claim:type shared
+drive d235dada-407c-4105-b4ef-636eb7604404
+install_notes CD Installation instructions:\n1. Add this CD to a server that you wish to install this software onto.\n2. Make sure there is a hard drive also attached to the same server on which this software can be installed if you intend to use this as an installation and not live CD only.\n3. Make sure that this CD is selected as the boot drive. You can do this from the &#39;Drives&#39; tab on the main server detail window.\n4. Start the server.\n5. Connect to the server using VNC. You will find the IP address and password on the &#39;Summary&#39; tab of the main server detail window and in the server list view.\n6. You will be able to complete the software installation via VNC and start using your new server.
+volume 00106cda-0e17-40c8-a576-b516f0eb67bc
+host 00109617-2c6b-424b-9cfa-5b572c17bafe
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+read:requests 35897
+free none
+type cdrom
+write:requests 70920
+size 289406976
+
+type disk
+licenses msft_p73_04837 msft_tfa_00009
+size 21474836480
+use dbserver,general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free false
+bits 64
+drive_type preinstalled
+status active
+description Please refer to the install notes for a full guide to initial configuration.
+favourite false
+install_notes ***You must update the default Administrator password for Windows Server Standard 2008 and the Super Administrator password (sa) for SQL Server Standard 2008***\n\nPre-installed Windows Server 2008 Standard R2 64bit English on 15/07/2010\n=========================================================================\n\n1. Minimum Hardware Requirements\n--------------------------------\n\nThe recommended minimum hardware requirements for the use of SQL Server Standard 2008 R2 with Windows Server Standard 2008 R2 as publishes by Microsoft can be found through the following link:\n\nhttp://msdn.microsoft.com/en-us/library/ms143506.aspx\n\n\n2. Update your administrator password\n-------------------------------------\n\nThe default administrator password is set to: CloudSigma1\n\nPlease CHANGE this IMMEDIATELY after first logging on.\n\na) Open the &quot;Control Panel&quot; and select &quot;User Accounts&quot;\n\nb) Select &quot;Change your Windows Password&quot;\n\nc) The Administrator user icon will be shown on the right, select again &quot;Change your Password&quot;, and on this screen update your details accordingly\n\n\n3. Expanding your drive\n-----------------------\n\nThe system is fully installed, but you will need to extend the\ndisk partition to cover the whole of your drive. To do this:\n\na) Open the &quot;Computer Management&quot; tool from &quot;Administrative Tools&quot; on the &quot;Start&quot; menu.\n\nb) Select &quot;Storage&quot; then &quot;Disk Management&quot; in the left hand pane\n\nc) Right-click on the 12.90 GB NTFS primary partition, and select &quot;Extend Volume&quot;\n\nd) Enter the amount of disk space that you want to increase the Volume size by (the default will be the maximum available)\n\nYou will need to repeat this procedure if you ever resize this drive in the future.\n\n\n4. Enabling Remote Access\n-------------------------\n\nAfter logging in to VNC for the first time to configure your new Windows server, we recommend that if you are logging in from a Windows Desktop that you enable Remote Desktop for better access performance. To do this, follow these instructions:\n\na) Select &quot;Start&quot; | &quot;Applications&quot; | &quot;Control Panel&quot;\n\nb) Select &quot;System and Security&quot;\n\nc) Under &quot;System&quot; select &quot;Allow Remote Access&quot;\n\nd) Select the corresponding connection according to your Security Configuration\n\n\n5. Pinging Service\n------------------\n\nThe Pinging service has been turned on by default, if you wish to disable it please follow these instructions:\n\na) Select the &quot;Windows Firewall with Advanced Security&quot; tool from  &quot;Administrative Tools&quot; on the &quot;Start&quot; menu.\n\nb) On the left hand pane, select &quot;Inbound Rules&quot;\n\nc) On the middle pane, select the rules &quot;File and Printer Sharing (Echo Request - ICMPv4-In)&quot; and &quot;File and Printer Sharing (Echo Request - ICMPv6-In)&quot;\n\nd) From the right-hand pane, select &quot;Disable Rules&quot;\n\n\nSQL Server 2008 R2 on 15/07/2010\n================================\n\n1. Change the Super Administrator Password (sa). \n--------------------------------------------------------------------\n\nThe default password has been set to &quot;CloudSigma1&quot;\n\na) Open &quot;Microsoft SQL Server Management Studio&quot;\n\nb) Connect to the Server Using &quot;Windows Indentificaiton&quot;\n\nc) From the Object Explorer select &quot;Security&quot; then &quot;Longins&quot;\n\nd) Right-click on sa and select &quot;Properties&quot;\n\ne) Enter the new password into &quot;Password&quot; and &quot;Confirm Password&quot; and press &quot;OK&quot;\n\n\n2. The following features were installed:\n-----------------------------------------------------\n\na) Main features\n\n-Database Engine Services\n-SQL Server Replication\n-Full-Text Search\n-Analysis Services\n-Reporting Services\n\nb) Shared Features\n\n-Business Intelligengce Development Studio\n-Client Tools Connectivity\n-Integration Services\n-Clinet Tools Backwards Compatibility\n-Clinet Tools SDK\n-SQL Server Books Online\n-Mangement Tools - Basic\n-Management Tools - Complete\n-SQL Client Connectivity SDK\n-Microsoft Sync Framework\n\n3 The following services were configured:\n--------------------------------------------------------\n\n\nService: SQL Server Agent\nUser: NT AUTHORITY\NETWORK SERVICE\nStartup Type: Manual\n\nService: SQL Server Database Engine\nUser: NT AUTHORITY\NETWORK SERVICE\nStartup Type: Automatic\n\nService: SQL Server Analysis Services\nUser: NT AUTHORITY\NETWORK SERVICE\nStartup Type: Disabled\n\nService: SQL Server Reporting Services\nUser: NT AUTHORITY\NETWORK SERVICE\nStartup Type: Disabled\n\nService: SQL Server Integration Services 10.1\nUser: NT AUTHORITY\NETWORK SERVICE\nStartup Type: Disabled\n \nService: SQL Full-text filter Daemon Lanuch\nUser: NT AUTHORITY\LOCALSERVICE\nStartup Type: Disabled\n\nService: SQL Server Browser\nUser: NT AUTHORITY\LOCALSERVICE\nStartup Type: Disabled\n\nFor detailed server installation configuration refer to the following installation log files on the system:\nC:\Program Files\Microsoft SQL Server\100\Setup Bootstrap\Log\20100716_162426\Summary_WIN-K0F21FV1C1V_20100716_162426.txt\n
+volume 00023324-4c49-4567-a017-c85c8a6b8313
+host 0002c6df-a1d2-4d1d-96f0-f95405a28183
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 5242881
+name SQL Server Standard 2008 R2 - Windows Server Standard 2008 R2 - 64bit English pub
+url http://www.microsoft.com/sqlserver/2008/en/us/
+read:bytes 49172439040
+claim:type shared
+drive 7b013f8c-dd4c-4701-b1ca-936506dc37ca
+write:bytes 21474840576
+read:requests 12004990
+os windows
+
+type disk
+licenses msft_lwa_00135
+size 13958643712
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free false
+bits 64
+drive_type preinstalled
+status active
+description Please refer to the install notes for a full guide to initial configuration.
+favourite false
+install_notes ***You must update the default Administrator password for Windows Web Server 2008***\n\nPre-installed Windows Server 2008 Web R2 64bit English on 24/07/2010\n============================================================\n\n1. Connecting to your server via VNC\n--------------------------------------------------\n\na) Having installed a compatible VNC client, open a  VNC connection to your server.\n\nb) Enter your IP address and VNC password as displayed on your Server Summary Window.\n\nc) Start to configure your server.\n\n\n2. Minimum Hardware Requirements\n--------------------------------------------------\n\nThe recommended minimum hardware requirements as publishes by Microsoft can be found through the following link:\n\nhttp://msdn.microsoft.com/en-us/windowsserver/cc196364.aspx\n\nWe recommend specifying a higher level of RAM for a better user experience.\n\n\n3. Update your administrator password\n----------------------------------------------------\n\nThe default administrator password is set to: CloudSigma1\n\nPlease CHANGE this IMMEDIATELY after first logging on.\n\na) Open the &quot;Control Panel&quot; from the &quot;Start&quot; menu and select &quot;User Accounts&quot;\n\nb) Select &quot;Change your Windows Password&quot;\n\nc) The Administrator user icon will be shown on the right, select again &quot;Change your Password&quot;, and on this screen update your details accordingly\n\n\n4. Configuring your Networking\n------------------------------------------\n\na) IP networking can be left as DHCP. Even if you are using a static IP address with this server our management layer will apply the same IP address via DHCP. Using DHCP ensures you will have no issues receiving the correct networking settings. We recommend using DHCP initially if only to receive all the correct networking settings.\n\nb) CloudSigma employs an open networking infrastructure. All ports are open for inbound and outbound traffic with the exception of port 25 (SMTP) which is blocked for trial users.\n\nIt is important that you secure access to your server according to your needs.\n\n\n5. Expanding your drive\n--------------------------------\n\nThe system is fully installed, but you will need to extend the disk partition to cover the whole of your drive. To do this:\n\na) Open the &quot;Computer Management&quot; tool from &quot;Administrative Tools&quot; on the &quot;Start&quot; menu.\n\nb) Select &quot;Storage&quot; then &quot;Disk Management&quot; in the left hand pane\n\nc) Right-click on the 12.90 GB NTFS primary partition, and select &quot;Extend Volume&quot;\n\nd) Enter the amount of disk space that you want to increase the Volume size by (the default will be the maximum available)\n\nYou will need to repeat this procedure if you ever resize this drive in the future.\n\n\n6. Enabling Remote Access\n--------------------------------------\n\nAfter logging in to VNC for the first time to configure your new Windows server, we recommend that if you are logging in from a Windows Desktop that you enable Remote Desktop for better access performance. To do this, follow these instructions:\n\na) Select &quot;Start&quot; | &quot;Applications&quot; | &quot;Control Panel&quot;\n\nb) Select &quot;System and Security&quot;\n\nc) Under &quot;System&quot; select &quot;Allow Remote Access&quot;\n\nd) Select the corresponding connection type according to your Security Configuration\n\n\n7. Pinging Service\n-------------------------\n\nThe Pinging service has been turned on by default, if you wish to disable it please follow these instructions:\n\na) Select the &quot;Windows Firewall with Advanced Security&quot; tool from  &quot;Administrative Tools&quot; on the &quot;Start&quot; menu.\n\nb) On the left hand pane, select &quot;Inbound Rules&quot;\n\nc) On the middle pane, select the rules &quot;File and Printer Sharing (Echo Request - ICMPv4-In)&quot; and &quot;File and Printer Sharing (Echo Request - ICMPv6-In)&quot;\n\nd) From the right-hand pane, select &quot;Disable Rules&quot;
+volume 00120946-d7a4-486e-867e-8348bebe0b95
+host 0012c12d-72b1-4dfc-ae0f-aeab09881545
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 3407873
+name Windows Server Web 2008 R2 64bit English
+url http://www.microsoft.com/windowsserver2008/en/us/default.aspx
+read:bytes 145252270080
+claim:type shared
+drive 71697799-c611-41b9-93be-f79152aefbe5
+write:bytes 13958647808
+read:requests 35461980
+os windows
+
+type disk
+licenses msft_p73_04837
+size 13958643712
+use general
+readers ffffffff-ffff-ffff-ffff-ffffffffffff
+free false
+bits 64
+drive_type preinstalled
+status active
+description Please refer to the install notes for a full guide to initial configuration.
+favourite false
+install_notes ***You must update the default Administrator password for Windows Server Standard 2008***\n\nPre-installed Windows Server 2008 Standard R2 64bit English on 24/07/2010\n============================================================\n\n1. Connecting to your server via VNC\n--------------------------------------------------\n\na) Having installed a compatible VNC client, open a  VNC connection to your server.\n\nb) Enter your IP address and VNC password as displayed on your Server Summary Window.\n\nc) Start to configure your server.\n\n\n2. Minimum Hardware Requirements\n--------------------------------------------------\n\nThe recommended minimum hardware requirements as publishes by Microsoft can be found through the following link:\n\nhttp://msdn.microsoft.com/en-us/windowsserver/cc196364.aspx\n\nWe recommend specifying a higher level of RAM for a better user experience.\n\n\n3. Update your administrator password\n----------------------------------------------------\n\nThe default administrator password is set to: CloudSigma1\n\nPlease CHANGE this IMMEDIATELY after first logging on.\n\na) Open the &quot;Control Panel&quot; from the &quot;Start&quot; menu and select &quot;User Accounts&quot;\n\nb) Select &quot;Change your Windows Password&quot;\n\nc) The Administrator user icon will be shown on the right, select again &quot;Change your Password&quot;, and on this screen update your details accordingly\n\n\n4. Configuring your Networking\n------------------------------------------\n\na) IP networking can be left as DHCP. Even if you are using a static IP address with this server our management layer will apply the same IP address via DHCP. Using DHCP ensures you will have no issues receiving the correct networking settings. We recommend using DHCP initially if only to receive all the correct networking settings.\n\nb) CloudSigma employs an open networking infrastructure. All ports are open for inbound and outbound traffic with the exception of port 25 (SMTP) which is blocked for trial users.\n\nIt is important that you secure access to your server according to your needs.\n\n\n5. Expanding your drive\n--------------------------------\n\nThe system is fully installed, but you will need to extend the disk partition to cover the whole of your drive. To do this:\n\na) Open the &quot;Computer Management&quot; tool from &quot;Administrative Tools&quot; on the &quot;Start&quot; menu.\n\nb) Select &quot;Storage&quot; then &quot;Disk Management&quot; in the left hand pane\n\nc) Right-click on the 12.90 GB NTFS primary partition, and select &quot;Extend Volume&quot;\n\nd) Enter the amount of disk space that you want to increase the Volume size by (the default will be the maximum available)\n\nYou will need to repeat this procedure if you ever resize this drive in the future.\n\n\n6. Enabling Remote Access\n--------------------------------------\n\nAfter logging in to VNC for the first time to configure your new Windows server, we recommend that if you are logging in from a Windows Desktop that you enable Remote Desktop for better access performance. To do this, follow these instructions:\n\na) Select &quot;Start&quot; | &quot;Applications&quot; | &quot;Control Panel&quot;\n\nb) Select &quot;System and Security&quot;\n\nc) Under &quot;System&quot; select &quot;Allow Remote Access&quot;\n\nd) Select the corresponding connection type according to your Security Configuration\n\n\n7. Pinging Service\n-------------------------\n\nThe Pinging service has been turned on by default, if you wish to disable it please follow these instructions:\n\na) Select the &quot;Windows Firewall with Advanced Security&quot; tool from  &quot;Administrative Tools&quot; on the &quot;Start&quot; menu.\n\nb) On the left hand pane, select &quot;Inbound Rules&quot;\n\nc) On the middle pane, select the rules &quot;File and Printer Sharing (Echo Request - ICMPv4-In)&quot; and &quot;File and Printer Sharing (Echo Request - ICMPv6-In)&quot;\n\nd) From the right-hand pane, select &quot;Disable Rules&quot;
+volume 0013fc75-b170-4d62-abaf-804b8fc466cc
+host 001318df-35c6-439f-8e72-8d57c36ca86b
+user 00000000-0000-0000-0000-000000000001
+autoexpanding false
+write:requests 3407873
+name Windows Server Standard 2008 R2 64bit English
+url http://www.microsoft.com/windowsserver2008/en/us/default.aspx
+read:bytes 257073537024
+claim:type shared
+drive 0611be3f-0607-4b3c-8bad-a0af392d928a
+write:bytes 13958647808
+read:requests 62762094
+os windows

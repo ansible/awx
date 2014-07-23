@@ -1,0 +1,31 @@
+{
+   "auth":{
+      "token":{
+         "id":"fooo-bar-fooo-bar-fooo-bar",
+         "expires":"2031-10-29T17:39:28.000-05:00"
+      },
+      "serviceCatalog":{
+         "cloudFilesCDN":[
+            {
+               "region":"ORD",
+               "publicURL":"https:\/\/cdn2.clouddrive.com\/v1\/MossoCloudFS_f66473fb-2e1e-4a44-barr-foooooo",
+               "v1Default":true
+            }
+         ],
+         "cloudFiles":[
+            {
+               "region":"ORD",
+               "publicURL":"https:\/\/storage101.ord1.clouddrive.com\/v1\/MossoCloudFS_fbarr-foooo-barr",
+               "v1Default":true,
+               "internalURL":"https:\/\/snet-storage101.ord1.clouddrive.com\/v1\/MossoCloudFS_fbarr-foooo-barr"
+            }
+         ],
+         "cloudServers":[
+            {
+               "publicURL":"https:\/\/servers.api.rackspacecloud.com\/v1.0\/11111",
+               "v1Default":true
+            }
+         ]
+      }
+   }
+}

@@ -1,0 +1,12 @@
+{
+  "IPAddress": "108.59.83.110",
+  "IPProtocol": "TCP",
+  "creationTimestamp": "2013-09-29T13:30:00.702-07:00",
+  "id": "1077550228014866104",
+  "kind": "compute#forwardingRule",
+  "name": "libcloud-lb-demo-lb",
+  "portRange": "80-80",
+  "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/forwardingRules/libcloud-lb-demo-lb",
+  "target": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/targetPools/libcloud-lb-demo-lb-tp"
+}

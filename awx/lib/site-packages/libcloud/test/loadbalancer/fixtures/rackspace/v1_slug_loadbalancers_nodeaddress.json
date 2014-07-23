@@ -1,0 +1,18 @@
+{"loadBalancers": [
+        {
+            "name": "First Loadbalancer",
+            "id": 1,
+            "status": "ACTIVE"
+        },
+        {
+            "name": "Second Loadbalancer",
+            "id": 2,
+            "status": "PENDING_UPDATE"
+        },
+        {
+            "name": "Third Loadbalancer",
+            "id": 8,
+            "status": "ERROR"
+        }
+    ]
+}

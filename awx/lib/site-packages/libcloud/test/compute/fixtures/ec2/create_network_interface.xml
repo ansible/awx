@@ -1,0 +1,30 @@
+<CreateNetworkInterfaceResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>ca764ebe-8abc-4d37-9995-b9e88c086fa8</requestId>
+    <networkInterface>
+        <networkInterfaceId>eni-2b36086d</networkInterfaceId>
+        <subnetId>subnet-5ed9d432</subnetId>
+        <vpcId>vpc-62ded30e</vpcId>
+        <availabilityZone>us-east-1d</availabilityZone>
+        <description>My Test</description>
+        <ownerId>123456789098</ownerId>
+        <requesterManaged>false</requesterManaged>
+        <status>pending</status>
+        <macAddress>0e:bd:49:3e:11:74</macAddress>
+        <privateIpAddress>172.16.4.144</privateIpAddress>
+        <privateDnsName>ip-172-16-4-144.ec2.internal</privateDnsName>
+        <sourceDestCheck>true</sourceDestCheck>
+        <groupSet>
+            <item>
+                <groupId>sg-495a9926</groupId>
+                <groupName>default</groupName>
+            </item>
+        </groupSet>
+        <tagSet/>
+        <privateIpAddressesSet>
+            <item>
+                <privateIpAddress>172.16.4.144</privateIpAddress>
+                <primary>true</primary>
+            </item>
+        </privateIpAddressesSet>
+    </networkInterface>
+</CreateNetworkInterfaceResponse>

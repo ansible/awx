@@ -1,0 +1,4 @@
+<DeleteVpcResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>85793fa6-2ece-480c-855f-0f82c3257e50</requestId>
+    <return>true</return>
+</DeleteVpcResponse>

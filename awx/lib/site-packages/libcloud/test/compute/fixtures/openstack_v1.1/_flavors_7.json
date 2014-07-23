@@ -1,0 +1,1 @@
+{"flavor": {"rxtx_quota": 2500, "name": "15.5GB slice", "links": [{"href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/v1.1/rs-reach-project/flavors/7", "rel": "self"}, {"href": "http://alpha.ord.servers.api.rackspacecloud.com:8774/rs-reach-project/flavors/7", "rel": "bookmark"}], "ram": 16384, "vcpus": 8, "rxtx_cap": 200, "swap": 0, "disk": 620, "id": 7}}

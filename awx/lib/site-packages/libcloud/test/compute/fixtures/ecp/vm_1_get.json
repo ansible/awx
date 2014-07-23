@@ -1,0 +1,3 @@
+{"errno": 0, "message": "Success", "vm": 
+{"vnc_enabled": true, "uuid": 1, "tags": [], "ip_address": "42.78.124.75", "interfaces": [{"ip": "42.78.124.75", "mac": "00:16:e9:d6:40:c6", "network_name": "Default", "uuid": "479b9823-2ded-11df-94e8-0015174e564c", "network": "fc38963c-a9fa-11de-8c4b-001b63a56c51"}], "vnc_port": "5900", "name": "dummy-1", "state": "off", "trusted": null, "os": "unknown", "vnc_password": "jBs5UT00", "vnc_ip_address": "192.168.1.111", "hardware_profile_uuid": "bcaff710-2914-11de-836c-001a929face2"}
+}

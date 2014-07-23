@@ -1,0 +1,15 @@
+{
+  "id": "7487852523793007955",
+  "insertTime": "2013-09-03T00:51:05.064-07:00",
+  "kind": "compute#operation",
+  "name": "operation-regions_us-central1_targetPools_post",
+  "operationType": "insert",
+  "progress": 100,
+  "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/operations/operation-regions_us-central1_targetPools_post",
+  "startTime": "2013-09-03T00:51:05.115-07:00",
+  "status": "DONE",
+  "targetId": "13598380121688918358",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/targetPools/lctargetpool",
+  "user": "user@gserviceaccount.com"
+}

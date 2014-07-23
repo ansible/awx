@@ -1,0 +1,18 @@
+{
+    "success": true,
+    "total_count": 1,
+    "subcode": 0,
+    "message": "Your request was processed successfully.",
+    "data": [
+        {
+            "public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDBs+gQwoeFNa+4pYz2AKz5Op7EqrzeP3YsyTKxx7P9gt4aSt5w8Z+lRn3p3CVG+th5i6lZqOxWgCZ1kp2KEKNbSsA2HWl3OwkY8IqHGSEeMrF+3A2Ncz88kUIAWzCswxPY4uqb/yA4EzEQDk7PJj7Q1DruObhOm7qyHT40n2KJ3TqHJQlV9XE3RcXSaQcwUt0YFXFMx8wkgy0NKqqSiQuH8RofyfnOABEzKAARGbcQjZWxh2ITzUmwMxUCBa0X5wvblgcE6/pRZN5Xq6NQr2XEU5Z48+mLy6asdasdwrM0v10Y7ojDL/TosK/8T5+d5yaRsvtBlBstDZhNWY31n5iCLxx user@mistio",
+            "name": "mistio-ssh",
+            "key_group": 1,
+            "uri": "https://api.nephoscale.com/key/sshrsa/72209/",
+            "key_type": 2,
+            "create_time": "2013-10-02 07:24:37",
+            "id": 72209
+        }
+    ],
+    "response": 200
+}

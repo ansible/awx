@@ -1,0 +1,11 @@
+{
+    "meta": {},
+    "name": "test tag 2",
+    "owner": {
+        "resource_uri": "/api/2.0/user/5b4a69a3-8e78-4c45-a8ba-8b13f0895e23/",
+        "uuid": "5b4a69a3-8e78-4c45-a8ba-8b13f0895e23"
+    },
+    "resource_uri": "/api/2.0/tags/a010ec41-2ead-4630-a1d0-237fa77e4d4d/",
+    "resources": [],
+    "uuid": "a010ec41-2ead-4630-a1d0-237fa77e4d4d"
+}

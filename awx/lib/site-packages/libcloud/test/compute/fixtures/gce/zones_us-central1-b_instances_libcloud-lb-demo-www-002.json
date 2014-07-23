@@ -1,0 +1,13 @@
+{
+  "error": {
+    "code": 404,
+    "errors": [
+      {
+        "domain": "global",
+        "message": "The resource 'projects/project-name/zones/us-central1-b/instances/libcloud-lb-demo-www-002' was not found",
+        "reason": "notFound"
+      }
+    ],
+    "message": "The resource 'projects/project-name/zones/us-central1-b/instances/libcloud-lb-demo-www-002' was not found"
+  }
+}

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DISK>
+    <ID>10</ID>
+    <NAME>Debian 7.1 LAMP</NAME>
+    <SIZE>2048</SIZE>
+    <URL>file:///images/debian/wheezy.img</URL>
+</DISK>

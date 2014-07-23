@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<server xmlns="http://docs.rackspacecloud.com/servers/api/v1.0" status="BUILD" progress="0" hostId="9dd380940fcbe39cb30255ed4664f1f3" flavorId="1" imageId="11" adminPass="racktestvJq7d3" id="72258" name="racktest">
+  <metadata>
+    <meta key="a">b</meta>
+    <meta key="c">d</meta>
+  </metadata>
+  <addresses>
+    <public>
+      <ip addr="67.23.21.33"/>
+    </public>
+    <private>
+      <ip addr="10.176.168.218"/>
+    </private>
+  </addresses>
+</server>

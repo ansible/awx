@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COMPUTE href='http://www.opennebula.org/compute/5'>
+    <ID>5</ID>
+    <NAME>Compute 5 Test</NAME>
+    <INSTANCE_TYPE>small</INSTANCE_TYPE>
+    <STATE>ACTIVE</STATE>
+    <DISK id="0">
+        <STORAGE href="http://www.opennebula.org/storage/5" name="Conpaas2"/>
+        <TYPE>FILE</TYPE>
+        <TARGET>hda</TARGET>
+    </DISK>
+    <DISK id="2">
+        <STORAGE href="http://www.opennebula.org/storage/15" name="test-volume"/>
+        <TYPE>FILE</TYPE>
+        <TARGET>sda</TARGET>
+    </DISK>
+    <NIC>
+        <NETWORK href="http://www.opennebula.org/network/5" name="Small network"/>
+        <IP>192.168.122.2</IP>
+        <MAC>02:00:c0:a8:7a:02</MAC>
+    </NIC>
+</COMPUTE>

@@ -1,0 +1,4 @@
+<AttachNetworkInterfaceResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>e46c7abc-8b14-4315-99cb-773a0f95d833</requestId>
+    <attachmentId>eni-attach-2b588b47</attachmentId>
+</AttachNetworkInterfaceResponse>

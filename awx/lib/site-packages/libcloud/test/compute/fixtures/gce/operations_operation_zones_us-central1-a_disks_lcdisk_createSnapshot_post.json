@@ -1,0 +1,16 @@
+{
+  "endTime": "2013-12-16T13:04:01.580-08:00",
+  "id": "0158330665043557584",
+  "insertTime": "2013-12-16T13:03:51.000-08:00",
+  "kind": "compute#operation",
+  "name": "operation-zones_us-central1-a_disks_lcdisk_createSnapshot_post",
+  "operationType": "createSnapshot",
+  "progress": 100,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/operations/operation-zones_us-central1-a_disks_lcdisk_createSnapshot_post",
+  "startTime": "2013-12-16T13:03:51.042-08:00",
+  "status": "DONE",
+  "targetId": "07494414044179227172",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/disks/lcdisk",
+  "user": "487551519631-t6qvu2na6p4u9ptm46bsdujf0ohbdro7@developer.gserviceaccount.com",
+  "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a"
+}

@@ -1,0 +1,9 @@
+{
+  "IPv4Range": "10.10.0.0/16",
+  "creationTimestamp": "2013-06-26T09:48:15.703-07:00",
+  "gatewayIPv4": "10.10.0.1",
+  "id": "17172579178188075621",
+  "kind": "compute#network",
+  "name": "libcloud-demo-network",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/libcloud-demo-network"
+}

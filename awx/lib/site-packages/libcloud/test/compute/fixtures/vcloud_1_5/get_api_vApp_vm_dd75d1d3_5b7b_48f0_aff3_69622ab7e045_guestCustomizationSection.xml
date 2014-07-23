@@ -1,0 +1,17 @@
+<GuestCustomizationSection type="application/vnd.vmware.vcloud.guestCustomizationSection+xml"
+                           href="https://vm-vcloud/api/vApp/vm-9e8837e6-5c4c-4112-bf01-5498616d865f/guestCustomizationSection/"
+                           xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+                           ovf:required="false">
+    <ovf:Info>Specifies Guest OS Customization Settings</ovf:Info>
+    <Enabled>true</Enabled>
+    <ChangeSid>false</ChangeSid>
+    <VirtualMachineId>9e8837e6-5c4c-4112-bf01-5498616d865f</VirtualMachineId>
+    <JoinDomainEnabled>false</JoinDomainEnabled>
+    <UseOrgSettings>false</UseOrgSettings>
+    <AdminPasswordEnabled>true</AdminPasswordEnabled>
+    <AdminPasswordAuto>true</AdminPasswordAuto>
+    <AdminPassword>aabbccddee</AdminPassword>
+    <ResetPasswordRequired>false</ResetPasswordRequired>
+    <ComputerName>VMMast-001</ComputerName>
+    <Link rel="edit" type="application/vnd.vmware.vcloud.guestCustomizationSection+xml" href="https://vm-vcloud/api/vApp/vm-9e8837e6-5c4c-4112-bf01-5498616d865f/guestCustomizationSection/"/>
+</GuestCustomizationSection>

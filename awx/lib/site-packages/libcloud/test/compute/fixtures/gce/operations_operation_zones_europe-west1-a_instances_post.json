@@ -1,0 +1,25 @@
+{
+  "error": {
+    "errors": [
+      {
+        "code": "RESOURCE_ALREADY_EXISTS",
+        "message": "The resource 'projects/project_name/zones/europe-west1-a/instances/libcloud-demo-europe-np-node' already exists"
+      }
+    ]
+  },
+  "httpErrorMessage": "CONFLICT",
+  "httpErrorStatusCode": 409,
+  "id": "1510575454210533141",
+  "insertTime": "2013-06-26T20:57:34.366-07:00",
+  "kind": "compute#operation",
+  "name": "operation-zones_europe-west1-a_instances_post",
+  "operationType": "insert",
+  "progress": 100,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/operations/operation-zones_europe-west1-a_instances_post",
+  "startTime": "2013-06-26T20:57:34.453-07:00",
+  "status": "DONE",
+  "targetId": "14308265828754333159",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/instances/libcloud-demo-europe-np-node",
+  "user": "897001307951@developer.gserviceaccount.com",
+  "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a"
+}

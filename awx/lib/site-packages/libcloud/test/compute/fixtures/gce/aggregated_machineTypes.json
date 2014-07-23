@@ -1,0 +1,1908 @@
+{
+  "id": "projects/project_name/aggregated/machineTypes",
+  "items": {
+    "zones/europe-west1-a": {
+      "machineTypes": [
+        {
+          "creationTimestamp": "2012-11-16T11:43:17.400-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highmem-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUs, 26 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "05095504563332567951",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 26624,
+          "name": "n1-highmem-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highmem-4-d",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:48:06.087-08:00",
+          "description": "4 vCPUs, 3.6 GB RAM",
+          "guestCpus": 4,
+          "id": "04759000181765218034",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3686,
+          "name": "n1-highcpu-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highcpu-4",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:51:04.549-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highcpu-8",
+            "state": "DEPRECATED"
+          },
+          "description": "8 vCPUS, 7.2 GB RAM, 2 scratch disks (1770 GB, 1770 GB)",
+          "guestCpus": 8,
+          "id": "02507333096579477005",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7373,
+          "name": "n1-highcpu-8-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            },
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highcpu-8-d",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:44:25.985-08:00",
+          "description": "8 vCPUs, 52 GB RAM",
+          "guestCpus": 8,
+          "id": "01717932668777642040",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 53248,
+          "name": "n1-highmem-8",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highmem-8",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2013-04-25T13:32:49.088-07:00",
+          "description": "1 vCPU (shared physical core) and 0.6 GB RAM",
+          "guestCpus": 1,
+          "id": "1133568312750571513",
+          "imageSpaceGb": 0,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 4,
+          "maximumPersistentDisksSizeGb": "3072",
+          "memoryMb": 614,
+          "name": "f1-micro",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/f1-micro",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:14.670-07:00",
+          "description": "1 vCPU, 3.75 GB RAM",
+          "guestCpus": 1,
+          "id": "11077240422128681563",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3840,
+          "name": "n1-standard-1",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-1",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:34.258-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-1",
+            "state": "DEPRECATED"
+          },
+          "description": "1 vCPU, 3.75 GB RAM, 1 scratch disk (420 GB)",
+          "guestCpus": 1,
+          "id": "10583029372018866711",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3840,
+          "name": "n1-standard-1-d",
+          "scratchDisks": [
+            {
+              "diskGb": 420
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-1-d",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:46:10.572-08:00",
+          "description": "2 vCPUs, 1.8 GB RAM",
+          "guestCpus": 2,
+          "id": "16898271314080235997",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 1843,
+          "name": "n1-highcpu-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highcpu-2",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:45:08.195-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highmem-8",
+            "state": "DEPRECATED"
+          },
+          "description": "8 vCPUs, 52 GB RAM, 2 scratch disks (1770 GB, 1770 GB)",
+          "guestCpus": 8,
+          "id": "07181827135536388552",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 53248,
+          "name": "n1-highmem-8-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            },
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highmem-8-d",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:49:19.448-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 7.5 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "06313284160910191442",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7680,
+          "name": "n1-standard-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-2-d",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:49:07.563-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highcpu-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUS, 3.6 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "01151097524490134507",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3686,
+          "name": "n1-highcpu-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highcpu-4-d",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:40:06.129-08:00",
+          "description": "2 vCPUs, 13 GB RAM",
+          "guestCpus": 2,
+          "id": "05438694236916301519",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 13312,
+          "name": "n1-highmem-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highmem-2",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:56.867-07:00",
+          "description": "2 vCPUs, 7.5 GB RAM",
+          "guestCpus": 2,
+          "id": "17936898073622676356",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7680,
+          "name": "n1-standard-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-2",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2013-04-25T13:32:45.550-07:00",
+          "description": "1 vCPU (shared physical core) and 1.7 GB RAM",
+          "guestCpus": 1,
+          "id": "1500265464823777597",
+          "imageSpaceGb": 0,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 4,
+          "maximumPersistentDisksSizeGb": "3072",
+          "memoryMb": 1740,
+          "name": "g1-small",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/g1-small",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:40:59.630-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highmem-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 13 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "00770157291441082211",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 13312,
+          "name": "n1-highmem-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highmem-2-d",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:49:40.050-07:00",
+          "description": "4 vCPUs, 15 GB RAM",
+          "guestCpus": 4,
+          "id": "09494636486174545828",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 15360,
+          "name": "n1-standard-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-4",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:50:15.128-08:00",
+          "description": "8 vCPUs, 7.2 GB RAM",
+          "guestCpus": 8,
+          "id": "01206886442411821831",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7373,
+          "name": "n1-highcpu-8",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highcpu-8",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:42:08.983-08:00",
+          "description": "4 vCPUs, 26 GB RAM",
+          "guestCpus": 4,
+          "id": "11556032176405786676",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 26624,
+          "name": "n1-highmem-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highmem-4",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:47:07.825-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highcpu-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 1.8 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "15178384466070744001",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 1843,
+          "name": "n1-highcpu-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-highcpu-2-d",
+          "zone": "europe-west1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:50:05.677-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUs, 15 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "00523085164784013586",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 15360,
+          "name": "n1-standard-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a/machineTypes/n1-standard-4-d",
+          "zone": "europe-west1-a"
+        }
+      ]
+    },
+    "zones/europe-west1-b": {
+      "machineTypes": [
+        {
+          "creationTimestamp": "2012-11-16T11:43:17.400-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highmem-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUs, 26 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "05095504563332567951",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 26624,
+          "name": "n1-highmem-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highmem-4-d",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:45:08.195-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highmem-8",
+            "state": "DEPRECATED"
+          },
+          "description": "8 vCPUs, 52 GB RAM, 2 scratch disks (1770 GB, 1770 GB)",
+          "guestCpus": 8,
+          "id": "07181827135536388552",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 53248,
+          "name": "n1-highmem-8-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            },
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highmem-8-d",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2013-04-25T13:32:49.088-07:00",
+          "description": "1 vCPU (shared physical core) and 0.6 GB RAM",
+          "guestCpus": 1,
+          "id": "1133568312750571513",
+          "imageSpaceGb": 0,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 4,
+          "maximumPersistentDisksSizeGb": "3072",
+          "memoryMb": 614,
+          "name": "f1-micro",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/f1-micro",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:40:59.630-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highmem-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 13 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "00770157291441082211",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 13312,
+          "name": "n1-highmem-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highmem-2-d",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:40:06.129-08:00",
+          "description": "2 vCPUs, 13 GB RAM",
+          "guestCpus": 2,
+          "id": "05438694236916301519",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 13312,
+          "name": "n1-highmem-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highmem-2",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:47:07.825-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highcpu-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 1.8 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "15178384466070744001",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 1843,
+          "name": "n1-highcpu-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highcpu-2-d",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:56.867-07:00",
+          "description": "2 vCPUs, 7.5 GB RAM",
+          "guestCpus": 2,
+          "id": "17936898073622676356",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7680,
+          "name": "n1-standard-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-standard-2",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:50:15.128-08:00",
+          "description": "8 vCPUs, 7.2 GB RAM",
+          "guestCpus": 8,
+          "id": "01206886442411821831",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7373,
+          "name": "n1-highcpu-8",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highcpu-8",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:44:25.985-08:00",
+          "description": "8 vCPUs, 52 GB RAM",
+          "guestCpus": 8,
+          "id": "01717932668777642040",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 53248,
+          "name": "n1-highmem-8",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highmem-8",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2013-04-25T13:32:45.550-07:00",
+          "description": "1 vCPU (shared physical core) and 1.7 GB RAM",
+          "guestCpus": 1,
+          "id": "1500265464823777597",
+          "imageSpaceGb": 0,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 4,
+          "maximumPersistentDisksSizeGb": "3072",
+          "memoryMb": 1740,
+          "name": "g1-small",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/g1-small",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:49:19.448-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-standard-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 7.5 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "06313284160910191442",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7680,
+          "name": "n1-standard-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-standard-2-d",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:50:05.677-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-standard-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUs, 15 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "00523085164784013586",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 15360,
+          "name": "n1-standard-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-standard-4-d",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:49:07.563-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highcpu-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUS, 3.6 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "01151097524490134507",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3686,
+          "name": "n1-highcpu-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highcpu-4-d",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:34.258-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-standard-1",
+            "state": "DEPRECATED"
+          },
+          "description": "1 vCPU, 3.75 GB RAM, 1 scratch disk (420 GB)",
+          "guestCpus": 1,
+          "id": "10583029372018866711",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3840,
+          "name": "n1-standard-1-d",
+          "scratchDisks": [
+            {
+              "diskGb": 420
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-standard-1-d",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:14.670-07:00",
+          "description": "1 vCPU, 3.75 GB RAM",
+          "guestCpus": 1,
+          "id": "11077240422128681563",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3840,
+          "name": "n1-standard-1",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-standard-1",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:48:06.087-08:00",
+          "description": "4 vCPUs, 3.6 GB RAM",
+          "guestCpus": 4,
+          "id": "04759000181765218034",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3686,
+          "name": "n1-highcpu-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highcpu-4",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:46:10.572-08:00",
+          "description": "2 vCPUs, 1.8 GB RAM",
+          "guestCpus": 2,
+          "id": "16898271314080235997",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 1843,
+          "name": "n1-highcpu-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highcpu-2",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:49:40.050-07:00",
+          "description": "4 vCPUs, 15 GB RAM",
+          "guestCpus": 4,
+          "id": "09494636486174545828",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 15360,
+          "name": "n1-standard-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-standard-4",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:51:04.549-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highcpu-8",
+            "state": "DEPRECATED"
+          },
+          "description": "8 vCPUS, 7.2 GB RAM, 2 scratch disks (1770 GB, 1770 GB)",
+          "guestCpus": 8,
+          "id": "02507333096579477005",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7373,
+          "name": "n1-highcpu-8-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            },
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highcpu-8-d",
+          "zone": "europe-west1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:42:08.983-08:00",
+          "description": "4 vCPUs, 26 GB RAM",
+          "guestCpus": 4,
+          "id": "11556032176405786676",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 26624,
+          "name": "n1-highmem-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b/machineTypes/n1-highmem-4",
+          "zone": "europe-west1-b"
+        }
+      ]
+    },
+    "zones/us-central1-a": {
+      "machineTypes": [
+        {
+          "creationTimestamp": "2012-06-07T13:49:40.050-07:00",
+          "description": "4 vCPUs, 15 GB RAM",
+          "guestCpus": 4,
+          "id": "09494636486174545828",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 15360,
+          "name": "n1-standard-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-standard-4",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:47:07.825-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highcpu-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 1.8 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "15178384466070744001",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 1843,
+          "name": "n1-highcpu-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highcpu-2-d",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2013-04-25T13:32:45.550-07:00",
+          "description": "1 vCPU (shared physical core) and 1.7 GB RAM",
+          "guestCpus": 1,
+          "id": "1500265464823777597",
+          "imageSpaceGb": 0,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 4,
+          "maximumPersistentDisksSizeGb": "3072",
+          "memoryMb": 1740,
+          "name": "g1-small",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/g1-small",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:49:19.448-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-standard-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 7.5 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "06313284160910191442",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7680,
+          "name": "n1-standard-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-standard-2-d",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2013-04-25T13:32:49.088-07:00",
+          "description": "1 vCPU (shared physical core) and 0.6 GB RAM",
+          "guestCpus": 1,
+          "id": "1133568312750571513",
+          "imageSpaceGb": 0,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 4,
+          "maximumPersistentDisksSizeGb": "3072",
+          "memoryMb": 614,
+          "name": "f1-micro",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/f1-micro",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:49:07.563-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highcpu-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUS, 3.6 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "01151097524490134507",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3686,
+          "name": "n1-highcpu-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highcpu-4-d",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:48:06.087-08:00",
+          "description": "4 vCPUs, 3.6 GB RAM",
+          "guestCpus": 4,
+          "id": "04759000181765218034",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3686,
+          "name": "n1-highcpu-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highcpu-4",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:40:59.630-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highmem-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 13 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "00770157291441082211",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 13312,
+          "name": "n1-highmem-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highmem-2-d",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:43:17.400-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highmem-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUs, 26 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "05095504563332567951",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 26624,
+          "name": "n1-highmem-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highmem-4-d",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:45:08.195-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highmem-8",
+            "state": "DEPRECATED"
+          },
+          "description": "8 vCPUs, 52 GB RAM, 2 scratch disks (1770 GB, 1770 GB)",
+          "guestCpus": 8,
+          "id": "07181827135536388552",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 53248,
+          "name": "n1-highmem-8-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            },
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highmem-8-d",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:56.867-07:00",
+          "description": "2 vCPUs, 7.5 GB RAM",
+          "guestCpus": 2,
+          "id": "17936898073622676356",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7680,
+          "name": "n1-standard-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-standard-2",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:34.258-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-standard-1",
+            "state": "DEPRECATED"
+          },
+          "description": "1 vCPU, 3.75 GB RAM, 1 scratch disk (420 GB)",
+          "guestCpus": 1,
+          "id": "10583029372018866711",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3840,
+          "name": "n1-standard-1-d",
+          "scratchDisks": [
+            {
+              "diskGb": 420
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-standard-1-d",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:46:10.572-08:00",
+          "description": "2 vCPUs, 1.8 GB RAM",
+          "guestCpus": 2,
+          "id": "16898271314080235997",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 1843,
+          "name": "n1-highcpu-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highcpu-2",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:50:15.128-08:00",
+          "description": "8 vCPUs, 7.2 GB RAM",
+          "guestCpus": 8,
+          "id": "01206886442411821831",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7373,
+          "name": "n1-highcpu-8",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highcpu-8",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:42:08.983-08:00",
+          "description": "4 vCPUs, 26 GB RAM",
+          "guestCpus": 4,
+          "id": "11556032176405786676",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 26624,
+          "name": "n1-highmem-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highmem-4",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:44:25.985-08:00",
+          "description": "8 vCPUs, 52 GB RAM",
+          "guestCpus": 8,
+          "id": "01717932668777642040",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 53248,
+          "name": "n1-highmem-8",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highmem-8",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:14.670-07:00",
+          "description": "1 vCPU, 3.75 GB RAM",
+          "guestCpus": 1,
+          "id": "11077240422128681563",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3840,
+          "name": "n1-standard-1",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-standard-1",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:40:06.129-08:00",
+          "description": "2 vCPUs, 13 GB RAM",
+          "guestCpus": 2,
+          "id": "05438694236916301519",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 13312,
+          "name": "n1-highmem-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highmem-2",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:50:05.677-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-standard-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUs, 15 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "00523085164784013586",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 15360,
+          "name": "n1-standard-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-standard-4-d",
+          "zone": "us-central1-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:51:04.549-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highcpu-8",
+            "state": "DEPRECATED"
+          },
+          "description": "8 vCPUS, 7.2 GB RAM, 2 scratch disks (1770 GB, 1770 GB)",
+          "guestCpus": 8,
+          "id": "02507333096579477005",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7373,
+          "name": "n1-highcpu-8-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            },
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-highcpu-8-d",
+          "zone": "us-central1-a"
+        }
+      ]
+    },
+    "zones/us-central1-b": {
+      "machineTypes": [
+        {
+          "creationTimestamp": "2013-04-25T13:32:45.550-07:00",
+          "description": "1 vCPU (shared physical core) and 1.7 GB RAM",
+          "guestCpus": 1,
+          "id": "1500265464823777597",
+          "imageSpaceGb": 0,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 4,
+          "maximumPersistentDisksSizeGb": "3072",
+          "memoryMb": 1740,
+          "name": "g1-small",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/g1-small",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:40:59.630-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highmem-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 13 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "00770157291441082211",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 13312,
+          "name": "n1-highmem-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highmem-2-d",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:51:04.549-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highcpu-8",
+            "state": "DEPRECATED"
+          },
+          "description": "8 vCPUS, 7.2 GB RAM, 2 scratch disks (1770 GB, 1770 GB)",
+          "guestCpus": 8,
+          "id": "02507333096579477005",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7373,
+          "name": "n1-highcpu-8-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            },
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highcpu-8-d",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:46:10.572-08:00",
+          "description": "2 vCPUs, 1.8 GB RAM",
+          "guestCpus": 2,
+          "id": "16898271314080235997",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 1843,
+          "name": "n1-highcpu-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highcpu-2",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:44:25.985-08:00",
+          "description": "8 vCPUs, 52 GB RAM",
+          "guestCpus": 8,
+          "id": "01717932668777642040",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 53248,
+          "name": "n1-highmem-8",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highmem-8",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:42:08.983-08:00",
+          "description": "4 vCPUs, 26 GB RAM",
+          "guestCpus": 4,
+          "id": "11556032176405786676",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 26624,
+          "name": "n1-highmem-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highmem-4",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2013-04-25T13:32:49.088-07:00",
+          "description": "1 vCPU (shared physical core) and 0.6 GB RAM",
+          "guestCpus": 1,
+          "id": "1133568312750571513",
+          "imageSpaceGb": 0,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 4,
+          "maximumPersistentDisksSizeGb": "3072",
+          "memoryMb": 614,
+          "name": "f1-micro",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/f1-micro",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:50:05.677-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-standard-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUs, 15 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "00523085164784013586",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 15360,
+          "name": "n1-standard-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-standard-4-d",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:47:07.825-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highcpu-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 1.8 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "15178384466070744001",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 1843,
+          "name": "n1-highcpu-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highcpu-2-d",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:43:17.400-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highmem-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUs, 26 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "05095504563332567951",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 26624,
+          "name": "n1-highmem-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highmem-4-d",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:56.867-07:00",
+          "description": "2 vCPUs, 7.5 GB RAM",
+          "guestCpus": 2,
+          "id": "17936898073622676356",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7680,
+          "name": "n1-standard-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-standard-2",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:48:06.087-08:00",
+          "description": "4 vCPUs, 3.6 GB RAM",
+          "guestCpus": 4,
+          "id": "04759000181765218034",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3686,
+          "name": "n1-highcpu-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highcpu-4",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:50:15.128-08:00",
+          "description": "8 vCPUs, 7.2 GB RAM",
+          "guestCpus": 8,
+          "id": "01206886442411821831",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7373,
+          "name": "n1-highcpu-8",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highcpu-8",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:49:07.563-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highcpu-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUS, 3.6 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "01151097524490134507",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3686,
+          "name": "n1-highcpu-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highcpu-4-d",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:45:08.195-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highmem-8",
+            "state": "DEPRECATED"
+          },
+          "description": "8 vCPUs, 52 GB RAM, 2 scratch disks (1770 GB, 1770 GB)",
+          "guestCpus": 8,
+          "id": "07181827135536388552",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 53248,
+          "name": "n1-highmem-8-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            },
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highmem-8-d",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:49:40.050-07:00",
+          "description": "4 vCPUs, 15 GB RAM",
+          "guestCpus": 4,
+          "id": "09494636486174545828",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 15360,
+          "name": "n1-standard-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-standard-4",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:49:19.448-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-standard-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 7.5 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "06313284160910191442",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7680,
+          "name": "n1-standard-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-standard-2-d",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:40:06.129-08:00",
+          "description": "2 vCPUs, 13 GB RAM",
+          "guestCpus": 2,
+          "id": "05438694236916301519",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 13312,
+          "name": "n1-highmem-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-highmem-2",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:34.258-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-standard-1",
+            "state": "DEPRECATED"
+          },
+          "description": "1 vCPU, 3.75 GB RAM, 1 scratch disk (420 GB)",
+          "guestCpus": 1,
+          "id": "10583029372018866711",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3840,
+          "name": "n1-standard-1-d",
+          "scratchDisks": [
+            {
+              "diskGb": 420
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-standard-1-d",
+          "zone": "us-central1-b"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:14.670-07:00",
+          "description": "1 vCPU, 3.75 GB RAM",
+          "guestCpus": 1,
+          "id": "11077240422128681563",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3840,
+          "name": "n1-standard-1",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b/machineTypes/n1-standard-1",
+          "zone": "us-central1-b"
+        }
+      ]
+    },
+    "zones/us-central2-a": {
+      "machineTypes": [
+        {
+          "creationTimestamp": "2012-06-07T13:49:40.050-07:00",
+          "description": "4 vCPUs, 15 GB RAM",
+          "guestCpus": 4,
+          "id": "09494636486174545828",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 15360,
+          "name": "n1-standard-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-standard-4",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:56.867-07:00",
+          "description": "2 vCPUs, 7.5 GB RAM",
+          "guestCpus": 2,
+          "id": "17936898073622676356",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7680,
+          "name": "n1-standard-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-standard-2",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:14.670-07:00",
+          "description": "1 vCPU, 3.75 GB RAM",
+          "guestCpus": 1,
+          "id": "11077240422128681563",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3840,
+          "name": "n1-standard-1",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-standard-1",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:48:06.087-08:00",
+          "description": "4 vCPUs, 3.6 GB RAM",
+          "guestCpus": 4,
+          "id": "04759000181765218034",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3686,
+          "name": "n1-highcpu-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highcpu-4",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2013-04-25T13:32:45.550-07:00",
+          "description": "1 vCPU (shared physical core) and 1.7 GB RAM",
+          "guestCpus": 1,
+          "id": "1500265464823777597",
+          "imageSpaceGb": 0,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 4,
+          "maximumPersistentDisksSizeGb": "3072",
+          "memoryMb": 1740,
+          "name": "g1-small",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/g1-small",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:47:07.825-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highcpu-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 1.8 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "15178384466070744001",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 1843,
+          "name": "n1-highcpu-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highcpu-2-d",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:40:59.630-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highmem-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 13 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "00770157291441082211",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 13312,
+          "name": "n1-highmem-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highmem-2-d",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2013-04-25T13:32:49.088-07:00",
+          "description": "1 vCPU (shared physical core) and 0.6 GB RAM",
+          "guestCpus": 1,
+          "id": "1133568312750571513",
+          "imageSpaceGb": 0,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 4,
+          "maximumPersistentDisksSizeGb": "3072",
+          "memoryMb": 614,
+          "name": "f1-micro",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/f1-micro",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:42:08.983-08:00",
+          "description": "4 vCPUs, 26 GB RAM",
+          "guestCpus": 4,
+          "id": "11556032176405786676",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 26624,
+          "name": "n1-highmem-4",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highmem-4",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:51:04.549-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highcpu-8",
+            "state": "DEPRECATED"
+          },
+          "description": "8 vCPUS, 7.2 GB RAM, 2 scratch disks (1770 GB, 1770 GB)",
+          "guestCpus": 8,
+          "id": "02507333096579477005",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7373,
+          "name": "n1-highcpu-8-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            },
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highcpu-8-d",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:44:25.985-08:00",
+          "description": "8 vCPUs, 52 GB RAM",
+          "guestCpus": 8,
+          "id": "01717932668777642040",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 53248,
+          "name": "n1-highmem-8",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highmem-8",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:50:05.677-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-standard-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUs, 15 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "00523085164784013586",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 15360,
+          "name": "n1-standard-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-standard-4-d",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:49:19.448-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-standard-2",
+            "state": "DEPRECATED"
+          },
+          "description": "2 vCPUs, 7.5 GB RAM, 1 scratch disk (870 GB)",
+          "guestCpus": 2,
+          "id": "06313284160910191442",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7680,
+          "name": "n1-standard-2-d",
+          "scratchDisks": [
+            {
+              "diskGb": 870
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-standard-2-d",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:50:15.128-08:00",
+          "description": "8 vCPUs, 7.2 GB RAM",
+          "guestCpus": 8,
+          "id": "01206886442411821831",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 7373,
+          "name": "n1-highcpu-8",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highcpu-8",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:45:08.195-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highmem-8",
+            "state": "DEPRECATED"
+          },
+          "description": "8 vCPUs, 52 GB RAM, 2 scratch disks (1770 GB, 1770 GB)",
+          "guestCpus": 8,
+          "id": "07181827135536388552",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 53248,
+          "name": "n1-highmem-8-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            },
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highmem-8-d",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:43:17.400-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highmem-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUs, 26 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "05095504563332567951",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 26624,
+          "name": "n1-highmem-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highmem-4-d",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:46:10.572-08:00",
+          "description": "2 vCPUs, 1.8 GB RAM",
+          "guestCpus": 2,
+          "id": "16898271314080235997",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 1843,
+          "name": "n1-highcpu-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highcpu-2",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:40:06.129-08:00",
+          "description": "2 vCPUs, 13 GB RAM",
+          "guestCpus": 2,
+          "id": "05438694236916301519",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 13312,
+          "name": "n1-highmem-2",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highmem-2",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-11-16T11:49:07.563-08:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highcpu-4",
+            "state": "DEPRECATED"
+          },
+          "description": "4 vCPUS, 3.6 GB RAM, 1 scratch disk (1770 GB)",
+          "guestCpus": 4,
+          "id": "01151097524490134507",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3686,
+          "name": "n1-highcpu-4-d",
+          "scratchDisks": [
+            {
+              "diskGb": 1770
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-highcpu-4-d",
+          "zone": "us-central2-a"
+        },
+        {
+          "creationTimestamp": "2012-06-07T13:48:34.258-07:00",
+          "deprecated": {
+            "deprecated": "2013-12-02T20:00:00-08:00",
+            "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-standard-1",
+            "state": "DEPRECATED"
+          },
+          "description": "1 vCPU, 3.75 GB RAM, 1 scratch disk (420 GB)",
+          "guestCpus": 1,
+          "id": "10583029372018866711",
+          "imageSpaceGb": 10,
+          "kind": "compute#machineType",
+          "maximumPersistentDisks": 16,
+          "maximumPersistentDisksSizeGb": "10240",
+          "memoryMb": 3840,
+          "name": "n1-standard-1-d",
+          "scratchDisks": [
+            {
+              "diskGb": 420
+            }
+          ],
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a/machineTypes/n1-standard-1-d",
+          "zone": "us-central2-a"
+        }
+      ]
+    }
+  },
+  "kind": "compute#machineTypeAggregatedList",
+  "nextPageToken": "ChhQRVJfUFJPSkVDVF9NQUNISU5FX1RZUEUSGjYwMDUzMTk1NTY3NS5uMS1zdGFuZGFyZC04",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/aggregated/machineTypes"
+}

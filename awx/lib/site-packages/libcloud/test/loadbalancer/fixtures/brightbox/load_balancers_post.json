@@ -1,0 +1,38 @@
+{"id": "lba-o466u",
+ "resource_type": "load_balancer",
+ "url": "https://api.gb1.brightbox.com/1.0/load_balancers/lba-o466u",
+ "policy": "least-connections",
+ "name": "lb2",
+ "created_at": "2011-10-01T01:00:00Z",
+ "deleted_at": null,
+ "healthcheck":
+  {"threshold_down": 3,
+   "timeout": 5000,
+   "port": 80,
+   "request": "/",
+   "type": "http",
+   "interval": 5000,
+   "threshold_up": 3},
+ "listeners":
+  [{"out": 80,
+    "protocol": "http",
+    "in": 80}],
+ "status": "creating",
+ "cloud_ips":
+  [],
+ "account":
+  {"id": "acc-43ks4",
+   "resource_type": "account",
+   "url": "https://api.gb1.brightbox.com/1.0/account",
+   "name": "Brightbox",
+   "status": "active"},
+ "nodes":
+  [{"id": "srv-lv426",
+    "resource_type": "server",
+    "url": "https://api.gb1.brightbox.com/1.0/servers/srv-lv426",
+    "name": "web1",
+    "created_at": "2011-10-01T01:00:00Z",
+    "deleted_at": null,
+    "hostname": "srv-lv426",
+    "started_at": "2011-10-01T01:01:00Z",
+    "status": "active"}]}

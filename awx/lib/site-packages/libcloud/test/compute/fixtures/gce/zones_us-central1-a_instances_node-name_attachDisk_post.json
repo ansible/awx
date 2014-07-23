@@ -1,0 +1,15 @@
+{
+  "id": "7455886659787654716",
+  "insertTime": "2013-06-26T16:48:27.691-07:00",
+  "kind": "compute#operation",
+  "name": "operation-zones_us-central1-a_instances_node-name_attachDisk_post",
+  "operationType": "attachDisk",
+  "progress": 0,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/operations/operation-zones_us-central1-a_instances_node-name_attachDisk_post",
+  "startTime": "2013-06-26T16:48:27.762-07:00",
+  "status": "PENDING",
+  "targetId": "1845312225624811608",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/instances/node-name",
+  "user": "897001307951@developer.gserviceaccount.com",
+  "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a"
+}

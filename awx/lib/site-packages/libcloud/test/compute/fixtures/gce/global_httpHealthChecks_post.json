@@ -1,0 +1,13 @@
+{
+  "id": "3903393118268087410",
+  "insertTime": "2013-09-03T02:19:54.629-07:00",
+  "kind": "compute#operation",
+  "name": "operation-global_httpHealthChecks_post",
+  "operationType": "insert",
+  "progress": 0,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/operations/operation-global_httpHealthChecks_post",
+  "startTime": "2013-09-03T02:19:54.718-07:00",
+  "status": "PENDING",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/healthChecks/lchealthcheck",
+  "user": "user@gserviceaccount.com"
+}

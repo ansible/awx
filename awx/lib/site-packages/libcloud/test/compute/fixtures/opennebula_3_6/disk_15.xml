@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DISK>
+    <ID>15</ID>
+    <NAME>Debian Sid</NAME>
+    <SIZE>1024</SIZE>
+    <URL>file:///images/debian/sid.img</URL>
+</DISK>

@@ -1,0 +1,14 @@
+{
+  "id": "1858155812259649243",
+  "insertTime": "2013-06-26T16:12:51.492-07:00",
+  "kind": "compute#operation",
+  "name": "operation-zones_us-central1-a_instances_post",
+  "operationType": "insert",
+  "progress": 0,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/operations/operation-zones_us-central1-a_instances_post",
+  "startTime": "2013-06-26T16:12:51.537-07:00",
+  "status": "PENDING",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/instances/lcnode-001",
+  "user": "897001307951@developer.gserviceaccount.com",
+  "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a"
+}

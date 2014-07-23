@@ -1,0 +1,13 @@
+resource 1.2.3.4
+netmask 255.255.255.0
+nameserver 91.203.56.1
+user f2e19d5c-eaa1-44e5-94aa-dc194594bd7b
+type ip
+gateway 91.203.56.1
+
+resource 1.2.3.5
+netmask 255.255.255.0
+nameserver 91.203.56.1
+user f2e19d5c-eaa1-44e5-94aa-dc194594bd7b
+type ip
+gateway 91.203.56.1

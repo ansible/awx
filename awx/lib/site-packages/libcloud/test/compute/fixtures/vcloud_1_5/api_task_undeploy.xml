@@ -1,0 +1,7 @@
+<Task status="success" startTime="2012-01-11T04:11:06.125-05:00" operationName="vappUndeployPowerOff" operation="Stopping Virtual Application (b0331206-dcc4-4874-b90a-351ff6502124)" expiryTime="2012-04-10T04:11:06.125-04:00" name="task" id="urn:vcloud:task:54516828-af1e-4723-9a0e-7783b0065d39" type="application/vnd.vmware.vcloud.task+xml"
+      href="https://vm-vcloud/api/task/undeploy" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.41.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Link rel="task:cancel" href="https://vm-vcloud/api/task/54516828-af1e-4723-9a0e-7783b0065d39/action/cancel"/>
+    <Owner type="application/vnd.vmware.vcloud.vApp+xml" name="" href="https://vm-vcloud/api/vApp/vapp-b0331206-dcc4-4874-b90a-351ff6502124"/>
+    <User type="application/vnd.vmware.admin.user+xml" name="labmanapi" href="https://vm-vcloud/api/admin/user/46f62cc3-65e0-4417-967a-a538ec6caea3"/>
+    <Organization type="application/vnd.vmware.vcloud.org+xml" name="MyOrg" href="https://vm-vcloud/api/org/96726c78-4ae3-402f-b08b-7a78c6903d2a"/>
+</Task>

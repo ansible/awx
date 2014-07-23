@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<images xmlns="http://docs.rackspacecloud.com/servers/api/v1.0">
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="CentOS 5.2" id="2"/>
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="Gentoo 2008.0" id="3"/>
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="Debian 5.0 (lenny)" id="4"/>
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="Fedora 10 (Cambridge)" id="5"/>
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="CentOS 5.3" id="7"/>
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="Ubuntu 9.04 (jaunty)" id="8"/>
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="Arch 2009.02" id="9"/>
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="Ubuntu 8.04.2 LTS (hardy)" id="10"/>
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="Ubuntu 8.10 (intrepid)" id="11"/>
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="Red Hat EL 5.3" id="12"/>
+  <image status="ACTIVE" created="2009-07-20T09:14:37-05:00" updated="2009-07-20T09:14:37-05:00" name="Fedora 11 (Leonidas)" id="13"/>
+  <image status="ACTIVE" progress="100" created="2009-11-29T20:22:09-06:00" updated="2009-11-29T20:24:08-06:00" serverId="91221" name="daily" id="191234" minDisk="5" minRam="256"/>
+</images>

@@ -1,0 +1,63 @@
+{ "queryasyncjobresultresponse": {
+    "accountid": "86d47ca2-726b-4b85-a18a-77d6b0d79829",
+    "userid": "20cd68f5-0633-48a5-826e-e4e2a00dd6b8",
+    "cmd": "org.apache.cloudstack.api.command.user.vm.DeployVMCmd",
+    "jobstatus": 1,
+    "jobprocstatus": 0,
+    "jobresultcode": 0,
+    "jobresulttype": "object",
+    "jobresult": {
+        "virtualmachine": {
+            "id": "19253fbf-abb7-4013-a8a1-97df3b93f206",
+            "name": "TestNode",
+            "projectid": "b90442d1-079b-4066-ab7d-41f8f3a5078b",
+            "project": "Test Project",
+            "domainid": "dc0314d4-09aa-4e8f-8a54-419ecf344635",
+            "domain": "Test Domain",
+            "created": "2014-03-06T15:39:44-0600",
+            "state": "Running",
+            "haenable": false,
+            "zoneid": "d630b15a-a9e1-4641-bee8-355005b7a14d",
+            "zonename": "TestZone",
+            "templateid": "a032e8a0-3411-48b7-9e78-ff66823e6561",
+            "templatename": "OL-6.3.1-64-13.11.01",
+            "templatedisplaytext": "OL-6.3.1-64-13.11.01",
+            "passwordenabled": true,
+            "serviceofferingid": "519f8667-26d0-40e5-a1cd-da04be1fd9b5",
+            "serviceofferingname": "Test Service Offering",
+            "cpunumber": 1,
+            "cpuspeed": 2000,
+            "memory": 2000,
+            "guestosid": "b8506c91-6d8e-4086-8659-f6296a7b71ac",
+            "rootdeviceid": 0,
+            "rootdevicetype": "ROOT",
+            "securitygroup": [],
+            "password": "mW6crjxag",
+            "nic": [
+                {
+                    "id": "1c144283-979a-4359-b695-3334dc403457",
+                    "networkid": "1bf4acce-19a5-4830-ab1d-444f8acb9986",
+                    "networkname": "Public",
+                    "netmask": "255.255.252.0",
+                    "gateway": "10.1.2.2",
+                    "ipaddress": "10.2.2.8",
+                    "isolationuri": "vlan://2950",
+                    "broadcasturi": "vlan://2950",
+                    "traffictype": "Guest",
+                    "type": "Shared",
+                    "isdefault": true,
+                    "macaddress": "06:ef:30:00:04:22"
+                }
+            ],
+            "hypervisor": "VMware",
+            "tags": [],
+            "affinitygroup": [],
+            "displayvm": true,
+            "isdynamicallyscalable": false,
+            "jobid": "e23b9f0c-b7ae-4ffe-aea0-c9cf436cc315",
+            "jobstatus": 0
+        }
+    },
+    "created": "2014-03-06T15:39:44-0600",
+    "jobid": "e23b9f0c-b7ae-4ffe-aea0-c9cf436cc315"
+} }

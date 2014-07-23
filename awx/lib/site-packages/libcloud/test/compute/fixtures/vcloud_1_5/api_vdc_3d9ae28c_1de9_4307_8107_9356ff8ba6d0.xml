@@ -1,0 +1,57 @@
+<Vdc status="1" name="MyVdc" id="urn:vcloud:vdc:3d9ae28c-1de9-4307-8107-9356ff8ba6d0" type="application/vnd.vmware.vcloud.vdc+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.41.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <Link rel="up" type="application/vnd.vmware.vcloud.org+xml" href="https://vm-vcloud/api/org/96726c78-4ae3-402f-b08b-7a78c6903d2a"/>
+   <Link rel="down" type="application/vnd.vmware.vcloud.metadata+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0/metadata"/>
+   <Link rel="add" type="application/vnd.vmware.vcloud.uploadVAppTemplateParams+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0/action/uploadVAppTemplate"/>
+   <Link rel="add" type="application/vnd.vmware.vcloud.media+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0/media"/>
+   <Link rel="add" type="application/vnd.vmware.vcloud.instantiateVAppTemplateParams+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0/action/instantiateVAppTemplate"/>
+   <Link rel="add" type="application/vnd.vmware.vcloud.cloneVAppParams+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0/action/cloneVApp"/>
+   <Link rel="add" type="application/vnd.vmware.vcloud.cloneVAppTemplateParams+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0/action/cloneVAppTemplate"/>
+   <Link rel="add" type="application/vnd.vmware.vcloud.cloneMediaParams+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0/action/cloneMedia"/>
+   <Link rel="add" type="application/vnd.vmware.vcloud.captureVAppParams+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0/action/captureVApp"/>
+   <Link rel="add" type="application/vnd.vmware.vcloud.composeVAppParams+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0/action/composeVApp"/>
+   <AllocationModel>AllocationPool</AllocationModel>
+   <StorageCapacity>
+      <Units>MB</Units>
+      <Allocated>5120000</Allocated>
+      <Limit>5120000</Limit>
+      <Used>1984512</Used>
+      <Overhead>0</Overhead>
+   </StorageCapacity>
+   <ComputeCapacity>
+      <Cpu>
+         <Units>MHz</Units>
+         <Allocated>130000</Allocated>
+         <Limit>160000</Limit>
+         <Used>0</Used>
+         <Overhead>0</Overhead>
+      </Cpu>
+      <Memory>
+         <Units>MB</Units>
+         <Allocated>527360</Allocated>
+         <Limit>527360</Limit>
+         <Used>130752</Used>
+         <Overhead>0</Overhead>
+      </Memory>
+   </ComputeCapacity>
+   <ResourceEntities>
+      <ResourceEntity type="application/vnd.vmware.vcloud.vApp+xml" name="testNode" href="https://vm-vcloud/api/vApp/vapp-8c57a5b6-e61b-48ca-8a78-3b70ee65ef6a"/>
+      <ResourceEntity type="application/vnd.vmware.vcloud.vApp+xml" name="testNode2" href="https://vm-vcloud/api/vApp/vapp-8c57a5b6-e61b-48ca-8a78-3b70ee65ef6b"/>
+      <ResourceEntity type="application/vnd.vmware.vcloud.vApp+xml" name="testNode3" href="https://vm-vcloud/api/vApp/vapp-8c57a5b6-e61b-48ca-8a78-3b70ee65ef6c"/>
+      <ResourceEntity type="application/vnd.vmware.vcloud.vApp+xml" name="deleted-test" href="https://vm-vcloud/api/vApp/vapp-access-to-resource-forbidden"/>
+      <ResourceEntity type="application/vnd.vmware.vcloud.vAppTemplate+xml" name="VMTemplate_Master" href="https://vm-vcloud/api/vAppTemplate/vappTemplate-ac1bc027-bf8c-4050-8643-4971f691c158"/>
+   </ResourceEntities>
+   <AvailableNetworks>
+      <Network type="application/vnd.vmware.vcloud.network+xml" name="vCloud - Default" href="https://vm-vcloud/api/network/dca8b667-6c8f-4c3e-be57-7a9425dba4f4"/>
+   </AvailableNetworks>
+   <Capabilities>
+      <SupportedHardwareVersions>
+         <SupportedHardwareVersion>vmx-04</SupportedHardwareVersion>
+         <SupportedHardwareVersion>vmx-07</SupportedHardwareVersion>
+         <SupportedHardwareVersion>vmx-08</SupportedHardwareVersion>
+      </SupportedHardwareVersions>
+   </Capabilities>
+   <NicQuota>0</NicQuota>
+   <NetworkQuota>1024</NetworkQuota>
+   <VmQuota>150</VmQuota>
+   <IsEnabled>true</IsEnabled>
+</Vdc>

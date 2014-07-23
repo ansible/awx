@@ -1,0 +1,1 @@
+{"kind": "dns#managedZone", "name": "example-com", "nameServers": ["ns-cloud-e1.googledomains.com.", "ns-cloud-e2.googledomains.com.", "ns-cloud-e3.googledomains.com.", "ns-cloud-e4.googledomains.com."], "creationTime": "2014-03-29T22:45:47.618Z", "dnsName": "example.com.", "id": "1", "description": ""}

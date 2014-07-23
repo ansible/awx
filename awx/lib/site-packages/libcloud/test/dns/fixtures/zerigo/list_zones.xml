@@ -1,0 +1,17 @@
+<zones type="array">
+  <zone>
+    <created-at type="datetime">2008-12-07T02:40:02Z</created-at>
+    <custom-nameservers nil="true"/>
+    <custom-ns type="boolean">false</custom-ns>
+    <default-ttl type="integer">600</default-ttl>
+    <domain>example.com</domain>
+    <hostmaster nil="true"/>
+    <id type="integer">12345678</id>
+    <notes>test foo bar</notes>
+    <ns1 nil="true"/>
+    <ns-type>pri_sec</ns-type>
+    <nx-ttl nil="true"/>
+    <slave-nameservers nil="true"/>
+    <updated-at type="datetime">2008-12-07T02:40:02Z</updated-at>
+  </zone>
+</zones>

@@ -1,0 +1,44 @@
+{
+    "objects": [
+        {
+            "context": true,
+            "cpu": 1000,
+            "cpu_model": null,
+            "cpus_instead_of_cores": false,
+            "drives": [],
+            "enable_numa": false,
+            "hv_relaxed": false,
+            "hv_tsc": false,
+            "mem": 536870912,
+            "meta": {},
+            "name": "test node",
+            "nics": [
+                {
+                    "boot_order": null,
+                    "firewall_policy": null,
+                    "ip_v4_conf": {
+                        "conf": "dhcp",
+                        "ip": null
+                    },
+                    "ip_v6_conf": null,
+                    "mac": "22:08:76:b1:ce:41",
+                    "model": "virtio",
+                    "runtime": null,
+                    "vlan": null
+                }
+            ],
+            "owner": {
+                "resource_uri": "/api/2.0/user/5b4a69a3-8e78-4c45-a8ba-8b13f0895e23/",
+                "uuid": "5b4a69a3-8e78-4c45-a8ba-8b13f0895e23"
+            },
+            "requirements": [],
+            "resource_uri": "/api/2.0/servers/9de75ed6_fd33_45e2_963f_d405f31fd911/",
+            "runtime": null,
+            "smp": 1,
+            "status": "started",
+            "tags": [],
+            "uuid": "9de75ed6_fd33_45e2_963f_d405f31fd911",
+            "vnc_password": "testserver"
+        }
+    ]
+}

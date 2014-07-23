@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COMPUTE href='http://www.opennebula.org/compute/15'>
+    <ID>15</ID>
+    <NAME>Compute 15 Test</NAME>
+    <INSTANCE_TYPE>small</INSTANCE_TYPE>
+    <STATE>ACTIVE</STATE>
+    <DISK id="0">
+        <STORAGE href="http://www.opennebula.org/storage/10" name="Debian"/>
+        <TYPE>FILE</TYPE>
+        <TARGET>hda</TARGET>
+    </DISK>
+    <NIC>
+        <NETWORK href="http://www.opennebula.org/network/5" name="Small network"/>
+        <IP>192.168.122.2</IP>
+        <MAC>02:00:c0:a8:7a:02</MAC>
+    </NIC>
+</COMPUTE>

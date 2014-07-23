@@ -1,0 +1,5 @@
+<Catalog href="https://services.vcloudexpress.terremark.com/api/v0.8/vdc/224/catalog" type="application/vnd.vmware.vcloud.catalog+xml" name="Miami Environment 1" xmlns="http://www.vmware.com/vcloud/v0.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <CatalogItems>
+    <CatalogItem href="https://services.vcloudexpress.terremark.com/api/v0.8/catalogItem/5" type="application/vnd.vmware.vcloud.catalogItem+xml" name="CentOS 5.3 (32-bit)"/>
+  </CatalogItems>
+</Catalog>

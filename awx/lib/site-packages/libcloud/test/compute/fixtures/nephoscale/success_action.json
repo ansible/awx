@@ -1,0 +1,11 @@
+{
+    "subcode": 0,
+    "message": "Your request was processed successfully.",
+    "data": {
+        "id": 141229,
+        "resource_type": "/job",
+        "uri": "https://api.nephoscale.com/job/141229/"
+    },
+    "response": 202,
+    "success": true
+}

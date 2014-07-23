@@ -1,0 +1,14 @@
+{
+  "id": "8983098895755095934",
+  "insertTime": "2013-06-26T10:04:53.453-07:00",
+  "kind": "compute#operation",
+  "name": "operation-global_firewalls_lcfirewall_delete",
+  "operationType": "delete",
+  "progress": 0,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/operations/operation-global_firewalls_lcfirewall_delete",
+  "startTime": "2013-06-26T10:04:53.508-07:00",
+  "status": "PENDING",
+  "targetId": "0565629596395414121",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/firewalls/lcfirewall",
+  "user": "897001307951@developer.gserviceaccount.com"
+}

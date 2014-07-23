@@ -1,0 +1,8 @@
+{
+    "keypair": {
+        "fingerprint": "97:10:a6:e7:92:65:7e:69:fe:e6:81:8f:39:3c:8f:5a",
+        "name": "key3",
+        "public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzTJr5BNSlTIDFsVY3zUJtbbcPsWbw7XDE/eXRQ+704790ARKKvE3FsERqdMZvwcx1osR0sGVdpgAiV/z5iEb5z2juQp7yQJHePiEnfHTH99NVJN+Y1BztchRoz224IaP987bN+fd8Pl/O1YDCyw+bX5zI/ekCC9z8fTdI2l1AbTnKVn7UjZBjKZi1uPMaH016fp039pIOtkjvIgDWjeGwOiJjY1vzaX3nxQje4kprEZ4FKk4yyG61qveBZr+/0Xq6ocNOYUSpB29AZ0IcfJa7P3yMxVRzSS9aN0fmrlf3kIFkVAy45A83GfZpiMxo/ulTaO9+tTSwulZP+0bxkCkn dummycomment\n",
+        "user_id": "dbdf4c6cab0c4ae78bef0bcdb03c2440"
+    }
+}

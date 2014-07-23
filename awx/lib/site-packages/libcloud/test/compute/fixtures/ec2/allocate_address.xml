@@ -1,0 +1,5 @@
+<AllocateAddressResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>56926e0e-5fa3-41f3-927c-17212def59df</requestId>
+    <publicIp>192.0.2.1</publicIp>
+    <domain>standard</domain>
+</AllocateAddressResponse>

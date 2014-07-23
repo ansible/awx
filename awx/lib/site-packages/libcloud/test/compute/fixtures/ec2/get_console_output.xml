@@ -1,0 +1,6 @@
+<GetConsoleOutputResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>f0ffb5ce-8d62-4ab9-add7-67a0f99c9811</requestId>
+    <instanceId>i-40128925</instanceId>
+    <timestamp>2013-12-02T12:31:38.000Z</timestamp>
+    <output>VGVzdCBTdHJpbmc=</output>
+</GetConsoleOutputResponse>

@@ -1,0 +1,8 @@
+{
+   "request":"{}",
+   "status":"COMPLETED",
+   "verb":"PUT",
+   "jobId":"116a8f17-38ac-4862-827c-506cd04800d5",
+   "callbackUrl":"https://dns.api.rackspacecloud.com/v1.0/11111/status/116a8f17-38ac-4862-827c-506cd04800d5",
+   "requestUrl":"http://dns.api.rackspacecloud.com/v1.0/11111/domains/2946173"
+}

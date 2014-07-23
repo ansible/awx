@@ -1,0 +1,15 @@
+{
+  "id": "10507122129283663728",
+  "insertTime": "2013-06-26T15:03:02.766-07:00",
+  "kind": "compute#operation",
+  "name": "operation-zones_us-central1-a_instances_node-name_reset_post",
+  "operationType": "reset",
+  "progress": 100,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/operations/operation-zones_us-central1-a_instances_node-name_reset_post",
+  "startTime": "2013-06-26T15:03:02.813-07:00",
+  "status": "DONE",
+  "targetId": "1845312225624811608",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/instances/node-name",
+  "user": "897001307951@developer.gserviceaccount.com",
+  "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a"
+}

@@ -1,0 +1,29 @@
+{
+   "request":"{\"domains\": [{\"recordsList\": {\"records\": []}, \"emailAddress\": \"test@test.com\", \"name\": \"bar.foo1.com\"}]}",
+   "response":{
+      "domains":[
+         {
+            "name":"bar.foo1.com",
+            "id":2946173,
+            "accountId":11111,
+            "updated":"2011-10-29T20:28:59.000+0000",
+            "ttl":3600,
+            "emailAddress":"test@test.com",
+            "nameservers":[
+               {
+                  "name":"ns.rackspace.com"
+               },
+               {
+                  "name":"ns2.rackspace.com"
+               }
+            ],
+            "created":"2011-10-29T20:28:59.000+0000"
+         }
+      ]
+   },
+   "status":"COMPLETED",
+   "verb":"POST",
+   "jobId":"288795f9-e74d-48be-880b-a9e36e0de61e",
+   "callbackUrl":"https://dns.api.rackspacecloud.com/v1.0/11111/status/288795f9-e74d-48be-880b-a9e36e0de61e",
+   "requestUrl":"http://dns.api.rackspacecloud.com/v1.0/11111/domains"
+}

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DeployedServers xmlns="http://oec.api.opsource.net/schemas/server" xmlns:ns9="http://oec.api.opsource.net/schemas/reset" xmlns:ns5="http://oec.api.opsource.net/schemas/vip" xmlns:ns12="http://oec.api.opsource.net/schemas/general" xmlns:ns6="http://oec.api.opsource.net/schemas/imageimportexport" xmlns:ns13="http://oec.api.opsource.net/schemas/support" xmlns:ns7="http://oec.api.opsource.net/schemas/whitelabel" xmlns:ns10="http://oec.api.opsource.net/schemas/ipplan" xmlns:ns8="http://oec.api.opsource.net/schemas/datacenter" xmlns:ns11="http://oec.api.opsource.net/schemas/storage" xmlns:ns2="http://oec.api.opsource.net/schemas/organization" xmlns:ns4="http://oec.api.opsource.net/schemas/network" xmlns:ns3="http://oec.api.opsource.net/schemas/directory">
+    <DeployedServer>
+        <id>abadbc7e-9e10-46ca-9d4a-194bcc6b6c16</id>
+        <name>testnode01</name>
+        <description>this is testnode01 description</description>
+        <machineSpecification>
+            <cpuCount>2</cpuCount>
+            <memoryMb>2048</memoryMb>
+            <osStorageGb>10</osStorageGb>
+            <additionalLocalStorageGb>20</additionalLocalStorageGb>
+            <operatingSystem>
+                <type>UNIX</type>
+                <displayName>REDHAT5/64</displayName>
+            </operatingSystem>
+        </machineSpecification>
+        <sourceImageId>44ed8b72-ebea-11df-bdc1-001517c46384</sourceImageId>
+        <networkId>53b4c05b-341e-4ac3-b688-bdd78e43ca9e</networkId>
+        <privateIpAddress>10.162.1.1</privateIpAddress>
+        <publicIpAddress>200.16.132.7</publicIpAddress>
+        <machineName>10-162-1-1</machineName>
+        <isStarted>true</isStarted>
+        <deployedTime>2011-03-02T17:16:09.882Z</deployedTime>
+    </DeployedServer>
+    <DeployedServer>
+        <id>dbadbc8e-9e10-56ca-5d4a-155bcc5b5c15</id>
+        <name>testnode02</name>
+        <description>this is testnode02 description</description>
+        <machineSpecification>
+            <cpuCount>4</cpuCount>
+            <memoryMb>4096</memoryMb>
+            <osStorageGb>10</osStorageGb>
+            <additionalLocalStorageGb>20</additionalLocalStorageGb>
+            <operatingSystem>
+                <type>UNIX</type>
+                <displayName>REDHAT5/64</displayName>
+            </operatingSystem>
+        </machineSpecification>
+        <sourceImageId>44ed8b72-ebea-11df-bdc1-001517c46384</sourceImageId>
+        <networkId>53b4c05b-341e-4ac3-b688-bdd78e43ca9e</networkId>
+        <privateIpAddress>10.162.1.2</privateIpAddress>
+        <machineName>10-162-1-2</machineName>
+        <isStarted>true</isStarted>
+        <deployedTime>2011-03-02T17:16:10.882Z</deployedTime>
+    </DeployedServer>
+</DeployedServers>

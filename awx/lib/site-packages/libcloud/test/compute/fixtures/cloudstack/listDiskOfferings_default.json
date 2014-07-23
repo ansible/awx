@@ -1,0 +1,1 @@
+{ "listdiskofferingsresponse" : { "count":1 ,"diskoffering" : [  {"id":"6345e3b7-227e-4209-8f8c-1f94219696e6","name":"Disk offer 1","displaytext":"Disk offer 1 display name","disksize":10,"created":"2012-04-24T16:35:55+0200","iscustomized":false}  ] } }

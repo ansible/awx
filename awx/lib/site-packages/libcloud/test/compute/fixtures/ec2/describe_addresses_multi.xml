@@ -1,0 +1,17 @@
+<DescribeAddressesResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+  <requestId>59dbff89-35bd-4eac-99ed-be587EXAMPLE</requestId>
+  <addressesSet>
+     <item>
+        <publicIp>1.2.3.4</publicIp>
+        <instanceId>i-4382922a</instanceId>
+     </item>
+     <item>
+        <publicIp>1.2.3.6</publicIp>
+        <instanceId>i-4382922b</instanceId>
+     </item>
+     <item>
+        <publicIp>1.2.3.5</publicIp>
+        <instanceId>i-4382922b</instanceId>
+     </item>
+</addressesSet>
+</DescribeAddressesResponse>

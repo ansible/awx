@@ -1,0 +1,15 @@
+{
+  "endTime": "2013-06-26T10:05:12.607-07:00",
+  "id": "4914541423567262393",
+  "insertTime": "2013-06-26T10:05:11.102-07:00",
+  "kind": "compute#operation",
+  "name": "operation-global_networks_lcnetwork_delete",
+  "operationType": "delete",
+  "progress": 100,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/operations/operation-global_networks_lcnetwork_delete",
+  "startTime": "2013-06-26T10:05:11.273-07:00",
+  "status": "DONE",
+  "targetId": "16211908079305042870",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/lcnetwork",
+  "user": "897001307951@developer.gserviceaccount.com"
+}

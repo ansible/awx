@@ -1,0 +1,111 @@
+{
+  "id": "projects/project_name/regions",
+  "items": [
+    {
+      "creationTimestamp": "2013-04-19T17:58:16.641-07:00",
+      "description": "europe-west1",
+      "id": "0827308347805275727",
+      "kind": "compute#region",
+      "name": "europe-west1",
+      "quotas": [
+        {
+          "limit": 24.0,
+          "metric": "CPUS",
+          "usage": 0.0
+        },
+        {
+          "limit": 5120.0,
+          "metric": "DISKS_TOTAL_GB",
+          "usage": 0.0
+        },
+        {
+          "limit": 7.0,
+          "metric": "STATIC_ADDRESSES",
+          "usage": 0.0
+        },
+        {
+          "limit": 23.0,
+          "metric": "IN_USE_ADDRESSES",
+          "usage": 0.0
+        }
+      ],
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/europe-west1",
+      "status": "UP",
+      "zones": [
+        "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a",
+        "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b"
+      ]
+    },
+    {
+      "creationTimestamp": "2013-04-19T18:17:05.050-07:00",
+      "description": "us-central1",
+      "id": "06713580496607310378",
+      "kind": "compute#region",
+      "name": "us-central1",
+      "quotas": [
+        {
+          "limit": 24.0,
+          "metric": "CPUS",
+          "usage": 3.0
+        },
+        {
+          "limit": 5120.0,
+          "metric": "DISKS_TOTAL_GB",
+          "usage": 10.0
+        },
+        {
+          "limit": 7.0,
+          "metric": "STATIC_ADDRESSES",
+          "usage": 0.0
+        },
+        {
+          "limit": 23.0,
+          "metric": "IN_USE_ADDRESSES",
+          "usage": 4.0
+        }
+      ],
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+      "status": "UP",
+      "zones": [
+        "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a",
+        "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b"
+      ]
+    },
+    {
+      "creationTimestamp": "2013-04-19T18:19:05.482-07:00",
+      "description": "us-central2",
+      "id": "04157375529195793136",
+      "kind": "compute#region",
+      "name": "us-central2",
+      "quotas": [
+        {
+          "limit": 24.0,
+          "metric": "CPUS",
+          "usage": 0.0
+        },
+        {
+          "limit": 5120.0,
+          "metric": "DISKS_TOTAL_GB",
+          "usage": 0.0
+        },
+        {
+          "limit": 7.0,
+          "metric": "STATIC_ADDRESSES",
+          "usage": 0.0
+        },
+        {
+          "limit": 23.0,
+          "metric": "IN_USE_ADDRESSES",
+          "usage": 0.0
+        }
+      ],
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central2",
+      "status": "UP",
+      "zones": [
+        "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a"
+      ]
+    }
+  ],
+  "kind": "compute#regionList",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions"
+}

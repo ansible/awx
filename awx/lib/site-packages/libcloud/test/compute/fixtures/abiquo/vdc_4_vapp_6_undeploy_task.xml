@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<task>
+    <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/virtualappliances/6/virtualmachines/3/tasks" rel="parent"/>
+    <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/virtualappliances/6/virtualmachines/3/tasks/1da8c8b6-86f6-49ef-9d29-57dcc73b875a" rel="self"/>
+    <jobs>
+        <job>
+            <description>Undeploy task's power off on virtual machine with id 3</description>
+            <id>1da8c8b6-86f6-49ef-9d29-57dcc73b875a.103a1a6b-4de2-48d8-9a38-8698561020b8</id>
+            <parentTaskId>1da8c8b6-86f6-49ef-9d29-57dcc73b875a</parentTaskId>
+            <rollbackState>UNKNOWN</rollbackState>
+            <state>DONE</state>
+            <timestamp>1358012669</timestamp>
+            <type>POWER_OFF</type>
+        </job>
+        <job>
+            <description>Undeploy task's deconfigure on virtual machine with id 3</description>
+            <id>1da8c8b6-86f6-49ef-9d29-57dcc73b875a.e4250ca9-505d-4640-9ad2-fb101f9e9978</id>
+            <parentTaskId>1da8c8b6-86f6-49ef-9d29-57dcc73b875a</parentTaskId>
+            <rollbackState>UNKNOWN</rollbackState>
+            <state>DONE</state>
+            <timestamp>1358012669</timestamp>
+            <type>DECONFIGURE</type>
+        </job>
+    </jobs>
+    <ownerId>3</ownerId>
+    <state>FINISHED_SUCCESSFULLY</state>
+    <taskId>1da8c8b6-86f6-49ef-9d29-57dcc73b875a</taskId>
+    <timestamp>1358012669</timestamp>
+    <type>UNDEPLOY</type>
+    <userId>admin</userId>
+</task>

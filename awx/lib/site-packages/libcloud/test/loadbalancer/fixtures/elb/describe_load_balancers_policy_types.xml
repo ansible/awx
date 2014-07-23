@@ -1,0 +1,21 @@
+<DescribeLoadBalancerPolicyTypesResponse xmlns="http://elasticloadbalancing.amazonaws.com/doc/2012-06-01/">
+  <DescribeLoadBalancerPolicyTypesResult>
+    <PolicyTypeDescriptions>
+      <member>
+        <PolicyAttributeTypeDescriptions>
+          <member>
+            <AttributeName>ProxyProtocol</AttributeName>
+            <AttributeType>Boolean</AttributeType>
+            <Cardinality>ONE</Cardinality>
+          </member>
+        </PolicyAttributeTypeDescriptions>
+        <PolicyTypeName>ProxyProtocolPolicyType</PolicyTypeName>
+        <Description>Policy that controls whether to include the IP address and port of the originating request for TCP messages.
+        This policy operates on TCP/SSL listeners only</Description>
+      </member>
+    </PolicyTypeDescriptions>
+  </DescribeLoadBalancerPolicyTypesResult>
+  <ResponseMetadata>
+    <RequestId>1549581b-12b7-11e3-895e-1334aEXAMPLE</RequestId>
+  </ResponseMetadata>
+</DescribeLoadBalancerPolicyTypesResponse>

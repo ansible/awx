@@ -1,0 +1,26 @@
+{"get_pricing_plans_response" : 
+ { "status_message" : null
+   , "status_code" : 200
+   , "error_info" : null
+   , "response_type" : "OK"
+   , "human_readable_message" : "Here some pricing plans we are offering on new orders.&nbsp; Note we offer most disk and memory sizes.&nbsp; So if you setup a new server feel free to vary these (e.g. different memory, disk, etc) and we will just adjust the pricing to suit.&nbsp; Pricing is in USD.&nbsp; If you are an NZ-based customer then we would need to add GST."
+   , "response_display_duration_type" : "REGULAR"
+   , "pricing_plan_infos" : 
+   [{ "pricing_plan_code" : "MiroVPSLowContention"
+      , "pricing_plan_description" : "MiroVPS Semi-Dedicated Server (Dallas)"
+      , "monthly_recurring_fee" : 32.54
+      , "monthly_recurring_amt" : {
+	  "amt" : 35.0
+	  , "currency" : "CUR_AUD"
+	  , "amt_usd" : 32.54}
+      , "minimum_memory_mb" : 950
+      , "minimum_disk_gb" : 20
+      , "minimum_data_transfer_allowance_gb" : 75
+      , "see_also_url" : "http://rimuhosting.com/order/serverdetails.jsp?plan=MiroVPSLowContention"
+      , "server_type" : "VPS"
+      , "offered_at_data_center" : 
+      { "data_center_location_code" : "DCDALLAS"
+        , "data_center_location_name" : "Dallas" }
+    }]
+ }
+}

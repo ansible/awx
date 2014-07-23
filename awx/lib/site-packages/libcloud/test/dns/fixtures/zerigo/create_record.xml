@@ -1,0 +1,13 @@
+<host>
+  <created-at type="datetime">2008-12-07T02:51:13Z</created-at>
+  <data>127.0.0.1</data>
+  <fqdn>www.example.com</fqdn>
+  <host-type>A</host-type>
+  <hostname>www</hostname>
+  <id type="integer">23456780</id>
+  <notes nil="true"/>
+  <priority type="integer" nil="true"/>
+  <ttl type="integer" nil="true"/>
+  <updated-at type="datetime">2008-12-07T02:51:13Z</updated-at>
+  <zone-id type="integer">12345678</zone-id>
+</host>

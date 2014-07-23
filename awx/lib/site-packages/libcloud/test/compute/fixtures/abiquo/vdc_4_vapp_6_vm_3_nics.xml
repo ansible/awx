@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<nics>
+    <nic>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/virtualappliances/6/virtualmachines/3/network/nics/64" type="application/vnd.abiquo.nic+xml" rel="edit"/><link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/privatenetworks/2/ips/64" type="application/vnd.abiquo.ip+xml" rel="privateip"/>
+        <link href="http://10.60.12.7:80/api/cloud/virtualdatacenters/4/privatenetworks/2" type="application/vnd.abiquo.vlan+xml" rel="privatenetwork" title="default_private_network"/>
+    <id>64</id><ip>192.168.0.2</ip><mac>52:54:00:b7:f7:85</mac><sequence>0</sequence></nic>
+    <nic>
+        <link href="http://10.60.12.7:80/api/cloud/datacenters/4/networks/4" type="application/vnd.abiquo.vlan+xml" rel="publicnetwork" title="public_network"/>
+    <id>364</id><ip>34.34.34.5</ip><mac>52:54:00:b7:f7:88</mac><sequence>0</sequence></nic>
+</nics>

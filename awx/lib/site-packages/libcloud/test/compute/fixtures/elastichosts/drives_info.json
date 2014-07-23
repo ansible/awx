@@ -1,0 +1,12 @@
+{
+  "drive": "0012e24a-6eae-4279-9912-3432f698cec8", 
+  "encryption:cipher": "aes-xts-plain", 
+  "name": "test drive", 
+  "read:bytes": "4096", 
+  "read:requests": "1", 
+  "size": 10737418240, 
+  "status": "active", 
+  "user": "2164ce57-591c-43ee-ade5-e2fe0ee13c3e", 
+  "write:bytes": "4096", 
+  "write:requests": "1"
+}

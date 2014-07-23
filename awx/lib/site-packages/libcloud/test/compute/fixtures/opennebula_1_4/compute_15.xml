@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COMPUTE>
+    <ID>15</ID>
+    <NAME>Compute 15</NAME>
+    <STATE>ACTIVE</STATE>
+    <STORAGE>
+        <DISK image="15" dev="sda1"/>
+        <FS size="512" format="ext3" dev="sda3"/>
+        <SWAP size="1024" dev="sda2"/>
+    </STORAGE>  
+    <NETWORK>
+        <NIC network="5" ip="192.168.0.2"/>
+        <NIC network="15" ip="192.168.1.2"/>
+    </NETWORK>
+</COMPUTE>

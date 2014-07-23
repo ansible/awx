@@ -1,0 +1,6 @@
+<Task status="running" startTime="2012-04-22T10:02:55.085-04:00" operationName="vappUpdateVm" operation="Updating Virtual Machine testVm (cbfe57d5-7362-482b-b313-e5b5bcff3309)" expiryTime="2012-07-21T10:02:55.085-04:00" name="task" id="urn:vcloud:task:38547d96-2a98-443e-8e4a-6765415e6c2c" type="application/vnd.vmware.vcloud.task+xml" href="https://vm-vcloud/api/task/b034df55-fe81-4798-bc81-1f0fd0ead450" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.33.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Link rel="task:cancel" href="https://vm-vcloud/api/task/38547d96-2a98-443e-8e4a-6765415e6c2c/action/cancel"/>
+    <Owner type="application/vnd.vmware.vcloud.vm+xml" name="ScrumVM_Master" href="https://vm-vcloud/api/vApp/vm-cbfe57d5-7362-482b-b313-e5b5bcff3309"/>
+    <User type="application/vnd.vmware.admin.user+xml" name="labmanapi" href="https://vm-vcloud/api/admin/user/46f62cc3-65e0-4417-967a-a538ec6caea3"/>
+    <Organization type="application/vnd.vmware.vcloud.org+xml" name="NetSuite" href="https://vm-vcloud/api/org/96726c78-4ae3-402f-b08b-7a78c6903d2a"/>
+</Task>

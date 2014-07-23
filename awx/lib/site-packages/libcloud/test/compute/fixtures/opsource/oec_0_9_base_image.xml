@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServerImages xmlns="http://oec.api.opsource.net/schemas/server" xmlns:ns9="http://oec.api.opsource.net/schemas/reset" xmlns:ns5="http://oec.api.opsource.net/schemas/vip" xmlns:ns12="http://oec.api.opsource.net/schemas/general" xmlns:ns6="http://oec.api.opsource.net/schemas/imageimportexport" xmlns:ns13="http://oec.api.opsource.net/schemas/support" xmlns:ns7="http://oec.api.opsource.net/schemas/whitelabel" xmlns:ns10="http://oec.api.opsource.net/schemas/ipplan" xmlns:ns8="http://oec.api.opsource.net/schemas/datacenter" xmlns:ns11="http://oec.api.opsource.net/schemas/storage" xmlns:ns2="http://oec.api.opsource.net/schemas/organization" xmlns:ns4="http://oec.api.opsource.net/schemas/network" xmlns:ns3="http://oec.api.opsource.net/schemas/directory">
+    <ServerImage>
+        <id>52ed8b72-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed8b72-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>RedHat 5.5 64-bit 1 CPU</name>
+        <description>RedHat 5.5 Enterprise (Tikanga), 64-bit</description>
+        <operatingSystem>
+            <type>UNIX</type>
+            <displayName>REDHAT5/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>1</cpuCount>
+        <memory>2048</memory>
+        <osStorage>10</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed8dca-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed8dca-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>RedHat 5.5 64-bit 2 CPU</name>
+        <description>RedHat 5.5 Enterprise (Tikanga), 64-bit</description>
+        <operatingSystem>
+            <type>UNIX</type>
+            <displayName>REDHAT5/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>2</cpuCount>
+        <memory>4096</memory>
+        <osStorage>10</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed8ed8-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed8ed8-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>RedHat 5.5 64-bit 4 CPU</name>
+        <description>RedHat 5.5 Enterprise (Tikanga), 64-bit</description>
+        <operatingSystem>
+            <type>UNIX</type>
+            <displayName>REDHAT5/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>4</cpuCount>
+        <memory>6144</memory>
+        <osStorage>10</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>6fc040ae-3605-11e0-bfb5-001517c46384</id>
+        <resourcePath>/oec/base/image/6fc040ae-3605-11e0-bfb5-001517c46384</resourcePath>
+        <name>RedHat 5.5 32-bit 1 CPU</name>
+        <description>RedHat 5.5 Enterprise (Tikanga), 32-bit</description>
+        <operatingSystem>
+            <type>UNIX</type>
+            <displayName>REDHAT5/32</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>1</cpuCount>
+        <memory>2048</memory>
+        <osStorage>10</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>2011-02-11T17:36:19.000Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed92d4-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed92d4-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Ubuntu 8.04.4 2 CPU</name>
+        <description>Ubuntu 8.04.4 LTS, 64-bit</description>
+        <operatingSystem>
+            <type>UNIX</type>
+            <displayName>UBUNTU8/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>2</cpuCount>
+        <memory>4096</memory>
+        <osStorage>10</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed876c-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed876c-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2008 Ent 64-bit R2 2 CPU</name>
+        <description>Windows 2008 Enterprise R2 64-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2008R2E/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>2</cpuCount>
+        <memory>4096</memory>
+        <osStorage>50</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed8a5a-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed8a5a-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2008 Ent 64-bit R2 4 CPU</name>
+        <description>Windows 2008 Enterprise R2 64-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2008R2E/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>4</cpuCount>
+        <memory>8192</memory>
+        <osStorage>50</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed865e-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed865e-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2008 Std 64-bit R2 2 CPU</name>
+        <description>Windows 2008 Standard R2 64-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2008R2S/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>2</cpuCount>
+        <memory>4096</memory>
+        <osStorage>50</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed7b96-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed7b96-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2008 Std 32-bit 1 CPU</name>
+        <description>Windows 2008 Standard SP2 32-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2008S/32</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>1</cpuCount>
+        <memory>2048</memory>
+        <osStorage>50</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed7cb8-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed7cb8-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2008 Std 32-bit 2 CPU</name>
+        <description>Windows 2008 Standard SP2 32-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2008S/32</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>2</cpuCount>
+        <memory>4096</memory>
+        <osStorage>50</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed7da8-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed7da8-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2008 Std 32-bit 4 CPU</name>
+        <description>Windows 2008 Standard SP2 32-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2008S/32</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>4</cpuCount>
+        <memory>4096</memory>
+        <osStorage>50</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed7ea2-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed7ea2-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2008 Ent 32-bit 2 CPU</name>
+        <description>Windows 2008 Enterprise SP2 32-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2008E/32</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>2</cpuCount>
+        <memory>4096</memory>
+        <osStorage>50</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed8fd2-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed8fd2-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Red Hat 4.8 32-bit 1 CPU</name>
+        <description>Red Hat ES 4.8 (Nahant), 32-bit</description>
+        <operatingSystem>
+            <type>UNIX</type>
+            <displayName>REDHAT4/32</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>1</cpuCount>
+        <memory>2048</memory>
+        <osStorage>10</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed90cc-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed90cc-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>CentOS 5.5 32-bit 1 CPU</name>
+        <description>CentOS release 5.5, 32-bit</description>
+        <operatingSystem>
+            <type>UNIX</type>
+            <displayName>CENTOS5/32</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>1</cpuCount>
+        <memory>2048</memory>
+        <osStorage>10</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed91da-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed91da-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>CentOS 5.5 64-bit 1 CPU</name>
+        <description>CentOS release 5.5, 64-bit</description>
+        <operatingSystem>
+            <type>UNIX</type>
+            <displayName>CENTOS5/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>1</cpuCount>
+        <memory>2048</memory>
+        <osStorage>10</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed766e-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed766e-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2003 Ent 32-bit 1 CPU</name>
+        <description>Windows 2003 Enterprise SP2 32-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2003E/32</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>1</cpuCount>
+        <memory>2048</memory>
+        <osStorage>16</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed7876-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed7876-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2003 Ent 32-bit 2 CPU</name>
+        <description>Windows 2003 Enterprise SP2 32-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2003E/32</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>2</cpuCount>
+        <memory>4096</memory>
+        <osStorage>16</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed7984-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed7984-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2003 Ent 32-bit 4 CPU</name>
+        <description>Windows 2003 Enterprise SP2 32-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2003E/32</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>4</cpuCount>
+        <memory>4096</memory>
+        <osStorage>16</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>52ed7a88-ebea-11df-bdc1-001517c46384</id>
+        <resourcePath>/oec/base/image/52ed7a88-ebea-11df-bdc1-001517c46384</resourcePath>
+        <name>Win2003 Std 64-bit 2 CPU</name>
+        <description>Windows 2003 Standard x64 SP2, 64-bit</description>
+        <operatingSystem>
+            <type>WINDOWS</type>
+            <displayName>WIN2003S/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>2</cpuCount>
+        <memory>4096</memory>
+        <osStorage>16</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>1970-01-01T00:00:02.010Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>0c231ef0-2a42-11e0-bfb5-001517c46384</id>
+        <resourcePath>/oec/base/image/0c231ef0-2a42-11e0-bfb5-001517c46384</resourcePath>
+        <name>RedHat 64-bit 2 CPU with MySQL</name>
+        <description>RedHat 5.5 Enterprise with MySQL 5.5 installed</description>
+        <operatingSystem>
+            <type>UNIX</type>
+            <displayName>REDHAT5/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>2</cpuCount>
+        <memory>8192</memory>
+        <osStorage>10</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>2011-01-27T18:19:58.000Z</created>
+    </ServerImage>
+    <ServerImage>
+        <id>2fb5261a-2a42-11e0-bfb5-001517c46384</id>
+        <resourcePath>/oec/base/image/2fb5261a-2a42-11e0-bfb5-001517c46384</resourcePath>
+        <name>RedHat 64-bit 2 CPU with PostgreSQL</name>
+        <description>RedHat 5.5 Enterprise with PostgreSQL 9.0 installed</description>
+        <operatingSystem>
+            <type>UNIX</type>
+            <displayName>REDHAT5/64</displayName>
+        </operatingSystem>
+        <location>NA1</location>
+        <cpuCount>2</cpuCount>
+        <memory>8192</memory>
+        <osStorage>10</osStorage>
+        <additionalLocalStorage>0</additionalLocalStorage>
+        <created>2011-01-27T18:20:57.000Z</created>
+    </ServerImage>
+</ServerImages>

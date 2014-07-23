@@ -1,0 +1,36 @@
+{
+  "ERRORARRAY": [],
+  "ACTION": "domain.list",
+  "DATA": [
+    {
+      "DOMAINID": 5093,
+      "DESCRIPTION": "",
+      "EXPIRE_SEC": 0,
+      "RETRY_SEC": 0,
+      "STATUS": 1,
+      "LPM_DISPLAYGROUP": "thing",
+      "MASTER_IPS": "",
+      "REFRESH_SEC": 0,
+      "SOA_EMAIL": "dns@example.com",
+      "TTL_SEC": 0,
+      "DOMAIN": "linode.com",
+      "AXFR_IPS": "none",
+      "TYPE": "master"
+    },
+    {
+      "DOMAINID": 5094,
+      "DESCRIPTION": "",
+      "EXPIRE_SEC": 0,
+      "RETRY_SEC": 0,
+      "STATUS": 1,
+      "LPM_DISPLAYGROUP": "",
+      "MASTER_IPS": "2600:3c03::f03c:91ff:feae:e071;66.228.43.47;",
+      "REFRESH_SEC": 0,
+      "SOA_EMAIL": "",
+      "TTL_SEC": 0,
+      "DOMAIN": "0.c.d.7.0.6.0.f.1.0.7.4.0.1.0.0.2.ip6.arpa",
+      "AXFR_IPS": "2600:3c03::f03c:91ff:feae:e071;66.228.43.47;",
+      "TYPE": "slave"
+    }
+  ]
+}

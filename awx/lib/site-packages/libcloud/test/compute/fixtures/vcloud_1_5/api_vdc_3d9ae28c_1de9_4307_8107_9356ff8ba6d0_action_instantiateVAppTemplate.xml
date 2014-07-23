@@ -1,0 +1,23 @@
+<VApp deployed="false" status="0" name="testNode" id="urn:vcloud:vapp:b0331206-dcc4-4874-b90a-351ff6502124" type="application/vnd.vmware.vcloud.vApp+xml"
+      href="https://vm-vcloud/api/vApp/vapp-8c57a5b6-e61b-48ca-8a78-3b70ee65ef6a" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.41.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Link rel="down" type="application/vnd.vmware.vcloud.vAppNetwork+xml" name="vCloud - Default" href="https://vm-vcloud/api/network/0601210e-e32a-43c1-94cd-e0f4fea04050"/>
+    <Link rel="down" type="application/vnd.vmware.vcloud.controlAccess+xml" href="https://vm-vcloud/api/vApp/vapp-b0331206-dcc4-4874-b90a-351ff6502124/controlAccess/"/>
+    <Link rel="up" type="application/vnd.vmware.vcloud.vdc+xml" href="https://vm-vcloud/api/vdc/3d9ae28c-1de9-4307-8107-9356ff8ba6d0"/>
+    <Link rel="down" type="application/vnd.vmware.vcloud.owner+xml" href="https://vm-vcloud/api/vApp/vapp-b0331206-dcc4-4874-b90a-351ff6502124/owner"/>
+    <Link rel="down" type="application/vnd.vmware.vcloud.metadata+xml" href="https://vm-vcloud/api/vApp/vapp-b0331206-dcc4-4874-b90a-351ff6502124/metadata"/>
+    <Description>testing instance</Description>
+    <Tasks>
+        <Task status="running" startTime="2012-01-11T04:10:07.804-05:00" operationName="vdcInstantiateVapp" operation="Creating Virtual Application soapUI-test(b0331206-dcc4-4874-b90a-351ff6502124)" expiryTime="2012-04-10T04:10:07.804-04:00" name="task" id="urn:vcloud:task:74737b15-3cdf-4302-a13c-0310dca5870c" type="application/vnd.vmware.vcloud.task+xml"
+              href="https://vm-vcloud/api/task/b034df55-fe81-4798-bc81-1f0fd0ead450">
+            <Link rel="task:cancel" href="https://vm-vcloud/api/task/74737b15-3cdf-4302-a13c-0310dca5870c/action/cancel"/>
+            <Owner type="application/vnd.vmware.vcloud.vApp+xml" name="soapUI-test" href="https://vm-vcloud/api/vApp/vapp-b0331206-dcc4-4874-b90a-351ff6502124"/>
+            <User type="application/vnd.vmware.admin.user+xml" name="labmanapi" href="https://vm-vcloud/api/admin/user/46f62cc3-65e0-4417-967a-a538ec6caea3"/>
+            <Organization type="application/vnd.vmware.vcloud.org+xml" name="MyOrg" href="https://vm-vcloud/api/org/96726c78-4ae3-402f-b08b-7a78c6903d2a"/>
+            <Progress>1</Progress>
+        </Task>
+    </Tasks>
+    <Owner type="application/vnd.vmware.vcloud.owner+xml">
+        <User type="application/vnd.vmware.admin.user+xml" name="labmanapi" href="https://vm-vcloud/api/admin/user/46f62cc3-65e0-4417-967a-a538ec6caea3"/>
+    </Owner>
+    <InMaintenanceMode>false</InMaintenanceMode>
+</VApp>

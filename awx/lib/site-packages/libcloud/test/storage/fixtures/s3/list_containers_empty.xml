@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+    <Owner>
+        <ID>af4rf45db0927637c66fb848dfc972b8b5126e1237bde6fe02862b11481fdfd9</ID>
+        <DisplayName>foobar</DisplayName>
+    </Owner>
+    <Buckets>
+    </Buckets>
+</ListAllMyBucketsResult>

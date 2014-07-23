@@ -1,0 +1,316 @@
+{
+    "list": [
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 1868101, 
+            "ip": "10.0.0.68", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.64/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 1868102, 
+            "ip": "10.0.0.69", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.64/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 1868106, 
+            "ip": "10.0.0.73", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.64/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 1868107, 
+            "ip": "10.0.0.74", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.64/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 1868108, 
+            "ip": "10.0.0.75", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.64/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 1868109, 
+            "ip": "10.0.0.76", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.64/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 1868110, 
+            "ip": "10.0.0.77", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.64/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 1868111, 
+            "ip": "10.0.0.78", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.64/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US East 1 Datacenter", 
+                "id": 2, 
+                "name": "US-East-1", 
+                "object": "option"
+            }, 
+            "id": 2277337, 
+            "ip": "10.0.0.244", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.240/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US East 1 Datacenter", 
+                "id": 2, 
+                "name": "US-East-1", 
+                "object": "option"
+            }, 
+            "id": 2277338, 
+            "ip": "10.0.0.245", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.240/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US East 1 Datacenter", 
+                "id": 2, 
+                "name": "US-East-1", 
+                "object": "option"
+            }, 
+            "id": 2277342, 
+            "ip": "10.0.0.249", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.240/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US East 1 Datacenter", 
+                "id": 2, 
+                "name": "US-East-1", 
+                "object": "option"
+            }, 
+            "id": 2277343, 
+            "ip": "10.0.0.250", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.240/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US East 1 Datacenter", 
+                "id": 2, 
+                "name": "US-East-1", 
+                "object": "option"
+            }, 
+            "id": 2277344, 
+            "ip": "10.0.0.251", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.240/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US East 1 Datacenter", 
+                "id": 2, 
+                "name": "US-East-1", 
+                "object": "option"
+            }, 
+            "id": 2277345, 
+            "ip": "10.0.0.252", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.240/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US East 1 Datacenter", 
+                "id": 2, 
+                "name": "US-East-1", 
+                "object": "option"
+            }, 
+            "id": 2277346, 
+            "ip": "10.0.0.253", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.240/255.255.255.240"
+        }, 
+        {
+            "datacenter": {
+                "description": "US East 1 Datacenter", 
+                "id": 2, 
+                "name": "US-East-1", 
+                "object": "option"
+            }, 
+            "id": 2277347, 
+            "ip": "10.0.0.254", 
+            "object": "ip", 
+            "public": true, 
+            "state": {
+                "description": "IP is available to use", 
+                "id": 1, 
+                "name": "Unassigned", 
+                "object": "option"
+            }, 
+            "subnet": "10.0.0.240/255.255.255.240"
+        }
+    ], 
+    "method": "/grid/ip/list", 
+    "status": "success", 
+    "summary": {
+        "numpages": 0, 
+        "returned": 16, 
+        "start": 0, 
+        "total": 16
+    }
+}

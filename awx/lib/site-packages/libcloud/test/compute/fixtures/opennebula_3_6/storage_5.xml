@@ -1,0 +1,13 @@
+<STORAGE href="http://www.opennebula.org/storage/5">
+    <ID>5</ID>
+    <NAME>test-volume</NAME>
+    <USER href="http://www.opennebula.org/user/0" name="oneadmin"/>
+    <GROUP>oneadmin</GROUP>
+    <STATE>READY</STATE>
+    <TYPE>DATABLOCK</TYPE>
+    <DESCRIPTION>Attached storage</DESCRIPTION>
+    <SIZE>1000</SIZE>
+    <FSTYPE>ext3</FSTYPE>
+    <PUBLIC>NO</PUBLIC>
+    <PERSISTENT>YES</PERSISTENT>
+</STORAGE>

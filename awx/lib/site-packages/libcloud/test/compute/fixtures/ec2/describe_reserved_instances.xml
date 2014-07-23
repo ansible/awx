@@ -1,0 +1,21 @@
+<DescribeReservedInstancesResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+  <requestId>56d0fffa-8819-4658-bdd7-548f143a86d2</requestId>
+    <reservedInstancesSet>
+        <item>
+            <reservedInstancesId>93bbbca2-c500-49d0-9ede-9d8737400498</reservedInstancesId>
+            <instanceType>t1.micro</instanceType>
+            <availabilityZone>us-east-1b</availabilityZone>
+            <start>2013-06-18T12:07:53.161Z</start>
+            <duration>31536000</duration>
+            <fixedPrice>23.0</fixedPrice>
+            <usagePrice>0.012</usagePrice>
+            <instanceCount>1</instanceCount>
+            <productDescription>Linux/UNIX</productDescription>
+            <state>active</state>
+            <instanceTenancy>default</instanceTenancy>
+            <currencyCode>USD</currencyCode>
+            <offeringType>Light Utilization</offeringType>
+            <recurringCharges/>
+        </item>
+    </reservedInstancesSet>
+</DescribeReservedInstancesResponse>

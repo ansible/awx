@@ -1,0 +1,11 @@
+<Item vcloud:href="https://vm-vcloud/api/vApp/vm-cbfe57d5-7362-482b-b313-e5b5bcff3309/virtualHardwareSection/cpu" vcloud:type="application/vnd.vmware.vcloud.rasdItem+xml" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.33.64.27/api/v1.5/schema/master.xsd http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_ResourceAllocationSettingData.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vcloud="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+    <rasd:Description>Number of Virtual CPUs</rasd:Description>
+    <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+    <rasd:InstanceID>4</rasd:InstanceID>
+    <rasd:Reservation>0</rasd:Reservation>
+    <rasd:ResourceType>3</rasd:ResourceType>
+    <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+    <rasd:Weight>0</rasd:Weight>
+    <Link rel="edit" type="application/vnd.vmware.vcloud.rasdItem+xml" href="https://vm-vcloud/api/vApp/vm-cbfe57d5-7362-482b-b313-e5b5bcff3309/virtualHardwareSection/cpu"/>
+</Item>

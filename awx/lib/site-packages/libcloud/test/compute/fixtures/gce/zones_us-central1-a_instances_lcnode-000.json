@@ -1,0 +1,48 @@
+{
+  "canIpForward": false,
+  "creationTimestamp": "2013-12-13T10:54:07.687-08:00",
+  "disks": [
+    {
+      "boot": true,
+      "deviceName": "lcnode-000",
+      "index": 0,
+      "kind": "compute#attachedDisk",
+      "mode": "READ_WRITE",
+      "source": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/disks/lcnode-000",
+      "type": "PERSISTENT"
+    }
+  ],
+  "id": "17170905942674172532",
+  "kind": "compute#instance",
+  "machineType": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/machineTypes/n1-standard-1",
+  "metadata": {
+    "fingerprint": "42WmSpB8rSM=",
+    "kind": "compute#metadata"
+  },
+  "name": "lcnode-000",
+  "networkInterfaces": [
+    {
+      "accessConfigs": [
+        {
+          "kind": "compute#accessConfig",
+          "name": "External NAT",
+          "natIP": "173.255.114.35",
+          "type": "ONE_TO_ONE_NAT"
+        }
+      ],
+      "name": "nic0",
+      "network": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/default",
+      "networkIP": "10.240.160.66"
+    }
+  ],
+  "scheduling": {
+    "automaticRestart": true,
+    "onHostMaintenance": "MIGRATE"
+  },
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/instances/lcnode-000",
+  "status": "RUNNING",
+  "tags": {
+    "fingerprint": "42WmSpB8rSM="
+  },
+  "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a"
+}

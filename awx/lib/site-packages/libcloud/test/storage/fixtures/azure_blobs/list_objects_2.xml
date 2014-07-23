@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EnumerationResults ContainerName="https://account.blob.core.windows.net/test_container">
+    <Marker>object3.txt</Marker>
+    <MaxResults>2</MaxResults>
+    <Blobs>
+        <Blob>
+            <Name>object3.txt</Name>
+            <Url>https://account.blob.core.windows.net/test_container/object3.txt</Url>
+            <Properties>
+                <Last-Modified>Sat, 05 Jan 2013 03:52:08 GMT</Last-Modified>
+                <Etag>0x8CFB90F2B6FC022</Etag>
+                <Content-Length>1048576</Content-Length>
+                <Content-Type>application/octet-stream</Content-Type>
+                <Content-Encoding />
+                <Content-Language />
+                <Content-MD5>ttgbNgpWctgMJ0MPORU+LA==</Content-MD5>
+                <Cache-Control />
+                <BlobType>BlockBlob</BlobType>
+                <LeaseStatus>unlocked</LeaseStatus>
+                <LeaseState>available</LeaseState>
+            </Properties>
+            <Metadata />
+        </Blob>
+        <Blob>
+            <Name>object4.txt</Name>
+            <Url>https://account.blob.core.windows.net/test_container/object4.txt</Url>
+            <Properties>
+                <Last-Modified>Fri, 04 Jan 2013 10:20:14 GMT</Last-Modified>
+                <Etag>0x8CFB87C38717450</Etag>
+                <Content-Length>0</Content-Length>
+                <Content-Type>application/octet-stream</Content-Type>
+                <Content-Encoding /><Content-Language />
+                <Content-MD5>1B2M2Y8AsgTpgAmY7PhCfg==</Content-MD5>
+                <Cache-Control />
+                <BlobType>BlockBlob</BlobType>
+                <LeaseStatus>unlocked</LeaseStatus>
+                <LeaseState>available</LeaseState>
+            </Properties>
+            <Metadata />
+        </Blob>
+    </Blobs>
+    <NextMarker />
+</EnumerationResults>

@@ -1,0 +1,14 @@
+{
+  "id": "0651769405845333112",
+  "insertTime": "2013-09-03T00:17:25.381-07:00",
+  "kind": "compute#operation",
+  "name": "operation-regions_us-central1_forwardingRules_post",
+  "operationType": "insert",
+  "progress": 0,
+  "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/operations/operation-regions_us-central1_forwardingRules_post",
+  "startTime": "2013-09-03T00:17:25.434-07:00",
+  "status": "PENDING",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/forwardingRules/lcforwardingrule",
+  "user": "user@gserviceaccount.com"
+}

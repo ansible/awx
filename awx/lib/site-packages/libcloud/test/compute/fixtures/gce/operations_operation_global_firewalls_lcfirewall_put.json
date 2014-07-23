@@ -1,0 +1,15 @@
+{
+  "endTime": "2013-06-26T20:52:10.075-07:00",
+  "id": "6526551968265354277",
+  "insertTime": "2013-06-26T20:52:00.355-07:00",
+  "kind": "compute#operation",
+  "name": "operation-global_firewalls_lcfirewall_put",
+  "operationType": "update",
+  "progress": 100,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/operations/operation-global_firewalls_lcfirewall_put",
+  "startTime": "2013-06-26T20:52:00.410-07:00",
+  "status": "DONE",
+  "targetId": "10942695305090163011",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/firewalls/lcfirewall",
+  "user": "897001307951@developer.gserviceaccount.com"
+}

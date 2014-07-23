@@ -1,0 +1,8 @@
+{
+   "status":"COMPLETED",
+   "verb":"DELETE",
+   "jobId":"0b40cd14-2e5d-490f-bb6e-fdc65d1118a9",
+   "callbackUrl":"https://dns.api.rackspacecloud.com/v1.0/11111/status/0b40cd14-2e5d-490f-bb6e-fdc65d1118a9",
+   "requestUrl":"http://dns.api.rackspacecloud.com/v1.0/11111/domains/2946181/records/2346"
+}
+

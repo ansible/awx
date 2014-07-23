@@ -1,0 +1,21 @@
+{
+  "ERRORARRAY": [],
+  "DATA": [
+    {
+      "DOMAINID": 5093,
+      "DESCRIPTION": "",
+      "EXPIRE_SEC": 0,
+      "RETRY_SEC": 0,
+      "STATUS": 1,
+      "LPM_DISPLAYGROUP": "thing",
+      "MASTER_IPS": "",
+      "REFRESH_SEC": 0,
+      "SOA_EMAIL": "dns@example.com",
+      "TTL_SEC": 0,
+      "DOMAIN": "linode.com",
+      "AXFR_IPS": "none",
+      "TYPE": "master"
+    }
+  ],
+  "ACTION": "domain.list"
+}

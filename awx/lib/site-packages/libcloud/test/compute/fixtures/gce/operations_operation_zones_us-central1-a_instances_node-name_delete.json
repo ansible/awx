@@ -1,0 +1,16 @@
+{
+  "endTime": "2013-06-26T10:06:00.917-07:00",
+  "id": "6999931397447918763",
+  "insertTime": "2013-06-26T10:05:40.350-07:00",
+  "kind": "compute#operation",
+  "name": "operation-zones_us-central1-a_instances_node-name_delete",
+  "operationType": "delete",
+  "progress": 100,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/operations/operation-zones_us-central1-a_instances_node-name_delete",
+  "startTime": "2013-06-26T10:05:40.405-07:00",
+  "status": "DONE",
+  "targetId": "07410051435384876224",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/instances/node-name",
+  "user": "897001307951@developer.gserviceaccount.com",
+  "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a"
+}

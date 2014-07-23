@@ -1,0 +1,10 @@
+{
+  "creationTimestamp": "2013-06-26T10:06:04.007-07:00",
+  "id": "16109451798967042451",
+  "kind": "compute#disk",
+  "name": "lcdisk",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/disks/lcdisk",
+  "sizeGb": "1",
+  "status": "READY",
+  "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a"
+}

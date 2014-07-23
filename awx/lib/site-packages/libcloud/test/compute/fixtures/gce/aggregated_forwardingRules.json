@@ -1,0 +1,59 @@
+{
+  "id": "projects/project_name/aggregated/forwardingRules",
+  "items": {
+    "regions/europe-west1": {
+      "warning": {
+        "code": "NO_RESULTS_ON_PAGE",
+        "data": [
+          {
+            "key": "scope",
+            "value": "regions/europe-west1"
+          }
+        ],
+        "message": "There are no results for scope 'regions/europe-west1' on this page."
+      }
+    },
+    "regions/us-central1": {
+      "forwardingRules": [
+        {
+          "IPAddress": "108.59.86.60",
+          "IPProtocol": "TCP",
+          "creationTimestamp": "2013-12-13T10:51:47.602-08:00",
+          "id": "0401221837226610637",
+          "kind": "compute#forwardingRule",
+          "name": "libcloud-lb-demo-lb",
+          "portRange": "80-80",
+          "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/forwardingRules/libcloud-lb-demo-lb",
+          "target": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/targetPools/libcloud-lb-demo-lb-tp"
+        },
+        {
+          "IPAddress": "173.255.114.35",
+          "IPProtocol": "TCP",
+          "creationTimestamp": "2013-12-13T10:52:57.170-08:00",
+          "id": "06342111469679701315",
+          "kind": "compute#forwardingRule",
+          "name": "lcforwardingrule",
+          "portRange": "8000-8500",
+          "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+          "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/forwardingRules/lcforwardingrule",
+          "target": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1/targetPools/libcloud-lb-demo-lb-tp"
+        }
+      ]
+    },
+    "regions/us-central2": {
+      "warning": {
+        "code": "NO_RESULTS_ON_PAGE",
+        "data": [
+          {
+            "key": "scope",
+            "value": "regions/us-central2"
+          }
+        ],
+        "message": "There are no results for scope 'regions/us-central2' on this page."
+      }
+    }
+  },
+  "kind": "compute#forwardingRuleAggregatedList",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/aggregated/forwardingRules"
+}

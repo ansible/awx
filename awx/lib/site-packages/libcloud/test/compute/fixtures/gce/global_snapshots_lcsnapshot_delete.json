@@ -1,0 +1,14 @@
+{
+  "id": "5994251357251874363",
+  "insertTime": "2013-12-16T13:04:03.831-08:00",
+  "kind": "compute#operation",
+  "name": "operation-global_snapshots_lcsnapshot_delete",
+  "operationType": "delete",
+  "progress": 0,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/operations/operation-global_snapshots_lcsnapshot_delete",
+  "startTime": "2013-12-16T13:04:03.924-08:00",
+  "status": "PENDING",
+  "targetId": "17482266715940883688",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/snapshots/lcsnapshot",
+  "user": "487551519631-t6qvu2na6p4u9ptm46bsdujf0ohbdro7@developer.gserviceaccount.com"
+}

@@ -1,0 +1,7 @@
+<Task status="running" startTime="2012-01-11T04:10:34.903-05:00" operationName="vappDeploy" operation="Starting Virtual Application testNode(b0331206-dcc4-4874-b90a-351ff6502124)" expiryTime="2012-04-10T04:10:34.903-04:00" name="task" id="urn:vcloud:task:939d0f80-9f78-42ca-89a9-8a2dda320cac" type="application/vnd.vmware.vcloud.task+xml"
+      href="https://vm-vcloud/api/task/b034df55-fe81-4798-bc81-1f0fd0ead450" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.41.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Link rel="task:cancel" href="https://vm-vcloud/api/task/939d0f80-9f78-42ca-89a9-8a2dda320cac/action/cancel"/>
+    <Owner type="application/vnd.vmware.vcloud.vApp+xml" name="testNode" href="https://vm-vcloud/api/vApp/vapp-b0331206-dcc4-4874-b90a-351ff6502124"/>
+    <User type="application/vnd.vmware.admin.user+xml" name="labmanapi" href="https://vm-vcloud/api/admin/user/46f62cc3-65e0-4417-967a-a538ec6caea3"/>
+    <Organization type="application/vnd.vmware.vcloud.org+xml" name="MyOrg" href="https://vm-vcloud/api/org/96726c78-4ae3-402f-b08b-7a78c6903d2a"/>
+</Task>

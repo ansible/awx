@@ -1,0 +1,161 @@
+{
+    "success": true,
+    "total_count": 2,
+    "subcode": 0,
+    "message": "Your request was processed successfully.",
+    "data": [
+        {
+            "server_keys": [
+                {
+                    "key_type": 2,
+                    "key_group": 1,
+                    "id": 71757,
+                    "uri": "https://api.nephoscale.com/key/sshrsa/71157/"
+                }
+            ],
+            "name": "mongodb-staging",
+            "zone": {
+                "uri": "https://api.nephoscale.com/datacenter/zone/88211/",
+                "id": 87729,
+                "name": "RIC-1"
+            },
+            "image": {
+                "max_cpu": 64,
+                "deployable_type": "both",
+                "is_active": true,
+                "friendly_name": "Linux Ubuntu Server 10.04 LTS 64-bit",
+                "uri": "https://api.nephoscale.com/image/server/49/",
+                "max_memory": 128,
+                "id": 49,
+                "is_default": true,
+                "create_time": "2011-10-08 05:01:10",
+                "architecture": "x86_64",
+                "has_agent": true,
+                "base_type": "linux"
+            },
+            "hostname": "mongodb-staging",
+            "podzone": "P1A2",
+            "uri": "https://api.nephoscale.com/server/cloud/87241/",
+            "ipaddresses": "198.89.117.16",
+            "power_status": "on",
+            "create_time": "2013-09-25 07:38:53",
+            "postinit_state": 1,
+            "console_keys": [
+                {
+                    "key_type": 1,
+                    "key_group": 4,
+                    "id": 71761,
+                    "uri": "https://api.nephoscale.com/key/password/71761/"
+                }
+            ],
+            "memory": 512,
+            "service_type": {
+                "sku": {
+                    "name": "CS05",
+                    "description": "Cloud Server 0.5 GB RAM, 1 Core"
+                },
+                "uri": "https://api.nephoscale.com/server/type/cloud/5/",
+                "friendly_name": "CS05 - 0.5GB, 1Core, 25GB",
+                "id": 5,
+                "billable_type": 1
+            },
+            "network_ports": [
+                {
+                    "macaddress": "00:16:3e:06:dc:41",
+                    "devname": "eth0",
+                    "network_domain": {
+                        "domain_type": 0,
+                        "name": "default_public_network_RIC"
+                    }
+                },
+                {
+                    "macaddress": "00:16:3e:06:dc:45",
+                    "devname": "eth1",
+                    "network_domain": {
+                        "domain_type": 1,
+                        "name": "default_private_network_RIC"
+                    }
+                }
+            ],
+            "id": 88241,
+            "is_console_enabled": true
+        },
+        {
+            "server_keys": [
+                {
+                    "key_type": 2,
+                    "key_group": 1,
+                    "id": 72049,
+                    "uri": "https://api.nephoscale.com/key/sshrsa/72049/"
+                }
+            ],
+            "name": "backup-server2",
+            "zone": {
+                "uri": "https://api.nephoscale.com/datacenter/zone/88751/",
+                "id": 87729,
+                "name": "RIC-1"
+            },
+            "image": {
+                "max_cpu": 64,
+                "deployable_type": "both",
+                "is_active": true,
+                "friendly_name": "Linux Debian Server 6.0.3 64-bit",
+                "uri": "https://api.nephoscale.com/image/server/51/",
+                "max_memory": 128,
+                "id": 51,
+                "is_default": true,
+                "create_time": "2011-10-08 19:54:41",
+                "architecture": "x86_64",
+                "has_agent": true,
+                "base_type": "linux"
+            },
+            "hostname": "backup-server2",
+            "podzone": "P1A2",
+            "uri": "https://api.nephoscale.com/server/cloud/88751/",
+            "ipaddresses": "198.89.112.115",
+            "power_status": "on",
+            "create_time": "2013-10-02 05:02:50",
+            "postinit_state": 1,
+            "console_keys": [
+                {
+                    "key_type": 1,
+                    "key_group": 4,
+                    "id": 72165,
+                    "uri": "https://api.nephoscale.com/key/password/72165/"
+                }
+            ],
+            "memory": 512,
+            "service_type": {
+                "sku": {
+                    "name": "CS05",
+                    "description": "Cloud Server 0.5 GB RAM, 1 Core"
+                },
+                "uri": "https://api.nephoscale.com/server/type/cloud/5/",
+                "friendly_name": "CS05 - 0.5GB, 1Core, 25GB",
+                "id": 5,
+                "billable_type": 1
+            },
+            "network_ports": [
+                {
+                    "macaddress": "00:16:3e:06:f5:2f",
+                    "devname": "eth0",
+                    "network_domain": {
+                        "domain_type": 0,
+                        "name": "default_public_network_RIC"
+                    }
+                },
+                {
+                    "macaddress": "00:16:3e:06:f5:33",
+                    "devname": "eth1",
+                    "network_domain": {
+                        "domain_type": 1,
+                        "name": "default_private_network_RIC"
+                    }
+                }
+            ],
+            "id": 88751,
+            "is_console_enabled": true
+        }
+    ],
+    "response": 200
+}

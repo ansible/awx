@@ -1,0 +1,26 @@
+ide:0:0:write:requests 466
+rx 760681
+vnc:password testpass
+ide:0:0 f0202f1c-0b4f-4cfc-8ae3-e30951d09ef0
+ide:0:0:read:requests 7467
+ide:0:0:read:bytes 165395968
+vnc:ip 178.22.66.28
+tx:packets 32
+tx 2568
+boot ide:0:0
+smp 2
+started 1286568422
+nic:0:model virtio
+status active
+mem 640
+rx:packets 12662
+user 93b34fd9-7986-4b25-8bfd-98a50383605d
+ide:0:0:media disk
+name cloudsigma node
+persistent true
+nic:0:block tcp/22 tcp/23 tcp/25 tcp/43594 tcp/43595
+server 62fe7cde-4fb9-4c63-bd8c-e757930066a0
+nic:0:dhcp 1.2.3.4
+nic:1:dhcp 1.2.3.5
+ide:0:0:write:bytes 7358464
+cpu 1100

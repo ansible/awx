@@ -1,0 +1,85 @@
+{
+  "id": "projects/project_name/zones",
+  "items": [
+    {
+      "creationTimestamp": "2013-02-05T16:19:23.254-08:00",
+      "description": "europe-west1-a",
+      "id": "13416642339679437530",
+      "kind": "compute#zone",
+      "maintenanceWindows": [
+        {
+          "beginTime": "2014-01-18T12:00:00.000-08:00",
+          "description": "maintenance zone",
+          "endTime": "2014-02-02T12:00:00.000-08:00",
+          "name": "2014-01-18-planned-outage"
+        }
+      ],
+      "name": "europe-west1-a",
+      "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/europe-west1",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-a",
+      "status": "UP"
+    },
+    {
+      "creationTimestamp": "2013-02-05T16:19:23.254-08:00",
+      "description": "europe-west1-b",
+      "id": "20623650177407096",
+      "kind": "compute#zone",
+      "maintenanceWindows": [
+        {
+          "beginTime": "2014-03-15T12:00:00.000-07:00",
+          "description": "maintenance zone",
+          "endTime": "2014-03-30T12:00:00.000-07:00",
+          "name": "2014-03-15-planned-outage"
+        }
+      ],
+      "name": "europe-west1-b",
+      "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/europe-west1",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/europe-west1-b",
+      "status": "UP"
+    },
+    {
+      "creationTimestamp": "2013-02-05T16:19:23.269-08:00",
+      "description": "us-central1-a",
+      "id": "13462829244527433283",
+      "kind": "compute#zone",
+      "name": "us-central1-a",
+      "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a",
+      "status": "UP"
+    },
+    {
+      "creationTimestamp": "2013-02-05T16:19:23.269-08:00",
+      "description": "us-central1-b",
+      "id": "1045862591201432620",
+      "kind": "compute#zone",
+      "name": "us-central1-b",
+      "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central1",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b",
+      "status": "UP"
+    },
+    {
+      "creationTimestamp": "2013-02-05T16:19:23.257-08:00",
+      "deprecated": {
+        "replacement": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-b",
+        "state": "DEPRECATED"
+      },
+      "description": "us-central2-a",
+      "id": "1001467574647549152",
+      "kind": "compute#zone",
+      "maintenanceWindows": [
+        {
+          "beginTime": "2013-12-31T12:00:00.000-08:00",
+          "description": "maintenance zone",
+          "endTime": "2014-07-01T12:00:00.000-07:00",
+          "name": "2013-12-31-planned-outage"
+        }
+      ],
+      "name": "us-central2-a",
+      "region": "https://www.googleapis.com/compute/v1/projects/project_name/regions/us-central2",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central2-a",
+      "status": "UP"
+    }
+  ],
+  "kind": "compute#zoneList",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones"
+}

@@ -1,0 +1,10 @@
+{"errno": 0, "message": "Success", "vms": 
+[
+{"vnc_enabled": true, "uuid": 1, "tags": [], "ip_address": "42.78.124.75", "interfaces": [{"ip": "42.78.124.75", "mac": "00:16:e9:d6:40:c6", "network_name": "Default", "uuid": "479b9823-2ded-11df-94e8-0015174e564c", "network": "fc38963c-a9fa-11de-8c4b-001b63a56c51"}], "vnc_port": "5900", "name": "dummy-1", "state": "running", "trusted": null, "os": "unknown", "vnc_password": "jBs5UT00", "vnc_ip_address": "192.168.1.111", "hardware_profile_uuid": "bcaff710-2914-11de-836c-001a929face2"}, 
+
+{"vnc_enabled": true, "uuid": 2, "tags": [], "ip_address": "42.78.124.75", "interfaces": [{"ip": "42.78.124.75", "mac": "00:16:72:b4:71:21", "network_name": "Default", "uuid": "c76edd61-2dfd-11df-84ca-0015174e564c", "network": "fc38963c-a9fa-11de-8c4b-001b63a56c51"}], "vnc_port": "5902", "name": "dummy-2", "state": "running", "trusted": null, "os": "unknown", "vnc_password": "zoiZW31T", "vnc_ip_address": "192.168.1.111", "hardware_profile_uuid": "bcaff710-2914-11de-836c-001a929face2"},
+
+{"vnc_enabled": true, "uuid": 3, "tags": [], "ip_address": "42.78.124.75", "interfaces": [{"ip": "42.78.124.75", "mac": "00:16:e9:d6:40:c6", "network_name": "Default", "uuid": "479b9823-2ded-11df-94e8-0015174e564c", "network": "fc38963c-a9fa-11de-8c4b-001b63a56c51"}], "vnc_port": "5900", "name": "dummy-1", "state": "stopped", "trusted": null, "os": "unknown", "vnc_password": "jBs5UT00", "vnc_ip_address": "192.168.1.111", "hardware_profile_uuid": "bcaff710-2914-11de-836c-001a929face2"}
+
+]
+}

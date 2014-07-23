@@ -1,0 +1,11 @@
+<Group name="MyGroup" id="urn:vcloud:group:b8202c48-7151-4e61-9a6c-155474c7d413" type="application/vnd.vmware.admin.group+xml" href="https://vm-vcloud/api/admin/group/b8202c48-7151-4e61-9a6c-155474c7d413" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://66.69.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Link rel="edit" type="application/vnd.vmware.admin.group+xml" href="https://vm-vcloud/api/admin/group/b8202c48-7151-4e61-9a6c-155474c7d413"/>
+    <Link rel="remove" href="https://vm-vcloud/api/admin/group/b8202c48-7151-4e61-9a6c-155474c7d413"/>
+    <Description/>
+    <NameInSource>\CF\CB\AD\5D\1D\34\09\4D\A4\77\8D\A3\CA\99\75\FB</NameInSource>
+    <UsersList>
+        <UserReference type="application/vnd.vmware.admin.user+xml" name="jrambo" href="https://vm-vcloud/api/admin/user/1f588aa4-2fce-4f64-9c24-46b525236ced"/>
+        <UserReference type="application/vnd.vmware.admin.user+xml" name="user2" href="https://vm-vcloud/api/admin/user/bf3d9ba7-074d-4adf-b13d-18605f04f5f7"/>
+    </UsersList>
+    <Role type="application/vnd.vmware.admin.role+xml" name="Viewer" href="https://vm-vcloud/api/admin/role/58247cd9-cd51-45db-b184-f824d3d0a655"/>
+</Group>

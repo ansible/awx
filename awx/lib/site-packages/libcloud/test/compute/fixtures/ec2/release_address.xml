@@ -1,0 +1,4 @@
+<ReleaseAddressResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>23ec1390-8c1d-4a3e-8042-b1ad84933f57</requestId>
+    <return>true</return>
+</ReleaseAddressResponse>

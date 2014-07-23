@@ -1,0 +1,46 @@
+[
+  {
+    "id": "3",
+    "name": "SJC - San Jose, CA"
+  },
+  {
+    "id": "13",
+    "name": "IAD2- Reston, VA"
+  },
+  {
+    "id": "21",
+    "name": "LAX3 - Los Angeles, CA"
+  },
+  {
+    "id": "31",
+    "name": "CHI - Chicago, IL"
+  },
+  {
+    "id": "41",
+    "name": "NYC - New York, NY"
+  },
+  {
+    "id": "61",
+    "name": "MAA - Chennai (Madras), India"
+  },
+  {
+    "id": "71",
+    "name": "LON - London, United Kingdom"
+  },
+  {
+    "id": "72",
+    "name": "AMS2 - Amsterdam, NL"
+  },
+  {
+    "id": "82",
+    "name": "FRA - Paris, France"
+  },
+  {
+    "id": "83",
+    "name": "HK - Hong Kong, HK"
+  },
+  {
+    "id": "101",
+    "name": "DFW - Dallas, TX"
+  }
+]

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DescribeAccountAttributesResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>a00adaf6-f86c-48eb-85f8-7ac470ae993d</requestId>
+    <accountAttributeSet>
+        <item>
+            <attributeName>max-instances</attributeName>
+            <attributeValueSet>
+                <item>
+                    <attributeValue>20</attributeValue>
+                </item>
+            </attributeValueSet>
+        </item>
+        <item>
+            <attributeName>max-elastic-ips</attributeName>
+            <attributeValueSet>
+                <item>
+                    <attributeValue>5</attributeValue>
+                </item>
+            </attributeValueSet>
+        </item>
+        <item>
+            <attributeName>vpc-max-elastic-ips</attributeName>
+            <attributeValueSet>
+                <item>
+                    <attributeValue>5</attributeValue>
+                </item>
+            </attributeValueSet>
+        </item>
+    </accountAttributeSet>
+</DescribeAccountAttributesResponse>

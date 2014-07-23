@@ -1,0 +1,17 @@
+<StartInstancesResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>322f78ee-967b-40c9-aecd-8d442022da20</requestId>
+    <instancesSet>
+        <item>
+            <instanceId>i-ff5de6aa</instanceId>
+            <currentState>
+                <code>0</code>
+                <name>pending</name>
+            </currentState>
+            <previousState>
+                <code>80</code>
+                <name>stopped</name>
+            </previousState>
+        </item>
+    </instancesSet>
+</StartInstancesResponse>
+

@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<methodResponse>
+   <params>
+      <param>
+         <value>
+            <struct>
+               <member>
+                  <name>date_updated</name>
+                  <value><dateTime.iso8601>20101028T12:38:17</dateTime.iso8601></value>
+               </member>
+               <member>
+                  <name>domains</name>
+                  <value><int>0</int></value>
+               </member>
+               <member>
+                  <name>id</name>
+                  <value><int>47234</int></value>
+               </member>
+               <member>
+                  <name>name</name>
+                  <value><string>t.com</string></value>
+               </member>
+               <member>
+                  <name>owner</name>
+                  <value><string>AB3917-GANDI</string></value>
+               </member>
+               <member>
+                  <name>public</name>
+                  <value><boolean>0</boolean></value>
+               </member>
+               <member>
+                  <name>version</name>
+                  <value><int>1</int></value>
+               </member>
+               <member>
+                  <name>versions</name>
+                  <value><array><data></data></array></value>
+               </member>
+            </struct>
+         </value>
+      </param>
+   </params>
+</methodResponse>

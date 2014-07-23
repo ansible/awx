@@ -1,0 +1,62 @@
+{
+    "list": [
+        {
+            "architecture": {
+                "description": "32 bit OS", 
+                "id": 1, 
+                "name": "32-bit", 
+                "object": "option"
+            }, 
+            "billingtokens": [
+                {
+                    "id": 46, 
+                    "name": "CentOS 5.3 32bit", 
+                    "object": "billingtoken", 
+                    "price": 0
+                }
+            ], 
+            "createdTime": 1289119839685, 
+            "description": "", 
+            "friendlyName": "testimage", 
+            "id": 5050, 
+            "isActive": true, 
+            "isPublic": false, 
+            "location": "123/GSI-3ee65927-f80d-43df-92df-6c7e352f009c.img", 
+            "name": "GSI-3ee65927-f80d-43df-92df-6c7e352f009c", 
+            "object": "serverimage", 
+            "os": {
+                "description": "CentOS 5.3 (32-bit)", 
+                "id": 16, 
+                "name": "CentOS 5.3 (32-bit)", 
+                "object": "option"
+            }, 
+            "owner": {
+                "id": 123, 
+                "name": "name", 
+                "object": "customer"
+            }, 
+            "price": 0, 
+            "state": {
+                "description": "Image is being saved", 
+                "id": 1, 
+                "name": "Saving", 
+                "object": "option"
+            }, 
+            "type": {
+                "description": "Web or Application Server", 
+                "id": 1, 
+                "name": "Web Server", 
+                "object": "option"
+            }, 
+            "updatedTime": 1289119839685
+        }
+    ], 
+    "method": "/grid/image/save", 
+    "status": "success", 
+    "summary": {
+        "numpages": 0, 
+        "returned": 1, 
+        "start": 0, 
+        "total": 1
+    }
+}

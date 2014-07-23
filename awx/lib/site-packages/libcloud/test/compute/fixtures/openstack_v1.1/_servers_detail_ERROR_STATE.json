@@ -1,0 +1,66 @@
+{
+    "servers": [
+        {
+            "status": "ERROR",
+            "updated": "2013-12-05T21:07:07Z",
+            "hostId": "2a4a12656a7a57c10188e4ea37f9e09dfb99e3d628f4064f97761e09",
+            "addresses": {
+                "pool": [
+                    {
+                        "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:be:f5:87",
+                        "version": 4,
+                        "addr": "192.168.3.4",
+                        "OS-EXT-IPS:type": "fixed"
+                    }
+                ]
+            },
+            "links": [
+                {
+                    "href": "http://192.168.0.1:8774/v2/dd3eca3de72846948f5d6d975660d325/servers/2d05bd68-3fbb-4b47-9f38-c690a5d93e45",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://192.168.0.1:8774/dd3eca3de72846948f5d6d975660d325/servers/2d05bd68-3fbb-4b47-9f38-c690a5d93e45",
+                    "rel": "bookmark"
+                }
+            ],
+            "key_name": "my_key",
+            "image": "",
+            "OS-EXT-STS:task_state": null,
+            "OS-EXT-STS:vm_state": "error",
+            "OS-SRV-USG:launched_at": null,
+            "flavor": {
+                "id": "4",
+                "links": [
+                    {
+                        "href": "http://192.168.0.1:8774/dd3eca3de72846948f5d6d975660d325/flavors/4",
+                        "rel": "bookmark"
+                    }
+                ]
+            },
+            "id": "2d05bd68-3fbb-4b47-9f38-c690a5d93e45",
+            "OS-SRV-USG:terminated_at": null,
+            "OS-EXT-AZ:availability_zone": "nova",
+            "user_id": "a75c583fa46148eaa020d3e88ab53802",
+            "name": "test_vm",
+            "created": "2013-12-02T18:40:36Z",
+            "tenant_id": "dd3eca3de72846948f5d6d975660d325",
+            "OS-DCF:diskConfig": "MANUAL",
+            "os-extended-volumes:volumes_attached": [
+                {
+                    "id": "0056485c-ada5-4e44-9905-5b09a18b0139"
+                }
+            ],
+            "accessIPv4": "",
+            "accessIPv6": "",
+            "fault": {
+                "message": "The server has either erred or is incapable of performing the requested operation. (HTTP 500) (Request-ID: req-5ec1e01c-bc04-43e7-957d-c810d4357908)",
+                "code": 500,
+                "created": "2013-12-05T21:07:07Z"
+            },
+            "OS-EXT-STS:power_state": 0,
+            "config_drive": "",
+            "metadata": {}
+        }
+    ]
+}

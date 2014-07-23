@@ -1,0 +1,13 @@
+{
+  "creationTimestamp": "2013-12-13T10:54:04.074-08:00",
+  "description": "Image: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-7-wheezy-v20131120",
+  "id": "3535838963674672928",
+  "kind": "compute#disk",
+  "name": "genericdisk",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a/disks/genericdisk",
+  "sizeGb": "10",
+  "sourceImage": "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-7-wheezy-v20131120",
+  "sourceImageId": "17312518942796567788",
+  "status": "READY",
+  "zone": "https://www.googleapis.com/compute/v1/projects/project_name/zones/us-central1-a"
+}

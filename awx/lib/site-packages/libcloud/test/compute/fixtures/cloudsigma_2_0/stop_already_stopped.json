@@ -1,0 +1,1 @@
+[{"error_point": null, "error_type": "permission", "error_message": "Cannot stop guest in state \"stopped\". Guest should be in state \"['started', 'running_legacy']\""}]

@@ -1,0 +1,14 @@
+{
+  "id": "1159296103027566387",
+  "insertTime": "2013-09-02T22:18:02.509-07:00",
+  "kind": "compute#operation",
+  "name": "operation-global_httpHealthChecks_lchealthcheck_delete",
+  "operationType": "delete",
+  "progress": 0,
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/operations/operation-global_httpHealthChecks_lchealthcheck_delete",
+  "startTime": "2013-09-02T22:18:02.558-07:00",
+  "status": "PENDING",
+  "targetId": "06860603312991823381",
+  "targetLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/healthChecks/lchealthcheck",
+  "user": "user@gserviceaccount.com"
+}

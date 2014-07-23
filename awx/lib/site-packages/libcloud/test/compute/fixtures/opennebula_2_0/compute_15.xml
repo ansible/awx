@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COMPUTE href='http://www.opennebula.org/compute/5'>
+    <ID>15</ID>
+    <NAME>Compute 15</NAME>
+    <INSTANCE_TYPE>small</INSTANCE_TYPE>
+    <STATE>ACTIVE</STATE>
+    <DISK>
+        <STORAGE href='http://www.opennebula.org/storage/15' name='Ubuntu 9.04 LAMP'/>
+        <TYPE>DISK</TYPE>
+        <TARGET>hda</TARGET>
+    </DISK>
+    <NIC>
+        <NETWORK href='http://www.opennebula.org/network/5' name='Network 5'/>
+        <IP>192.168.0.2</IP>
+        <MAC>02:00:c0:a8:00:02</MAC>
+    </NIC>
+    <NIC>
+        <NETWORK href='http://www.opennebula.org/network/15' name='Network 15'/>
+        <IP>192.168.1.2</IP>
+        <MAC>02:00:c0:a8:01:02</MAC>
+    </NIC>
+    <CONTEXT>
+        <HOSTNAME>compute-15</HOSTNAME>
+    </CONTEXT>
+</COMPUTE>

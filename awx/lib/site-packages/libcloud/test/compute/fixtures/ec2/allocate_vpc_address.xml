@@ -1,0 +1,6 @@
+<AllocateAddressResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>eb920193-37a9-401a-8fff-089783b2c153</requestId>
+    <publicIp>192.0.2.2</publicIp>
+    <domain>vpc</domain>
+    <allocationId>eipalloc-666d7f04</allocationId>
+</AllocateAddressResponse>

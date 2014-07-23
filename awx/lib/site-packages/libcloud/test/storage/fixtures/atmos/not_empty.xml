@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Error>
+	<Code>1023</Code>
+	<Message>The directory you are trying to delete is not empty.</Message>
+</Error>

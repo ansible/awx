@@ -1,0 +1,10 @@
+<CreateVpcResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+    <requestId>7a662fe5-1f34-4e17-9ee9-69a28a8ac0be</requestId>
+    <vpc>
+        <vpcId>vpc-ad3527cf</vpcId>
+        <state>pending</state>
+        <cidrBlock>192.168.55.0/24</cidrBlock>
+        <dhcpOptionsId>dopt-7eded312</dhcpOptionsId>
+        <instanceTenancy>default</instanceTenancy>
+    </vpc>
+</CreateVpcResponse>

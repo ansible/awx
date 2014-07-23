@@ -1,0 +1,224 @@
+{
+    "list": [
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 23517, 
+            "name": "foo", 
+            "object": "loadbalancer", 
+            "os": {
+                "description": "The F5 Load Balancer.", 
+                "id": 1, 
+                "name": "F5", 
+                "object": "option"
+            }, 
+            "persistence": {
+                "description": "", 
+                "id": 1, 
+                "name": "None", 
+                "object": "option"
+            }, 
+            "realiplist": [
+                {
+                    "ip": {
+                        "datacenter": {
+                            "description": "US West 1 Datacenter", 
+                            "id": 1, 
+                            "name": "US-West-1", 
+                            "object": "option"
+                        }, 
+                        "id": 1868111, 
+                        "ip": "10.0.0.78", 
+                        "object": "ip", 
+                        "public": true, 
+                        "state": {
+                            "description": "IP is available to use", 
+                            "id": 1, 
+                            "name": "Unassigned", 
+                            "object": "option"
+                        }, 
+                        "subnet": "10.0.0.64/255.255.255.240"
+                    }, 
+                    "object": "ipportpair", 
+                    "port": 80
+                }
+            ], 
+            "state": {
+                "description": "Loadbalancer is enabled and on.", 
+                "id": 1, 
+                "name": "On", 
+                "object": "option"
+            }, 
+            "type": {
+                "description": "", 
+                "id": 1, 
+                "name": "Round Robin", 
+                "object": "option"
+            }, 
+            "virtualip": {
+                "ip": {
+                    "datacenter": {
+                        "description": "US West 1 Datacenter", 
+                        "id": 1, 
+                        "name": "US-West-1", 
+                        "object": "option"
+                    }, 
+                    "id": 1868099, 
+                    "ip": "10.0.0.66", 
+                    "object": "ip", 
+                    "public": true, 
+                    "state": {
+                        "description": "IP is reserved or in use", 
+                        "id": 2, 
+                        "name": "Assigned", 
+                        "object": "option"
+                    }, 
+                    "subnet": "10.0.0.64/255.255.255.240"
+                }, 
+                "object": "ipportpair", 
+                "port": 80
+            }
+        }, 
+        {
+            "datacenter": {
+                "description": "US West 1 Datacenter", 
+                "id": 1, 
+                "name": "US-West-1", 
+                "object": "option"
+            }, 
+            "id": 23526, 
+            "name": "bar", 
+            "object": "loadbalancer", 
+            "os": {
+                "description": "The F5 Load Balancer.", 
+                "id": 1, 
+                "name": "F5", 
+                "object": "option"
+            }, 
+            "persistence": {
+                "description": "", 
+                "id": 1, 
+                "name": "None", 
+                "object": "option"
+            }, 
+            "realiplist": [
+                {
+                    "ip": {
+                        "datacenter": {
+                            "description": "US West 1 Datacenter", 
+                            "id": 1, 
+                            "name": "US-West-1", 
+                            "object": "option"
+                        }, 
+                        "id": 1868109, 
+                        "ip": "10.0.0.76", 
+                        "object": "ip", 
+                        "public": true, 
+                        "state": {
+                            "description": "IP is available to use", 
+                            "id": 1, 
+                            "name": "Unassigned", 
+                            "object": "option"
+                        }, 
+                        "subnet": "10.0.0.64/255.255.255.240"
+                    }, 
+                    "object": "ipportpair", 
+                    "port": 80
+                }, 
+                {
+                    "ip": {
+                        "datacenter": {
+                            "description": "US West 1 Datacenter", 
+                            "id": 1, 
+                            "name": "US-West-1", 
+                            "object": "option"
+                        }, 
+                        "id": 1868110, 
+                        "ip": "10.0.0.77", 
+                        "object": "ip", 
+                        "public": true, 
+                        "state": {
+                            "description": "IP is available to use", 
+                            "id": 1, 
+                            "name": "Unassigned", 
+                            "object": "option"
+                        }, 
+                        "subnet": "10.0.0.64/255.255.255.240"
+                    }, 
+                    "object": "ipportpair", 
+                    "port": 80
+                }, 
+                {
+                    "ip": {
+                        "datacenter": {
+                            "description": "US West 1 Datacenter", 
+                            "id": 1, 
+                            "name": "US-West-1", 
+                            "object": "option"
+                        }, 
+                        "id": 1868111, 
+                        "ip": "10.0.0.78", 
+                        "object": "ip", 
+                        "public": true, 
+                        "state": {
+                            "description": "IP is available to use", 
+                            "id": 1, 
+                            "name": "Unassigned", 
+                            "object": "option"
+                        }, 
+                        "subnet": "10.0.0.64/255.255.255.240"
+                    }, 
+                    "object": "ipportpair", 
+                    "port": 80
+                }
+            ], 
+            "state": {
+                "description": "Loadbalancer is enabled and on.", 
+                "id": 1, 
+                "name": "On", 
+                "object": "option"
+            }, 
+            "type": {
+                "description": "", 
+                "id": 1, 
+                "name": "Round Robin", 
+                "object": "option"
+            }, 
+            "virtualip": {
+                "ip": {
+                    "datacenter": {
+                        "description": "US West 1 Datacenter", 
+                        "id": 1, 
+                        "name": "US-West-1", 
+                        "object": "option"
+                    }, 
+                    "id": 1868100, 
+                    "ip": "10.0.0.67", 
+                    "object": "ip", 
+                    "public": true, 
+                    "state": {
+                        "description": "IP is reserved or in use", 
+                        "id": 2, 
+                        "name": "Assigned", 
+                        "object": "option"
+                    }, 
+                    "subnet": "10.0.0.64/255.255.255.240"
+                }, 
+                "object": "ipportpair", 
+                "port": 80
+            }
+        }
+    ], 
+    "method": "/grid/loadbalancer/list", 
+    "status": "success", 
+    "summary": {
+        "numpages": 0, 
+        "returned": 2, 
+        "start": 0, 
+        "total": 2
+    }
+}

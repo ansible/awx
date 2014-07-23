@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<user>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/users/2" type="application/vnd.abiquo.user+xml" rel="edit"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1" type="application/vnd.abiquo.enterprise+xml" rel="enterprise"/>
+    <link href="http://10.60.12.7:80/api/admin/roles/2" type="application/vnd.abiquo.role+xml" rel="role"/>
+    <link href="http://10.60.12.7:80/api/admin/enterprises/1/users/2/action/virtualmachines" type="application/vnd.abiquo.virtualmachines+xml" rel="virtualmachines"/>
+    <active>true</active>
+    <authType>ABIQUO</authType>
+    <description>Standard user</description>
+    <email></email>
+    <id>2</id>
+    <locale>en_US</locale>
+    <name>Standard</name>
+    <nick>user</nick>
+    <password>c69a39bd64ffb77ea7ee3369dce742f3</password>
+    <surname>User</surname>
+</user>

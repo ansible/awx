@@ -1,0 +1,48 @@
+{
+    "loadBalancer": {
+        "algorithm": "RANDOM", 
+        "cluster": {
+            "name": "ztm-n05.lbaas.ord1.rackspace.net"
+        }, 
+        "connectionLogging": {
+            "enabled": false
+        }, 
+        "created": {
+            "time": "2011-04-07T16:27:50+0000"
+        }, 
+        "id": 8290, 
+        "name": "test2", 
+        "nodes": [
+            {
+                "address": "10.1.0.11", 
+                "condition": "ENABLED", 
+                "id": 30944, 
+                "port": 80, 
+                "status": "ONLINE", 
+                "weight": 1
+            }, 
+            {
+                "address": "10.1.0.10", 
+                "condition": "ENABLED", 
+                "id": 30945, 
+                "port": 80, 
+                "status": "ONLINE", 
+                "weight": 1
+            }
+        ], 
+        "port": 80, 
+        "protocol": "HTTP", 
+        "status": "BUILD", 
+        "updated": {
+            "time": "2011-04-07T16:27:50+0000"
+        }, 
+        "virtualIps": [
+            {
+                "address": "1.1.1.1", 
+                "id": 1151, 
+                "ipVersion": "IPV4", 
+                "type": "PUBLIC"
+            }
+        ]
+    }
+}

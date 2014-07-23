@@ -1,0 +1,117 @@
+{
+  "id": "projects/project_name/global/firewalls",
+  "items": [
+    {
+      "allowed": [
+        {
+          "IPProtocol": "udp"
+        },
+        {
+          "IPProtocol": "tcp"
+        },
+        {
+          "IPProtocol": "icmp"
+        }
+      ],
+      "creationTimestamp": "2013-06-25T19:50:41.630-07:00",
+      "description": "",
+      "id": "5399576268464751692",
+      "kind": "compute#firewall",
+      "name": "default-allow-internal",
+      "network": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/default",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/firewalls/default-allow-internal",
+      "sourceRanges": [
+        "10.240.0.0/16"
+      ]
+    },
+    {
+      "allowed": [
+        {
+          "IPProtocol": "tcp",
+          "ports": [
+            "22"
+          ]
+        }
+      ],
+      "creationTimestamp": "2013-06-25T19:48:25.111-07:00",
+      "description": "",
+      "id": "8063006729705804986",
+      "kind": "compute#firewall",
+      "name": "default-ssh",
+      "network": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/default",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/firewalls/default-ssh",
+      "sourceRanges": [
+        "0.0.0.0/0"
+      ]
+    },
+    {
+      "allowed": [
+        {
+          "IPProtocol": "tcp",
+          "ports": [
+            "3141"
+          ]
+        }
+      ],
+      "creationTimestamp": "2013-11-01T14:46:25.155-07:00",
+      "id": "13827675544891616808",
+      "kind": "compute#firewall",
+      "name": "libcloud-demo-europe-firewall",
+      "network": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/libcloud-demo-europe-network",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/firewalls/libcloud-demo-europe-firewall",
+      "sourceRanges": [
+        "0.0.0.0/0"
+      ],
+      "sourceTags": [
+        "libcloud"
+      ]
+    },
+    {
+      "allowed": [
+        {
+          "IPProtocol": "tcp",
+          "ports": [
+            "3141"
+          ]
+        }
+      ],
+      "creationTimestamp": "2013-11-01T14:44:31.284-07:00",
+      "id": "1648761630208029546",
+      "kind": "compute#firewall",
+      "name": "libcloud-demo-firewall",
+      "network": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/libcloud-demo-network",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/firewalls/libcloud-demo-firewall",
+      "sourceRanges": [
+        "0.0.0.0/0"
+      ],
+      "sourceTags": [
+        "libcloud"
+      ]
+    },
+    {
+      "allowed": [
+        {
+          "IPProtocol": "tcp",
+          "ports": [
+            "80"
+          ]
+        }
+      ],
+      "creationTimestamp": "2013-08-19T14:40:22.562-07:00",
+      "description": "",
+      "id": "01326795494450101956",
+      "kind": "compute#firewall",
+      "name": "www-firewall",
+      "network": "https://www.googleapis.com/compute/v1/projects/project_name/global/networks/default",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/firewalls/www-firewall",
+      "sourceRanges": [
+        "0.0.0.0/0"
+      ],
+      "targetTags": [
+        "www-tag"
+      ]
+    }
+  ],
+  "kind": "compute#firewallList",
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/project_name/global/firewalls"
+}

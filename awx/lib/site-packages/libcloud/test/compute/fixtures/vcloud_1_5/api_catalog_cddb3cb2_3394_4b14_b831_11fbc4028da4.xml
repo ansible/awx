@@ -1,0 +1,9 @@
+<Catalog name="Dev" id="urn:vcloud:catalog:cddb3cb2-3394-4b14-b831-11fbc4028da4" type="application/vnd.vmware.vcloud.catalog+xml" href="https://vm-vcloud/api/catalog/cddb3cb2-3394-4b14-b831-11fbc4028da4" xsi:schemaLocation="http://www.vmware.com/vcloud/v1.5 http://65.41.64.27/api/v1.5/schema/master.xsd" xmlns="http://www.vmware.com/vcloud/v1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <Link rel="up" type="application/vnd.vmware.vcloud.org+xml" href="https://vm-vcloud/api/org/96726c78-4ae3-402f-b08b-7a78c6903d2a"/>
+   <Link rel="add" type="application/vnd.vmware.vcloud.catalogItem+xml" href="https://vm-vcloud/api/catalog/cddb3cb2-3394-4b14-b831-11fbc4028da4/catalogItems"/>
+   <Link rel="down" type="application/vnd.vmware.vcloud.metadata+xml" href="https://vm-vcloud/api/catalog/cddb3cb2-3394-4b14-b831-11fbc4028da4/metadata"/>
+   <CatalogItems>
+      <CatalogItem type="application/vnd.vmware.vcloud.catalogItem+xml" name="VMMasterTemplate" href="https://vm-vcloud/api/catalogItem/3132e037-759b-4627-9056-ca66466fa607"/>
+   </CatalogItems>
+   <IsPublished>false</IsPublished>
+</Catalog>

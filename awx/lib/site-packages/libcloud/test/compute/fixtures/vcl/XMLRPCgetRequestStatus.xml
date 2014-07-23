@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<methodResponse>
+<params>
+ <param>
+  <value>
+   <struct>
+    <member>
+     <name>status</name>
+     <value>
+      <string>ready</string>
+     </value>
+    </member>
+   </struct>
+  </value>
+ </param>
+</params>
+</methodResponse>
