@@ -13,16 +13,13 @@ angular.module('LicenseFormDefinition', [])
 
         name: 'license',
         well: false,
-        
+
         tabs: [{
             name: 'license',
             label: 'License'
         }, {
             name: 'managed',
             label: 'Managed Hosts'
-        },{
-            name: 'contact',
-            label: 'Contact Info'
         }],
 
         fields: {
@@ -71,24 +68,6 @@ angular.module('LicenseFormDefinition', [])
                 controlNGClass: 'free_instances_class',
                 labelNGClass: 'free_instances_class',
                 tab: 'managed'
-            },
-            company_name: {
-                label: 'Company',
-                type: 'text',
-                readonly: true,
-                tab: 'contact'
-            },
-            contact_name: {
-                label: 'Contact',
-                type: 'text',
-                readonly: true,
-                tab: 'contact'
-            },
-            contact_email: {
-                label: 'Contact Email',
-                type: 'text',
-                readonly: true,
-                tab: 'contact'
             }
         }
     });
