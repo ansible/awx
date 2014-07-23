@@ -2,7 +2,7 @@
 **    Created by: Jeff Todnem (http://www.todnem.com/)
 **    Created on: 2007-08-14
 **    Modified: 2013-07-31 by James Cammarata
-**   
+**
 **    License Information:
 **    -------------------------------------------------------------------------
 **    Copyright (C) 2007 Jeff Todnem
@@ -11,18 +11,18 @@
 **    under the terms of the GNU General Public License as published by the
 **    Free Software Foundation; either version 2 of the License, or (at your
 **    option) any later version.
-**    
+**
 **    This program is distributed in the hope that it will be useful, but
 **    WITHOUT ANY WARRANTY; without even the implied warranty of
 **    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 **    General Public License for more details.
-**    
+**
 **    You should have received a copy of the GNU General Public License along
 **    with this program; if not, write to the Free Software Foundation, Inc.,
 **    59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-**   
 **
-**    CLH 09/05/13 - Set required strength in config.js 
+**
+**    CLH 09/05/13 - Set required strength in config.js
 **        02/10/14 - Applied jsHint
 */
 
@@ -40,7 +40,7 @@ var nScore = 0;
 
 function chkPass(pwd) {
     // Simultaneous variable declaration and value assignment aren't supported in IE apparently
-    // so I'm forced to assign the same value individually per var to support a crappy browser *sigh* 
+    // so I'm forced to assign the same value individually per var to support a crappy browser *sigh*
     var nLength = 0,
         nAlphaUC = 0,
         nAlphaLC = 0,
@@ -169,7 +169,7 @@ function chkPass(pwd) {
             for (b = 0; b < arrPwdLen; b++) {
                 if (arrPwd[a] == arrPwd[b] && a != b) { /* repeat character exists */
                     bCharExists = true;
-                    /* 
+                    /*
                Calculate icrement deduction based on proximity to identical characters
                Deduction is incremented each time a new match is discovered
                Deduction amount is based on total password length divided by the
@@ -279,16 +279,23 @@ function chkPass(pwd) {
             sSeqSymbol = "- " + parseInt(nSeqSymbol * nMultSeqSymbol);
         }
 
+        progbar = $("#progbar");
+        required_strength = $AnsibleConfig.password_strength;
+        warning_level = ($AnsibleConfig.password_strength - 15 < 0) ? 0 : $AnsibleConfig.password_strength - 15;
+
+        /*  Enforce a minimum length of 8 */
+        if (nLength < 8) {
+            nScore = 0;
+        }
+
         /* Determine complexity based on overall score */
         if (nScore > 100) {
             nScore = 100;
         } else if (nScore < 0) {
             nScore = 0;
+        } else if (nScore >= required_strength) {
+            nScore = 100;  //a green progress bar should be at 100%
         }
-
-        progbar = $("#progbar");
-        required_strength = $AnsibleConfig.password_strength;
-        warning_level = ($AnsibleConfig.password_strength - 15 < 0) ? 0 : $AnsibleConfig.password_strength - 15;
 
         progbar.css("width", nScore + '%');
 
@@ -311,5 +318,6 @@ function chkPass(pwd) {
         progbar.css("width", '0%');
         progbar.removeClass('progress-bar-success progress-bar-warning');
     }
+
     return nScore;
 }
