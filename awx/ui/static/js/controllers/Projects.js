@@ -26,7 +26,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         url = (base === 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl,
         choiceCount = 0;
 
-    view.inject(list, { mode: mode, scope: $scope });
+    view.inject(list, { mode: mode, scope: $scope, breadCrumbs:(($routeParams.team_id) ? true : false)});
 
     $rootScope.flashMessage = null;
     $scope.projectLoading = true;

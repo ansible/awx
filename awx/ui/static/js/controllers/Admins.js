@@ -19,7 +19,7 @@ function AdminsList($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
         mode = 'select',
         url = GetBasePath('organizations') + $routeParams.organization_id + '/admins/';
 
-    generator.inject(AdminList, { mode: mode, scope: $scope });
+    generator.inject(AdminList, { mode: mode, scope: $scope, breadCrumbs: true });
 
     SelectionInit({ scope: $scope, list: list, url: url, returnToCaller: 1 });
 

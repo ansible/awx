@@ -21,7 +21,7 @@ function PermissionsList($scope, $rootScope, $location, $log, $routeParams, Rest
         defaultUrl = GetBasePath(base),
         generator = GenerateList;
 
-    generator.inject(list, { mode: 'edit', scope: $scope });
+    generator.inject(list, { mode: 'edit', scope: $scope, breadCrumbs: true });
     defaultUrl += ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id;
     defaultUrl += '/permissions/';
 

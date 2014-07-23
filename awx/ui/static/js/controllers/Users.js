@@ -22,7 +22,7 @@ function UsersList($scope, $rootScope, $location, $log, $routeParams, Rest, Aler
         url = (base === 'organizations') ? GetBasePath('organizations') + $routeParams.organization_id + '/users/' :
             GetBasePath('teams') + $routeParams.team_id + '/users/';
 
-    generator.inject(UserList, { mode: mode, scope: $scope });
+    generator.inject(UserList, { mode: mode, scope: $scope, breadCrumbs:(($routeParams.organization_id || $routeParams.team_id) ? true : false) });
 
     $scope.selected = [];
 

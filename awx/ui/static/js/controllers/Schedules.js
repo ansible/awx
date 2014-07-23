@@ -12,7 +12,7 @@
 
 function ScheduleEditController($scope, $compile, $location, $routeParams, SchedulesList, Rest, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
 GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, GetChoices, Stream) {
-    
+
     ClearScope();
 
     var base, e, id, url, parentObject;
@@ -28,7 +28,7 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
             list[idx].play_tip = (element.enabled) ? 'Schedule is Active. Click to temporarily stop.' : 'Schedule is temporarily stopped. Click to activate.';
         });
     });
-    
+
     if ($scope.removeParentLoaded) {
         $scope.removeParentLoaded();
     }
@@ -54,7 +54,7 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
         });
     });
 
-    
+
     if ($scope.removeChoicesReady) {
         $scope.removeChocesReady();
     }
@@ -83,7 +83,7 @@ GetBasePath, Wait, Breadcrumbs, Find, LoadDialogPartial, LoadSchedulesScope, Get
     };
 
     Wait('start');
-    
+
     GetChoices({
         scope: $scope,
         url: GetBasePath('unified_jobs'),   //'/static/sample/data/types/data.json'

@@ -24,7 +24,7 @@ function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest
         mode = (base === 'credentials') ? 'edit' : 'select',
         url;
 
-    view.inject(list, { mode: mode, scope: $scope });
+    view.inject(list, { mode: mode, scope: $scope, breadCrumbs:(($routeParams.user_id || $routeParams.team_id) ? true : false) });
 
     $scope.selected = [];
     $scope.credentialLoading = true;
