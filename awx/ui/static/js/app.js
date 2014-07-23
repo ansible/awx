@@ -442,8 +442,7 @@ angular.module('Tower', [
 
             function activateTab() {
                 // Make the correct tab active
-                var base = $location.path().replace(/^\//, '').split('/')[0],
-                    urlDepth = $location.path().replace(/^\//, '').split('/').length;
+                var base = $location.path().replace(/^\//, '').split('/')[0];
 
                 if (base === '') {
                     base = 'home';
