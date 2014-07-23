@@ -14,10 +14,11 @@ angular.module('ApiLoader', ['Utilities'])
 .factory('LoadBasePaths', ['$http', '$rootScope', 'Store', 'ProcessErrors',
     function ($http, $rootScope, Store, ProcessErrors) {
         return function () {
-            $http.get('/api/')
+
+            $http.({ method: 'GET', url:'/api/', headers: { 'Authorization': "" } })
                 .success(function (data) {
                     var base = data.current_version;
-                    $http.get(base)
+                    $http.get({ method: 'GET', url:base, headers: { 'Authorization': "" } })
                         .success(function (data) {
                             data.base = base;
                             $rootScope.defaultUrls = data;
