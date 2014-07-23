@@ -452,9 +452,7 @@ angular.module('Tower', [
                     base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
                 }
 
-                if (urlDepth === 1 && base !== 'home') {
-                    $('#ansible-list-title').html('<strong>' + base.replace(/\_/,' ') + '</strong>');
-                }
+                $('#ansible-list-title').html('<strong>' + base.replace(/\_/,' ') + '</strong>');
 
                 $('#ansible-main-menu li').each(function() {
                     $(this).removeClass('active');
