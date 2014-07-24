@@ -46,8 +46,6 @@ HIDDEN_PASSWORD = '**********'
 
 logger = logging.getLogger('awx.main.tasks')
 
-# FIXME: Cleanly cancel task when celery worker is stopped.
-
 @task()
 def bulk_inventory_element_delete(inventory, hosts=[], groups=[]):
     from awx.main.signals import disable_activity_stream

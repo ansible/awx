@@ -258,8 +258,8 @@ class InventoryAccess(BaseAccess):
         qs = qs.select_related('created_by', 'organization')
         if self.user.is_superuser:
             return qs
-        admin_of = qs.filter(organization__admins__in=[self.user],
-                             organization__active=True).distinct()
+        qs = qs.filter(organization__active=True)
+        admin_of = qs.filter(organization__admins__in=[self.user]).distinct()
         has_user_perms = qs.filter(
             permissions__user__in=[self.user],
             permissions__permission_type__in=allowed,

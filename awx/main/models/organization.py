@@ -83,6 +83,13 @@ class Team(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:team_detail', args=(self.pk,))
 
+    def mark_inactive(self, save=True):
+        '''
+        When marking a team inactive we'll wipe out its credentials also
+        '''
+        for cred in self.credentials.all():
+            cred.mark_inactive()
+        super(Team, self).mark_inactive(save=save)
 
 class Permission(CommonModelNameNotUnique):
     '''

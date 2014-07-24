@@ -251,6 +251,23 @@ class BaseJobTestMixin(BaseTestMixin):
         self.team_ops_west.users.add(self.user_greg)
         self.team_ops_west.users.add(self.user_iris)
 
+        # The south team is no longer active having been folded into the east team
+        self.team_ops_south = self.org_ops.teams.create(
+            name='southerners',
+            created_by=self.user_sue,
+            active=False,
+        )
+        self.team_ops_south.projects.add(self.proj_prod)
+        self.team_ops_south.users.add(self.user_greg)
+
+        # The north team is going to be deleted
+        self.team_ops_north = self.org_ops.teams.create(
+            name='northerners',
+            created_by=self.user_sue,
+        )
+        self.team_ops_north.projects.add(self.proj_prod)
+        self.team_ops_north.users.add(self.user_greg)
+
         # Each user has his/her own set of credentials.
         from awx.main.tests.tasks import (TEST_SSH_KEY_DATA,
                                           TEST_SSH_KEY_DATA_LOCKED,
@@ -310,6 +327,17 @@ class BaseJobTestMixin(BaseTestMixin):
         self.cred_ops_west = self.team_ops_west.credentials.create(
             username='west',
             password='Heading270',
+            created_by = self.user_sue,
+        )
+        self.cred_ops_south = self.team_ops_south.credentials.create(
+            username='south',
+            password='Heading180',
+            created_by = self.user_sue,
+        )
+
+        self.cred_ops_north = self.team_ops_north.credentials.create(
+            username='north',
+            password='Heading0',
             created_by = self.user_sue,
         )
 
@@ -502,6 +530,20 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
         # FIXME: Check with other credentials.
 
+    def test_credentials_list(self):
+        url = reverse('api:credential_list')
+        # Greg can't see the 'south' credential because the 'southerns' team is inactive
+        with self.current_user(self.user_greg):
+            all_credentials = self.get(url, expect=200)
+            self.assertFalse('south' in [x['username'] for x in all_credentials['results']])
+
+        url2 = reverse('api:team_detail', args=(self.team_ops_north.id,))
+        # Sue shouldn't be able to see the north credential once deleting its team
+        with self.current_user(self.user_sue):
+            self.delete(url2, expect=204)
+            all_credentials = self.get(url, expect=200)
+            self.assertFalse('north' in [x['username'] for x in all_credentials['results']])
+
     def test_post_job_template_list(self):
         url = reverse('api:job_template_list')
         data = dict(
@@ -685,6 +727,8 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         )
         with self.current_user(self.user_sue):
             response = self.post(url, data, expect=201)
+
+        # sue can't create a job when it is hidden due to inactive team
 
         # FIXME: Check with other credentials and optional fields.
 
