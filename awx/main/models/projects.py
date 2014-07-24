@@ -206,6 +206,7 @@ class Project(UnifiedJobTemplate, ProjectOptions):
 
     class Meta:
         app_label = 'main'
+        ordering = ('id',)
 
     scm_delete_on_next_update = models.BooleanField(
         default=False,

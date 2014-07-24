@@ -29,6 +29,7 @@ class Organization(CommonModel):
 
     class Meta:
         app_label = 'main'
+        ordering = ('name',)
 
     users = models.ManyToManyField(
         'auth.User',
@@ -61,6 +62,7 @@ class Team(CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         unique_together = [('organization', 'name')]
+        ordering = ('organization__name', 'name')
 
     users = models.ManyToManyField(
         'auth.User',

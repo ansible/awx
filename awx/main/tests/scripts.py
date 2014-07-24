@@ -288,7 +288,7 @@ class InventoryScriptTest(BaseScriptTest):
         # Valid host, but not part of the specified inventory.
         inventory = self.inventories[0]
         self.assertTrue(inventory.active)
-        host = Host.objects.exclude(inventory=inventory)[0]
+        host = Host.objects.get(id=12)
         self.assertTrue(host.active)
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script(host=host.name)

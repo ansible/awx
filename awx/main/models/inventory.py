@@ -50,6 +50,7 @@ class Inventory(CommonModel):
         app_label = 'main'
         verbose_name_plural = _('inventories')
         unique_together = [('name', 'organization')]
+        ordering = ('name',)
 
     organization = models.ForeignKey(
         'Organization',
@@ -329,6 +330,7 @@ class Host(CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         unique_together = (("name", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
+        ordering = ('inventory', 'name')
 
     inventory = models.ForeignKey(
         'Inventory',
@@ -463,6 +465,7 @@ class Group(CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         unique_together = (("name", "inventory"),)
+        ordering = ('name',)
 
     inventory = models.ForeignKey(
         'Inventory',

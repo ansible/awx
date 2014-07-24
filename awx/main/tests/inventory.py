@@ -501,10 +501,9 @@ class InventoryTest(BaseTest):
         vars_a = dict(asdf=7777, dog='droopy',   cat='battlecat', unstructured=dict(a=[1,1,1],b=dict(x=1,y=2)))
         vars_b = dict(asdf=8888, dog='snoopy',   cat='cheshire',  unstructured=dict(a=[2,2,2],b=dict(x=3,y=4)))
         vars_c = dict(asdf=9999, dog='pluto',    cat='five',      unstructured=dict(a=[3,3,3],b=dict(z=5)))
-        groups = Group.objects.all()
+        group = Group.objects.get(id=1)
 
-        vdata1_url = reverse('api:group_variable_data', args=(groups[0].pk,))
-        vdata2_url = reverse('api:group_variable_data', args=(groups[1].pk,))
+        vdata1_url = reverse('api:group_variable_data', args=(group.pk,))
 
         # a super user can associate variable objects with groups
         got = self.get(vdata1_url, expect=200, auth=self.get_super_credentials())

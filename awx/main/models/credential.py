@@ -40,6 +40,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         unique_together = [('user', 'team', 'kind', 'name')]
+        ordering = ('kind', 'name')
 
     user = models.ForeignKey(
         'auth.User',

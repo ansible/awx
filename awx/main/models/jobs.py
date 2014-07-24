@@ -138,6 +138,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
 
     class Meta:
         app_label = 'main'
+        ordering = ('name',)
 
     host_config_key = models.CharField(
         max_length=1024,
@@ -195,6 +196,7 @@ class Job(UnifiedJob, JobOptions):
 
     class Meta:
         app_label = 'main'
+        ordering = ('id',)
 
     job_template = models.ForeignKey(
         'JobTemplate',
