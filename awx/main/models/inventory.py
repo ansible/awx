@@ -830,7 +830,7 @@ class InventorySourceOptions(BaseModel):
             # If a credential was provided, it's important that it matches
             # the actual inventory source being used (Amazon requires Amazon
             # credentials; Rackspace requires Rackspace credentials; etc...)
-            if self.source.replace('ec2', 'awx') != cred.kind:
+            if self.source.replace('ec2', 'aws') != cred.kind:
                 raise ValidationError(
                     'Cloud-based inventory sources (such as %s) require '
                     'credentials for the matching cloud service.' % self.source
