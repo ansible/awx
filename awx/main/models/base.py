@@ -203,6 +203,15 @@ class PasswordFieldsModel(BaseModel):
     def _password_field_allows_ask(self, field):
         return False # Override in subclasses if needed.
 
+    def mark_inactive(self, save=True):
+        '''
+        When marking a password model inactive we'll clear sensitive fields
+        '''
+        for sensitive_field in self.PASSWORD_FIELDS:
+            setattr(self, sensitive_field, "")
+        self.save()
+        super(PasswordFieldsModel, self).mark_inactive(save=save)
+
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
         # If update_fields has been specified, add our field names to it,
