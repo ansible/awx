@@ -20,12 +20,12 @@ from awx.main.models import *
 from awx.main.tests.base import BaseLiveServerTest
 from awx.main.tasks import RunJob
 
-TEST_PLAYBOOK = '''
+TEST_PLAYBOOK = u'''
 - name: test success
   hosts: test-group
   gather_facts: False
   tasks:
-  - name: should pass
+  - name: should pass \u2623
     command: test 1 = 1
   - name: should also pass
     command: test 2 = 2
@@ -329,13 +329,13 @@ class RunJobTest(BaseCeleryTest):
 
     def check_job_result(self, job, expected='successful', expect_stdout=True,
                          expect_traceback=False):
-        msg = 'job status is %s, expected %s' % (job.status, expected)
-        msg = '%s\nargs:\n%s' % (msg, job.job_args)
-        msg = '%s\nenv:\n%s' % (msg, job.job_env)
+        msg = u'job status is %s, expected %s' % (job.status, expected)
+        msg = u'%s\nargs:\n%s' % (msg, job.job_args)
+        msg = u'%s\nenv:\n%s' % (msg, job.job_env)
         if job.result_traceback:
-            msg = '%s\ngot traceback:\n%s' % (msg, job.result_traceback)
+            msg = u'%s\ngot traceback:\n%s' % (msg, job.result_traceback)
         if job.result_stdout:
-            msg = '%s\ngot stdout:\n%s' % (msg, job.result_stdout)
+            msg = u'%s\ngot stdout:\n%s' % (msg, job.result_stdout)
         if isinstance(expected, (list, tuple)):
             self.assertTrue(job.status in expected)
         else:
@@ -344,13 +344,13 @@ class RunJobTest(BaseCeleryTest):
             self.assertTrue(job.result_stdout)
         else:
             self.assertFalse(job.result_stdout,
-                             'expected no stdout, got:\n%s' %
+                             u'expected no stdout, got:\n%s' %
                              job.result_stdout)
         if expect_traceback:
             self.assertTrue(job.result_traceback)
         else:
             self.assertFalse(job.result_traceback,
-                             'expected no traceback, got:\n%s' %
+                             u'expected no traceback, got:\n%s' %
                              job.result_traceback)
 
     def check_job_events(self, job, runner_status='ok', plays=1, tasks=1,

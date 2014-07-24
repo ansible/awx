@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import codecs
 import json
 import logging
 import re
@@ -506,7 +507,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if self.result_stdout_file != "":
             if not os.path.exists(self.result_stdout_file):
                 return StringIO("stdout capture is missing")
-            return open(self.result_stdout_file, "r")
+            return codecs.open(self.result_stdout_file, "r", encoding='utf-8')
         else:
             return StringIO(self.result_stdout_text)
 
@@ -520,7 +521,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return ansi_escape.sub('', self.result_stdout_raw)
 
     def result_stdout_raw_limited(self, start_line=0, end_line=None):
-        return_buffer = ""
+        return_buffer = u""
         if end_line is not None:
             end_line = int(end_line)
         stdout_lines = self.result_stdout_raw_handle().readlines()

@@ -180,7 +180,7 @@ class BaseTestMixin(object):
             handle, playbook_path = tempfile.mkstemp(suffix='.yml',
                                                      dir=project_dir)
             test_playbook_file = os.fdopen(handle, 'w')
-            test_playbook_file.write(playbook_content)
+            test_playbook_file.write(playbook_content.encode('utf-8'))
             test_playbook_file.close()
             # Role playbooks are specified as a dict of role name and the
             # content of tasks/main.yml playbook.

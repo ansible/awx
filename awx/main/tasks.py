@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import codecs
 import ConfigParser
 import cStringIO
 from distutils.version import StrictVersion as Version
@@ -388,7 +389,7 @@ class BaseTask(Task):
             if not os.path.exists(settings.JOBOUTPUT_ROOT):
                 os.makedirs(settings.JOBOUTPUT_ROOT)
             stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, str(uuid.uuid1()) + ".out")
-            stdout_handle = open(stdout_filename, 'w')
+            stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
                                          job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
             status = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
