@@ -575,8 +575,9 @@ angular.module('Tower', [
                 setInterval(function() {
                     if (sock.checkStatus() === 'error' || checkCount > 3) {
                         // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
-                        sock = null;
+                        $log.debug('socket status: ' + sock.checkStatus());
                         $log.debug('attempting new socket connection');
+                        sock = null;
                         openSocket();
                         checkCount = 0;
                     }

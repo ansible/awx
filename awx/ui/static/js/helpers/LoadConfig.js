@@ -14,7 +14,7 @@
 
 angular.module('LoadConfigHelper', ['Utilities'])
 
-.factory('LoadConfig', ['$log', '$rootScope', '$http', 'ProcessErrors', function($log, $rootScope, $http, ProcessErrors) {
+.factory('LoadConfig', ['$log', '$rootScope', '$http', 'ProcessErrors', 'Store', function($log, $rootScope, $http, ProcessErrors, Store) {
     return function() {
 
         if ($rootScope.removeLoadConfig) {
@@ -27,6 +27,7 @@ angular.module('LoadConfigHelper', ['Utilities'])
                 .success(function(data) {
                     $log.info('loaded config.js');
                     $AnsibleConfig = eval(data);
+                    Store('AnsibleConfig', $AnsibleConfig);
                     $rootScope.$emit('ConfigReady');
                 })
                 .error(function(data, status) {
@@ -41,6 +42,7 @@ angular.module('LoadConfigHelper', ['Utilities'])
             .success(function(data) {
                 $log.info('loaded local_config.js');
                 $AnsibleConfig = eval(data);
+                Store('AnsibleConfig', $AnsibleConfig);
                 $rootScope.$emit('ConfigReady');
             })
             .error(function() {

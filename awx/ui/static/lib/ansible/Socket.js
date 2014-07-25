@@ -12,13 +12,26 @@
 
 angular.module('SocketIO', ['AuthService', 'Utilities'])
 
-    .factory('Socket', ['$rootScope', '$location', '$log', 'Authorization', function ($rootScope, $location, $log, Authorization) {
+    .factory('Socket', ['$rootScope', '$location', '$log', 'Authorization', 'Store', function ($rootScope, $location, $log, Authorization, Store) {
         return function(params) {
             var scope = params.scope,
                 host = $location.host(),
                 endpoint = params.endpoint,
                 protocol = $location.protocol(),
-                url = protocol + '://' + host + ':' + $AnsibleConfig.websocket_port + '/socket.io/' + endpoint;
+                config, socketPort, url;
+
+            // Since some pages are opened in a new tab, we might get here before AnsibleConfig is available.
+            // In that case, load from local storage.
+            if ($AnsibleConfig) {
+                socketPort = $AnsibleConfig.websocket_port;
+            }
+            else {
+                $log.debug('getting web socket port from local storage');
+                config = Store('AnsibleConfig');
+                socketPort = config.websocket_port;
+            }
+            url = protocol + '://' + host + ':' + socketPort + '/socket.io/' + endpoint;
+            $log.debug('opening socket connection to: ' + url);
 
             function getSocketTip(status) {
                 var result = '';
@@ -43,7 +56,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 init: function() {
                     var self = this,
                         token = Authorization.getToken();
-                    if (!$rootScope.sessionTimer.isExpired()) {
+                    if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
                         // We have a valid session token, so attmempt socket connection
                         $log.debug('Socket connecting to: ' + url);
                         self.scope.socket_url = url;
