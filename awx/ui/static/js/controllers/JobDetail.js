@@ -31,8 +31,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.tasksMaxRows = 200;
     scope.playsMaxRows = 200;
 
-    scope.liveEventProcessing = true;  // control play/pause state of event processing
-    scope.pauseLiveEvents = false;
+    scope.liveEventProcessing = true;     // true while job is active and live events are arriving
+    scope.pauseLiveEvents = false;        // control play/pause state of event processing
 
     scope.job_status = {};
     scope.job_id = job_id;
@@ -105,7 +105,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 if ($rootScope.jobDetailInterval) {
                     window.clearInterval($rootScope.jobDetailInterval);
                 }
-                $scope.$emit('LoadJob'); //this is what is used for the refresh
+                if (!scope.pauseLiveEvents) {
+                    $scope.$emit('LoadJob'); //this is what is used for the refresh
+                }
             }
         }
     });
@@ -118,8 +120,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         var url;
         Wait('stop');
         if (JobIsFinished(scope)) {
-            $scope.liveEventProcessing = false; // signal that event processing is over and endless scroll
-                                                // should be enabled
+            scope.liveEventProcessing = false; // signal that event processing is over and endless scroll
+            scope.pauseLiveEvents = false;      // should be enabled
             url = scope.job.related.job_events + '?event=playbook_on_stats';
             Rest.setUrl(url);
             Rest.get()
@@ -143,7 +145,6 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         else {
             api_complete = true;  //trigger events to start processing
             $rootScope.jobDetailInterval = setInterval(function() {
-                $log.debug('Updating the DOM...');
                 UpdateDOM({ scope: scope });
             }, 2000);
         }
@@ -291,6 +292,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                         else {
                             scope.activeTask = data.results[0].id;
                         }
+                        scope.selectedTask = scope.activeTask;
                     }
                     data.results.forEach(function(event, idx) {
                         var end, elapsed, status, status_text;
@@ -352,7 +354,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             task: play.tasks[event.id]
                         });
                     });
-                    if (scope.activeTask) {
+                    if (scope.activeTask && scope.jobData.plays[scope.activePlay] && scope.jobData.plays[scope.activePlay].tasks[scope.activeTask]) {
                         scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
                     }
                     scope.$emit('LoadHosts');
@@ -395,6 +397,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     else {
                         scope.activePlay = data.results[0].id;
                     }
+                    scope.selectedPlay = scope.activePlay;
                 }
                 data.results.forEach(function(event, idx) {
                     var status, status_text, start, end, elapsed, ok, changed, failed, skipped;
@@ -457,7 +460,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
                         scope.host_summary.failed;
                 });
-                if (scope.activePlay) {
+                if (scope.activePlay && scope.jobData.plays[scope.activePlay]) {
                     scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
                 }
                 scope.$emit('LoadTasks', events_url);
@@ -507,6 +510,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     }
     scope.removeLoadJobRow = scope.$on('LoadJob', function() {
         Wait('start');
+        scope.job_status = {};
         // Load the job record
         Rest.setUrl(GetBasePath('jobs') + job_id + '/');
         Rest.get()
@@ -552,6 +556,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
                     scope.job_status.finished = data.finsished;
                     scope.liveEventProcessing = false;
+                    scope.pauseLiveEvents = false;
                 }
                 else {
                     scope.job_status.finished = null;
@@ -653,9 +658,19 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         scope.adjustSize();
     }, 500));
 
+    function flashPlayTip() {
+        setTimeout(function(){
+            $('#play-help').popover('show');
+        },500);
+        setTimeout(function() {
+            $('#play-help').popover('hide');
+        }, 5000);
+    }
+
     scope.selectPlay = function(id) {
-        if (scope.liveEventProcessing) {
+        if (scope.liveEventProcessing && !scope.pauseLiveEvents) {
             scope.pauseLiveEvents = true;
+            flashPlayTip();
         }
         SelectPlay({
             scope: scope,
@@ -664,13 +679,21 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     };
 
     scope.selectTask = function(id) {
-        if (scope.liveEventProcessing) {
+        if (scope.liveEventProcessing && !scope.pauseLiveEvents) {
             scope.pauseLiveEvents = true;
+            flashPlayTip();
         }
         SelectTask({
             scope: scope,
             id: id
         });
+    };
+
+    scope.togglePlayButton = function() {
+        if (scope.pauseLiveEvents) {
+            scope.pauseLiveEvents = false;
+            scope.$emit('LoadJob');
+        }
     };
 
     scope.toggleSummary = function(hide) {
@@ -739,7 +762,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
     scope.filterPlayStatus = function() {
         scope.search_play_status = (scope.search_play_status === 'all') ? 'failed' : 'all';
-        if (!scope.liveEventProcessing) {
+        if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
             LoadPlays({
                 scope: scope
             });
@@ -753,7 +776,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         else {
             scope.searchPlaysEnabled = true;
         }
-        if (!scope.liveEventProcessing) {
+        if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
             LoadPlays({
                 scope: scope
             });
@@ -774,7 +797,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         else {
             scope.searchTasksEnabled = true;
         }
-        if (!scope.liveEventProcessing) {
+        if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
             LoadTasks({
                 scope: scope
             });
@@ -795,7 +818,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         else {
             scope.searchHostsEnabled = true;
         }
-        if (!scope.liveEventProcessing) {
+        if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
             LoadHosts({
                 scope: scope
             });
@@ -816,7 +839,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         else {
             scope.searchHostSummaryEnabled = true;
         }
-        if (!scope.liveEventProcessing) {
+        if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
             ReloadHostSummaryList({
                 scope: scope
             });
@@ -832,7 +855,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
     scope.filterTaskStatus = function() {
         scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
-        if (!scope.liveEventProcessing) {
+        if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
             LoadTasks({
                 scope: scope
             });
@@ -841,7 +864,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
     scope.filterHostStatus = function() {
         scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
-        if (!scope.liveEventProcessing) {
+        if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
             LoadHosts({
                 scope: scope
             });
@@ -850,7 +873,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
     scope.filterHostSummaryStatus = function() {
         scope.search_host_summary_status = (scope.search_host_summary_status === 'all') ? 'failed' : 'all';
-        if (!scope.liveEventProcessing) {
+        if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
             ReloadHostSummaryList({
                 scope: scope
             });
@@ -861,7 +884,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         EventViewer({
             scope: scope,
             url: scope.job.related.job_events,
-            parent_id: scope.activeTask,
+            parent_id: scope.selectedTask,
             event_id: id,
             title: 'Host Events'
         });
@@ -975,7 +998,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                         else {
                             // no next event (task), get the end time of the play
                             scope.plays.every(function(p, j) {
-                                if (p.id === scope.activePlay) {
+                                if (p.id === scope.selectedPlay) {
                                     end = scope.plays[j].finished;
                                     return false;
                                 }
@@ -997,7 +1020,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
                         scope.tasks.push({
                             id: event.id,
-                            play_id: scope.activePlay,
+                            play_id: scope.selectedPlay,
                             name: event.name,
                             status: status,
                             status_text: status_text,

@@ -725,16 +725,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     };
 }])
 
-// Call SelectPlay whenever the the activePlay needs to change
-.factory('SelectPlay', ['SelectTask', 'LoadTasks', function(SelectTask, LoadTasks) {
+// Call when the selected Play needs to change
+.factory('SelectPlay', ['LoadTasks', function(LoadTasks) {
     return function(params) {
         var scope = params.scope,
             id = params.id,
             callback = params.callback;
 
-        scope.activePlay = id;
+        scope.selectedPlay = id;
         scope.plays.forEach(function(play, idx) {
-            if (play.id === scope.activePlay) {
+            if (play.id === scope.selectedPlay) {
                 scope.plays[idx].playActiveClass = 'active';
             }
             else {
@@ -760,14 +760,14 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         scope.tasks = [];
         scope.tasksMap = {};
 
-        if (scope.activePlay) {
-            url = scope.job.url + 'job_tasks/?event_id=' + scope.activePlay;
+        if (scope.selectedPlay) {
+            url = scope.job.url + 'job_tasks/?event_id=' + scope.selectedPlay;
             url += (scope.search_task_name) ? '&task__icontains=' + scope.search_task_name : '';
             url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
             url += '&page_size=' + scope.tasksMaxRows + '&order_by=id';
 
             scope.plays.every(function(p, idx) {
-                if (p.id === scope.activePlay) {
+                if (p.id === scope.selectedPlay) {
                     play = scope.plays[idx];
                     return false;
                 }
@@ -793,7 +793,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                         else {
                             // no next event (task), get the end time of the play
                             scope.plays.every(function(play) {
-                                if (play.id === scope.activePlay) {
+                                if (play.id === scope.selectedPlay) {
                                     end = play.finished;
                                     return false;
                                 }
@@ -816,7 +816,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
                         scope.tasks.push({
                             id: event.id,
-                            play_id: scope.activePlay,
+                            play_id: scope.selectedPlay,
                             name: event.name,
                             status: status,
                             status_text: status_text,
@@ -859,7 +859,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 });
         }
         else {
-            //$('#tasks-table-detail').mCustomScrollbar("update");
             SelectTask({
                 scope: scope,
                 id: null,
@@ -869,16 +868,16 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     };
 }])
 
-// Call SelectTask whenever the activeTask needs to change
+// Call when the selected task needs to change
 .factory('SelectTask', ['LoadHosts', function(LoadHosts) {
     return function(params) {
         var scope = params.scope,
             id = params.id,
             callback = params.callback;
 
-        scope.activeTask = id;
+        scope.selectedTask = id;
         scope.tasks.forEach(function(task, idx) {
-            if (task.id === scope.activeTask) {
+            if (task.id === scope.selectedTask) {
                 scope.tasks[idx].taskActiveClass = 'active';
             }
             else {
@@ -904,9 +903,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         scope.hostResults = [];
         scope.hostResultsMap = {};
 
-        if (scope.activeTask) {
+        if (scope.selectedTask) {
             // If we have a selected task, then get the list of hosts
-            url = scope.job.related.job_events + '?parent=' + scope.activeTask + '&';
+            url = scope.job.related.job_events + '?parent=' + scope.selectedTask + '&';
             url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
             url += (scope.search_host_status === 'failed') ? 'failed=true&' : '';
             url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=host__name';
@@ -1178,6 +1177,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         setTimeout( function() {
             scope.$apply( function() {
                 scope.plays = result;
+                scope.selectedPlay = scope.activePlay;
                 if (scope.liveEventProcessing) {
                     $('#plays-table-detail').scrollTop($('#plays-table-detail').prop("scrollHeight"));
                 }
@@ -1203,7 +1203,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             return 0;
         }
 
-        if (scope.activePlay) {
+        if (scope.activePlay && scope.jobData.plays[scope.activePlay]) {
 
             tasks = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks));
 
@@ -1253,6 +1253,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         setTimeout( function() {
             scope.$apply( function() {
                 scope.tasks = result;
+                scope.selectedTask = scope.activeTask;
                 if (scope.liveEventProcessing) {
                     $('#tasks-table-detail').scrollTop($('#tasks-table-detail').prop("scrollHeight"));
                 }
@@ -1273,7 +1274,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             key,
             keys;
 
-        if (scope.activePlay && scope.activeTask) {
+        if (scope.activePlay && scope.activeTask && scope.jobData.plays[scope.activePlay] &&
+            scope.jobData.plays[scope.activePlay].tasks[scope.activeTask]) {
 
             hostResults = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults));
 

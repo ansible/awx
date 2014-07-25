@@ -229,7 +229,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
      *     aw-tool-tip="<< tooltip text here >>"
      *
      *  Include the standard TB data-XXX attributes to controll a tooltip's appearance.  We will
-     *  default placement to the left and delay to 2 seconds.
+     *  default placement to the left and delay to the config setting.
      */
     .directive('awToolTip', function() {
         return function(scope, element, attrs) {

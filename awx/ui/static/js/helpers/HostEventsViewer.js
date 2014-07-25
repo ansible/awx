@@ -116,9 +116,9 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
                 var html = '';
                 html += "<tr>\n";
                 html += "<td class=\"col-md-3\"><a href=\"\" ng-click=\"showDetails(" + res.id + ")\" aw-tool-tip=\"Click to view details\" data-placement=\"top\"><i class=\"fa icon-job-" + res.status + "\"></i> " + res.status_text + "</a></td>\n";
-                html += "<td class=\"col-md=3\">" + res.host_name + "</td>\n";
-                html += "<td class=\"col-md-3\">" + res.play + "</td>\n";
-                html += "<td class=\"col-md-3\">" + res.task + "</td>\n";
+                html += "<td class=\"col-md=3\" ng-non-bindable>" + res.host_name + "</td>\n";
+                html += "<td class=\"col-md-3\" ng-non-bindable>" + res.play + "</td>\n";
+                html += "<td class=\"col-md-3\" ng-non-bindable>" + res.task + "</td>\n";
                 html += "</tr>";
                 return html;
             };
