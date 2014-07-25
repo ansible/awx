@@ -27,7 +27,6 @@ angular.module('InventoryHostsDefinition', [])
                 key: true,
                 label: 'Hosts',
                 ngClick: "editHost(host.id)",
-                searchPlaceholder: "search_place_holder",
                 columnClass: 'col-lg-8 col-md-9 col-sm-9 col-xs-7',
                 dataHostId: "{{ host.id }}",
                 dataType: "host"
