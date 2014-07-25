@@ -44,5 +44,5 @@ angular.module('LoadConfigHelper', ['Utilities'])
                 //local_config.js not found
                 $rootScope.$emit('LoadConfig');
             });
-    }
+    };
 }]);
