@@ -400,7 +400,7 @@ angular.module('Tower', [
             var _debug = $delegate.debug;
             $delegate.debug = function(msg) {
                 // only show debug messages when debug_mode set to true in config
-                if ($AnsibleConfig.debug_mode) {
+                if ($AnsibleConfig && $AnsibleConfig.debug_mode) {
                     _debug(msg);
                 }
             };
@@ -414,8 +414,6 @@ angular.module('Tower', [
             Timer, ClearScope, HideStream, Socket, LoadConfig) {
 
             var e, html, sock, checkCount;
-
-            LoadConfig();
 
             function detectBrowser() {
                 var ua = window.navigator.userAgent,
@@ -462,52 +460,6 @@ angular.module('Tower', [
                 $('#ansible-mobile-menu a[href="#' + base + '"]').addClass('active');
             }
 
-            $rootScope.browser = detectBrowser();
-
-            $rootScope.$on("$routeChangeStart", function (event, next) {
-                // Before navigating away from current tab, make sure the primary view is visible
-                if ($('#stream-container').is(':visible')) {
-                    HideStream();
-                }
-
-                // remove any lingering intervals
-                if ($rootScope.jobDetailInterval) {
-                    window.clearInterval($rootScope.jobDetailInterval);
-                }
-                if ($rootScope.jobStdOutInterval) {
-                    window.clearInterval($rootScope.jobStdOutInterval);
-                }
-                if ($rootScope.checkSocketConnectionInterval) {
-                    // use to monitor and restart socket connections
-                    window.clearInterval($rootScope.checkSocketConnectionInterval);
-                }
-
-                // On each navigation request, check that the user is logged in
-                if (!/^\/(login|logout)/.test($location.path())) {
-                    // capture most recent URL, excluding login/logout
-                    $rootScope.lastPath = $location.path();
-                    $cookieStore.put('lastPath', $location.path());
-                }
-
-                if (Authorization.isUserLoggedIn() === false) {
-                    if (next.templateUrl !== (urlPrefix + 'partials/login.html')) {
-                        $location.path('/login');
-                    }
-                } else if ($rootScope.sessionTimer.isExpired()) {
-                    if (next.templateUrl !== (urlPrefix + 'partials/login.html')) {
-                        $rootScope.sessionTimer.expireSession();
-                        $location.path('/login');
-                    }
-                } else {
-                    if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
-                        Authorization.restoreUserInfo(); //user must have hit browser refresh
-                    }
-                    CheckLicense();
-                }
-
-                activateTab();
-            });
-
             if ($rootScope.removeConfigReady) {
                 $rootScope.removeConfigReady();
             }
@@ -517,6 +469,52 @@ angular.module('Tower', [
                 $rootScope.breadcrumbs = [];
                 $rootScope.crumbCache = [];
                 $rootScope.sessionTimer = Timer.init();
+
+                $rootScope.browser = detectBrowser();
+
+                $rootScope.$on("$routeChangeStart", function (event, next) {
+                    // Before navigating away from current tab, make sure the primary view is visible
+                    if ($('#stream-container').is(':visible')) {
+                        HideStream();
+                    }
+
+                    // remove any lingering intervals
+                    if ($rootScope.jobDetailInterval) {
+                        window.clearInterval($rootScope.jobDetailInterval);
+                    }
+                    if ($rootScope.jobStdOutInterval) {
+                        window.clearInterval($rootScope.jobStdOutInterval);
+                    }
+                    if ($rootScope.checkSocketConnectionInterval) {
+                        // use to monitor and restart socket connections
+                        window.clearInterval($rootScope.checkSocketConnectionInterval);
+                    }
+
+                    // On each navigation request, check that the user is logged in
+                    if (!/^\/(login|logout)/.test($location.path())) {
+                        // capture most recent URL, excluding login/logout
+                        $rootScope.lastPath = $location.path();
+                        $cookieStore.put('lastPath', $location.path());
+                    }
+
+                    if (Authorization.isUserLoggedIn() === false) {
+                        if (next.templateUrl !== (urlPrefix + 'partials/login.html')) {
+                            $location.path('/login');
+                        }
+                    } else if ($rootScope.sessionTimer.isExpired()) {
+                        if (next.templateUrl !== (urlPrefix + 'partials/login.html')) {
+                            $rootScope.sessionTimer.expireSession();
+                            $location.path('/login');
+                        }
+                    } else {
+                        if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
+                            Authorization.restoreUserInfo(); //user must have hit browser refresh
+                        }
+                        CheckLicense();
+                    }
+
+                    activateTab();
+                });
 
                 if (!Authorization.getToken()) {
                     // When the app first loads, redirect to login page
@@ -575,7 +573,7 @@ angular.module('Tower', [
                 // monitor socket status
                 checkCount = 0;
                 setInterval(function() {
-                    if (sock.checkStatus() === 'error' || checkCount > 2) {
+                    if (sock.checkStatus() === 'error' || checkCount > 3) {
                         // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
                         sock = null;
                         $log.debug('attempting new socket connection');
@@ -590,5 +588,7 @@ angular.module('Tower', [
                     }
                 }, 3000);
             });
+
+            LoadConfig();
         }
     ]);

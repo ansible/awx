@@ -14,7 +14,7 @@
 
 angular.module('LoadConfigHelper', ['Utilities'])
 
-.factory('LoadConfig', ['$rootScope', '$http', 'ProcessErrors', function($rootScope, $http, ProcessErrors) {
+.factory('LoadConfig', ['$log', '$rootScope', '$http', 'ProcessErrors', function($log, $rootScope, $http, ProcessErrors) {
     return function() {
 
         if ($rootScope.removeLoadConfig) {
@@ -22,8 +22,10 @@ angular.module('LoadConfigHelper', ['Utilities'])
         }
         $rootScope.removeLoadConfig = $rootScope.$on('LoadConfig', function() {
             // local_config.js not found, so we'll load config.js
+            $log.info('attempting to load config.js');
             $http({ method:'GET', url: $basePath + 'js/config.js' })
                 .success(function(data) {
+                    $log.info('loaded config.js');
                     $AnsibleConfig = eval(data);
                     $rootScope.$emit('ConfigReady');
                 })
@@ -37,11 +39,13 @@ angular.module('LoadConfigHelper', ['Utilities'])
         // Load js/local_config.js
         $http({ method:'GET', url: $basePath + 'js/local_config.js' })
             .success(function(data) {
+                $log.info('loaded local_config.js');
                 $AnsibleConfig = eval(data);
                 $rootScope.$emit('ConfigReady');
             })
             .error(function() {
                 //local_config.js not found
+                $log.info('local_config.js not found');
                 $rootScope.$emit('LoadConfig');
             });
     };

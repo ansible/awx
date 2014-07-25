@@ -8,11 +8,9 @@
  *
  */
 
- /* globals console:false */
-
 'use strict';
 
-function Authenticate($cookieStore, $compile, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
+function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
     Timer, Empty) {
 
     var setLoginFocus, lastPath, sessionExpired,
@@ -28,10 +26,8 @@ function Authenticate($cookieStore, $compile, $window, $scope, $rootScope, $loca
         return (Empty($rootScope.lastPath)) ? $cookieStore.get('lastPath') : $rootScope.lastPath;
     };
 
-    if ($AnsibleConfig.debug_mode && console) {
-        console.log('User session expired: ' + sessionExpired);
-        console.log('Last URL: ' + lastPath());
-    }
+    $log.debug('User session expired: ' + sessionExpired);
+    $log.debug('Last URL: ' + lastPath());
 
     // Hide any lingering modal dialogs
     $('.modal[aria-hidden=false]').each(function () {
@@ -166,6 +162,6 @@ function Authenticate($cookieStore, $compile, $window, $scope, $rootScope, $loca
     };
 }
 
-Authenticate.$inject = ['$cookieStore', '$compile', '$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
+Authenticate.$inject = ['$log', '$cookieStore', '$compile', '$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
     'Timer', 'Empty'
 ];
