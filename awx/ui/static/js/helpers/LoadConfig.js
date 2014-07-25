@@ -25,6 +25,7 @@ angular.module('LoadConfigHelper', ['Utilities'])
             $http({ method:'GET', url: $basePath + 'js/config.js' })
                 .success(function(data) {
                     $AnsibleConfig = eval(data);
+                    $rootScope.$emit('ConfigReady');
                 })
                 .error(function(data, status) {
                     ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
@@ -37,10 +38,11 @@ angular.module('LoadConfigHelper', ['Utilities'])
         $http({ method:'GET', url: $basePath + 'js/local_config.js' })
             .success(function(data) {
                 $AnsibleConfig = eval(data);
+                $rootScope.$emit('ConfigReady');
             })
             .error(function() {
                 //local_config.js not found
                 $rootScope.$emit('LoadConfig');
             });
-    };
+    }
 }]);
