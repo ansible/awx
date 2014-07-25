@@ -5,6 +5,7 @@
  *
  */
 var urlPrefix = $basePath;
+var $AnsibleConfig;
 
 angular.module('Tower', [
     'ngRoute',
@@ -99,7 +100,8 @@ angular.module('Tower', [
     'HostEventsViewerHelper',
     'JobDetailHelper',
     'SocketIO',
-    'lrInfiniteScroll'
+    'lrInfiniteScroll',
+    'LoadConfigHelper'
 ])
 
     .constant('AngularScheduler.partials', $basePath + 'lib/angular-scheduler/lib/')
@@ -407,12 +409,13 @@ angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'ViewLicense',
-        'Timer', 'ClearScope', 'HideStream', 'Socket',
+        'Timer', 'ClearScope', 'HideStream', 'Socket', 'LoadConfig',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
-            Timer, ClearScope, HideStream, Socket) {
+            Timer, ClearScope, HideStream, Socket, LoadConfig) {
 
             var e, html, sock, checkCount;
 
+            LoadConfig();
             LoadBasePaths();
 
             $rootScope.breadcrumbs = [];
