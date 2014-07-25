@@ -233,7 +233,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
      */
     .directive('awToolTip', function() {
         return function(scope, element, attrs) {
-            var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : $AnsibleConfig.tooltip_delay,
+            var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : ($AnsibleConfig) ? $AnsibleConfig.tooltip_delay : {show: 500, hide: 100},
                 placement;
             if (attrs.awTipPlacement) {
                 placement = attrs.awTipPlacement;

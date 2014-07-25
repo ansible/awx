@@ -413,7 +413,7 @@ angular.module('Tower', [
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
             Timer, ClearScope, HideStream, Socket, LoadConfig) {
 
-            var e, html, sock, checkCount;
+            var e, html, sock, checkCount = 0;
 
             function detectBrowser() {
                 var ua = window.navigator.userAgent,
@@ -586,7 +586,7 @@ angular.module('Tower', [
                     else {
                         checkCount = 0;
                     }
-                }, 3000);
+                }, 5000);
             });
 
             LoadConfig();

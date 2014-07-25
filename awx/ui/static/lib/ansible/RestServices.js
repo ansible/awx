@@ -17,7 +17,7 @@ angular.module('RestServices', ['ngCookies', 'AuthService'])
                     this.url = url;
                 },
                 checkExpired: function () {
-                    return $rootScope.sessionTimer.isExpired();
+                    return ($rootScope.sessionTimer) ? $rootScope.sessionTimer.isExpired() : false;
                 },
                 pReplace: function () {
                     //in our url, replace :xx params with a value, assuming
