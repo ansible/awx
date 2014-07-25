@@ -396,31 +396,6 @@ dd {
   min-height: 15px;
 }
 
-/* The sticky footer: http://css-tricks.com/snippets/css/sticky-footer, with less variables */
-  @footer-height: 68px;
-  @footer-margin: 22px;
-  @push-height: (@footer-height + @footer-margin);
-  #wrap {
-      min-height: 100%;
-      height: 100%;
-      height: auto !important;
-      margin-bottom: -(@push-height);
-  }
-  #wrap:after {
-      content: "";
-      display: block;
-  }
-
-  #wrap:after {
-      height: @push-height;
-  }
-
-  .site-footer {
-      height: @footer-height;
-      margin-top: @footer-margin;
-  }
-
-
 #navbar-container, .main-menu {
   width: 100%;
   background-color: @black;
@@ -453,43 +428,6 @@ dd {
   border-bottom-right-radius: 0;
   margin-bottom: 0;
   background-color: @black;
-}
-
-.site-footer {
-    color: @grey;
-    text-align: center;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    font-size: 12px;
-
-    a,
-    a:active,
-    a:visited {
-        color: @grey;
-    }
-
-    a:hover {
-        color: @blue;
-    }
-
-    .help {
-        padding-top: 14px;
-        font-weight: normal;
-    }
-
-    .logo {
-        text-align: right;
-    }
-
-    .logo img {
-        max-width: 46px;
-    }
-
-    .copyright {
-        padding-top: 6px;
-        font-weight: normal;
-        text-align: center;
-    }
 }
 
 .modal-header.login-header {
@@ -1735,35 +1673,6 @@ tr td button i {
 /* Landscape phone to portrait tablet */
 
 @media (max-width: 767px) {
-
-  /* The sticky footer: http://css-tricks.com/snippets/css/sticky-footer, with less variables */
-  @footer-height: 140px;
-  @footer-margin: 15px;
-  @push-height: (@footer-height + @footer-margin);
-  #wrap {
-      min-height: 100%;
-      height: 100%;
-      height: auto !important;
-      margin-bottom: -(@push-height);
-  }
-  #wrap:after {
-      content: "";
-      display: block;
-  }
-  #wrap:after {
-      height: @push-height;
-  }
-  .site-footer {
-      height: @footer-height;
-      margin-top: @footer-margin;
-      padding-top: 5px;
-      padding-bottom: 5px;
-      .logo {
-          text-align: center;
-          padding-top: 10px;
-          margin-bottom: 10px;
-      }
-  }
 
   /* Job events */
 

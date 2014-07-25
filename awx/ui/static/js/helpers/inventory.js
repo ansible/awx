@@ -30,15 +30,15 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
             $('.site-footer').outerHeight() - $('.group-breadcrumbs').outerHeight() - $('#groups-container #search-widget-container').outerHeight() -
             $('#groups_table thead').height() ));
       */
-        return $(window).height() - $('.main-menu').outerHeight() - $('#main_tabs').outerHeight() - $('#breadcrumbs').outerHeight() -
+        return $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#breadcrumbs').outerHeight() -
             $('.site-footer').outerHeight() - $('.group-breadcrumbs').outerHeight() - $('#groups-container #search-widget-container').outerHeight() -
-            $('#groups_table thead').height() - 70;
+            $('#groups_table thead').height() - 90;
     };
 }])
 
 .factory('GetHostContainerRows', [ function() {
     return function() {
-        var height = $('#hosts-container .well').height() - $('#hosts-constainer .well .row').height() - $('#hosts_table thead').height();
+        var height = $('#hosts-container .list-well').height() - $('#hosts-constainer .list-well .row').height() - $('#hosts_table thead').height();
         return Math.floor(height / 30) - 2;
     };
 }])
@@ -59,11 +59,12 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
         if ($(window).width() > 1210) {
             height = GetGroupContainerHeight();
             $('#groups-container .list-table-container').height(height);
-            $('#hosts-container .well').height( $('#groups-container .well').height());
+            $('#hosts-container .list-table-container').height(height);
+            setTimeout(function() { $('#hosts-container .list-well').height( $('#groups-container .list-well').outerHeight()); }, 500);
         }
         else {
             $('#groups-container .list-table-container').height('auto');
-            $('#hosts-container .well').height('auto');
+            $('#hosts-container .list-well').height('auto');
         }
         //$('#groups-container .list-table-container').mCustomScrollbar("update");
 
