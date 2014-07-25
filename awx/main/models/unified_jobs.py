@@ -534,7 +534,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         else:
             start_actual = int(start_line)
             if end_line is not None:
-                end_actual = min(int(start_line)+int(end_line), len(stdout_lines))
+                end_actual = min(int(end_line), len(stdout_lines))
             else:
                 end_actual = len(stdout_lines)
         return return_buffer, start_actual, end_actual, absolute_end

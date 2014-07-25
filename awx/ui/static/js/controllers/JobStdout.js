@@ -237,7 +237,7 @@ function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, 
 
     function getNextSection() {
         // get the next range of data from the API
-        var start = loaded_sections[loaded_sections.length - 1].end + 1, url;
+        var start = loaded_sections[loaded_sections.length - 1].end, url;
         url = stdout_url + '?format=json&start_line=' + start + '&end_line=' + (start + page_size);
         $('#stdoutMoreRowsBottom').fadeIn();
         Rest.setUrl(url);
