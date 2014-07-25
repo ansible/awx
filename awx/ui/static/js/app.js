@@ -409,9 +409,9 @@ angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'ViewLicense',
-        'Timer', 'ClearScope', 'HideStream', 'Socket', 'LoadConfig',
+        'Timer', 'ClearScope', 'HideStream', 'Socket', 'LoadConfig', 'Store',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
-            Timer, ClearScope, HideStream, Socket, LoadConfig) {
+            Timer, ClearScope, HideStream, Socket, LoadConfig, Store) {
 
             var e, html, sock, checkCount = 0;
 
@@ -589,6 +589,11 @@ angular.module('Tower', [
                     }
                 }, 5000);
             });
+
+            if (!$AnsibleConfig) {
+                // there may be leg time loading the config file, so temporarily use what's in local storage
+                $AnsibleConfig = Store('AnsibleConfig');
+            }
 
             LoadConfig();
         }
