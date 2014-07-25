@@ -19,7 +19,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         api_complete = false,
         refresh_count = 0,
         lastEventId = 0,
-        verbosity_options, job_type_options;
+        verbosity_options,
+        job_type_options,
+        checkCount = 0;
 
     scope.plays = [];
     scope.hosts = [];
@@ -77,20 +79,36 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n" +
         "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
 
-    event_socket =  Socket({
-        scope: scope,
-        endpoint: "job_events"
-    });
+    function openSocket() {
+        event_socket =  Socket({
+            scope: scope,
+            endpoint: "job_events"
+        });
+        event_socket.init();
+        event_socket.on("job_events-" + job_id, function(data) {
+            if (api_complete && data.id > lastEventId) {
+                data.event = data.event_name;
+                DigestEvent({ scope: scope, event: data });
+            }
+        });
+    }
+    openSocket();
 
-    event_socket.init();
-
-    event_socket.on("job_events-" + job_id, function(data) {
-        if (api_complete && data.id > lastEventId) {
-            data.event = data.event_name;
-            DigestEvent({ scope: scope, event: data });
+    $rootScope.checkSocketConnectionInterval = setInterval(function() {
+        if (event_socket.checkStatus() === 'error' || checkCount > 2) {
+            // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
+            $log.debug('job detail page: initializing and restarting socket connections');
+            event_socket = null;
+            openSocket();
+            checkCount = 0;
         }
-    });
-
+        else if (event_socket.checkStatus() === 'connecting') {
+            checkCount++;
+        }
+        else {
+            checkCount = 0;
+        }
+    }, 3000);
 
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
