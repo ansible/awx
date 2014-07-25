@@ -41,7 +41,9 @@ angular.module('TimerService', ['ngCookies', 'Utilities'])
                 },
 
                 moveForward: function () {
-                    var t = new Date().getTime() + ($AnsibleConfig.session_timeout * 1000);
+                    var tm, t;
+                    tm = ($AnsibleConfig) ? $AnsibleConfig.session_timeout : 1800;
+                    t = new Date().getTime() + (tm * 1000);
                     this.sessionTime = t;
                     $cookieStore.put('sessionTime', t);
                     $rootScope.sessionExpired = false;

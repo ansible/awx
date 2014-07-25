@@ -138,13 +138,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
         return function (scope, data, status, form, defaultMsg) {
             var field, fieldErrors, msg, keys;
             Wait('stop');
-            if ($AnsibleConfig.debug_mode) {
-                $log.debug('Debug status: ' + status);
-                $log.debug('Debug data: ');
-                $log.debug(data);
-                if (defaultMsg.msg) {
-                    $log.debug('Debug: ' + defaultMsg.msg);
-                }
+            $log.debug('Debug status: ' + status);
+            $log.debug('Debug data: ');
+            $log.debug(data);
+            if (defaultMsg.msg) {
+                $log.debug('Debug: ' + defaultMsg.msg);
             }
             if (status === 403) {
                 msg = 'The API responded with a 403 Access Denied error. ';
@@ -158,7 +156,9 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 Alert('Deleted Object', 'The requested object was previously deleted and can no longer be accessed.');
             } else if ((status === 'Token is expired') || (status === 401 && data.detail && data.detail === 'Token is expired') ||
                 (status === 401 && data.detail && data.detail === 'Invalid token')) {
-                $rootScope.sessionTimer.expireSession();
+                if ($rootScope.sessionTimer) {
+                    $rootScope.sessionTimer.expireSession();
+                }
                 $location.url('/login');
             } else if (data.non_field_errors) {
                 Alert('Error!', data.non_field_errors);
