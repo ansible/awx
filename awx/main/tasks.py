@@ -880,6 +880,9 @@ class RunInventoryUpdate(BaseTask):
             env['VMWARE_HOST'] = passwords.get('source_host', '')
             env['VMWARE_USER'] = passwords.get('source_username', '')
             env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
+        elif inventory_update.source == 'azure':
+            env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
+            env['AZURE_CERT_PATH'] = 
         elif inventory_update.source == 'gce':
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')

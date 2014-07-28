@@ -14,6 +14,7 @@ from django.core.urlresolvers import reverse
 
 # AWX
 from awx.main import storage
+from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.utils import decrypt_field
 from awx.main.models.base import *
 
@@ -34,6 +35,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         ('rax',    _('Rackspace')),
         ('vmware', _('VMWare')),
         ('gce',    _('Google Compute Engine')),
+        ('azure',  _('Windows Azure')),
     ]
 
     PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock',
@@ -312,7 +314,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         # If update_fields has been specified, add our field names to it,
         # if hit hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        cloud = self.kind in ('aws', 'rax', 'gce', 'vmware', 'azure')
+        cloud = self.kind in CLOUD_PROVIDERS + ('aws',)
         if self.cloud != cloud:
             self.cloud = cloud
             if 'cloud' not in update_fields:
