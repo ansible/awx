@@ -138,7 +138,7 @@ angular.module('CredentialFormDefinition', [])
                 labelBind: 'usernameLabel',
                 type: 'text',
                 ngShow: "kind.value && kind.value !== 'aws' && " +
-                        "kind.value !== 'gce'",
+                        "kind.value !== 'gce' && kind.value!=='azure'",
                 awRequiredWhen: {
                     variable: 'aws_required',
                     init: false
@@ -153,6 +153,18 @@ angular.module('CredentialFormDefinition', [])
                     variable: 'username_required',
                     init: false
                 },
+                autocomplete: false
+            },
+            "subscription_id": {
+                labelBind: "usernameLabel",
+                type: 'text',
+                ngShow: "kind.value == 'azure'",
+                awRequiredWhen: {
+                    variable: 'subscription_required',
+                    init: false
+                },
+                addRequired: false,
+                editRequired: false,
                 autocomplete: false
             },
             "api_key": {
@@ -289,6 +301,7 @@ angular.module('CredentialFormDefinition', [])
                 editRequired: false,
                 autocomplete: false
             },
+
             "vault_password": {
                 label: "Vault Password",
                 type: 'password',

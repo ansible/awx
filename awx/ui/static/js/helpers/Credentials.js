@@ -27,6 +27,7 @@ angular.module('CredentialsHelper', ['Utilities'])
             scope.username_required = false;                        // JT-- added username_required b/c mutliple 'kinds' need username to be required (GCE)
             scope.key_required = false;                                 // JT -- doing the same for key and project
             scope.project_required = false;
+            scope.subscription_required = false;
 
             if (!Empty(scope.kind)) {
                 // Apply kind specific settings
@@ -50,6 +51,12 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.username_required = true;
                     scope.key_required = true;
                     scope.project_required = true;
+                    break;
+                case 'azure':
+                    scope.usernameLabel = "Subscription ID";
+                    scope.sshKeyDataLabel = 'RSA Private Key';
+                    scope.subscription_required = true;
+                    scope.key_required = true;
                     break;
                 }
             }
@@ -152,6 +159,9 @@ angular.module('CredentialsHelper', ['Utilities'])
             case 'gce':
                 data.username = scope.email_address;
                 data.project = scope.project;
+                break;
+            case 'azure':
+                data.username = scope.subscription_id;
             }
 
             if (Empty(data.team) && Empty(data.user)) {
