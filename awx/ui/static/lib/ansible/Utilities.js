@@ -312,26 +312,43 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  * HelpDialog({ defn: <HelpDefinition> })
  *
  */
-.factory('HelpDialog', ['$rootScope', '$location', 'Store',
-    function ($rootScope, $location, Store) {
+.factory('HelpDialog', ['$rootScope', '$compile', '$location', 'Store',
+    function ($rootScope, $compile, $location, Store) {
         return function (params) {
 
             var defn = params.defn,
                 current_step = params.step,
-                autoShow = params.autoShow || false;
+                autoShow = params.autoShow || false,
+                scope = (params.scope) ? params.scope : $rootScope.$new();
+
+            function setButtonMargin() {
+                var width = ($('.ui-dialog[aria-describedby="help-modal-dialog"] .ui-dialog-buttonpane').innerWidth() / 2) - $('#help-next-button').outerWidth() - 93;
+                $('#help-next-button').css({'margin-right': width + 'px'});
+            }
 
             function showHelp(step) {
 
-                var btns, ww, width, height, isOpen = false;
+                var e, btns, ww, width, height, isOpen = false;
                 current_step = step;
 
                 function buildHtml(step) {
                     var html = '';
-                    //html += (step.intro) ? "<div class=\"help-intro\">" + step.intro + "</div>" : "";
                     html += "<h4>" + step.intro + "</h4>\n";
-                    html += "<div class=\"img-container\">\n";
-                    html += "<img src=\"" + $basePath + "img/help/" + step.img.src + "\" >";
-                    html += "</div>\n";
+                    if (step.img) {
+                        html += "<div class=\"img-container\">\n";
+                        html += "<img src=\"" + $basePath + "img/help/" + step.img.src + "\" ";
+                        html += (step.img.maxWidth) ? "style=\"max-width:" + step.img.maxWidth + "px\" " : "";
+                        html += ">";
+                        html += "</div>\n";
+                    }
+                    if (step.icon) {
+                        html += "<div class=\"icon-container\"";
+                        html += (step.icon.containerHeight) ? "style=\"height:" + step.icon.containerHeight + "px;\">\n" : "";
+                        html += "<i class=\"" + step.icon['class'] + "\" ";
+                        html += (step.icon.style) ? "style=\"" + step.icon.style + "\" " : "";
+                        html += "></i>\n";
+                        html += "</div>\n";
+                    }
                     html += "<div class=\"help-box\">" + step.box + "</div>";
                     html += (autoShow && step.autoOffNotice) ? "<div class=\"help-auto-off\"><label><input type=\"checkbox\" " +
                         "name=\"auto-off-checkbox\" id=\"auto-off-checkbox\"> Do not show this message in the future</label></div>\n" : "";
@@ -346,14 +363,16 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 width = (width > ww) ? ww : width;
 
                 try {
-                    isOpen = $('#help-modal').dialog('isOpen');
-                } catch (e) {
+                    isOpen = $('#help-modal-dialog').dialog('isOpen');
+                } catch (err) {
                     // ignore
                 }
 
-                if (isOpen) {
-                    $('#help-modal').html(buildHtml(defn.story.steps[current_step]));
-                } else {
+                e = angular.element(document.getElementById('help-modal-dialog'));
+                e.empty().html(buildHtml(defn.story.steps[current_step]));
+                setTimeout(function() { scope.$apply(function() { $compile(e)(scope); }); });
+
+                if (!isOpen) {
                     // Define buttons based on story length
                     btns = [];
                     if (defn.story.steps.length > 1) {
@@ -386,11 +405,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     btns.push({
                         text: "Close",
                         click: function () {
-                            $('#help-modal').dialog('close');
+                            $('#help-modal-dialog').dialog('close');
                         }
                     });
                     // Show the dialog
-                    $('#help-modal').html(buildHtml(defn.story.steps[current_step])).dialog({
+                    $('#help-modal-dialog').dialog({
                         position: {
                             my: "center top",
                             at: "center top+150",
@@ -405,7 +424,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         hide: 500,
                         resizable: false,
                         close: function () {
-                            $('#help-modal').empty();
+                            $('#help-modal-dialog').empty();
                         }
                     });
 
@@ -442,7 +461,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         }
                     });
 
-                    $('.ui-dialog[aria-describedby="help-modal"]').find('.ui-dialog-titlebar button')
+                    $('.ui-dialog[aria-describedby="help-modal-dialog"]').find('.ui-dialog-titlebar button')
                         .empty().attr({
                             'class': 'close'
                         }).text('x');
@@ -455,11 +474,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                             Store('inventoryAutoHelp', 'on');
                         }
                     });
+
+                    setButtonMargin();
                 }
             }
 
             showHelp(0);
-
         };
     }
 ])

@@ -101,7 +101,8 @@ angular.module('Tower', [
     'JobDetailHelper',
     'SocketIO',
     'lrInfiniteScroll',
-    'LoadConfigHelper'
+    'LoadConfigHelper',
+    'SocketHelper'
 ])
 
     .constant('AngularScheduler.partials', $basePath + 'lib/angular-scheduler/lib/')
@@ -409,9 +410,9 @@ angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'ViewLicense',
-        'Timer', 'ClearScope', 'HideStream', 'Socket', 'LoadConfig', 'Store',
+        'Timer', 'ClearScope', 'HideStream', 'Socket', 'LoadConfig', 'Store', 'ShowSocketHelp',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
-            Timer, ClearScope, HideStream, Socket, LoadConfig, Store) {
+            Timer, ClearScope, HideStream, Socket, LoadConfig, Store, ShowSocketHelp) {
 
             var e, html, sock, checkCount = 0;
 
@@ -421,16 +422,16 @@ angular.module('Tower', [
                 if (ua.search("MSIE") >= 0) {
                     browser = "MSIE";
                 }
-                else if (navigator.userAgent.search("Chrome") >= 0) {
+                else if (navigator.userAgent.search("Chrome") >= 0 && navigator.userAgent.search("OPR") < 0) {
                     browser = "CHROME";
                 }
                 else if (navigator.userAgent.search("Firefox") >= 0) {
                     browser = "FF";
                 }
-                else if (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0) {
+                else if (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0 && navigator.userAgent.search("OPR") < 0) {
                     browser = "SAFARI";
                 }
-                else if (navigator.userAgent.search("Opera") >= 0) {
+                else if (navigator.userAgent.search("OPR") >= 0) {
                     browser = "OPERA";
                 }
                 return browser;
@@ -540,8 +541,12 @@ angular.module('Tower', [
                     $('#' + tabs + ' #' + tab).tab('show');
                 };
 
-                html = "<a href=\"\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
-                    "data-popover-title=\"Live Updates\" data-container=\"body\" style=\"font-size: 10px;\"><i class=\"fa icon-socket-{{ socketStatus }}\"></i></a>";
+                $rootScope.socketHelp = function() {
+                    ShowSocketHelp();
+                };
+
+                html = "<a href=\"\" ng-click=\"socketHelp()\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
+                    "data-popover-title=\"Live Events\" data-container=\"body\" style=\"font-size: 10px;\"><i class=\"fa icon-socket-{{ socketStatus }}\"></i></a>";
                 e = angular.element(document.getElementById('socket-beacon-div'));
                 e.empty().append(html);
                 $compile(e)($rootScope);

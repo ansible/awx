@@ -1125,8 +1125,17 @@ input[type="checkbox"].checkbox-no-label {
     content: "\f111";
   }
 
+  .error-color {
+      color:@red;
+  }
+
+  .connecting-color {
+      color: @warning;
+  }
+
+  .ok-color,
   .icon-cloud-true {
-    color: @green;
+      color: @green;
   }
 
   .icon-cloud-false {
@@ -1511,33 +1520,36 @@ tr td button i {
 
 /* Help modal dialog */
 
-#help-modal {
+#help-modal-dialog {
   overflow: hidden;
   padding: 10px;
 
   img {
-    max-width: 450px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-    border: 1px solid @grey;
-    box-shadow: 3px 3px 5px 0 @grey;
-    }
+      margin-top: 15px;
+      margin-bottom: 15px;
+      border: 1px solid @grey;
+      box-shadow: 3px 3px 5px 0 @grey;
+  }
+
+  .img-container,
+  .icon-container {
+      width: 100%;
+      text-align: center;
+  }
+
+  .icon-container {
+      margin-top: 15px;
+      margin-bottom: 15px;
+  }
+
+  .help-box {
+      width: 100%;
+      margin-top: 15px;
+      border-radius: 6px;
+      color: @grey-txt;
+      font-size: 14px;
+  }
 }
-
-#help-modal .img-container {
-    width: 100%;
-    text-align: center;
-}
-
-.help-box {
-    width: 100%;
-    margin-top: 15px;
-    border-radius: 6px;
-    padding: 8px;
-    color: @grey-txt;
-    font-size: 14px;
-    }
-
 
 /* Activity Stream Widget */
 
