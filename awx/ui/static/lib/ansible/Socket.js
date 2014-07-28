@@ -37,14 +37,13 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 var result = '';
                 switch(status) {
                     case 'error':
-                        result = "There was an error connecting to the websocket server. Click for troubleshooting help.";
+                        result = "Live events: error connecting to the Tower server. Click for troubleshooting help.";
                         break;
                     case 'connecting':
-                        result = "Attempting to connect to the websocket server. Click for troubleshooting help.";
+                        result = "Live events: attempting to connect to the Tower server. Click for troubleshooting help.";
                         break;
                     case "ok":
-                        result = "Connected to the websocket server. Pages containing job status information for playbook runs, SCM updates and inventory " +
-                            "sync processes will automatically update in real-time.";
+                        result = "Live events: connected. Pages containing job status information will automatically update in real-time.";
                 }
                 return result;
             }

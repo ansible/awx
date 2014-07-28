@@ -125,6 +125,7 @@
   <script src="{{ STATIC_URL }}js/lists/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Schedules.js"></script>
   <script src="{{ STATIC_URL }}js/lists/ScheduledJobs.js"></script>
+  <script src="{{ STATIC_URL }}js/helpers/SocketHelper.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/LoadConfig.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh-related.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-search.js"></script>
@@ -163,6 +164,9 @@
   <script src="{{ STATIC_URL }}js/widgets/DashboardJobs.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/Stream.js"></script>
   <script src="{{ STATIC_URL }}js/help/InventoryGroups.js"></script>
+  <script src="{{ STATIC_URL }}js/help/FireFoxSocketHelp.js"></script>
+  <script src="{{ STATIC_URL }}js/help/SafariSocketHelp.js"></script>
+  <script src="{{ STATIC_URL }}js/help/ChromeSocketHelp.js"></script>
   {% endif %}
 
 </head>
@@ -388,8 +392,7 @@
        </div><!-- modal-dialog -->
     </div><!-- modal -->
 
-    <!-- Help dialog -->
-    <div id="help-modal" style="display: none;"></div>
+    <div id="help-modal-dialog" style="display: none;"></div>
 
   </div><!-- container -->
 
