@@ -57,6 +57,8 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         Wait('start');
     }
 
+
+
     if ($scope.removeWidgetLoaded) {
         $scope.removeWidgetLoaded();
     }
@@ -64,6 +66,12 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         // Once all the widgets report back 'loaded', turn off Wait widget
         loadedCount++;
         if (loadedCount === waitCount) {
+            $(window).resize(_.debounce(function() {
+                Wait('start');
+                $scope.$emit('ResizeJobGraph');
+                $scope.$emit('ResizeHostGraph');
+                $scope.$emit('ResizeHostPieGraph');
+            }, 500));
             $(window).resize();
             Wait('stop');
         }
@@ -100,6 +108,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         });
 
         if ($rootScope.user_is_superuser === true) {
+            waitCount = 5;
             HostGraph({
                 scope: $scope,
                 target: 'dash-host-count-graph',
