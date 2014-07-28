@@ -20,7 +20,7 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                     target = params.target,
                     dashboard = params.dashboard,
                     html, element, data,
-                    canvas, context, winHeight, available_height;
+                    canvas, context, winHeight, available_height, host_pie_chart;
 
                 // html = "<div class=\"graph-container\">\n";
 
@@ -38,6 +38,21 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                 element.html(html);
                 $compile(element)(scope);
 
+                if (scope.removeResizeHostPieGraph) {
+                    scope.removeResizeHostPieGraph();
+                }
+                scope.removeResizeHostPieGraph= scope.$on('ResizeHostPieGraph', function () {
+                    if($(window).width()<500){
+                        $('.graph-container').height(300);
+                    }
+                    else{
+                        var winHeight = $(window).height(),
+                        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
+                        $('.graph-container').height(available_height/2);
+                        host_pie_chart.update();
+                    }
+                });
+
                 if(dashboard.hosts.total+dashboard.hosts.failed>0){
                     data = [
                         {
@@ -54,8 +69,8 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
 
                     nv.addGraph(function() {
                         var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
-                        height = $('.graph-container').height()*0.7, //nv.utils.windowSize().height/5,
-                        chart = nv.models.pieChart()
+                        height = $('.graph-container').height()*0.7; //nv.utils.windowSize().height/5,
+                        host_pie_chart = nv.models.pieChart()
                           .margin({top: 5, right: 75, bottom: 40, left: 85})
                           .x(function(d) { return d.label; })
                           .y(function(d) { return d.value; })
@@ -66,23 +81,23 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                             })
                           .color(['#00aa00', '#aa0000']);
 
-                        chart.pie.pieLabelsOutside(true).labelType("percent");
+                        host_pie_chart.pie.pieLabelsOutside(true).labelType("percent");
 
                         d3.select(".host-pie-chart svg")
                             .datum(data)
                             .attr('width', width)
                             .attr('height', height)
                             .transition().duration(350)
-                            .call(chart)
+                            .call(host_pie_chart)
                              .style({
                             "font-family": 'Open Sans',
                             "font-style": "normal",
                             "font-weight":400,
                             "src": "url(/static/fonts/OpenSans-Regular.ttf)"
                         });
-                        nv.utils.windowResize(chart.update);
+                        // nv.utils.windowResize(host_pie_chart.update);
                         scope.$emit('WidgetLoaded');
-                        return chart;
+                        return host_pie_chart;
                     });
                 }
                 else{

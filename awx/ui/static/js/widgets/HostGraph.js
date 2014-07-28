@@ -16,7 +16,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
 
                 var scope = params.scope,
                     target = params.target,
-                    html, element, url, license;
+                    html, element, url, license, license_graph;
 
 
                // html = "<div class=\"graph-container\">\n";
@@ -35,6 +35,21 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                 $compile(element)(scope);
 
                 url = GetBasePath('config');
+
+                if (scope.removeResizeHostGraph) {
+                    scope.removeResizeHostGraph();
+                }
+                scope.removeResizeHostGraph= scope.$on('ResizeHostGraph', function () {
+                    if($(window).width()<500){
+                        $('.graph-container').height(300);
+                    }
+                    else{
+                        var winHeight = $(window).height(),
+                        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
+                        $('.graph-container').height(available_height/2);
+                        license_graph.update();
+                    }
+                });
 
                 Rest.setUrl(url);
                 Rest.get()
@@ -108,8 +123,8 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                         nv.addGraph({
                                 generate: function() {
                                     var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
-                                    height = $('.graph-container').height()*0.6, //nv.utils.windowSize().height/5,
-                                    chart = nv.models.lineChart()
+                                    height = $('.graph-container').height()*0.6; //nv.utils.windowSize().height/5,
+                                    license_graph = nv.models.lineChart()
                                         .margin({top: 15, right: 75, bottom: 40, left: 85})
                                         .x(function(d,i) { return i ;})
                                         .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
@@ -119,14 +134,14 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                         .showXAxis(true)        //Show the x-axis
                                         ;
 
-                                    chart.xAxis
+                                    license_graph.xAxis
                                     .axisLabel("Time")
                                     .tickFormat(function(d) {
                                         var dx = graphData[0].values[d] && graphData[0].values[d].x || 0;
                                         return dx ? d3.time.format('%m/%d')(new Date(Number(dx+'000'))) : '';
                                     });
 
-                                    chart.yAxis     //Chart y-axis settings
+                                    license_graph.yAxis     //Chart y-axis settings
                                     .axisLabel('Hosts')
                                     .tickFormat(d3.format('.f'));
 
@@ -135,7 +150,7 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                         .attr('width', width)
                                         .attr('height', height)
                                         .duration(500)
-                                        .call(chart)
+                                        .call(license_graph)
                                         .style({
                                             // 'width': width,
                                             // 'height': height,
@@ -145,13 +160,10 @@ angular.module('HostGraphWidget', ['RestServices', 'Utilities'])
                                             "src": "url(/static/fonts/OpenSans-Regular.ttf)"
                                         });
 
-                                    // d3.selectAll(".nv-line").on("click", function () {
-                                    //     alert("clicked");
-                                    // });
 
-                                    nv.utils.windowResize(chart.update);
-
-                                    return chart;
+                                    // nv.utils.windowResize(license_graph.update);
+                                    scope.$emit('WidgetLoaded');
+                                    return license_graph;
 
                                 },
 
