@@ -15,7 +15,7 @@ angular.module('SourceFormDefinition', [])
         cancelButton: false,
         name: 'source',
         well: false,
-        
+
         fields: {
             source: {
                 label: 'Source',
@@ -47,7 +47,7 @@ angular.module('SourceFormDefinition', [])
             source_regions: {
                 label: 'Regions',
                 type: 'text',
-                ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce')",
+                ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure')",
                 addRequired: false,
                 editRequired: false,
                 awMultiselect: 'source_region_choices',
@@ -150,7 +150,7 @@ angular.module('SourceFormDefinition', [])
         },
 
         buttons: {
-        
+
         },
 
         related: { }

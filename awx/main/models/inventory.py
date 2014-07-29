@@ -30,6 +30,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from django.core.cache import cache
 
 # AWX
+from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.fields import AutoOneToOneField
 from awx.main.models.base import *
 from awx.main.models.jobs import Job
@@ -733,10 +734,11 @@ class InventorySourceOptions(BaseModel):
     '''
 
     SOURCE_CHOICES = [
-        ('file', _('Local File, Directory or Script')),
-        ('rax', _('Rackspace Cloud Servers')),
-        ('ec2', _('Amazon EC2')),
-        ('gce', _('Google Compute Engine')),
+        ('file',  _('Local File, Directory or Script')),
+        ('rax',   _('Rackspace Cloud Servers')),
+        ('ec2',   _('Amazon EC2')),
+        ('gce',   _('Google Compute Engine')),
+        ('azure', _('Windows Azure')),
     ]
 
     class Meta:
@@ -822,6 +824,19 @@ class InventorySourceOptions(BaseModel):
         regions.insert(0, ('all', 'All'))
         return regions
 
+    @classmethod
+    def get_azure_region_choices(self):
+        """Return a complete list of regions in Windows Azure, as a list of
+        two-tuples.
+        """
+        # It's not possible to get a list of regions from Azure without
+        # authenticating first (someone reading these might think there's
+        # a pattern here!).  Therefore, you guessed it, use a list from
+        # settings.
+        regions = list(getattr(settings, 'AZURE_REGION_CHOICES', []))
+        regions.insert(0, ('all', 'All'))
+        return regions
+
     def clean_credential(self):
         if not self.source:
             return None
@@ -835,21 +850,20 @@ class InventorySourceOptions(BaseModel):
                     'Cloud-based inventory sources (such as %s) require '
                     'credentials for the matching cloud service.' % self.source
                 )
-        elif self.source in ('ec2', 'rax', 'gce'):
+        elif self.source in CLOUD_PROVIDERS:
             raise ValidationError('Credential is required for a cloud source')
         return cred
 
     def clean_source_regions(self):
         regions = self.source_regions
-        if self.source == 'ec2':
-            valid_regions = [x[0] for x in self.get_ec2_region_choices()]
-            region_transform = lambda x: x.strip().lower()
-        elif self.source == 'rax':
-            valid_regions = [x[0] for x in self.get_rax_region_choices()]
-            region_transform = lambda x: x.strip().upper()
-        elif self.source == 'gce':
-            valid_regions = [x[0] for x in self.get_gce_region_choices()]
-            region_transform = lambda x: x.strip().lower()
+
+        if self.source in CLOUD_PROVIDERS:
+            get_regions = getattr(self, 'get_%s_region_choices' % self.source)
+            valid_regions = [x[0] for x in get_regions()]
+            if self.source == 'rax':
+                region_transform = lambda x: x.strip().upper()
+            else:
+                region_transform = lambda x: x.strip().lower()
         else:
             return ''
         all_region = region_transform('all')

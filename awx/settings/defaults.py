@@ -437,6 +437,42 @@ GCE_EXCLUDE_EMPTY_GROUPS = True
 GCE_INSTANCE_ID_VAR = None
 
 
+# -------------------
+# -- Windows Azure --
+# -------------------
+
+# It's not possible to get zones in Azure without authenticating, so we
+# provide a list here.
+AZURE_REGION_CHOICES = [
+    ('Central_US', 'US Central'),
+    ('East_US_1', 'US East'),
+    ('East_US_2', 'US East 2'),
+    ('North_Central_US', 'US North Central'),
+    ('South_Central_US', 'US South Central'),
+    ('West_US', 'US West'),
+    ('North_Europe', 'Europe North'),
+    ('West_Europe', 'Europe West'),
+    ('East_Asia_Pacific', 'Asia Pacific East'),
+    ('Southest_Asia_Pacific', 'Asia Pacific Southeast'),
+    ('East_Japan', 'Japan East'),
+    ('West_Japan', 'Japan West'),
+    ('South_Brazil', 'Brazil South'),
+]
+AZURE_REGIONS_BLACKLIST = []
+
+# Inventory variable name/value for determining whether a host is active
+# in Windows Azure.
+AZURE_ENABLED_VAR = 'status'
+AZURE_ENABLED_VALUE = 'created'
+
+# Filter for allowed group and host names when importing inventory from
+# Windows Azure.
+AZURE_GROUP_FILTER = r'^.+$'
+AZURE_HOST_FILTER = r'^.+$'
+AZURE_EXCLUDE_EMPTY_GROUPS = True
+AZURE_INSTANCE_ID_VAR = None
+
+
 # ---------------------
 # -- Activity Stream --
 # ---------------------

@@ -964,9 +964,9 @@ class InventorySourceOptionsSerializer(BaseSerializer):
     def metadata(self):
         metadata = super(InventorySourceOptionsSerializer, self).metadata()
         field_opts = metadata.get('source_regions', {})
-        field_opts['ec2_region_choices'] = self.opts.model.get_ec2_region_choices()
-        field_opts['rax_region_choices'] = self.opts.model.get_rax_region_choices()
-        field_opts['gce_region_choices'] = self.opts.model.get_gce_region_choices()
+        for cp in ('azure', 'ec2', 'gce', 'rax'):
+            get_regions = getattr(self.opts.model, 'get_%s_region_choices' % cp)
+            field_opts['%s_region_choices' % cp] = get_regions()
         return metadata
 
     def to_native(self, obj):

@@ -37,10 +37,13 @@ from django.utils.datastructures import SortedDict
 from django.utils.timezone import now
 
 # AWX
+from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # Job, JobEvent, ProjectUpdate, InventoryUpdate, Schedule, UnifiedJobTemplate
-from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url, ignore_inventory_computed_fields, emit_websocket_notification
+from awx.main.utils import (get_ansible_version, decrypt_field, update_scm_url,
+            ignore_inventory_computed_fields, emit_websocket_notification)
 
-__all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate', 'handle_work_error', 'update_inventory_computed_fields']
+__all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate',
+           'handle_work_error', 'update_inventory_computed_fields']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -788,9 +791,14 @@ class RunInventoryUpdate(BaseTask):
     model = InventoryUpdate
 
     def build_private_data(self, inventory_update, **kwargs):
-        '''
-        Return private data needed for inventory update.
-        '''
+        """Return private data needed for inventory update.
+        If no private data is needed, return None.
+        """
+        # If this is Windows Azure or GCE, return the RSA key
+        if inventory_update.source in ('azure', 'gce'):
+            credential = inventory_update.credential
+            return decrypt_field(credential, 'ssh_key_data')
+
         cp = ConfigParser.ConfigParser()
         # Build custom ec2.ini for ec2 inventory script to use.
         if inventory_update.source == 'ec2':
@@ -833,8 +841,12 @@ class RunInventoryUpdate(BaseTask):
 
         This dictionary is used by `build_env`, below.
         """
-        passwords = super(RunInventoryUpdate, self).build_passwords(inventory_update,
-                                                                    **kwargs)
+        # Run the superclass implementation.
+        super_ = super(RunInventoryUpdate, self).build_passwords
+        passwords = super_(inventory_update, **kwargs)
+
+        # Take key fields from the credential in use and add them to the
+        # passwords dictionary.
         credential = inventory_update.credential
         if credential:
             for subkey in ('username', 'host', 'project'):
@@ -880,42 +892,13 @@ class RunInventoryUpdate(BaseTask):
             env['VMWARE_HOST'] = passwords.get('source_host', '')
             env['VMWARE_USER'] = passwords.get('source_username', '')
             env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
+        elif inventory_update.source == 'azure':
+            env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
+            env['AZURE_CERT_PATH'] = kwargs['private_data_file']
         elif inventory_update.source == 'gce':
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')
-
-            # I am intentionally misnaming this environment variable here.
-            #
-            # Here's what is going on:
-            # The GCE driver provided by libcloud takes two positional
-            # arguments that are usually a bogus "email address" provided
-            # by Google Developer Center, followed by a path to a PEM key
-            # that you create by downloading a P12 file, performing an 
-            # ancient druidic ritual at Stonehenge in the light of a full
-            # moon, memorizing Beowulf in Middle English, and then standing
-            # on your head, Cheshire-Cat-style, for 42 minutes.
-            #
-            # We're not going to use PEM files in Tower, because we don't
-            # want to do the file upload for them (and because I left my copy
-            # of Middle English Beowulf in my other laptop bag...hate it when
-            # that happens...).
-            #
-            # It turns out that you can also send an RSA private key, which
-            # is perfect for us, because we already have that concept for
-            # our credentials. You simply provide the RSA key in lieu of the
-            # path to the PEM file, and everything in libcloud just works.
-            # Naturally, libcloud doesn't actually document this (I determined
-            # it by spelunking in its code).
-            #
-            # So, why the misnamed environment variable? Because the Ansible
-            # inventory module expects a PEM key path, and I don't necessarily
-            # want to introduce this epic confusion into a public module.
-            # The path of least resistance is simply to use a misleading
-            # environment variable at this point and call it out, and all
-            # the subsequent steps will just work. Users of just the inventory
-            # module can provide a PEM file path to the environment variable
-            # as expected.
-            env['GCE_PEM_FILE_PATH'] = passwords.get('source_ssh_key_data', '')
+            env['GCE_PEM_FILE_PATH'] = kwargs['private_data_file']
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
@@ -948,7 +931,7 @@ class RunInventoryUpdate(BaseTask):
         # These settings are "per-cloud-provider"; it's entirely possible that
         # they will be different between cloud providers if a Tower user
         # actively uses more than one.
-        if inventory_update.source in ('ec2', 'rax', 'vmware', 'gce'):
+        if inventory_update.source in CLOUD_PROVIDERS:
             # We need to reference the source's code frequently, assign it
             # to a shorter variable. :)
             src = inventory_update.source

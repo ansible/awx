@@ -396,6 +396,10 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
                 case 'gce':
                     $scope.email_address = data.username;
                     $scope.project = data.project;
+                    break;
+                case 'azure':
+                    $scope.subscription_id = data.username;
+
                 }
 
                 $scope.$emit('credentialLoaded');

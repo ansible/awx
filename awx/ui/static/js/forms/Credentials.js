@@ -97,14 +97,10 @@ angular.module('CredentialFormDefinition', [])
                         '<dd>Used to check out and synchronize playbook repositories with a remote source control ' +
                         'management system such as Git, Subversion (svn), or Mercurial (hg). These credentials are ' +
                         'used on the Projects tab.</dd>\n' +
-                        '<dt>Amazon Web Services</dt>\n' +
-                        '<dd>Access keys for Amazon Web Services used for inventory management or deployment.</dd>\n' +
-                        '<dt>Rackspace</dt>\n' +
-                        '<dd>Access information for Rackspace Cloud used for inventory management or deployment.</dd>\n' +
-                        '<dt>Google Compute Engine</dt>\n' +
-                        '<dd>Credentials for Google Compute Engine, used for inventory management or deployment.</dd>\n' +
-                        '<dt>VMWare</dt>\n' +
-                        '<dd>Access information for VMWare vSphere used for inventory management or deployment.</dd>\n' +
+                        '<dt>Others (Cloud Providers)</dt>\n' +
+                        '<dd>Access keys for authenticating to the specific ' +
+                        'cloud provider, usually used for inventory sync ' +
+                        'and deployment.</dd>\n' +
                         '</dl>\n'
                 }]
             },
@@ -141,7 +137,8 @@ angular.module('CredentialFormDefinition', [])
             "username": {
                 labelBind: 'usernameLabel',
                 type: 'text',
-                ngShow: "kind.value && kind.value !== 'aws' && kind.value!=='gce'",
+                ngShow: "kind.value && kind.value !== 'aws' && " +
+                        "kind.value !== 'gce' && kind.value!=='azure'",
                 awRequiredWhen: {
                     variable: 'aws_required',
                     init: false
@@ -156,6 +153,18 @@ angular.module('CredentialFormDefinition', [])
                     variable: 'username_required',
                     init: false
                 },
+                autocomplete: false
+            },
+            "subscription_id": {
+                labelBind: "usernameLabel",
+                type: 'text',
+                ngShow: "kind.value == 'azure'",
+                awRequiredWhen: {
+                    variable: 'subscription_required',
+                    init: false
+                },
+                addRequired: false,
+                editRequired: false,
                 autocomplete: false
             },
             "api_key": {
@@ -218,7 +227,8 @@ angular.module('CredentialFormDefinition', [])
             "ssh_key_data": {
                 labelBind: 'sshKeyDataLabel',
                 type: 'textarea',
-                ngShow: "kind.value == 'ssh' || kind.value == 'scm' || kind.value == 'gce'",
+                ngShow: "kind.value == 'ssh' || kind.value == 'scm' || " +
+                        "kind.value == 'gce' || kind.value == 'azure'",
                 awRequiredWhen: {
                     variable: 'key_required',
                     init: true
@@ -237,7 +247,7 @@ angular.module('CredentialFormDefinition', [])
                 ngChange: "clearPWConfirm('ssh_key_unlock_confirm')",
                 associated: 'ssh_key_unlock_confirm',
                 ask: true,
-                askShow: "kind.value == 'ssh'", //Only allow ask for machine credentials
+                askShow: "kind.value == 'ssh'",  // Only allow ask for machine credentials
                 clear: true
             },
             "ssh_key_unlock_confirm": {
@@ -291,6 +301,7 @@ angular.module('CredentialFormDefinition', [])
                 editRequired: false,
                 autocomplete: false
             },
+
             "vault_password": {
                 label: "Vault Password",
                 type: 'password',
