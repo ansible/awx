@@ -443,7 +443,7 @@ GCE_INSTANCE_ID_VAR = None
 
 # It's not possible to get zones in Azure without authenticating, so we
 # provide a list here.
-WA_REGION_CHOICES = [
+AZURE_REGION_CHOICES = [
     ('Central_US', 'US Central'),
     ('East_US_1', 'US East'),
     ('East_US_2', 'US East 2'),
@@ -458,19 +458,19 @@ WA_REGION_CHOICES = [
     ('West_Japan', 'Japan West'),
     ('South_Brazil', 'Brazil South'),
 ]
-WA_REGIONS_BLACKLIST = []
+AZURE_REGIONS_BLACKLIST = []
 
 # Inventory variable name/value for determining whether a host is active
-# in Google Compute Engine.
-WA_ENABLED_VAR = 'status'
-WA_ENABLED_VALUE = 'running'
+# in Windows Azure.
+AZURE_ENABLED_VAR = 'status'
+AZURE_ENABLED_VALUE = 'created'
 
 # Filter for allowed group and host names when importing inventory from
-# Google Compute Engine.
-WA_GROUP_FILTER = r'^.+$'
-WA_HOST_FILTER = r'^.+$'
-WA_EXCLUDE_EMPTY_GROUPS = True
-WA_INSTANCE_ID_VAR = None
+# Windows Azure.
+AZURE_GROUP_FILTER = r'^.+$'
+AZURE_HOST_FILTER = r'^.+$'
+AZURE_EXCLUDE_EMPTY_GROUPS = True
+AZURE_INSTANCE_ID_VAR = None
 
 
 # ---------------------

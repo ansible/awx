@@ -201,15 +201,39 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         return password
 
     def _validate_ssh_private_key(self, data):
+        """Validate that the given SSH private key or certificate is,
+        in fact, valid.
+        """
+        cert = ''
+        data = data.strip()
         validation_error = ValidationError('Invalid SSH private key')
-        begin_re = re.compile(r'^(-{4,})\s*BEGIN\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})$')
-        header_re = re.compile(r'^(.+?):\s*?(.+?)(\\??)$')
-        end_re = re.compile(r'^(-{4,})\s*END\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})$')
-        lines = data.strip().splitlines()
+
+        # Set up the valid private key header and footer.
+        begin_re = r'^(-{4,})\s*BEGIN\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})$'
+        end_re = r'^(-{4,})\s*END\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})$'
+
+        # Sanity check: We may potentially receive a full PEM certificate,
+        # and we want to accept these.
+        cert_re = r'^(-{4,})\s*BEGIN\s+CERTIFICATE\s*(-{4,})'
+        cert_match = re.search(cert_re, data)
+        if cert_match:
+            private_key_begin = re.search(begin_re[1:-1], data)
+            if not private_key_begin:
+                raise validation_error
+            boundary = private_key_begin.start()
+            cert = data[:boundary].strip()
+            data = data[boundary:].strip()
+
+        # Split the SSH key into individual lines.
+        # If we have no content at all, then this is not a valid SSH key.
+        lines = data.splitlines()
         if not lines:
             raise validation_error
-        begin_match = begin_re.match(lines[0])
-        end_match = end_re.match(lines[-1])
+
+        # Match the beginning and ending against what we expect, and also
+        # ensure that they match one another.
+        begin_match = re.match(begin_re, lines[0])
+        end_match = re.match(end_re, lines[-1])
         if not begin_match or not end_match:
             raise validation_error
         dashes = set([begin_match.groups()[0], begin_match.groups()[2],
@@ -219,25 +243,40 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         if begin_match.groups()[1] != end_match.groups()[1]:
             raise validation_error
         line_continues = False
+
+        # Establish that we are able to base64 decode the private key;
+        # if we can't, then it's not a valid key.
+        #
+        # If we got a certificate, validate that also, in the same way.
+        header_re = re.compile(r'^(.+?):\s*?(.+?)(\\??)$')
         base64_data = ''
-        for line in lines[1:-1]:
-            line = line.strip()
-            if not line:
+        for segment_to_validate in (cert, data):
+            # If we have nothing; skip this one.
+            # We've already validated that we have a private key above,
+            # so we don't need to do it again.
+            if not segment_to_validate:
                 continue
-            if line_continues:
-                line_continues = line.endswith('\\')
-                continue
-            line_match = header_re.match(line)
-            if line_match:
-                line_continues = line.endswith('\\')
-                continue
-            base64_data += line
-        try:
-            decoded_data = base64.b64decode(base64_data)
-            if not decoded_data:
+
+            # Ensure that this segment is valid base64 data.
+            lines = segment_to_validate.splitlines()
+            for line in lines[1:-1]:
+                line = line.strip()
+                if not line:
+                    continue
+                if line_continues:
+                    line_continues = line.endswith('\\')
+                    continue
+                line_match = header_re.match(line)
+                if line_match:
+                    line_continues = line.endswith('\\')
+                    continue
+                base64_data += line
+            try:
+                decoded_data = base64.b64decode(base64_data)
+                if not decoded_data:
+                    raise validation_error
+            except TypeError:
                 raise validation_error
-        except TypeError:
-            raise validation_error
 
     def clean_ssh_key_data(self):
         if self.pk:
