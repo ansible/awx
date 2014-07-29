@@ -201,8 +201,7 @@ setup(
                                      "config/awx-httpd-443.conf",
                                      "config/awx-munin.conf",
                                     ]),
-            ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh",
-                                     "tools/scripts/tower_jobs"]),
+            ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh",]),
             ("%s" % munin_plugin_path, ["tools/scripts/tower_jobs"]),
             ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
         ]
