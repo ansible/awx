@@ -56,22 +56,30 @@ angular.module('InventoryGroupsHelpDefinition', [])
             }, {
                 intro: "Groups can have subgroups:",
                 img: {
-                    src: 'groups005.png',
-                    maxWidth: 430,
-                    maxHeight: 206
+                    src: 'groups008.png',
+                    maxWidth: 380,
+                    maxHeight: 231
                 },
-                box: "<div class=\"text-left\">First, select a group. Then click <i class=\"fa fa-plus\"></i> to create a new group. The new group " +
+                box: "<div class=\"text-left\">First, select a group.</div>"
+            }, {
+                intro: "Groups can have subgroups:",
+                img: {
+                    src: 'groups009.png',
+                    maxWidth: 400,
+                    maxHeight: 132
+                },
+                box: "<div class=\"text-left\">Then click <i class=\"fa fa-plus\"></i> to create a new group. The new group " +
                     "will be added to the selected group.</div>"
-            },{
+            }, {
                 intro: 'Adding hosts:',
                 img: {
-                    src: 'groups007.png',
-                    maxWidth: 466,
-                    maxHeight: 178
+                    src: 'groups010.png',
+                    maxWidth: 400,
+                    maxHeight: 122
                 },
                 box: "<div class=\"text-left\"><p>First, select a Group. " +
                     "Then click <i class=\"fa fa-plus\"></i> on the hosts list (the right side of the page) to create a host. " +
-                    "The new host will be part of the selected group.</p><p>Note hosts cannot be added to the All Hosts group.</p></div>"
+                    "The new host will be part of the selected group.</p></div>"
             }]
         }
     });
