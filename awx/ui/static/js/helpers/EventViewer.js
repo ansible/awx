@@ -65,11 +65,13 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 $('#stdout-form-container').empty();
                 $('#stderr-form-container').empty();
                 $('#traceback-form-container').empty();
+                $('#json-form-container').empty();
                 $('#eventview-tabs li:eq(1)').hide();
                 $('#eventview-tabs li:eq(2)').hide();
                 $('#eventview-tabs li:eq(3)').hide();
                 $('#eventview-tabs li:eq(4)').hide();
                 $('#eventview-tabs li:eq(5)').hide();
+                $('#eventview-tabs li:eq(6)').hide();
 
                 EventAddTable({ scope: scope, id: 'status-form-container', event: data, section: 'Event' });
 
@@ -109,6 +111,13 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                         val: data.traceback
                     });
                 }
+
+                show_tabs = true;
+                $('#eventview-tabs li:eq(6)').show();
+                EventAddPreFormattedText({
+                    id: 'json-form-container',
+                    val: JSON.stringify(data, null, 2)
+                });
 
                 if (!show_tabs) {
                     $('#eventview-tabs').hide();
@@ -370,8 +379,52 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 return html;
             }
 
+            function parseItem(itm, key, label) {
+                var i, html = '';
+                if (Empty(itm)) {
+                    // exclude empty items
+                }
+                else if (typeof itm === "boolean" || typeof itm === "number" || typeof itm === "string") {
+                    html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">";
+                    if (key === "status") {
+                        html += "<i class=\"fa icon-job-" + itm + "\"></i> " + itm;
+                    }
+                    else if (key === "start" || key === "end" || key === "created") {
+                        if (!/Z$/.test(itm)) {
+                            itm = itm.replace(/\ /,'T') + 'Z';
+                            html += $filter('date')(itm, 'MM/dd/yy HH:mm:ss.sss');
+                        }
+                        else {
+                            html += $filter('date')(itm, 'MM/dd/yy HH:mm:ss');
+                        }
+                    }
+                    else if (key === "host_name" && event.host_id) {
+                        html += "<a href=\"/#/home/hosts/?id=" + event.host_id + "\" target=\"_blank\" " +
+                            "aw-tool-tip=\"View host. Opens in new tab or window.\" data-placement=\"top\" " +
+                            ">" + itm + "</a>";
+                    }
+                    else {
+                        html += "<span ng-non-bindable>" + itm + "</span>";
+                    }
+
+                    html += "</td></tr>\n";
+                }
+                else if (typeof itm === "object" && Array.isArray(itm)) {
+                    html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">[";
+                    for (i = 0; i < itm.length; i++) {
+                        html += itm[i] + ",";
+                    }
+                    html = html.replace(/,$/,'');
+                    html += "]</td></tr>\n";
+                }
+                else if (typeof itm === "object") {
+                    html += "<tr><td class=\"key\">" + label + ":</td><td class=\"nested-table\"><table>\n<tbody>\n" + parseObject(itm) + "</tbody>\n</table>\n</td></tr>\n";
+                }
+                return html;
+            }
+
             function parseJSON(obj) {
-                var html = '', key, keys, found = false;
+                var h, html = '', key, keys, found = false;
                 if (typeof obj === "object") {
                     html += "<table class=\"table eventviewer-status\">\n";
                     html += "<tbody>\n";
@@ -382,54 +435,30 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                         }
                     }
                     keys.forEach(function(key) {
-                        var i, label;
-                        //if (EventsViewerForm.fields[key] && EventsViewerForm.fields[key].section === section) {
+                        var h, label;
                         label = EventsViewerForm.fields[key].label;
-                        if (Empty(obj[key])) {
-                            // exclude empty items
-                        }
-                        else if (typeof obj[key] === "boolean" || typeof obj[key] === "number" || typeof obj[key] === "string") {
+                        h = parseItem(obj[key], key, label);
+                        if (h) {
+                            html += h;
                             found = true;
-                            html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">";
-                            if (key === "status") {
-                                html += "<i class=\"fa icon-job-" + obj[key] + "\"></i> " + obj[key];
-                            }
-                            else if (key === "start" || key === "end" || key === "created") {
-                                if (!/Z$/.test(obj[key])) {
-                                    //sec = parseInt(obj[key].substr(obj[key].length - 6, 6),10) / 1000);
-                                    //obj[key] = obj[key].replace(/\d{6}$/,sec) + 'Z';
-                                    obj[key] = obj[key].replace(/\ /,'T') + 'Z';
-                                    html += $filter('date')(obj[key], 'MM/dd/yy HH:mm:ss.sss');
-                                }
-                                else {
-                                    html += $filter('date')(obj[key], 'MM/dd/yy HH:mm:ss');
-                                }
-                            }
-                            else if (key === "host_name" && obj.host_id) {
-                                html += "<a href=\"/#/home/hosts/?id=" + obj.host_id + "\" target=\"_blank\" " +
-                                    "aw-tool-tip=\"View host. Opens in new tab or window.\" data-placement=\"top\" " +
-                                    ">" + obj[key] + "</a>";
-                            }
-                            else {
-                                html += "<span ng-non-bindable>" + obj[key] + "</span>";
-                            }
-
-                            html += "</td></tr>\n";
-                        }
-                        else if (typeof obj[key] === "object" && Array.isArray(obj[key])) {
-                            found = true;
-                            html += "<tr><td class=\"key\">" + label + ":</td><td class=\"value\">[";
-                            for (i = 0; i < obj[key].length; i++) {
-                                html += obj[key][i] + ",";
-                            }
-                            html = html.replace(/,$/,'');
-                            html += "]</td></tr>\n";
-                        }
-                        else if (typeof obj[key] === "object") {
-                            found = true;
-                            html += "<tr><td class=\"key\">" + label + ":</td><td class=\"nested-table\"><table>\n<tbody>\n" + parseObject(obj[key]) + "</tbody>\n</table>\n</td></tr>\n";
                         }
                     });
+                    if (section === 'Results') {
+                        // Add result fields that might be not be found the form object
+                        // to results.
+                        for (key in obj) {
+                            h = '';
+                            if (key !== 'host_id' && key !== 'parent' && key !== 'event' && key !== 'src' && key !== 'md5sum') {
+                                if (!EventsViewerForm.fields[key]) {
+                                    h = parseItem(obj[key], key, key);
+                                    if (h) {
+                                        html += h;
+                                        found = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
                     html += "</tbody>\n";
                     html += "</table>\n";
                 }
