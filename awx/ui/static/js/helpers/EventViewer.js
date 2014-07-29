@@ -155,14 +155,20 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
             scope.removeEventReady = scope.$on('EventReady', function(e, data) {
                 var btns;
                 scope.events = data;
-                // find and show the selected event
-                data.every(function(row, idx) {
-                    if (parseInt(row.id,10) === parseInt(event_id,10)) {
-                        current_event = idx;
-                        return false;
-                    }
-                    return true;
-                });
+
+                if (event_id) {
+                    // find and show the selected event
+                    data.every(function(row, idx) {
+                        if (parseInt(row.id,10) === parseInt(event_id,10)) {
+                            current_event = idx;
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+                else {
+                    current_event = 0;
+                }
                 showEvent(current_event);
 
                 btns = [];
@@ -248,8 +254,11 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 });
             });
 
+            url += (/\/$/.test(url)) ? '?' : '&';
+            url += (parent_id) ? 'parent=' + parent_id + '&page_size=50&order_by=id' : 'page_size=50&order_by=id';
+
             GetEvent({
-                url: url + '?parent=' + parent_id + '&page_size=50&order_by=id',
+                url: url,
                 scope: scope
             });
 
