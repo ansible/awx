@@ -457,7 +457,8 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                         // to results.
                         for (key in obj) {
                             h = '';
-                            if (key !== 'host_id' && key !== 'parent' && key !== 'event' && key !== 'src' && key !== 'md5sum') {
+                            if (key !== 'host_id' && key !== 'parent' && key !== 'event' && key !== 'src' && key !== 'md5sum' &&
+                                key !== 'stdout' && key !== 'traceback' && key !== 'stderr') {
                                 if (!EventsViewerForm.fields[key]) {
                                     h = parseItem(obj[key], key, key);
                                     if (h) {
