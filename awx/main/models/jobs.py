@@ -36,6 +36,7 @@ from jsonfield import JSONField
 from polymorphic import PolymorphicModel
 
 # AWX
+from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import *
 from awx.main.models.unified_jobs import *
 from awx.main.utils import encrypt_field, decrypt_field, ignore_inventory_computed_fields
@@ -119,14 +120,18 @@ class JobOptions(BaseModel):
     def clean_credential(self):
         cred = self.credential
         if cred and cred.kind != 'ssh':
-            raise ValidationError('Credential kind must be "ssh"')
+            raise ValidationError(
+                'You must provide a machine / SSH credential.',
+            )
         return cred
 
     def clean_cloud_credential(self):
         cred = self.cloud_credential
-        if cred and cred.kind not in ('aws', 'rax'):
-            raise ValidationError('Cloud credential kind must be "aws" or '
-                                  '"rax"')
+        if cred and cred.kind not in CLOUD_PROVIDERS + ('aws',):
+            raise ValidationError(
+                'Must provide a credential for a cloud provider, such as '
+                'Amazon Web Services or Rackspace.',
+            )
         return cred
 
 
