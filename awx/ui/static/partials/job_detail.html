@@ -178,7 +178,10 @@
                                             <td class="col-lg-1 col-md-2 col-sm-2 col-xs-2 status-column" aw-tool-tip="{{ play.status_tip }}" data-tip-watch="play.status_tip" data-placement="top"><i class="fa icon-job-{{ play.status }}"></i></td>
                                             <td class="col-lg-7 col-md-6 col-sm-6 col-xs-4">{{ play.name }}</td>
                                         </tr>
-                                        <tr ng-show="plays.length === 0">
+                                        <tr ng-show="plays.length === 0 && playsLoading">
+                                            <td colspan="4" class="col-lg-12 loading-info">Loading...</td>
+                                        </tr>
+                                        <tr ng-show="plays.length === 0 && !playsLoading">
                                             <td colspan="4" class="col-lg-12 loading-info">No matching plays</td>
                                         </tr>
                                     </tbody>
@@ -239,7 +242,10 @@
                                             <td class="col-lg-3 col-md-3 col-sm-6 col-xs-4" id="">{{ task.name }}</td>
                                             <td class="col-lg-4 col-md-3 hidden-sm hidden-xs"><div class="status-bar"><div class="successful-hosts inner-bar" id="{{ task.id }}-successful-bar" aw-tool-tip="Hosts OK" data-placement="top" ng-style="task.successfulStyle">{{ task.successfulCount }}</div><div class="changed-hosts inner-bar" id="{{ task.id }}-changed-bar" aw-tool-tip="Hosts Changed" data-placement="top" ng-style="task.changedStyle">{{ task.changedCount }}</div><div class="skipped-hosts inner-bar" id="{{ task.id }}-skipped-bar" aw-tool-tip="Hosts Skipped" data-placement="top" ng-style="task.skippedStyle">{{ task.skippedCount }}</div><div class="failed-hosts inner-bar" id="{{ task.id }}-failed-bar" aw-tool-tip="Hosts Failed" data-placement="top" ng-style="task.failedStyle">{{ task.failedCount }}</div><div class="unreachable-hosts inner-bar" id="{{ task.id }}-unreachable-hosts-bar" aw-tool-tip="Hosts Unreachable" data-placement="top" ng-style="task.unreachableStyle">{{ task.unreachableCount }}</div><div class="missing-hosts inner-bar" id="{{ task.id }}-misssing-hosts-bar" ng-style="task.missingStyle">{{ task.missingCount }}</div><div class="no-matching-hosts inner-bar" id="{{ task.id }}-{{ task.play_id }}-no-matching-hosts-bar" aw-tool-tip="No matching hosts were found" data-placement="top" style="width: 100%;" ng-show="task.status === 'no-matching-hosts'">No matching hosts</div></div></td>
                                         </tr>
-                                        <tr ng-show="taskList.length === 0">
+                                        <tr ng-show="taskList.length === 0 && tasksLoading">
+                                            <td colspan="5" class="col-lg-12 loading-info">Loading...</td>
+                                        </tr>
+                                        <tr ng-show="taskList.length === 0 && !tasksLoading">
                                             <td colspan="5" class="col-lg-12 loading-info">No matching tasks</td>
                                         </tr>
                                     </tbody>
@@ -298,7 +304,10 @@
                                             <td class="col-lg-4 col-md-4 col-sm-3 col-xs-3">{{ result.msg }}</td>
                                             <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1"><a ng-show="result.host_id" href="" ng-click="editHost(result.host_id)" aw-tool-tip="Edit host" data-placement="top"><i class="fa fa-pencil"></i></a></td>
                                         </tr>
-                                        <tr ng-show="results.length === 0">
+                                        <tr ng-show="results.length === 0 && hostResultsLoading">
+                                            <td colspan="5" class="col-lg-12 loading-info">Loading...</td>
+                                        </tr>
+                                        <tr ng-show="results.length === 0 && !hostResultsLoading">
                                             <td colspan="5" class="col-lg-12 loading-info">No matching hosts</td>
                                         </tr>
                                     </tbody>
@@ -375,7 +384,10 @@
                                                 <a href="" ng-click="hostEventsViewer(host.id, host.name, 'failed')" aw-tool-tip="Failed" data-placement="top" ng-hide="host.failed == 0"><span class="badge failed-hosts">{{ host.failed }}</span></a></td>
                                             <td class="col-lg-1 col-md-1 col-sm-1 col-xs-1"><a ng-show="host.id" href="" ng-click="editHost(host.id)" aw-tool-tip="Edit host" data-placement="top"><i class="fa fa-pencil"></i></a></td>
                                         </tr>
-                                        <tr ng-show="summaryList.length === 0">
+                                        <tr ng-show="summaryList.length === 0 && hostSummariesLoading">
+                                            <td colspan="5" class="col-lg-12 loading-info">Loading...</td>
+                                        </tr>
+                                        <tr ng-show="summaryList.length === 0 && !hostSummariesLoading">
                                             <td colspan="2" class="col-lg-12 loading-info">No matching hosts</td>
                                         </tr>
                                     </tbody>

@@ -665,7 +665,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         url = scope.job.url + 'job_plays/?page_size=' + scope.playsMaxRows + '&order_by=id';
         url += (scope.search_play_name) ? '&play__icontains=' + scope.search_play_name : '';
         url += (scope.search_play_status === 'failed') ? '&failed=true' : '';
-
+        scope.playsLoading = true;
         Rest.setUrl(url);
         Rest.get()
             .success(function(data) {
@@ -717,6 +717,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     id: (scope.plays.length > 0) ? scope.plays[0].id : null,
                     callback: callback
                 });
+                scope.playsLoading = false;
             })
             .error(function(data) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -773,6 +774,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 }
                 return true;
             });
+
+            scope.tasksLoading = true;
 
             Rest.setUrl(url);
             Rest.get()
@@ -852,6 +855,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                         callback: callback
                     });
 
+                    scope.tasksLoading = false;
+
                 })
                 .error(function(data) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -909,7 +914,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
             url += (scope.search_host_status === 'failed') ? 'failed=true&' : '';
             url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=host__name';
-
+            scope.hostResultsLoading = true;
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
@@ -963,6 +968,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                                 item: item
                             });
                         }
+                        scope.hostResultsLoading = false;
                     });
                     if (callback) {
                         scope.$emit(callback);
@@ -995,6 +1001,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host_name';
 
         scope.hosts = [];
+        scope.hostSummariesLoading = true;
 
         Rest.setUrl(url);
         Rest.get()
@@ -1017,6 +1024,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                         failed: event.failures,
                         status: (event.failed) ? 'failed' : 'successful'
                     });
+                    scope.hostSummariesLoading = false;
                 });
                 if (callback) {
                     scope.$emit(callback);
@@ -1398,6 +1406,13 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         }
 
         DrawHostSummaries({ scope: scope });
+
+        setTimeout(function() {
+            scope.playsLoading = false;
+            scope.tasksLoading = false;
+            scope.hostResultsLoading = false;
+            scope.LoadHostSummaries = false;
+        },100);
 
         if (scope.host_summary.total > 0) {
             DrawGraph({ scope: scope, resize: true });

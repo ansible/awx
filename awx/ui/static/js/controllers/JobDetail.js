@@ -33,6 +33,12 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.tasksMaxRows = 200;
     scope.playsMaxRows = 200;
 
+    // Set the following to true when 'Loading...' message desired
+    scope.playsLoading = true;
+    scope.tasksLoading = true;
+    scope.hostResultsLoading = true;
+    scope.hostSummariesLoading = true;
+
     scope.liveEventProcessing = true;     // true while job is active and live events are arriving
     scope.pauseLiveEvents = false;        // control play/pause state of event processing
 
@@ -137,6 +143,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.removeInitialLoadComplete = scope.$on('InitialLoadComplete', function() {
         var url;
         Wait('stop');
+
         if (JobIsFinished(scope)) {
             scope.liveEventProcessing = false; // signal that event processing is over and endless scroll
             scope.pauseLiveEvents = false;      // should be enabled
@@ -529,6 +536,12 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.removeLoadJobRow = scope.$on('LoadJob', function() {
         Wait('start');
         scope.job_status = {};
+
+        scope.playsLoading = true;
+        scope.tasksLoading = true;
+        scope.hostResultsLoading = true;
+        scope.LoadHostSummaries = true;
+
         // Load the job record
         Rest.setUrl(GetBasePath('jobs') + job_id + '/');
         Rest.get()
@@ -939,6 +952,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         // check for more plays when user scrolls to bottom of play list...
         if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_plays) {
             $('#playsMoreRows').fadeIn();
+            scope.playsLoading = true;
             Rest.setUrl(scope.next_plays);
             Rest.get()
                 .success( function(data) {
@@ -989,6 +1003,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                         skipped = (event.skipped_count) ? event.skipped_count : 0;
 
                         scope.plays[scope.plays.length - 1].hostCount = ok + changed + failed + skipped;
+                        scope.playsLoading = false;
                     });
                     $('#playsMoreRows').fadeOut(400);
                 })
@@ -1003,6 +1018,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         // check for more tasks when user scrolls to bottom of task list...
         if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_tasks) {
             $('#tasksMoreRows').fadeIn();
+            scope.tasksLoading = true;
             Rest.setUrl(scope.next_tasks);
             Rest.get()
                 .success(function(data) {
@@ -1060,6 +1076,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                         });
                     });
                     $('#tasksMoreRows').fadeOut(400);
+                    scope.tasksLoading = false;
                 })
                 .error(function(data, status) {
                     $('#tasksMoreRows').fadeOut(400);
@@ -1073,6 +1090,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         // check for more hosts when user scrolls to bottom of host results list...
         if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_host_results) {
             $('#hostResultsMoreRows').fadeIn();
+            scope.hostResultsLoading = true;
             Rest.setUrl(scope.next_host_results);
             Rest.get()
                 .success(function(data) {
@@ -1121,6 +1139,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             msg: (row.event_data && row.event_data.res) ? row.event_data.res.msg : '',
                             item: item
                         });
+                        scope.hostResultsLoading = false;
                     });
                     $('#hostResultsMoreRows').fadeOut(400);
                 })
@@ -1135,6 +1154,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.hostSummariesScrollDown = function() {
         // check for more hosts when user scrolls to bottom of host summaries list...
         if (((!scope.liveEventProcessing) || (scope.liveEventProcessing && scope.pauseLiveEvents)) && scope.next_host_summaries) {
+            scope.hostSummariesLoading = true;
             Rest.setUrl(scope.next_host_summaries);
             Rest.get()
                 .success(function(data) {
@@ -1157,6 +1177,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                         });
                     });
                     $('#hostSummariesMoreRows').fadeOut();
+                    scope.hostSummariesLoading = false;
                 })
                 .error(function(data, status) {
                     $('#hostSummariesMoreRows').fadeOut();
