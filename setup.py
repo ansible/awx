@@ -16,6 +16,9 @@ build_timestamp = os.getenv("BUILD",datetime.datetime.now().strftime('-%Y%m%d%H%
 etcpath = "/etc/awx"
 homedir = "/var/lib/awx"
 sharedir = "/usr/share/awx"
+munin_plugin_path = "/etc/munin/plugins/"
+munin_plugin_conf_path = "/etc/munin/plugin-conf.d"
+
 if os.path.exists("/etc/debian_version"):
     webconfig  = "/etc/apache2/conf.d"
     shutil.copy("config/awx-munin-ubuntu.conf", "config/awx-munin.conf")
@@ -198,7 +201,10 @@ setup(
                                      "config/awx-httpd-443.conf",
                                      "config/awx-munin.conf",
                                     ]),
-            ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh"]),
+            ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh",
+                                     "tools/scripts/tower_jobs"]),
+            ("%s" % munin_plugin_path, ["tools/scripts/tower_jobs"]),
+            ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
         ]
     ),
     options = {
