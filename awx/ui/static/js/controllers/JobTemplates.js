@@ -412,6 +412,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                         ' project or make the playbooks available on the file system.', 'alert-info');
                 });
         }
+        else Wait('stop');
     };
 
     // Detect and alert user to potential SCM status issues
