@@ -6,6 +6,7 @@
         <li><a href="#stdout" id="stdout-link" data-toggle="tab" ng-click="toggleTab($event, 'stdout-link', 'eventview-tabs')">Standard Out</a></li>
         <li><a href="#stderr" id="stderr-link" data-toggle="tab" ng-click="toggleTab($event, 'stderr-link', 'eventview-tabs')">Standard Error</a></li>
         <li><a href="#traceback" id="traceback-link" data-toggle="tab" ng-click="toggleTab($event, 'traceback-link', 'eventview-tabs')">Traceback</a></li>
+        <li><a href="#json" id="json-link" data-toggle="tab" ng-click="toggleTab($event, 'json-link', 'eventview-tabs')">JSON</a></li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane active" id="status">
@@ -25,6 +26,9 @@
         </div>
         <div class="tab-pane" id="traceback">
             <div id="traceback-form-container"></div>
+        </div>
+        <div class="tab-pane" id="json">
+            <div id="json-form-container"></div>
         </div>
     </div>
 </div>
