@@ -480,6 +480,16 @@ dd {
   padding-right: 10px;
 }
 
+.label-hint-text {
+   font-weight: normal;
+   color: @grey;
+}
+.label-hint-text:before {
+    /* for a line break before hintText */
+    content: '\A';
+    white-space: pre;
+}
+
 #group_form #group_tabs {
   margin-top: 25px;
 }

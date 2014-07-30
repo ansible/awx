@@ -545,6 +545,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                             html += "<span class=\"label-text\">" + field.label + "</span>";
                         }
                         html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
+                        html += (field.hintText) ? " <span class=\"label-hint-text\"><i class=\"fa fa-info-circle\"></i> Hint: " + field.hintText + "</span>" : "";
                         html += "</label>\n";
                     }
                     return html;

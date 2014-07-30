@@ -238,6 +238,7 @@ angular.module('CredentialFormDefinition', [])
                     variable: 'key_required',
                     init: true
                 },
+                hintText:"drag and drop an SSH private key file on the field below",
                 addRequired: false,
                 editRequired: false,
                 awDropFile: true,
