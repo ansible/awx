@@ -340,7 +340,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
-    GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit) {
+    GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit, PlaybookRun)
+{
 
     ClearScope();
 
@@ -577,8 +578,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     }
     $scope.removeLoadJobs = $scope.$on('LoadJobs', function() {
         // Retrieve detail record and prepopulate the form
-        Rest.setUrl(defaultUrl + ':id/');
-        Rest.get({ params: { id: id } })
+        Rest.setUrl(defaultUrl + id);
+        Rest.get()
             .success(function (data) {
                 var fld, i;
                 LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
@@ -788,6 +789,14 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         $location.path('/' + set + '/' + id);
     };
 
+    // Launch a job using the selected template
+    $scope.launch = function() {
+        PlaybookRun({
+            scope: $scope,
+            id: id
+        });
+    };
+
     // Related set: Delete button
     $scope['delete'] = function (set, itm_id, name, title) {
         $rootScope.flashMessage = null;
@@ -824,5 +833,5 @@ JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$l
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
     'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices',
-    'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit'
+    'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit', 'PlaybookRun'
 ];
