@@ -13,6 +13,7 @@ from awx import __version__
 build_timestamp = os.getenv("BUILD",datetime.datetime.now().strftime('-%Y%m%d%H%M'))
 
 # Paths we'll use later
+sysinit = "/etc/init.d"
 etcpath = "/etc/awx"
 homedir = "/var/lib/awx"
 sharedir = "/usr/share/awx"
@@ -205,6 +206,7 @@ setup(
             ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh",]),
             ("%s" % munin_plugin_path, ["tools/scripts/tower_jobs"]),
             ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
+            ("%s" % sysinit, ["tools/scripts/ansible-tower"]),
         ]
     ),
     options = {

@@ -18,6 +18,7 @@ include awx/ui/static/js/awx.min.js
 include awx/ui/static/js/config.js
 include tools/scripts/request_tower_configuration.sh
 include tools/scripts/tower_jobs
+include tools/scripts/ansible-tower
 include COPYING
 prune awx/public
 prune awx/projects
