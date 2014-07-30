@@ -1,7 +1,7 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  FireFoxSocketHelp.js
+ *  FirefoxSocketHelp.js
  *
  *  Help object for socket connection troubleshooting
  *
