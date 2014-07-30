@@ -530,7 +530,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                     var html = '';
                     if (field.label || field.labelBind) {
                         html += "<label ";
-                        html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
                         if (horizontal || field.labelClass) {
                             html += "class=\"";
                             html += (field.labelClass) ? field.labelClass : "";
@@ -540,7 +539,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                         html += "for=\"" + fld + '">';
                         html += (field.icon) ? Icon(field.icon) : "";
-                        html += "<span class=\"label-text\">" + field.label + "</span>";
+                        if (field.labelBind) {
+                            html += "<span class=\"label-text\" ng-bind=\"" + field.labelBind + "\"></span>";
+                        } else {
+                            html += "<span class=\"label-text\">" + field.label + "</span>";
+                        }
                         html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
                         html += "</label>\n";
                     }
