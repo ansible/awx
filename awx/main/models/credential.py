@@ -209,33 +209,29 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         validation_error = ValidationError('Invalid SSH private key')
 
         # Set up the valid private key header and footer.
-        begin_re = r'^(-{4,})\s*BEGIN\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})$'
-        end_re = r'^(-{4,})\s*END\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})$'
+        begin_re = r'(-{4,})\s*BEGIN\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})'
+        end_re = r'(-{4,})\s*END\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})'
 
         # Sanity check: We may potentially receive a full PEM certificate,
         # and we want to accept these.
-        cert_re = r'^(-{4,})\s*BEGIN\s+CERTIFICATE\s*(-{4,})'
-        cert_match = re.search(cert_re, data)
-        if cert_match:
-            private_key_begin = re.search(begin_re[1:-1], data)
-            if not private_key_begin:
+        cert_begin_re = r'^(-{4,})\s*BEGIN\s+CERTIFICATE\s*(-{4,})'
+        cert_end_re = r'^(-{4,})\s*END\s+CERTIFICATE\s*(-{4,})'
+        cert_begin_match = re.search(cert_begin_re, data)
+        if cert_begin_match:
+            cert_end_match = re.search(cert_end_re, data)
+            if not cert_end_match:
                 raise validation_error
-            boundary = private_key_begin.start()
-            cert = data[:boundary].strip()
-            data = data[boundary:].strip()
+            cert = data[cert_begin_match.start():cert_end_match.end()]
 
-        # Split the SSH key into individual lines.
-        # If we have no content at all, then this is not a valid SSH key.
-        lines = data.splitlines()
-        if not lines:
-            raise validation_error
-
-        # Match the beginning and ending against what we expect, and also
-        # ensure that they match one another.
-        begin_match = re.match(begin_re, lines[0])
-        end_match = re.match(end_re, lines[-1])
+        # Find the private key, and also ensure that it internally matches
+        # itself.
+        begin_match = re.search(begin_re, data)
+        end_match = re.search(end_re, data)
         if not begin_match or not end_match:
             raise validation_error
+
+        # Ensure that everything, such as dash counts and key type, lines up,
+        # and raise an error if it does not.
         dashes = set([begin_match.groups()[0], begin_match.groups()[2],
                       end_match.groups()[0], end_match.groups()[2]])
         if len(dashes) != 1:
@@ -243,6 +239,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         if begin_match.groups()[1] != end_match.groups()[1]:
             raise validation_error
         line_continues = False
+
+        # The private key data begins and ends with the private key.
+        data = data[begin_match.start():end_match.end()]
 
         # Establish that we are able to base64 decode the private key;
         # if we can't, then it's not a valid key.
