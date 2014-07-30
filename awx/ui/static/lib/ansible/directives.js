@@ -760,7 +760,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     // Support dropping files on an element. Used on credentials page for SSH/RSA private keys
     // Inspired by https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications
     //
-    .directive('awDropFile', [ function() {
+    .directive('awDropFile', ['Alert', function(Alert) {
         return {
             require: 'ngModel',
             link: function(scope, element, attrs, ctrl) {
@@ -783,6 +783,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         ctrl.$setViewValue(reader.result);
                         ctrl.$render();
                     };
+                    reader.onerror = function() {
+                        Alert('Error','There was an error reading the selected file.');
+                    }
                     reader.readAsText(files[0]);
                 });
             }
