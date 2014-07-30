@@ -22,10 +22,11 @@ angular.module('CredentialsHelper', ['Utilities'])
             // Put things in a default state
             scope.usernameLabel = 'Username';
             scope.aws_required = false;
+            scope.email_required = false;
             scope.rackspace_required = false;
             scope.sshKeyDataLabel = 'SSH Private Key';
             scope.username_required = false;                        // JT-- added username_required b/c mutliple 'kinds' need username to be required (GCE)
-            scope.key_required = false;                                 // JT -- doing the same for key and project
+            scope.key_required = false;                             // JT -- doing the same for key and project
             scope.project_required = false;
             scope.subscription_required = false;
 
@@ -46,9 +47,9 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.sshKeyDataLabel = 'SCM Private Key';
                     break;
                 case 'gce':
-                    scope.usernameLabel = 'Email Address';
+                    scope.usernameLabel = 'Service Account Email Address';
                     scope.sshKeyDataLabel = 'RSA Private Key';
-                    scope.username_required = true;
+                    scope.email_required = true;
                     scope.key_required = true;
                     scope.project_required = true;
                     break;

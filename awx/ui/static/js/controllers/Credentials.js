@@ -225,6 +225,7 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
 
     // Reset defaults
     $scope.formReset = function () {
+        //DebugForm({ scope: $scope, form: CredentialForm });
         generator.reset();
     };
 

@@ -140,7 +140,7 @@ angular.module('CredentialFormDefinition', [])
                 ngShow: "kind.value && kind.value !== 'aws' && " +
                         "kind.value !== 'gce' && kind.value!=='azure'",
                 awRequiredWhen: {
-                    variable: 'aws_required',
+                    variable: 'username_required',
                     init: false
                 },
                 autocomplete: false
@@ -150,7 +150,7 @@ angular.module('CredentialFormDefinition', [])
                 type: 'email',
                 ngShow: "kind.value === 'gce'",
                 awRequiredWhen: {
-                    variable: 'username_required',
+                    variable: 'email_required',
                     init: false
                 },
                 autocomplete: false
