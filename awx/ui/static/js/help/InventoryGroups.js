@@ -13,7 +13,7 @@
 angular.module('InventoryGroupsHelpDefinition', [])
     .value('InventoryGroupsHelp', {
         story: {
-            hdr: 'Building your inventory',
+            hdr: 'Inventory Setup',
             width: 510,
             height: 560,
             steps: [{
@@ -52,29 +52,29 @@ angular.module('InventoryGroupsHelpDefinition', [])
                     maxWidth: 261,
                     maxHeight: 221
                 },
-                box: "To pull the cloud inventory into Tower, initiate an inventory sync by clicking <i class=\"fa fa-exchange\"></i>."
+                box: "To import a cloud inventory into Tower, initiate an inventory sync by clicking <i class=\"fa fa-exchange\"></i>."
             }, {
-                intro: "Groups can have subgroups:",
+                intro: "Add subgroups:",
                 img: {
                     src: 'groups008.png',
-                    maxWidth: 380,
+                    maxWidth: 500,
                     maxHeight: 231
                 },
                 box: "<div class=\"text-left\">First, select a group.</div>"
             }, {
-                intro: "Groups can have subgroups:",
+                intro: "Add subgroups:",
                 img: {
                     src: 'groups009.png',
-                    maxWidth: 400,
+                    maxWidth: 475,
                     maxHeight: 132
                 },
                 box: "<div class=\"text-left\">Then click <i class=\"fa fa-plus\"></i> to create a new group. The new group " +
                     "will be added to the selected group.</div>"
             }, {
-                intro: 'Adding hosts:',
+                intro: 'Add hosts:',
                 img: {
                     src: 'groups010.png',
-                    maxWidth: 400,
+                    maxWidth: 475,
                     maxHeight: 122
                 },
                 box: "<div class=\"text-left\"><p>First, select a Group. " +
