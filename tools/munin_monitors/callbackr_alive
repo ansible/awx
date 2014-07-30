@@ -1,0 +1,17 @@
+#!/bin/sh
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title Callback Receiver Processes
+graph_vlabel num processes
+graph_category tower
+callbackr.label Callback Receiver Processes
+callbackr.type DERIVE
+EOM
+        exit 0;;
+esac
+
+printf "callbackr.value "
+ps ax | grep run_callback_receiver | grep -v grep | wc -l
+printf "\n"

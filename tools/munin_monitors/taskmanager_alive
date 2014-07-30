@@ -1,0 +1,17 @@
+#!/bin/sh
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title Task Manager Processes
+graph_vlabel num processes
+graph_category tower
+taskm.label Task Manager Processes
+taskm.type DERIVE
+EOM
+        exit 0;;
+esac
+
+printf "taskm.value "
+ps ax | grep run_task_system | grep -v grep | wc -l
+printf "\n"

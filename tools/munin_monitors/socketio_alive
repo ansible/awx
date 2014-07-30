@@ -1,0 +1,17 @@
+#!/bin/sh
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title SocketIO Service Processes
+graph_vlabel num processes
+graph_category tower
+socketio.label SocketIO Service Processes
+socketio.type DERIVE
+EOM
+        exit 0;;
+esac
+
+printf "socketio.value "
+ps ax | grep run_socketio_service | grep -v grep | wc -l
+printf "\n"

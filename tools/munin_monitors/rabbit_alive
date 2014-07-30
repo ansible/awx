@@ -1,0 +1,17 @@
+#!/bin/sh
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title Rabbit Processes
+graph_vlabel num processes
+graph_category tower
+rabbit.label Rabbit Processes
+rabbit.type DERIVE
+EOM
+        exit 0;;
+esac
+
+printf "rabbit.value "
+ps ax | grep rabbitmq-server | grep -v grep | wc -l
+printf "\n"

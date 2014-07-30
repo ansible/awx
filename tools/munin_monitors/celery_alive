@@ -1,0 +1,17 @@
+#!/bin/sh
+
+case $1 in
+   config)
+        cat <<'EOM'
+graph_title Celery Processes
+graph_vlabel num processes
+graph_category tower
+celeryd.label Celery Processes
+celeryd.type DERIVE
+EOM
+        exit 0;;
+esac
+
+printf "celeryd.value "
+ps ax | grep celeryd | grep -v grep | wc -l
+printf "\n"
