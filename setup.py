@@ -191,6 +191,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'awx-manage = awx:manage',
+            'tower-manage = awx:manage',
         ],
     },
     data_files = proc_data_files([
