@@ -240,6 +240,7 @@ angular.module('CredentialFormDefinition', [])
                 },
                 addRequired: false,
                 editRequired: false,
+                awDropFile: true,
                 'class': 'ssh-key-field',
                 rows: 10
             },
