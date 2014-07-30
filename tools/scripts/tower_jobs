@@ -3,7 +3,7 @@
 case $1 in
    config)
         cat <<'EOM'
-multigraph jobs
+multigraph tower_jobs
 graph_title Running Jobs breakdown
 graph_vlabel job count
 graph_category tower
@@ -19,9 +19,12 @@ esac
 
 printf "running.value "
 awx-manage stats --stat jobs_running
+printf "\n"
 
 printf "waiting.value "
 awx-manage stats --stat jobs_waiting
+printf "\n"
 
 printf "pending.value "
 awx-manage stats --stat jobs_pending
+printf "\n"
