@@ -21,9 +21,8 @@ angular.module('ChromeSocketHelpDefinition', [])
                     src: 'socket_indicator.png',
                     maxWidth: 360
                 },
-                box: "<p>When live events are streaming the connection status indicator will be green. Red or orange indicates the " +
-                    "browser is having difficulty connecting to the server, and live events are no longer being received.</p><p>If the indicator " +
-                    "appears red or orange, click next for troubleshooting help.</p>"
+                box: "<p><i class=\"fa icon-socket-ok\"></i> indicates live events are streaming and the browser is connected to the live events server.</p><p>If the indicator continually shows <i class=\"fa icon-socket-error\"></i> " +
+                    "or <i class=\"fa icon-socket-connecting\"></i>, then live events are not streaming, and the browser is having difficulty connecting to the live events server. In this case click Next for troubleshooting help.</p>"
             }, {
                 intro: 'Live events connection:',
                 icon: {

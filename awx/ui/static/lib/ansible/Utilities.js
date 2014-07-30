@@ -408,6 +408,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                             $('#help-modal-dialog').dialog('close');
                         }
                     });
+
+                    $('.overlay').css({
+                        width: $(document).width(),
+                        height: $(document).height()
+                    }).fadeIn();
+
                     // Show the dialog
                     $('#help-modal-dialog').dialog({
                         position: {
@@ -424,6 +430,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         hide: 500,
                         resizable: false,
                         close: function () {
+                            $('.overlay').hide();
                             $('#help-modal-dialog').empty();
                         }
                     });
