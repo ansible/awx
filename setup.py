@@ -13,7 +13,6 @@ from awx import __version__
 build_timestamp = os.getenv("BUILD",datetime.datetime.now().strftime('-%Y%m%d%H%M'))
 
 # Paths we'll use later
-sysinit = "/etc/init.d"
 etcpath = "/etc/awx"
 homedir = "/var/lib/awx"
 sharedir = "/usr/share/awx"
@@ -21,9 +20,11 @@ munin_plugin_path = "/etc/munin/plugins/"
 munin_plugin_conf_path = "/etc/munin/plugin-conf.d"
 
 if os.path.exists("/etc/debian_version"):
+    sysinit = "/etc/init.d"
     webconfig  = "/etc/apache2/conf.d"
     shutil.copy("config/awx-munin-ubuntu.conf", "config/awx-munin.conf")
 else:
+    sysinit = "/etc/rc.d/init.d"
     webconfig  = "/etc/httpd/conf.d"
     shutil.copy("config/awx-munin-el.conf", "config/awx-munin.conf")
 

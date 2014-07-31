@@ -1,8 +1,21 @@
 #!/bin/bash
+#
+# ansible-tower
+#
+# chkconfig: - 20 80
+# description: support init to manage tower and its related services
 
-# init script to manage tower and its related services
-# Copyright (c) 2014 Ansible, Inc.
-# All Rights Reserved
+### BEGIN INIT INFO
+# Provides: 
+# Required-Start: 
+# Required-Stop: 
+# Should-Start: 
+# Should-Stop: 
+# Default-Start: 
+# Default-Stop: 
+# Short-Description: support init to manage tower and its related services
+# Description: Ansible Tower provides an easy-to-use UI and dashboard, role-based access control and more for your Ansible initiative
+### END INIT INFO
 
 if [ -e /etc/debian_version ]
 then 
@@ -36,5 +49,5 @@ case "$1" in
 	service_action status
 	;;
     *)
-	echo "Usage: $0 {start|stop|restart}"
+	echo "Usage: $0 {start|stop|restart|status}"
 esac
