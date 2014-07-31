@@ -40,7 +40,7 @@ angular.module('SafariSocketHelpDefinition', [])
                     style: "margin-top: 75px;",
                     containerHeight: 200
                 },
-                box: "<p>Safari will not connect to the live event port when the Tower web server is configured with a self signed certificate. Check with a system administrator to" +
+                box: "<p>Safari will not connect to the live event port when the Tower web server is configured with a self signed certificate. Check with a system administrator to " +
                     "determine if Tower is using a self signed certificate. Installing a signed certificate will fix the problem.</p>" +
                     "<p>Switching browsers to either Chrome or Firefox will work as well.</p>"
             }]
