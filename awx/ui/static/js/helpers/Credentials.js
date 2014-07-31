@@ -19,6 +19,14 @@ angular.module('CredentialsHelper', ['Utilities'])
                 reset = params.reset,
                 collapse, id;
 
+            $('.popover').each(function() {
+                // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                $(this).remove();
+            });
+            $('.tooltip').each( function() {
+                // close any lingering tool tipss
+                $(this).hide();
+            });
             // Put things in a default state
             scope.usernameLabel = 'Username';
             scope.aws_required = false;
@@ -29,7 +37,8 @@ angular.module('CredentialsHelper', ['Utilities'])
             scope.key_required = false;                             // JT -- doing the same for key and project
             scope.project_required = false;
             scope.subscription_required = false;
-            scope.key_description = '';
+            scope.key_description = "Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
+            scope.key_hint= "drag and drop an SSH private key file on the field below";
             if (!Empty(scope.kind)) {
                 // Apply kind specific settings
                 switch (scope.kind.value) {
@@ -52,14 +61,16 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.email_required = true;
                     scope.key_required = true;
                     scope.project_required = true;
-                    scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Windows Azure console.";
+                    scope.key_description =  'Paste the value of the private key found within a GCE service account\'s JSON key. <div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>';
+                    scope.key_hint= "drag and drop a private key file on the field below";
                     break;
                 case 'azure':
                     scope.usernameLabel = "Subscription ID";
-                    scope.sshKeyDataLabel = 'RSA Private Key';
+                    scope.sshKeyDataLabel = 'Management Certificate';
                     scope.subscription_required = true;
                     scope.key_required = true;
-                    scope.key_description = 'Paste the value of the private key within a GCE service account\'s JSON key.';
+                    scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Windows Azure console.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
+                    scope.key_hint= "drag and drop a management certificate file on the field below";
                     break;
                 }
             }

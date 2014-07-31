@@ -172,7 +172,7 @@ angular.module('CredentialFormDefinition', [])
                 },
                 autocomplete: false,
                 awPopOver: '<p>The e-mail address assigned to the Google Compute Engine <b><i>service account.</b></i></p>',
-                dataTitle: 'Subscription ID',
+                dataTitle: 'Email',
                 dataPlacement: 'right',
                 dataContainer: "body"
             },
@@ -259,16 +259,17 @@ angular.module('CredentialFormDefinition', [])
                     variable: 'key_required',
                     init: true
                 },
-                hintText:"drag and drop an SSH private key file on the field below",
+                hintText: "{{ key_hint }}",
                 addRequired: false,
                 editRequired: false,
                 awDropFile: true,
                 'class': 'ssh-key-field',
                 rows: 10,
-                // awPopOver: "key_description",
-                // dataTitle: 'Subscription ID',
-                // dataPlacement: 'right',
-                // dataContainer: "body"
+                awPopOver: "SSH key description",
+                awPopOverWatch:   "key_description",
+                dataTitle: 'Help',
+                dataPlacement: 'right',
+                dataContainer: "body"
             },
             "ssh_key_unlock": {
                 label: 'Key Password',
