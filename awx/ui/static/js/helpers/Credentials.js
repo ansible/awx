@@ -29,7 +29,7 @@ angular.module('CredentialsHelper', ['Utilities'])
             scope.key_required = false;                             // JT -- doing the same for key and project
             scope.project_required = false;
             scope.subscription_required = false;
-
+            scope.key_description = '';
             if (!Empty(scope.kind)) {
                 // Apply kind specific settings
                 switch (scope.kind.value) {
@@ -52,12 +52,14 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.email_required = true;
                     scope.key_required = true;
                     scope.project_required = true;
+                    scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Windows Azure console.";
                     break;
                 case 'azure':
                     scope.usernameLabel = "Subscription ID";
                     scope.sshKeyDataLabel = 'RSA Private Key';
                     scope.subscription_required = true;
                     scope.key_required = true;
+                    scope.key_description = 'Paste the value of the private key within a GCE service account\'s JSON key.';
                     break;
                 }
             }
