@@ -501,7 +501,7 @@ function InventoriesEdit ($log, $scope, $location, $routeParams, $compile, Gener
     ClearScope();
 
     $scope.group_breadcrumbs = [{
-        name: 'All',
+        name: '',
         id: 0,
         description: '',
         show: true,
@@ -511,6 +511,8 @@ function InventoriesEdit ($log, $scope, $location, $routeParams, $compile, Gener
         active_class: 'active',
         show_failures: false
     }];
+
+    /**/
 
     $scope.refreshHostsOnGroupRefresh = false;
     $scope.selected_group_id = null;
@@ -566,10 +568,11 @@ function InventoriesEdit ($log, $scope, $location, $routeParams, $compile, Gener
     $scope.removeInventoryLoaded = $scope.$on('InventoryLoaded', function() {
         var e, rows;
 
-        LoadBreadCrumbs({
+        /*LoadBreadCrumbs({
             path: $location.path(),
             title: '{{ inventory.name }}'
-        });
+        });*/
+        $scope.group_breadcrumbs[0].name = $scope.inventory.name;
 
         // Build page breadcrumbs
         e = angular.element(document.getElementById('breadcrumbs'));
