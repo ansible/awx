@@ -61,7 +61,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.email_required = true;
                     scope.key_required = true;
                     scope.project_required = true;
-                    scope.key_description =  'Paste the value of the private key found within a GCE service account\'s JSON key. <div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>';
+                    scope.key_description =  'Paste the contents of the PEM file associated with the service account email. <div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>';
                     scope.key_hint= "drag and drop a private key file on the field below";
                     break;
                 case 'azure':
