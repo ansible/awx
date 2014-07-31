@@ -81,9 +81,9 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
         if (secondAlert) {
             e = angular.element(document.getElementById('alert-modal2'));
 
-            $('#alertHeader2').text(hdr);
-            $('#alert2-modal-msg').text(msg);
-            $("#alertHeader").text(msg);
+            $('#alertHeader2').html(hdr);
+            $('#alert2-modal-msg').html(msg);
+
             alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
 
             $('#alert2-modal-msg').attr({ "class": "alert " + alertClass });
@@ -107,8 +107,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
         } else {
             e = angular.element(document.getElementById('alert-modal'));
 
-            $('#alertHeader').text(hdr);
-            $('#alert-modal-msg').text(msg);
+            $('#alertHeader').html(hdr);
+            $('#alert-modal-msg').html(msg);
             alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
             $('#alert-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal').modal({
