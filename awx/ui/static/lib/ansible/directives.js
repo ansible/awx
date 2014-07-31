@@ -786,7 +786,12 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     reader.onerror = function() {
                         Alert('Error','There was an error reading the selected file.');
                     };
-                    reader.readAsText(files[0]);
+                    if(files[0].size<10000){
+                        reader.readAsText(files[0]);
+                    }
+                    else {
+                        Alert('Error','There was an error reading the selected file.');
+                    }
                 });
             }
         };

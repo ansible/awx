@@ -362,7 +362,7 @@
               <div class="modal-header">
                 <button type="button" class="close" ng-hide="disableButtons" data-target="#alert-modal"
                     data-dismiss="modal" class="modal" aria-hidden="true">&times;</button>
-                <h3 ng-bind="alertHeader"></h3>
+                <h3 id= "alertHeader" ng-bind="alertHeader"></h3>
               </div>
               <div class="modal-body">
                 <div id="alert-modal-msg" class="alert" ng-bind-html="alertBody"></div>
@@ -380,7 +380,7 @@
               <div class="modal-header">
                 <button type="button" class="close" data-target="#alert-modal2"
                                 data-dismiss="modal" ng-hide="disableButtons2" aria-hidden="true">&times;</button>
-                <h3 ng-bind="alertHeader2"></h3>
+                <h3 id="alertHeader2" ng-bind="alertHeader2"></h3>
               </div>
               <div class="modal-body">
                 <div id="alert2-modal-msg" class="alert" ng-bind-html="alertBody2"></div>
