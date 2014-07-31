@@ -265,10 +265,10 @@ angular.module('CredentialFormDefinition', [])
                 awDropFile: true,
                 'class': 'ssh-key-field',
                 rows: 10,
-                awPopOver: "key_description", //kind.value" ==="gce") return "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Windows Azure console.";
-                dataTitle: 'Subscription ID',
-                dataPlacement: 'right',
-                dataContainer: "body"
+                // awPopOver: "key_description",
+                // dataTitle: 'Subscription ID',
+                // dataPlacement: 'right',
+                // dataContainer: "body"
             },
             "ssh_key_unlock": {
                 label: 'Key Password',
@@ -329,7 +329,7 @@ angular.module('CredentialFormDefinition', [])
                     variable: 'project_required',
                     init: false
                 },
-                awPopOver: "<p>The Project ID is the GCE assigned identification. It is constructed as two words followed by a three digit number.  Such as: </p><p>adjective-noun-000</p>", //kind.value" ==="gce") return "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Windows Azure console.";
+                awPopOver: "<p>The Project ID is the GCE assigned identification. It is constructed as two words followed by a three digit number.  Such as: </p><p>adjective-noun-000</p>",
                 dataTitle: 'Project ID',
                 dataPlacement: 'right',
                 dataContainer: "body",
