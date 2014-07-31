@@ -30,23 +30,31 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
             $('.site-footer').outerHeight() - $('.group-breadcrumbs').outerHeight() - $('#groups-container #search-widget-container').outerHeight() -
             $('#groups_table thead').height() ));
       */
-        return $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#breadcrumbs').outerHeight() -
+        var height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#breadcrumbs').outerHeight() -
             $('.site-footer').outerHeight() - $('.group-breadcrumbs').outerHeight() - $('#groups-container #search-widget-container').outerHeight() -
             $('#groups_table thead').height() - 90;
+        height = (height < 600) ? 600 : height;
+        return height;
     };
 }])
 
 .factory('GetHostContainerRows', [ function() {
     return function() {
-        var height = $('#hosts-container .list-well').height() - $('#hosts-constainer .list-well .row').height() - $('#hosts_table thead').height();
-        return Math.floor(height / 30) - 2;
+        var height, rows;
+        height = $('#hosts-container .list-well').height() - $('#hosts-constainer .list-well .row').height() - $('#hosts_table thead').height();
+        rows = Math.floor(height / 30) - 2;
+        rows = (rows < 20) ? 20 : rows;
+        return rows;
     };
 }])
 
 .factory('GetGroupContainerRows', [ function() {
     return function() {
-        var height = $('#groups-container .list-table-container').height();
-        return Math.floor(height / 31) - 2;
+        var height, rows;
+        height = $('#groups-container .list-table-container').height();
+        rows = Math.floor(height / 31) - 2;
+        rows = (rows < 20) ? 20 : rows;
+        return rows;
     };
 }])
 
@@ -54,35 +62,38 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
     return function(params) {
         var group_scope = params.group_scope,
             host_scope = params.host_scope,
-            reloadHosts = (params && params.reloadHosts) ? true : false,
+            reloadHosts = (params.reloadHosts) ? true : false,
             height, rows;
-        if ($(window).width() > 1210) {
-            height = GetGroupContainerHeight();
-            $('#groups-container .list-table-container').height(height);
-            $('#hosts-container .list-table-container').height(height);
-            setTimeout(function() { $('#hosts-container .list-well').height( $('#groups-container .list-well').outerHeight()); }, 500);
-        }
-        else {
-            $('#groups-container .list-table-container').height('auto');
-            $('#hosts-container .list-well').height('auto');
-        }
-        //$('#groups-container .list-table-container').mCustomScrollbar("update");
 
-        if (reloadHosts) {
-            // we need ro recalc the the page size
+        $('#groups-container .list-table-container').height('auto');
+        $('#hosts-container .list-well').height('auto');
+        $('#hosts-container .list-table-container').height('auto');
+
+        setTimeout(function() {
             if ($(window).width() > 1210) {
-                rows = GetHostContainerRows();
-                host_scope.host_page_size = rows;
-                group_scope.group_page_size = rows;
+                height = GetGroupContainerHeight();
+                $('#groups-container .list-table-container').height(height);
+                $('#hosts-container .list-table-container').height(height);
+                setTimeout(function() { $('#hosts-container .list-well').height( $('#groups-container .list-well').outerHeight()); }, 500);
             }
-            else {
-                // on small screens we go back to the default
-                host_scope.host_page_size = 20;
-                group_scope.group_page_size = 20;
+
+            if (reloadHosts) {
+                // we need ro recalc the the page size
+                if ($(window).width() > 1210) {
+                    rows = GetHostContainerRows();
+                    host_scope.host_page_size = rows;
+                    group_scope.group_page_size = rows;
+                }
+                else {
+                    // on small screens we go back to the default
+                    host_scope.host_page_size = 20;
+                    group_scope.group_page_size = 20;
+                }
+                host_scope.changePageSize('hosts', 'host');
+                group_scope.changePageSize('groups', 'group');
             }
-            host_scope.changePageSize('hosts', 'host');
-            group_scope.changePageSize('groups', 'group');
-        }
+        }, 100);
+
     };
 }])
 
@@ -95,15 +106,6 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                 host_scope = params.host_scope;
             $(window).off("resize");
             $(window).resize(_.debounce(function() {
-                // Hack to stop group-name div slipping to a new line
-                //$('#groups_table .name-column').each(function () {
-                //    var td_width = $(this).width(),
-                //        level_width = $(this).find('.level').width(),
-                //        level_padding = parseInt($(this).find('.level').css('padding-left').replace(/px/, '')),
-                //        level = level_width + level_padding,
-                //        pct = (100 - Math.ceil((level / td_width) * 100)) + '%';
-                //    $(this).find('.group-name').css({ width: pct });
-                //});
                 ApplyEllipsis('#groups_table .group-name a');
                 ApplyEllipsis('#hosts_table .host-name a');
                 SetContainerHeights({
