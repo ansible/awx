@@ -216,7 +216,11 @@ function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, C
         if (docw > 1200) {
             // customize the container height and # of rows based on available viewport height
             available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - 80;
-            available_height = (available_height < 550) ? 550 : available_height;
+            if (docw < 1350) {
+                available_height = (available_height < 800) ? 800 : available_height;
+            } else {
+                available_height = (available_height < 550) ? 550 : available_height;
+            }
             $log.debug('available_height: ' + available_height);
             $('.jobs-list-container').each(function() {
                 $(this).height(Math.floor(available_height / 2));
