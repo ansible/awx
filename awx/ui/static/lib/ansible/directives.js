@@ -782,6 +782,11 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     reader.onload = function() {
                         ctrl.$setViewValue(reader.result);
                         ctrl.$render();
+                        ctrl.$setValidity('required',true);
+                        ctrl.$dirty = true;
+                        if (!scope.$$phase) {
+                            scope.$digest();
+                        }
                     };
                     reader.onerror = function() {
                         Alert('Error','There was an error reading the selected file.');
