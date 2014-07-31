@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # init script to manage tower and its related services
 # Copyright (c) 2014 Ansible, Inc.
@@ -6,7 +6,7 @@
 
 if [ -e /etc/debian_version ]
 then 
-    SERVICES=(postgresql rabbitmq-server apache2 supervisord)
+    SERVICES=(postgresql rabbitmq-server apache2 supervisor)
 else
     SERVICES=(postgresql rabbitmq-server httpd supervisord)
 fi
@@ -28,7 +28,8 @@ case "$1" in
 	;;
     restart)
 	echo "Restarting Tower"
-	service_action restart
+	service_action stop
+	service_action start
 	;;
     status)
 	echo "Showing Tower Status"
