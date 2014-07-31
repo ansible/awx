@@ -20,8 +20,8 @@ angular.module('InventoryGroupsHelpDefinition', [])
                 intro: 'Start by creating a group:',
                 img: {
                     src: 'groups001.png',
-                    maxWidth: 338,
-                    maxHeight: 222
+                    maxWidth: 257,
+                    maxHeight: 114
                 },
                 box: "Click <i class=\"fa fa-plus\"></i> on the groups list (the left side of the page) to add a new group.",
                 autoOffNotice: true
@@ -49,24 +49,24 @@ angular.module('InventoryGroupsHelpDefinition', [])
                 intro: 'Cloud inventory: synchronize Tower with the cloud',
                 img: {
                     src: 'groups004.png',
-                    maxWidth: 261,
-                    maxHeight: 221
+                    maxWidth: 187,
+                    maxHeight: 175
                 },
                 box: "To import a cloud inventory into Tower, initiate an inventory sync by clicking <i class=\"fa fa-exchange\"></i>."
             }, {
                 intro: "Add subgroups:",
                 img: {
                     src: 'groups008.png',
-                    maxWidth: 500,
-                    maxHeight: 231
+                    maxWidth: 469,
+                    maxHeight: 243
                 },
-                box: "<div class=\"text-left\">First, select a group.</div>"
+                box: "<div class=\"text-left\">First, select an existing group.</div>"
             }, {
                 intro: "Add subgroups:",
                 img: {
                     src: 'groups009.png',
                     maxWidth: 475,
-                    maxHeight: 132
+                    maxHeight: 198
                 },
                 box: "<div class=\"text-left\">Then click <i class=\"fa fa-plus\"></i> to create a new group. The new group " +
                     "will be added to the selected group.</div>"
