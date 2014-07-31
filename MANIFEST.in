@@ -17,8 +17,8 @@ recursive-exclude awx/settings local_settings.py*
 include awx/ui/static/js/awx.min.js
 include awx/ui/static/js/config.js
 include tools/scripts/request_tower_configuration.sh
-include tools/scripts/tower_jobs
 include tools/scripts/ansible-tower
+include tools/munin_monitors/*
 include COPYING
 prune awx/public
 prune awx/projects
