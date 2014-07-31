@@ -222,12 +222,17 @@ class Ec2Inventory(object):
             self.route53_excluded_zones.extend(
                 config.get('ec2', 'route53_excluded_zones', '').split(','))
 
-        # Return all EC2/RDS instances
+        # Include RDS instances?
+        self.rds_enabled = True
+        if config.has_option('ec2', 'rds'):
+            self.rds_enabled = config.getboolean('ec2', 'rds')
+
+        # Return all EC2 and RDS instances (if RDS is enabled)
         if config.has_option('ec2', 'all_instances'):
             self.all_instances = config.getboolean('ec2', 'all_instances')
         else:
             self.all_instances = False
-        if config.has_option('ec2', 'all_rds_instances'):
+        if config.has_option('ec2', 'all_rds_instances') and self.rds_enabled:
             self.all_rds_instances = config.getboolean('ec2', 'all_rds_instances')
         else:
             self.all_rds_instances = False
@@ -241,7 +246,7 @@ class Ec2Inventory(object):
         self.cache_path_index = cache_dir + "/ansible-ec2.index"
         self.cache_max_age = config.getint('ec2', 'cache_max_age')
 
-        # Ansible Tower - configure nested groups instead of flat namespace.
+        # Configure nested groups instead of flat namespace.
         if config.has_option('ec2', 'nested_groups'):
             self.nested_groups = config.getboolean('ec2', 'nested_groups')
         else:
@@ -268,7 +273,8 @@ class Ec2Inventory(object):
 
         for region in self.regions:
             self.get_instances_by_region(region)
-            self.get_rds_instances_by_region(region)
+            if self.rds_enabled:
+                self.get_rds_instances_by_region(region)
 
         self.write_to_cache(self.inventory, self.cache_path_cache)
         self.write_to_cache(self.index, self.cache_path_index)
@@ -289,12 +295,12 @@ class Ec2Inventory(object):
             if conn is None:
                 print("region name: %s likely not supported, or AWS is down.  connection to region failed." % region)
                 sys.exit(1)
- 
+
             reservations = conn.get_all_instances()
             for reservation in reservations:
                 for instance in reservation.instances:
                     self.add_instance(instance, region)
-        
+
         except boto.exception.BotoServerError, e:
             if  not self.eucalyptus:
                 print "Looks like AWS is down again:"
@@ -358,6 +364,8 @@ class Ec2Inventory(object):
 
         # Inventory: Group by instance ID (always a group of 1)
         self.inventory[instance.id] = [dest]
+        if self.nested_groups:
+            self.push_group(self.inventory, 'instances', instance.id)
 
         # Inventory: Group by region
         if self.nested_groups:
@@ -441,21 +449,34 @@ class Ec2Inventory(object):
 
         # Inventory: Group by instance ID (always a group of 1)
         self.inventory[instance.id] = [dest]
+        if self.nested_groups:
+            self.push_group(self.inventory, 'instances', instance.id)
 
         # Inventory: Group by region
-        self.push(self.inventory, region, dest)
+        if self.nested_groups:
+            self.push_group(self.inventory, 'regions', region)
+        else:
+            self.push(self.inventory, region, dest)
 
         # Inventory: Group by availability zone
         self.push(self.inventory, instance.availability_zone, dest)
+        if self.nested_groups:
+            self.push_group(self.inventory, region, instance.availability_zone)
         
         # Inventory: Group by instance type
-        self.push(self.inventory, self.to_safe('type_' + instance.instance_class), dest)
+        type_name = self.to_safe('type_' + instance.instance_class)
+        self.push(self.inventory, type_name, dest)
+        if self.nested_groups:
+            self.push_group(self.inventory, 'types', type_name)
         
         # Inventory: Group by security group
         try:
             if instance.security_group:
                 key = self.to_safe("security_group_" + instance.security_group.name)
                 self.push(self.inventory, key, dest)
+                if self.nested_groups:
+                    self.push_group(self.inventory, 'security_groups', key)
+
         except AttributeError:
             print 'Package boto seems a bit older.'
             print 'Please upgrade boto >= 2.3.0.'
@@ -463,12 +484,18 @@ class Ec2Inventory(object):
 
         # Inventory: Group by engine
         self.push(self.inventory, self.to_safe("rds_" + instance.engine), dest)
+        if self.nested_groups:
+            self.push_group(self.inventory, 'rds_engines', self.to_safe("rds_" + instance.engine))
 
         # Inventory: Group by parameter group
         self.push(self.inventory, self.to_safe("rds_parameter_group_" + instance.parameter_group.name), dest)
+        if self.nested_groups:
+            self.push_group(self.inventory, 'rds_parameter_groups', self.to_safe("rds_parameter_group_" + instance.parameter_group.name))
 
         # Global Tag: all RDS instances
         self.push(self.inventory, 'rds', dest)
+
+        self.inventory["_meta"]["hostvars"][dest] = self.get_host_info_dict_from_instance(instance)
 
 
     def get_route53_records(self):
@@ -584,7 +611,7 @@ class Ec2Inventory(object):
         return self.json_format_dict(self.get_host_info_dict_from_instance(instance), True)
 
     def push(self, my_dict, key, element):
-        ''' Pushed an element onto an array that may not have been defined in
+        ''' Push an element onto an array that may not have been defined in
         the dict '''
         group_info = my_dict.setdefault(key, [])
         if isinstance(group_info, dict):

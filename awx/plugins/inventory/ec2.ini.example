@@ -38,6 +38,9 @@ vpc_destination_variable = ip_address
 # Route53, uncomment and set 'route53' to True.
 route53 = False
 
+# To exclude RDS instances from the inventory, uncomment and set to False.
+#rds = False
+
 # Additionally, you can specify the list of zones to exclude looking up in
 # 'route53_excluded_zones' as a comma-separated list.
 # route53_excluded_zones = samplezone1.com, samplezone2.com
@@ -59,8 +62,8 @@ cache_path = ~/.ansible/tmp
 
 # The number of seconds a cache file is considered valid. After this many
 # seconds, a new API call will be made, and the cache file will be updated.
+# To disable the cache, set this value to 0
 cache_max_age = 300
 
-# For Ansible Tower, organize groups into a nested/hierarchy instead of a flat
-# namespace.
-nested_groups = True
+# Organize groups into a nested/hierarchy instead of a flat namespace.
+nested_groups = False

@@ -382,7 +382,7 @@ EC2_INSTANCE_ID_VAR = 'ec2_id'
 # By default, filter group of one created for each instance, filter all RDS
 # hosts, and exclude all groups without children, hosts and variables.
 EC2_GROUP_FILTER = r'^(?!i-[a-f0-9]{8,}).+$'
-EC2_HOST_FILTER = r'^.+(?<!rds\.amazonaws\.com)$'
+EC2_HOST_FILTER = r'^.+$'
 EC2_EXCLUDE_EMPTY_GROUPS = True
 
 
