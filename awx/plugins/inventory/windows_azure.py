@@ -92,13 +92,23 @@ class AzureInventory(object):
         elif self.args.list:
             # Display list of nodes for inventory
             if len(self.inventory) == 0:
-                data_to_print = self.get_inventory_from_cache()
+                data = json.loads(self.get_inventory_from_cache())
             else:
-                data_to_print = self.json_format_dict(self.inventory, True)
+                data = self.inventory
+
+            # Add the `_meta` information.
+            _meta = {}
+            for host in set(reduce(lambda x, y: x + y,
+                                   [i for i in data.values()])):
+                _meta[host] = self.get_host(host, jsonify=False)
+            data['_meta'] = _meta
+
+            # JSONify the data.
+            data_to_print = self.json_format_dict(data, pretty=True)
 
         print data_to_print
 
-    def get_host(self, hostname):
+    def get_host(self, hostname, jsonify=True):
         """Return information about the given hostname, based on what
         the Windows Azure API provides.
         """
@@ -110,10 +120,13 @@ class AzureInventory(object):
         # Retrieve information about the host.
         host = self.sms.get_hosted_service_properties(hostname)
         hsp = host.hosted_service_properties  # Because reasons.
-        return json.dumps({
+        answer = {
             'label': hsp.label,
             'status': hsp.status.lower(),
-        })
+        }
+        if jsonify:
+            return json.dumps(answer)
+        return answer
 
     def get_images(self):
         images = []
@@ -195,7 +208,9 @@ class AzureInventory(object):
             sys.exit(1)
 
     def add_deployments(self, cloud_service):
-        """Makes an Azure API call to get the list of virtual machines associated with a cloud service"""
+        """Makes an Azure API call to get the list of virtual machines
+        associated with a cloud service.
+        """
         try:
             for deployment in self.sms.get_hosted_service_properties(cloud_service.service_name,embed_detail=True).deployments.deployments:
                 if deployment.deployment_slot == "Production":
