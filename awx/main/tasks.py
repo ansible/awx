@@ -492,6 +492,13 @@ class RunJob(BaseTask):
         elif cloud_cred and cloud_cred.kind == 'rax':
             env['RAX_USERNAME'] = cloud_cred.username
             env['RAX_API_KEY'] = decrypt_field(cloud_cred, 'password')
+        elif cloud_cred and cloud_cred.kind == 'gce':
+            env['GCE_EMAIL'] = cloud_cred.username
+            env['GCE_PROJECT'] = cloud_cred.project
+            env['GCE_PEM_FILE_PATH'] = kwargs['private_data_file']
+        elif cloud_cred and cloud_cred.kind == 'azure':
+            env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.username
+            env['AZURE_CERT_PATH'] = kwargs['private_data_file']
 
         return env
 
