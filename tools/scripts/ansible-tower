@@ -26,10 +26,15 @@ fi
 
 service_action() {
     for svc in ${SERVICES[@]}; do
-	/etc/init.d/${svc} $1
+	service ${svc} $1
+	this_return=$?
+	if [ $this_return -gt $worst_return ]; then
+	    worst_return=$this_return
+	fi
     done
 }
 
+worst_return=0
 case "$1" in
     start)
 	echo "Starting Tower"
@@ -51,3 +56,4 @@ case "$1" in
     *)
 	echo "Usage: $0 {start|stop|restart|status}"
 esac
+exit $worst_return
