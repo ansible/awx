@@ -1,3 +1,4 @@
+
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
@@ -39,7 +40,7 @@ from ansi2html.style import SCHEME
 import qsstats
 
 # AWX
-from awx.main.task_engine import TaskSerializer
+from awx.main.task_engine import TaskSerializer, TASK_FILE
 from awx.main.models import *
 from awx.main.utils import *
 from awx.main.access import get_user_queryset
@@ -143,6 +144,25 @@ class ApiV1ConfigView(APIView):
             ))
 
         return Response(data)
+
+    def post(self, request):
+        if not request.user.is_superuser:
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+        try:
+            data_actual = json.dumps(request.DATA)
+        except Exception, e:
+            return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
+        license_reader = TaskSerializer()
+        try:
+            license_data = license_reader.from_string(data_actual)
+        except Exception, e:
+            return Response({"error": "Invalid License"}, status=status.HTTP_400_BAD_REQUEST)
+        if license_data['valid_key']:
+            fh = open(TASK_FILE, "w")
+            fh.write(data_actual)
+            fh.close()
+            return Response(license_data)
+        return Response({"error": "Invalid license"}, status=status.HTTP_400_BAD_REQUEST)
 
 class DashboardView(APIView):
 
