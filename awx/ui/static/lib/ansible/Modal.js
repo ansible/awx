@@ -8,11 +8,11 @@
  *
  *
  */
- 
+
 'use strict';
 
 angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
-    
+
     /**
      *
      * CreateDialog({
@@ -30,7 +30,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
      *     callback:     - String to pass to scope.$emit() after dialog is created, optional
      * })
      *
-     * Note that the dialog will be created but not opened. It's up to the caller to open it. Use callback 
+     * Note that the dialog will be created but not opened. It's up to the caller to open it. Use callback
      * option to respond to dialog created event.
      */
     .factory('CreateDialog', ['Empty', function(Empty) {
@@ -65,12 +65,12 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                     "id": "dialog-ok-button"
                 }];
             }
-            
+
             buttons = {};
             buttonSet.forEach( function(btn) {
                 buttons[btn.label] = btn.onClick;
             });
-            
+
             // Set modal dimensions based on viewport width
             ww = $(document).width();
             wh = $('body').height();
@@ -90,7 +90,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 create: function () {
                     // Fix the close button
                     $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
-                    
+
                     setTimeout(function() {
                         // Make buttons bootstrapy
                         $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-buttonset button').each(function () {
@@ -161,26 +161,32 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
     }])
 
     /**
-     * TextareaResize({ 
+     * TextareaResize({
      *     scope:           - $scope associated with the textarea element
      *     textareaId:      - id attribute value of the textarea
      *     modalId:         - id attribute of the <div> element used to create the modal
      *     formId:          - id attribute of the textarea's parent form
      *     parse:           - if true, call ParseTypeChange and replace textarea with codemirror editor
+     *     fld:             - optional, form field name
+     *     bottom_margin:   - optional, integer value for additional margin to leave below the textarea
+     *     onChange;        - optional, function to call when the textarea value changes
      *  })
      *
-     *  Use to resize a textarea field contained on a modal. Has only been tested where the 
+     *  Use to resize a textarea field contained on a modal. Has only been tested where the
      *  form contains 1 textarea and the the textarea is at the bottom of the form/modal.
      *
      **/
     .factory('TextareaResize', ['ParseTypeChange', 'Wait', function(ParseTypeChange, Wait){
         return function(params) {
-            
+
             var scope = params.scope,
                 textareaId = params.textareaId,
                 modalId = params.modalId,
                 formId = params.formId,
+                fld = params.fld,
                 parse = (params.parse === undefined) ? true : params.parse,
+                bottom_margin = (params.bottom_margin) ? params.bottom_margin : 0,
+                onChange = params.onChange,
                 textarea,
                 formHeight, model, windowHeight, offset, rows;
 
@@ -188,7 +194,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 Wait('stop');
             }
 
-            // Attempt to create the largest textarea field that will fit on the window. Minimum 
+            // Attempt to create the largest textarea field that will fit on the window. Minimum
             // height is 6 rows, so on short windows you will see vertical scrolling
             textarea = $('#' + textareaId);
             if (scope.codeMirror) {
@@ -199,16 +205,16 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
             textarea.attr('rows', 1);
             formHeight = $('#' + formId).height();
             windowHeight = $('#' + modalId).height() - 20;   //leave a margin of 20px
-            offset = Math.floor(windowHeight - formHeight);
+            offset = Math.floor(windowHeight - formHeight - bottom_margin);
             rows = Math.floor(offset / 20);
             rows = (rows < 6) ? 6 : rows;
             textarea.attr('rows', rows);
-            while(rows > 6 && $('#' + formId).height() > $('#' + modalId).height()) {
+            while(rows > 6 && ($('#' + formId).height() > $('#' + modalId).height() + bottom_margin)) {
                 rows--;
                 textarea.attr('rows', rows);
             }
             if (parse) {
-                ParseTypeChange({ scope: scope, field_id: textareaId, onReady: waitStop });
+                ParseTypeChange({ scope: scope, field_id: textareaId, onReady: waitStop, variable: fld, onChange: onChange });
             }
         };
     }]);

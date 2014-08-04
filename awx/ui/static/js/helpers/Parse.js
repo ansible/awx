@@ -13,7 +13,7 @@
 angular.module('ParseHelper', ['Utilities', 'AngularCodeMirrorModule'])
     .factory('ParseTypeChange', ['Alert', 'AngularCodeMirror', function (Alert, AngularCodeMirror) {
         return function (params) {
-        
+
             var scope = params.scope,
                 field_id = params.field_id,
                 fld = (params.variable) ? params.variable : 'variables',

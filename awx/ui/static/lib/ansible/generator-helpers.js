@@ -51,7 +51,7 @@ angular.module('GeneratorHelpers', [])
                 result = "ng-show=\"" + value + "\" ";
                 break;
             case 'icon':
-                // new method of constructing <i> icon tag. Replces Icon method.
+                // new method of constructing <i> icon tag. Replaces Icon method.
                 result = "<i class=\"fa fa-" + value;
                 result += (obj.iconSize) ? " " + obj.iconSize : "";
                 result += "\"></i>";
@@ -127,6 +127,7 @@ angular.module('GeneratorHelpers', [])
                 icon = 'fa-arrow-left';
                 break;
             case 'save':
+            case 'form_submit':
                 icon = 'fa-check-square-o';
                 break;
             case 'properties':

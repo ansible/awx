@@ -9,7 +9,8 @@
 
 'use strict';
 
-angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
+angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies', 'LicenseUpdateFormDefinition', 'FormGenerator', 'ParseHelper', 'ModalDialog', 'VariablesHelper'])
+
     .factory('CheckAccess', ['$rootScope', 'Alert', 'Rest', 'GetBasePath', 'ProcessErrors',
         function ($rootScope, Alert, Rest, GetBasePath, ProcessErrors) {
             return function (params) {
@@ -48,6 +49,199 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
         }
     ])
 
+.factory('CheckLicense', ['$rootScope', '$compile', 'CreateDialog', 'Store', 'LicenseUpdateForm', 'GenerateForm', 'TextareaResize', 'ToJSON', 'GetBasePath', 'Rest', 'ProcessErrors', 'Alert',
+function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateForm, TextareaResize, ToJSON, GetBasePath, Rest, ProcessErrors, Alert) {
+    return {
+        getRemainingDays: function(time_remaining) {
+            // assumes time_remaining will be in seconds
+            var tr = parseInt(time_remaining, 10);
+            return Math.floor(tr / 86400);
+        },
+
+        shouldNotify: function(license) {
+            if (license && typeof license === 'object' && Object.keys(license).length > 0) {
+                // we have a license object
+                if (!license.valid_key) {
+                    // missing valid key
+                    return true;
+                }
+                else if (license.free_instances <= 0) {
+                    // host count exceeded
+                    return true;
+                }
+                else if (this.getRemainingDays(license.time_remaining) < 15) {
+                    // below 15 days remaining on license
+                    return true;
+                }
+                return false;
+            } else {
+                // missing license object
+                return true;
+            }
+        },
+
+        getHTML: function(license) {
+            var title, html, result = {};
+            if (license && typeof license === 'object' && Object.keys(license).length > 0 && license.valid_key !== undefined) {
+                // we have a license
+                if (!license.valid_key) {
+                    title = "Invalid License";
+                    html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>The Ansible Tower license is invalid. Please visit " +
+                        "<a href=\"http://ansible.com/license\" target=\"_blank\">http://ansible.com/license</a> to obtain a valid license key. " +
+                        "Copy and paste the key in the field below and click the Submit button.</p></div>";
+                }
+                else if (this.getRemainingDays(license.time_remaining) <= 0) {
+                    if (parseInt(license.grace_period_remaining,10) > 86400) {
+                        title = "License Expired";
+                        html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for using Ansible Tower. The Ansible Tower license " +
+                        "has expired. You will no longer be able to run playbooks after " + this.getRemainingDays(license.grace_period_remaining) + " days</p>" +
+                        "<p>Please visit <a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a> to purchse a valid license. " +
+                        "Copy and paste the new license key in the field below and click the Submit button.</p></div>";
+                    } else {
+                        title = "License Expired";
+                        html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for using Ansible Tower. The Ansible Tower license " +
+                        "has expired, and the 30 day grace period has been exceeded. To continue using Tower to run playbooks and adding managed hosts a " +
+                        "valid license key is required.</p><p>Please visit <a href=\"ansible.com/license\" target=\"_blank\">http://ansible.com/license</a> to " +
+                        "purchse a license. Copy and paste the new license key in the field below and click the Submit button.</p>";
+                    }
+                }
+                else if (this.getRemainingDays(license.time_remaining) < 15) {
+                    html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for using Ansible Tower. The Ansible Tower license " +
+                        "has " +  this.getRemainingDays(license.time_remaining) + " remaining.</p>" +
+                        "<p>Extend your Ansible Tower license by visiting <a href=\"ansible.com/license\" target=\"_blank\">http://ansible.com/license</a>. " +
+                        "Copy and paste the new license key in the field below and click the Submit button.</p></div>";
+                }
+                else if (license.free_instances <= 0) {
+                    title = "Host Count Exceeded";
+                    html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>The Ansible Tower license has reached capacity for the number of " +
+                        "managed hosts allowed. No additional hosts can be added.</p><p>To extend the Ansible Tower license please visit " +
+                        "<a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a>. " +
+                        "Copy and paste the new license key in the field below and click the Submit button.</p>";
+                }
+            } else {
+                // No license
+                title = "License Required";
+                html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for trying Ansible Tower. A <strong>FREE</strong> trial license is available for various infrastructure sizes, as well as free unlimited use for up to ten nodes.<p>" +
+                    "<p>Visit <a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a> to obtain a free license key. Copy and paste the key in the field below and " +
+                    "click the Submit button.</p></div>";
+            }
+            html += GenerateForm.buildHTML(LicenseUpdateForm, { mode: 'edit', showButtons: true, breadCrumbs: false });
+            html += "</div>";
+            result.body = html;
+            result.title = title;
+            return result;
+        },
+
+        test: function() {
+            var license = Store('license'),
+                notify = this.shouldNotify(license),
+                html, buttons, scope;
+
+            if (license && typeof license === 'object' && Object.keys(license).length > 0) {
+                if (license.tested) {
+                    return true;
+                }
+                license.tested = true;
+                Store('license',license);  //update with tested flag
+            }
+
+            if (!notify) {
+                return true;
+            }
+
+            scope = $rootScope.$new();
+            html = this.getHTML(license);
+            $('#license-modal-dialog').html(html.body);
+
+            scope.flashMessage = null;
+            scope.parseType = 'json';
+            scope.license_json = " ";
+
+            scope.removeLicenseDialogReady = scope.$on('LicenseDialogReady', function() {
+                var e = angular.element(document.getElementById('license-modal-dialog'));
+                $compile(e)(scope);
+                $('#license-modal-dialog').dialog('open');
+            });
+
+            scope.submitLicenseKey = function() {
+                var url = GetBasePath('config'),
+                    json_data = ToJSON(scope.parseType, scope.license_json);
+                if (typeof json_data === 'object' && Object.keys(json_data).length > 0) {
+                    Rest.setUrl(url);
+                    Rest.post(json_data)
+                        .success(function () {
+                            $('#license-modal-dialog').dialog('close');
+                            Alert('License Accepted', 'The Ansible Tower license was updated. To view or update license information in the future choose View License from the Account menu.','alert-info');
+                        })
+                        .error(function (data, status) {
+                            scope.license_json_api_error = "A valid license key in JSON format is required";
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Failed to update license. POST returned: ' + status
+                            });
+                        });
+                } else {
+                    scope.license_json_api_error = "A valid license key in JSON format is required";
+                }
+            };
+
+            buttons = [{
+                label: "Cancel",
+                onClick: function() {
+                    $('#license-modal-dialog').dialog('close');
+                },
+                "class": "btn btn-default",
+                "id": "license-cancel-button"
+            }];
+
+            CreateDialog({
+                scope: scope,
+                buttons: buttons,
+                width: 700,
+                height: 625,
+                minWidth: 400,
+                title: html.title,
+                id: 'license-modal-dialog',
+                clonseOnEscape: false,
+                onClose: function() {
+                    if (scope.codeMirror) {
+                        scope.codeMirror.destroy();
+                    }
+                    $('#license-modal-dialog').empty();
+                },
+                onResizeStop: function() {
+                    TextareaResize({
+                        scope: scope,
+                        textareaId: 'license_license_json',
+                        modalId: 'license-modal-dialog',
+                        formId: 'license-notification-body',
+                        fld: 'license_json',
+                        bottom_margin: 30,
+                        parse: true,
+                        onChange: function() { scope.license_json_api_error = ''; }
+                    });
+                },
+                onOpen: function() {
+                    setTimeout(function() {
+                        TextareaResize({
+                            scope: scope,
+                            textareaId: 'license_license_json',
+                            modalId: 'license-modal-dialog',
+                            formId: 'license-notification-body',
+                            fld: 'license_json',
+                            bottom_margin: 30,
+                            parse: true,
+                            onChange: function() { scope.license_json_api_error = ''; }
+                        });
+                        $('#cm-license_json-container .CodeMirror textarea').focus();
+                    }, 300);
+                },
+                callback: 'LicenseDialogReady'
+            });
+        }
+    };
+}]);
+
+/*
 .factory('CheckLicense', ['$rootScope', 'Store', 'Alert', '$location', 'Authorization',
     function ($rootScope, Store, Alert, $location, Authorization) {
         return function () {
@@ -104,3 +298,6 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
         };
     }
 ]);
+*/
+
+

@@ -511,7 +511,7 @@ angular.module('Tower', [
                         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
-                        CheckLicense();
+                        CheckLicense.test();
                     }
 
                     activateTab();
