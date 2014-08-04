@@ -160,7 +160,7 @@ class AzureInventory(object):
 
         # Cache related
         if config.has_option('azure', 'cache_path'):
-            cache_path = config.get('azure', 'cache_path')
+            cache_path = os.path.expanduser(config.get('azure', 'cache_path'))
             self.cache_path_cache = cache_path + '/ansible-azure.cache'
             self.cache_path_index = cache_path + '/ansible-azure.index'
         if config.has_option('azure', 'cache_max_age'):
