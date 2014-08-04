@@ -274,7 +274,7 @@ class InventoryTest(BaseTest):
         inventories_2 = reverse('api:inventory_detail', args=(self.inventory_b.pk,))
         hosts         = reverse('api:host_list')
         groups        = reverse('api:group_list')
-
+        self.create_test_license_file()
 
         # a super user can add hosts (but inventory ID is required)
         inv = Inventory.objects.create(

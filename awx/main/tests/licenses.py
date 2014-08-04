@@ -70,4 +70,43 @@ class LicenseTests(BaseTest):
         assert vdata['valid_key'] == True
         assert vdata['compliant'] == False
 
+    def test_expired_licenses(self):
+        reader = TaskSerializer()
+        writer = TaskEngager(
+            company_name='Tower',
+            contact_name='Tower Admin',
+            contact_email='tower@ansible.com',
+            license_date=int(time.time() - 3600),
+            instance_count=100,
+            trial=True)
+        strdata = writer.get_string()
+        vdata = reader.from_string(strdata)
 
+        assert vdata['compliant'] == False
+        assert vdata['grace_period_remaining'] < 0
+
+        writer = TaskEngager(
+            company_name='Tower',
+            contact_name='Tower Admin',
+            contact_email='tower@ansible.com',
+            license_date=int(time.time() - 2592001),
+            instance_count=100,
+            trial=False)
+        strdata = writer.get_string()
+        vdata = reader.from_string(strdata)
+
+        assert vdata['compliant'] == False
+        assert vdata['grace_period_remaining'] < 0
+
+        writer = TaskEngager(
+            company_name='Tower',
+            contact_name='Tower Admin',
+            contact_email='tower@ansible.com',
+            license_date=int(time.time() - 3600),
+            instance_count=100,
+            trial=False)
+        strdata = writer.get_string()
+        vdata = reader.from_string(strdata)
+
+        assert vdata['compliant'] == False
+        assert vdata['grace_period_remaining'] > 0

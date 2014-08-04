@@ -358,8 +358,12 @@ class HostAccess(BaseAccess):
             # this hack is in here so the test code can function
             # but still go down *most* of the license code path.
             validation_info['free_instances'] = 99999999
+            validation_info['time_remaining'] = 99999999
+            validation_info['grace_period_remaining'] = 99999999
 
-        if not validation_info.get('demo') and validation_info.get('time_remaining') <= 0:
+        if validation_info.get('time_remaining', None) is None:
+            raise PermissionDenied("license is missing")
+        if validation_info.get('grace_period_remaining') <= 0:
             raise PermissionDenied("license has expired")
 
         if validation_info.get('free_instances', 0) > 0:
@@ -987,6 +991,21 @@ class JobAccess(BaseAccess):
         return self.can_read(obj)
 
     def can_start(self, obj):
+        reader = TaskSerializer()
+        validation_info = reader.from_file()
+
+        if 'test' in sys.argv:
+            validation_info['free_instances'] = 99999999
+            validation_info['time_remaining'] = 99999999
+            validation_info['grace_period_remaining'] = 99999999
+
+        if validation_info.get('time_remaining', None) is None:
+            raise PermissionDenied("license is missing")
+        if validation_info.get("grace_period_remaining") <= 0:
+            raise PermissionDenied("license has expired")
+        if validation_info.get('free_instances', 0) < 0:
+            raise PermissionDenied("Host Count exceeds available instances")
+
         dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and \
                      self.user.can_access(Project, 'read', obj.project)
         return self.can_read(obj) and obj.can_start and dep_access
