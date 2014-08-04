@@ -215,6 +215,55 @@ wwoi+P4JlJF6ZuhuDv6mhmBCSdXdc1bvimvdpOljhThr+cG5mM08iqWGKdA665cw
 -----END RSA PRIVATE KEY-----
 '''
 
+TEST_SSH_CERT_KEY = """-----BEGIN CERTIFICATE-----
+MIIDNTCCAh2gAwIBAgIBATALBgkqhkiG9w0BAQswSTEWMBQGA1UEAwwNV2luZG93
+cyBBenVyZTELMAkGA1UEBhMCVVMxIjAgBgkqhkiG9w0BCQEWE2x1a2VAc25lZXJp
+bmdlci5jb20wHhcNMTQwNzI4MTQzMjExWhcNMTUwNzI4MTQzMjExWjBJMRYwFAYD
+VQQDDA1XaW5kb3dzIEF6dXJlMQswCQYDVQQGEwJVUzEiMCAGCSqGSIb3DQEJARYT
+bHVrZUBzbmVlcmluZ2VyLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+ggEBAL9UHMhmAkbEJtg7jxAYjRbyTILDkNG5X/5UDpReIBD3VZfIrrXKX/groKbE
+uiH9vdHkhdbOV1WkINuz+12Hdfk7irRXPRNC6SQVNeCy/DuCIEX+pQCAn60pc3eT
+ctQG4oCiwQrlFMjoV9S5kbKoUavtuEt7Huo4YIVJK1/McEYq8mIM1W6MGOwXQI0b
+rKsp1zRviiQWU5zijQYxepSpBNJcGS1lNhD1m5ycy7+0Zm7FqBa6nlf/2kLadREF
+4o3bHljfrLTa+czV9lI9HjwpeLCfccx0T7etpv+u/JzSlt1MlAnlCNtz2wo1oNdi
+scyRdRlb00AWQMneQfSYgwGHyQ8CAwEAAaMqMCgwDgYDVR0PAQH/BAQDAgeAMBYG
+A1UdJQEB/wQMMAoGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4IBAQCc064W0uk3
+hVVYtHuOBPSag9TvyqJrnvHsPgWiwFTh7t4CGF2TiH6myxkboAN0BGZqIj0zorT+
+VORmZ4PrDqV29q8M77n4aTmDmqXXcCAMOtyC87xlK+YvsVtrvu2zYXnZV+BJ+UtT
+FpDqgMLrE0ecnkDClAK4vPx3TqSzU3v//lgUG1o3VibJbzMptggMVA4Hl9AXGLnU
+FNpK5B4mm/PQHQC1Ma/nweMoDcVlQUne8XgnwEf0ixGkViFLm6FmI7DfKUpq3zXb
+vWKu8qiBmz4tju6LT2n+q66MNEMmS1qhuJJYZrORJgQkCVbo1RRwW6UNZSIjD8D6
+8QJhq7hCxteN
+-----END CERTIFICATE-----
+-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEAv1QcyGYCRsQm2DuPEBiNFvJMgsOQ0blf/lQOlF4gEPdVl8iu
+tcpf+CugpsS6If290eSF1s5XVaQg27P7XYd1+TuKtFc9E0LpJBU14LL8O4IgRf6l
+AICfrSlzd5Ny1AbigKLBCuUUyOhX1LmRsqhRq+24S3se6jhghUkrX8xwRiryYgzV
+bowY7BdAjRusqynXNG+KJBZTnOKNBjF6lKkE0lwZLWU2EPWbnJzLv7RmbsWoFrqe
+V//aQtp1EQXijdseWN+stNr5zNX2Uj0ePCl4sJ9xzHRPt62m/678nNKW3UyUCeUI
+23PbCjWg12KxzJF1GVvTQBZAyd5B9JiDAYfJDwIDAQABAoIBACNozL7l6ivwp4PD
+WhHPiWUiyLg2u3mlBjgKlHwvA15AeC3ULUllv+ctI9lZdV1PGa9bzM1ZeN5XtuES
+aUYBCPtsYppHvvzumDleV49TcM0OoyxxGVaDd4nTrxQFTO4irA7EkFeU2Ajqvz6W
+bXmUHzFjmIUXrzwH3Q0t4oIjUvAZNhNY63G3XZ264pNckvtuRArgn0r7e+trplII
+qDYPwOLPhorwG6a0HIsSWbECA+NbzC5wBIr4CMfDRiHDQ5g4cGstpbBAUkAs2LSU
+2QcGp3AIqOnzMDxLTMqKcKQ9YXOMqTpVoyll+jkgdHLCqHjo+O51/E5AsjBcabmi
+4LpeVsECgYEA+7g2y8J54GWhNOpJ+RQ6IvoUuA9YmEe3byIglat5b+AWuy7Miq4u
+VSiIjEqDf8Ci1LxHrkRCe4S/9VZSNJdfbv5I1LW3Wx4JRZ1JFR5Z9B0XI5SdkokM
+O9DXIJHgxSzC9kCKgBpH5KxqMpEdMMv70C7gbMpnONEL1zIOZJxAwq8CgYEAwpUB
+Dp5l8Wpma5SnUAJiTU9XdgtPr1M8WFde9jP3e2VK2O4DmnZkLN5aLbMfnftUNAl1
+mP4CTxtkkEwNtkol+rZAy6wwzQA/TP2yC0Wfw+xeDTKJ+JDDoWM+4FAhjBpns/gx
+Ehfqj76jRjBW9DtARaHgrIHHFUn2p6wMZq4Sd6ECgYEA4jlNrdQrGnvb5KWHM750
+/UhJ5J2OHtWdStid9kU0j1ISu8k0dJJT+57BEWxKQD9NV+madkjMgxvsNL6OhMti
+LmuD4v8pOU+GP7U6oCs15slaKVUARFi80OlA3fmcyzgOQ6f/kV+NKzu0+ZsnY9p/
+hjsK4VsKZ6qgfJd1DgDLxusCgYArXCDcLRfycA9ascmG3sEhESkgOO0M2LN9zBpx
+KqtfZ/cB2CgdZ3xzMylNPbkx7yuYXPNDoHbLQgNq1EfJ80P7VlmiCUDmrcNtWKsw
+L9emRSnALx7nsPqnIAKG4dRX8Bpj1E67BXFTjtu7bFI0Im/0FFqIlnLSn6TDQGeT
+Cf87gQKBgCgW/kFaQAhP5Pdb7oOQcaF4/dq50QNDyQMFOPKWHY/5IrsIrDVI5V/D
+o1npLPB+YE3baQqo58JX1UuO83F4zlwzS3Q4lS3dxg+gdvgzFHvQd/SV5IDhmLWL
+L5Hj+B02+FAiz8zVGumbVykvPtzgTb0E+0rJKNO0/EgGqWsk/oC0
+-----END RSA PRIVATE KEY-----
+"""
+
 TEST_SSH_KEY_DATA_UNLOCK = 'unlockme'
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
@@ -993,9 +1042,16 @@ class RunJobTest(BaseCeleryTest):
         elif kind == 'rax':
             env_var1 = 'RAX_USERNAME'
             env_var2 = 'RAX_API_KEY'
+        elif kind == 'gce':
+            env_var1 = 'GCE_EMAIL'
+            env_var2 = 'GCE_PEM_FILE_PATH'
+        elif kind == 'azure':
+            env_var1 = 'AZURE_SUBSCRIPTION_ID'
+            env_var2 = 'AZURE_CERT_PATH'
         self.create_test_cloud_credential(name='%s cred' % kind, kind=kind,
                                           username='my %s access' % kind,
-                                          password='my %s secret' % kind)
+                                          password='my %s secret' % kind,
+                                          ssh_key_data=TEST_SSH_CERT_KEY)
         playbook = TEST_ENV_PLAYBOOK % {'env_var1': env_var1,
                                         'env_var2': env_var2}
         self.create_test_project(playbook)
@@ -1014,6 +1070,12 @@ class RunJobTest(BaseCeleryTest):
 
     def test_rax_cloud_credential_environment_variables(self):
         self._test_cloud_credential_environment_variables('rax')
+
+    def test_gce_cloud_credential_environment_variables(self):
+        self._test_cloud_credential_environment_variables('gce')
+
+    def test_azure_cloud_credential_environment_variables(self):
+        self._test_cloud_credential_environment_variables('azure')
 
     def test_run_async_job(self):
         self.create_test_project(TEST_ASYNC_OK_PLAYBOOK)

@@ -435,9 +435,22 @@ class RunJob(BaseTask):
         Return SSH private key data needed for this job (only if stored in DB
         as ssh_key_data).
         '''
+        # If we were sent SSH credentials, decrypt them and send them
+        # back (they will be written to a temporary file).
         credential = getattr(job, 'credential', None)
         if credential:
             return decrypt_field(credential, 'ssh_key_data') or None
+
+        # We might also have been sent a cloud credential. If so, send it.
+        #
+        # This sets up an either/or situation with credential and cloud
+        # credential when it comes to SSH data. This should be fine, as if
+        # you're running against cloud instances, you'll be using the cloud
+        # credentials to do so. I assert that no situation currently exists
+        # where we need both.
+        cloud_credential = getattr(job, 'cloud_credential', None)
+        if cloud_credential:
+            return decrypt_field(cloud_credential, 'ssh_key_data') or None
 
     def build_passwords(self, job, **kwargs):
         '''
