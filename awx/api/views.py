@@ -118,7 +118,7 @@ class ApiV1ConfigView(APIView):
         '''Return various sitewide configuration settings.'''
 
         license_reader = TaskSerializer()
-        license_data   = license_reader.from_file()
+        license_data   = license_reader.from_file(show_key=request.user.is_superuser)
 
         data = dict(
             time_zone=settings.TIME_ZONE,
