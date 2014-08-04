@@ -72,6 +72,14 @@ Author: Eric Johnson <erjohnso@google.com>
 Version: 0.0.1
 '''
 
+# We need to use pycrypto >= 2.6
+# These lines are necessary because some of the Ansible OS packages install
+# pycrypto 2.0, and it's actually possible through OS packaging to have 2.0 and
+# 2.6 installed alongside one another, and 2.0 can then win on precedence
+# order.  This gets around that.
+__requires__ = ['pycrypto>=2.6']
+import pkg_resources
+
 USER_AGENT_PRODUCT="Ansible-gce_inventory_plugin"
 USER_AGENT_VERSION="v1"
 
