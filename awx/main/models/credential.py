@@ -214,8 +214,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
 
         # Sanity check: We may potentially receive a full PEM certificate,
         # and we want to accept these.
-        cert_begin_re = r'^(-{4,})\s*BEGIN\s+CERTIFICATE\s*(-{4,})'
-        cert_end_re = r'^(-{4,})\s*END\s+CERTIFICATE\s*(-{4,})'
+        cert_begin_re = r'(-{4,})\s*BEGIN\s+CERTIFICATE\s*(-{4,})'
+        cert_end_re = r'(-{4,})\s*END\s+CERTIFICATE\s*(-{4,})'
         cert_begin_match = re.search(cert_begin_re, data)
         if cert_begin_match:
             cert_end_match = re.search(cert_end_re, data)
