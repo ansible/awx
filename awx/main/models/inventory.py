@@ -308,13 +308,15 @@ class Inventory(CommonModel):
             'total_inventory_sources': active_inventory_sources.count(),
             'inventory_sources_with_failures': failed_inventory_sources.count(),
         }
+        # CentOS python seems to have issues clobbering the inventory on poor timing during certain operations
+        iobj = Inventory.objects.get(id=self.id)
         for field, value in computed_fields.items():
-            if getattr(self, field) != value:
-                setattr(self, field, value)
+            if getattr(iobj, field) != value:
+                setattr(iobj, field, value)
             else:
                 computed_fields.pop(field)
         if computed_fields:
-            self.save(update_fields=computed_fields.keys())
+            iobj.save(update_fields=computed_fields.keys())
         logger.debug("Finished updating inventory computed fields")
 
     @property
