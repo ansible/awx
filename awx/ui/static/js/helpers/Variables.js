@@ -9,9 +9,9 @@
 'use strict';
 
 angular.module('VariablesHelper', ['Utilities'])
-    
+
     /**
-     variables: string containing YAML or JSON | a JSON object. 
+     variables: string containing YAML or JSON | a JSON object.
 
      If JSON string, convert to JSON object and run through jsyaml.safeDump() to create a YAML document. If YAML,
      will attempt to load via jsyaml.safeLoad() and return a YAML document using jsyaml.safeDump(). In all cases
@@ -73,11 +73,17 @@ angular.module('VariablesHelper', ['Utilities'])
 
      **/
     .factory('ToJSON', ['$log', 'ProcessErrors', function($log, ProcessErrors) {
-        return function(parseType, variables, stringify) {
+        return function(parseType, variables, stringify, reviver) {
             var json_data, result;
             if (parseType === 'json') {
                 try {
-                    json_data = JSON.parse(variables); //make sure JSON parses
+                    //parse a JSON string
+                    if (reviver) {
+                        json_data = JSON.parse(variables, reviver);
+                    }
+                    else {
+                        json_data = JSON.parse(variables);
+                    }
                 }
                 catch(e) {
                     json_data = {};

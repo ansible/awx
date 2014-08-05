@@ -25,13 +25,18 @@ angular.module('LicenseFormDefinition', [])
         fields: {
             license_status: {
                 type: 'custom',
-                control: "<div class=\"license-status\" ng-class=\"status_color\"><i class=\"fa fa-circle\"></i> " +
-                    "{{ license_status }}</span></div>",
+                control: "<div class=\"license-status\" ng-class=\"status_color\"><i class=\"fa fa-circle\"></i> {{ license_status }}</div>",
+                readonly: true,
+                tab: 'license'
+            },
+            tower_version: {
+                label: 'Tower Version',
+                type: 'text',
                 readonly: true,
                 tab: 'license'
             },
             license_key: {
-                label: 'Key',
+                label: 'License Key',
                 type: 'textarea',
                 'class': 'modal-input-xlarge',
                 readonly: true,

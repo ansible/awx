@@ -25,6 +25,7 @@ angular.module('Tower', [
     'RestServices',
     'AuthService',
     'Utilities',
+    'LicenseHelper',
     'OrganizationFormDefinition',
     'UserFormDefinition',
     'FormGenerator',
@@ -79,7 +80,6 @@ angular.module('Tower', [
     'md5Helper',
     'AccessHelper',
     'SelectionHelper',
-    'License',
     'HostGroupsFormDefinition',
     'DashboardCountsWidget',
     'JobStatusGraphWidget',
@@ -420,10 +420,10 @@ angular.module('Tower', [
         }]);
     }])
 
-    .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'ViewLicense',
-        'Timer', 'ClearScope', 'HideStream', 'Socket', 'LoadConfig', 'Store', 'ShowSocketHelp',
-        function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
-            Timer, ClearScope, HideStream, Socket, LoadConfig, Store, ShowSocketHelp) {
+    .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'LicenseViewer',
+        function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
+        LoadConfig, Store, ShowSocketHelp, LicenseViewer) {
 
             var e, html, sock, checkCount = 0;
 
@@ -522,9 +522,11 @@ angular.module('Tower', [
                         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
-                        CheckLicense.test();
+                        if (!/^\/(login|logout)/.test(next.$$route.originalPath)) {
+                            // if not headed to /login or /logout, then check the license
+                            CheckLicense.test();
+                        }
                     }
-
                     activateTab();
                 });
 
@@ -545,7 +547,7 @@ angular.module('Tower', [
                 };
 
                 $rootScope.viewLicense = function () {
-                    ViewLicense();
+                    LicenseViewer.showViewer();
                 };
                 $rootScope.toggleTab = function(e, tab, tabs) {
                     e.preventDefault();
