@@ -1,11 +1,22 @@
 /************************************
  * Copyright (c) 2014 AnsibleWorks, Inc.
  *
- * Our main application mdoule. Declare application routes and perform initialization chores.
+ * app.js
+ *
+ * Declare the Tower app, define routes and perform initialization chores.
  *
  */
-var urlPrefix = $basePath;
-var $AnsibleConfig;
+
+var urlPrefix,
+    $AnsibleConfig;
+
+if ($basePath) {
+    urlPrefix = $basePath;
+} else {
+    // required to make tests work
+    var $basePath = '/static/';
+    urlPrefix = $basePath;
+}
 
 angular.module('Tower', [
     'ngRoute',
@@ -105,10 +116,10 @@ angular.module('Tower', [
     'SocketHelper'
 ])
 
-    .constant('AngularScheduler.partials', $basePath + 'lib/angular-scheduler/lib/')
+    .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
-    .constant('$timezones.definitions.location', $basePath + 'lib/angular-tz-extensions/tz/data')
+    .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')
 
     .config(['$routeProvider',
         function ($routeProvider) {
