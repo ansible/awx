@@ -8,11 +8,8 @@ graph_title Running Jobs breakdown
 graph_vlabel job count
 graph_category tower
 running.label Running jobs
-running.type DERIVE
 waiting.label Waiting jobs
-waiting.type DERIVE
 pending.label Pending jobs
-pending.type DERIVE
 EOM
         exit 0;;
 esac

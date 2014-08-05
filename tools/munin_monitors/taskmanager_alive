@@ -7,7 +7,6 @@ graph_title Task Manager Processes
 graph_vlabel num processes
 graph_category tower
 taskm.label Task Manager Processes
-taskm.type DERIVE
 EOM
         exit 0;;
 esac

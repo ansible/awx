@@ -7,7 +7,6 @@ graph_title Callback Receiver Processes
 graph_vlabel num processes
 graph_category tower
 callbackr.label Callback Receiver Processes
-callbackr.type DERIVE
 EOM
         exit 0;;
 esac

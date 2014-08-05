@@ -7,7 +7,6 @@ graph_title Postmaster Processes
 graph_vlabel num processes
 graph_category tower
 postmaster.label Postmaster Processes
-postmaster.type DERIVE
 EOM
         exit 0;;
 esac

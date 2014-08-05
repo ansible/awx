@@ -7,7 +7,6 @@ graph_title Celery Processes
 graph_vlabel num processes
 graph_category tower
 celeryd.label Celery Processes
-celeryd.type DERIVE
 EOM
         exit 0;;
 esac
