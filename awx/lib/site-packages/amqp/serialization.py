@@ -144,25 +144,62 @@ class AMQPReader(object):
 
     def read_item(self):
         ftype = ord(self.input.read(1))
-        if ftype == 83:  # 'S'
+
+        # 'S': long string
+        if ftype == 83:
             val = self.read_longstr()
-        elif ftype == 73:  # 'I'
-            val = unpack('>i', self.input.read(4))[0]
-        elif ftype == 68:  # 'D'
-            d = self.read_octet()
-            n = unpack('>i', self.input.read(4))[0]
-            val = Decimal(n) / Decimal(10 ** d)
-        elif ftype == 84:  # 'T'
-            val = self.read_timestamp()
-        elif ftype == 70:  # 'F'
-            val = self.read_table()  # recurse
-        elif ftype == 65:  # 'A'
-            val = self.read_array()
-        elif ftype == 116:
-            val = self.read_bit()
+        # 's': short string
+        elif ftype == 115:
+            val = self.read_shortstr()
+        # 'b': short-short int
+        elif ftype == 98:
+            val, = unpack('>B', self.input.read(1))
+        # 'B': short-short unsigned int
+        elif ftype == 66:
+            val, = unpack('>b', self.input.read(1))
+        # 'U': short int
+        elif ftype == 85:
+            val, = unpack('>h', self.input.read(2))
+        # 'u': short unsigned int
+        elif ftype == 117:
+            val, = unpack('>H', self.input.read(2))
+        # 'I': long int
+        elif ftype == 73:
+            val, = unpack('>i', self.input.read(4))
+        # 'i': long unsigned int
+        elif ftype == 105:  # 'l'
+            val, = unpack('>I', self.input.read(4))
+        # 'L': long long int
+        elif ftype == 76:
+            val, = unpack('>q', self.input.read(8))
+        # 'l': long long unsigned int
+        elif ftype == 108:
+            val, = unpack('>Q', self.input.read(8))
+        # 'f': float
+        elif ftype == 102:
+            val, = unpack('>f', self.input.read(4))
+        # 'd': double
         elif ftype == 100:
             val = self.read_float()
-        elif ftype == 86:  # 'V'
+        # 'D': decimal
+        elif ftype == 68:
+            d = self.read_octet()
+            n, = unpack('>i', self.input.read(4))
+            val = Decimal(n) / Decimal(10 ** d)
+        # 'F': table
+        elif ftype == 70:
+            val = self.read_table()  # recurse
+        # 'A': array
+        elif ftype == 65:
+            val = self.read_array()
+        # 't' (bool)
+        elif ftype == 116:
+            val = self.read_bit()
+        # 'T': timestamp
+        elif ftype == 84:
+            val = self.read_timestamp()
+        # 'V': void
+        elif ftype == 86:
             val = None
         else:
             raise FrameSyntaxError(
