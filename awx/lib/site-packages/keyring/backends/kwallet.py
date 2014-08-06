@@ -62,6 +62,8 @@ class Keyring(KeyringBackend):
             KWallet.__name__
         if exc:
             raise RuntimeError("KDE libraries not available")
+        if "DISPLAY" not in os.environ:
+            raise RuntimeError("cannot connect to X server")
         # Infer if KDE environment is active based on environment vars.
         # TODO: Does PyKDE provide a better indicator?
         kde_session_keys = (

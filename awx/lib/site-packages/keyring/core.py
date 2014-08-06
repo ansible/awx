@@ -5,7 +5,6 @@ Created by Kang Zhang on 2009-07-09
 """
 import os
 import sys
-import warnings
 import logging
 
 from .py27compat import configparser
@@ -71,19 +70,12 @@ def _get_best_keyring():
     return keyrings[0]
 
 
-def load_keyring(keyring_path, keyring_name):
+def load_keyring(keyring_name):
     """
     Load the specified keyring by name (a fully-qualified name to the
     keyring, such as 'keyring.backends.file.PlaintextKeyring')
-
-    `keyring_path` is an additional, optional search path and may be None.
-    **deprecated** In the future, keyring_path must be None.
     """
     module_name, sep, class_name = keyring_name.rpartition('.')
-    if keyring_path is not None and keyring_path not in sys.path:
-        warnings.warn("keyring_path is deprecated and should always be None",
-            DeprecationWarning)
-        sys.path.insert(0, keyring_path)
     __import__(module_name)
     module = sys.modules[module_name]
     class_ = getattr(module, class_name)
@@ -93,46 +85,32 @@ def load_keyring(keyring_path, keyring_name):
 
 
 def load_config():
-    """Load a keyring using the config file.
-
-    The config file can be in the current working directory, or in the user's
-    home directory.
-    """
-    keyring = None
+    """Load a keyring using the config file in the config root."""
 
     filename = 'keyringrc.cfg'
 
-    local_path = os.path.join(os.getcwd(), filename)
-    config_path = os.path.join(platform.config_root(), filename)
+    keyring_cfg = os.path.join(platform.config_root(), filename)
 
-    # search from current working directory and the data root
-    keyring_cfg_candidates = [local_path, config_path]
+    if not os.path.exists(keyring_cfg):
+        return
 
-    # initialize the keyring_config with the first detected config file
-    keyring_cfg = None
-    for path in keyring_cfg_candidates:
-        keyring_cfg = path
-        if os.path.exists(path):
-            break
+    config = configparser.RawConfigParser()
+    config.read(keyring_cfg)
+    _load_keyring_path(config)
 
-    if os.path.exists(keyring_cfg):
-        config = configparser.RawConfigParser()
-        config.read(keyring_cfg)
-        _load_keyring_path(config)
+    # load the keyring class name, and then load this keyring
+    try:
+        if config.has_section("backend"):
+            keyring_name = config.get("backend", "default-keyring").strip()
+        else:
+            raise configparser.NoOptionError('backend', 'default-keyring')
 
-        # load the keyring class name, and then load this keyring
-        try:
-            if config.has_section("backend"):
-                keyring_name = config.get("backend", "default-keyring").strip()
-            else:
-                raise configparser.NoOptionError('backend', 'default-keyring')
+    except (configparser.NoOptionError, ImportError):
+        logger.warning("Keyring config file contains incorrect values.\n" +
+                       "Config file: %s" % keyring_cfg)
+        return
 
-            keyring = load_keyring(None, keyring_name)
-        except (configparser.NoOptionError, ImportError):
-            logger.warning("Keyring config file contains incorrect values.\n" +
-                           "Config file: %s" % keyring_cfg)
-
-    return keyring
+    return load_keyring(keyring_name)
 
 def _load_keyring_path(config):
     "load the keyring-path option (if present)"

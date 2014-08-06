@@ -37,8 +37,9 @@ class CommandLineTool(object):
 
         if opts.keyring_backend is not None:
             try:
-                backend = core.load_keyring(opts.keyring_path,
-                                            opts.keyring_backend)
+                if opts.keyring_path:
+                    sys.path.insert(0, opts.keyring_path)
+                backend = core.load_keyring(opts.keyring_backend)
                 set_keyring(backend)
             except (Exception,):
                 # Tons of things can go wrong here:

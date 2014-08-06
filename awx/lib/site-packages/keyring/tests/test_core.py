@@ -10,17 +10,23 @@ import os
 import tempfile
 import shutil
 
-from keyring.tests.py30compat import unittest
-
 import mock
+import pytest
 
 import keyring.backend
 import keyring.core
+import keyring.util.platform_
 from keyring import errors
 
 PASSWORD_TEXT = "This is password"
 PASSWORD_TEXT_2 = "This is password2"
-KEYRINGRC = "keyringrc.cfg"
+
+
+@pytest.yield_fixture()
+def config_filename(tmpdir):
+    filename = tmpdir / 'keyringrc.cfg'
+    with mock.patch('keyring.util.platform_.config_root', lambda: str(tmpdir)):
+        yield str(filename)
 
 
 class TestKeyring(keyring.backend.KeyringBackend):
@@ -53,7 +59,7 @@ class TestKeyring2(TestKeyring):
         return PASSWORD_TEXT_2
 
 
-class CoreTestCase(unittest.TestCase):
+class TestCore:
     mock_global_backend = mock.patch('keyring.core._keyring_backend')
 
     @mock_global_backend
@@ -72,7 +78,7 @@ class CoreTestCase(unittest.TestCase):
         """
         result = keyring.core.get_password("test", "user")
         backend.get_password.assert_called_once_with('test', 'user')
-        self.assertIsNotNone(result)
+        assert result is not None
 
     @mock_global_backend
     def test_delete_password(self, backend):
@@ -85,71 +91,40 @@ class CoreTestCase(unittest.TestCase):
         keyring.core.set_keyring(TestKeyring())
 
         keyring.core.set_password("test", "user", "password")
-        self.assertEqual(keyring.core.get_password("test", "user"),
-            PASSWORD_TEXT)
+        assert keyring.core.get_password("test", "user") == PASSWORD_TEXT
 
-    def test_set_keyring_in_config(self):
+    def test_set_keyring_in_config(self, config_filename):
         """Test setting the keyring by config file.
         """
         # create the config file
-        config_file = open(KEYRINGRC, 'w')
-        config_file.writelines([
-            "[backend]\n",
-            # the path for the user created keyring
-            "keyring-path= %s\n" % os.path.dirname(os.path.abspath(__file__)),
-            # the name of the keyring class
-            "default-keyring=test_core.TestKeyring2\n",
-            ])
-        config_file.close()
+        with open(config_filename, 'w') as config_file:
+            config_file.writelines([
+                "[backend]\n",
+                # the path for the user created keyring
+                "keyring-path= %s\n" % os.path.dirname(os.path.abspath(__file__)),
+                # the name of the keyring class
+                "default-keyring=test_core.TestKeyring2\n",
+                ])
 
         # init the keyring lib, the lib will automaticlly load the
         # config file and load the user defined module
         keyring.core.init_backend()
 
         keyring.core.set_password("test", "user", "password")
-        self.assertEqual(keyring.core.get_password("test", "user"),
-            PASSWORD_TEXT_2)
+        assert keyring.core.get_password("test", "user") == PASSWORD_TEXT_2
 
-        os.remove(KEYRINGRC)
+    def test_load_config_empty(self, config_filename):
+        "A non-existent or empty config should load"
+        assert keyring.core.load_config() is None
 
-    def test_load_config(self):
-        tempdir = tempfile.mkdtemp()
-        old_location = os.getcwd()
-        os.chdir(tempdir)
-        personal_cfg = os.path.join(os.path.expanduser("~"), "keyringrc.cfg")
-        if os.path.exists(personal_cfg):
-            os.rename(personal_cfg, personal_cfg + '.old')
-            personal_renamed = True
-        else:
-            personal_renamed = False
+    def test_load_config_degenerate(self, config_filename):
+        "load_config should succeed in the absence of a backend section"
+        with open(config_filename, 'w') as config_file:
+            config_file.write('[keyring]')
+        assert keyring.core.load_config() is None
 
-        # loading with an empty environment
-        keyring.core.load_config()
-
-        # loading with a file that doesn't have a backend section
-        cfg = os.path.join(tempdir, "keyringrc.cfg")
-        f = open(cfg, 'w')
-        f.write('[keyring]')
-        f.close()
-        keyring.core.load_config()
-
-        # loading with a file that doesn't have a default-keyring value
-        cfg = os.path.join(tempdir, "keyringrc.cfg")
-        f = open(cfg, 'w')
-        f.write('[backend]')
-        f.close()
-        keyring.core.load_config()
-
-        os.chdir(old_location)
-        shutil.rmtree(tempdir)
-        if personal_renamed:
-            os.rename(personal_cfg + '.old', personal_cfg)
-
-
-def test_suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(CoreTestCase))
-    return suite
-
-if __name__ == "__main__":
-    unittest.main(defaultTest="test_suite")
+    def test_load_config_blank_backend(self, config_filename):
+        "load_config should succeed with an empty [backend] section"
+        with open(config_filename, 'w') as config_file:
+            config_file.write('[backend]')
+        assert keyring.core.load_config() is None
