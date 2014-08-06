@@ -354,7 +354,7 @@ class HostAccess(BaseAccess):
         reader = TaskSerializer()
         validation_info = reader.from_file()
 
-        if 'test' in sys.argv:
+        if 'test' in sys.argv or 'jenkins' in sys.argv:
             # this hack is in here so the test code can function
             # but still go down *most* of the license code path.
             validation_info['free_instances'] = 99999999
@@ -994,7 +994,7 @@ class JobAccess(BaseAccess):
         reader = TaskSerializer()
         validation_info = reader.from_file()
 
-        if 'test' in sys.argv:
+        if 'test' in sys.argv or 'jenkins' in sys.argv:
             validation_info['free_instances'] = 99999999
             validation_info['time_remaining'] = 99999999
             validation_info['grace_period_remaining'] = 99999999
