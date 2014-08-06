@@ -10,7 +10,7 @@
 """
 from __future__ import absolute_import
 
-############## py3k #########################################################
+# ############# py3k #########################################################
 import sys
 PY3 = sys.version_info[0] == 3
 
@@ -34,7 +34,7 @@ try:
 except NameError:  # pragma: no cover
     bytes_t = str  # noqa
 
-############## time.monotonic ################################################
+# ############# time.monotonic ###############################################
 
 if sys.version_info < (3, 3):
 
@@ -89,7 +89,7 @@ try:
 except ImportError:
     monotonic = _monotonic  # noqa
 
-############## Py3 <-> Py2 ###################################################
+# ############# Py3 <-> Py2 ##################################################
 
 if PY3:  # pragma: no cover
     import builtins

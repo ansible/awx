@@ -153,6 +153,7 @@ class Transport(virtual.Transport):
     default_port = 0
     driver_type = 'sql'
     driver_name = 'sqlalchemy'
+    connection_errors = (OperationalError, )
 
     def driver_version(self):
         import sqlalchemy

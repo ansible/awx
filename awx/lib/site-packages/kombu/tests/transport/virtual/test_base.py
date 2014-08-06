@@ -267,8 +267,8 @@ class test_Channel(Case):
         c.exchange_declare(n)
         c.queue_declare(n)
         c.queue_bind(n, n, n)
-        c.queue_bind(n, n, n)   # tests code path that returns
-                                # if queue already bound.
+        # tests code path that returns if queue already bound.
+        c.queue_bind(n, n, n)
 
         c.queue_delete(n, if_empty=True)
         self.assertIn(n, c.state.bindings)

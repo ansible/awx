@@ -36,7 +36,7 @@ class test_Producer(Case):
         p = Producer(None)
         self.assertFalse(p._channel)
 
-    @patch('kombu.common.maybe_declare')
+    @patch('kombu.messaging.maybe_declare')
     def test_maybe_declare(self, maybe_declare):
         p = self.connection.Producer()
         q = Queue('foo')

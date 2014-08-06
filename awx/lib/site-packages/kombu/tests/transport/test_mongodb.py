@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from kombu import Connection
 
-from kombu.tests.case import Case, SkipTest, skip_if_not_module
+from kombu.tests.case import Case, SkipTest, Mock, skip_if_not_module
 
 
 class MockConnection(dict):
@@ -16,8 +16,14 @@ class test_mongodb(Case):
     def _get_connection(self, url, **kwargs):
         from kombu.transport import mongodb
 
+        class _Channel(mongodb.Channel):
+
+            def _create_client(self):
+                self._client = Mock(name='client')
+
         class Transport(mongodb.Transport):
             Connection = MockConnection
+            Channel = _Channel
 
         return Connection(url, transport=Transport, **kwargs).connect()
 
@@ -48,7 +54,7 @@ class test_mongodb(Case):
         self.assertEquals(dbname, 'dbname')
 
     @skip_if_not_module('pymongo')
-    def test_custom_credentions(self):
+    def test_custom_credentials(self):
         url = 'mongodb://localhost/dbname'
         c = self._get_connection(url, userid='foo', password='bar')
         hostname, dbname, options = c.channels[0]._parse_uri()

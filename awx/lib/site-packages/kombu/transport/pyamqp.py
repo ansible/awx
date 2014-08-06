@@ -11,6 +11,7 @@ import amqp
 
 from kombu.five import items
 from kombu.utils.amq_manager import get_manager
+from kombu.utils.text import version_string_as_tuple
 
 from . import base
 
@@ -128,6 +129,12 @@ class Transport(base.Transport):
 
     def heartbeat_check(self, connection, rate=2):
         return connection.heartbeat_tick(rate=rate)
+
+    def qos_semantics_matches_spec(self, connection):
+        props = connection.server_properties
+        if props.get('product') == 'RabbitMQ':
+            return version_string_as_tuple(props['version']) < (3, 3)
+        return True
 
     @property
     def default_connection_params(self):

@@ -35,7 +35,6 @@ class Channel(virtual.Channel):
         super(Channel, self).basic_consume(queue, *args, **kwargs)
 
     def _get(self, queue):
-        #self.refresh_connection()
         m = Queue.objects.fetch(queue)
         if m:
             return loads(bytes_to_str(m))

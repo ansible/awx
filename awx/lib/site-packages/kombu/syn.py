@@ -21,7 +21,7 @@ def select_blocking_method(type):
 
 
 def _detect_environment():
-    ## -eventlet-
+    # ## -eventlet-
     if 'eventlet' in sys.modules:
         try:
             from eventlet.patcher import is_monkey_patched as is_eventlet
@@ -32,7 +32,7 @@ def _detect_environment():
         except ImportError:
             pass
 
-    # -gevent-
+    # ## -gevent-
     if 'gevent' in sys.modules:
         try:
             from gevent import socket as _gsocket

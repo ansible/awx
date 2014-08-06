@@ -25,10 +25,10 @@ class TokenBucket(object):
 
     """
 
-    #: The rate in tokens/second that the bucket will be refilled
+    #: The rate in tokens/second that the bucket will be refilled.
     fill_rate = None
 
-    #: Maximum number of tokensin the bucket.
+    #: Maximum number of tokens in the bucket.
     capacity = 1
 
     #: Timestamp of the last time a token was taken out of the bucket.

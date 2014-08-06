@@ -152,6 +152,9 @@ class Transport(object):
 
         return _read
 
+    def qos_semantics_matches_spec(self, connection):
+        return True
+
     def on_readable(self, connection, loop):
         reader = self.__reader
         if reader is None:

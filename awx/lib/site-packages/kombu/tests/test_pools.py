@@ -220,6 +220,9 @@ class test_fun_PoolGroup(Case):
         assert eqhash(c1) != eqhash(c2)
         assert eqhash(c1) == eqhash(c3)
 
+        c4 = Connection(c1u, transport_options={'confirm_publish': True})
+        self.assertNotEqual(eqhash(c3), eqhash(c4))
+
         p1 = pools.connections[c1]
         p2 = pools.connections[c2]
         p3 = pools.connections[c3]

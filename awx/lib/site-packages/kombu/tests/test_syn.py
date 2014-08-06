@@ -38,9 +38,12 @@ class test_syn(Case):
     def test_detect_environment_gevent(self):
         with patch('gevent.socket', create=True) as m:
             prev, socket.socket = socket.socket, m.socket
-            self.assertTrue(sys.modules['gevent'])
-            env = syn._detect_environment()
-            self.assertEqual(env, 'gevent')
+            try:
+                self.assertTrue(sys.modules['gevent'])
+                env = syn._detect_environment()
+                self.assertEqual(env, 'gevent')
+            finally:
+                socket.socket = prev
 
     def test_detect_environment_no_eventlet_or_gevent(self):
         try:

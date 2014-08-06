@@ -8,7 +8,7 @@ Helps compatibility with older Python versions.
 from __future__ import absolute_import
 
 
-############## timedelta_seconds() -> delta.total_seconds ####################
+# ############# timedelta_seconds() -> delta.total_seconds ###################
 from datetime import timedelta
 
 HAVE_TIMEDELTA_TOTAL_SECONDS = hasattr(timedelta, 'total_seconds')
@@ -36,7 +36,7 @@ else:  # pragma: no cover
             return 0
         return delta.days * 86400 + delta.seconds + (delta.microseconds / 10e5)
 
-############## socket.error.errno ############################################
+# ############# socket.error.errno ###########################################
 
 
 def get_errno(exc):
@@ -53,7 +53,7 @@ def get_errno(exc):
             pass
     return 0
 
-############## collections.OrderedDict #######################################
+# ############# collections.OrderedDict ######################################
 try:
     from collections import OrderedDict
 except ImportError:

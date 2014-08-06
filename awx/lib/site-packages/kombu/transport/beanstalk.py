@@ -10,7 +10,6 @@ Beanstalk transport.
 """
 from __future__ import absolute_import
 
-import beanstalkc
 import socket
 
 from anyjson import loads, dumps
@@ -19,6 +18,11 @@ from kombu.five import Empty
 from kombu.utils.encoding import bytes_to_str
 
 from . import virtual
+
+try:
+    import beanstalkc
+except ImportError:  # pragma: no cover
+    beanstalkc = None  # noqa
 
 DEFAULT_PORT = 11300
 
@@ -127,16 +131,25 @@ class Transport(virtual.Transport):
     default_port = DEFAULT_PORT
     connection_errors = (
         virtual.Transport.connection_errors + (
-            socket.error, beanstalkc.SocketError, IOError)
+            socket.error, IOError,
+            getattr(beanstalkc, 'SocketError', None),
+        )
     )
     channel_errors = (
         virtual.Transport.channel_errors + (
             socket.error, IOError,
-            beanstalkc.SocketError,
-            beanstalkc.BeanstalkcException)
+            getattr(beanstalkc, 'SocketError', None),
+            getattr(beanstalkc, 'BeanstalkcException', None),
+        )
     )
     driver_type = 'beanstalk'
     driver_name = 'beanstalkc'
+
+    def __init__(self, *args, **kwargs):
+        if beanstalkc is None:
+            raise ImportError(
+                'Missing beanstalkc library (pip install beanstalkc)')
+        super(Transport, self).__init__(*args, **kwargs)
 
     def driver_version(self):
         return beanstalkc.__version__

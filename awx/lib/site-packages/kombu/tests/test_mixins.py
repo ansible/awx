@@ -90,7 +90,6 @@ class test_ConsumerMixin(Case):
 
     def test_Consumer_context(self):
         c, Acons, Bcons = self._context()
-        _connref = _chanref = None
 
         with c.Consumer() as (conn, channel, consumer):
             self.assertIs(conn, c.connection)
@@ -104,7 +103,6 @@ class test_ConsumerMixin(Case):
             self.assertIs(subcons.channel, conn.default_channel)
             Acons.__enter__.assert_called_with()
             Bcons.__enter__.assert_called_with()
-            _connref, _chanref = conn, channel
         c.on_consume_end.assert_called_with(conn, channel)
 
 

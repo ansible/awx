@@ -105,6 +105,8 @@ class test_maybe_declare(Case):
 
     def test_with_retry(self):
         channel = Mock()
+        client = channel.connection.client = Mock()
+        client.declared_entities = set()
         entity = Mock()
         entity.can_cache_declaration = True
         entity.is_bound = True
@@ -265,8 +267,8 @@ class test_itermessages(Case):
         conn = self.MockConnection()
         channel = Mock()
         channel.connection.client = conn
-        it = common.itermessages(conn, channel, 'q', limit=1,
-                                 Consumer=MockConsumer)
+        conn.Consumer = MockConsumer
+        it = common.itermessages(conn, channel, 'q', limit=1)
 
         ret = next(it)
         self.assertTupleEqual(ret, ('body', 'message'))
@@ -279,8 +281,8 @@ class test_itermessages(Case):
         conn.should_raise_timeout = True
         channel = Mock()
         channel.connection.client = conn
-        it = common.itermessages(conn, channel, 'q', limit=1,
-                                 Consumer=MockConsumer)
+        conn.Consumer = MockConsumer
+        it = common.itermessages(conn, channel, 'q', limit=1)
 
         with self.assertRaises(StopIteration):
             next(it)
@@ -291,8 +293,8 @@ class test_itermessages(Case):
         deque_instance.popleft.side_effect = IndexError()
         conn = self.MockConnection()
         channel = Mock()
-        it = common.itermessages(conn, channel, 'q', limit=1,
-                                 Consumer=MockConsumer)
+        conn.Consumer = MockConsumer
+        it = common.itermessages(conn, channel, 'q', limit=1)
 
         with self.assertRaises(StopIteration):
             next(it)

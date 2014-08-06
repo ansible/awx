@@ -272,35 +272,39 @@ class Hub(object):
                     item()
 
             poll_timeout = fire_timers(propagate=propagate) if scheduled else 1
-            #print('[[[HUB]]]: %s' % (self.repr_active(), ))
             if readers or writers:
                 to_consolidate = []
                 try:
                     events = poll(poll_timeout)
-                    #print('[EVENTS]: %s' % (self.nepr_events(events or []), ))
                 except ValueError:  # Issue 882
                     raise StopIteration()
 
-                for fileno, event in events or ():
-                    if fileno in consolidate and \
-                            writers.get(fileno) is None:
-                        to_consolidate.append(fileno)
+                for fd, event in events or ():
+                    if fd in consolidate and \
+                            writers.get(fd) is None:
+                        to_consolidate.append(fd)
                         continue
                     cb = cbargs = None
-                    try:
-                        if event & READ:
-                            cb, cbargs = readers[fileno]
-                        elif event & WRITE:
-                            cb, cbargs = writers[fileno]
-                        elif event & ERR:
-                            try:
-                                cb, cbargs = (readers.get(fileno) or
-                                              writers.get(fileno))
-                            except TypeError:
-                                pass
-                    except (KeyError, Empty):
-                        hub_remove(fileno)
-                        continue
+
+                    if event & READ:
+                        try:
+                            cb, cbargs = readers[fd]
+                        except KeyError:
+                            self.remove_reader(fd)
+                            continue
+                    elif event & WRITE:
+                        try:
+                            cb, cbargs = writers[fd]
+                        except KeyError:
+                            self.remove_writer(fd)
+                            continue
+                    elif event & ERR:
+                        try:
+                            cb, cbargs = (readers.get(fd) or
+                                          writers.get(fd))
+                        except TypeError:
+                            pass
+
                     if cb is None:
                         continue
                     if isinstance(cb, generator):
@@ -309,11 +313,11 @@ class Hub(object):
                         except OSError as exc:
                             if get_errno(exc) != errno.EBADF:
                                 raise
-                            hub_remove(fileno)
+                            hub_remove(fd)
                         except StopIteration:
                             pass
                         except Exception:
-                            hub_remove(fileno)
+                            hub_remove(fd)
                             raise
                     else:
                         try:

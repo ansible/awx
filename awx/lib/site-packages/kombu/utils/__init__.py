@@ -101,6 +101,19 @@ def symbol_by_name(name, aliases={}, imp=None, package=None,
     return default
 
 
+class HashedSeq(list):
+    """type used for hash() to make sure the hash is not generated
+    multiple times."""
+    __slots__ = 'hashvalue'
+
+    def __init__(self, *seq):
+        self[:] = seq
+        self.hashvalue = hash(seq)
+
+    def __hash__(self):
+        return self.hashvalue
+
+
 def eqhash(o):
     try:
         return o.__eqhash__()

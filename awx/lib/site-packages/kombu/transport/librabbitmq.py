@@ -11,6 +11,7 @@ from __future__ import absolute_import
 
 import os
 import socket
+import warnings
 
 try:
     import librabbitmq as amqp
@@ -24,9 +25,14 @@ except ImportError:  # pragma: no cover
 
 from kombu.five import items, values
 from kombu.utils.amq_manager import get_manager
+from kombu.utils.text import version_string_as_tuple
 
 from . import base
 
+W_VERSION = """
+    librabbitmq version too old to detect RabbitMQ version information
+    so make sure you are using librabbitmq 1.5 when using rabbitmq > 3.3
+"""
 DEFAULT_PORT = 5672
 
 NO_SSL_ERROR = """\
@@ -149,6 +155,16 @@ class Transport(base.Transport):
 
     def get_manager(self, *args, **kwargs):
         return get_manager(self.client, *args, **kwargs)
+
+    def qos_semantics_matches_spec(self, connection):
+        try:
+            props = connection.server_properties
+        except AttributeError:
+            warnings.warn(UserWarning(W_VERSION))
+        else:
+            if props.get('product') == 'RabbitMQ':
+                return version_string_as_tuple(props['version']) < (3, 3)
+        return True
 
     @property
     def default_connection_params(self):

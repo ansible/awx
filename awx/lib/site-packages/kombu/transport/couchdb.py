@@ -11,7 +11,6 @@ CouchDB transport.
 from __future__ import absolute_import
 
 import socket
-import couchdb
 
 from anyjson import loads, dumps
 
@@ -20,6 +19,11 @@ from kombu.utils import uuid4
 from kombu.utils.encoding import bytes_to_str
 
 from . import virtual
+
+try:
+    import couchdb
+except ImportError:  # pragma: no cover
+    couchdb = None   # noqa
 
 DEFAULT_PORT = 5984
 DEFAULT_DATABASE = 'kombu_default'
@@ -80,7 +84,9 @@ class Channel(virtual.Channel):
                                                  port))
         # Use username and password if avaliable
         try:
-            server.resource.credentials = (conninfo.userid, conninfo.password)
+            if conninfo.userid:
+                server.resource.credentials = (conninfo.userid,
+                                               conninfo.password)
         except AttributeError:
             pass
         try:
@@ -110,20 +116,27 @@ class Transport(virtual.Transport):
     connection_errors = (
         virtual.Transport.connection_errors + (
             socket.error,
-            couchdb.HTTPError,
-            couchdb.ServerError,
-            couchdb.Unauthorized)
+            getattr(couchdb, 'HTTPError', None),
+            getattr(couchdb, 'ServerError', None),
+            getattr(couchdb, 'Unauthorized', None),
+        )
     )
     channel_errors = (
         virtual.Transport.channel_errors + (
-            couchdb.HTTPError,
-            couchdb.ServerError,
-            couchdb.PreconditionFailed,
-            couchdb.ResourceConflict,
-            couchdb.ResourceNotFound)
+            getattr(couchdb, 'HTTPError', None),
+            getattr(couchdb, 'ServerError', None),
+            getattr(couchdb, 'PreconditionFailed', None),
+            getattr(couchdb, 'ResourceConflict', None),
+            getattr(couchdb, 'ResourceNotFound', None),
+        )
     )
     driver_type = 'couchdb'
     driver_name = 'couchdb'
+
+    def __init__(self, *args, **kwargs):
+        if couchdb is None:
+            raise ImportError('Missing couchdb library (pip install couchdb)')
+        super(Transport, self).__init__(*args, **kwargs)
 
     def driver_version(self):
         return couchdb.__version__

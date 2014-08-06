@@ -34,7 +34,7 @@ class test_compression(Case):
             self.assertIn('application/x-bz2', encoders)
 
     def test_compress__decompress__zlib(self):
-        text = 'The Quick Brown Fox Jumps Over The Lazy Dog'
+        text = b'The Quick Brown Fox Jumps Over The Lazy Dog'
         c, ctype = compression.compress(text, 'zlib')
         self.assertNotEqual(text, c)
         d = compression.decompress(c, ctype)
@@ -43,7 +43,7 @@ class test_compression(Case):
     def test_compress__decompress__bzip2(self):
         if not self.has_bzip2:
             raise SkipTest('bzip2 not available')
-        text = 'The Brown Quick Fox Over The Lazy Dog Jumps'
+        text = b'The Brown Quick Fox Over The Lazy Dog Jumps'
         c, ctype = compression.compress(text, 'bzip2')
         self.assertNotEqual(text, c)
         d = compression.decompress(c, ctype)
