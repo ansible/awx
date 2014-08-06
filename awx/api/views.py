@@ -1529,6 +1529,8 @@ class JobStart(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if not request.user.can_access(self.model, 'start', obj):
+            raise PermissionDenied()
         if obj.can_start:
             result = obj.signal_start(**request.DATA)
             if not result:

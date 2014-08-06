@@ -1008,7 +1008,7 @@ class JobAccess(BaseAccess):
 
         dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and \
                      self.user.can_access(Project, 'read', obj.project)
-        return self.can_read(obj) and obj.can_start and dep_access
+        return self.can_read(obj) and dep_access
 
     def can_cancel(self, obj):
         return self.can_read(obj) and obj.can_cancel
