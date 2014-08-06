@@ -16,7 +16,7 @@ from .packages.urllib3.response import HTTPResponse
 from .packages.urllib3.util import Timeout as TimeoutSauce
 from .compat import urlparse, basestring, urldefrag, unquote
 from .utils import (DEFAULT_CA_BUNDLE_PATH, get_encoding_from_headers,
-                    except_on_missing_scheme, get_auth_from_url)
+                    prepend_scheme_if_needed, get_auth_from_url)
 from .structures import CaseInsensitiveDict
 from .packages.urllib3.exceptions import MaxRetryError
 from .packages.urllib3.exceptions import TimeoutError
@@ -203,7 +203,7 @@ class HTTPAdapter(BaseAdapter):
         proxy = proxies.get(urlparse(url.lower()).scheme)
 
         if proxy:
-            except_on_missing_scheme(proxy)
+            proxy = prepend_scheme_if_needed(proxy, 'http')
             proxy_headers = self.proxy_headers(proxy)
 
             if not proxy in self.proxy_manager:
@@ -310,10 +310,7 @@ class HTTPAdapter(BaseAdapter):
 
         chunked = not (request.body is None or 'Content-Length' in request.headers)
 
-        if stream:
-            timeout = TimeoutSauce(connect=timeout)
-        else:
-            timeout = TimeoutSauce(connect=timeout, read=timeout)
+        timeout = TimeoutSauce(connect=timeout, read=timeout)
 
         try:
             if not chunked:
@@ -372,25 +369,20 @@ class HTTPAdapter(BaseAdapter):
                     conn._put_conn(low_conn)
 
         except socket.error as sockerr:
-            raise ConnectionError(sockerr)
+            raise ConnectionError(sockerr, request=request)
 
         except MaxRetryError as e:
-            raise ConnectionError(e)
+            raise ConnectionError(e, request=request)
 
         except _ProxyError as e:
             raise ProxyError(e)
 
         except (_SSLError, _HTTPError) as e:
             if isinstance(e, _SSLError):
-                raise SSLError(e)
+                raise SSLError(e, request=request)
             elif isinstance(e, TimeoutError):
-                raise Timeout(e)
+                raise Timeout(e, request=request)
             else:
                 raise
 
-        r = self.build_response(request, resp)
-
-        if not stream:
-            r.content
-
-        return r
+        return self.build_response(request, resp)

@@ -1,4 +1,7 @@
-'''SSL with SNI_-support for Python 2.
+'''SSL with SNI_-support for Python 2. Follow these instructions if you would
+like to verify SSL certificates in Python 2. Note, the default libraries do
+*not* do certificate checking; you need to do additional work to validate
+certificates yourself.
 
 This needs the following packages installed:
 
@@ -6,9 +9,15 @@ This needs the following packages installed:
 * ndg-httpsclient (tested with 0.3.2)
 * pyasn1 (tested with 0.1.6)
 
-To activate it call :func:`~urllib3.contrib.pyopenssl.inject_into_urllib3`.
-This can be done in a ``sitecustomize`` module, or at any other time before
-your application begins using ``urllib3``, like this::
+You can install them with the following command:
+
+    pip install pyopenssl ndg-httpsclient pyasn1
+
+To activate certificate checking, call
+:func:`~urllib3.contrib.pyopenssl.inject_into_urllib3` from your Python code
+before you begin making HTTP requests. This can be done in a ``sitecustomize``
+module, or at any other time before your application begins using ``urllib3``,
+like this::
 
     try:
         import urllib3.contrib.pyopenssl
@@ -29,9 +38,8 @@ Module Variables
 ----------------
 
 :var DEFAULT_SSL_CIPHER_LIST: The list of supported SSL/TLS cipher suites.
-    Default: ``EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA256
-    EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EDH+aRSA EECDH RC4 !aNULL !eNULL !LOW !3DES
-    !MD5 !EXP !PSK !SRP !DSS'``
+    Default: ``ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:
+    ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS``
 
 .. _sni: https://en.wikipedia.org/wiki/Server_Name_Indication
 .. _crime attack: https://en.wikipedia.org/wiki/CRIME_(security_exploit)
@@ -43,7 +51,7 @@ from ndg.httpsclient.subj_alt_name import SubjectAltName as BaseSubjectAltName
 import OpenSSL.SSL
 from pyasn1.codec.der import decoder as der_decoder
 from pyasn1.type import univ, constraint
-from socket import _fileobject
+from socket import _fileobject, timeout
 import ssl
 import select
 from cStringIO import StringIO
@@ -69,12 +77,22 @@ _openssl_verify = {
                        + OpenSSL.SSL.VERIFY_FAIL_IF_NO_PEER_CERT,
 }
 
-# Default SSL/TLS cipher list.
-# Recommendation by https://community.qualys.com/blogs/securitylabs/2013/08/05/
-# configuring-apache-nginx-and-openssl-for-forward-secrecy
-DEFAULT_SSL_CIPHER_LIST = 'EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM ' + \
-        'EECDH+ECDSA+SHA256 EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EDH+aRSA ' + \
-        'EECDH RC4 !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS'
+# A secure default.
+# Sources for more information on TLS ciphers:
+#
+# - https://wiki.mozilla.org/Security/Server_Side_TLS
+# - https://www.ssllabs.com/projects/best-practices/index.html
+# - https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
+#
+# The general intent is:
+# - Prefer cipher suites that offer perfect forward secrecy (DHE/ECDHE),
+# - prefer ECDHE over DHE for better performance,
+# - prefer any AES-GCM over any AES-CBC for better performance and security,
+# - use 3DES as fallback which is secure but slow,
+# - disable NULL authentication, MD5 MACs and DSS for security reasons.
+DEFAULT_SSL_CIPHER_LIST = "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:" + \
+    "ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:" + \
+    "!aNULL:!MD5:!DSS"
 
 
 orig_util_HAS_SNI = util.HAS_SNI
@@ -139,6 +157,13 @@ def get_subj_alt_name(peer_cert):
 
 class fileobject(_fileobject):
 
+    def _wait_for_sock(self):
+        rd, wd, ed = select.select([self._sock], [], [],
+                                   self._sock.gettimeout())
+        if not rd:
+            raise timeout()
+
+
     def read(self, size=-1):
         # Use max, disallow tiny reads in a loop as they are very inefficient.
         # We never leave read() with any leftover data from a new recv() call
@@ -156,6 +181,7 @@ class fileobject(_fileobject):
                 try:
                     data = self._sock.recv(rbufsize)
                 except OpenSSL.SSL.WantReadError:
+                    self._wait_for_sock()
                     continue
                 if not data:
                     break
@@ -183,6 +209,7 @@ class fileobject(_fileobject):
                 try:
                     data = self._sock.recv(left)
                 except OpenSSL.SSL.WantReadError:
+                    self._wait_for_sock()
                     continue
                 if not data:
                     break
@@ -234,6 +261,7 @@ class fileobject(_fileobject):
                                 break
                             buffers.append(data)
                     except OpenSSL.SSL.WantReadError:
+                        self._wait_for_sock()
                         continue
                     break
                 return "".join(buffers)
@@ -244,6 +272,7 @@ class fileobject(_fileobject):
                 try:
                     data = self._sock.recv(self._rbufsize)
                 except OpenSSL.SSL.WantReadError:
+                    self._wait_for_sock()
                     continue
                 if not data:
                     break
@@ -271,7 +300,8 @@ class fileobject(_fileobject):
                 try:
                     data = self._sock.recv(self._rbufsize)
                 except OpenSSL.SSL.WantReadError:
-                        continue
+                    self._wait_for_sock()
+                    continue
                 if not data:
                     break
                 left = size - buf_len
@@ -366,6 +396,8 @@ def ssl_wrap_socket(sock, keyfile=None, certfile=None, cert_reqs=None,
             ctx.load_verify_locations(ca_certs, None)
         except OpenSSL.SSL.Error as e:
             raise ssl.SSLError('bad ca_certs: %r' % ca_certs, e)
+    else:
+        ctx.set_default_verify_paths()
 
     # Disable TLS compression to migitate CRIME attack (issue #309)
     OP_NO_COMPRESSION = 0x20000

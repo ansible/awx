@@ -106,8 +106,7 @@ class CaseInsensitiveDict(collections.MutableMapping):
         return CaseInsensitiveDict(self._store.values())
 
     def __repr__(self):
-        return '%s(%r)' % (self.__class__.__name__, dict(self.items()))
-
+        return str(dict(self.items()))
 
 class LookupDict(dict):
     """Dictionary lookup object."""
