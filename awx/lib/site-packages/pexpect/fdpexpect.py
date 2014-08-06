@@ -89,9 +89,9 @@ class fdspawn (spawn):
         except:
             return False
 
-    def terminate (self, force=False):
+    def terminate (self, force=False):  # pragma: no cover
         raise ExceptionPexpect('This method is not valid for file descriptors.')
 
-    def kill (self, sig):
+    def kill (self, sig):  # pragma: no cover
         """No-op - no process to kill."""
         return
