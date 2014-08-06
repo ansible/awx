@@ -1,17 +1,4 @@
-try:
-    import simplejson as json
-    json_decimal_args = {"use_decimal": True} # pragma: no cover
-except ImportError:
-    import json
-    import decimal
-
-    class DecimalEncoder(json.JSONEncoder):
-        def default(self, o):
-            if isinstance(o, decimal.Decimal):
-                return float(o)
-            return super(DecimalEncoder, self).default(o)
-    json_decimal_args = {"cls": DecimalEncoder}
-
+from socketio.defaultjson import default_json_dumps, default_json_loads
 
 MSG_TYPES = {
     'disconnect': 0,
@@ -45,7 +32,7 @@ socketio_packet_attributes = ['type', 'name', 'data', 'endpoint', 'args',
                               'ackId', 'reason', 'advice', 'qs', 'id']
 
 
-def encode(data):
+def encode(data, json_dumps=default_json_dumps):
     """
     Encode an attribute dict into a byte string.
     """
@@ -72,14 +59,13 @@ def encode(data):
         if msg == '3':
             payload = data['data']
         if msg == '4':
-            payload = json.dumps(data['data'], separators=(',', ':'),
-                                 **json_decimal_args)
+            payload = json_dumps(data['data'])
         if msg == '5':
             d = {}
             d['name'] = data['name']
             if 'args' in data and data['args'] != []:
                 d['args'] = data['args']
-            payload = json.dumps(d, separators=(',', ':'), **json_decimal_args)
+            payload = json_dumps(d)
         if 'id' in data:
             msg += ':' + str(data['id'])
             if data['ack'] == 'data':
@@ -98,8 +84,7 @@ def encode(data):
         # '6:::' [id] '+' [data]
         msg += '::' + data.get('endpoint', '') + ':' + str(data['ackId'])
         if 'args' in data and data['args'] != []:
-            msg += '+' + json.dumps(data['args'], separators=(',', ':'),
-                                    **json_decimal_args)
+            msg += '+' + json_dumps(data['args'])
 
     elif msg == '7':
         # '7::' [endpoint] ':' [reason] '+' [advice]
@@ -117,7 +102,7 @@ def encode(data):
     return msg
 
 
-def decode(rawstr):
+def decode(rawstr, json_loads=default_json_loads):
     """
     Decode a rawstr packet arriving from the socket into a dict.
     """
@@ -163,11 +148,11 @@ def decode(rawstr):
         decoded_msg['data'] = data
 
     elif msg_type == "4":  # json msg
-        decoded_msg['data'] = json.loads(data)
+        decoded_msg['data'] = json_loads(data)
 
     elif msg_type == "5":  # event
         try:
-            data = json.loads(data)
+            data = json_loads(data)
         except ValueError, e:
             print("Invalid JSON event message", data)
             decoded_msg['args'] = []
@@ -182,7 +167,7 @@ def decode(rawstr):
         if '+' in data:
             ackId, data = data.split('+')
             decoded_msg['ackId'] = int(ackId)
-            decoded_msg['args'] = json.loads(data)
+            decoded_msg['args'] = json_loads(data)
         else:
             decoded_msg['ackId'] = int(data)
             decoded_msg['args'] = []
