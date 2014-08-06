@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2013 Rackspace
+# Copyright (c)2013 Rackspace US, Inc.
 
 # All Rights Reserved.
 #
@@ -16,6 +16,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+import base64
 
 import pyrax
 from pyrax.client import BaseClient
@@ -441,9 +443,9 @@ class ScalingGroupManager(BaseManager):
         largs = scaling_group.launchConfiguration.get("args", {})
         srv_args = largs.get("server", {})
         lb_args = largs.get("loadBalancers", {})
-        flav = "%s" % flavor or srv_args.get("flavorRef")
-        dconf = disk_config or srv_args.get("OS-DCF:diskConfig")
-        pers = personality or srv_args.get("personality")
+        flav = flavor or srv_args.get("flavorRef")
+        dconf = disk_config or srv_args.get("OS-DCF:diskConfig", "AUTO")
+        pers = personality or srv_args.get("personality", [])
         body = {"type": "launch_server",
                 "args": {
                     "server": {
@@ -451,13 +453,14 @@ class ScalingGroupManager(BaseManager):
                         "imageRef": image or srv_args.get("imageRef"),
                         "flavorRef": flav,
                         "OS-DCF:diskConfig": dconf,
-                        "personality": pers,
                         "networks": networks or srv_args.get("networks"),
                         "metadata": metadata or srv_args.get("metadata"),
                     },
                     "loadBalancers": load_balancers or lb_args,
                 },
             }
+        if pers:
+            body["args"]["server"]["personality"] = pers
         key_name = key_name or srv_args.get("key_name")
         if key_name:
             body["args"]["server"] = key_name
@@ -765,6 +768,10 @@ class ScalingGroupManager(BaseManager):
             metadata = {}
         if personality is None:
             personality = []
+        else:
+            for file in personality:
+                if "contents" in file:
+                    file["contents"] = base64.b64encode(file["contents"])
         if scaling_policies is None:
             scaling_policies = []
         group_config = self._create_group_config_body(name, cooldown,

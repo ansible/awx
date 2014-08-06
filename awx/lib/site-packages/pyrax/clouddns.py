@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2012 Rackspace
+# Copyright (c)2012 Rackspace US, Inc.
 
 # All Rights Reserved.
 #
@@ -871,12 +871,14 @@ class CloudDNSManager(BaseManager):
         Takes a device and device type and returns the corresponding HREF link
         and service name for use with PTR record management.
         """
+        context = self.api.identity
+        region = self.api.region_name
         if device_type.lower().startswith("load"):
-            ep = pyrax._get_service_endpoint("load_balancer")
+            ep = pyrax._get_service_endpoint(context, "load_balancer", region)
             svc = "loadbalancers"
             svc_name = "cloudLoadBalancers"
         else:
-            ep = pyrax._get_service_endpoint("compute")
+            ep = pyrax._get_service_endpoint(context, "compute", region)
             svc = "servers"
             svc_name = "cloudServersOpenStack"
         href = "%s/%s/%s" % (ep, svc, utils.get_id(device))

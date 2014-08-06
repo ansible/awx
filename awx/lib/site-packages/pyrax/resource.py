@@ -1,7 +1,7 @@
 # Copyright 2010 Jacob Kaplan-Moss
 
 # Copyright 2011 OpenStack LLC.
-# Copyright 2012 Rackspace
+# Copyright (c)2012 Rackspace US, Inc.
 
 # All Rights Reserved.
 #
@@ -67,9 +67,11 @@ class BaseResource(object):
         Takes the dict returned by the API call and sets the
         corresponding attributes on the object.
         """
-        for (key, val) in info.iteritems():
+        for (key, val) in six.iteritems(info):
             if isinstance(key, six.text_type):
                 key = key.encode(pyrax.get_encoding())
+            elif isinstance(key, bytes):
+                key = key.decode("utf-8")
             setattr(self, key, val)
 
 

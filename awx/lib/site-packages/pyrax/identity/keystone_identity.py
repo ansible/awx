@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import pyrax
-from pyrax.base_identity import BaseAuth
-import pyrax.exceptions as exc
+from ..base_identity import BaseIdentity
+from .. import exceptions as exc
 
 
-class KeystoneIdentity(BaseAuth):
+class KeystoneIdentity(BaseIdentity):
     """
     Implements the Keystone-specific behaviors for Identity. In most
     cases you will want to create specific subclasses to implement the

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2012 Rackspace
+# Copyright (c)2012 Rackspace US, Inc.
 
 # All Rights Reserved.
 #
@@ -85,9 +85,15 @@ class CloudLoadBalancer(BaseResource):
         return self.manager.get_usage(self, start=start, end=end)
 
 
+    def get_stats(self):
+        """
+        Return the stats for this loadbalancer
+        """
+        return self.manager.get_stats(self)
+
     def _add_details(self, info):
         """Override the base behavior to add Nodes, VirtualIPs, etc."""
-        for (key, val) in info.iteritems():
+        for (key, val) in six.iteritems(info):
             if key == "nodes":
                 val = [Node(parent=self, **nd) for nd in val]
             elif key == "sessionPersistence":
@@ -956,7 +962,7 @@ class CloudLoadBalancerManager(BaseManager):
         return body
 
 
-    def get_stats(self, loadbalancer):
+    def get_stats(self, loadbalancer=None):
         """
         Returns statistics for the given load balancer.
         """

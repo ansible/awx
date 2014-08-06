@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2013 Rackspace
+# Copyright (c)2013 Rackspace US, Inc.
 
 # All Rights Reserved.
 #
@@ -162,7 +162,7 @@ class CloudMonitorNotificationManager(BaseManager):
                 "details": details,
                 }
         resp, resp_body = self.api.method_post(uri, body=body)
-        return self.get(resp["x-object-id"])
+        return self.get(resp.headers["x-object-id"])
 
 
     def test_notification(self, notification=None, notification_type=None,
@@ -259,7 +259,7 @@ class CloudMonitorNotificationPlanManager(BaseManager):
             ok_state = utils.coerce_string_to_list(ok_state)
             body["ok_state"] = make_list_of_ids(ok_state)
         resp, resp_body = self.api.method_post(uri, body=body)
-        return self.get(resp["x-object-id"])
+        return self.get(resp.headers["x-object-id"])
 
 
 class CloudMonitorEntityManager(BaseManager):
@@ -380,9 +380,8 @@ class CloudMonitorEntityManager(BaseManager):
                     raise exc.InvalidMonitoringCheckDetails("Validation "
                             "failed. Error: '%s'." % dtls)
         else:
-            status = resp["status"]
-            if status == "201":
-                check_id = resp["x-object-id"]
+            if resp.status_code == 201:
+                check_id = resp.headers["x-object-id"]
                 return self.get_check(entity, check_id)
 
 
@@ -564,11 +563,10 @@ class CloudMonitorEntityManager(BaseManager):
         if metadata:
             body["metadata"] = metadata
         resp, resp_body = self.api.method_post(uri, body=body)
-
-        status = resp["status"]
-        if status == "201":
-            alarm_id = resp["x-object-id"]
+        if resp.status_code == 201:
+            alarm_id = resp.headers["x-object-id"]
             return self.get_alarm(entity, alarm_id)
+
 
     def update_alarm(self, entity, alarm, criteria=None, disabled=False,
             label=None, name=None, metadata=None):
@@ -948,9 +946,8 @@ class CloudMonitorClient(BaseClient):
         resp = self._entity_manager.create(label=label, name=name, agent=agent,
                 ip_addresses=ip_addresses, metadata=metadata,
                 return_response=True)
-        status = resp["status"]
-        if status == "201":
-            ent_id = resp["x-object-id"]
+        if resp.status_code == 201:
+            ent_id = resp.headers["x-object-id"]
             return self.get_entity(ent_id)
 
 
