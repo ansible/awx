@@ -68,5 +68,5 @@ class ClientException(Exception):
         return b and '%s: %s' % (a, b) or a
 
 
-class InvalidHeadersException(Exception):
+class SkipTest(Exception):
     pass
