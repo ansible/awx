@@ -104,6 +104,28 @@ class ServersTest(utils.TestCase):
 
         test_create_server_from_volume()
 
+    def test_create_server_boot_with_nics_ipv6(self):
+        old_boot = cs.servers._boot
+        nics = [{'net-id': '11111111-1111-1111-1111-111111111111',
+                'v6-fixed-ip': '2001:db9:0:1::10'}]
+
+        def wrapped_boot(url, key, *boot_args, **boot_kwargs):
+            self.assertEqual(boot_kwargs['nics'], nics)
+            return old_boot(url, key, *boot_args, **boot_kwargs)
+
+        with mock.patch.object(cs.servers, '_boot', wrapped_boot):
+            s = cs.servers.create(
+                name="My server",
+                image=1,
+                flavor=1,
+                meta={'foo': 'bar'},
+                userdata="hello moto",
+                key_name="fakekey",
+                nics=nics
+            )
+            cs.assert_called('POST', '/servers')
+            self.assertIsInstance(s, servers.Server)
+
     def test_create_server_userdata_file_object(self):
         s = cs.servers.create(
             name="My server",
@@ -200,17 +222,17 @@ class ServersTest(utils.TestCase):
         cs.assert_called('DELETE', '/servers/1234')
 
     def test_delete_server_meta(self):
-        s = cs.servers.delete_meta(1234, ['test_key'])
+        cs.servers.delete_meta(1234, ['test_key'])
         cs.assert_called('DELETE', '/servers/1234/metadata/test_key')
 
     def test_set_server_meta(self):
-        s = cs.servers.set_meta(1234, {'test_key': 'test_value'})
-        reval = cs.assert_called('POST', '/servers/1234/metadata',
+        cs.servers.set_meta(1234, {'test_key': 'test_value'})
+        cs.assert_called('POST', '/servers/1234/metadata',
                          {'metadata': {'test_key': 'test_value'}})
 
     def test_set_server_meta_item(self):
-        s = cs.servers.set_meta_item(1234, 'test_key', 'test_value')
-        reval = cs.assert_called('PUT', '/servers/1234/metadata/test_key',
+        cs.servers.set_meta_item(1234, 'test_key', 'test_value')
+        cs.assert_called('PUT', '/servers/1234/metadata/test_key',
                          {'meta': {'test_key': 'test_value'}})
 
     def test_find(self):
@@ -581,6 +603,32 @@ class ServersTest(utils.TestCase):
         s = cs.servers.get(1234)
         s.interface_list()
         cs.assert_called('GET', '/servers/1234/os-interface')
+
+    def test_interface_list_result_string_representable(self):
+        """Test for bugs.launchpad.net/python-novaclient/+bug/1280453."""
+        # According to https://github.com/openstack/nova/blob/master/
+        # nova/api/openstack/compute/contrib/attach_interfaces.py#L33,
+        # the attach_interface extension get method will return a json
+        # object partly like this:
+        interface_list = [{
+            'net_id': 'd7745cf5-63f9-4883-b0ae-983f061e4f23',
+            'port_id': 'f35079da-36d5-4513-8ec1-0298d703f70e',
+            'mac_addr': 'fa:16:3e:4c:37:c8',
+            'port_state': 'ACTIVE',
+            'fixed_ips': [{
+                'subnet_id': 'f1ad93ad-2967-46ba-b403-e8cbbe65f7fa',
+                'ip_address': '10.2.0.96'
+                }]
+            }]
+        # If server is not string representable, it will raise an exception,
+        # because attribute named 'name' cannot be found.
+        # Parameter 'loaded' must be True or it will try to get attribute
+        # 'id' then fails (lazy load detail), this is exactly same as
+        # novaclient.base.Manager._list()
+        s = servers.Server(servers.ServerManager, interface_list[0],
+                           loaded=True)
+        # Trigger the __repr__ magic method
+        self.assertEqual('<Server: unknown-name>', '%r' % s)
 
     def test_interface_attach(self):
         s = cs.servers.get(1234)

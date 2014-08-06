@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
 import six
 
 from novaclient import exceptions
@@ -74,6 +75,50 @@ class ServersTest(utils.TestCase):
         cs.assert_called('POST', '/servers')
         self.assertIsInstance(s, servers.Server)
 
+    def test_create_server_boot_with_nics_ipv4(self):
+        old_boot = cs.servers._boot
+        nics = [{'net-id': '11111111-1111-1111-1111-111111111111',
+                'v4-fixed-ip': '10.10.0.7'}]
+
+        def wrapped_boot(url, key, *boot_args, **boot_kwargs):
+            self.assertEqual(boot_kwargs['nics'], nics)
+            return old_boot(url, key, *boot_args, **boot_kwargs)
+
+        with mock.patch.object(cs.servers, '_boot', wrapped_boot):
+            s = cs.servers.create(
+                name="My server",
+                image=1,
+                flavor=1,
+                meta={'foo': 'bar'},
+                userdata="hello moto",
+                key_name="fakekey",
+                nics=nics
+            )
+            cs.assert_called('POST', '/servers')
+            self.assertIsInstance(s, servers.Server)
+
+    def test_create_server_boot_with_nics_ipv6(self):
+        old_boot = cs.servers._boot
+        nics = [{'net-id': '11111111-1111-1111-1111-111111111111',
+                'v6-fixed-ip': '2001:db9:0:1::10'}]
+
+        def wrapped_boot(url, key, *boot_args, **boot_kwargs):
+            self.assertEqual(boot_kwargs['nics'], nics)
+            return old_boot(url, key, *boot_args, **boot_kwargs)
+
+        with mock.patch.object(cs.servers, '_boot', wrapped_boot):
+            s = cs.servers.create(
+                name="My server",
+                image=1,
+                flavor=1,
+                meta={'foo': 'bar'},
+                userdata="hello moto",
+                key_name="fakekey",
+                nics=nics
+            )
+            cs.assert_called('POST', '/servers')
+            self.assertIsInstance(s, servers.Server)
+
     def test_create_server_userdata_file_object(self):
         s = cs.servers.create(
             name="My server",
@@ -121,6 +166,26 @@ class ServersTest(utils.TestCase):
         cs.assert_called('POST', '/servers')
         self.assertIsInstance(s, servers.Server)
 
+    def test_create_server_return_reservation_id(self):
+        s = cs.servers.create(
+            name="My server",
+            image=1,
+            flavor=1,
+            reservation_id=True
+        )
+        expected_body = {
+            'server': {
+                'name': 'My server',
+                'image_ref': '1',
+                'flavor_ref': '1',
+                'os-multiple-create:min_count': 1,
+                'os-multiple-create:max_count': 1,
+                'os-multiple-create:return_reservation_id': True,
+            }
+        }
+        cs.assert_called('POST', '/servers', expected_body)
+        self.assertIsInstance(s, servers.Server)
+
     def test_update_server(self):
         s = cs.servers.get(1234)
 
@@ -147,12 +212,12 @@ class ServersTest(utils.TestCase):
         cs.assert_called('DELETE', '/servers/1234')
 
     def test_delete_server_meta(self):
-        s = cs.servers.delete_meta(1234, ['test_key'])
+        cs.servers.delete_meta(1234, ['test_key'])
         cs.assert_called('DELETE', '/servers/1234/metadata/test_key')
 
     def test_set_server_meta(self):
-        s = cs.servers.set_meta(1234, {'test_key': 'test_value'})
-        reval = cs.assert_called('POST', '/servers/1234/metadata',
+        cs.servers.set_meta(1234, {'test_key': 'test_value'})
+        cs.assert_called('POST', '/servers/1234/metadata',
                          {'metadata': {'test_key': 'test_value'}})
 
     def test_find(self):
@@ -299,7 +364,8 @@ class ServersTest(utils.TestCase):
 
         cs.servers.get_console_output(s)
         self.assertEqual(cs.servers.get_console_output(s), success)
-        cs.assert_called('POST', '/servers/1234/action')
+        cs.assert_called('POST', '/servers/1234/action',
+                         {'get_console_output': {'length': -1}})
 
     def test_get_console_output_with_length(self):
         success = 'foo'
@@ -307,11 +373,13 @@ class ServersTest(utils.TestCase):
         s = cs.servers.get(1234)
         s.get_console_output(length=50)
         self.assertEqual(s.get_console_output(length=50), success)
-        cs.assert_called('POST', '/servers/1234/action')
+        cs.assert_called('POST', '/servers/1234/action',
+                         {'get_console_output': {'length': 50}})
 
         cs.servers.get_console_output(s, length=50)
         self.assertEqual(cs.servers.get_console_output(s, length=50), success)
-        cs.assert_called('POST', '/servers/1234/action')
+        cs.assert_called('POST', '/servers/1234/action',
+                         {'get_console_output': {'length': 50}})
 
     def test_get_password(self):
         s = cs.servers.get(1234)

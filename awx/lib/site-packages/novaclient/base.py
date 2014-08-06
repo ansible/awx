@@ -20,11 +20,7 @@ Base utilities to build API operation managers and objects on top of.
 """
 
 import abc
-import contextlib
-import hashlib
 import inspect
-import os
-import threading
 
 import six
 
@@ -52,10 +48,17 @@ class Manager(utils.HookableMixin):
     etc.) and provide CRUD operations for them.
     """
     resource_class = None
-    cache_lock = threading.RLock()
 
     def __init__(self, api):
         self.api = api
+
+    def _write_object_to_completion_cache(self, obj):
+        if hasattr(self.api, 'write_object_to_completion_cache'):
+            self.api.write_object_to_completion_cache(obj)
+
+    def _clear_completion_cache_for_class(self, obj_class):
+        if hasattr(self.api, 'clear_completion_cache_for_class'):
+            self.api.clear_completion_cache_for_class(obj_class)
 
     def _list(self, url, response_key, obj_class=None, body=None):
         if body:
@@ -75,77 +78,22 @@ class Manager(utils.HookableMixin):
             except KeyError:
                 pass
 
-        with self.completion_cache('human_id', obj_class, mode="w"):
-            with self.completion_cache('uuid', obj_class, mode="w"):
-                return [obj_class(self, res, loaded=True)
-                        for res in data if res]
+        self._clear_completion_cache_for_class(obj_class)
 
-    @contextlib.contextmanager
-    def completion_cache(self, cache_type, obj_class, mode):
-        """
-        The completion cache store items that can be used for bash
-        autocompletion, like UUIDs or human-friendly IDs.
+        objs = []
+        for res in data:
+            if res:
+                obj = obj_class(self, res, loaded=True)
+                self._write_object_to_completion_cache(obj)
+                objs.append(obj)
 
-        A resource listing will clear and repopulate the cache.
-
-        A resource create will append to the cache.
-
-        Delete is not handled because listings are assumed to be performed
-        often enough to keep the cache reasonably up-to-date.
-        """
-        # NOTE(wryan): This lock protects read and write access to the
-        # completion caches
-        with self.cache_lock:
-            base_dir = utils.env('NOVACLIENT_UUID_CACHE_DIR',
-                                 default="~/.novaclient")
-
-            # NOTE(sirp): Keep separate UUID caches for each username +
-            # endpoint pair
-            username = utils.env('OS_USERNAME', 'NOVA_USERNAME')
-            url = utils.env('OS_URL', 'NOVA_URL')
-            uniqifier = hashlib.md5(username.encode('utf-8') +
-                                    url.encode('utf-8')).hexdigest()
-
-            cache_dir = os.path.expanduser(os.path.join(base_dir, uniqifier))
-
-            try:
-                os.makedirs(cache_dir, 0o755)
-            except OSError:
-                # NOTE(kiall): This is typically either permission denied while
-                #              attempting to create the directory, or the
-                #              directory already exists. Either way, don't
-                #              fail.
-                pass
-
-            resource = obj_class.__name__.lower()
-            filename = "%s-%s-cache" % (resource, cache_type.replace('_', '-'))
-            path = os.path.join(cache_dir, filename)
-
-            cache_attr = "_%s_cache" % cache_type
-
-            try:
-                setattr(self, cache_attr, open(path, mode))
-            except IOError:
-                # NOTE(kiall): This is typically a permission denied while
-                #              attempting to write the cache file.
-                pass
-
-            try:
-                yield
-            finally:
-                cache = getattr(self, cache_attr, None)
-                if cache:
-                    cache.close()
-                    delattr(self, cache_attr)
-
-    def write_to_completion_cache(self, cache_type, val):
-        cache = getattr(self, "_%s_cache" % cache_type, None)
-        if cache:
-            cache.write("%s\n" % val)
+        return objs
 
     def _get(self, url, response_key):
         _resp, body = self.api.client.get(url)
-        return self.resource_class(self, body[response_key], loaded=True)
+        obj = self.resource_class(self, body[response_key], loaded=True)
+        self._write_object_to_completion_cache(obj)
+        return obj
 
     def _create(self, url, body, response_key, return_raw=False, **kwargs):
         self.run_hooks('modify_body_for_create', body, **kwargs)
@@ -153,9 +101,9 @@ class Manager(utils.HookableMixin):
         if return_raw:
             return body[response_key]
 
-        with self.completion_cache('human_id', self.resource_class, mode="a"):
-            with self.completion_cache('uuid', self.resource_class, mode="a"):
-                return self.resource_class(self, body[response_key])
+        obj = self.resource_class(self, body[response_key])
+        self._write_object_to_completion_cache(obj)
+        return obj
 
     def _delete(self, url):
         _resp, _body = self.api.client.delete(url)

@@ -26,6 +26,7 @@ from six.moves.urllib import parse
 
 from novaclient import base
 from novaclient import crypto
+from novaclient.openstack.common.gettextutils import _
 from novaclient.openstack.common import strutils
 
 REBOOT_SOFT, REBOOT_HARD = 'SOFT', 'HARD'
@@ -403,13 +404,13 @@ class ServerManager(base.BootingManagerWithFind):
             else:
                 userdata = strutils.safe_encode(userdata)
 
-            body["server"][
-                "os-user-data:user_data"] = base64.b64encode(userdata)
+            data = base64.b64encode(userdata).decode('utf-8')
+            body["server"]["os-user-data:user_data"] = data
         if meta:
             body["server"]["metadata"] = meta
         if reservation_id:
             body["server"][
-                "os-multiple-create:reservation_id"] = reservation_id
+                "os-multiple-create:return_reservation_id"] = reservation_id
         if key_name:
             body["server"]["key_name"] = key_name
         if scheduler_hints:
@@ -457,8 +458,15 @@ class ServerManager(base.BootingManagerWithFind):
                 # if value is empty string, do not send value in body
                 if nic_info.get('net-id'):
                     net_data['uuid'] = nic_info['net-id']
-                if nic_info.get('v4-fixed-ip'):
+                if (nic_info.get('v4-fixed-ip') and
+                    nic_info.get('v6-fixed-ip')):
+                    raise base.exceptions.CommandError(_(
+                        "Only one of 'v4-fixed-ip' and 'v6-fixed-ip' may be"
+                        " provided."))
+                elif nic_info.get('v4-fixed-ip'):
                     net_data['fixed_ip'] = nic_info['v4-fixed-ip']
+                elif nic_info.get('v6-fixed-ip'):
+                    net_data['fixed_ip'] = nic_info['v6-fixed-ip']
                 if nic_info.get('port-id'):
                     net_data['port'] = nic_info['port-id']
                 all_net_data.append(net_data)
@@ -894,6 +902,11 @@ class ServerManager(base.BootingManagerWithFind):
                         you would like to retrieve.
         :param length: The number of tail loglines you would like to retrieve.
         """
+        if length is None:
+            # NOTE: On v3 get_console_output API, -1 means an unlimited length.
+            # Here translates None, which means an unlimited in the internal
+            # implementation, to -1.
+            length = -1
         return self._action('get_console_output',
                             server, {'length': length})[1]['output']
 

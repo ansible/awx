@@ -92,11 +92,11 @@ class DeprecatedAuthPluginTest(utils.TestCase):
 
         @mock.patch.object(pkg_resources, "iter_entry_points",
                            mock_iter_entry_points)
-        @mock.patch.object(requests.Session, "request", mock_request)
+        @mock.patch.object(requests, "request", mock_request)
         def test_auth_call():
             plugin = auth_plugin.DeprecatedAuthPlugin("fake")
             cs = client.Client("username", "password", "project_id",
-                               "auth_url/v2.0", auth_system="fake",
+                               utils.AUTH_URL_V2, auth_system="fake",
                                auth_plugin=plugin)
             cs.client.authenticate()
 
@@ -121,12 +121,12 @@ class DeprecatedAuthPluginTest(utils.TestCase):
 
         @mock.patch.object(pkg_resources, "iter_entry_points",
                            mock_iter_entry_points)
-        @mock.patch.object(requests.Session, "request", mock_request)
+        @mock.patch.object(requests, "request", mock_request)
         def test_auth_call():
             auth_plugin.discover_auth_systems()
             plugin = auth_plugin.DeprecatedAuthPlugin("notexists")
             cs = client.Client("username", "password", "project_id",
-                               "auth_url/v2.0", auth_system="notexists",
+                               utils.AUTH_URL_V2, auth_system="notexists",
                                auth_plugin=plugin)
             self.assertRaises(exceptions.AuthSystemNotFound,
                               cs.client.authenticate)
@@ -164,7 +164,7 @@ class DeprecatedAuthPluginTest(utils.TestCase):
 
         @mock.patch.object(pkg_resources, "iter_entry_points",
                            mock_iter_entry_points)
-        @mock.patch.object(requests.Session, "request", mock_request)
+        @mock.patch.object(requests, "request", mock_request)
         def test_auth_call():
             plugin = auth_plugin.DeprecatedAuthPlugin("fakewithauthurl")
             cs = client.Client("username", "password", "project_id",
@@ -197,7 +197,7 @@ class DeprecatedAuthPluginTest(utils.TestCase):
 
 
 class AuthPluginTest(utils.TestCase):
-    @mock.patch.object(requests.Session, "request")
+    @mock.patch.object(requests, "request")
     @mock.patch.object(pkg_resources, "iter_entry_points")
     def test_auth_system_success(self, mock_iter_entry_points, mock_request):
         """Test that we can authenticate using the auth system."""
@@ -217,7 +217,7 @@ class AuthPluginTest(utils.TestCase):
         auth_plugin.discover_auth_systems()
         plugin = auth_plugin.load_plugin("fake")
         cs = client.Client("username", "password", "project_id",
-                           "auth_url/v2.0", auth_system="fake",
+                           utils.AUTH_URL_V2, auth_system="fake",
                            auth_plugin=plugin)
         cs.client.authenticate()
 

@@ -186,20 +186,6 @@ class ShellTest(utils.TestCase):
             }},
         )
 
-    def test_boot_multiple(self):
-        self.run_command('boot --flavor 1 --image 1'
-                         ' --num-instances 3 some-server')
-        self.assert_called_anytime(
-            'POST', '/servers',
-            {'server': {
-                'flavor_ref': '1',
-                'name': 'some-server',
-                'image_ref': '1',
-                'os-multiple-create:min_count': 1,
-                'os-multiple-create:max_count': 3,
-            }},
-        )
-
     def test_boot_image_with(self):
         self.run_command("boot --flavor 1"
                          " --image-with test_key=test_value some-server")
@@ -240,6 +226,7 @@ class ShellTest(utils.TestCase):
 
             mock_open.assert_called_once_with(testfile)
 
+        user_data = base64.b64encode(file_text.encode('utf-8')).decode('utf-8')
         self.assert_called_anytime(
             'POST', '/servers',
             {'server': {
@@ -248,9 +235,7 @@ class ShellTest(utils.TestCase):
                 'image_ref': '1',
                 'os-multiple-create:min_count': 1,
                 'os-multiple-create:max_count': 1,
-                'os-user-data:user_data': base64.b64encode(
-                    file_text.encode('utf-8'))
-            }},
+                'os-user-data:user_data': user_data}},
         )
 
     def test_boot_avzone(self):
@@ -428,7 +413,33 @@ class ShellTest(utils.TestCase):
             },
         )
 
-    def tets_boot_nics_no_value(self):
+    def test_boot_nics_ipv6(self):
+        cmd = ('boot --image 1 --flavor 1 '
+               '--nic net-id=a=c,v6-fixed-ip=2001:db9:0:1::10 some-server')
+        self.run_command(cmd)
+        self.assert_called_anytime(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavor_ref': '1',
+                    'name': 'some-server',
+                    'image_ref': '1',
+                    'os-multiple-create:min_count': 1,
+                    'os-multiple-create:max_count': 1,
+                    'networks': [
+                        {'uuid': 'a=c', 'fixed_ip': '2001:db9:0:1::10'},
+                    ],
+                },
+            },
+        )
+
+    def test_boot_nics_both_ipv4_and_ipv6(self):
+        cmd = ('boot --image 1 --flavor 1 '
+               '--nic net-id=a=c,v4-fixed-ip=10.0.0.1,'
+               'v6-fixed-ip=2001:db9:0:1::10 some-server')
+        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
+
+    def test_boot_nics_no_value(self):
         cmd = ('boot --image 1 --flavor 1 '
                '--nic net-id some-server')
         self.assertRaises(exceptions.CommandError, self.run_command, cmd)
@@ -441,6 +452,11 @@ class ShellTest(utils.TestCase):
     def test_boot_nics_no_netid_or_portid(self):
         cmd = ('boot --image 1 --flavor 1 '
                '--nic v4-fixed-ip=10.0.0.1 some-server')
+        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
+
+    def test_boot_nics_netid_and_portid(self):
+        cmd = ('boot --image 1 --flavor 1 '
+               '--nic port-id=some=port,net-id=some=net some-server')
         self.assertRaises(exceptions.CommandError, self.run_command, cmd)
 
     def test_boot_num_instances(self):
@@ -458,9 +474,67 @@ class ShellTest(utils.TestCase):
             })
 
     def test_boot_invalid_num_instances(self):
-        cmd = 'boot --image 1 --flavor 1 --num-instances 1  server'
-        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
         cmd = 'boot --image 1 --flavor 1 --num-instances 0  server'
+        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
+
+    def test_boot_num_instances_and_count(self):
+        cmd = 'boot --image 1 --flavor 1 --num-instances 3 --min-count 3 serv'
+        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
+        cmd = 'boot --image 1 --flavor 1 --num-instances 3 --max-count 3 serv'
+        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
+
+    def test_boot_min_max_count(self):
+        self.run_command('boot --image 1 --flavor 1 --max-count 3 server')
+        self.assert_called_anytime(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavor_ref': '1',
+                    'name': 'server',
+                    'image_ref': '1',
+                    'os-multiple-create:min_count': 1,
+                    'os-multiple-create:max_count': 3,
+                }
+            })
+        self.run_command('boot --image 1 --flavor 1 --min-count 3 server')
+        self.assert_called_anytime(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavor_ref': '1',
+                    'name': 'server',
+                    'image_ref': '1',
+                    'os-multiple-create:min_count': 3,
+                    'os-multiple-create:max_count': 3,
+                }
+            })
+        self.run_command('boot --image 1 --flavor 1 '
+                         '--min-count 3 --max-count 3 server')
+        self.assert_called_anytime(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavor_ref': '1',
+                    'name': 'server',
+                    'image_ref': '1',
+                    'os-multiple-create:min_count': 3,
+                    'os-multiple-create:max_count': 3,
+                }
+            })
+        self.run_command('boot --image 1 --flavor 1 '
+                         '--min-count 3 --max-count 5 server')
+        self.assert_called_anytime(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavor_ref': '1',
+                    'name': 'server',
+                    'image_ref': '1',
+                    'os-multiple-create:min_count': 3,
+                    'os-multiple-create:max_count': 5,
+                }
+            })
+        cmd = 'boot --image 1 --flavor 1 --min-count 3 --max-count 1 serv'
         self.assertRaises(exceptions.CommandError, self.run_command, cmd)
 
     @mock.patch('novaclient.v3.shell._poll_for_status')
@@ -480,3 +554,43 @@ class ShellTest(utils.TestCase):
         poll_method.assert_has_calls(
             [mock.call(self.shell.cs.servers.get, 1234, 'building',
                        ['active'])])
+
+    def test_boot_with_poll_to_check_VM_state_error(self):
+        self.assertRaises(exceptions.InstanceInErrorState, self.run_command,
+                          'boot --flavor 1 --image 1 some-bad-server --poll')
+
+    def test_boot_named_flavor(self):
+        self.run_command(["boot", "--image", "1",
+                          "--flavor", "512 MB Server",
+                          "--max-count", "3", "server"])
+        self.assert_called('GET', '/flavors/512 MB Server', pos=0)
+        self.assert_called('GET', '/flavors?is_public=None', pos=1)
+        self.assert_called('GET', '/flavors?is_public=None', pos=2)
+        self.assert_called('GET', '/flavors/2', pos=3)
+        self.assert_called(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavor_ref': '2',
+                    'name': 'server',
+                    'image_ref': '1',
+                    'os-multiple-create:min_count': 1,
+                    'os-multiple-create:max_count': 3,
+                }
+            }, pos=4)
+
+    def test_flavor_show_by_name(self):
+        self.run_command(['flavor-show', '128 MB Server'])
+        self.assert_called('GET', '/flavors/128 MB Server', pos=0)
+        self.assert_called('GET', '/flavors?is_public=None', pos=1)
+        self.assert_called('GET', '/flavors?is_public=None', pos=2)
+        self.assert_called('GET', '/flavors/aa1', pos=3)
+        self.assert_called('GET', '/flavors/aa1/flavor-extra-specs', pos=4)
+
+    def test_flavor_show_by_name_priv(self):
+        self.run_command(['flavor-show', '512 MB Server'])
+        self.assert_called('GET', '/flavors/512 MB Server', pos=0)
+        self.assert_called('GET', '/flavors?is_public=None', pos=1)
+        self.assert_called('GET', '/flavors?is_public=None', pos=2)
+        self.assert_called('GET', '/flavors/2', pos=3)
+        self.assert_called('GET', '/flavors/2/flavor-extra-specs', pos=4)

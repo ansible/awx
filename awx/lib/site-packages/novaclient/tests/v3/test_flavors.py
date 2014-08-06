@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
+
 from novaclient.tests.v1_1 import test_flavors
 from novaclient.tests.v3 import fakes
 from novaclient.v3 import flavors
@@ -57,10 +59,15 @@ class FlavorsTest(test_flavors.FlavorsTest):
             self.cs.assert_called('POST', '/flavors/4/flavor-extra-specs',
                                   {"extra_specs": {key: 'v4'}})
 
-    def test_unset_keys(self):
+    @mock.patch.object(flavors.FlavorManager, '_delete')
+    def test_unset_keys(self, mock_delete):
         f = self.cs.flavors.get(1)
-        f.unset_keys(['k1'])
-        self.cs.assert_called('DELETE', '/flavors/1/flavor-extra-specs/k1')
+        keys = ['k1', 'k2']
+        f.unset_keys(keys)
+        mock_delete.assert_has_calls([
+            mock.call("/flavors/1/flavor-extra-specs/k1"),
+            mock.call("/flavors/1/flavor-extra-specs/k2")
+        ])
 
     def test_get_flavor_details_diablo(self):
         # Don't need for V3 API to work against diablo

@@ -11,34 +11,35 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import networks as data
 from novaclient.tests import utils
-from novaclient.tests.v1_1 import fakes
 from novaclient.v1_1 import networks
 
 
-cs = fakes.FakeClient()
+class NetworksTest(utils.FixturedTestCase):
 
-
-class NetworksTest(utils.TestCase):
+    client_fixture_class = client.V1
+    data_fixture_class = data.Fixture
 
     def test_list_networks(self):
-        fl = cs.networks.list()
-        cs.assert_called('GET', '/os-networks')
+        fl = self.cs.networks.list()
+        self.assert_called('GET', '/os-networks')
         [self.assertIsInstance(f, networks.Network) for f in fl]
 
     def test_get_network(self):
-        f = cs.networks.get(1)
-        cs.assert_called('GET', '/os-networks/1')
+        f = self.cs.networks.get(1)
+        self.assert_called('GET', '/os-networks/1')
         self.assertIsInstance(f, networks.Network)
 
     def test_delete(self):
-        cs.networks.delete('networkdelete')
-        cs.assert_called('DELETE', '/os-networks/networkdelete')
+        self.cs.networks.delete('networkdelete')
+        self.assert_called('DELETE', '/os-networks/networkdelete')
 
     def test_create(self):
-        f = cs.networks.create(label='foo')
-        cs.assert_called('POST', '/os-networks',
-                         {'network': {'label': 'foo'}})
+        f = self.cs.networks.create(label='foo')
+        self.assert_called('POST', '/os-networks',
+                           {'network': {'label': 'foo'}})
         self.assertIsInstance(f, networks.Network)
 
     def test_create_allparams(self):
@@ -56,43 +57,44 @@ class NetworksTest(utils.TestCase):
             'multi_host': 'T',
             'priority': '1',
             'project_id': '1',
+            'vlan': 5,
             'vlan_start': 1,
             'vpn_start': 1
         }
 
-        f = cs.networks.create(**params)
-        cs.assert_called('POST', '/os-networks', {'network': params})
+        f = self.cs.networks.create(**params)
+        self.assert_called('POST', '/os-networks', {'network': params})
         self.assertIsInstance(f, networks.Network)
 
     def test_associate_project(self):
-        cs.networks.associate_project('networktest')
-        cs.assert_called('POST', '/os-networks/add',
-                         {'id': 'networktest'})
+        self.cs.networks.associate_project('networktest')
+        self.assert_called('POST', '/os-networks/add',
+                           {'id': 'networktest'})
 
     def test_associate_host(self):
-        cs.networks.associate_host('networktest', 'testHost')
-        cs.assert_called('POST', '/os-networks/networktest/action',
-                         {'associate_host': 'testHost'})
+        self.cs.networks.associate_host('networktest', 'testHost')
+        self.assert_called('POST', '/os-networks/networktest/action',
+                           {'associate_host': 'testHost'})
 
     def test_disassociate(self):
-        cs.networks.disassociate('networkdisassociate')
-        cs.assert_called('POST',
-                         '/os-networks/networkdisassociate/action',
-                         {'disassociate': None})
+        self.cs.networks.disassociate('networkdisassociate')
+        self.assert_called('POST',
+                           '/os-networks/networkdisassociate/action',
+                           {'disassociate': None})
 
     def test_disassociate_host_only(self):
-        cs.networks.disassociate('networkdisassociate', True, False)
-        cs.assert_called('POST',
-                         '/os-networks/networkdisassociate/action',
-                         {'disassociate_host': None})
+        self.cs.networks.disassociate('networkdisassociate', True, False)
+        self.assert_called('POST',
+                           '/os-networks/networkdisassociate/action',
+                           {'disassociate_host': None})
 
     def test_disassociate_project(self):
-        cs.networks.disassociate('networkdisassociate', False, True)
-        cs.assert_called('POST',
-                         '/os-networks/networkdisassociate/action',
-                         {'disassociate_project': None})
+        self.cs.networks.disassociate('networkdisassociate', False, True)
+        self.assert_called('POST',
+                           '/os-networks/networkdisassociate/action',
+                           {'disassociate_project': None})
 
     def test_add(self):
-        cs.networks.add('networkadd')
-        cs.assert_called('POST', '/os-networks/add',
-                         {'id': 'networkadd'})
+        self.cs.networks.add('networkadd')
+        self.assert_called('POST', '/os-networks/add',
+                           {'id': 'networkadd'})

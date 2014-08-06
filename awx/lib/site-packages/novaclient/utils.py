@@ -57,13 +57,14 @@ def get_resource_manager_extra_kwargs(f, args, allow_conflicts=False):
     extra_kwargs = {}
     for hook in hooks:
         hook_kwargs = hook(args)
-
+        hook_name = hook.__name__
         conflicting_keys = set(hook_kwargs.keys()) & set(extra_kwargs.keys())
         if conflicting_keys and not allow_conflicts:
-            raise Exception(_("Hook '%(hook_name)s' is attempting to redefine"
-                    " attributes '%(conflicting_keys)s'") %
-                    {'hook_name': hook_name,
-                        'conflicting_keys': conflicting_keys})
+            msg = (_("Hook '%(hook_name)s' is attempting to redefine "
+                     "attributes '%(conflicting_keys)s'") %
+                   {'hook_name': hook_name,
+                    'conflicting_keys': conflicting_keys})
+            raise exceptions.NoUniqueMatch(msg)
 
         extra_kwargs.update(hook_kwargs)
 
@@ -203,7 +204,7 @@ def print_dict(d, dict_property="Property", dict_value="Value", wrap=0):
 
 def find_resource(manager, name_or_id, **find_args):
     """Helper for the _find_* methods."""
-    # for str id which is not uuid (for Flavor search currently)
+    # for str id which is not uuid (for Flavor and Keypair search currently)
     if getattr(manager, 'is_alphanum_id_allowed', False):
         try:
             return manager.get(name_or_id)
@@ -351,7 +352,7 @@ def _load_entry_point(ep_name, name=None):
 def is_integer_like(val):
     """Returns validation of a value as an integer."""
     try:
-        value = int(val)
+        int(val)
         return True
     except (TypeError, ValueError, AttributeError):
         return False

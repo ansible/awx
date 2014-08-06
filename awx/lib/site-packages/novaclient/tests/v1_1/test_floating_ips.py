@@ -14,38 +14,46 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import floatingips as data
 from novaclient.tests import utils
-from novaclient.tests.v1_1 import fakes
 from novaclient.v1_1 import floating_ips
 
 
-cs = fakes.FakeClient()
+class FloatingIPsTest(utils.FixturedTestCase):
 
-
-class FloatingIPsTest(utils.TestCase):
+    client_fixture_class = client.V1
+    data_fixture_class = data.FloatingFixture
 
     def test_list_floating_ips(self):
-        fl = cs.floating_ips.list()
-        cs.assert_called('GET', '/os-floating-ips')
-        [self.assertIsInstance(f, floating_ips.FloatingIP) for f in fl]
+        fips = self.cs.floating_ips.list()
+        self.assert_called('GET', '/os-floating-ips')
+        for fip in fips:
+            self.assertIsInstance(fip, floating_ips.FloatingIP)
+
+    def test_list_floating_ips_all_tenants(self):
+        fips = self.cs.floating_ips.list(all_tenants=True)
+        self.assert_called('GET', '/os-floating-ips?all_tenants=1')
+        for fip in fips:
+            self.assertIsInstance(fip, floating_ips.FloatingIP)
 
     def test_delete_floating_ip(self):
-        fl = cs.floating_ips.list()[0]
+        fl = self.cs.floating_ips.list()[0]
         fl.delete()
-        cs.assert_called('DELETE', '/os-floating-ips/1')
-        cs.floating_ips.delete(1)
-        cs.assert_called('DELETE', '/os-floating-ips/1')
-        cs.floating_ips.delete(fl)
-        cs.assert_called('DELETE', '/os-floating-ips/1')
+        self.assert_called('DELETE', '/os-floating-ips/1')
+        self.cs.floating_ips.delete(1)
+        self.assert_called('DELETE', '/os-floating-ips/1')
+        self.cs.floating_ips.delete(fl)
+        self.assert_called('DELETE', '/os-floating-ips/1')
 
     def test_create_floating_ip(self):
-        fl = cs.floating_ips.create()
-        cs.assert_called('POST', '/os-floating-ips')
+        fl = self.cs.floating_ips.create()
+        self.assert_called('POST', '/os-floating-ips')
         self.assertIsNone(fl.pool)
         self.assertIsInstance(fl, floating_ips.FloatingIP)
 
     def test_create_floating_ip_with_pool(self):
-        fl = cs.floating_ips.create('foo')
-        cs.assert_called('POST', '/os-floating-ips')
+        fl = self.cs.floating_ips.create('nova')
+        self.assert_called('POST', '/os-floating-ips')
         self.assertEqual(fl.pool, 'nova')
         self.assertIsInstance(fl, floating_ips.FloatingIP)

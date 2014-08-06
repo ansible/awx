@@ -25,6 +25,8 @@ import sys
 
 import six
 
+from novaclient.openstack.common.gettextutils import _
+
 
 class ClientException(Exception):
     """The base exception class for all exceptions this library raises.
@@ -36,7 +38,7 @@ class MissingArgs(ClientException):
     """Supplied arguments are not sufficient for calling a function."""
     def __init__(self, missing):
         self.missing = missing
-        msg = "Missing argument(s): %s" % ", ".join(missing)
+        msg = _("Missing arguments: %s") % ", ".join(missing)
         super(MissingArgs, self).__init__(msg)
 
 
@@ -55,6 +57,11 @@ class CommandError(ClientException):
     pass
 
 
+class ResourceNotFound(ClientException):
+    """Error in getting the resource."""
+    pass
+
+
 class AuthorizationFailure(ClientException):
     """Cannot authorize API client."""
     pass
@@ -69,16 +76,16 @@ class AuthPluginOptionsMissing(AuthorizationFailure):
     """Auth plugin misses some options."""
     def __init__(self, opt_names):
         super(AuthPluginOptionsMissing, self).__init__(
-            "Authentication failed. Missing options: %s" %
+            _("Authentication failed. Missing options: %s") %
             ", ".join(opt_names))
         self.opt_names = opt_names
 
 
 class AuthSystemNotFound(AuthorizationFailure):
-    """User has specified a AuthSystem that is not installed."""
+    """User has specified an AuthSystem that is not installed."""
     def __init__(self, auth_system):
         super(AuthSystemNotFound, self).__init__(
-            "AuthSystemNotFound: %s" % repr(auth_system))
+            _("AuthSystemNotFound: %s") % repr(auth_system))
         self.auth_system = auth_system
 
 
@@ -101,7 +108,7 @@ class AmbiguousEndpoints(EndpointException):
     """Found more than one matching endpoint in Service Catalog."""
     def __init__(self, endpoints=None):
         super(AmbiguousEndpoints, self).__init__(
-            "AmbiguousEndpoints: %s" % repr(endpoints))
+            _("AmbiguousEndpoints: %s") % repr(endpoints))
         self.endpoints = endpoints
 
 
@@ -109,7 +116,7 @@ class HttpError(ClientException):
     """The base exception class for all HTTP exceptions.
     """
     http_status = 0
-    message = "HTTP Error"
+    message = _("HTTP Error")
 
     def __init__(self, message=None, details=None,
                  response=None, request_id=None,
@@ -129,7 +136,7 @@ class HttpError(ClientException):
 
 class HTTPRedirection(HttpError):
     """HTTP Redirection."""
-    message = "HTTP Redirection"
+    message = _("HTTP Redirection")
 
 
 class HTTPClientError(HttpError):
@@ -137,7 +144,7 @@ class HTTPClientError(HttpError):
 
     Exception for cases in which the client seems to have erred.
     """
-    message = "HTTP Client Error"
+    message = _("HTTP Client Error")
 
 
 class HttpServerError(HttpError):
@@ -146,7 +153,7 @@ class HttpServerError(HttpError):
     Exception for cases in which the server is aware that it has
     erred or is incapable of performing the request.
     """
-    message = "HTTP Server Error"
+    message = _("HTTP Server Error")
 
 
 class MultipleChoices(HTTPRedirection):
@@ -156,7 +163,7 @@ class MultipleChoices(HTTPRedirection):
     """
 
     http_status = 300
-    message = "Multiple Choices"
+    message = _("Multiple Choices")
 
 
 class BadRequest(HTTPClientError):
@@ -165,7 +172,7 @@ class BadRequest(HTTPClientError):
     The request cannot be fulfilled due to bad syntax.
     """
     http_status = 400
-    message = "Bad Request"
+    message = _("Bad Request")
 
 
 class Unauthorized(HTTPClientError):
@@ -175,7 +182,7 @@ class Unauthorized(HTTPClientError):
     is required and has failed or has not yet been provided.
     """
     http_status = 401
-    message = "Unauthorized"
+    message = _("Unauthorized")
 
 
 class PaymentRequired(HTTPClientError):
@@ -184,7 +191,7 @@ class PaymentRequired(HTTPClientError):
     Reserved for future use.
     """
     http_status = 402
-    message = "Payment Required"
+    message = _("Payment Required")
 
 
 class Forbidden(HTTPClientError):
@@ -194,7 +201,7 @@ class Forbidden(HTTPClientError):
     to it.
     """
     http_status = 403
-    message = "Forbidden"
+    message = _("Forbidden")
 
 
 class NotFound(HTTPClientError):
@@ -204,7 +211,7 @@ class NotFound(HTTPClientError):
     in the future.
     """
     http_status = 404
-    message = "Not Found"
+    message = _("Not Found")
 
 
 class MethodNotAllowed(HTTPClientError):
@@ -214,7 +221,7 @@ class MethodNotAllowed(HTTPClientError):
     by that resource.
     """
     http_status = 405
-    message = "Method Not Allowed"
+    message = _("Method Not Allowed")
 
 
 class NotAcceptable(HTTPClientError):
@@ -224,7 +231,7 @@ class NotAcceptable(HTTPClientError):
     acceptable according to the Accept headers sent in the request.
     """
     http_status = 406
-    message = "Not Acceptable"
+    message = _("Not Acceptable")
 
 
 class ProxyAuthenticationRequired(HTTPClientError):
@@ -233,7 +240,7 @@ class ProxyAuthenticationRequired(HTTPClientError):
     The client must first authenticate itself with the proxy.
     """
     http_status = 407
-    message = "Proxy Authentication Required"
+    message = _("Proxy Authentication Required")
 
 
 class RequestTimeout(HTTPClientError):
@@ -242,7 +249,7 @@ class RequestTimeout(HTTPClientError):
     The server timed out waiting for the request.
     """
     http_status = 408
-    message = "Request Timeout"
+    message = _("Request Timeout")
 
 
 class Conflict(HTTPClientError):
@@ -252,7 +259,7 @@ class Conflict(HTTPClientError):
     in the request, such as an edit conflict.
     """
     http_status = 409
-    message = "Conflict"
+    message = _("Conflict")
 
 
 class Gone(HTTPClientError):
@@ -262,7 +269,7 @@ class Gone(HTTPClientError):
     not be available again.
     """
     http_status = 410
-    message = "Gone"
+    message = _("Gone")
 
 
 class LengthRequired(HTTPClientError):
@@ -272,7 +279,7 @@ class LengthRequired(HTTPClientError):
     required by the requested resource.
     """
     http_status = 411
-    message = "Length Required"
+    message = _("Length Required")
 
 
 class PreconditionFailed(HTTPClientError):
@@ -282,7 +289,7 @@ class PreconditionFailed(HTTPClientError):
     put on the request.
     """
     http_status = 412
-    message = "Precondition Failed"
+    message = _("Precondition Failed")
 
 
 class RequestEntityTooLarge(HTTPClientError):
@@ -291,7 +298,7 @@ class RequestEntityTooLarge(HTTPClientError):
     The request is larger than the server is willing or able to process.
     """
     http_status = 413
-    message = "Request Entity Too Large"
+    message = _("Request Entity Too Large")
 
     def __init__(self, *args, **kwargs):
         try:
@@ -308,7 +315,7 @@ class RequestUriTooLong(HTTPClientError):
     The URI provided was too long for the server to process.
     """
     http_status = 414
-    message = "Request-URI Too Long"
+    message = _("Request-URI Too Long")
 
 
 class UnsupportedMediaType(HTTPClientError):
@@ -318,7 +325,7 @@ class UnsupportedMediaType(HTTPClientError):
     not support.
     """
     http_status = 415
-    message = "Unsupported Media Type"
+    message = _("Unsupported Media Type")
 
 
 class RequestedRangeNotSatisfiable(HTTPClientError):
@@ -328,7 +335,7 @@ class RequestedRangeNotSatisfiable(HTTPClientError):
     supply that portion.
     """
     http_status = 416
-    message = "Requested Range Not Satisfiable"
+    message = _("Requested Range Not Satisfiable")
 
 
 class ExpectationFailed(HTTPClientError):
@@ -337,7 +344,7 @@ class ExpectationFailed(HTTPClientError):
     The server cannot meet the requirements of the Expect request-header field.
     """
     http_status = 417
-    message = "Expectation Failed"
+    message = _("Expectation Failed")
 
 
 class UnprocessableEntity(HTTPClientError):
@@ -347,7 +354,7 @@ class UnprocessableEntity(HTTPClientError):
     errors.
     """
     http_status = 422
-    message = "Unprocessable Entity"
+    message = _("Unprocessable Entity")
 
 
 class InternalServerError(HttpServerError):
@@ -356,7 +363,7 @@ class InternalServerError(HttpServerError):
     A generic error message, given when no more specific message is suitable.
     """
     http_status = 500
-    message = "Internal Server Error"
+    message = _("Internal Server Error")
 
 
 # NotImplemented is a python keyword.
@@ -367,7 +374,7 @@ class HttpNotImplemented(HttpServerError):
     the ability to fulfill the request.
     """
     http_status = 501
-    message = "Not Implemented"
+    message = _("Not Implemented")
 
 
 class BadGateway(HttpServerError):
@@ -377,7 +384,7 @@ class BadGateway(HttpServerError):
     response from the upstream server.
     """
     http_status = 502
-    message = "Bad Gateway"
+    message = _("Bad Gateway")
 
 
 class ServiceUnavailable(HttpServerError):
@@ -386,7 +393,7 @@ class ServiceUnavailable(HttpServerError):
     The server is currently unavailable.
     """
     http_status = 503
-    message = "Service Unavailable"
+    message = _("Service Unavailable")
 
 
 class GatewayTimeout(HttpServerError):
@@ -396,7 +403,7 @@ class GatewayTimeout(HttpServerError):
     response from the upstream server.
     """
     http_status = 504
-    message = "Gateway Timeout"
+    message = _("Gateway Timeout")
 
 
 class HttpVersionNotSupported(HttpServerError):
@@ -405,7 +412,7 @@ class HttpVersionNotSupported(HttpServerError):
     The server does not support the HTTP protocol version used in the request.
     """
     http_status = 505
-    message = "HTTP Version Not Supported"
+    message = _("HTTP Version Not Supported")
 
 
 # _code_map contains all the classes that have http_status attribute.
@@ -423,12 +430,17 @@ def from_response(response, method, url):
     :param method: HTTP method used for request
     :param url: URL used for request
     """
+
+    req_id = response.headers.get("x-openstack-request-id")
+    #NOTE(hdd) true for older versions of nova and cinder
+    if not req_id:
+        req_id = response.headers.get("x-compute-request-id")
     kwargs = {
         "http_status": response.status_code,
         "response": response,
         "method": method,
         "url": url,
-        "request_id": response.headers.get("x-compute-request-id"),
+        "request_id": req_id,
     }
     if "retry-after" in response.headers:
         kwargs["retry_after"] = response.headers["retry-after"]

@@ -11,28 +11,29 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import limits as data
 from novaclient.tests import utils
-from novaclient.tests.v1_1 import fakes
 from novaclient.v1_1 import limits
 
 
-cs = fakes.FakeClient()
+class LimitsTest(utils.FixturedTestCase):
 
-
-class LimitsTest(utils.TestCase):
+    client_fixture_class = client.V1
+    data_fixture_class = data.Fixture
 
     def test_get_limits(self):
-        obj = cs.limits.get()
-        cs.assert_called('GET', '/limits')
+        obj = self.cs.limits.get()
+        self.assert_called('GET', '/limits')
         self.assertIsInstance(obj, limits.Limits)
 
     def test_get_limits_for_a_tenant(self):
-        obj = cs.limits.get(tenant_id=1234)
-        cs.assert_called('GET', '/limits?tenant_id=1234')
+        obj = self.cs.limits.get(tenant_id=1234)
+        self.assert_called('GET', '/limits?tenant_id=1234')
         self.assertIsInstance(obj, limits.Limits)
 
     def test_absolute_limits(self):
-        obj = cs.limits.get()
+        obj = self.cs.limits.get()
 
         expected = (
             limits.AbsoluteLimit("maxTotalRAMSize", 51200),
@@ -49,7 +50,7 @@ class LimitsTest(utils.TestCase):
             self.assertTrue(limit in expected)
 
     def test_absolute_limits_reserved(self):
-        obj = cs.limits.get(reserved=True)
+        obj = self.cs.limits.get(reserved=True)
 
         expected = (
             limits.AbsoluteLimit("maxTotalRAMSize", 51200),
@@ -59,7 +60,7 @@ class LimitsTest(utils.TestCase):
             limits.AbsoluteLimit("maxPersonalitySize", 10240),
         )
 
-        cs.assert_called('GET', '/limits?reserved=1')
+        self.assert_called('GET', '/limits?reserved=1')
         abs_limits = list(obj.absolute)
         self.assertEqual(len(abs_limits), len(expected))
 
@@ -67,7 +68,7 @@ class LimitsTest(utils.TestCase):
             self.assertTrue(limit in expected)
 
     def test_rate_limits(self):
-        obj = cs.limits.get()
+        obj = self.cs.limits.get()
 
         expected = (
             limits.RateLimit('POST', '*', '.*', 10, 2, 'MINUTE',

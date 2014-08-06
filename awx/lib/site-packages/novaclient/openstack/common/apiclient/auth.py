@@ -213,8 +213,8 @@ class BaseAuthPlugin(object):
         :type service_type: string
         :param endpoint_type: Type of endpoint.
                               Possible values: public or publicURL,
-                                  internal or internalURL,
-                                  admin or adminURL
+                              internal or internalURL,
+                              admin or adminURL
         :type endpoint_type: string
         :returns: tuple of token and endpoint strings
         :raises: EndpointException

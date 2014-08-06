@@ -301,3 +301,23 @@ class ValidationsTestCase(test_utils.TestCase):
                 self.fail("Invalid key passed validation: %s" % key)
             except exceptions.CommandError as ce:
                 self.assertTrue(key in str(ce))
+
+
+class ResourceManagerExtraKwargsHookTestCase(test_utils.TestCase):
+    def test_get_resource_manager_extra_kwargs_hook_test(self):
+        do_foo = mock.MagicMock()
+
+        def hook1(args):
+            return {'kwarg1': 'v_hook1'}
+
+        def hook2(args):
+            return {'kwarg1': 'v_hook2'}
+        do_foo.resource_manager_kwargs_hooks = [hook1, hook2]
+        args = {}
+        exc = self.assertRaises(exceptions.NoUniqueMatch,
+                                utils.get_resource_manager_extra_kwargs,
+                                do_foo,
+                                args)
+        except_error = ("Hook 'hook2' is attempting to redefine "
+                        "attributes")
+        self.assertIn(except_error, six.text_type(exc))

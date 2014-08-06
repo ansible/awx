@@ -24,16 +24,23 @@ class VolumeManager(base.Manager):
     Manage :class:`Volume` resources.
     """
 
-    def attach_server_volume(self, server, volume_id, device):
+    def attach_server_volume(self, server, volume_id, device,
+                             disk_bus=None, device_type=None):
         """
         Attach a volume identified by the volume ID to the given server ID
 
         :param server: The server (or it's ID)
         :param volume_id: The ID of the volume to attach.
         :param device: The device name
+        :param disk_bus: The disk bus of the volume
+        :param device_type: The device type of the volume
         :rtype: :class:`Volume`
         """
         body = {'volume_id': volume_id, 'device': device}
+        if disk_bus:
+            body['disk_bus'] = disk_bus
+        if device_type:
+            body['device_type'] = device_type
         return self._action('attach', server, body)
 
     def update_server_volume(self, server, old_volume_id, new_volume_id):

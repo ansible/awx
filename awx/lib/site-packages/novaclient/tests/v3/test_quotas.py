@@ -12,22 +12,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import quotas as data
 from novaclient.tests.v1_1 import test_quotas
-from novaclient.tests.v3 import fakes
 
 
 class QuotaSetsTest(test_quotas.QuotaSetsTest):
-    def setUp(self):
-        super(QuotaSetsTest, self).setUp()
-        self.cs = self._get_fake_client()
 
-    def _get_fake_client(self):
-        return fakes.FakeClient()
+    client_fixture_class = client.V3
+    data_fixture_class = data.V3
 
     def test_force_update_quota(self):
         q = self.cs.quotas.get('97f4c221bff44578b0300df4ef119353')
         q.update(cores=2, force=True)
-        self.cs.assert_called(
+        self.assert_called(
             'PUT', '/os-quota-sets/97f4c221bff44578b0300df4ef119353',
             {'quota_set': {'force': True,
                            'cores': 2}})
@@ -35,11 +33,11 @@ class QuotaSetsTest(test_quotas.QuotaSetsTest):
     def test_tenant_quotas_get_detail(self):
         tenant_id = 'test'
         self.cs.quotas.get(tenant_id, detail=True)
-        self.cs.assert_called('GET', '/os-quota-sets/%s/detail' % tenant_id)
+        self.assert_called('GET', '/os-quota-sets/%s/detail' % tenant_id)
 
     def test_user_quotas_get_detail(self):
         tenant_id = 'test'
         user_id = 'fake_user'
         self.cs.quotas.get(tenant_id, user_id=user_id, detail=True)
         url = '/os-quota-sets/%s/detail?user_id=%s' % (tenant_id, user_id)
-        self.cs.assert_called('GET', url)
+        self.assert_called('GET', url)

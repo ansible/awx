@@ -285,6 +285,11 @@ class OpenStackComputeShell(object):
         parser.add_argument('--os_username',
             help=argparse.SUPPRESS)
 
+        parser.add_argument('--os-user-id',
+            metavar='<auth-user-id>',
+            default=utils.env('OS_USER_ID'),
+            help=_('Defaults to env[OS_USER_ID].'))
+
         parser.add_argument('--os-password',
             metavar='<auth-password>',
             default=utils.env('OS_PASSWORD', 'NOVA_PASSWORD'),
@@ -385,7 +390,9 @@ class OpenStackComputeShell(object):
         parser.add_argument('--bypass-url',
             metavar='<bypass-url>',
             dest='bypass_url',
-            help="Use this API endpoint instead of the Service Catalog")
+            default=utils.env('NOVACLIENT_BYPASS_URL'),
+            help="Use this API endpoint instead of the Service Catalog. "
+                 "Defaults to env[NOVACLIENT_BYPASS_URL]")
         parser.add_argument('--bypass_url',
             help=argparse.SUPPRESS)
 
@@ -550,6 +557,7 @@ class OpenStackComputeShell(object):
             return 0
 
         os_username = args.os_username
+        os_user_id = args.os_user_id
         os_password = None  # Fetched and set later as needed
         os_tenant_name = args.os_tenant_name
         os_tenant_id = args.os_tenant_id
@@ -606,9 +614,10 @@ class OpenStackComputeShell(object):
                 auth_plugin.parse_opts(args)
 
             if not auth_plugin or not auth_plugin.opts:
-                if not os_username:
+                if not os_username and not os_user_id:
                     raise exc.CommandError(_("You must provide a username "
-                            "via either --os-username or env[OS_USERNAME]"))
+                            "or user id via --os-username, --os-user-id, "
+                            "env[OS_USERNAME] or env[OS_USER_ID]"))
 
             if not os_tenant_name and not os_tenant_id:
                 raise exc.CommandError(_("You must provide a tenant name "
@@ -639,8 +648,11 @@ class OpenStackComputeShell(object):
                 raise exc.CommandError(_("You must provide an auth url "
                         "via either --os-auth-url or env[OS_AUTH_URL]"))
 
-        self.cs = client.Client(options.os_compute_api_version, os_username,
-                os_password, os_tenant_name, tenant_id=os_tenant_id,
+        completion_cache = client.CompletionCache(os_username, os_auth_url)
+
+        self.cs = client.Client(options.os_compute_api_version,
+                os_username, os_password, os_tenant_name,
+                tenant_id=os_tenant_id, user_id=os_user_id,
                 auth_url=os_auth_url, insecure=insecure,
                 region_name=os_region_name, endpoint_type=endpoint_type,
                 extensions=self.extensions, service_type=service_type,
@@ -649,7 +661,8 @@ class OpenStackComputeShell(object):
                 volume_service_name=volume_service_name,
                 timings=args.timings, bypass_url=bypass_url,
                 os_cache=os_cache, http_log_debug=options.debug,
-                cacert=cacert, timeout=timeout)
+                cacert=cacert, timeout=timeout,
+                completion_cache=completion_cache)
 
         # Now check for the password/token of which pieces of the
         # identifying keyring key can come from the underlying client
@@ -694,6 +707,12 @@ class OpenStackComputeShell(object):
             # sometimes need to be able to look up images information
             # via glance when connected to the nova api.
             image_service_type = 'image'
+            # NOTE(hdd): the password is needed again because creating a new
+            # Client without specifying bypass_url will force authentication.
+            # We can't reuse self.cs's bypass_url, because that's the URL for
+            # the nova service; we need to get glance's URL for this Client
+            if not os_password:
+                os_password = helper.password
             self.cs.image_cs = client.Client(
                 options.os_compute_api_version, os_username,
                 os_password, os_tenant_name, tenant_id=os_tenant_id,
@@ -763,6 +782,11 @@ class OpenStackComputeShell(object):
 
 # I'm picky about my shell help.
 class OpenStackHelpFormatter(argparse.HelpFormatter):
+    def __init__(self, prog, indent_increment=2, max_help_position=32,
+                 width=None):
+        super(OpenStackHelpFormatter, self).__init__(prog, indent_increment,
+              max_help_position, width)
+
     def start_section(self, heading):
         # Title-case the headings
         heading = '%s%s' % (heading[0].upper(), heading[1:])
@@ -771,11 +795,14 @@ class OpenStackHelpFormatter(argparse.HelpFormatter):
 
 def main():
     try:
-        OpenStackComputeShell().main(map(strutils.safe_decode, sys.argv[1:]))
+        argv = [strutils.safe_decode(a) for a in sys.argv[1:]]
+        OpenStackComputeShell().main(argv)
 
     except Exception as e:
         logger.debug(e, exc_info=1)
-        print("ERROR: %s" % strutils.safe_encode(six.text_type(e)),
+        details = {'name': strutils.safe_encode(e.__class__.__name__),
+                   'msg': strutils.safe_encode(six.text_type(e))}
+        print("ERROR (%(name)s): %(msg)s" % details,
               file=sys.stderr)
         sys.exit(1)
     except KeyboardInterrupt as e:

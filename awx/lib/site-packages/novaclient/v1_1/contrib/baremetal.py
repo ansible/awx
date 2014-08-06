@@ -194,7 +194,7 @@ def do_baremetal_node_create(cs, args):
 
 @utils.arg('node',
     metavar='<node>',
-    help='ID of the node to delete.')
+    help=_('ID of the node to delete.'))
 def do_baremetal_node_delete(cs, args):
     """Remove a baremetal node and any associated interfaces."""
     node = _find_baremetal_node(cs, args.node)
@@ -219,10 +219,22 @@ def _translate_baremetal_node_keys(collection):
 
 def _print_baremetal_nodes_list(nodes):
     """Print the list of baremetal nodes."""
+
+    def _parse_address(fields):
+        macs = []
+        for interface in fields.interfaces:
+            macs.append(interface['address'])
+        return ', '.join("%s" % i for i in macs)
+
+    formatters = {
+        'MAC Address': _parse_address
+    }
+
     _translate_baremetal_node_keys(nodes)
     utils.print_list(nodes, [
         'ID',
         'Host',
+        'Task State',
         'CPUs',
         'Memory_MB',
         'Disk_GB',
@@ -231,7 +243,7 @@ def _print_baremetal_nodes_list(nodes):
         'PM Username',
         'PM Password',
         'Terminal Port',
-        ])
+        ], formatters=formatters)
 
 
 def do_baremetal_node_list(cs, _args):
@@ -263,7 +275,7 @@ def _print_baremetal_node_interfaces(interfaces):
 
 @utils.arg('node',
      metavar='<node>',
-     help="ID of node")
+     help=_("ID of node"))
 def do_baremetal_node_show(cs, args):
     """Show information about a baremetal node."""
     node = _find_baremetal_node(cs, args.node)
@@ -298,7 +310,7 @@ def do_baremetal_interface_remove(cs, args):
     cs.baremetal.remove_interface(args.node, args.address)
 
 
-@utils.arg('node', metavar='<node>', help="ID of node")
+@utils.arg('node', metavar='<node>', help=_("ID of node"))
 def do_baremetal_interface_list(cs, args):
     """List network interfaces associated with a baremetal node."""
     interfaces = cs.baremetal.list_interfaces(args.node)

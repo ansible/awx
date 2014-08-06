@@ -13,35 +13,64 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import httpretty
+
+from novaclient.openstack.common import jsonutils
+from novaclient.tests.fixture_data import agents as data
+from novaclient.tests.fixture_data import client
 from novaclient.tests import utils
-from novaclient.tests.v1_1 import fakes
 from novaclient.v1_1 import agents
 
 
-class AgentsTest(utils.TestCase):
-    def setUp(self):
-        super(AgentsTest, self).setUp()
-        self.cs = self._get_fake_client()
-        self.agent_type = self._get_agent_type()
+class AgentsTest(utils.FixturedTestCase):
 
-    def _get_fake_client(self):
-        return fakes.FakeClient()
+    data_fixture_class = data.Fixture
 
-    def _get_agent_type(self):
-        return agents.Agent
+    scenarios = [('original', {'client_fixture_class': client.V1}),
+                 ('session', {'client_fixture_class': client.SessionV1})]
+
+    def stub_hypervisors(self, hypervisor='kvm'):
+        get_os_agents = {'agents':
+            [
+                {
+                    'hypervisor': hypervisor,
+                    'os': 'win',
+                    'architecture': 'x86',
+                    'version': '7.0',
+                    'url': 'xxx://xxxx/xxx/xxx',
+                    'md5hash': 'add6bb58e139be103324d04d82d8f545',
+                    'id': 1
+                },
+                {
+                    'hypervisor': hypervisor,
+                    'os': 'linux',
+                    'architecture': 'x86',
+                    'version': '16.0',
+                    'url': 'xxx://xxxx/xxx/xxx1',
+                    'md5hash': 'add6bb58e139be103324d04d82d8f546',
+                    'id': 2
+                },
+            ]
+        }
+
+        httpretty.register_uri(httpretty.GET, self.data_fixture.url(),
+                               body=jsonutils.dumps(get_os_agents),
+                               content_type='application/json')
 
     def test_list_agents(self):
+        self.stub_hypervisors()
         ags = self.cs.agents.list()
-        self.cs.assert_called('GET', '/os-agents')
+        self.assert_called('GET', '/os-agents')
         for a in ags:
-            self.assertIsInstance(a, self.agent_type)
+            self.assertIsInstance(a, agents.Agent)
             self.assertEqual(a.hypervisor, 'kvm')
 
     def test_list_agents_with_hypervisor(self):
+        self.stub_hypervisors('xen')
         ags = self.cs.agents.list('xen')
-        self.cs.assert_called('GET', '/os-agents?hypervisor=xen')
+        self.assert_called('GET', '/os-agents?hypervisor=xen')
         for a in ags:
-            self.assertIsInstance(a, self.agent_type)
+            self.assertIsInstance(a, agents.Agent)
             self.assertEqual(a.hypervisor, 'xen')
 
     def test_agents_create(self):
@@ -56,12 +85,12 @@ class AgentsTest(utils.TestCase):
                         'version': '7.0',
                         'architecture': 'x86',
                         'os': 'win'}}
-        self.cs.assert_called('POST', '/os-agents', body)
+        self.assert_called('POST', '/os-agents', body)
         self.assertEqual(1, ag._info.copy()['id'])
 
     def test_agents_delete(self):
         self.cs.agents.delete('1')
-        self.cs.assert_called('DELETE', '/os-agents/1')
+        self.assert_called('DELETE', '/os-agents/1')
 
     def _build_example_update_body(self):
         return {"para": {
@@ -74,5 +103,5 @@ class AgentsTest(utils.TestCase):
                               '/yyy/yyyy/yyyy',
                               'add6bb58e139be103324d04d82d8f546')
         body = self._build_example_update_body()
-        self.cs.assert_called('PUT', '/os-agents/1', body)
+        self.assert_called('PUT', '/os-agents/1', body)
         self.assertEqual(1, ag.id)

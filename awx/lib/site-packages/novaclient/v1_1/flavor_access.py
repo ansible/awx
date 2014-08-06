@@ -21,7 +21,8 @@ from novaclient.openstack.common.gettextutils import _
 
 class FlavorAccess(base.Resource):
     def __repr__(self):
-        return "<FlavorAccess: %s>" % self.name
+        return ("<FlavorAccess flavor id: %s, tenant id: %s>" %
+                (self.flavor_id, self.tenant_id))
 
 
 class FlavorAccessManager(base.ManagerWithFind):

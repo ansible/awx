@@ -32,10 +32,10 @@ cs = fakes.FakeClient(extensions=extensions)
 class AssistedVolumeSnapshotsTestCase(utils.TestCase):
 
     def test_create_snap(self):
-        res = cs.assisted_volume_snapshots.create('1', {})
+        cs.assisted_volume_snapshots.create('1', {})
         cs.assert_called('POST', '/os-assisted-volume-snapshots')
 
     def test_delete_snap(self):
-        res = cs.assisted_volume_snapshots.delete('x', {})
+        cs.assisted_volume_snapshots.delete('x', {})
         cs.assert_called('DELETE',
                 '/os-assisted-volume-snapshots/x?delete_info={}')

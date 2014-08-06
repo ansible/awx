@@ -53,6 +53,7 @@ class Keypair(base.Resource):
 class KeypairManager(base.ManagerWithFind):
     resource_class = Keypair
     keypair_prefix = "os-keypairs"
+    is_alphanum_id_allowed = True
 
     def get(self, keypair):
         """

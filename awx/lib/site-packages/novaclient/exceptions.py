@@ -77,10 +77,17 @@ class ConnectionRefused(Exception):
         return "ConnectionRefused: %s" % repr(self.response)
 
 
+class InstanceInErrorState(Exception):
+    """Instance is in the error state."""
+    pass
+
+
 class ClientException(Exception):
     """
     The base exception class for all exceptions this library raises.
     """
+    message = 'Unknown Error'
+
     def __init__(self, code, message=None, details=None, request_id=None,
                  url=None, method=None):
         self.code = code
@@ -190,6 +197,16 @@ _error_classes = [BadRequest, Unauthorized, Forbidden, NotFound,
                   MethodNotAllowed, Conflict, OverLimit, RateLimit,
                   HTTPNotImplemented]
 _code_map = dict((c.http_status, c) for c in _error_classes)
+
+
+class InvalidUsage(RuntimeError):
+    """This function call is invalid in the way you are using this client.
+
+    Due to the transition to using keystoneclient some function calls are no
+    longer available. You should make a similar call to the session object
+    instead.
+    """
+    pass
 
 
 def from_response(response, body, url, method=None):

@@ -14,18 +14,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import floatingips as data
 from novaclient.tests import utils
-from novaclient.tests.v1_1 import fakes
 from novaclient.v1_1 import floating_ip_pools
 
 
-cs = fakes.FakeClient()
+class TestFloatingIPPools(utils.FixturedTestCase):
 
-
-class TestFloatingIPPools(utils.TestCase):
+    client_fixture_class = client.V1
+    data_fixture_class = data.PoolsFixture
 
     def test_list_floating_ips(self):
-        fl = cs.floating_ip_pools.list()
-        cs.assert_called('GET', '/os-floating-ip-pools')
+        fl = self.cs.floating_ip_pools.list()
+        self.assert_called('GET', '/os-floating-ip-pools')
         [self.assertIsInstance(f, floating_ip_pools.FloatingIPPool)
                                                                    for f in fl]

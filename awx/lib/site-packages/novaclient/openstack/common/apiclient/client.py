@@ -36,6 +36,7 @@ except ImportError:
 import requests
 
 from novaclient.openstack.common.apiclient import exceptions
+from novaclient.openstack.common.gettextutils import _
 from novaclient.openstack.common import importutils
 
 
@@ -46,6 +47,7 @@ class HTTPClient(object):
     """This client handles sending HTTP requests to OpenStack servers.
 
     Features:
+
     - share authentication information between several clients to different
       services (e.g., for compute and image clients);
     - reissue authentication request for expired tokens;
@@ -151,7 +153,7 @@ class HTTPClient(object):
         :param method: method of HTTP request
         :param url: URL of HTTP request
         :param kwargs: any other parameter that can be passed to
-'            requests.Session.request (such as `headers`) or `json`
+             requests.Session.request (such as `headers`) or `json`
              that will be encoded as JSON and used as `data` argument
         """
         kwargs.setdefault("headers", kwargs.get("headers", {}))
@@ -206,7 +208,7 @@ class HTTPClient(object):
         :param method: method of HTTP request
         :param url: URL of HTTP request
         :param kwargs: any other parameter that can be passed to
-'            `HTTPClient.request`
+            `HTTPClient.request`
         """
 
         filter_args = {
@@ -228,7 +230,7 @@ class HTTPClient(object):
                     **filter_args)
                 if not (token and endpoint):
                     raise exceptions.AuthorizationFailure(
-                        "Cannot find endpoint or token for request")
+                        _("Cannot find endpoint or token for request"))
 
         old_token_endpoint = (token, endpoint)
         kwargs.setdefault("headers", {})["X-Auth-Token"] = token
@@ -351,8 +353,12 @@ class BaseClient(object):
         try:
             client_path = version_map[str(version)]
         except (KeyError, ValueError):
-            msg = "Invalid %s client version '%s'. must be one of: %s" % (
-                  (api_name, version, ', '.join(version_map.keys())))
+            msg = _("Invalid %(api_name)s client version '%(version)s'. "
+                    "Must be one of: %(version_map)s") % {
+                        'api_name': api_name,
+                        'version': version,
+                        'version_map': ', '.join(version_map.keys())
+                    }
             raise exceptions.UnsupportedVersion(msg)
 
         return importutils.import_class(client_path)

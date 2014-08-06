@@ -13,20 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
 from novaclient.tests.v1_1 import test_agents
-from novaclient.tests.v3 import fakes
-from novaclient.v3 import agents
 
 
 class AgentsTest(test_agents.AgentsTest):
+
+    scenarios = [('original', {'client_fixture_class': client.V3}),
+                 ('session', {'client_fixture_class': client.SessionV3})]
+
     def _build_example_update_body(self):
         return {"agent": {
             "url": "/yyy/yyyy/yyyy",
             "version": "8.0",
             "md5hash": "add6bb58e139be103324d04d82d8f546"}}
-
-    def _get_fake_client(self):
-        return fakes.FakeClient()
-
-    def _get_agent_type(self):
-        return agents.Agent

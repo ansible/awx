@@ -14,8 +14,11 @@
 #    under the License.
 
 
+import logging
 import mock
 import requests
+
+import fixtures
 
 import novaclient.client
 import novaclient.extension
@@ -25,6 +28,16 @@ import novaclient.v1_1.client
 import novaclient.v3.client
 
 import json
+
+
+class ClientConnectionPoolTest(utils.TestCase):
+
+    @mock.patch("novaclient.client.adapters.HTTPAdapter")
+    def test_get(self, mock_http_adapter):
+        mock_http_adapter.side_effect = lambda: mock.Mock()
+        pool = novaclient.client._ClientConnectionPool()
+        self.assertEqual(pool.get("abc"), pool.get("abc"))
+        self.assertNotEqual(pool.get("abc"), pool.get("def"))
 
 
 class ClientTest(utils.TestCase):
@@ -43,9 +56,9 @@ class ClientTest(utils.TestCase):
             'x-server-management-url': 'blah.com',
             'x-auth-token': 'blah',
         }
-        with mock.patch('requests.Session.request', mock_request):
+        with mock.patch('requests.request', mock_request):
             instance.authenticate()
-            requests.Session.request.assert_called_with(mock.ANY, mock.ANY,
+            requests.request.assert_called_with(mock.ANY, mock.ANY,
                                                         timeout=2,
                                                         headers=mock.ANY,
                                                         verify=mock.ANY)
@@ -61,7 +74,7 @@ class ClientTest(utils.TestCase):
         instance.version = 'v2.0'
         mock_request = mock.Mock()
         mock_request.side_effect = novaclient.exceptions.Unauthorized(401)
-        with mock.patch('requests.Session.request', mock_request):
+        with mock.patch('requests.request', mock_request):
             try:
                 instance.get('/servers/detail')
             except Exception:
@@ -197,6 +210,26 @@ class ClientTest(utils.TestCase):
         cs.authenticate()
         self.assertTrue(mock_authenticate.called)
 
+    @mock.patch('novaclient.client.HTTPClient')
+    def test_contextmanager_v1_1(self, mock_http_client):
+        fake_client = mock.Mock()
+        mock_http_client.return_value = fake_client
+        with novaclient.v1_1.client.Client("user", "password", "project_id",
+                auth_url="foo/v2"):
+            pass
+        self.assertTrue(fake_client.open_session.called)
+        self.assertTrue(fake_client.close_session.called)
+
+    @mock.patch('novaclient.client.HTTPClient')
+    def test_contextmanager_v3(self, mock_http_client):
+        fake_client = mock.Mock()
+        mock_http_client.return_value = fake_client
+        with novaclient.v3.client.Client("user", "password", "project_id",
+                auth_url="foo/v2"):
+            pass
+        self.assertTrue(fake_client.open_session.called)
+        self.assertTrue(fake_client.close_session.called)
+
     def test_get_password_simple(self):
         cs = novaclient.client.HTTPClient("user", "password", "", "")
         cs.password_func = mock.Mock()
@@ -216,3 +249,110 @@ class ClientTest(utils.TestCase):
         cs.password_func = mock.Mock()
         self.assertEqual(cs._get_password(), "password")
         self.assertFalse(cs.password_func.called)
+
+    def test_auth_url_rstrip_slash(self):
+        cs = novaclient.client.HTTPClient("user", "password", "project_id",
+                                          auth_url="foo/v2/")
+        self.assertEqual(cs.auth_url, "foo/v2")
+
+    def test_token_and_bypass_url(self):
+        cs = novaclient.client.HTTPClient(None, None, None,
+                                          auth_token="12345",
+                                          bypass_url="compute/v100/")
+        self.assertIsNone(cs.auth_url)
+        self.assertEqual(cs.auth_token, "12345")
+        self.assertEqual(cs.bypass_url, "compute/v100")
+        self.assertEqual(cs.management_url, "compute/v100")
+
+    @mock.patch("novaclient.client.requests.Session")
+    def test_session(self, mock_session):
+        fake_session = mock.Mock()
+        mock_session.return_value = fake_session
+        cs = novaclient.client.HTTPClient("user", None, "", "")
+        cs.open_session()
+        self.assertEqual(cs._session, fake_session)
+        cs.close_session()
+        self.assertIsNone(cs._session)
+
+    def test_session_connection_pool(self):
+        cs = novaclient.client.HTTPClient("user", None, "",
+                                          "", connection_pool=True)
+        cs.open_session()
+        self.assertIsNone(cs._session)
+        cs.close_session()
+        self.assertIsNone(cs._session)
+
+    def test_get_session(self):
+        cs = novaclient.client.HTTPClient("user", None, "", "")
+        self.assertIsNone(cs._get_session("http://nooooooooo.com"))
+
+    @mock.patch("novaclient.client.requests.Session")
+    def test_get_session_open_session(self, mock_session):
+        fake_session = mock.Mock()
+        mock_session.return_value = fake_session
+        cs = novaclient.client.HTTPClient("user", None, "", "")
+        cs.open_session()
+        self.assertEqual(fake_session, cs._get_session("http://example.com"))
+
+    @mock.patch("novaclient.client.requests.Session")
+    @mock.patch("novaclient.client._ClientConnectionPool")
+    def test_get_session_connection_pool(self, mock_pool, mock_session):
+        service_url = "http://example.com"
+
+        pool = mock.MagicMock()
+        pool.get.return_value = "http_adapter"
+        mock_pool.return_value = pool
+        cs = novaclient.client.HTTPClient("user", None, "",
+                                          "", connection_pool=True)
+        cs._current_url = "http://another.com"
+
+        session = cs._get_session(service_url)
+        self.assertEqual(session, mock_session.return_value)
+        pool.get.assert_called_once_with(service_url)
+        mock_session().mount.assert_called_once_with(service_url,
+                                                     'http_adapter')
+
+    def test_init_without_connection_pool(self):
+        cs = novaclient.client.HTTPClient("user", None, "", "")
+        self.assertIsNone(cs._connection_pool)
+
+    @mock.patch("novaclient.client._ClientConnectionPool")
+    def test_init_with_proper_connection_pool(self, mock_pool):
+        fake_pool = mock.Mock()
+        mock_pool.return_value = fake_pool
+        cs = novaclient.client.HTTPClient("user", None, "",
+                                          connection_pool=True)
+        self.assertEqual(cs._connection_pool, fake_pool)
+
+    def test_log_req(self):
+        self.logger = self.useFixture(
+            fixtures.FakeLogger(
+                format="%(message)s",
+                level=logging.DEBUG,
+                nuke_handlers=True
+            )
+        )
+        cs = novaclient.client.HTTPClient("user", None, "",
+                                          connection_pool=True)
+        cs.http_log_debug = True
+        cs.http_log_req('GET', '/foo', {'headers': {}})
+        cs.http_log_req('GET', '/foo', {'headers':
+                                        {'X-Auth-Token': 'totally_bogus'}
+                                    })
+        cs.http_log_req('GET', '/foo', {'headers':
+                                        {'X-Foo': 'bar',
+                                         'X-Auth-Token': 'totally_bogus'}
+                                    })
+
+        output = self.logger.output.split('\n')
+
+        self.assertIn("REQ: curl -i '/foo' -X GET", output)
+        self.assertIn(
+            "REQ: curl -i '/foo' -X GET -H "
+            '"X-Auth-Token: {SHA1}b42162b6ffdbd7c3c37b7c95b7ba9f51dda0236d"',
+            output)
+        self.assertIn(
+            "REQ: curl -i '/foo' -X GET -H "
+            '"X-Auth-Token: {SHA1}b42162b6ffdbd7c3c37b7c95b7ba9f51dda0236d"'
+            ' -H "X-Foo: bar"',
+            output)

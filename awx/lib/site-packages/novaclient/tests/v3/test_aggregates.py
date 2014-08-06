@@ -12,19 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
 from novaclient.tests.v1_1 import test_aggregates
-from novaclient.tests.v3 import fakes
-from novaclient.v3 import aggregates
 
 
 class AggregatesTest(test_aggregates.AggregatesTest):
-    def setUp(self):
-        super(AggregatesTest, self).setUp()
-        self.cs = self._get_fake_client()
-        self.aggregate_type = self._get_aggregate_type()
 
-    def _get_fake_client(self):
-        return fakes.FakeClient()
-
-    def _get_aggregate_type(self):
-        return aggregates.Aggregate
+    scenarios = [('original', {'client_fixture_class': client.V3}),
+                 ('session', {'client_fixture_class': client.SessionV3})]

@@ -13,45 +13,45 @@
 #    under the License.
 
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import images as data
 from novaclient.tests import utils
-from novaclient.tests.v3 import fakes
 from novaclient.v3 import images
 
 
-cs = fakes.FakeClient()
+class ImagesTest(utils.FixturedTestCase):
 
-
-class ImagesTest(utils.TestCase):
+    client_fixture_class = client.V3
+    data_fixture_class = data.V3
 
     def test_list_images(self):
-        il = cs.images.list()
-        cs.assert_called('GET', '/v1/images/detail')
+        il = self.cs.images.list()
+        self.assert_called('GET', '/v1/images/detail')
         for i in il:
             self.assertIsInstance(i, images.Image)
 
     def test_list_images_undetailed(self):
-        il = cs.images.list(detailed=False)
-        cs.assert_called('GET', '/v1/images')
+        il = self.cs.images.list(detailed=False)
+        self.assert_called('GET', '/v1/images')
         for i in il:
             self.assertIsInstance(i, images.Image)
 
     def test_list_images_with_limit(self):
-        il = cs.images.list(limit=4)
-        cs.assert_called('GET', '/v1/images/detail?limit=4')
+        self.cs.images.list(limit=4)
+        self.assert_called('GET', '/v1/images/detail?limit=4')
 
     def test_get_image_details(self):
-        i = cs.images.get(1)
-        cs.assert_called('HEAD', '/v1/images/1')
+        i = self.cs.images.get(1)
+        self.assert_called('HEAD', '/v1/images/1')
         self.assertIsInstance(i, images.Image)
         self.assertEqual(i.id, '1')
         self.assertEqual(i.name, 'CentOS 5.2')
 
     def test_find(self):
-        i = cs.images.find(name="CentOS 5.2")
+        i = self.cs.images.find(name="CentOS 5.2")
         self.assertEqual(i.id, '1')
-        cs.assert_called('GET', '/v1/images', pos=-2)
-        cs.assert_called('HEAD', '/v1/images/1', pos=-1)
+        self.assert_called('HEAD', '/v1/images/1')
 
-        iml = cs.images.findall(status='SAVING')
+        iml = self.cs.images.findall(status='SAVING')
         self.assertEqual(len(iml), 1)
         self.assertEqual(iml[0].name, 'My Server Backup')

@@ -120,6 +120,10 @@ class FakeHTTPClient(fakes_v1_1.FakeHTTPClient):
     #
     get_flavors_2_flavor_access = (
         fakes_v1_1.FakeHTTPClient.get_flavors_2_os_flavor_access)
+    get_flavors_2_flavor_extra_specs = (
+        fakes_v1_1.FakeHTTPClient.get_flavors_2_os_extra_specs)
+    get_flavors_aa1_flavor_extra_specs = (
+        fakes_v1_1.FakeHTTPClient.get_flavors_aa1_os_extra_specs)
 
     #
     # Images
@@ -170,7 +174,10 @@ class FakeHTTPClient(fakes_v1_1.FakeHTTPClient):
                         required=['name', 'image_ref', 'flavor_ref'],
                         optional=['metadata', 'personality',
                                   'os-scheduler-hints:scheduler_hints'])
-        return (202, {}, self.get_servers_1234()[2])
+        if body['server']['name'] == 'some-bad-server':
+            return (202, {}, self.get_servers_1235()[2])
+        else:
+            return (202, {}, self.get_servers_1234()[2])
 
     #
     # Server Actions
@@ -204,9 +211,10 @@ class FakeHTTPClient(fakes_v1_1.FakeHTTPClient):
             'create_image': ['name', 'metadata'],
             'migrate_live': ['host', 'block_migration', 'disk_over_commit'],
             'create_backup': ['name', 'backup_type', 'rotation'],
-            'attach': ['volume_id', 'device'],
             'detach': ['volume_id'],
             'swap_volume_attachment': ['old_volume_id', 'new_volume_id']}
+        body_params_check_superset = {
+            'attach': ['volume_id', 'device']}
 
         assert len(body.keys()) == 1
         action = list(body)[0]
@@ -224,6 +232,9 @@ class FakeHTTPClient(fakes_v1_1.FakeHTTPClient):
         if action in body_params_check_exact:
             assert set(body[action]) == set(body_params_check_exact[action])
 
+        if action in body_params_check_superset:
+            assert set(body[action]) >= set(body_params_check_superset[action])
+
         if action == 'reboot':
             assert body[action]['type'] in ['HARD', 'SOFT']
         elif action == 'confirm_resize':
@@ -234,7 +245,8 @@ class FakeHTTPClient(fakes_v1_1.FakeHTTPClient):
 
         if action not in set.union(set(body_is_none_list),
                                      set(body_params_check_exact.keys()),
-                                     set(body_param_check_exists.keys())):
+                                     set(body_param_check_exists.keys()),
+                                     set(body_params_check_superset.keys())):
             raise AssertionError("Unexpected server action: %s" % action)
 
         return (resp, _headers, _body)
@@ -329,8 +341,8 @@ class FakeHTTPClient(fakes_v1_1.FakeHTTPClient):
                     {'id': 1234,
                      'hypervisor_hostname': 'hyper1',
                      'servers': [
-                            {'name': 'inst1', 'uuid': 'uuid1'},
-                            {'name': 'inst2', 'uuid': 'uuid2'}
+                            {'name': 'inst1', 'id': 'uuid1'},
+                            {'name': 'inst2', 'id': 'uuid2'}
                             ]},
                     })
 
@@ -341,3 +353,31 @@ class FakeHTTPClient(fakes_v1_1.FakeHTTPClient):
     get_keypairs = fakes_v1_1.FakeHTTPClient.get_os_keypairs
     delete_keypairs_test = fakes_v1_1.FakeHTTPClient.delete_os_keypairs_test
     post_keypairs = fakes_v1_1.FakeHTTPClient.post_os_keypairs
+
+    #
+    # List all extensions
+    #
+    def get_extensions(self, **kw):
+        exts = [
+            {
+                "alias": "os-multinic",
+                "description": "Multiple network support",
+                "name": "Multinic",
+                "version": 1,
+            },
+            {
+                "alias": "os-extended-server-attributes",
+                "description": "Extended Server Attributes support.",
+                "name": "ExtendedServerAttributes",
+                "version": 1,
+            },
+            {
+                "alias": "os-extended-status",
+                "description": "Extended Status support",
+                "name": "ExtendedStatus",
+                "version": 1,
+            },
+        ]
+        return (200, {}, {
+            "extensions": exts,
+        })

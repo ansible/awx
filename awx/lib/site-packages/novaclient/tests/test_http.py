@@ -13,6 +13,7 @@
 
 import mock
 import requests
+import six
 
 from novaclient import client
 from novaclient import exceptions
@@ -37,10 +38,17 @@ bad_req_response = utils.TestResponse({
 })
 bad_req_mock_request = mock.Mock(return_value=(bad_req_response))
 
+unknown_error_response = utils.TestResponse({
+    "status_code": 503,
+    "text": '',
+})
+unknown_error_mock_request = mock.Mock(return_value=unknown_error_response)
+
 
 def get_client():
     cl = client.HTTPClient("username", "password",
-                           "project_id", "auth_test")
+                           "project_id",
+                           utils.AUTH_URL_V2)
     return cl
 
 
@@ -56,7 +64,7 @@ class ClientTest(utils.TestCase):
     def test_get(self):
         cl = get_authed_client()
 
-        @mock.patch.object(requests.Session, "request", mock_request)
+        @mock.patch.object(requests, "request", mock_request)
         @mock.patch('time.time', mock.Mock(return_value=1234))
         def test_get_call():
             resp, body = cl.get("/hi")
@@ -78,7 +86,7 @@ class ClientTest(utils.TestCase):
     def test_post(self):
         cl = get_authed_client()
 
-        @mock.patch.object(requests.Session, "request", mock_request)
+        @mock.patch.object(requests, "request", mock_request)
         def test_post_call():
             cl.post("/hi", body=[1, 2, 3])
             headers = {
@@ -110,7 +118,7 @@ class ClientTest(utils.TestCase):
     def test_connection_refused(self):
         cl = get_client()
 
-        @mock.patch.object(requests.Session, "request", refused_mock_request)
+        @mock.patch.object(requests, "request", refused_mock_request)
         def test_refused_call():
             self.assertRaises(exceptions.ConnectionRefused, cl.get, "/hi")
 
@@ -119,7 +127,7 @@ class ClientTest(utils.TestCase):
     def test_bad_request(self):
         cl = get_client()
 
-        @mock.patch.object(requests.Session, "request", bad_req_mock_request)
+        @mock.patch.object(requests, "request", bad_req_mock_request)
         def test_refused_call():
             self.assertRaises(exceptions.BadRequest, cl.get, "/hi")
 
@@ -133,3 +141,16 @@ class ClientTest(utils.TestCase):
         cl2 = client.HTTPClient("username", "password", "project_id",
                                 "auth_test", http_log_debug=True)
         self.assertEqual(len(cl2._logger.handlers), 1)
+
+    @mock.patch.object(requests, 'request', unknown_error_mock_request)
+    def test_unknown_server_error(self):
+        cl = get_client()
+        # This would be cleaner with the context manager version of
+        # assertRaises or assertRaisesRegexp, but both only appeared in
+        # Python 2.7 and testtools doesn't match that implementation yet
+        try:
+            cl.get('/hi')
+        except exceptions.ClientException as exc:
+            self.assertIn('Unknown Error', six.text_type(exc))
+        else:
+            self.fail('Expected exceptions.ClientException')

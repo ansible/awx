@@ -13,49 +13,50 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import fping as data
 from novaclient.tests import utils
-from novaclient.tests.v1_1 import fakes
 from novaclient.v1_1 import fping
 
 
-cs = fakes.FakeClient()
+class FpingTest(utils.FixturedTestCase):
 
-
-class FpingTest(utils.TestCase):
+    client_fixture_class = client.V1
+    data_fixture_class = data.Fixture
 
     def test_fping_repr(self):
-        r = cs.fping.get(1)
+        r = self.cs.fping.get(1)
         self.assertEqual(repr(r), "<Fping: 1>")
 
     def test_list_fpings(self):
-        fl = cs.fping.list()
-        cs.assert_called('GET', '/os-fping')
+        fl = self.cs.fping.list()
+        self.assert_called('GET', '/os-fping')
         for f in fl:
             self.assertIsInstance(f, fping.Fping)
             self.assertEqual(f.project_id, "fake-project")
             self.assertEqual(f.alive, True)
 
     def test_list_fpings_all_tenants(self):
-        fl = cs.fping.list(all_tenants=True)
+        fl = self.cs.fping.list(all_tenants=True)
         for f in fl:
             self.assertIsInstance(f, fping.Fping)
-        cs.assert_called('GET', '/os-fping?all_tenants=1')
+        self.assert_called('GET', '/os-fping?all_tenants=1')
 
     def test_list_fpings_exclude(self):
-        fl = cs.fping.list(exclude=['1'])
+        fl = self.cs.fping.list(exclude=['1'])
         for f in fl:
             self.assertIsInstance(f, fping.Fping)
-        cs.assert_called('GET', '/os-fping?exclude=1')
+        self.assert_called('GET', '/os-fping?exclude=1')
 
     def test_list_fpings_include(self):
-        fl = cs.fping.list(include=['1'])
+        fl = self.cs.fping.list(include=['1'])
         for f in fl:
             self.assertIsInstance(f, fping.Fping)
-        cs.assert_called('GET', '/os-fping?include=1')
+        self.assert_called('GET', '/os-fping?include=1')
 
     def test_get_fping(self):
-        f = cs.fping.get(1)
-        cs.assert_called('GET', '/os-fping/1')
+        f = self.cs.fping.get(1)
+        self.assert_called('GET', '/os-fping/1')
         self.assertIsInstance(f, fping.Fping)
         self.assertEqual(f.project_id, "fake-project")
         self.assertEqual(f.alive, True)

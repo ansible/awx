@@ -78,6 +78,10 @@ class ServicesTest(utils.TestCase):
         self.assertIsInstance(service, self._get_service_type())
         self.assertEqual(service.status, 'enabled')
 
+    def test_services_delete(self):
+        self.cs.services.delete('1')
+        self.cs.assert_called('DELETE', '/os-services/1')
+
     def test_services_disable(self):
         service = self.cs.services.disable('host1', 'nova-cert')
         values = self._update_body("host1", "nova-cert")

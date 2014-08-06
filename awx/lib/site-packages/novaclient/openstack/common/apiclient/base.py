@@ -30,6 +30,7 @@ import six
 from six.moves.urllib import parse
 
 from novaclient.openstack.common.apiclient import exceptions
+from novaclient.openstack.common.gettextutils import _
 from novaclient.openstack.common import strutils
 
 
@@ -74,8 +75,8 @@ class HookableMixin(object):
 
         :param cls: class that registers hooks
         :param hook_type: hook type, e.g., '__pre_parse_args__'
-        :param **args: args to be passed to every hook function
-        :param **kwargs: kwargs to be passed to every hook function
+        :param args: args to be passed to every hook function
+        :param kwargs: kwargs to be passed to every hook function
         """
         hook_funcs = cls._hooks_map.get(hook_type) or []
         for hook_func in hook_funcs:
@@ -219,7 +220,10 @@ class ManagerWithFind(BaseManager):
         matches = self.findall(**kwargs)
         num_matches = len(matches)
         if num_matches == 0:
-            msg = "No %s matching %s." % (self.resource_class.__name__, kwargs)
+            msg = _("No %(name)s matching %(args)s.") % {
+                'name': self.resource_class.__name__,
+                'args': kwargs
+            }
             raise exceptions.NotFound(msg)
         elif num_matches > 1:
             raise exceptions.NoUniqueMatch()
@@ -373,7 +377,10 @@ class CrudManager(BaseManager):
         num = len(rl)
 
         if num == 0:
-            msg = "No %s matching %s." % (self.resource_class.__name__, kwargs)
+            msg = _("No %(name)s matching %(args)s.") % {
+                'name': self.resource_class.__name__,
+                'args': kwargs
+            }
             raise exceptions.NotFound(404, msg)
         elif num > 1:
             raise exceptions.NoUniqueMatch
@@ -441,8 +448,10 @@ class Resource(object):
     def human_id(self):
         """Human-readable ID which can be used for bash completion.
         """
-        if self.NAME_ATTR in self.__dict__ and self.HUMAN_ID:
-            return strutils.to_slug(getattr(self, self.NAME_ATTR))
+        if self.HUMAN_ID:
+            name = getattr(self, self.NAME_ATTR, None)
+            if name is not None:
+                return strutils.to_slug(name)
         return None
 
     def _add_details(self, info):

@@ -13,17 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import hypervisors as data
 from novaclient.tests import utils
-from novaclient.tests.v1_1 import fakes
 
 
-class HypervisorsTest(utils.TestCase):
-    def setUp(self):
-        super(HypervisorsTest, self).setUp()
-        self.cs = self._get_fake_client()
+class HypervisorsTest(utils.FixturedTestCase):
 
-    def _get_fake_client(self):
-        return fakes.FakeClient()
+    client_fixture_class = client.V1
+    data_fixture_class = data.V1
 
     def compare_to_expected(self, expected, hyper):
         for key, value in expected.items():
@@ -36,7 +34,7 @@ class HypervisorsTest(utils.TestCase):
             ]
 
         result = self.cs.hypervisors.list(False)
-        self.cs.assert_called('GET', '/os-hypervisors')
+        self.assert_called('GET', '/os-hypervisors')
 
         for idx, hyper in enumerate(result):
             self.compare_to_expected(expected[idx], hyper)
@@ -79,7 +77,7 @@ class HypervisorsTest(utils.TestCase):
                  disk_available_least=100)]
 
         result = self.cs.hypervisors.list()
-        self.cs.assert_called('GET', '/os-hypervisors/detail')
+        self.assert_called('GET', '/os-hypervisors/detail')
 
         for idx, hyper in enumerate(result):
             self.compare_to_expected(expected[idx], hyper)
@@ -91,7 +89,7 @@ class HypervisorsTest(utils.TestCase):
             ]
 
         result = self.cs.hypervisors.search('hyper')
-        self.cs.assert_called('GET', '/os-hypervisors/hyper/search')
+        self.assert_called('GET', '/os-hypervisors/hyper/search')
 
         for idx, hyper in enumerate(result):
             self.compare_to_expected(expected[idx], hyper)
@@ -111,7 +109,7 @@ class HypervisorsTest(utils.TestCase):
             ]
 
         result = self.cs.hypervisors.search('hyper', True)
-        self.cs.assert_called('GET', '/os-hypervisors/hyper/servers')
+        self.assert_called('GET', '/os-hypervisors/hyper/servers')
 
         for idx, hyper in enumerate(result):
             self.compare_to_expected(expected[idx], hyper)
@@ -137,7 +135,7 @@ class HypervisorsTest(utils.TestCase):
             disk_available_least=100)
 
         result = self.cs.hypervisors.get(1234)
-        self.cs.assert_called('GET', '/os-hypervisors/1234')
+        self.assert_called('GET', '/os-hypervisors/1234')
 
         self.compare_to_expected(expected, result)
 
@@ -148,7 +146,7 @@ class HypervisorsTest(utils.TestCase):
             uptime="fake uptime")
 
         result = self.cs.hypervisors.uptime(1234)
-        self.cs.assert_called('GET', '/os-hypervisors/1234/uptime')
+        self.assert_called('GET', '/os-hypervisors/1234/uptime')
 
         self.compare_to_expected(expected, result)
 
@@ -169,6 +167,6 @@ class HypervisorsTest(utils.TestCase):
             )
 
         result = self.cs.hypervisors.statistics()
-        self.cs.assert_called('GET', '/os-hypervisors/statistics')
+        self.assert_called('GET', '/os-hypervisors/statistics')
 
         self.compare_to_expected(expected, result)

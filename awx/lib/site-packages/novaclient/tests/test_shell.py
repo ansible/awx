@@ -32,7 +32,7 @@ FAKE_ENV = {'OS_USERNAME': 'username',
             'OS_TENANT_NAME': 'tenant_name',
             'OS_AUTH_URL': 'http://no.where'}
 
-FAKE_ENV2 = {'OS_USERNAME': 'username',
+FAKE_ENV2 = {'OS_USER_ID': 'user_id',
              'OS_PASSWORD': 'password',
              'OS_TENANT_ID': 'tenant_id',
              'OS_AUTH_URL': 'http://no.where'}
@@ -133,25 +133,38 @@ class ShellTest(utils.TestCase):
                             matchers.MatchesRegex(r, re.DOTALL | re.MULTILINE))
 
     def test_no_username(self):
-        required = ('You must provide a username'
-                    ' via either --os-username or env[OS_USERNAME]',)
+        required = ('You must provide a username or user id'
+                    ' via --os-username, --os-user-id,'
+                    ' env[OS_USERNAME] or env[OS_USER_ID]')
         self.make_env(exclude='OS_USERNAME')
         try:
             self.shell('list')
         except exceptions.CommandError as message:
-            self.assertEqual(required, message.args)
+            self.assertEqual(required, message.args[0])
+        else:
+            self.fail('CommandError not raised')
+
+    def test_no_user_id(self):
+        required = ('You must provide a username or user id'
+                    ' via --os-username, --os-user-id,'
+                    ' env[OS_USERNAME] or env[OS_USER_ID]')
+        self.make_env(exclude='OS_USER_ID', fake_env=FAKE_ENV2)
+        try:
+            self.shell('list')
+        except exceptions.CommandError as message:
+            self.assertEqual(required, message.args[0])
         else:
             self.fail('CommandError not raised')
 
     def test_no_tenant_name(self):
         required = ('You must provide a tenant name or tenant id'
                     ' via --os-tenant-name, --os-tenant-id,'
-                    ' env[OS_TENANT_NAME] or env[OS_TENANT_ID]',)
+                    ' env[OS_TENANT_NAME] or env[OS_TENANT_ID]')
         self.make_env(exclude='OS_TENANT_NAME')
         try:
             self.shell('list')
         except exceptions.CommandError as message:
-            self.assertEqual(required, message.args)
+            self.assertEqual(required, message.args[0])
         else:
             self.fail('CommandError not raised')
 
@@ -244,3 +257,17 @@ class ShellTest(utils.TestCase):
     @mock.patch('novaclient.client.Client')
     def test_v_unknown_service_type(self, mock_client):
         self._test_service_type('unknown', 'compute', mock_client)
+
+    @mock.patch('sys.argv', ['nova'])
+    @mock.patch('sys.stdout', six.StringIO())
+    @mock.patch('sys.stderr', six.StringIO())
+    def test_main_noargs(self):
+        # Ensure that main works with no command-line arguments
+        try:
+            novaclient.shell.main()
+        except SystemExit:
+            self.fail('Unexpected SystemExit')
+
+        # We expect the normal usage as a result
+        self.assertIn('Command-line interface to the OpenStack Nova API',
+                      sys.stdout.getvalue())

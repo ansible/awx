@@ -26,6 +26,7 @@ from six.moves.urllib import parse
 
 from novaclient import base
 from novaclient import crypto
+from novaclient.openstack.common.gettextutils import _
 from novaclient.openstack.common import strutils
 from novaclient.v1_1.security_groups import SecurityGroup
 
@@ -36,7 +37,7 @@ class Server(base.Resource):
     HUMAN_ID = True
 
     def __repr__(self):
-        return "<Server: %s>" % self.name
+        return '<Server: %s>' % getattr(self, 'name', 'unknown-name')
 
     def delete(self):
         """
@@ -434,8 +435,8 @@ class ServerManager(base.BootingManagerWithFind):
                       connected networks, fixed ips, etc.
         :param scheduler_hints: (optional extension) arbitrary key-value pairs
                               specified by the client to help boot an instance.
-        :param config_drive: (optional extension) value for config drive
-                            either boolean, or volume-id
+        :param config_drive: (optional extension) If True, enable config drive
+                             on the server.
         :param admin_pass: admin password for the server.
         :param disk_config: (optional extension) control how the disk is
                             partitioned when the server is created.
@@ -454,7 +455,8 @@ class ServerManager(base.BootingManagerWithFind):
             else:
                 userdata = strutils.safe_encode(userdata)
 
-            body["server"]["user_data"] = base64.b64encode(userdata)
+            userdata_b64 = base64.b64encode(userdata).decode('utf-8')
+            body["server"]["user_data"] = userdata_b64
         if meta:
             body["server"]["metadata"] = meta
         if reservation_id:
@@ -490,9 +492,11 @@ class ServerManager(base.BootingManagerWithFind):
                     data = file_or_string.read()
                 else:
                     data = file_or_string
+
+                cont = base64.b64encode(data.encode('utf-8')).decode('utf-8')
                 personality.append({
                     'path': filepath,
-                    'contents': base64.b64encode(data.encode('utf-8')),
+                    'contents': cont,
                 })
 
         if availability_zone:
@@ -520,8 +524,15 @@ class ServerManager(base.BootingManagerWithFind):
                 # if value is empty string, do not send value in body
                 if nic_info.get('net-id'):
                     net_data['uuid'] = nic_info['net-id']
-                if nic_info.get('v4-fixed-ip'):
+                if (nic_info.get('v4-fixed-ip') and
+                    nic_info.get('v6-fixed-ip')):
+                    raise base.exceptions.CommandError(_(
+                        "Only one of 'v4-fixed-ip' and 'v6-fixed-ip' may be"
+                        " provided."))
+                elif nic_info.get('v4-fixed-ip'):
                     net_data['fixed_ip'] = nic_info['v4-fixed-ip']
+                elif nic_info.get('v6-fixed-ip'):
+                    net_data['fixed_ip'] = nic_info['v6-fixed-ip']
                 if nic_info.get('port-id'):
                     net_data['port'] = nic_info['port-id']
                 all_net_data.append(net_data)

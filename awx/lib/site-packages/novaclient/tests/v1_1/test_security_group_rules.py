@@ -12,21 +12,24 @@
 #    under the License.
 
 from novaclient import exceptions
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import security_group_rules as data
 from novaclient.tests import utils
-from novaclient.tests.v1_1 import fakes
 from novaclient.v1_1 import security_group_rules
 
 
-cs = fakes.FakeClient()
+class SecurityGroupRulesTest(utils.FixturedTestCase):
 
+    client_fixture_class = client.V1
+    data_fixture_class = data.Fixture
 
-class SecurityGroupRulesTest(utils.TestCase):
     def test_delete_security_group_rule(self):
-        cs.security_group_rules.delete(1)
-        cs.assert_called('DELETE', '/os-security-group-rules/1')
+        self.cs.security_group_rules.delete(1)
+        self.assert_called('DELETE', '/os-security-group-rules/1')
 
     def test_create_security_group_rule(self):
-        sg = cs.security_group_rules.create(1, "tcp", 1, 65535, "10.0.0.0/16")
+        sg = self.cs.security_group_rules.create(1, "tcp", 1, 65535,
+                                                 "10.0.0.0/16")
 
         body = {
             "security_group_rule": {
@@ -39,12 +42,12 @@ class SecurityGroupRulesTest(utils.TestCase):
             }
         }
 
-        cs.assert_called('POST', '/os-security-group-rules', body)
+        self.assert_called('POST', '/os-security-group-rules', body)
         self.assertTrue(isinstance(sg, security_group_rules.SecurityGroupRule))
 
     def test_create_security_group_group_rule(self):
-        sg = cs.security_group_rules.create(1, "tcp", 1, 65535, "10.0.0.0/16",
-                                            101)
+        sg = self.cs.security_group_rules.create(1, "tcp", 1, 65535,
+                                                 "10.0.0.0/16", 101)
 
         body = {
             "security_group_rule": {
@@ -57,25 +60,27 @@ class SecurityGroupRulesTest(utils.TestCase):
             }
         }
 
-        cs.assert_called('POST', '/os-security-group-rules', body)
+        self.assert_called('POST', '/os-security-group-rules', body)
         self.assertTrue(isinstance(sg, security_group_rules.SecurityGroupRule))
 
     def test_invalid_parameters_create(self):
         self.assertRaises(exceptions.CommandError,
-            cs.security_group_rules.create,
+            self.cs.security_group_rules.create,
             1, "invalid_ip_protocol", 1, 65535, "10.0.0.0/16", 101)
         self.assertRaises(exceptions.CommandError,
-            cs.security_group_rules.create,
+            self.cs.security_group_rules.create,
             1, "tcp", "invalid_from_port", 65535, "10.0.0.0/16", 101)
         self.assertRaises(exceptions.CommandError,
-            cs.security_group_rules.create,
+            self.cs.security_group_rules.create,
             1, "tcp", 1, "invalid_to_port", "10.0.0.0/16", 101)
 
     def test_security_group_rule_str(self):
-        sg = cs.security_group_rules.create(1, "tcp", 1, 65535, "10.0.0.0/16")
+        sg = self.cs.security_group_rules.create(1, "tcp", 1, 65535,
+                                                 "10.0.0.0/16")
         self.assertEqual('1', str(sg))
 
     def test_security_group_rule_del(self):
-        sg = cs.security_group_rules.create(1, "tcp", 1, 65535, "10.0.0.0/16")
+        sg = self.cs.security_group_rules.create(1, "tcp", 1, 65535,
+                                                 "10.0.0.0/16")
         sg.delete()
-        cs.assert_called('DELETE', '/os-security-group-rules/1')
+        self.assert_called('DELETE', '/os-security-group-rules/1')

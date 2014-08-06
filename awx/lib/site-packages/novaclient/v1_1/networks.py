@@ -86,6 +86,7 @@ class NetworkManager(base.ManagerWithFind):
         :param multi_host: str
         :param priority: str
         :param project_id: str
+        :param vlan: int
         :param vlan_start: int
         :param vpn_start: int
 

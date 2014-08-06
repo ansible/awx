@@ -69,3 +69,7 @@ class ServiceManager(base.ManagerWithFind):
         """Disable the service with reason."""
         body = self._update_body(host, binary, reason)
         return self._update("/os-services/disable-log-reason", body, "service")
+
+    def delete(self, service_id):
+        """Delete a service."""
+        return self._delete("/os-services/%s" % service_id)

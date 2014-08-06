@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
+
 from novaclient import exceptions
 from novaclient.tests import utils
 from novaclient.tests.v1_1 import fakes
@@ -206,7 +208,12 @@ class FlavorsTest(utils.TestCase):
         for key in invalid_keys:
             self.assertRaises(exceptions.CommandError, f.set_keys, {key: 'v1'})
 
-    def test_unset_keys(self):
+    @mock.patch.object(flavors.FlavorManager, '_delete')
+    def test_unset_keys(self, mock_delete):
         f = self.cs.flavors.get(1)
-        f.unset_keys(['k1'])
-        self.cs.assert_called('DELETE', '/flavors/1/os-extra_specs/k1')
+        keys = ['k1', 'k2']
+        f.unset_keys(keys)
+        mock_delete.assert_has_calls([
+            mock.call("/flavors/1/os-extra_specs/k1"),
+            mock.call("/flavors/1/os-extra_specs/k2")
+        ])

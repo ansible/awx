@@ -13,17 +13,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import fixedips as data
 from novaclient.tests import utils
-from novaclient.tests.v1_1 import fakes
-
-cs = fakes.FakeClient()
 
 
-class FixedIpsTest(utils.TestCase):
+class FixedIpsTest(utils.FixturedTestCase):
+
+    data_fixture_class = data.Fixture
+
+    scenarios = [('original', {'client_fixture_class': client.V1}),
+                 ('session', {'client_fixture_class': client.SessionV1})]
 
     def test_get_fixed_ip(self):
-        info = cs.fixed_ips.get(fixed_ip='192.168.1.1')
-        cs.assert_called('GET', '/os-fixed-ips/192.168.1.1')
+        info = self.cs.fixed_ips.get(fixed_ip='192.168.1.1')
+        self.assert_called('GET', '/os-fixed-ips/192.168.1.1')
         self.assertEqual(info.cidr, '192.168.1.0/24')
         self.assertEqual(info.address, '192.168.1.1')
         self.assertEqual(info.hostname, 'foo')
@@ -31,10 +35,10 @@ class FixedIpsTest(utils.TestCase):
 
     def test_reserve_fixed_ip(self):
         body = {"reserve": None}
-        res = cs.fixed_ips.reserve(fixed_ip='192.168.1.1')
-        cs.assert_called('POST', '/os-fixed-ips/192.168.1.1/action', body)
+        self.cs.fixed_ips.reserve(fixed_ip='192.168.1.1')
+        self.assert_called('POST', '/os-fixed-ips/192.168.1.1/action', body)
 
     def test_unreserve_fixed_ip(self):
         body = {"unreserve": None}
-        res = cs.fixed_ips.unreserve(fixed_ip='192.168.1.1')
-        cs.assert_called('POST', '/os-fixed-ips/192.168.1.1/action', body)
+        self.cs.fixed_ips.unreserve(fixed_ip='192.168.1.1')
+        self.assert_called('POST', '/os-fixed-ips/192.168.1.1/action', body)

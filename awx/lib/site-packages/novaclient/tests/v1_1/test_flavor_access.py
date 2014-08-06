@@ -56,3 +56,15 @@ class FlavorAccessTest(utils.TestCase):
 
         cs.assert_called('POST', '/flavors/2/action', body)
         [self.assertIsInstance(a, flavor_access.FlavorAccess) for a in r]
+
+    def test_repr_flavor_access(self):
+        flavor = cs.flavors.get(2)
+        tenant = 'proj3'
+        r = cs.flavor_access.add_tenant_access(flavor, tenant)
+
+        def get_expected(flavor_access):
+            return ("<FlavorAccess flavor id: %s, tenant id: %s>" %
+                    (flavor_access.flavor_id, flavor_access.tenant_id))
+
+        for a in r:
+            self.assertEqual(get_expected(a), repr(a))

@@ -13,17 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import hypervisors as data
 from novaclient.tests.v1_1 import test_hypervisors
-from novaclient.tests.v3 import fakes
 
 
 class HypervisorsTest(test_hypervisors.HypervisorsTest):
-    def setUp(self):
-        super(HypervisorsTest, self).setUp()
-        self.cs = self._get_fake_client()
 
-    def _get_fake_client(self):
-        return fakes.FakeClient()
+    client_fixture_class = client.V3
+    data_fixture_class = data.V3
 
     def test_hypervisor_search(self):
         expected = [
@@ -32,7 +30,7 @@ class HypervisorsTest(test_hypervisors.HypervisorsTest):
             ]
 
         result = self.cs.hypervisors.search('hyper')
-        self.cs.assert_called('GET', '/os-hypervisors/search?query=hyper')
+        self.assert_called('GET', '/os-hypervisors/search?query=hyper')
 
         for idx, hyper in enumerate(result):
             self.compare_to_expected(expected[idx], hyper)
@@ -41,10 +39,10 @@ class HypervisorsTest(test_hypervisors.HypervisorsTest):
         expected = dict(id=1234,
                         hypervisor_hostname='hyper1',
                         servers=[
-                            dict(name='inst1', uuid='uuid1'),
-                            dict(name='inst2', uuid='uuid2')])
+                            dict(name='inst1', id='uuid1'),
+                            dict(name='inst2', id='uuid2')])
 
         result = self.cs.hypervisors.servers('1234')
-        self.cs.assert_called('GET', '/os-hypervisors/1234/servers')
+        self.assert_called('GET', '/os-hypervisors/1234/servers')
 
         self.compare_to_expected(expected, result)

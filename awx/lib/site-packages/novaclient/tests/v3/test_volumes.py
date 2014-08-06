@@ -26,16 +26,33 @@ class VolumesTest(utils.TestCase):
         return fakes.FakeClient()
 
     def test_attach_server_volume(self):
-        v = self.cs.volumes.attach_server_volume(
+        self.cs.volumes.attach_server_volume(
             server=1234,
             volume_id='15e59938-07d5-11e1-90e3-e3dffe0c5983',
             device='/dev/vdb'
         )
         self.cs.assert_called('POST', '/servers/1234/action')
 
+    def test_attach_server_volume_disk_bus_device_type(self):
+        volume_id = '15e59938-07d5-11e1-90e3-e3dffe0c5983'
+        device = '/dev/vdb'
+        disk_bus = 'ide'
+        device_type = 'cdrom'
+        self.cs.volumes.attach_server_volume(server=1234,
+                                             volume_id=volume_id,
+                                             device=device,
+                                             disk_bus=disk_bus,
+                                             device_type=device_type)
+        body_params = {'volume_id': volume_id,
+                       'device': device,
+                       'disk_bus': disk_bus,
+                       'device_type': device_type}
+        body = {'attach': body_params}
+        self.cs.assert_called('POST', '/servers/1234/action', body)
+
     def test_update_server_volume(self):
         vol_id = '15e59938-07d5-11e1-90e3-e3dffe0c5983'
-        v = self.cs.volumes.update_server_volume(
+        self.cs.volumes.update_server_volume(
             server=1234,
             old_volume_id='Work',
             new_volume_id=vol_id

@@ -23,6 +23,7 @@ import os
 import fixtures
 import mock
 import six
+from six.moves import builtins
 
 import novaclient.client
 from novaclient import exceptions
@@ -128,20 +129,6 @@ class ShellTest(utils.TestCase):
             }},
         )
 
-    def test_boot_multiple(self):
-        self.run_command('boot --flavor 1 --image 1'
-                         ' --num-instances 3 some-server')
-        self.assert_called_anytime(
-            'POST', '/servers',
-            {'server': {
-                'flavorRef': '1',
-                'name': 'some-server',
-                'imageRef': '1',
-                'min_count': 1,
-                'max_count': 3,
-            }},
-        )
-
     def test_boot_image_with(self):
         self.run_command("boot --flavor 1"
                          " --image-with test_key=test_value some-server")
@@ -172,8 +159,8 @@ class ShellTest(utils.TestCase):
 
     def test_boot_user_data(self):
         testfile = os.path.join(os.path.dirname(__file__), 'testfile.txt')
-        data = open(testfile).read()
-        expected_file_data = base64.b64encode(data.encode('utf-8'))
+        data = open(testfile).read().encode('utf-8')
+        expected_file_data = base64.b64encode(data).decode('utf-8')
         self.run_command(
             'boot --flavor 1 --image 1 --user_data %s some-server' % testfile)
         self.assert_called_anytime(
@@ -497,7 +484,33 @@ class ShellTest(utils.TestCase):
             },
         )
 
-    def tets_boot_nics_no_value(self):
+    def test_boot_nics_ipv6(self):
+        cmd = ('boot --image 1 --flavor 1 '
+               '--nic net-id=a=c,v6-fixed-ip=2001:db9:0:1::10 some-server')
+        self.run_command(cmd)
+        self.assert_called_anytime(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavorRef': '1',
+                    'name': 'some-server',
+                    'imageRef': '1',
+                    'min_count': 1,
+                    'max_count': 1,
+                    'networks': [
+                        {'uuid': 'a=c', 'fixed_ip': '2001:db9:0:1::10'},
+                    ],
+                },
+            },
+        )
+
+    def test_boot_nics_both_ipv4_and_ipv6(self):
+        cmd = ('boot --image 1 --flavor 1 '
+               '--nic net-id=a=c,v4-fixed-ip=10.0.0.1,'
+               'v6-fixed-ip=2001:db9:0:1::10 some-server')
+        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
+
+    def test_boot_nics_no_value(self):
         cmd = ('boot --image 1 --flavor 1 '
                '--nic net-id some-server')
         self.assertRaises(exceptions.CommandError, self.run_command, cmd)
@@ -512,10 +525,15 @@ class ShellTest(utils.TestCase):
                '--nic v4-fixed-ip=10.0.0.1 some-server')
         self.assertRaises(exceptions.CommandError, self.run_command, cmd)
 
+    def test_boot_nics_netid_and_portid(self):
+        cmd = ('boot --image 1 --flavor 1 '
+               '--nic port-id=some=port,net-id=some=net some-server')
+        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
+
     def test_boot_files(self):
         testfile = os.path.join(os.path.dirname(__file__), 'testfile.txt')
         data = open(testfile).read()
-        expected_file_data = base64.b64encode(data.encode('utf-8'))
+        expected = base64.b64encode(data.encode('utf-8')).decode('utf-8')
 
         cmd = ('boot some-server --flavor 1 --image 1'
                ' --file /tmp/foo=%s --file /tmp/bar=%s')
@@ -530,8 +548,8 @@ class ShellTest(utils.TestCase):
                 'min_count': 1,
                 'max_count': 1,
                 'personality': [
-                    {'path': '/tmp/bar', 'contents': expected_file_data},
-                    {'path': '/tmp/foo', 'contents': expected_file_data},
+                    {'path': '/tmp/bar', 'contents': expected},
+                    {'path': '/tmp/foo', 'contents': expected},
                 ]
             }},
         )
@@ -558,9 +576,67 @@ class ShellTest(utils.TestCase):
             })
 
     def test_boot_invalid_num_instances(self):
-        cmd = 'boot --image 1 --flavor 1 --num-instances 1  server'
-        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
         cmd = 'boot --image 1 --flavor 1 --num-instances 0  server'
+        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
+
+    def test_boot_num_instances_and_count(self):
+        cmd = 'boot --image 1 --flavor 1 --num-instances 3 --min-count 3 serv'
+        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
+        cmd = 'boot --image 1 --flavor 1 --num-instances 3 --max-count 3 serv'
+        self.assertRaises(exceptions.CommandError, self.run_command, cmd)
+
+    def test_boot_min_max_count(self):
+        self.run_command('boot --image 1 --flavor 1 --max-count 3 server')
+        self.assert_called_anytime(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavorRef': '1',
+                    'name': 'server',
+                    'imageRef': '1',
+                    'min_count': 1,
+                    'max_count': 3,
+                }
+            })
+        self.run_command('boot --image 1 --flavor 1 --min-count 3 server')
+        self.assert_called_anytime(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavorRef': '1',
+                    'name': 'server',
+                    'imageRef': '1',
+                    'min_count': 3,
+                    'max_count': 3,
+                }
+            })
+        self.run_command('boot --image 1 --flavor 1 '
+                         '--min-count 3 --max-count 3 server')
+        self.assert_called_anytime(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavorRef': '1',
+                    'name': 'server',
+                    'imageRef': '1',
+                    'min_count': 3,
+                    'max_count': 3,
+                }
+            })
+        self.run_command('boot --image 1 --flavor 1 '
+                         '--min-count 3 --max-count 5 server')
+        self.assert_called_anytime(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavorRef': '1',
+                    'name': 'server',
+                    'imageRef': '1',
+                    'min_count': 3,
+                    'max_count': 5,
+                }
+            })
+        cmd = 'boot --image 1 --flavor 1 --min-count 3 --max-count 1 serv'
         self.assertRaises(exceptions.CommandError, self.run_command, cmd)
 
     @mock.patch('novaclient.v1_1.shell._poll_for_status')
@@ -580,6 +656,31 @@ class ShellTest(utils.TestCase):
         poll_method.assert_has_calls(
             [mock.call(self.shell.cs.servers.get, 1234, 'building',
                        ['active'])])
+
+    def test_boot_with_poll_to_check_VM_state_error(self):
+        self.assertRaises(exceptions.InstanceInErrorState, self.run_command,
+                          'boot --flavor 1 --image 1 some-bad-server --poll')
+
+    def test_boot_named_flavor(self):
+        self.run_command(["boot", "--image", "1",
+                          "--flavor", "512 MB Server",
+                          "--max-count", "3", "server"])
+        self.assert_called('GET', '/images/1', pos=0)
+        self.assert_called('GET', '/flavors/512 MB Server', pos=1)
+        self.assert_called('GET', '/flavors?is_public=None', pos=2)
+        self.assert_called('GET', '/flavors?is_public=None', pos=3)
+        self.assert_called('GET', '/flavors/2', pos=4)
+        self.assert_called(
+            'POST', '/servers',
+            {
+                'server': {
+                    'flavorRef': '2',
+                    'name': 'server',
+                    'imageRef': '1',
+                    'min_count': 1,
+                    'max_count': 3,
+                }
+            }, pos=5)
 
     def test_flavor_list(self):
         self.run_command('flavor-list')
@@ -601,6 +702,22 @@ class ShellTest(utils.TestCase):
     def test_flavor_show_with_alphanum_id(self):
         self.run_command('flavor-show aa1')
         self.assert_called_anytime('GET', '/flavors/aa1')
+
+    def test_flavor_show_by_name(self):
+        self.run_command(['flavor-show', '128 MB Server'])
+        self.assert_called('GET', '/flavors/128 MB Server', pos=0)
+        self.assert_called('GET', '/flavors?is_public=None', pos=1)
+        self.assert_called('GET', '/flavors?is_public=None', pos=2)
+        self.assert_called('GET', '/flavors/aa1', pos=3)
+        self.assert_called('GET', '/flavors/aa1/os-extra_specs', pos=4)
+
+    def test_flavor_show_by_name_priv(self):
+        self.run_command(['flavor-show', '512 MB Server'])
+        self.assert_called('GET', '/flavors/512 MB Server', pos=0)
+        self.assert_called('GET', '/flavors?is_public=None', pos=1)
+        self.assert_called('GET', '/flavors?is_public=None', pos=2)
+        self.assert_called('GET', '/flavors/2', pos=3)
+        self.assert_called('GET', '/flavors/2/os-extra_specs', pos=4)
 
     def test_flavor_key_set(self):
         self.run_command('flavor-key 1 set k1=v1')
@@ -735,43 +852,37 @@ class ShellTest(utils.TestCase):
                            {'reboot': {'type': 'HARD'}})
 
     def test_rebuild(self):
-        self.run_command('rebuild sample-server 1')
-        self.assert_called('GET', '/servers', pos=-8)
-        self.assert_called('GET', '/servers/1234', pos=-7)
-        self.assert_called('GET', '/images/1', pos=-6)
+        output = self.run_command('rebuild sample-server 1')
+        self.assert_called('GET', '/servers', pos=-6)
+        self.assert_called('GET', '/servers/1234', pos=-5)
+        self.assert_called('GET', '/images/1', pos=-4)
         self.assert_called('POST', '/servers/1234/action',
-                           {'rebuild': {'imageRef': 1}}, pos=-5)
+                           {'rebuild': {'imageRef': 1}}, pos=-3)
         self.assert_called('GET', '/flavors/1', pos=-2)
         self.assert_called('GET', '/images/2')
+        self.assertIn('adminPass', output)
 
-        self.run_command('rebuild sample-server 1 --rebuild-password asdf')
-        self.assert_called('GET', '/servers', pos=-8)
-        self.assert_called('GET', '/servers/1234', pos=-7)
-        self.assert_called('GET', '/images/1', pos=-6)
+    def test_rebuild_password(self):
+        output = self.run_command('rebuild sample-server 1'
+                                  ' --rebuild-password asdf')
+        self.assert_called('GET', '/servers', pos=-6)
+        self.assert_called('GET', '/servers/1234', pos=-5)
+        self.assert_called('GET', '/images/1', pos=-4)
         self.assert_called('POST', '/servers/1234/action',
                            {'rebuild': {'imageRef': 1, 'adminPass': 'asdf'}},
-                           pos=-5)
+                           pos=-3)
         self.assert_called('GET', '/flavors/1', pos=-2)
         self.assert_called('GET', '/images/2')
+        self.assertIn('adminPass', output)
 
     def test_rebuild_preserve_ephemeral(self):
         self.run_command('rebuild sample-server 1 --preserve-ephemeral')
-        self.assert_called('GET', '/servers', pos=-8)
-        self.assert_called('GET', '/servers/1234', pos=-7)
-        self.assert_called('GET', '/images/1', pos=-6)
+        self.assert_called('GET', '/servers', pos=-6)
+        self.assert_called('GET', '/servers/1234', pos=-5)
+        self.assert_called('GET', '/images/1', pos=-4)
         self.assert_called('POST', '/servers/1234/action',
                            {'rebuild': {'imageRef': 1,
-                                        'preserve_ephemeral': True}}, pos=-5)
-        self.assert_called('GET', '/flavors/1', pos=-2)
-        self.assert_called('GET', '/images/2')
-
-        self.run_command('rebuild sample-server 1 --rebuild-password asdf')
-        self.assert_called('GET', '/servers', pos=-8)
-        self.assert_called('GET', '/servers/1234', pos=-7)
-        self.assert_called('GET', '/images/1', pos=-6)
-        self.assert_called('POST', '/servers/1234/action',
-                           {'rebuild': {'imageRef': 1, 'adminPass': 'asdf'}},
-                           pos=-5)
+                                        'preserve_ephemeral': True}}, pos=-3)
         self.assert_called('GET', '/flavors/1', pos=-2)
         self.assert_called('GET', '/images/2')
 
@@ -1039,6 +1150,10 @@ class ShellTest(utils.TestCase):
         self.run_command('floating-ip-list')
         self.assert_called('GET', '/os-floating-ips')
 
+    def test_floating_ip_list_all_tenants(self):
+        self.run_command('floating-ip-list --all-tenants')
+        self.assert_called('GET', '/os-floating-ips?all_tenants=1')
+
     def test_floating_ip_create(self):
         self.run_command('floating-ip-create')
         self.assert_called('GET', '/os-floating-ips/1')
@@ -1251,6 +1366,20 @@ class ShellTest(utils.TestCase):
         self.assert_called('POST', '/servers/1234/action',
                            {'os-resetState': {'state': 'active'}})
 
+    def test_reset_state_multiple(self):
+        self.run_command('reset-state sample-server sample-server2')
+        self.assert_called('POST', '/servers/1234/action',
+                           {'os-resetState': {'state': 'error'}}, pos=-4)
+        self.assert_called('POST', '/servers/5678/action',
+                           {'os-resetState': {'state': 'error'}}, pos=-1)
+
+    def test_reset_state_active_multiple(self):
+        self.run_command('reset-state --active sample-server sample-server2')
+        self.assert_called('POST', '/servers/1234/action',
+                           {'os-resetState': {'state': 'active'}}, pos=-4)
+        self.assert_called('POST', '/servers/5678/action',
+                           {'os-resetState': {'state': 'active'}}, pos=-1)
+
     def test_reset_network(self):
         self.run_command('reset-network sample-server')
         self.assert_called('POST', '/servers/1234/action',
@@ -1287,6 +1416,10 @@ class ShellTest(utils.TestCase):
         body = {'host': 'host1', 'binary': 'nova-cert',
                 'disabled_reason': 'no_reason'}
         self.assert_called('PUT', '/os-services/disable-log-reason', body)
+
+    def test_services_delete(self):
+        self.run_command('service-delete 1')
+        self.assert_called('DELETE', '/os-services/1')
 
     def test_fixed_ips_get(self):
         self.run_command('fixed-ip-get 192.168.1.1')
@@ -1518,11 +1651,22 @@ class ShellTest(utils.TestCase):
         self.assert_called('GET', '/os-quota-class-sets/test')
 
     def test_quota_class_update(self):
-        self.run_command('quota-class-update 97f4c221bff44578b0300df4ef119353'
-                         ' --instances=5')
-        self.assert_called('PUT',
-                           '/os-quota-class-sets/97f4c221bff44578b0300'
-                           'df4ef119353')
+        # The list of args we can update.
+        args = (
+            '--instances', '--cores', '--ram', '--floating-ips', '--fixed-ips',
+            '--metadata-items', '--injected-files',
+            '--injected-file-content-bytes', '--injected-file-path-bytes',
+            '--key-pairs', '--security-groups', '--security-group-rules'
+        )
+        for arg in args:
+            self.run_command('quota-class-update '
+                             '97f4c221bff44578b0300df4ef119353 '
+                             '%s=5' % arg)
+            request_param = arg[2:].replace('-', '_')
+            body = {'quota_class_set': {request_param: 5}}
+            self.assert_called(
+                'PUT', '/os-quota-class-sets/97f4c221bff44578b0300df4ef119353',
+                body)
 
     def test_network_list(self):
         self.run_command('network-list')
@@ -1613,7 +1757,14 @@ class ShellTest(utils.TestCase):
         self.run_command('network-create --fixed-range-v4 192.168.0.0/24'
                          ' --vlan=200 new_network')
         body = {'network': {'cidr': '192.168.0.0/24', 'label': 'new_network',
-                            'vlan_start': '200'}}
+                            'vlan': '200'}}
+        self.assert_called('POST', '/os-networks', body)
+
+    def test_network_create_vlan_start(self):
+        self.run_command('network-create --fixed-range-v4 192.168.0.0/24'
+                         ' --vlan-start=100 new_network')
+        body = {'network': {'cidr': '192.168.0.0/24', 'label': 'new_network',
+                            'vlan_start': '100'}}
         self.assert_called('POST', '/os-networks', body)
 
     def test_add_fixed_ip(self):
@@ -1918,6 +2069,45 @@ class ShellTest(utils.TestCase):
         mock_system.assert_called_with("ssh -6 -p22  "
                                        "root@2607:f0d0:1002::4 -1")
 
+    def test_keypair_add(self):
+        self.run_command('keypair-add test')
+        self.assert_called('POST', '/os-keypairs',
+                           {'keypair':
+                               {'name': 'test'}})
+
+    @mock.patch.object(builtins, 'open',
+             mock.mock_open(read_data='FAKE_PUBLIC_KEY'))
+    def test_keypair_import(self):
+        self.run_command('keypair-add --pub-key test.pub test')
+        self.assert_called('POST', '/os-keypairs',
+                           {'keypair':
+                              {'public_key': 'FAKE_PUBLIC_KEY',
+                               'name': 'test'}})
+
+    def test_keypair_list(self):
+        self.run_command('keypair-list')
+        self.assert_called('GET', '/os-keypairs')
+
+    def test_keypair_show(self):
+        self.run_command('keypair-show test')
+        self.assert_called('GET', '/os-keypairs/test')
+
+    def test_keypair_delete(self):
+        self.run_command('keypair-delete test')
+        self.assert_called('DELETE', '/os-keypairs/test')
+
+    def test_create_server_group(self):
+        self.run_command('server-group-create wjsg affinity')
+        self.assert_called('POST', '/os-server-groups',
+                           {'server_group':
+                              {'name': 'wjsg',
+                               'policies': ['affinity']}})
+
+    def test_delete_multi_server_groups(self):
+        self.run_command('server-group-delete 12345 56789')
+        self.assert_called('DELETE', '/os-server-groups/56789')
+        self.assert_called('DELETE', '/os-server-groups/12345', pos=-2)
+
 
 class GetSecgroupTest(utils.TestCase):
     def test_with_integer(self):
@@ -1949,3 +2139,15 @@ class GetSecgroupTest(utils.TestCase):
                           novaclient.v1_1.shell._get_secgroup,
                           cs,
                           'abc')
+
+    def test_with_non_unique_name(self):
+        group_one = mock.MagicMock()
+        group_one.name = 'group_one'
+        cs = mock.Mock(**{
+            'security_groups.get.return_value': 'sec_group',
+            'security_groups.list.return_value': [group_one, group_one],
+        })
+        self.assertRaises(exceptions.NoUniqueMatch,
+                          novaclient.v1_1.shell._get_secgroup,
+                          cs,
+                          'group_one')

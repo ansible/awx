@@ -28,11 +28,14 @@ class FloatingIP(base.Resource):
 class FloatingIPManager(base.ManagerWithFind):
     resource_class = FloatingIP
 
-    def list(self):
+    def list(self, all_tenants=False):
         """
-        List floating ips for a tenant
+        List floating ips
         """
-        return self._list("/os-floating-ips", "floating_ips")
+        url = '/os-floating-ips'
+        if all_tenants:
+            url += '?all_tenants=1'
+        return self._list(url, "floating_ips")
 
     def create(self, pool=None):
         """

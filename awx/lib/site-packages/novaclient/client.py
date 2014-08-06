@@ -20,7 +20,12 @@
 OpenStack Client interface. Handles the REST calls and responses.
 """
 
+import errno
+import functools
+import glob
+import hashlib
 import logging
+import os
 import time
 
 import requests
@@ -35,21 +40,177 @@ from six.moves.urllib import parse
 
 from novaclient import exceptions
 from novaclient.openstack.common.gettextutils import _
+from novaclient.openstack.common import network_utils
 from novaclient import service_catalog
 from novaclient import utils
 
+SENSITIVE_HEADERS = ('X-Auth-Token',)
 
-_ADAPTERS = {}
+
+class _ClientConnectionPool(object):
+
+    def __init__(self):
+        self._adapters = {}
+
+    def get(self, url):
+        """
+        Store and reuse HTTP adapters per Service URL.
+        """
+        if url not in self._adapters:
+            self._adapters[url] = adapters.HTTPAdapter()
+
+        return self._adapters[url]
 
 
-def _adapter_pool(url):
+class CompletionCache(object):
+    """The completion cache is how we support tab-completion with novaclient.
+
+    The `Manager` writes object IDs and Human-IDs to the completion-cache on
+    object-show, object-list, and object-create calls.
+
+    The `nova.bash_completion` script then uses these files to provide the
+    actual tab-completion.
+
+    The cache directory layout is:
+
+        ~/.novaclient/
+            <hash-of-endpoint-and-username>/
+                <resource>-id-cache
+                <resource>-human-id-cache
     """
-    Store and reuse HTTP adapters per Service URL.
-    """
-    if url not in _ADAPTERS:
-        _ADAPTERS[url] = adapters.HTTPAdapter()
+    def __init__(self, username, auth_url, attributes=('id', 'human_id')):
+        self.directory = self._make_directory_name(username, auth_url)
+        self.attributes = attributes
 
-    return _ADAPTERS[url]
+    def _make_directory_name(self, username, auth_url):
+        """Creates a unique directory name based on the auth_url and username
+        of the current user.
+        """
+        uniqifier = hashlib.md5(username.encode('utf-8') +
+                                auth_url.encode('utf-8')).hexdigest()
+        base_dir = utils.env('NOVACLIENT_UUID_CACHE_DIR',
+                             default="~/.novaclient")
+        return os.path.expanduser(os.path.join(base_dir, uniqifier))
+
+    def _prepare_directory(self):
+        try:
+            os.makedirs(self.directory, 0o755)
+        except OSError:
+            # NOTE(kiall): This is typically either permission denied while
+            #              attempting to create the directory, or the
+            #              directory already exists. Either way, don't
+            #              fail.
+            pass
+
+    def clear_class(self, obj_class):
+        self._prepare_directory()
+
+        resource = obj_class.__name__.lower()
+        resource_glob = os.path.join(self.directory, "%s-*-cache" % resource)
+
+        for filename in glob.iglob(resource_glob):
+            try:
+                os.unlink(filename)
+            except OSError as e:
+                if e.errno != errno.ENOENT:
+                    raise
+
+    def _write_attribute(self, resource, attribute, value):
+        self._prepare_directory()
+
+        filename = "%s-%s-cache" % (resource, attribute.replace('_', '-'))
+        path = os.path.join(self.directory, filename)
+
+        with open(path, 'a') as f:
+            f.write("%s\n" % value)
+
+    def write_object(self, obj):
+        resource = obj.__class__.__name__.lower()
+
+        for attribute in self.attributes:
+            value = getattr(obj, attribute, None)
+            if value:
+                self._write_attribute(resource, attribute, value)
+
+
+class SessionClient(object):
+
+    def __init__(self, session, auth, interface, service_type, region_name):
+        self.session = session
+        self.auth = auth
+
+        self.interface = interface
+        self.service_type = service_type
+        self.region_name = region_name
+
+    def request(self, url, method, **kwargs):
+        kwargs.setdefault('user_agent', 'python-novaclient')
+        kwargs.setdefault('auth', self.auth)
+        kwargs.setdefault('authenticated', False)
+
+        try:
+            kwargs['json'] = kwargs.pop('body')
+        except KeyError:
+            pass
+
+        headers = kwargs.setdefault('headers', {})
+        headers.setdefault('Accept', 'application/json')
+
+        endpoint_filter = kwargs.setdefault('endpoint_filter', {})
+        endpoint_filter.setdefault('interface', self.interface)
+        endpoint_filter.setdefault('service_type', self.service_type)
+        endpoint_filter.setdefault('region_name', self.region_name)
+
+        resp = self.session.request(url, method, raise_exc=False, **kwargs)
+
+        body = None
+        if resp.text:
+            try:
+                body = resp.json()
+            except ValueError:
+                pass
+
+        if resp.status_code >= 400:
+            raise exceptions.from_response(resp, body, url, method)
+
+        return resp, body
+
+    def _cs_request(self, url, method, **kwargs):
+        # this function is mostly redundant but makes compatibility easier
+        kwargs.setdefault('authenticated', True)
+        return self.request(url, method, **kwargs)
+
+    def get(self, url, **kwargs):
+        return self._cs_request(url, 'GET', **kwargs)
+
+    def post(self, url, **kwargs):
+        return self._cs_request(url, 'POST', **kwargs)
+
+    def put(self, url, **kwargs):
+        return self._cs_request(url, 'PUT', **kwargs)
+
+    def delete(self, url, **kwargs):
+        return self._cs_request(url, 'DELETE', **kwargs)
+
+
+def _original_only(f):
+    """Indicates and enforces that this function can only be used if we are
+    using the original HTTPClient object.
+
+    We use this to specify that if you use the newer Session HTTP client then
+    you are aware that the way you use your client has been updated and certain
+    functions are no longer allowed to be used.
+    """
+    @functools.wraps(f)
+    def wrapper(self, *args, **kwargs):
+        if isinstance(self.client, SessionClient):
+            msg = ('This call is no longer available. The operation should '
+                   'be performed on the session object instead.')
+            raise exceptions.InvalidUsage(msg)
+
+        return f(self, *args, **kwargs)
+
+    return wrapper
 
 
 class HTTPClient(object):
@@ -64,11 +225,16 @@ class HTTPClient(object):
                  os_cache=False, no_cache=True,
                  http_log_debug=False, auth_system='keystone',
                  auth_plugin=None, auth_token=None,
-                 cacert=None, tenant_id=None):
+                 cacert=None, tenant_id=None, user_id=None,
+                 connection_pool=False):
         self.user = user
+        self.user_id = user_id
         self.password = password
         self.projectid = projectid
         self.tenant_id = tenant_id
+
+        self._connection_pool = (_ClientConnectionPool()
+                                if connection_pool else None)
 
         # This will be called by #_get_password if self.password is None.
         # EG if a password can only be obtained by prompting the user, but a
@@ -83,7 +249,7 @@ class HTTPClient(object):
             auth_url = auth_plugin.get_auth_url()
             if not auth_url:
                 raise exceptions.EndpointNotFound()
-        self.auth_url = auth_url.rstrip('/')
+        self.auth_url = auth_url.rstrip('/') if auth_url else auth_url
         self.version = 'v1.1'
         self.region_name = region_name
         self.endpoint_type = endpoint_type
@@ -91,7 +257,7 @@ class HTTPClient(object):
         self.service_name = service_name
         self.volume_service_name = volume_service_name
         self.timings = timings
-        self.bypass_url = bypass_url
+        self.bypass_url = bypass_url.rstrip('/') if bypass_url else bypass_url
         self.os_cache = os_cache or not no_cache
         self.http_log_debug = http_log_debug
         if timeout is not None:
@@ -118,8 +284,8 @@ class HTTPClient(object):
 
         self.auth_system = auth_system
         self.auth_plugin = auth_plugin
+        self._session = None
         self._current_url = None
-        self._http = None
         self._logger = logging.getLogger(__name__)
 
         if self.http_log_debug and not self._logger.handlers:
@@ -152,6 +318,16 @@ class HTTPClient(object):
     def reset_timings(self):
         self.times = []
 
+    def safe_header(self, name, value):
+        if name in SENSITIVE_HEADERS:
+            # because in python3 byte string handling is ... ug
+            v = value.encode('utf-8')
+            h = hashlib.sha1(v)
+            d = h.hexdigest()
+            return name, "{SHA1}%s" % d
+        else:
+            return name, value
+
     def http_log_req(self, method, url, kwargs):
         if not self.http_log_debug:
             return
@@ -164,35 +340,52 @@ class HTTPClient(object):
         string_parts.append(" '%s'" % url)
         string_parts.append(' -X %s' % method)
 
-        for element in kwargs['headers']:
-            header = ' -H "%s: %s"' % (element, kwargs['headers'][element])
+        # because dict ordering changes from 2 to 3
+        keys = sorted(kwargs['headers'].keys())
+        for name in keys:
+            value = kwargs['headers'][name]
+            header = ' -H "%s: %s"' % self.safe_header(name, value)
             string_parts.append(header)
 
         if 'data' in kwargs:
             string_parts.append(" -d '%s'" % (kwargs['data']))
-        self._logger.debug("\nREQ: %s\n" % "".join(string_parts))
+        self._logger.debug("REQ: %s" % "".join(string_parts))
 
     def http_log_resp(self, resp):
         if not self.http_log_debug:
             return
-        self._logger.debug(_("RESP: [%(status)s] %(headers)s\nRESP BODY: "
-                             "%(text)s\n"), {'status': resp.status_code,
-                                             'headers': resp.headers,
-                                             'text': resp.text})
+        self._logger.debug("RESP: [%(status)s] %(headers)s\nRESP BODY: "
+                           "%(text)s\n", {'status': resp.status_code,
+                                          'headers': resp.headers,
+                                          'text': resp.text})
 
-    def http(self, url):
-        magic_tuple = parse.urlsplit(url)
-        scheme, netloc, path, query, frag = magic_tuple
-        service_url = '%s://%s' % (scheme, netloc)
-        if self._current_url != service_url:
-            # Invalidate Session object in case the url is somehow changed
-            if self._http:
-                self._http.close()
-            self._current_url = service_url
-            self._logger.debug("New session created for: (%s)" % service_url)
-            self._http = requests.Session()
-            self._http.mount(service_url, _adapter_pool(service_url))
-        return self._http
+    def open_session(self):
+        if not self._connection_pool:
+            self._session = requests.Session()
+
+    def close_session(self):
+        if self._session and not self._connection_pool:
+            self._session.close()
+            self._session = None
+
+    def _get_session(self, url):
+        if self._connection_pool:
+            magic_tuple = parse.urlsplit(url)
+            scheme, netloc, path, query, frag = magic_tuple
+            service_url = '%s://%s' % (scheme, netloc)
+            if self._current_url != service_url:
+                # Invalidate Session object in case the url is somehow changed
+                if self._session:
+                    self._session.close()
+                self._current_url = service_url
+                self._logger.debug(
+                        "New session created for: (%s)" % service_url)
+                self._session = requests.Session()
+                self._session.mount(service_url,
+                        self._connection_pool.get(service_url))
+            return self._session
+        elif self._session:
+            return self._session
 
     def request(self, url, method, **kwargs):
         kwargs.setdefault('headers', kwargs.get('headers', {}))
@@ -207,7 +400,13 @@ class HTTPClient(object):
         kwargs['verify'] = self.verify_cert
 
         self.http_log_req(method, url, kwargs)
-        resp = self.http(url).request(
+
+        request_func = requests.request
+        session = self._get_session(url)
+        if session:
+            request_func = session.request
+
+        resp = request_func(
             method,
             url,
             **kwargs)
@@ -347,14 +546,14 @@ class HTTPClient(object):
         # GET ...:5001/v2.0/tokens/#####/endpoints
         url = '/'.join([url, 'tokens', '%s?belongsTo=%s'
                         % (self.proxy_token, self.proxy_tenant_id)])
-        self._logger.debug(_("Using Endpoint URL: %s") % url)
+        self._logger.debug("Using Endpoint URL: %s" % url)
         resp, body = self._time_request(
             url, "GET", headers={'X-Auth-Token': self.auth_token})
         return self._extract_service_catalog(url, resp, body,
                                              extract_token=False)
 
     def authenticate(self):
-        magic_tuple = parse.urlsplit(self.auth_url)
+        magic_tuple = network_utils.urlsplit(self.auth_url)
         scheme, netloc, path, query, frag = magic_tuple
         port = magic_tuple.port
         if port is None:
@@ -456,6 +655,10 @@ class HTTPClient(object):
         if self.auth_token:
             body = {"auth": {
                     "token": {"id": self.auth_token}}}
+        elif self.user_id:
+            body = {"auth": {
+                    "passwordCredentials": {"userId": self.user_id,
+                                            "password": self._get_password()}}}
         else:
             body = {"auth": {
                     "passwordCredentials": {"username": self.user,
@@ -482,6 +685,53 @@ class HTTPClient(object):
             **kwargs)
 
         return self._extract_service_catalog(url, resp, respbody)
+
+
+def _construct_http_client(username=None, password=None, project_id=None,
+                           auth_url=None, insecure=False, timeout=None,
+                           proxy_tenant_id=None, proxy_token=None,
+                           region_name=None, endpoint_type='publicURL',
+                           extensions=None, service_type='compute',
+                           service_name=None, volume_service_name=None,
+                           timings=False, bypass_url=None, os_cache=False,
+                           no_cache=True, http_log_debug=False,
+                           auth_system='keystone', auth_plugin=None,
+                           auth_token=None, cacert=None, tenant_id=None,
+                           user_id=None, connection_pool=False, session=None,
+                           auth=None):
+    if session:
+        return SessionClient(session=session,
+                             auth=auth,
+                             interface=endpoint_type,
+                             service_type=service_type,
+                             region_name=region_name)
+    else:
+        # FIXME(jamielennox): username and password are now optional. Need
+        # to test that they were provided in this mode.
+        return HTTPClient(username,
+                          password,
+                          user_id=user_id,
+                          projectid=project_id,
+                          tenant_id=tenant_id,
+                          auth_url=auth_url,
+                          auth_token=auth_token,
+                          insecure=insecure,
+                          timeout=timeout,
+                          auth_system=auth_system,
+                          auth_plugin=auth_plugin,
+                          proxy_token=proxy_token,
+                          proxy_tenant_id=proxy_tenant_id,
+                          region_name=region_name,
+                          endpoint_type=endpoint_type,
+                          service_type=service_type,
+                          service_name=service_name,
+                          volume_service_name=volume_service_name,
+                          timings=timings,
+                          bypass_url=bypass_url,
+                          os_cache=os_cache,
+                          http_log_debug=http_log_debug,
+                          cacert=cacert,
+                          connection_pool=connection_pool)
 
 
 def get_client_class(version):

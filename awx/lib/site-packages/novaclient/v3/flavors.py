@@ -72,9 +72,9 @@ class Flavor(base.Resource):
         :param keys: A list of keys to be unset
         """
         for k in keys:
-            return self.manager._delete(
-                            "/flavors/%s/flavor-extra-specs/%s" % (
-                            base.getid(self), k))
+            self.manager._delete(
+                    "/flavors/%s/flavor-extra-specs/%s" % (
+                    base.getid(self), k))
 
     def delete(self):
         """

@@ -369,7 +369,10 @@ class FakeHTTPClient(base_client.HTTPClient):
         if 'personality' in body['server']:
             for pfile in body['server']['personality']:
                 fakes.assert_has_keys(pfile, required=['path', 'contents'])
-        return (202, {}, self.get_servers_1234()[2])
+        if body['server']['name'] == 'some-bad-server':
+            return (202, {}, self.get_servers_1235()[2])
+        else:
+            return (202, {}, self.get_servers_1234()[2])
 
     def post_os_volumes_boot(self, body, **kw):
         assert set(body.keys()) <= set(['server', 'os:scheduler_hints'])
@@ -392,6 +395,13 @@ class FakeHTTPClient(base_client.HTTPClient):
         r = {'server': self.get_servers_detail()[2]['servers'][0]}
         return (200, {}, r)
 
+    def get_servers_1235(self, **kw):
+        r = {'server': self.get_servers_detail()[2]['servers'][0]}
+        r['server']['id'] = 1235
+        r['server']['status'] = 'error'
+        r['server']['fault'] = {'message': 'something went wrong!'}
+        return (200, {}, r)
+
     def get_servers_5678(self, **kw):
         r = {'server': self.get_servers_detail()[2]['servers'][1]}
         return (200, {}, r)
@@ -404,6 +414,12 @@ class FakeHTTPClient(base_client.HTTPClient):
         assert list(body) == ['server']
         fakes.assert_has_keys(body['server'], optional=['name', 'adminPass'])
         return (204, {}, body)
+
+    def delete_os_server_groups_12345(self, **kw):
+        return (202, {}, None)
+
+    def delete_os_server_groups_56789(self, **kw):
+        return (202, {}, None)
 
     def delete_servers_1234(self, **kw):
         return (202, {}, None)
@@ -525,11 +541,11 @@ class FakeHTTPClient(base_client.HTTPClient):
             assert list(body[action]) == ['type']
             assert body[action]['type'] in ['HARD', 'SOFT']
         elif action == 'rebuild':
-            keys = list(body[action])
-            if 'adminPass' in keys:
-                keys.remove('adminPass')
-            assert 'imageRef' in keys
+            body = body[action]
+            adminPass = body.get('adminPass', 'randompassword')
+            assert 'imageRef' in body
             _body = self.get_servers_1234()[2]
+            _body['server']['adminPass'] = adminPass
         elif action == 'resize':
             keys = body[action].keys()
             assert 'flavorRef' in keys
@@ -624,6 +640,9 @@ class FakeHTTPClient(base_client.HTTPClient):
         else:
             raise AssertionError("Unexpected server action: %s" % action)
         return (resp, _headers, _body)
+
+    def post_servers_5678_action(self, body, **kw):
+        return self.post_servers_1234_action(body, **kw)
 
     #
     # Cloudpipe
@@ -734,8 +753,11 @@ class FakeHTTPClient(base_client.HTTPClient):
     def get_flavors_512_MB_Server(self, **kw):
         raise exceptions.NotFound('404')
 
+    def get_flavors_128_MB_Server(self, **kw):
+        raise exceptions.NotFound('404')
+
     def get_flavors_aa1(self, **kw):
-        # Aplhanumeric flavor id are allowed.
+        # Alphanumeric flavor id are allowed.
         return (
             200,
             {},
@@ -1003,12 +1025,24 @@ class FakeHTTPClient(base_client.HTTPClient):
     # Keypairs
     #
     def get_os_keypairs_test(self, *kw):
-        return (200, {}, {'keypair': self.get_os_keypairs()[2]['keypairs'][0]})
+        return (200, {}, {'keypair':
+                          self.get_os_keypairs()[2]['keypairs'][0]['keypair']})
 
     def get_os_keypairs(self, *kw):
         return (200, {}, {"keypairs": [
-            {'fingerprint': 'FAKE_KEYPAIR', 'name': 'test'}
-        ]})
+                              {"keypair": {
+                                  "public_key": "FAKE_SSH_RSA",
+                                  "private_key": "FAKE_PRIVATE_KEY",
+                                  "user_id":
+                                      "81e373b596d6466e99c4896826abaa46",
+                                  "name": "test",
+                                  "deleted": False,
+                                  "created_at": "2014-04-19T02:16:44.000000",
+                                  "updated_at": "2014-04-19T10:12:3.000000",
+                                  "figerprint": "FAKE_KEYPAIR",
+                                  "deleted_at": None,
+                                  "id": 4}
+                               }]})
 
     def delete_os_keypairs_test(self, **kw):
         return (202, {}, None)
@@ -1017,7 +1051,7 @@ class FakeHTTPClient(base_client.HTTPClient):
         assert list(body) == ['keypair']
         fakes.assert_has_keys(body['keypair'],
                               required=['name'])
-        r = {'keypair': self.get_os_keypairs()[2]['keypairs'][0]}
+        r = {'keypair': self.get_os_keypairs()[2]['keypairs'][0]['keypair']}
         return (202, {}, r)
 
     #
@@ -1485,6 +1519,9 @@ class FakeHTTPClient(base_client.HTTPClient):
                           'binary': body['binary'],
                           'status': 'disabled',
                           'disabled_reason': body['disabled_reason']}})
+
+    def delete_os_services_1(self, **kw):
+        return (204, {}, None)
 
     #
     # Fixed IPs
@@ -1996,3 +2033,48 @@ class FakeHTTPClient(base_client.HTTPClient):
         return (200, {}, {'events': [
                     {'name': 'network-changed',
                      'server_uuid': '1234'}]})
+
+    #
+    # Server Groups
+    #
+
+    def get_os_server_groups(self, *kw):
+        return (200, {},
+                {"server_groups": [
+                 {"members": [], "metadata": {},
+                  "id": "2cbd51f4-fafe-4cdb-801b-cf913a6f288b",
+                  "policies": [], "name": "ig1"},
+                 {"members": [], "metadata": {},
+                  "id": "4473bb03-4370-4bfb-80d3-dc8cffc47d94",
+                  "policies": ["anti-affinity"], "name": "ig2"},
+                 {"members": [], "metadata": {"key": "value"},
+                  "id": "31ab9bdb-55e1-4ac3-b094-97eeb1b65cc4",
+                  "policies": [], "name": "ig3"},
+                 {"members": ["2dccb4a1-02b9-482a-aa23-5799490d6f5d"],
+                  "metadata": {},
+                  "id": "4890bb03-7070-45fb-8453-d34556c87d94",
+                  "policies": ["anti-affinity"], "name": "ig2"}]})
+
+    def _return_server_group(self):
+        r = {'server_group':
+             self.get_os_server_groups()[2]['server_groups'][0]}
+        return (200, {}, r)
+
+    def post_os_server_groups(self, body, **kw):
+        return self._return_server_group()
+
+    def get_os_server_groups_2cbd51f4_fafe_4cdb_801b_cf913a6f288b(self,
+                                                                    **kw):
+        return self._return_server_group()
+
+    def put_os_server_groups_2cbd51f4_fafe_4cdb_801b_cf913a6f288b(self,
+                                                                    **kw):
+        return self._return_server_group()
+
+    def post_os_server_groups_2cbd51f4_fafe_4cdb_801b_cf913a6f288b_action(
+            self, body, **kw):
+        return self._return_server_group()
+
+    def delete_os_server_groups_2cbd51f4_fafe_4cdb_801b_cf913a6f288b(
+            self, **kw):
+        return (202, {}, None)

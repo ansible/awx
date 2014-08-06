@@ -11,69 +11,70 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from novaclient.tests.fixture_data import client
+from novaclient.tests.fixture_data import hosts as data
 from novaclient.tests import utils
-from novaclient.tests.v1_1 import fakes
 from novaclient.v1_1 import hosts
 
 
-cs = fakes.FakeClient()
+class HostsTest(utils.FixturedTestCase):
 
-
-class HostsTest(utils.TestCase):
+    client_fixture_class = client.V1
+    data_fixture_class = data.V1
 
     def test_describe_resource(self):
-        hs = cs.hosts.get('host')
-        cs.assert_called('GET', '/os-hosts/host')
+        hs = self.cs.hosts.get('host')
+        self.assert_called('GET', '/os-hosts/host')
         [self.assertIsInstance(h, hosts.Host) for h in hs]
 
     def test_list_host(self):
-        hs = cs.hosts.list()
-        cs.assert_called('GET', '/os-hosts')
+        hs = self.cs.hosts.list()
+        self.assert_called('GET', '/os-hosts')
         [self.assertIsInstance(h, hosts.Host) for h in hs]
         [self.assertEqual(h.zone, 'nova1') for h in hs]
 
     def test_list_host_with_zone(self):
-        hs = cs.hosts.list('nova')
-        cs.assert_called('GET', '/os-hosts?zone=nova')
+        hs = self.cs.hosts.list('nova')
+        self.assert_called('GET', '/os-hosts?zone=nova')
         [self.assertIsInstance(h, hosts.Host) for h in hs]
         [self.assertEqual(h.zone, 'nova') for h in hs]
 
     def test_update_enable(self):
-        host = cs.hosts.get('sample_host')[0]
+        host = self.cs.hosts.get('sample_host')[0]
         values = {"status": "enabled"}
         result = host.update(values)
-        cs.assert_called('PUT', '/os-hosts/sample_host', values)
+        self.assert_called('PUT', '/os-hosts/sample_host', values)
         self.assertIsInstance(result, hosts.Host)
 
     def test_update_maintenance(self):
-        host = cs.hosts.get('sample_host')[0]
+        host = self.cs.hosts.get('sample_host')[0]
         values = {"maintenance_mode": "enable"}
         result = host.update(values)
-        cs.assert_called('PUT', '/os-hosts/sample_host', values)
+        self.assert_called('PUT', '/os-hosts/sample_host', values)
         self.assertIsInstance(result, hosts.Host)
 
     def test_update_both(self):
-        host = cs.hosts.get('sample_host')[0]
+        host = self.cs.hosts.get('sample_host')[0]
         values = {"status": "enabled",
                   "maintenance_mode": "enable"}
         result = host.update(values)
-        cs.assert_called('PUT', '/os-hosts/sample_host', values)
+        self.assert_called('PUT', '/os-hosts/sample_host', values)
         self.assertIsInstance(result, hosts.Host)
 
     def test_host_startup(self):
-        host = cs.hosts.get('sample_host')[0]
-        result = host.startup()
-        cs.assert_called(
+        host = self.cs.hosts.get('sample_host')[0]
+        host.startup()
+        self.assert_called(
             'GET', '/os-hosts/sample_host/startup')
 
     def test_host_reboot(self):
-        host = cs.hosts.get('sample_host')[0]
-        result = host.reboot()
-        cs.assert_called(
+        host = self.cs.hosts.get('sample_host')[0]
+        host.reboot()
+        self.assert_called(
             'GET', '/os-hosts/sample_host/reboot')
 
     def test_host_shutdown(self):
-        host = cs.hosts.get('sample_host')[0]
-        result = host.shutdown()
-        cs.assert_called(
+        host = self.cs.hosts.get('sample_host')[0]
+        host.shutdown()
+        self.assert_called(
             'GET', '/os-hosts/sample_host/shutdown')

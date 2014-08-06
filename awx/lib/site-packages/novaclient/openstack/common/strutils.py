@@ -98,7 +98,8 @@ def bool_from_string(subject, strict=False, default=False):
 
 
 def safe_decode(text, incoming=None, errors='strict'):
-    """Decodes incoming str using `incoming` if they're not already unicode.
+    """Decodes incoming text/bytes string using `incoming` if they're not
+       already unicode.
 
     :param incoming: Text's current encoding
     :param errors: Errors handling policy. See here for valid
@@ -107,7 +108,7 @@ def safe_decode(text, incoming=None, errors='strict'):
                 representation of it.
     :raises TypeError: If text is not an instance of str
     """
-    if not isinstance(text, six.string_types):
+    if not isinstance(text, (six.string_types, six.binary_type)):
         raise TypeError("%s can't be decoded" % type(text))
 
     if isinstance(text, six.text_type):
@@ -137,7 +138,7 @@ def safe_decode(text, incoming=None, errors='strict'):
 
 def safe_encode(text, incoming=None,
                 encoding='utf-8', errors='strict'):
-    """Encodes incoming str/unicode using `encoding`.
+    """Encodes incoming text/bytes string using `encoding`.
 
     If incoming is not specified, text is expected to be encoded with
     current python's default encoding. (`sys.getdefaultencoding`)
@@ -150,7 +151,7 @@ def safe_encode(text, incoming=None,
                 representation of it.
     :raises TypeError: If text is not an instance of str
     """
-    if not isinstance(text, six.string_types):
+    if not isinstance(text, (six.string_types, six.binary_type)):
         raise TypeError("%s can't be encoded" % type(text))
 
     if not incoming:

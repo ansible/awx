@@ -37,7 +37,7 @@ class CertificateManager(base.Manager):
 
     def create(self):
         """
-        Create a x509 certificates for a user in tenant.
+        Create a x509 certificate for a user in tenant.
         """
         return self._create('/os-certificates', {}, 'certificate')
 
