@@ -22,6 +22,7 @@ import boto
 from boto.utils import find_class, Password
 from boto.sdb.db.key import Key
 from boto.sdb.db.model import Model
+from boto.compat import six, encodebytes
 from datetime import datetime
 from xml.dom.minidom import getDOMImplementation, parse, parseString, Node
 
@@ -43,11 +44,12 @@ class XMLConverter(object):
         self.manager = manager
         self.type_map = { bool : (self.encode_bool, self.decode_bool),
                           int : (self.encode_int, self.decode_int),
-                          long : (self.encode_long, self.decode_long),
                           Model : (self.encode_reference, self.decode_reference),
                           Key : (self.encode_reference, self.decode_reference),
                           Password : (self.encode_password, self.decode_password),
                           datetime : (self.encode_datetime, self.decode_datetime)}
+        if six.PY2:
+            self.type_map[long] = (self.encode_long, self.decode_long)
 
     def get_text_value(self, parent_node):
         value = ''
@@ -145,7 +147,7 @@ class XMLConverter(object):
             return None
 
     def encode_reference(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             return value
         if value is None:
             return ''
@@ -201,9 +203,8 @@ class XMLManager(object):
         self.enable_ssl = enable_ssl
         self.auth_header = None
         if self.db_user:
-            import base64
-            base64string = base64.encodestring('%s:%s' % (self.db_user, self.db_passwd))[:-1]
-            authheader =  "Basic %s" % base64string
+            base64string = encodebytes('%s:%s' % (self.db_user, self.db_passwd))[:-1]
+            authheader = "Basic %s" % base64string
             self.auth_header = authheader
 
     def _connect(self):
@@ -373,7 +374,7 @@ class XMLManager(object):
             for property in properties:
                 if property.name == name:
                     found = True
-                    if types.TypeType(value) == types.ListType:
+                    if types.TypeType(value) == list:
                         filter_parts = []
                         for val in value:
                             val = self.encode_value(property, val)
@@ -459,14 +460,14 @@ class XMLManager(object):
                 elif isinstance(value, Node):
                     prop_node.appendChild(value)
                 else:
-                    text_node = doc.createTextNode(unicode(value).encode("ascii", "ignore"))
+                    text_node = doc.createTextNode(six.text_type(value).encode("ascii", "ignore"))
                     prop_node.appendChild(text_node)
             obj_node.appendChild(prop_node)
 
         return doc
 
     def unmarshal_object(self, fp, cls=None, id=None):
-        if isinstance(fp, basestring):
+        if isinstance(fp, six.string_types):
             doc = parseString(fp)
         else:
             doc = parse(fp)
@@ -477,7 +478,7 @@ class XMLManager(object):
         Same as unmarshalling an object, except it returns
         from "get_props_from_doc"
         """
-        if isinstance(fp, basestring):
+        if isinstance(fp, six.string_types):
             doc = parseString(fp)
         else:
             doc = parse(fp)
@@ -488,7 +489,7 @@ class XMLManager(object):
         return self._make_request("DELETE", url)
 
     def set_key_value(self, obj, name, value):
-        self.domain.put_attributes(obj.id, {name : value}, replace=True)
+        self.domain.put_attributes(obj.id, {name: value}, replace=True)
 
     def delete_key_value(self, obj, name):
         self.domain.delete_attributes(obj.id, name)
@@ -514,4 +515,3 @@ class XMLManager(object):
             obj = obj.get_by_id(obj.id)
             obj._loaded = True
         return obj
-

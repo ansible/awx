@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 #
 
-from .regioninfo import SDBRegionInfo
+from boto.sdb.regioninfo import SDBRegionInfo
 from boto.regioninfo import get_regions
 
 

@@ -26,9 +26,9 @@
 This module provies an interface to the Elastic MapReduce (EMR)
 service from AWS.
 """
-from connection import EmrConnection
-from step import Step, StreamingStep, JarStep
-from bootstrap_action import BootstrapAction
+from boto.emr.connection import EmrConnection
+from boto.emr.step import Step, StreamingStep, JarStep
+from boto.emr.bootstrap_action import BootstrapAction
 from boto.regioninfo import RegionInfo, get_regions
 
 

@@ -25,4 +25,3 @@ class HelloWorld(ScriptBase):
 
     def main(self):
         self.log('Hello World!!!')
-        

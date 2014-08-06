@@ -20,6 +20,7 @@
 # IN THE SOFTWARE.
 
 from boto.exception import SDBResponseError
+from boto.compat import six
 
 class SequenceGenerator(object):
     """Generic Sequence Generator object, this takes a single
@@ -71,8 +72,7 @@ class SequenceGenerator(object):
     def _inc(self, val):
         """Increment a single value"""
         assert(len(val) == self.sequence_length)
-        return self.sequence_string[(self.sequence_string.index(val)+1) % len(self.sequence_string)]
-
+        return self.sequence_string[(self.sequence_string.index(val) + 1) % len(self.sequence_string)]
 
 
 #
@@ -100,19 +100,17 @@ def fib(cv=1, lv=0):
 increment_string = SequenceGenerator("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 
-
 class Sequence(object):
     """A simple Sequence using the new SDB "Consistent" features
     Based largly off of the "Counter" example from mitch garnaat:
     http://bitbucket.org/mitch/stupidbototricks/src/tip/counter.py"""
 
-
     def __init__(self, id=None, domain_name=None, fnc=increment_by_one, init_val=None):
-        """Create a new Sequence, using an optional function to 
+        """Create a new Sequence, using an optional function to
         increment to the next number, by default we just increment by one.
         Every parameter here is optional, if you don't specify any options
         then you'll get a new SequenceGenerator with a random ID stored in the
-        default domain that increments by one and uses the default botoweb 
+        default domain that increments by one and uses the default botoweb
         environment
 
         :param id: Optional ID (name) for this counter
@@ -127,7 +125,7 @@ class Sequence(object):
             Your function must accept "None" to get the initial value
         :type fnc: function, str
 
-        :param init_val: Initial value, by default this is the first element in your sequence, 
+        :param init_val: Initial value, by default this is the first element in your sequence,
             but you can pass in any value, even a string if you pass in a function that uses
             strings instead of ints to increment
         """
@@ -146,7 +144,7 @@ class Sequence(object):
         self.item_type = type(fnc(None))
         self.timestamp = None
         # Allow us to pass in a full name to a function
-        if isinstance(fnc, basestring):
+        if isinstance(fnc, six.string_types):
             from boto.utils import find_class
             fnc = find_class(fnc)
         self.fnc = fnc
@@ -169,7 +167,7 @@ class Sequence(object):
         try:
             self.db.put_attributes(self.id, new_val, expected_value=expected_value)
             self.timestamp = new_val['timestamp']
-        except SDBResponseError, e:
+        except SDBResponseError as e:
             if e.status == 409:
                 raise ValueError("Sequence out of sync")
             else:
@@ -208,7 +206,7 @@ class Sequence(object):
                 self.domain_name = boto.config.get("DB", "sequence_db", boto.config.get("DB", "db_name", "default"))
             try:
                 self._db = sdb.get_domain(self.domain_name)
-            except SDBResponseError, e:
+            except SDBResponseError as e:
                 if e.status == 400:
                     self._db = sdb.create_domain(self.domain_name)
                 else:

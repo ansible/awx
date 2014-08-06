@@ -96,7 +96,7 @@ class Layer1(AWSAuthConnection):
         :type data: dict
         :param data: Specifies request parameters with default values to be removed.
         """
-        for item in data.keys():
+        for item in list(data.keys()):
             if isinstance(data[item], dict):
                 cls._normalize_request_dict(data[item])
             if data[item] in (None, {}):
@@ -130,7 +130,7 @@ class Layer1(AWSAuthConnection):
                                                     {}, headers, body, None)
         response = self._mexe(http_request, sender=None,
                               override_num_retries=10)
-        response_body = response.read()
+        response_body = response.read().decode('utf-8')
         boto.log.debug(response_body)
         if response.status == 200:
             if response_body:

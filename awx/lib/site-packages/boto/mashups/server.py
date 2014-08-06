@@ -18,19 +18,19 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-
 """
 High-level abstraction of an EC2 server
 """
+
 import boto
 import boto.utils
+from boto.compat import StringIO
 from boto.mashups.iobject import IObject
 from boto.pyami.config import Config, BotoConfigPath
 from boto.mashups.interactive import interactive_shell
 from boto.sdb.db.model import Model
 from boto.sdb.db.property import StringProperty
 import os
-import StringIO
 
 
 class ServerSet(list):
@@ -228,7 +228,7 @@ class Server(Model):
             self._config.set('Pyami', 'server_sdb_domain', self._manager.domain.name)
             self._config.set("Pyami", 'server_sdb_name', self.name)
 
-        cfg = StringIO.StringIO()
+        cfg = StringIO()
         self._config.write(cfg)
         cfg = cfg.getvalue()
         r = ami.run(min_count=1,
@@ -252,7 +252,7 @@ class Server(Model):
                        uname='root'):
         import paramiko
         if not self.instance:
-            print 'No instance yet!'
+            print('No instance yet!')
             return
         if not self._ssh_client:
             if not key_file:
@@ -288,8 +288,8 @@ class Server(Model):
         interactive_shell(channel)
 
     def bundle_image(self, prefix, key_file, cert_file, size):
-        print 'bundling image...'
-        print '\tcopying cert and pk over to /mnt directory on server'
+        print('bundling image...')
+        print('\tcopying cert and pk over to /mnt directory on server')
         ssh_client = self.get_ssh_client()
         sftp_client = ssh_client.open_sftp()
         path, name = os.path.split(key_file)
@@ -298,7 +298,7 @@ class Server(Model):
         path, name = os.path.split(cert_file)
         remote_cert_file = '/mnt/%s' % name
         self.put_file(cert_file, remote_cert_file)
-        print '\tdeleting %s' % BotoConfigPath
+        print('\tdeleting %s' % BotoConfigPath)
         # delete the metadata.ini file if it exists
         try:
             sftp_client.remove(BotoConfigPath)
@@ -314,27 +314,27 @@ class Server(Model):
             command += '-r i386'
         else:
             command += '-r x86_64'
-        print '\t%s' % command
+        print('\t%s' % command)
         t = ssh_client.exec_command(command)
         response = t[1].read()
-        print '\t%s' % response
-        print '\t%s' % t[2].read()
-        print '...complete!'
+        print('\t%s' % response)
+        print('\t%s' % t[2].read())
+        print('...complete!')
 
     def upload_bundle(self, bucket, prefix):
-        print 'uploading bundle...'
+        print('uploading bundle...')
         command = 'ec2-upload-bundle '
         command += '-m /mnt/%s.manifest.xml ' % prefix
         command += '-b %s ' % bucket
         command += '-a %s ' % self.ec2.aws_access_key_id
         command += '-s %s ' % self.ec2.aws_secret_access_key
-        print '\t%s' % command
+        print('\t%s' % command)
         ssh_client = self.get_ssh_client()
         t = ssh_client.exec_command(command)
         response = t[1].read()
-        print '\t%s' % response
-        print '\t%s' % t[2].read()
-        print '...complete!'
+        print('\t%s' % response)
+        print('\t%s' % t[2].read())
+        print('...complete!')
 
     def create_image(self, bucket=None, prefix=None, key_file=None, cert_file=None, size=None):
         iobject = IObject()
@@ -350,7 +350,7 @@ class Server(Model):
             size = iobject.get_int('Size (in MB) of bundled image')
         self.bundle_image(prefix, key_file, cert_file, size)
         self.upload_bundle(bucket, prefix)
-        print 'registering image...'
+        print('registering image...')
         self.image_id = self.ec2.register_image('%s/%s.manifest.xml' % (bucket, prefix))
         return self.image_id
 
@@ -384,12 +384,12 @@ class Server(Model):
         return self.ec2.detach_volume(volume_id=volume_id, instance_id=self.instance_id)
 
     def install_package(self, package_name):
-        print 'installing %s...' % package_name
+        print('installing %s...' % package_name)
         command = 'yum -y install %s' % package_name
-        print '\t%s' % command
+        print('\t%s' % command)
         ssh_client = self.get_ssh_client()
         t = ssh_client.exec_command(command)
         response = t[1].read()
-        print '\t%s' % response
-        print '\t%s' % t[2].read()
-        print '...complete!'
+        print('\t%s' % response)
+        print('\t%s' % t[2].read())
+        print('...complete!')

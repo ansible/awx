@@ -23,7 +23,7 @@
 This module provides an interface to the Elastic Compute Cloud (EC2)
 CloudWatch service from AWS.
 """
-from boto.compat import json
+from boto.compat import json, map, six, zip
 from boto.connection import AWSQueryConnection
 from boto.ec2.cloudwatch.metric import Metric
 from boto.ec2.cloudwatch.alarm import MetricAlarm, MetricAlarms, AlarmHistoryItem
@@ -110,7 +110,7 @@ class CloudWatchConnection(AWSQueryConnection):
         for dim_name in dimension:
             dim_value = dimension[dim_name]
             if dim_value:
-                if isinstance(dim_value, basestring):
+                if isinstance(dim_value, six.string_types):
                     dim_value = [dim_value]
                 for value in dim_value:
                     params['%s.%d.Name' % (prefix, i+1)] = dim_name
@@ -121,12 +121,12 @@ class CloudWatchConnection(AWSQueryConnection):
                 i += 1
 
     def build_list_params(self, params, items, label):
-        if isinstance(items, basestring):
+        if isinstance(items, six.string_types):
             items = [items]
         for index, item in enumerate(items):
             i = index + 1
             if isinstance(item, dict):
-                for k, v in item.iteritems():
+                for k, v in six.iteritems(item):
                     params[label % (i, 'Name')] = k
                     if v is not None:
                         params[label % (i, 'Value')] = v
@@ -171,7 +171,7 @@ class CloudWatchConnection(AWSQueryConnection):
             else:
                 raise Exception('Must specify a value or statistics to put.')
 
-            for key, val in metric_data.iteritems():
+            for key, val in six.iteritems(metric_data):
                 params['MetricData.member.%d.%s' % (index + 1, key)] = val
 
     def get_metric_statistics(self, period, start_time, end_time, metric_name,

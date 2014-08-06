@@ -44,6 +44,7 @@ class Volume(TaggedEC2Object):
     :ivar type: The type of volume (standard or consistent-iops)
     :ivar iops: If this volume is of type consistent-iops, this is
         the number of IOPS provisioned (10-300).
+    :ivar encrypted: True if this volume is encrypted.
     """
 
     def __init__(self, connection=None):
@@ -57,6 +58,7 @@ class Volume(TaggedEC2Object):
         self.zone = None
         self.type = None
         self.iops = None
+        self.encrypted = None
 
     def __repr__(self):
         return 'Volume:%s' % self.id
@@ -92,6 +94,8 @@ class Volume(TaggedEC2Object):
             self.type = value
         elif name == 'iops':
             self.iops = int(value)
+        elif name == 'encrypted':
+            self.encrypted = (value.lower() == 'true')
         else:
             setattr(self, name, value)
 

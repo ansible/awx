@@ -49,7 +49,7 @@ def regions():
     :rtype: list
     :return: A list of :class:`boto.regioninfo.RegionInfo`
     """
-    from .connection import S3Connection
+    from boto.s3.connection import S3Connection
     return get_regions(
         's3',
         region_cls=S3RegionInfo,

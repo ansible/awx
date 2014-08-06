@@ -46,7 +46,7 @@ class Converter(object):
 
     @classmethod
     def convert_file(cls, param, value):
-        if os.path.isfile(value):
+        if os.path.exists(value) and not os.path.isdir(value):
             return value
         raise ValueError
 

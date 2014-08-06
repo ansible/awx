@@ -18,7 +18,6 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-
 """
 High-level abstraction of an EC2 order for servers
 """
@@ -29,7 +28,8 @@ from boto.mashups.server import Server, ServerSet
 from boto.mashups.iobject import IObject
 from boto.pyami.config import Config
 from boto.sdb.persist import get_domain, set_domain
-import time, StringIO
+import time
+from boto.compat import StringIO
 
 InstanceTypes = ['m1.small', 'm1.large', 'm1.xlarge', 'c1.medium', 'c1.xlarge']
 
@@ -124,7 +124,7 @@ class Item(IObject):
         self.config = Config(path=config_path)
 
     def get_userdata_string(self):
-        s = StringIO.StringIO()
+        s = StringIO()
         self.config.write(s)
         return s.getvalue()
 
@@ -171,16 +171,16 @@ class Order(IObject):
         self.items.append(item)
 
     def display(self):
-        print 'This Order consists of the following items'
-        print 
-        print 'QTY\tNAME\tTYPE\nAMI\t\tGroups\t\t\tKeyPair'
+        print('This Order consists of the following items')
+        print() 
+        print('QTY\tNAME\tTYPE\nAMI\t\tGroups\t\t\tKeyPair')
         for item in self.items:
-            print '%s\t%s\t%s\t%s\t%s\t%s' % (item.quantity, item.name, item.instance_type,
-                                              item.ami.id, item.groups, item.key.name)
+            print('%s\t%s\t%s\t%s\t%s\t%s' % (item.quantity, item.name, item.instance_type,
+                                              item.ami.id, item.groups, item.key.name))
 
     def place(self, block=True):
         if get_domain() is None:
-            print 'SDB Persistence Domain not set'
+            print('SDB Persistence Domain not set')
             domain_name = self.get_string('Specify SDB Domain')
             set_domain(domain_name)
         s = ServerSet()
@@ -192,7 +192,7 @@ class Order(IObject):
             if block:
                 states = [i.state for i in r.instances]
                 if states.count('running') != len(states):
-                    print states
+                    print(states)
                     time.sleep(15)
                     states = [i.update() for i in r.instances]
             for i in r.instances:

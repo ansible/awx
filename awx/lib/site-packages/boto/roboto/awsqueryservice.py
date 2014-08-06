@@ -1,10 +1,11 @@
+from __future__ import print_function
 import os
 import urlparse
 import boto
 import boto.connection
 import boto.jsonresponse
 import boto.exception
-import awsqueryrequest
+from boto.roboto import awsqueryrequest
 
 class NoCredentialsError(boto.exception.BotoClientError):
 
@@ -48,7 +49,7 @@ class AWSQueryService(boto.connection.AWSQueryConnection):
 
     def check_for_credential_file(self):
         """
-        Checks for the existance of an AWS credential file.
+        Checks for the existence of an AWS credential file.
         If the environment variable AWS_CREDENTIAL_FILE is
         set and points to a file, that file will be read and
         will be searched credentials.
@@ -77,7 +78,7 @@ class AWSQueryService(boto.connection.AWSQueryConnection):
                                     value = value.strip()
                                     self.args['aws_secret_access_key'] = value
             else:
-                print 'Warning: unable to read AWS_CREDENTIAL_FILE'
+                print('Warning: unable to read AWS_CREDENTIAL_FILE')
 
     def check_for_env_url(self):
         """

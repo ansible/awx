@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 
 import xml.sax.saxutils
-from acl import Grant
+from boto.s3.acl import Grant
 
 class BucketLogging(object):
 

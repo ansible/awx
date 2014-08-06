@@ -114,7 +114,7 @@ class EBSInstaller(Installer):
         if self.logical_volume_name:
             # if a logical volume was specified, override the specified volume_id
             # (if there was one) with the current AWS volume for the logical volume:
-            logical_volume = Volume.find(name = self.logical_volume_name).next()
+            logical_volume = next(Volume.find(name=self.logical_volume_name))
             self.volume_id = logical_volume._volume_id
         volume = ec2.get_all_volumes([self.volume_id])[0]
         # wait for the volume to be available. The volume may still be being created
@@ -128,7 +128,7 @@ class EBSInstaller(Installer):
             try:
                 ec2.attach_volume(self.volume_id, self.instance_id, self.device)
                 attempt_attach = False
-            except EC2ResponseError, e:
+            except EC2ResponseError as e:
                 if e.error_code != 'IncorrectState':
                     # if there's an EC2ResonseError with the code set to IncorrectState, delay a bit for ec2
                     # to realize the instance is running, then try again. Otherwise, raise the error:
@@ -157,7 +157,7 @@ class EBSInstaller(Installer):
         fp.close()
         self.run('chmod +x /usr/local/bin/ebs_backup')
 
-    def create_backup_cleanup_script(self, use_tag_based_cleanup = False):
+    def create_backup_cleanup_script(self, use_tag_based_cleanup=False):
         fp = open('/usr/local/bin/ebs_backup_cleanup', 'w')
         if use_tag_based_cleanup:
             fp.write(TagBasedBackupCleanupScript)
@@ -225,7 +225,7 @@ class EBSInstaller(Installer):
             # volume. Check for the presence of the new configuration flag, and use the appropriate
             # cleanup method / script:
             use_tag_based_cleanup = boto.config.has_option('EBS', 'use_tag_based_snapshot_cleanup')
-            self.create_backup_cleanup_script(use_tag_based_cleanup);
+            self.create_backup_cleanup_script(use_tag_based_cleanup)
             self.add_cron("ebs_backup_cleanup", "/usr/local/bin/ebs_backup_cleanup", minute=minute, hour=hour)
 
         # Set up the fstab

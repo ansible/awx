@@ -74,6 +74,31 @@ class AccessLogAttribute(object):
         elif name == 'EmitInterval':
             self.emit_interval = int(value)
 
+class ConnectionDrainingAttribute(object):
+    """
+    Represents the ConnectionDraining segment of ELB attributes.
+    """
+    def __init__(self, connection=None):
+        self.enabled = None
+        self.timeout = None
+
+    def __repr__(self):
+        return 'ConnectionDraining(%s, %s)' % (
+            self.enabled,
+            self.timeout
+        )
+
+    def startElement(self, name, attrs, connection):
+        pass
+
+    def endElement(self, name, value, connection):
+        if name == 'Enabled':
+            if value.lower() == 'true':
+                self.enabled = True
+            else:
+                self.enabled = False
+        elif name == 'Timeout':
+            self.timeout = int(value)
 
 class LbAttributes(object):
     """
@@ -84,17 +109,21 @@ class LbAttributes(object):
         self.cross_zone_load_balancing = CrossZoneLoadBalancingAttribute(
           self.connection)
         self.access_log = AccessLogAttribute(self.connection)
+        self.connection_draining = ConnectionDrainingAttribute(self.connection)
 
     def __repr__(self):
-        return 'LbAttributes(%s, %s)' % (
+        return 'LbAttributes(%s, %s, %s)' % (
             repr(self.cross_zone_load_balancing),
-            repr(self.access_log))
+            repr(self.access_log),
+            repr(self.connection_draining))
 
     def startElement(self, name, attrs, connection):
         if name == 'CrossZoneLoadBalancing':
             return self.cross_zone_load_balancing
         if name == 'AccessLog':
             return self.access_log
+        if name == 'ConnectionDraining':
+            return self.connection_draining
 
     def endElement(self, name, value, connection):
         pass

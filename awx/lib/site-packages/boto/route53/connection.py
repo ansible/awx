@@ -24,9 +24,8 @@
 # IN THE SOFTWARE.
 #
 
-import exception
+from boto.route53 import exception
 import random
-import urllib
 import uuid
 import xml.sax
 
@@ -36,6 +35,7 @@ from boto import handler
 import boto.jsonresponse
 from boto.route53.record import ResourceRecordSets
 from boto.route53.zone import Zone
+from boto.compat import six, urllib
 
 
 HZXML = """<?xml version="1.0" encoding="UTF-8"?>
@@ -79,10 +79,10 @@ class Route53Connection(AWSAuthConnection):
     def make_request(self, action, path, headers=None, data='', params=None):
         if params:
             pairs = []
-            for key, val in params.iteritems():
+            for key, val in six.iteritems(params):
                 if val is None:
                     continue
-                pairs.append(key + '=' + urllib.quote(str(val)))
+                pairs.append(key + '=' + urllib.parse.quote(str(val)))
             path += '?' + '&'.join(pairs)
         return super(Route53Connection, self).make_request(action, path,
                                               headers, data,
@@ -213,6 +213,13 @@ class Route53Connection(AWSAuthConnection):
                                            body)
 
     def delete_hosted_zone(self, hosted_zone_id):
+        """
+        Delete the hosted zone specified by the given id.
+
+        :type hosted_zone_id: str
+        :param hosted_zone_id: The hosted zone's id
+
+        """
         uri = '/%s/hostedzone/%s' % (self.Version, hosted_zone_id)
         response = self.make_request('DELETE', uri)
         body = response.read()
@@ -480,6 +487,10 @@ class Route53Connection(AWSAuthConnection):
         """
         Returns a list of Zone objects, one for each of the Hosted
         Zones defined for the AWS account.
+
+        :rtype: list
+        :returns: A list of Zone objects.
+
         """
         zones = self.get_all_hosted_zones()
         return [Zone(self, zone) for zone in
@@ -519,7 +530,8 @@ class Route53Connection(AWSAuthConnection):
                     'PriorRequestNotComplete',
                     i
                 )
-                next_sleep = random.random() * (2 ** i)
+                next_sleep = min(random.random() * (2 ** i),
+                                 boto.config.get('Boto', 'max_retry_delay', 60))
                 i += 1
                 status = (msg, i, next_sleep)
 

@@ -167,6 +167,70 @@ class NetworkInterface(TaggedEC2Object):
         else:
             setattr(self, name, value)
 
+    def _update(self, updated):
+        self.__dict__.update(updated.__dict__)
+
+    def update(self, validate=False, dry_run=False):
+        """
+        Update the data associated with this ENI by querying EC2.
+
+        :type validate: bool
+        :param validate: By default, if EC2 returns no data about the
+                         ENI the update method returns quietly.  If
+                         the validate param is True, however, it will
+                         raise a ValueError exception if no data is
+                         returned from EC2.
+        """
+        rs = self.connection.get_all_network_interfaces(
+            [self.id],
+            dry_run=dry_run
+        )
+        if len(rs) > 0:
+            self._update(rs[0])
+        elif validate:
+            raise ValueError('%s is not a valid ENI ID' % self.id)
+        return self.status
+
+    def attach(self, instance_id, device_index, dry_run=False):
+        """
+        Attach this ENI to an EC2 instance.
+
+        :type instance_id: str
+        :param instance_id: The ID of the EC2 instance to which it will
+                            be attached.
+
+        :type device_index: int
+        :param device_index: The interface nunber, N, on the instance (eg. ethN)
+
+        :rtype: bool
+        :return: True if successful
+        """
+        return self.connection.attach_network_interface(
+            self.id,
+            instance_id,
+            device_index,
+            dry_run=dry_run
+        )
+
+    def detach(self, force=False, dry_run=False):
+        """
+        Detach this ENI from an EC2 instance.
+
+        :type force: bool
+        :param force: Forces detachment if the previous detachment
+                      attempt did not occur cleanly.
+
+        :rtype: bool
+        :return: True if successful
+        """
+        attachment_id = getattr(self.attachment, 'id', None)
+
+        return self.connection.detach_network_interface(
+            attachment_id,
+            force,
+            dry_run=dry_run
+        )
+
     def delete(self, dry_run=False):
         return self.connection.delete_network_interface(
             self.id,

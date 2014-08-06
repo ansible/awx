@@ -18,7 +18,6 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-
 import boto.ec2
 from boto.sdb.db.property import StringProperty, IntegerProperty
 from boto.manage import propget
@@ -66,19 +65,19 @@ if __name__ == "__main__":
     obj.get(params)
     offerings = obj.ec2.get_all_reserved_instances_offerings(instance_type=params['instance_type'],
                                                              availability_zone=params['zone'].name)
-    print '\nThe following Reserved Instances Offerings are available:\n'
+    print('\nThe following Reserved Instances Offerings are available:\n')
     for offering in offerings:
         offering.describe()
     prop = StringProperty(name='offering', verbose_name='Offering',
                           choices=offerings)
     offering = propget.get(prop)
-    print '\nYou have chosen this offering:'
+    print('\nYou have chosen this offering:')
     offering.describe()
     unit_price = float(offering.fixed_price)
     total_price = unit_price * params['quantity']
-    print '!!! You are about to purchase %d of these offerings for a total of $%.2f !!!' % (params['quantity'], total_price)
+    print('!!! You are about to purchase %d of these offerings for a total of $%.2f !!!' % (params['quantity'], total_price))
     answer = raw_input('Are you sure you want to do this?  If so, enter YES: ')
     if answer.strip().lower() == 'yes':
         offering.purchase(params['quantity'])
     else:
-        print 'Purchase cancelled'
+        print('Purchase cancelled')

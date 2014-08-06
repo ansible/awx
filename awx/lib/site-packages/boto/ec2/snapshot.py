@@ -41,6 +41,7 @@ class Snapshot(TaggedEC2Object):
         self.owner_alias = None
         self.volume_size = None
         self.description = None
+        self.encrypted = None
 
     def __repr__(self):
         return 'Snapshot:%s' % self.id
@@ -65,6 +66,8 @@ class Snapshot(TaggedEC2Object):
                 self.volume_size = value
         elif name == 'description':
             self.description = value
+        elif name == 'encrypted':
+            self.encrypted = (value.lower() == 'true')
         else:
             setattr(self, name, value)
 
@@ -152,6 +155,7 @@ class Snapshot(TaggedEC2Object):
             self.id,
             volume_type,
             iops,
+            self.encrypted,
             dry_run=dry_run
         )
 

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
+from boto.compat import six
 
 
 class Batch(object):
@@ -176,7 +177,7 @@ class BatchList(list):
         if not self.unprocessed:
             return None
 
-        for table_name, table_req in self.unprocessed.iteritems():
+        for table_name, table_req in six.iteritems(self.unprocessed):
             table_keys = table_req['Keys']
             table = self.layer2.get_table(table_name)
 
@@ -195,7 +196,6 @@ class BatchList(list):
             self.add_batch(table, keys, attributes_to_get=attributes_to_get)
 
         return self.submit()
-
 
     def submit(self):
         res = self.layer2.batch_get_item(self)
@@ -259,4 +259,3 @@ class BatchWriteList(list):
             table_name, batch_dict = batch.to_dict()
             d[table_name] = batch_dict
         return d
-

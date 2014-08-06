@@ -35,4 +35,3 @@ class Dimension(dict):
                 self[self._name] = [value]
         else:
             setattr(self, name, value)
-

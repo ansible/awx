@@ -19,14 +19,15 @@
 
 """Extensions to allow HTTPS requests with SSL certificate validation."""
 
-import httplib
 import re
 import socket
 import ssl
 
 import boto
 
-class InvalidCertificateException(httplib.HTTPException):
+from boto.compat import six, http_client
+
+class InvalidCertificateException(http_client.HTTPException):
   """Raised when a certificate is provided with an invalid hostname."""
 
   def __init__(self, host, cert, reason):
@@ -36,7 +37,7 @@ class InvalidCertificateException(httplib.HTTPException):
       host: The hostname the connection was made to.
       cert: The SSL certificate (as a dictionary) the host returned.
     """
-    httplib.HTTPException.__init__(self)
+    http_client.HTTPException.__init__(self)
     self.host = host
     self.cert = cert
     self.reason = reason
@@ -79,10 +80,10 @@ def ValidateCertificateHostname(cert, hostname):
   return False
 
 
-class CertValidatingHTTPSConnection(httplib.HTTPConnection):
+class CertValidatingHTTPSConnection(http_client.HTTPConnection):
   """An HTTPConnection that connects over SSL and validates certificates."""
 
-  default_port = httplib.HTTPS_PORT
+  default_port = http_client.HTTPS_PORT
 
   def __init__(self, host, port=default_port, key_file=None, cert_file=None,
                ca_certs=None, strict=None, **kwargs):
@@ -98,17 +99,23 @@ class CertValidatingHTTPSConnection(httplib.HTTPConnection):
       strict: When true, causes BadStatusLine to be raised if the status line
           can't be parsed as a valid HTTP/1.0 or 1.1 status line.
     """
-    httplib.HTTPConnection.__init__(self, host, port, strict, **kwargs)
+    if six.PY2:
+        # Python 3.2 and newer have deprecated and removed the strict
+        # parameter. Since the params are supported as keyword arguments
+        # we conditionally add it here.
+        kwargs['strict'] = strict
+
+    http_client.HTTPConnection.__init__(self, host=host, port=port, **kwargs)
     self.key_file = key_file
     self.cert_file = cert_file
     self.ca_certs = ca_certs
 
   def connect(self):
     "Connect to a host on a given (SSL) port."
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    if hasattr(self, "timeout") and self.timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:
-        sock.settimeout(self.timeout)
-    sock.connect((self.host, self.port))
+    if hasattr(self, "timeout"):
+        sock = socket.create_connection((self.host, self.port), self.timeout)
+    else:
+        sock = socket.create_connection((self.host, self.port))
     msg = "wrapping ssl socket; "
     if self.ca_certs:
         msg += "CA certificate file=%s" %self.ca_certs

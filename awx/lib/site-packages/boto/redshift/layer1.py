@@ -2930,7 +2930,7 @@ class RedshiftConnection(AWSQueryConnection):
         params['ContentType'] = 'JSON'
         response = self.make_request(action=action, verb='POST',
                                      path='/', params=params)
-        body = response.read()
+        body = response.read().decode('utf-8')
         boto.log.debug(body)
         if response.status == 200:
             return json.loads(body)

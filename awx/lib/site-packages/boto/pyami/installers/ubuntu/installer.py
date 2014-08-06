@@ -56,7 +56,7 @@ class Installer(boto.pyami.installers.Installer):
         f = open(f_path, "w")
         f.write(file)
         f.close()
-        os.chmod(f_path, stat.S_IREAD| stat.S_IWRITE | stat.S_IEXEC)
+        os.chmod(f_path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
         self.run("/usr/sbin/update-rc.d %s defaults" % name)
 
     def add_env(self, key, value):
@@ -84,13 +84,11 @@ class Installer(boto.pyami.installers.Installer):
         Create a user on the local system
         """
         self.run("useradd -m %s" % user)
-        usr =  getpwnam(user)
+        usr = getpwnam(user)
         return usr
-
 
     def install(self):
         """
         This is the only method you need to override
         """
         raise NotImplementedError
-

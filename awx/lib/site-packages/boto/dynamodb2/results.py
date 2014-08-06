@@ -52,7 +52,7 @@ class ResultSet(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         self._offset += 1
 
         if self._offset >= len(self._results):
@@ -77,6 +77,8 @@ class ResultSet(object):
             return self._results[self._offset]
         else:
             raise StopIteration()
+
+    next = __next__
 
     def to_call(self, the_callable, *args, **kwargs):
         """
@@ -106,7 +108,7 @@ class ResultSet(object):
         # DDB api calls use (which limit page size, not the overall result set).
         self._limit = kwargs.pop('limit', None)
 
-        if self._limit < 0:
+        if self._limit is not None and self._limit < 0:
             self._limit = None
 
         self.the_callable = the_callable
@@ -130,7 +132,7 @@ class ResultSet(object):
 
         # If the page size is greater than limit set them
         #   to the same value
-        if self._limit and self._max_page_size > self._limit:
+        if self._limit and self._max_page_size and self._max_page_size > self._limit:
             self._max_page_size = self._limit
 
         # Put in the max page size.

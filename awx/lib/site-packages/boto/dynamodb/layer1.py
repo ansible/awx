@@ -122,14 +122,14 @@ class Layer1(AWSAuthConnection):
         boto.log.debug('RequestId: %s' % request_id)
         boto.perflog.debug('%s: id=%s time=%sms',
                            headers['X-Amz-Target'], request_id, int(elapsed))
-        response_body = response.read()
+        response_body = response.read().decode('utf-8')
         boto.log.debug(response_body)
         return json.loads(response_body, object_hook=object_hook)
 
     def _retry_handler(self, response, i, next_sleep):
         status = None
         if response.status == 400:
-            response_body = response.read()
+            response_body = response.read().decode('utf-8')
             boto.log.debug(response_body)
             data = json.loads(response_body)
             if self.ThruputError in data.get('__type'):
@@ -160,7 +160,7 @@ class Layer1(AWSAuthConnection):
         expected_crc32 = response.getheader('x-amz-crc32')
         if self._validate_checksums and expected_crc32 is not None:
             boto.log.debug('Validating crc32 checksum for body: %s',
-                           response.read())
+                           response.read().decode('utf-8'))
             actual_crc32 = crc32(response.read()) & 0xffffffff
             expected_crc32 = int(expected_crc32)
             if actual_crc32 != expected_crc32:
@@ -173,7 +173,8 @@ class Layer1(AWSAuthConnection):
         if i == 0:
             next_sleep = 0
         else:
-            next_sleep = 0.05 * (2 ** i)
+            next_sleep = min(0.05 * (2 ** i),
+                             boto.config.get('Boto', 'max_retry_delay', 60))
         return next_sleep
 
     def list_tables(self, limit=None, start_table=None):

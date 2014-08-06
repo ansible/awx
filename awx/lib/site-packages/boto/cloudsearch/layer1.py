@@ -680,7 +680,7 @@ class Layer1(AWSQueryConnection):
                     'update_stemming_options_result',
                     'stems')
         params = {'DomainName': domain_name,
-                 'Stems': stems}
+                  'Stems': stems}
         return self.get_response(doc_path, 'UpdateStemmingOptions',
                                  params, verb='POST')
 

@@ -75,7 +75,7 @@ class KeyFile():
       raise IOError('Invalid whence param (%d) passed to seek' % whence)
     try:
       self.key.open_read(headers={"Range": "bytes=%d-" % pos})
-    except StorageResponseError, e:
+    except StorageResponseError as e:
       # 416 Invalid Range means that the given starting byte was past the end
       # of file. We catch this because the Python file interface allows silently
       # seeking past the end of the file.

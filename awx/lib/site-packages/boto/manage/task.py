@@ -23,7 +23,8 @@
 import boto
 from boto.sdb.db.property import StringProperty, DateTimeProperty, IntegerProperty
 from boto.sdb.db.model import Model
-import datetime, subprocess, StringIO, time
+import datetime, subprocess, time
+from boto.compat import StringIO
 
 def check_hour(val):
     if val == '*':
@@ -100,7 +101,7 @@ class Task(Model):
 
     def _run(self, msg, vtimeout):
         boto.log.info('Task[%s] - running:%s' % (self.name, self.command))
-        log_fp = StringIO.StringIO()
+        log_fp = StringIO()
         process = subprocess.Popen(self.command, shell=True, stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         nsecs = 5

@@ -233,6 +233,9 @@ class Image(TaggedEC2Object):
             * i2.2xlarge
             * i2.4xlarge
             * i2.8xlarge
+            * t2.micro
+            * t2.small
+            * t2.medium
 
         :type placement: string
         :param placement: The Availability Zone to launch the instance into.

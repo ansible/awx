@@ -54,6 +54,6 @@ class Key(object):
 
     def parent(self):
         raise NotImplementedError("Key parents are not currently supported")
-        
+
     def __str__(self):
         return self.id_or_name()

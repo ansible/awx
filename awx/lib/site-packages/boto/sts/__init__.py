@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-from connection import STSConnection
+from boto.sts.connection import STSConnection
 from boto.regioninfo import RegionInfo, get_regions
 
 

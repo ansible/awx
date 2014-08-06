@@ -23,6 +23,7 @@ from boto.sdb.db.property import Property
 from boto.sdb.db.key import Key
 from boto.sdb.db.query import Query
 import boto
+from boto.compat import filter
 
 class ModelMeta(type):
     "Metaclass for all Models"
@@ -166,7 +167,7 @@ class Model(object):
                 # so if it fails we just revert to it's default value
                 try:
                     setattr(self, key, kw[key])
-                except Exception, e:
+                except Exception as e:
                     boto.log.exception(e)
 
     def __repr__(self):
@@ -254,9 +255,9 @@ class Model(object):
         props = {}
         for prop in self.properties(hidden=False):
             props[prop.name] = getattr(self, prop.name)
-        obj = {'properties' : props,
-               'id' : self.id}
-        return {self.__class__.__name__ : obj}
+        obj = {'properties': props,
+               'id': self.id}
+        return {self.__class__.__name__: obj}
 
     def to_xml(self, doc=None):
         xmlmanager = self.get_xmlmanager()
@@ -293,5 +294,3 @@ class Expando(Model):
                 object.__setattr__(self, name, value)
                 return value
         raise AttributeError
-
-

@@ -32,7 +32,7 @@ class JSONMessage(MHMessage):
 
     def decode(self, value):
         try:
-            value = base64.b64decode(value)
+            value = base64.b64decode(value.encode('utf-8')).decode('utf-8')
             value = json.loads(value)
         except:
             raise SQSDecodeError('Unable to decode message', self)
@@ -40,4 +40,4 @@ class JSONMessage(MHMessage):
 
     def encode(self, value):
         value = json.dumps(value)
-        return base64.b64encode(value)
+        return base64.b64encode(value.encode('utf-8')).decode('utf-8')

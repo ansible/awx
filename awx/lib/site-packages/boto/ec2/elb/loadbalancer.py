@@ -27,6 +27,7 @@ from boto.ec2.elb.policies import Policies, OtherPolicy
 from boto.ec2.elb.securitygroup import SecurityGroup
 from boto.ec2.instanceinfo import InstanceInfo
 from boto.resultset import ResultSet
+from boto.compat import six
 
 
 class Backend(object):
@@ -67,6 +68,7 @@ class LoadBalancerZones(object):
     def endElement(self, name, value, connection):
         pass
 
+
 class LoadBalancer(object):
     """
     Represents an EC2 Load Balancer.
@@ -82,6 +84,7 @@ class LoadBalancer(object):
             check policy for this load balancer.
         :ivar boto.ec2.elb.policies.Policies policies: Cookie stickiness and
             other policies.
+        :ivar str name: The name of the Load Balancer.
         :ivar str dns_name: The external DNS name for the balancer.
         :ivar str created_time: A date+time string showing when the
             load balancer was created.
@@ -186,7 +189,7 @@ class LoadBalancer(object):
         :param zones: The name of the zone(s) to add.
 
         """
-        if isinstance(zones, basestring):
+        if isinstance(zones, six.string_types):
             zones = [zones]
         new_zones = self.connection.enable_availability_zones(self.name, zones)
         self.availability_zones = new_zones
@@ -199,9 +202,10 @@ class LoadBalancer(object):
         :param zones: The name of the zone(s) to add.
 
         """
-        if isinstance(zones, basestring):
+        if isinstance(zones, six.string_types):
             zones = [zones]
-        new_zones = self.connection.disable_availability_zones(self.name, zones)
+        new_zones = self.connection.disable_availability_zones(
+            self.name, zones)
         self.availability_zones = new_zones
 
     def get_attributes(self, force=False):
@@ -266,7 +270,7 @@ class LoadBalancer(object):
             to add to this load balancer.
 
         """
-        if isinstance(instances, basestring):
+        if isinstance(instances, six.string_types):
             instances = [instances]
         new_instances = self.connection.register_instances(self.name,
                                                            instances)
@@ -281,7 +285,7 @@ class LoadBalancer(object):
             to remove from this load balancer.
 
         """
-        if isinstance(instances, basestring):
+        if isinstance(instances, six.string_types):
             instances = [instances]
         new_instances = self.connection.deregister_instances(self.name,
                                                              instances)
@@ -348,14 +352,13 @@ class LoadBalancer(object):
                                                            policies)
 
     def set_policies_of_backend_server(self, instance_port, policies):
-        return self.connection.set_lb_policies_of_backend_server(self.name,
-                                                           instance_port,
-                                                           policies)
-
+        return self.connection.set_lb_policies_of_backend_server(
+            self.name, instance_port, policies)
 
     def create_cookie_stickiness_policy(self, cookie_expiration_period,
                                         policy_name):
-        return self.connection.create_lb_cookie_stickiness_policy(cookie_expiration_period, self.name, policy_name)
+        return self.connection.create_lb_cookie_stickiness_policy(
+            cookie_expiration_period, self.name, policy_name)
 
     def create_app_cookie_stickiness_policy(self, name, policy_name):
         return self.connection.create_app_cookie_stickiness_policy(name,
@@ -363,12 +366,12 @@ class LoadBalancer(object):
                                                                    policy_name)
 
     def set_listener_SSL_certificate(self, lb_port, ssl_certificate_id):
-        return self.connection.set_lb_listener_SSL_certificate(self.name,
-                                                               lb_port,
-                                                               ssl_certificate_id)
+        return self.connection.set_lb_listener_SSL_certificate(
+            self.name, lb_port, ssl_certificate_id)
 
     def create_lb_policy(self, policy_name, policy_type, policy_attribute):
-        return self.connection.create_lb_policy(self.name, policy_name, policy_type, policy_attribute)
+        return self.connection.create_lb_policy(
+            self.name, policy_name, policy_type, policy_attribute)
 
     def attach_subnets(self, subnets):
         """
@@ -380,7 +383,7 @@ class LoadBalancer(object):
         :param subnets: The name of the subnet(s) to add.
 
         """
-        if isinstance(subnets, basestring):
+        if isinstance(subnets, six.string_types):
             subnets = [subnets]
         new_subnets = self.connection.attach_lb_to_subnets(self.name, subnets)
         self.subnets = new_subnets
@@ -393,9 +396,10 @@ class LoadBalancer(object):
         :param subnets: The name of the subnet(s) to detach.
 
         """
-        if isinstance(subnets, basestring):
+        if isinstance(subnets, six.string_types):
             subnets = [subnets]
-        new_subnets = self.connection.detach_lb_from_subnets(self.name, subnets)
+        new_subnets = self.connection.detach_lb_from_subnets(
+            self.name, subnets)
         self.subnets = new_subnets
 
     def apply_security_groups(self, security_groups):
@@ -408,8 +412,8 @@ class LoadBalancer(object):
         :param security_groups: The name of the security group(s) to add.
 
         """
-        if isinstance(security_groups, basestring):
+        if isinstance(security_groups, six.string_types):
             security_groups = [security_groups]
         new_sgs = self.connection.apply_security_groups_to_lb(
-                                         self.name, security_groups)
+            self.name, security_groups)
         self.security_groups = new_sgs

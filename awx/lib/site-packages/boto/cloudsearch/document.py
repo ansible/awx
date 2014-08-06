@@ -221,13 +221,15 @@ class CommitResponse(object):
         self.doc_service = doc_service
         self.sdf = sdf
 
+        _body = response.content.decode('utf-8')
+
         try:
-            self.content = json.loads(response.content)
+            self.content = json.loads(_body)
         except:
             boto.log.error('Error indexing documents.\nResponse Content:\n{0}\n\n'
-                'SDF:\n{1}'.format(response.content, self.sdf))
+                'SDF:\n{1}'.format(_body, self.sdf))
             raise boto.exception.BotoServerError(self.response.status_code, '',
-                body=response.content)
+                body=_body)
 
         self.status = self.content['status']
         if self.status == 'error':
@@ -238,6 +240,9 @@ class CommitResponse(object):
                     raise EncodingError("Illegal Unicode character in document")
                 elif e == "The Content-Length is too long":
                     raise ContentTooLongError("Content was too long")
+            if 'adds' not in self.content or 'deletes' not in self.content:
+                raise SearchServiceException("Error indexing documents"
+                    " => %s" % self.content.get('message', ''))
         else:
             self.errors = []
 

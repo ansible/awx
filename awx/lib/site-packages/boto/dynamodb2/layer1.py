@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Amazon.com, Inc. or its affiliates.  All Rights Reserved
+# Copyright (c) 2014 Amazon.com, Inc. or its affiliates.  All Rights Reserved
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -37,7 +37,112 @@ class DynamoDBConnection(AWSQueryConnection):
     """
     Amazon DynamoDB **Overview**
     This is the Amazon DynamoDB API Reference. This guide provides
-    descriptions and samples of the Amazon DynamoDB API.
+    descriptions and samples of the low-level DynamoDB API. For
+    information about DynamoDB application development, go to the
+    `Amazon DynamoDB Developer Guide`_.
+
+    Instead of making the requests to the low-level DynamoDB API
+    directly from your application, we recommend that you use the AWS
+    Software Development Kits (SDKs). The easy-to-use libraries in the
+    AWS SDKs make it unnecessary to call the low-level DynamoDB API
+    directly from your application. The libraries take care of request
+    authentication, serialization, and connection management. For more
+    information, go to `Using the AWS SDKs with DynamoDB`_ in the
+    Amazon DynamoDB Developer Guide .
+
+    If you decide to code against the low-level DynamoDB API directly,
+    you will need to write the necessary code to authenticate your
+    requests. For more information on signing your requests, go to
+    `Using the DynamoDB API`_ in the Amazon DynamoDB Developer Guide .
+
+    The following are short descriptions of each low-level API action,
+    organized by function.
+
+    **Managing Tables**
+
+
+
+    + CreateTable - Creates a table with user-specified provisioned
+      throughput settings. You must designate one attribute as the hash
+      primary key for the table; you can optionally designate a second
+      attribute as the range primary key. DynamoDB creates indexes on
+      these key attributes for fast data access. Optionally, you can
+      create one or more secondary indexes, which provide fast data
+      access using non-key attributes.
+    + DescribeTable - Returns metadata for a table, such as table
+      size, status, and index information.
+    + UpdateTable - Modifies the provisioned throughput settings for a
+      table. Optionally, you can modify the provisioned throughput
+      settings for global secondary indexes on the table.
+    + ListTables - Returns a list of all tables associated with the
+      current AWS account and endpoint.
+    + DeleteTable - Deletes a table and all of its indexes.
+
+
+
+    For conceptual information about managing tables, go to `Working
+    with Tables`_ in the Amazon DynamoDB Developer Guide .
+
+    **Reading Data**
+
+
+
+    + GetItem - Returns a set of attributes for the item that has a
+      given primary key. By default, GetItem performs an eventually
+      consistent read; however, applications can specify a strongly
+      consistent read instead.
+    + BatchGetItem - Performs multiple GetItem requests for data items
+      using their primary keys, from one table or multiple tables. The
+      response from BatchGetItem has a size limit of 1 MB and returns a
+      maximum of 100 items. Both eventually consistent and strongly
+      consistent reads can be used.
+    + Query - Returns one or more items from a table or a secondary
+      index. You must provide a specific hash key value. You can narrow
+      the scope of the query using comparison operators against a range
+      key value, or on the index key. Query supports either eventual or
+      strong consistency. A single response has a size limit of 1 MB.
+    + Scan - Reads every item in a table; the result set is eventually
+      consistent. You can limit the number of items returned by
+      filtering the data attributes, using conditional expressions. Scan
+      can be used to enable ad-hoc querying of a table against non-key
+      attributes; however, since this is a full table scan without using
+      an index, Scan should not be used for any application query use
+      case that requires predictable performance.
+
+
+
+    For conceptual information about reading data, go to `Working with
+    Items`_ and `Query and Scan Operations`_ in the Amazon DynamoDB
+    Developer Guide .
+
+    **Modifying Data**
+
+
+
+    + PutItem - Creates a new item, or replaces an existing item with
+      a new item (including all the attributes). By default, if an item
+      in the table already exists with the same primary key, the new
+      item completely replaces the existing item. You can use
+      conditional operators to replace an item only if its attribute
+      values match certain conditions, or to insert a new item only if
+      that item doesn't already exist.
+    + UpdateItem - Modifies the attributes of an existing item. You
+      can also use conditional operators to perform an update only if
+      the item's attribute values match certain conditions.
+    + DeleteItem - Deletes an item in a table by primary key. You can
+      use conditional operators to perform a delete an item only if the
+      item's attribute values match certain conditions.
+    + BatchWriteItem - Performs multiple PutItem and DeleteItem
+      requests across multiple tables in a single request. A failure of
+      any request(s) in the batch will not cause the entire
+      BatchWriteItem operation to fail. Supports batches of up to 25
+      items to put or delete, with a maximum total request size of 1 MB.
+
+
+
+    For conceptual information about modifying data, go to `Working
+    with Items`_ and `Query and Scan Operations`_ in the Amazon
+    DynamoDB Developer Guide .
     """
     APIVersion = "2012-08-10"
     DefaultRegionName = "us-east-1"
@@ -91,7 +196,7 @@ class DynamoDBConnection(AWSQueryConnection):
         items by primary key.
 
         A single operation can retrieve up to 1 MB of data, which can
-        comprise as many as 100 items. BatchGetItem will return a
+        contain as many as 100 items. BatchGetItem will return a
         partial result if the response size limit is exceeded, the
         table's provisioned throughput is exceeded, or an internal
         processing failure occurs. If a partial result is returned,
@@ -106,24 +211,38 @@ class DynamoDBConnection(AWSQueryConnection):
         include its own logic to assemble the pages of results into
         one dataset.
 
-        If no items can be processed because of insufficient
-        provisioned throughput on each of the tables involved in the
-        request, BatchGetItem throws
-        ProvisionedThroughputExceededException .
+        If none of the items can be processed due to insufficient
+        provisioned throughput on all of the tables in the request,
+        then BatchGetItem will throw a
+        ProvisionedThroughputExceededException . If at least one of
+        the items is successfully processed, then BatchGetItem
+        completes successfully, while returning the keys of the unread
+        items in UnprocessedKeys .
+
+        If DynamoDB returns any unprocessed items, you should retry
+        the batch operation on those items. However, we strongly
+        recommend that you use an exponential backoff algorithm . If
+        you retry the batch operation immediately, the underlying read
+        or write requests can still fail due to throttling on the
+        individual tables. If you delay the batch operation using
+        exponential backoff, the individual requests in the batch are
+        much more likely to succeed.
+
+        For more information, go to `Batch Operations and Error
+        Handling`_ in the Amazon DynamoDB Developer Guide.
 
         By default, BatchGetItem performs eventually consistent reads
         on every table in the request. If you want strongly consistent
         reads instead, you can set ConsistentRead to `True` for any or
         all tables.
 
-        In order to minimize response latency, BatchGetItem fetches
+        In order to minimize response latency, BatchGetItem retrieves
         items in parallel.
 
-        When designing your application, keep in mind that Amazon
-        DynamoDB does not return attributes in any particular order.
-        To help parse the response by item, include the primary key
-        values for the items in your request in the AttributesToGet
-        parameter.
+        When designing your application, keep in mind that DynamoDB
+        does not return attributes in any particular order. To help
+        parse the response by item, include the primary key values for
+        the items in your request in the AttributesToGet parameter.
 
         If a requested item does not exist, it is not returned in the
         result. Requests for nonexistent items consume the minimum
@@ -141,17 +260,27 @@ class DynamoDBConnection(AWSQueryConnection):
 
 
         + Keys - An array of primary key attribute values that define specific
-              items in the table.
+              items in the table. For each primary key, you must provide all of
+              the key attributes. For example, with a hash type primary key, you
+              only need to specify the hash attribute. For a hash-and-range type
+              primary key, you must specify both the hash attribute and the range
+              attribute.
         + AttributesToGet - One or more attributes to be retrieved from the
-              table or index. By default, all attributes are returned. If a
-              specified attribute is not found, it does not appear in the result.
+              table. By default, all attributes are returned. If a specified
+              attribute is not found, it does not appear in the result. Note that
+              AttributesToGet has no effect on provisioned throughput
+              consumption. DynamoDB determines capacity units consumed based on
+              item size, not on the amount of data that is returned to an
+              application.
         + ConsistentRead - If `True`, a strongly consistent read is used; if
               `False` (the default), an eventually consistent read is used.
 
         :type return_consumed_capacity: string
-        :param return_consumed_capacity: If set to `TOTAL`, ConsumedCapacity is
-            included in the response; if set to `NONE` (the default),
-            ConsumedCapacity is not included.
+        :param return_consumed_capacity: If set to `TOTAL`, the response
+            includes ConsumedCapacity data for tables and indexes. If set to
+            `INDEXES`, the response includes ConsumedCapacity for indexes. If
+            set to `NONE` (the default), ConsumedCapacity is not included in
+            the response.
 
         """
         params = {'RequestItems': request_items, }
@@ -183,27 +312,39 @@ class DynamoDBConnection(AWSQueryConnection):
         unprocessed items and submit a new BatchWriteItem request with
         those unprocessed items until all items have been processed.
 
-        To write one item, you can use the PutItem operation; to
-        delete one item, you can use the DeleteItem operation.
+        Note that if none of the items can be processed due to
+        insufficient provisioned throughput on all of the tables in
+        the request, then BatchGetItem will throw a
+        ProvisionedThroughputExceededException .
+
+        If DynamoDB returns any unprocessed items, you should retry
+        the batch operation on those items. However, we strongly
+        recommend that you use an exponential backoff algorithm . If
+        you retry the batch operation immediately, the underlying read
+        or write requests can still fail due to throttling on the
+        individual tables. If you delay the batch operation using
+        exponential backoff, the individual requests in the batch are
+        much more likely to succeed.
+
+        For more information, go to `Batch Operations and Error
+        Handling`_ in the Amazon DynamoDB Developer Guide.
 
         With BatchWriteItem , you can efficiently write or delete
         large amounts of data, such as from Amazon Elastic MapReduce
-        (EMR), or copy data from another database into Amazon
-        DynamoDB. In order to improve performance with these large-
-        scale operations, BatchWriteItem does not behave in the same
-        way as individual PutItem and DeleteItem calls would For
-        example, you cannot specify conditions on individual put and
-        delete requests, and BatchWriteItem does not return deleted
-        items in the response.
+        (EMR), or copy data from another database into DynamoDB. In
+        order to improve performance with these large-scale
+        operations, BatchWriteItem does not behave in the same way as
+        individual PutItem and DeleteItem calls would For example, you
+        cannot specify conditions on individual put and delete
+        requests, and BatchWriteItem does not return deleted items in
+        the response.
 
         If you use a programming language that supports concurrency,
         such as Java, you can use threads to write items in parallel.
         Your application must include the necessary logic to manage
-        the threads.
-
-        With languages that don't support threading, such as PHP,
-        BatchWriteItem will write or delete the specified items one at
-        a time. In both situations, BatchWriteItem provides an
+        the threads. With languages that don't support threading, such
+        as PHP, you must update or delete the specified items one at a
+        time. In both situations, BatchWriteItem provides an
         alternative where the API performs the specified put and
         delete operations in parallel, giving you the power of the
         thread pool approach without having to introduce complexity
@@ -215,8 +356,8 @@ class DynamoDBConnection(AWSQueryConnection):
         operations on nonexistent items consume one write capacity
         unit.
 
-        If one or more of the following is true, Amazon DynamoDB
-        rejects the entire batch write operation:
+        If one or more of the following is true, DynamoDB rejects the
+        entire batch write operation:
 
 
         + One or more tables specified in the BatchWriteItem request
@@ -241,8 +382,12 @@ class DynamoDBConnection(AWSQueryConnection):
               The item to be deleted is identified by a Key subelement:
 
             + Key - A map of primary key attribute values that uniquely identify
-                  the item. Each entry in this map consists of an attribute name and
-                  an attribute value.
+                  the ! item. Each entry in this map consists of an attribute name
+                  and an attribute value. For each primary key, you must provide all
+                  of the key attributes. For example, with a hash type primary key,
+                  you only need to specify the hash attribute. For a hash-and-range
+                  type primary key, you must specify both the hash attribute and the
+                  range attribute.
 
         + PutRequest - Perform a PutItem operation on the specified item. The
               item to be put is identified by an Item subelement:
@@ -257,15 +402,17 @@ class DynamoDBConnection(AWSQueryConnection):
                   match those of the schema in the table's attribute definition.
 
         :type return_consumed_capacity: string
-        :param return_consumed_capacity: If set to `TOTAL`, ConsumedCapacity is
-            included in the response; if set to `NONE` (the default),
-            ConsumedCapacity is not included.
+        :param return_consumed_capacity: If set to `TOTAL`, the response
+            includes ConsumedCapacity data for tables and indexes. If set to
+            `INDEXES`, the response includes ConsumedCapacity for indexes. If
+            set to `NONE` (the default), ConsumedCapacity is not included in
+            the response.
 
         :type return_item_collection_metrics: string
         :param return_item_collection_metrics: If set to `SIZE`, statistics
             about item collections, if any, that were modified during the
             operation are returned in the response. If set to `NONE` (the
-            default), no statistics are returned..
+            default), no statistics are returned.
 
         """
         params = {'RequestItems': request_items, }
@@ -286,16 +433,15 @@ class DynamoDBConnection(AWSQueryConnection):
         the tables in different regions.
 
         CreateTable is an asynchronous operation. Upon receiving a
-        CreateTable request, Amazon DynamoDB immediately returns a
-        response with a TableStatus of `CREATING`. After the table is
-        created, Amazon DynamoDB sets the TableStatus to `ACTIVE`. You
-        can perform read and write operations only on an `ACTIVE`
-        table.
+        CreateTable request, DynamoDB immediately returns a response
+        with a TableStatus of `CREATING`. After the table is created,
+        DynamoDB sets the TableStatus to `ACTIVE`. You can perform
+        read and write operations only on an `ACTIVE` table.
 
-        If you want to create multiple tables with local secondary
-        indexes on them, you must create them sequentially. Only one
-        table with local secondary indexes can be in the `CREATING`
-        state at any given time.
+        If you want to create multiple tables with secondary indexes
+        on them, you must create them sequentially. Only one table
+        with secondary indexes can be in the `CREATING` state at any
+        given time.
 
         You can use the DescribeTable API to check the table status.
 
@@ -308,9 +454,9 @@ class DynamoDBConnection(AWSQueryConnection):
 
         :type key_schema: list
         :param key_schema: Specifies the attributes that make up the primary
-            key for the table. The attributes in KeySchema must also be defined
-            in the AttributeDefinitions array. For more information, see `Data
-            Model`_ in the Amazon DynamoDB Developer Guide.
+            key for a table or an index. The attributes in KeySchema must also
+            be defined in the AttributeDefinitions array. For more information,
+            see `Data Model`_ in the Amazon DynamoDB Developer Guide.
         Each KeySchemaElement in the array is composed of:
 
 
@@ -331,18 +477,19 @@ class DynamoDBConnection(AWSQueryConnection):
 
         :type local_secondary_indexes: list
         :param local_secondary_indexes:
-        One or more secondary indexes (the maximum is five) to be created on
-            the table. Each index is scoped to a given hash key value. There is
-            a 10 gigabyte size limit per hash key; otherwise, the size of a
-            local secondary index is unconstrained.
+        One or more local secondary indexes (the maximum is five) to be created
+            on the table. Each index is scoped to a given hash key value. There
+            is a 10 GB size limit per hash key; otherwise, the size of a local
+            secondary index is unconstrained.
 
-        Each secondary index in the array includes the following:
+        Each local secondary index in the array includes the following:
 
 
-        + IndexName - The name of the secondary index. Must be unique only for
-              this table.
-        + KeySchema - Specifies the key schema for the index. The key schema
-              must begin with the same hash key attribute as the table.
+        + IndexName - The name of the local secondary index. Must be unique
+              only for this table.
+        + KeySchema - Specifies the key schema for the local secondary index.
+              The key schema must begin with the same hash key attribute as the
+              table.
         + Projection - Specifies attributes that are copied (projected) from
               the table into the index. These are in addition to the primary key
               attributes and index key attributes, which are automatically
@@ -358,19 +505,51 @@ class DynamoDBConnection(AWSQueryConnection):
                 + `ALL` - All of the table attributes are projected into the index.
 
             + NonKeyAttributes - A list of one or more non-key attribute names that
-                  are projected into the index. The total count of attributes
-                  specified in NonKeyAttributes , summed across all of the local
+                  are projected into the secondary index. The total count of
+                  attributes specified in NonKeyAttributes , summed across all of the
                   secondary indexes, must not exceed 20. If you project the same
                   attribute into two different indexes, this counts as two distinct
                   attributes when determining the total.
 
         :type global_secondary_indexes: list
         :param global_secondary_indexes:
+        One or more global secondary indexes (the maximum is five) to be
+            created on the table. Each global secondary index in the array
+            includes the following:
+
+
+        + IndexName - The name of the global secondary index. Must be unique
+              only for this table.
+        + KeySchema - Specifies the key schema for the global secondary index.
+        + Projection - Specifies attributes that are copied (projected) from
+              the table into the index. These are in addition to the primary key
+              attributes and index key attributes, which are automatically
+              projected. Each attribute specification is composed of:
+
+            + ProjectionType - One of the following:
+
+                + `KEYS_ONLY` - Only the index and primary keys are projected into the
+                      index.
+                + `INCLUDE` - Only the specified table attributes are projected into
+                      the index. The list of projected attributes are in NonKeyAttributes
+                      .
+                + `ALL` - All of the table attributes are projected into the index.
+
+            + NonKeyAttributes - A list of one or more non-key attribute names that
+                  are projected into the secondary index. The total count of
+                  attributes specified in NonKeyAttributes , summed across all of the
+                  secondary indexes, must not exceed 20. If you project the same
+                  attribute into two different indexes, this counts as two distinct
+                  attributes when determining the total.
+
+        + ProvisionedThroughput - The provisioned throughput settings for the
+              global secondary index, consisting of read and write capacity
+              units.
 
         :type provisioned_throughput: dict
-        :param provisioned_throughput: The provisioned throughput settings for
-            the specified table. The settings can be modified using the
-            UpdateTable operation.
+        :param provisioned_throughput: Represents the provisioned throughput
+            settings for a specified table or index. The settings can be
+            modified using the UpdateTable operation.
         For current minimum and maximum provisioned throughput values, see
             `Limits`_ in the Amazon DynamoDB Developer Guide.
 
@@ -388,7 +567,8 @@ class DynamoDBConnection(AWSQueryConnection):
         return self.make_request(action='CreateTable',
                                  body=json.dumps(params))
 
-    def delete_item(self, table_name, key, expected=None, return_values=None,
+    def delete_item(self, table_name, key, expected=None,
+                    conditional_operator=None, return_values=None,
                     return_consumed_capacity=None,
                     return_item_collection_metrics=None):
         """
@@ -406,8 +586,8 @@ class DynamoDBConnection(AWSQueryConnection):
 
         Conditional deletes are useful for only deleting items if
         specific conditions are met. If those conditions are met,
-        Amazon DynamoDB performs the delete. Otherwise, the item is
-        not deleted.
+        DynamoDB performs the delete. Otherwise, the item is not
+        deleted.
 
         :type table_name: string
         :param table_name: The name of the table from which to delete the item.
@@ -415,50 +595,181 @@ class DynamoDBConnection(AWSQueryConnection):
         :type key: map
         :param key: A map of attribute names to AttributeValue objects,
             representing the primary key of the item to delete.
+        For the primary key, you must provide all of the attributes. For
+            example, with a hash type primary key, you only need to specify the
+            hash attribute. For a hash-and-range type primary key, you must
+            specify both the hash attribute and the range attribute.
 
         :type expected: map
-        :param expected: A map of attribute/condition pairs. This is the
-            conditional block for the DeleteItem operation. All the conditions
-            must be met for the operation to succeed.
-        Expected allows you to provide an attribute name, and whether or not
-            Amazon DynamoDB should check to see if the attribute value already
-            exists; or if the attribute value exists and has a particular value
-            before changing it.
+        :param expected:
+        A map of attribute/condition pairs. This is the conditional block for
+            the DeleteItem operation.
 
-        Each item in Expected represents an attribute name for Amazon DynamoDB
-            to check, along with the following:
+        Each element of Expected consists of an attribute name, a comparison
+            operator, and one or more values. DynamoDB compares the attribute
+            with the value(s) you supplied, using the comparison operator. For
+            each Expected element, the result of the evaluation is either true
+            or false.
 
+        If you specify more than one element in the Expected map, then by
+            default all of the conditions must evaluate to true. In other
+            words, the conditions are ANDed together. (You can use the
+            ConditionalOperator parameter to OR the conditions instead. If you
+            do this, then at least one of the conditions must evaluate to true,
+            rather than all of them.)
 
-        + Value - The attribute value for Amazon DynamoDB to check.
-        + Exists - Causes Amazon DynamoDB to evaluate the value before
-              attempting a conditional operation:
+        If the Expected map evaluates to true, then the conditional operation
+            succeeds; otherwise, it fails.
 
-            + If Exists is `True`, Amazon DynamoDB will check to see if that
-                  attribute value already exists in the table. If it is found, then
-                  the operation succeeds. If it is not found, the operation fails
-                  with a ConditionalCheckFailedException .
-            + If Exists is `False`, Amazon DynamoDB assumes that the attribute
-                  value does not exist in the table. If in fact the value does not
-                  exist, then the assumption is valid and the operation succeeds. If
-                  the value is found, despite the assumption that it does not exist,
-                  the operation fails with a ConditionalCheckFailedException .
-          The default setting for Exists is `True`. If you supply a Value all by
-              itself, Amazon DynamoDB assumes the attribute exists: You don't
-              have to set Exists to `True`, because it is implied. Amazon
-              DynamoDB returns a ValidationException if:
-
-            + Exists is `True` but there is no Value to check. (You expect a value
-                  to exist, but don't specify what that value is.)
-            + Exists is `False` but you also specify a Value . (You cannot expect
-                  an attribute to have a value, while also expecting it not to
-                  exist.)
+        Each item in Expected represents an attribute name for DynamoDB to
+            check, along with an AttributeValueList and a ComparisonOperator :
 
 
+        + AttributeValueList - One or more values to evaluate against the
+              supplied attribute. The number of values in the list depends on the
+              ComparisonOperator being used. For type Number, value comparisons
+              are numeric. String value comparisons for greater than, equals, or
+              less than are based on ASCII character code values. For example,
+              `a` is greater than `A`, and `aa` is greater than `B`. For a list
+              of code values, see
+              `http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters`_.
+              For Binary, DynamoDB treats each byte of the binary data as
+              unsigned when it compares binary values, for example when
+              evaluating query expressions.
+        + ComparisonOperator - A comparator for evaluating attributes in the
+              AttributeValueList . When performing the comparison, DynamoDB uses
+              strongly consistent reads. The following comparison operators are
+              available: `EQ | NE | LE | LT | GE | GT | NOT_NULL | NULL |
+              CONTAINS | NOT_CONTAINS | BEGINS_WITH | IN | BETWEEN` The following
+              are descriptions of each comparison operator.
 
-        If you specify more than one condition for Exists , then all of the
-            conditions must evaluate to true. (In other words, the conditions
-            are ANDed together.) Otherwise, the conditional operation will
-            fail.
+            + `EQ` : Equal. AttributeValueList can contain only one AttributeValue
+                of type String, Number, Binary, String Set, Number Set, or Binary
+                Set. If an item contains an AttributeValue of a different type than
+                the one specified in the request, the value does not match. For
+                example, `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}`
+                does not equal `{"NS":["6", "2", "1"]}`. > <li>
+            + `NE` : Not equal. AttributeValueList can contain only one
+                AttributeValue of type String, Number, Binary, String Set, Number
+                Set, or Binary Set. If an item contains an AttributeValue of a
+                different type than the one specified in the request, the value
+                does not match. For example, `{"S":"6"}` does not equal
+                `{"N":"6"}`. Also, `{"N":"6"}` does not equal `{"NS":["6", "2",
+                "1"]}`. > <li>
+            + `LE` : Less than or equal. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `LT` : Less than. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `GE` : Greater than or equal. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `GT` : Greater than. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `NOT_NULL` : The attribute exists.
+            + `NULL` : The attribute does not exist.
+            + `CONTAINS` : checks for a subsequence, or value in a set.
+                  AttributeValueList can contain only one AttributeValue of type
+                  String, Number, or Binary (not a set). If the target attribute of
+                  the comparison is a String, then the operation checks for a
+                  substring match. If the target attribute of the comparison is
+                  Binary, then the operation looks for a subsequence of the target
+                  that matches the input. If the target attribute of the comparison
+                  is a set ("SS", "NS", or "BS"), then the operation checks for a
+                  member of the set (not as a substring).
+            + `NOT_CONTAINS` : checks for absence of a subsequence, or absence of a
+                  value in a set. AttributeValueList can contain only one
+                  AttributeValue of type String, Number, or Binary (not a set). If
+                  the target attribute of the comparison is a String, then the
+                  operation checks for the absence of a substring match. If the
+                  target attribute of the comparison is Binary, then the operation
+                  checks for the absence of a subsequence of the target that matches
+                  the input. If the target attribute of the comparison is a set
+                  ("SS", "NS", or "BS"), then the operation checks for the absence of
+                  a member of the set (not as a substring).
+            + `BEGINS_WITH` : checks for a prefix. AttributeValueList can contain
+                only one AttributeValue of type String or Binary (not a Number or a
+                set). The target attribute of the comparison must be a String or
+                Binary (not a Number or a set). > <li>
+            + `IN` : checks for exact matches. AttributeValueList can contain more
+                  than one AttributeValue of type String, Number, or Binary (not a
+                  set). The target attribute of the comparison must be of the same
+                  type and exact value to match. A String never matches a String set.
+            + `BETWEEN` : Greater than or equal to the first value, and less than
+                  or equal to the second value. AttributeValueList must contain two
+                  AttributeValue elements of the same type, either String, Number, or
+                  Binary (not a set). A target attribute matches if the target value
+                  is greater than, or equal to, the first element and less than, or
+                  equal to, the second element. If an item contains an AttributeValue
+                  of a different type than the one specified in the request, the
+                  value does not match. For example, `{"S":"6"}` does not compare to
+                  `{"N":"6"}`. Also, `{"N":"6"}` does not compare to `{"NS":["6",
+                  "2", "1"]}`
+
+
+
+        For usage examples of AttributeValueList and ComparisonOperator , see
+            `Conditional Expressions`_ in the Amazon DynamoDB Developer Guide.
+
+
+        For backward compatibility with previous DynamoDB releases, the
+            following parameters can be used instead of AttributeValueList and
+            ComparisonOperator :
+
+
+        + Value - A value for DynamoDB to compare with an attribute.
+        + Exists - Causes DynamoDB to evaluate the value before attempting the
+              conditional operation:
+
+            + If Exists is `True`, DynamoDB will check to see if that attribute
+                  value already exists in the table. If it is found, then the
+                  condition evaluates to true; otherwise the condition evaluate to
+                  false.
+            + If Exists is `False`, DynamoDB assumes that the attribute value does
+                  not exist in the table. If in fact the value does not exist, then
+                  the assumption is valid and the condition evaluates to true. If the
+                  value is found, despite the assumption that it does not exist, the
+                  condition evaluates to false.
+
+
+
+        Even though DynamoDB continues to accept the Value and Exists
+            parameters, they are now deprecated. We recommend that you use
+            AttributeValueList and ComparisonOperator instead, since they allow
+            you to construct a much wider range of conditions.
+
+        The Value and Exists parameters are incompatible with
+            AttributeValueList and ComparisonOperator . If you attempt to use
+            both sets of parameters at once, DynamoDB will throw a
+            ValidationException .
+
+        :type conditional_operator: string
+        :param conditional_operator: A logical operator to apply to the
+            conditions in the Expected map:
+
+        + `AND` - If all of the conditions evaluate to true, then the entire
+              map evaluates to true.
+        + `OR` - If at least one of the conditions evaluate to true, then the
+              entire map evaluates to true.
+
+
+        If you omit ConditionalOperator , then `AND` is the default.
+
+        The operation will succeed only if the entire map evaluates to true.
 
         :type return_values: string
         :param return_values:
@@ -472,20 +783,24 @@ class DynamoDBConnection(AWSQueryConnection):
         + `ALL_OLD` - The content of the old item is returned.
 
         :type return_consumed_capacity: string
-        :param return_consumed_capacity: If set to `TOTAL`, ConsumedCapacity is
-            included in the response; if set to `NONE` (the default),
-            ConsumedCapacity is not included.
+        :param return_consumed_capacity: If set to `TOTAL`, the response
+            includes ConsumedCapacity data for tables and indexes. If set to
+            `INDEXES`, the response includes ConsumedCapacity for indexes. If
+            set to `NONE` (the default), ConsumedCapacity is not included in
+            the response.
 
         :type return_item_collection_metrics: string
         :param return_item_collection_metrics: If set to `SIZE`, statistics
             about item collections, if any, that were modified during the
             operation are returned in the response. If set to `NONE` (the
-            default), no statistics are returned..
+            default), no statistics are returned.
 
         """
         params = {'TableName': table_name, 'Key': key, }
         if expected is not None:
             params['Expected'] = expected
+        if conditional_operator is not None:
+            params['ConditionalOperator'] = conditional_operator
         if return_values is not None:
             params['ReturnValues'] = return_values
         if return_consumed_capacity is not None:
@@ -499,20 +814,20 @@ class DynamoDBConnection(AWSQueryConnection):
         """
         The DeleteTable operation deletes a table and all of its
         items. After a DeleteTable request, the specified table is in
-        the `DELETING` state until Amazon DynamoDB completes the
-        deletion. If the table is in the `ACTIVE` state, you can
-        delete it. If a table is in `CREATING` or `UPDATING` states,
-        then Amazon DynamoDB returns a ResourceInUseException . If the
-        specified table does not exist, Amazon DynamoDB returns a
-        ResourceNotFoundException . If table is already in the
-        `DELETING` state, no error is returned.
+        the `DELETING` state until DynamoDB completes the deletion. If
+        the table is in the `ACTIVE` state, you can delete it. If a
+        table is in `CREATING` or `UPDATING` states, then DynamoDB
+        returns a ResourceInUseException . If the specified table does
+        not exist, DynamoDB returns a ResourceNotFoundException . If
+        table is already in the `DELETING` state, no error is
+        returned.
 
-        Amazon DynamoDB might continue to accept data read and write
+        DynamoDB might continue to accept data read and write
         operations, such as GetItem and PutItem , on a table in the
         `DELETING` state until the table deletion is complete.
 
-        When you delete a table, any local secondary indexes on that
-        table are also deleted.
+        When you delete a table, any indexes on that table are also
+        deleted.
 
         Use the DescribeTable API to check the status of the table.
 
@@ -557,12 +872,20 @@ class DynamoDBConnection(AWSQueryConnection):
         :type key: map
         :param key: A map of attribute names to AttributeValue objects,
             representing the primary key of the item to retrieve.
+        For the primary key, you must provide all of the attributes. For
+            example, with a hash type primary key, you only need to specify the
+            hash attribute. For a hash-and-range type primary key, you must
+            specify both the hash attribute and the range attribute.
 
         :type attributes_to_get: list
         :param attributes_to_get: The names of one or more attributes to
             retrieve. If no attribute names are specified, then all attributes
             will be returned. If any of the requested attributes are not found,
             they will not appear in the result.
+        Note that AttributesToGet has no effect on provisioned throughput
+            consumption. DynamoDB determines capacity units consumed based on
+            item size, not on the amount of data that is returned to an
+            application.
 
         :type consistent_read: boolean
         :param consistent_read: If set to `True`, then the operation uses
@@ -570,9 +893,11 @@ class DynamoDBConnection(AWSQueryConnection):
             are used.
 
         :type return_consumed_capacity: string
-        :param return_consumed_capacity: If set to `TOTAL`, ConsumedCapacity is
-            included in the response; if set to `NONE` (the default),
-            ConsumedCapacity is not included.
+        :param return_consumed_capacity: If set to `TOTAL`, the response
+            includes ConsumedCapacity data for tables and indexes. If set to
+            `INDEXES`, the response includes ConsumedCapacity for indexes. If
+            set to `NONE` (the default), ConsumedCapacity is not included in
+            the response.
 
         """
         params = {'TableName': table_name, 'Key': key, }
@@ -587,17 +912,19 @@ class DynamoDBConnection(AWSQueryConnection):
 
     def list_tables(self, exclusive_start_table_name=None, limit=None):
         """
-        Returns an array of all the tables associated with the current
-        account and endpoint.
+        Returns an array of table names associated with the current
+        account and endpoint. The output from ListTables is paginated,
+        with each page returning a maximum of 100 table names.
 
         :type exclusive_start_table_name: string
-        :param exclusive_start_table_name: The name of the table that starts
-            the list. If you already ran a ListTables operation and received a
-            LastEvaluatedTableName value in the response, use that value here
-            to continue the list.
+        :param exclusive_start_table_name: The first table name that this
+            operation will evaluate. Use the value that was returned for
+            LastEvaluatedTableName in a previous operation, so that you can
+            obtain the next page of results.
 
         :type limit: integer
-        :param limit: A maximum number of table names to return.
+        :param limit: A maximum number of table names to return. If this
+            parameter is not specified, the limit is 100.
 
         """
         params = {}
@@ -610,7 +937,8 @@ class DynamoDBConnection(AWSQueryConnection):
 
     def put_item(self, table_name, item, expected=None, return_values=None,
                  return_consumed_capacity=None,
-                 return_item_collection_metrics=None):
+                 return_item_collection_metrics=None,
+                 conditional_operator=None):
         """
         Creates a new item, or replaces an old item with a new item.
         If an item already exists in the specified table with the same
@@ -635,8 +963,8 @@ class DynamoDBConnection(AWSQueryConnection):
         description.
 
         To prevent a new item from replacing an existing item, use a
-        conditional put operation with Exists set to `False` for the
-        primary key attribute, or attributes.
+        conditional put operation with ComparisonOperator set to
+        `NULL` for the primary key attribute, or attributes.
 
         For more information about using this API, see `Working with
         Items`_ in the Amazon DynamoDB Developer Guide.
@@ -648,6 +976,11 @@ class DynamoDBConnection(AWSQueryConnection):
         :param item: A map of attribute name/value pairs, one for each
             attribute. Only the primary key attributes are required; you can
             optionally provide other attribute name-value pairs for the item.
+        You must provide all of the attributes for the primary key. For
+            example, with a hash type primary key, you only need to specify the
+            hash attribute. For a hash-and-range type primary key, you must
+            specify both the hash attribute and the range attribute.
+
         If you specify any attributes that are part of an index key, then the
             data types for those attributes must match those of the schema in
             the table's attribute definition.
@@ -658,48 +991,161 @@ class DynamoDBConnection(AWSQueryConnection):
         Each element in the Item map is an AttributeValue object.
 
         :type expected: map
-        :param expected: A map of attribute/condition pairs. This is the
-            conditional block for the PutItem operation. All the conditions
-            must be met for the operation to succeed.
-        Expected allows you to provide an attribute name, and whether or not
-            Amazon DynamoDB should check to see if the attribute value already
-            exists; or if the attribute value exists and has a particular value
-            before changing it.
+        :param expected:
+        A map of attribute/condition pairs. This is the conditional block for
+            the PutItem operation.
 
-        Each item in Expected represents an attribute name for Amazon DynamoDB
-            to check, along with the following:
+        Each element of Expected consists of an attribute name, a comparison
+            operator, and one or more values. DynamoDB compares the attribute
+            with the value(s) you supplied, using the comparison operator. For
+            each Expected element, the result of the evaluation is either true
+            or false.
 
+        If you specify more than one element in the Expected map, then by
+            default all of the conditions must evaluate to true. In other
+            words, the conditions are ANDed together. (You can use the
+            ConditionalOperator parameter to OR the conditions instead. If you
+            do this, then at least one of the conditions must evaluate to true,
+            rather than all of them.)
 
-        + Value - The attribute value for Amazon DynamoDB to check.
-        + Exists - Causes Amazon DynamoDB to evaluate the value before
-              attempting a conditional operation:
+        If the Expected map evaluates to true, then the conditional operation
+            succeeds; otherwise, it fails.
 
-            + If Exists is `True`, Amazon DynamoDB will check to see if that
-                  attribute value already exists in the table. If it is found, then
-                  the operation succeeds. If it is not found, the operation fails
-                  with a ConditionalCheckFailedException .
-            + If Exists is `False`, Amazon DynamoDB assumes that the attribute
-                  value does not exist in the table. If in fact the value does not
-                  exist, then the assumption is valid and the operation succeeds. If
-                  the value is found, despite the assumption that it does not exist,
-                  the operation fails with a ConditionalCheckFailedException .
-          The default setting for Exists is `True`. If you supply a Value all by
-              itself, Amazon DynamoDB assumes the attribute exists: You don't
-              have to set Exists to `True`, because it is implied. Amazon
-              DynamoDB returns a ValidationException if:
-
-            + Exists is `True` but there is no Value to check. (You expect a value
-                  to exist, but don't specify what that value is.)
-            + Exists is `False` but you also specify a Value . (You cannot expect
-                  an attribute to have a value, while also expecting it not to
-                  exist.)
+        Each item in Expected represents an attribute name for DynamoDB to
+            check, along with an AttributeValueList and a ComparisonOperator :
 
 
+        + AttributeValueList - One or more values to evaluate against the
+              supplied attribute. The number of values in the list depends on the
+              ComparisonOperator being used. For type Number, value comparisons
+              are numeric. String value comparisons for greater than, equals, or
+              less than are based on ASCII character code values. For example,
+              `a` is greater than `A`, and `aa` is greater than `B`. For a list
+              of code values, see
+              `http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters`_.
+              For Binary, DynamoDB treats each byte of the binary data as
+              unsigned when it compares binary values, for example when
+              evaluating query expressions.
+        + ComparisonOperator - A comparator for evaluating attributes in the
+              AttributeValueList . When performing the comparison, DynamoDB uses
+              strongly consistent reads. The following comparison operators are
+              available: `EQ | NE | LE | LT | GE | GT | NOT_NULL | NULL |
+              CONTAINS | NOT_CONTAINS | BEGINS_WITH | IN | BETWEEN` The following
+              are descriptions of each comparison operator.
 
-        If you specify more than one condition for Exists , then all of the
-            conditions must evaluate to true. (In other words, the conditions
-            are ANDed together.) Otherwise, the conditional operation will
-            fail.
+            + `EQ` : Equal. AttributeValueList can contain only one AttributeValue
+                of type String, Number, Binary, String Set, Number Set, or Binary
+                Set. If an item contains an AttributeValue of a different type than
+                the one specified in the request, the value does not match. For
+                example, `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}`
+                does not equal `{"NS":["6", "2", "1"]}`. > <li>
+            + `NE` : Not equal. AttributeValueList can contain only one
+                AttributeValue of type String, Number, Binary, String Set, Number
+                Set, or Binary Set. If an item contains an AttributeValue of a
+                different type than the one specified in the request, the value
+                does not match. For example, `{"S":"6"}` does not equal
+                `{"N":"6"}`. Also, `{"N":"6"}` does not equal `{"NS":["6", "2",
+                "1"]}`. > <li>
+            + `LE` : Less than or equal. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `LT` : Less than. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `GE` : Greater than or equal. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `GT` : Greater than. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `NOT_NULL` : The attribute exists.
+            + `NULL` : The attribute does not exist.
+            + `CONTAINS` : checks for a subsequence, or value in a set.
+                  AttributeValueList can contain only one AttributeValue of type
+                  String, Number, or Binary (not a set). If the target attribute of
+                  the comparison is a String, then the operation checks for a
+                  substring match. If the target attribute of the comparison is
+                  Binary, then the operation looks for a subsequence of the target
+                  that matches the input. If the target attribute of the comparison
+                  is a set ("SS", "NS", or "BS"), then the operation checks for a
+                  member of the set (not as a substring).
+            + `NOT_CONTAINS` : checks for absence of a subsequence, or absence of a
+                  value in a set. AttributeValueList can contain only one
+                  AttributeValue of type String, Number, or Binary (not a set). If
+                  the target attribute of the comparison is a String, then the
+                  operation checks for the absence of a substring match. If the
+                  target attribute of the comparison is Binary, then the operation
+                  checks for the absence of a subsequence of the target that matches
+                  the input. If the target attribute of the comparison is a set
+                  ("SS", "NS", or "BS"), then the operation checks for the absence of
+                  a member of the set (not as a substring).
+            + `BEGINS_WITH` : checks for a prefix. AttributeValueList can contain
+                only one AttributeValue of type String or Binary (not a Number or a
+                set). The target attribute of the comparison must be a String or
+                Binary (not a Number or a set). > <li>
+            + `IN` : checks for exact matches. AttributeValueList can contain more
+                  than one AttributeValue of type String, Number, or Binary (not a
+                  set). The target attribute of the comparison must be of the same
+                  type and exact value to match. A String never matches a String set.
+            + `BETWEEN` : Greater than or equal to the first value, and less than
+                  or equal to the second value. AttributeValueList must contain two
+                  AttributeValue elements of the same type, either String, Number, or
+                  Binary (not a set). A target attribute matches if the target value
+                  is greater than, or equal to, the first element and less than, or
+                  equal to, the second element. If an item contains an AttributeValue
+                  of a different type than the one specified in the request, the
+                  value does not match. For example, `{"S":"6"}` does not compare to
+                  `{"N":"6"}`. Also, `{"N":"6"}` does not compare to `{"NS":["6",
+                  "2", "1"]}`
+
+
+
+        For usage examples of AttributeValueList and ComparisonOperator , see
+            `Conditional Expressions`_ in the Amazon DynamoDB Developer Guide.
+
+
+        For backward compatibility with previous DynamoDB releases, the
+            following parameters can be used instead of AttributeValueList and
+            ComparisonOperator :
+
+
+        + Value - A value for DynamoDB to compare with an attribute.
+        + Exists - Causes DynamoDB to evaluate the value before attempting the
+              conditional operation:
+
+            + If Exists is `True`, DynamoDB will check to see if that attribute
+                  value already exists in the table. If it is found, then the
+                  condition evaluates to true; otherwise the condition evaluate to
+                  false.
+            + If Exists is `False`, DynamoDB assumes that the attribute value does
+                  not exist in the table. If in fact the value does not exist, then
+                  the assumption is valid and the condition evaluates to true. If the
+                  value is found, despite the assumption that it does not exist, the
+                  condition evaluates to false.
+
+
+
+        Even though DynamoDB continues to accept the Value and Exists
+            parameters, they are now deprecated. We recommend that you use
+            AttributeValueList and ComparisonOperator instead, since they allow
+            you to construct a much wider range of conditions.
+
+        The Value and Exists parameters are incompatible with
+            AttributeValueList and ComparisonOperator . If you attempt to use
+            both sets of parameters at once, DynamoDB will throw a
+            ValidationException .
 
         :type return_values: string
         :param return_values:
@@ -714,15 +1160,31 @@ class DynamoDBConnection(AWSQueryConnection):
               the content of the old item is returned.
 
         :type return_consumed_capacity: string
-        :param return_consumed_capacity: If set to `TOTAL`, ConsumedCapacity is
-            included in the response; if set to `NONE` (the default),
-            ConsumedCapacity is not included.
+        :param return_consumed_capacity: If set to `TOTAL`, the response
+            includes ConsumedCapacity data for tables and indexes. If set to
+            `INDEXES`, the response includes ConsumedCapacity for indexes. If
+            set to `NONE` (the default), ConsumedCapacity is not included in
+            the response.
 
         :type return_item_collection_metrics: string
         :param return_item_collection_metrics: If set to `SIZE`, statistics
             about item collections, if any, that were modified during the
             operation are returned in the response. If set to `NONE` (the
-            default), no statistics are returned..
+            default), no statistics are returned.
+
+        :type conditional_operator: string
+        :param conditional_operator: A logical operator to apply to the
+            conditions in the Expected map:
+
+        + `AND` - If all of the conditions evaluate to true, then the entire
+              map evaluates to true.
+        + `OR` - If at least one of the conditions evaluate to true, then the
+              entire map evaluates to true.
+
+
+        If you omit ConditionalOperator , then `AND` is the default.
+
+        The operation will succeed only if the entire map evaluates to true.
 
         """
         params = {'TableName': table_name, 'Item': item, }
@@ -734,13 +1196,16 @@ class DynamoDBConnection(AWSQueryConnection):
             params['ReturnConsumedCapacity'] = return_consumed_capacity
         if return_item_collection_metrics is not None:
             params['ReturnItemCollectionMetrics'] = return_item_collection_metrics
+        if conditional_operator is not None:
+            params['ConditionalOperator'] = conditional_operator
         return self.make_request(action='PutItem',
                                  body=json.dumps(params))
 
-    def query(self, table_name, index_name=None, select=None,
+    def query(self, table_name, key_conditions, index_name=None, select=None,
               attributes_to_get=None, limit=None, consistent_read=None,
-              key_conditions=None, scan_index_forward=None,
-              exclusive_start_key=None, return_consumed_capacity=None):
+              query_filter=None, conditional_operator=None,
+              scan_index_forward=None, exclusive_start_key=None,
+              return_consumed_capacity=None):
         """
         A Query operation directly accesses items from a table using
         the table primary key, or from an index using the index key.
@@ -761,15 +1226,20 @@ class DynamoDBConnection(AWSQueryConnection):
         and a LastEvaluatedKey . The LastEvaluatedKey is only provided
         if the results exceed 1 MB, or if you have used Limit .
 
-        To request a strongly consistent result, set ConsistentRead to
-        true.
+        You can query a table, a local secondary index, or a global
+        secondary index. For a query on a table or on a local
+        secondary index, you can set ConsistentRead to true and obtain
+        a strongly consistent result. Global secondary indexes support
+        eventually consistent reads only, so do not specify
+        ConsistentRead when querying a global secondary index.
 
         :type table_name: string
         :param table_name: The name of the table containing the requested
             items.
 
         :type index_name: string
-        :param index_name: The name of an index on the table to query.
+        :param index_name: The name of an index to query. This can be any local
+            secondary index or global secondary index on the table.
 
         :type select: string
         :param select: The attributes to be returned in the result. You can
@@ -777,31 +1247,35 @@ class DynamoDBConnection(AWSQueryConnection):
             of matching items, or in the case of an index, some or all of the
             attributes projected into the index.
 
-        + `ALL_ATTRIBUTES`: Returns all of the item attributes. For a table,
-              this is the default. For an index, this mode causes Amazon DynamoDB
-              to fetch the full item from the table for each matching item in the
-              index. If the index is configured to project all item attributes,
-              the matching items will not be fetched from the table. Fetching
-              items from the table incurs additional throughput cost and latency.
+        + `ALL_ATTRIBUTES`: Returns all of the item attributes from the
+              specified table or index. If you are querying a local secondary
+              index, then for each matching item in the index DynamoDB will fetch
+              the entire item from the parent table. If the index is configured
+              to project all item attributes, then all of the data can be
+              obtained from the local secondary index, and no fetching is
+              required..
         + `ALL_PROJECTED_ATTRIBUTES`: Allowed only when querying an index.
               Retrieves all attributes which have been projected into the index.
               If the index is configured to project all attributes, this is
-              equivalent to specifying ALL_ATTRIBUTES .
+              equivalent to specifying `ALL_ATTRIBUTES`.
         + `COUNT`: Returns the number of matching items, rather than the
               matching items themselves.
         + `SPECIFIC_ATTRIBUTES` : Returns only the attributes listed in
               AttributesToGet . This is equivalent to specifying AttributesToGet
-              without specifying any value for Select . If you are querying an
-              index and request only attributes that are projected into that
-              index, the operation will read only the index and not the table. If
-              any of the requested attributes are not projected into the index,
-              Amazon DynamoDB will need to fetch each matching item from the
-              table. This extra fetching incurs additional throughput cost and
-              latency.
+              without specifying any value for Select . If you are querying a
+              local secondary index and request only attributes that are
+              projected into that index, the operation will read only the index
+              and not the table. If any of the requested attributes are not
+              projected into the local secondary index, DynamoDB will fetch each
+              of these attributes from the parent table. This extra fetching
+              incurs additional throughput cost and latency. If you are querying
+              a global secondary index, you can only request attributes that are
+              projected into the index. Global secondary index queries cannot
+              fetch attributes from the parent table.
 
 
-        When neither Select nor AttributesToGet are specified, Amazon DynamoDB
-            defaults to `ALL_ATTRIBUTES` when accessing a table, and
+        If neither Select nor AttributesToGet are specified, DynamoDB defaults
+            to `ALL_ATTRIBUTES` when accessing a table, and
             `ALL_PROJECTED_ATTRIBUTES` when accessing an index. You cannot use
             both Select and AttributesToGet together in a single request,
             unless the value for Select is `SPECIFIC_ATTRIBUTES`. (This usage
@@ -813,75 +1287,87 @@ class DynamoDBConnection(AWSQueryConnection):
             retrieve. If no attribute names are specified, then all attributes
             will be returned. If any of the requested attributes are not found,
             they will not appear in the result.
-        If you are querying an index and request only attributes that are
-            projected into that index, the operation will read only the index
-            and not the table. If any of the requested attributes are not
-            projected into the index, Amazon DynamoDB will need to fetch each
-            matching item from the table. This extra fetching incurs additional
-            throughput cost and latency.
+        Note that AttributesToGet has no effect on provisioned throughput
+            consumption. DynamoDB determines capacity units consumed based on
+            item size, not on the amount of data that is returned to an
+            application.
 
         You cannot use both AttributesToGet and Select together in a Query
             request, unless the value for Select is `SPECIFIC_ATTRIBUTES`.
             (This usage is equivalent to specifying AttributesToGet without any
             value for Select .)
 
+        If you are querying a local secondary index and request only attributes
+            that are projected into that index, the operation will read only
+            the index and not the table. If any of the requested attributes are
+            not projected into the local secondary index, DynamoDB will fetch
+            each of these attributes from the parent table. This extra fetching
+            incurs additional throughput cost and latency.
+
+        If you are querying a global secondary index, you can only request
+            attributes that are projected into the index. Global secondary
+            index queries cannot fetch attributes from the parent table.
+
         :type limit: integer
         :param limit: The maximum number of items to evaluate (not necessarily
-            the number of matching items). If Amazon DynamoDB processes the
-            number of items up to the limit while processing the results, it
-            stops the operation and returns the matching values up to that
-            point, and a LastEvaluatedKey to apply in a subsequent operation,
-            so that you can pick up where you left off. Also, if the processed
-            data set size exceeds 1 MB before Amazon DynamoDB reaches this
-            limit, it stops the operation and returns the matching values up to
-            the limit, and a LastEvaluatedKey to apply in a subsequent
-            operation to continue the operation. For more information see
-            `Query and Scan`_ in the Amazon DynamoDB Developer Guide.
+            the number of matching items). If DynamoDB processes the number of
+            items up to the limit while processing the results, it stops the
+            operation and returns the matching values up to that point, and a
+            LastEvaluatedKey to apply in a subsequent operation, so that you
+            can pick up where you left off. Also, if the processed data set
+            size exceeds 1 MB before DynamoDB reaches this limit, it stops the
+            operation and returns the matching values up to the limit, and a
+            LastEvaluatedKey to apply in a subsequent operation to continue the
+            operation. For more information, see `Query and Scan`_ in the
+            Amazon DynamoDB Developer Guide.
 
         :type consistent_read: boolean
         :param consistent_read: If set to `True`, then the operation uses
             strongly consistent reads; otherwise, eventually consistent reads
             are used.
+        Strongly consistent reads are not supported on global secondary
+            indexes. If you query a global secondary index with ConsistentRead
+            set to `True`, you will receive an error message.
 
         :type key_conditions: map
-        :param key_conditions:
-        The selection criteria for the query.
-
+        :param key_conditions: The selection criteria for the query.
         For a query on a table, you can only have conditions on the table
             primary key attributes. You must specify the hash key attribute
             name and value as an `EQ` condition. You can optionally specify a
             second condition, referring to the range key attribute.
 
-        For a query on a secondary index, you can only have conditions on the
-            index key attributes. You must specify the index hash attribute
-            name and value as an EQ condition. You can optionally specify a
-            second condition, referring to the index key range attribute.
+        For a query on an index, you can only have conditions on the index key
+            attributes. You must specify the index hash attribute name and
+            value as an EQ condition. You can optionally specify a second
+            condition, referring to the index key range attribute.
 
-        Multiple conditions are evaluated using "AND"; in other words, all of
-            the conditions must be met in order for an item to appear in the
-            results results.
+        If you specify more than one condition in the KeyConditions map, then
+            by default all of the conditions must evaluate to true. In other
+            words, the conditions are ANDed together. (You can use the
+            ConditionalOperator parameter to OR the conditions instead. If you
+            do this, then at least one of the conditions must evaluate to true,
+            rather than all of them.)
 
         Each KeyConditions element consists of an attribute name to compare,
             along with the following:
 
 
         + AttributeValueList - One or more values to evaluate against the
-              supplied attribute. This list contains exactly one value, except
-              for a `BETWEEN` or `IN` comparison, in which case the list contains
-              two values. For type Number, value comparisons are numeric. String
-              value comparisons for greater than, equals, or less than are based
-              on ASCII character code values. For example, `a` is greater than
-              `A`, and `aa` is greater than `B`. For a list of code values, see
+              supplied attribute. The number of values in the list depends on the
+              ComparisonOperator being used. For type Number, value comparisons
+              are numeric. String value comparisons for greater than, equals, or
+              less than are based on ASCII character code values. For example,
+              `a` is greater than `A`, and `aa` is greater than `B`. For a list
+              of code values, see
               `http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters`_.
-              For Binary, Amazon DynamoDB treats each byte of the binary data as
+              For Binary, DynamoDB treats each byte of the binary data as
               unsigned when it compares binary values, for example when
               evaluating query expressions.
         + ComparisonOperator - A comparator for evaluating attributes. For
-              example, equals, greater than, less than, etc. Valid comparison
-              operators for Query: `EQ | LE | LT | GE | GT | BEGINS_WITH |
-              BETWEEN` For information on specifying data types in JSON, see
-              `JSON Data Format`_ in the Amazon DynamoDB Developer Guide. The
-              following are descriptions of each comparison operator.
+              example, equals, greater than, less than, etc. For KeyConditions ,
+              only the following comparison operators are supported: `EQ | LE |
+              LT | GE | GT | BEGINS_WITH | BETWEEN` The following are
+              descriptions of these comparison operators.
 
             + `EQ` : Equal. AttributeValueList can contain only one AttributeValue
                   of type String, Number, or Binary (not a set). If an item contains
@@ -890,33 +1376,33 @@ class DynamoDBConnection(AWSQueryConnection):
                   not equal `{"N":"6"}`. Also, `{"N":"6"}` does not equal
                   `{"NS":["6", "2", "1"]}`.
             + `LE` : Less than or equal. AttributeValueList can contain only one
-                  AttributeValue of type String, Number, or Binary (not a set). If an
-                  item contains an AttributeValue of a different type than the one
-                  specified in the request, the value does not match. For example,
-                  `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
-                  compare to `{"NS":["6", "2", "1"]}`.
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
             + `LT` : Less than. AttributeValueList can contain only one
-                  AttributeValue of type String, Number, or Binary (not a set). If an
-                  item contains an AttributeValue of a different type than the one
-                  specified in the request, the value does not match. For example,
-                  `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
-                  compare to `{"NS":["6", "2", "1"]}`.
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
             + `GE` : Greater than or equal. AttributeValueList can contain only one
-                  AttributeValue of type String, Number, or Binary (not a set). If an
-                  item contains an AttributeValue of a different type than the one
-                  specified in the request, the value does not match. For example,
-                  `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
-                  compare to `{"NS":["6", "2", "1"]}`.
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
             + `GT` : Greater than. AttributeValueList can contain only one
-                  AttributeValue of type String, Number, or Binary (not a set). If an
-                  item contains an AttributeValue of a different type than the one
-                  specified in the request, the value does not match. For example,
-                  `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
-                  compare to `{"NS":["6", "2", "1"]}`.
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
             + `BEGINS_WITH` : checks for a prefix. AttributeValueList can contain
-                  only one AttributeValue of type String or Binary (not a Number or a
-                  set). The target attribute of the comparison must be a String or
-                  Binary (not a Number or a set).
+                only one AttributeValue of type String or Binary (not a Number or a
+                set). The target attribute of the comparison must be a String or
+                Binary (not a Number or a set). > <li>
             + `BETWEEN` : Greater than or equal to the first value, and less than
                   or equal to the second value. AttributeValueList must contain two
                   AttributeValue elements of the same type, either String, Number, or
@@ -928,14 +1414,68 @@ class DynamoDBConnection(AWSQueryConnection):
                   `{"N":"6"}`. Also, `{"N":"6"}` does not compare to `{"NS":["6",
                   "2", "1"]}`
 
+
+
+        For usage examples of AttributeValueList and ComparisonOperator , see
+            `Conditional Expressions`_ in the Amazon DynamoDB Developer Guide.
+
+        :type query_filter: map
+        :param query_filter:
+        Evaluates the query results and returns only the desired values.
+
+        If you specify more than one condition in the QueryFilter map, then by
+            default all of the conditions must evaluate to true. In other
+            words, the conditions are ANDed together. (You can use the
+            ConditionalOperator parameter to OR the conditions instead. If you
+            do this, then at least one of the conditions must evaluate to true,
+            rather than all of them.)
+
+        Each QueryFilter element consists of an attribute name to compare,
+            along with the following:
+
+
+        + AttributeValueList - One or more values to evaluate against the
+              supplied attribute. The number of values in the list depends on the
+              ComparisonOperator being used. For type Number, value comparisons
+              are numeric. String value comparisons for greater than, equals, or
+              less than are based on ASCII character code values. For example,
+              `a` is greater than `A`, and `aa` is greater than `B`. For a list
+              of code values, see
+              `http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters`_.
+              For Binary, DynamoDB treats each byte of the binary data as
+              unsigned when it compares binary values, for example when
+              evaluating query expressions. For information on specifying data
+              types in JSON, see `JSON Data Format`_ in the Amazon DynamoDB
+              Developer Guide.
+        + ComparisonOperator - A comparator for evaluating attributes. For
+              example, equals, greater than, less than, etc. The following
+              comparison operators are available: `EQ | NE | LE | LT | GE | GT |
+              NOT_NULL | NULL | CONTAINS | NOT_CONTAINS | BEGINS_WITH | IN |
+              BETWEEN` For complete descriptions of all comparison operators, see
+              `API_Condition.html`_.
+
+        :type conditional_operator: string
+        :param conditional_operator: A logical operator to apply to the
+            conditions in the QueryFilter map:
+
+        + `AND` - If all of the conditions evaluate to true, then the entire
+              map evaluates to true.
+        + `OR` - If at least one of the conditions evaluate to true, then the
+              entire map evaluates to true.
+
+
+        If you omit ConditionalOperator , then `AND` is the default.
+
+        The operation will succeed only if the entire map evaluates to true.
+
         :type scan_index_forward: boolean
         :param scan_index_forward: Specifies ascending (true) or descending
-            (false) traversal of the index. Amazon DynamoDB returns results
-            reflecting the requested order determined by the range key. If the
-            data type is Number, the results are returned in numeric order. For
-            String, the results are returned in order of ASCII character code
-            values. For Binary, Amazon DynamoDB treats each byte of the binary
-            data as unsigned when it compares binary values.
+            (false) traversal of the index. DynamoDB returns results reflecting
+            the requested order determined by the range key. If the data type
+            is Number, the results are returned in numeric order. For String,
+            the results are returned in order of ASCII character code values.
+            For Binary, DynamoDB treats each byte of the binary data as
+            unsigned when it compares binary values.
         If ScanIndexForward is not specified, the results are returned in
             ascending order.
 
@@ -947,12 +1487,17 @@ class DynamoDBConnection(AWSQueryConnection):
             No set data types are allowed.
 
         :type return_consumed_capacity: string
-        :param return_consumed_capacity: If set to `TOTAL`, ConsumedCapacity is
-            included in the response; if set to `NONE` (the default),
-            ConsumedCapacity is not included.
+        :param return_consumed_capacity: If set to `TOTAL`, the response
+            includes ConsumedCapacity data for tables and indexes. If set to
+            `INDEXES`, the response includes ConsumedCapacity for indexes. If
+            set to `NONE` (the default), ConsumedCapacity is not included in
+            the response.
 
         """
-        params = {'TableName': table_name, }
+        params = {
+            'TableName': table_name,
+            'KeyConditions': key_conditions,
+        }
         if index_name is not None:
             params['IndexName'] = index_name
         if select is not None:
@@ -963,8 +1508,10 @@ class DynamoDBConnection(AWSQueryConnection):
             params['Limit'] = limit
         if consistent_read is not None:
             params['ConsistentRead'] = consistent_read
-        if key_conditions is not None:
-            params['KeyConditions'] = key_conditions
+        if query_filter is not None:
+            params['QueryFilter'] = query_filter
+        if conditional_operator is not None:
+            params['ConditionalOperator'] = conditional_operator
         if scan_index_forward is not None:
             params['ScanIndexForward'] = scan_index_forward
         if exclusive_start_key is not None:
@@ -975,14 +1522,13 @@ class DynamoDBConnection(AWSQueryConnection):
                                  body=json.dumps(params))
 
     def scan(self, table_name, attributes_to_get=None, limit=None,
-             select=None, scan_filter=None, exclusive_start_key=None,
-             return_consumed_capacity=None, total_segments=None,
-             segment=None):
+             select=None, scan_filter=None, conditional_operator=None,
+             exclusive_start_key=None, return_consumed_capacity=None,
+             total_segments=None, segment=None):
         """
         The Scan operation returns one or more items and item
         attributes by accessing every item in the table. To have
-        Amazon DynamoDB return fewer items, you can provide a
-        ScanFilter .
+        DynamoDB return fewer items, you can provide a ScanFilter .
 
         If the total number of scanned items exceeds the maximum data
         set size limit of 1 MB, the scan stops and results are
@@ -1008,160 +1554,91 @@ class DynamoDBConnection(AWSQueryConnection):
             retrieve. If no attribute names are specified, then all attributes
             will be returned. If any of the requested attributes are not found,
             they will not appear in the result.
+        Note that AttributesToGet has no effect on provisioned throughput
+            consumption. DynamoDB determines capacity units consumed based on
+            item size, not on the amount of data that is returned to an
+            application.
 
         :type limit: integer
         :param limit: The maximum number of items to evaluate (not necessarily
-            the number of matching items). If Amazon DynamoDB processes the
-            number of items up to the limit while processing the results, it
-            stops the operation and returns the matching values up to that
-            point, and a LastEvaluatedKey to apply in a subsequent operation,
-            so that you can pick up where you left off. Also, if the processed
-            data set size exceeds 1 MB before Amazon DynamoDB reaches this
-            limit, it stops the operation and returns the matching values up to
-            the limit, and a LastEvaluatedKey to apply in a subsequent
-            operation to continue the operation. For more information see
-            `Query and Scan`_ in the Amazon DynamoDB Developer Guide.
+            the number of matching items). If DynamoDB processes the number of
+            items up to the limit while processing the results, it stops the
+            operation and returns the matching values up to that point, and a
+            LastEvaluatedKey to apply in a subsequent operation, so that you
+            can pick up where you left off. Also, if the processed data set
+            size exceeds 1 MB before DynamoDB reaches this limit, it stops the
+            operation and returns the matching values up to the limit, and a
+            LastEvaluatedKey to apply in a subsequent operation to continue the
+            operation. For more information, see `Query and Scan`_ in the
+            Amazon DynamoDB Developer Guide.
 
         :type select: string
         :param select: The attributes to be returned in the result. You can
-            retrieve all item attributes, specific item attributes, the count
-            of matching items, or in the case of an index, some or all of the
-            attributes projected into the index.
+            retrieve all item attributes, specific item attributes, or the
+            count of matching items.
 
-        + `ALL_ATTRIBUTES`: Returns all of the item attributes. For a table,
-              this is the default. For an index, this mode causes Amazon DynamoDB
-              to fetch the full item from the table for each matching item in the
-              index. If the index is configured to project all item attributes,
-              the matching items will not be fetched from the table. Fetching
-              items from the table incurs additional throughput cost and latency.
-        + `ALL_PROJECTED_ATTRIBUTES`: Retrieves all attributes which have been
-              projected into the index. If the index is configured to project all
-              attributes, this is equivalent to specifying ALL_ATTRIBUTES .
+        + `ALL_ATTRIBUTES`: Returns all of the item attributes.
         + `COUNT`: Returns the number of matching items, rather than the
               matching items themselves.
         + `SPECIFIC_ATTRIBUTES` : Returns only the attributes listed in
               AttributesToGet . This is equivalent to specifying AttributesToGet
-              without specifying any value for Select . If you are querying an
-              index and request only attributes that are projected into that
-              index, the operation will read only the index and not the table. If
-              any of the requested attributes are not projected into the index,
-              Amazon DynamoDB will need to fetch each matching item from the
-              table. This extra fetching incurs additional throughput cost and
-              latency.
+              without specifying any value for Select .
 
 
-        When neither Select nor AttributesToGet are specified, Amazon DynamoDB
-            defaults to `ALL_ATTRIBUTES` when accessing a table, and
-            `ALL_PROJECTED_ATTRIBUTES` when accessing an index. You cannot use
-            both Select and AttributesToGet together in a single request,
-            unless the value for Select is `SPECIFIC_ATTRIBUTES`. (This usage
-            is equivalent to specifying AttributesToGet without any value for
-            Select .)
+        If neither Select nor AttributesToGet are specified, DynamoDB defaults
+            to `ALL_ATTRIBUTES`. You cannot use both Select and AttributesToGet
+            together in a single request, unless the value for Select is
+            `SPECIFIC_ATTRIBUTES`. (This usage is equivalent to specifying
+            AttributesToGet without any value for Select .)
 
         :type scan_filter: map
         :param scan_filter:
         Evaluates the scan results and returns only the desired values.
-            Multiple conditions are treated as "AND" operations: all conditions
-            must be met to be included in the results.
 
-        Each ScanConditions element consists of an attribute name to compare,
-            along with the following:
+        If you specify more than one condition in the ScanFilter map, then by
+            default all of the conditions must evaluate to true. In other
+            words, the conditions are ANDed together. (You can use the
+            ConditionalOperator parameter to OR the conditions instead. If you
+            do this, then at least one of the conditions must evaluate to true,
+            rather than all of them.)
+
+        Each ScanFilter element consists of an attribute name to compare, along
+            with the following:
 
 
         + AttributeValueList - One or more values to evaluate against the
-              supplied attribute. This list contains exactly one value, except
-              for a `BETWEEN` or `IN` comparison, in which case the list contains
-              two values. For type Number, value comparisons are numeric. String
-              value comparisons for greater than, equals, or less than are based
-              on ASCII character code values. For example, `a` is greater than
-              `A`, and `aa` is greater than `B`. For a list of code values, see
+              supplied attribute. The number of values in the list depends on the
+              ComparisonOperator being used. For type Number, value comparisons
+              are numeric. String value comparisons for greater than, equals, or
+              less than are based on ASCII character code values. For example,
+              `a` is greater than `A`, and `aa` is greater than `B`. For a list
+              of code values, see
               `http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters`_.
-              For Binary, Amazon DynamoDB treats each byte of the binary data as
+              For Binary, DynamoDB treats each byte of the binary data as
               unsigned when it compares binary values, for example when
-              evaluating query expressions.
+              evaluating query expressions. For information on specifying data
+              types in JSON, see `JSON Data Format`_ in the Amazon DynamoDB
+              Developer Guide.
         + ComparisonOperator - A comparator for evaluating attributes. For
-              example, equals, greater than, less than, etc. Valid comparison
-              operators for Scan: `EQ | NE | LE | LT | GE | GT | NOT_NULL | NULL
-              | CONTAINS | NOT_CONTAINS | BEGINS_WITH | IN | BETWEEN` For
-              information on specifying data types in JSON, see `JSON Data
-              Format`_ in the Amazon DynamoDB Developer Guide. The following are
-              descriptions of each comparison operator.
+              example, equals, greater than, less than, etc. The following
+              comparison operators are available: `EQ | NE | LE | LT | GE | GT |
+              NOT_NULL | NULL | CONTAINS | NOT_CONTAINS | BEGINS_WITH | IN |
+              BETWEEN` For complete descriptions of all comparison operators, see
+              `Condition`_.
 
-            + `EQ` : Equal. AttributeValueList can contain only one AttributeValue
-                  of type String, Number, or Binary (not a set). If an item contains
-                  an AttributeValue of a different type than the one specified in the
-                  request, the value does not match. For example, `{"S":"6"}` does
-                  not equal `{"N":"6"}`. Also, `{"N":"6"}` does not equal
-                  `{"NS":["6", "2", "1"]}`.
-            + `NE` : Not equal. AttributeValueList can contain only one
-                  AttributeValue of type String, Number, or Binary (not a set). If an
-                  item contains an AttributeValue of a different type than the one
-                  specified in the request, the value does not match. For example,
-                  `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
-                  equal `{"NS":["6", "2", "1"]}`.
-            + `LE` : Less than or equal. AttributeValueList can contain only one
-                  AttributeValue of type String, Number, or Binary (not a set). If an
-                  item contains an AttributeValue of a different type than the one
-                  specified in the request, the value does not match. For example,
-                  `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
-                  compare to `{"NS":["6", "2", "1"]}`.
-            + `LT` : Less than. AttributeValueList can contain only one
-                  AttributeValue of type String, Number, or Binary (not a set). If an
-                  item contains an AttributeValue of a different type than the one
-                  specified in the request, the value does not match. For example,
-                  `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
-                  compare to `{"NS":["6", "2", "1"]}`.
-            + `GE` : Greater than or equal. AttributeValueList can contain only one
-                  AttributeValue of type String, Number, or Binary (not a set). If an
-                  item contains an AttributeValue of a different type than the one
-                  specified in the request, the value does not match. For example,
-                  `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
-                  compare to `{"NS":["6", "2", "1"]}`.
-            + `GT` : Greater than. AttributeValueList can contain only one
-                  AttributeValue of type String, Number, or Binary (not a set). If an
-                  item contains an AttributeValue of a different type than the one
-                  specified in the request, the value does not match. For example,
-                  `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
-                  compare to `{"NS":["6", "2", "1"]}`.
-            + `NOT_NULL` : The attribute exists.
-            + `NULL` : The attribute does not exist.
-            + `CONTAINS` : checks for a subsequence, or value in a set.
-                  AttributeValueList can contain only one AttributeValue of type
-                  String, Number, or Binary (not a set). If the target attribute of
-                  the comparison is a String, then the operation checks for a
-                  substring match. If the target attribute of the comparison is
-                  Binary, then the operation looks for a subsequence of the target
-                  that matches the input. If the target attribute of the comparison
-                  is a set ("SS", "NS", or "BS"), then the operation checks for a
-                  member of the set (not as a substring).
-            + `NOT_CONTAINS` : checks for absence of a subsequence, or absence of a
-                  value in a set. AttributeValueList can contain only one
-                  AttributeValue of type String, Number, or Binary (not a set). If
-                  the target attribute of the comparison is a String, then the
-                  operation checks for the absence of a substring match. If the
-                  target attribute of the comparison is Binary, then the operation
-                  checks for the absence of a subsequence of the target that matches
-                  the input. If the target attribute of the comparison is a set
-                  ("SS", "NS", or "BS"), then the operation checks for the absence of
-                  a member of the set (not as a substring).
-            + `BEGINS_WITH` : checks for a prefix. AttributeValueList can contain
-                  only one AttributeValue of type String or Binary (not a Number or a
-                  set). The target attribute of the comparison must be a String or
-                  Binary (not a Number or a set).
-            + `IN` : checks for exact matches. AttributeValueList can contain more
-                  than one AttributeValue of type String, Number, or Binary (not a
-                  set). The target attribute of the comparison must be of the same
-                  type and exact value to match. A String never matches a String set.
-            + `BETWEEN` : Greater than or equal to the first value, and less than
-                  or equal to the second value. AttributeValueList must contain two
-                  AttributeValue elements of the same type, either String, Number, or
-                  Binary (not a set). A target attribute matches if the target value
-                  is greater than, or equal to, the first element and less than, or
-                  equal to, the second element. If an item contains an AttributeValue
-                  of a different type than the one specified in the request, the
-                  value does not match. For example, `{"S":"6"}` does not compare to
-                  `{"N":"6"}`. Also, `{"N":"6"}` does not compare to `{"NS":["6",
-                  "2", "1"]}`
+        :type conditional_operator: string
+        :param conditional_operator: A logical operator to apply to the
+            conditions in the ScanFilter map:
+
+        + `AND` - If all of the conditions evaluate to true, then the entire
+              map evaluates to true.
+        + `OR` - If at least one of the conditions evaluate to true, then the
+              entire map evaluates to true.
+
+
+        If you omit ConditionalOperator , then `AND` is the default.
+
+        The operation will succeed only if the entire map evaluates to true.
 
         :type exclusive_start_key: map
         :param exclusive_start_key: The primary key of the first item that this
@@ -1175,9 +1652,11 @@ class DynamoDBConnection(AWSQueryConnection):
             corresponding value of LastEvaluatedKey .
 
         :type return_consumed_capacity: string
-        :param return_consumed_capacity: If set to `TOTAL`, ConsumedCapacity is
-            included in the response; if set to `NONE` (the default),
-            ConsumedCapacity is not included.
+        :param return_consumed_capacity: If set to `TOTAL`, the response
+            includes ConsumedCapacity data for tables and indexes. If set to
+            `INDEXES`, the response includes ConsumedCapacity for indexes. If
+            set to `NONE` (the default), ConsumedCapacity is not included in
+            the response.
 
         :type total_segments: integer
         :param total_segments: For a parallel Scan request, TotalSegments
@@ -1219,6 +1698,8 @@ class DynamoDBConnection(AWSQueryConnection):
             params['Select'] = select
         if scan_filter is not None:
             params['ScanFilter'] = scan_filter
+        if conditional_operator is not None:
+            params['ConditionalOperator'] = conditional_operator
         if exclusive_start_key is not None:
             params['ExclusiveStartKey'] = exclusive_start_key
         if return_consumed_capacity is not None:
@@ -1231,8 +1712,8 @@ class DynamoDBConnection(AWSQueryConnection):
                                  body=json.dumps(params))
 
     def update_item(self, table_name, key, attribute_updates=None,
-                    expected=None, return_values=None,
-                    return_consumed_capacity=None,
+                    expected=None, conditional_operator=None,
+                    return_values=None, return_consumed_capacity=None,
                     return_item_collection_metrics=None):
         """
         Edits an existing item's attributes, or inserts a new item if
@@ -1250,8 +1731,12 @@ class DynamoDBConnection(AWSQueryConnection):
         :param table_name: The name of the table containing the item to update.
 
         :type key: map
-        :param key: The primary key that defines the item. Each element
+        :param key: The primary key of the item to be updated. Each element
             consists of an attribute name and a value for that attribute.
+        For the primary key, you must provide all of the attributes. For
+            example, with a hash type primary key, you only need to specify the
+            hash attribute. For a hash-and-range type primary key, you must
+            specify both the hash attribute and the range attribute.
 
         :type attribute_updates: map
         :param attribute_updates: The names of attributes to be modified, the
@@ -1294,16 +1779,16 @@ class DynamoDBConnection(AWSQueryConnection):
                       If Value is a negative number, then it is subtracted from the
                       existing attribute. If you use `ADD` to increment or decrement a
                       number value for an item that doesn't exist before the update,
-                      Amazon DynamoDB uses 0 as the initial value. In addition, if you
-                      use `ADD` to update an existing item, and intend to increment or
-                      decrement an attribute value which does not yet exist, Amazon
-                      DynamoDB uses `0` as the initial value. For example, suppose that
-                      the item you want to update does not yet have an attribute named
-                      itemcount , but you decide to `ADD` the number `3` to this
-                      attribute anyway, even though it currently does not exist. Amazon
-                      DynamoDB will create the itemcount attribute, set its initial value
-                      to `0`, and finally add `3` to it. The result will be a new
-                      itemcount attribute in the item, with a value of `3`.
+                      DynamoDB uses 0 as the initial value. In addition, if you use `ADD`
+                      to update an existing item, and intend to increment or decrement an
+                      attribute value which does not yet exist, DynamoDB uses `0` as the
+                      initial value. For example, suppose that the item you want to
+                      update does not yet have an attribute named itemcount , but you
+                      decide to `ADD` the number `3` to this attribute anyway, even
+                      though it currently does not exist. DynamoDB will create the
+                      itemcount attribute, set its initial value to `0`, and finally add
+                      `3` to it. The result will be a new itemcount attribute in the
+                      item, with a value of `3`.
                 + If the existing data type is a set, and if the Value is also a set,
                       then the Value is added to the existing set. (This is a set
                       operation, not mathematical addition.) For example, if the
@@ -1319,13 +1804,13 @@ class DynamoDBConnection(AWSQueryConnection):
                   number or is a set. Do not use `ADD` for any other data types.
           **If no item with the specified Key is found:**
 
-            + `PUT` - Amazon DynamoDB creates a new item with the specified primary
-                  key, and then adds the attribute.
+            + `PUT` - DynamoDB creates a new item with the specified primary key,
+                  and then adds the attribute.
             + `DELETE` - Nothing happens; there is no attribute to delete.
-            + `ADD` - Amazon DynamoDB creates an item with the supplied primary key
-                  and number (or set of numbers) for the attribute value. The only
-                  data types allowed are number and number set; no other data types
-                  can be specified.
+            + `ADD` - DynamoDB creates an item with the supplied primary key and
+                  number (or set of numbers) for the attribute value. The only data
+                  types allowed are number and number set; no other data types can be
+                  specified.
 
 
 
@@ -1334,48 +1819,175 @@ class DynamoDBConnection(AWSQueryConnection):
             the table's attribute definition.
 
         :type expected: map
-        :param expected: A map of attribute/condition pairs. This is the
-            conditional block for the UpdateItem operation. All the conditions
-            must be met for the operation to succeed.
-        Expected allows you to provide an attribute name, and whether or not
-            Amazon DynamoDB should check to see if the attribute value already
-            exists; or if the attribute value exists and has a particular value
-            before changing it.
+        :param expected:
+        A map of attribute/condition pairs. This is the conditional block for
+            the UpdateItem operation.
 
-        Each item in Expected represents an attribute name for Amazon DynamoDB
-            to check, along with the following:
+        Each element of Expected consists of an attribute name, a comparison
+            operator, and one or more values. DynamoDB compares the attribute
+            with the value(s) you supplied, using the comparison operator. For
+            each Expected element, the result of the evaluation is either true
+            or false.
 
+        If you specify more than one element in the Expected map, then by
+            default all of the conditions must evaluate to true. In other
+            words, the conditions are ANDed together. (You can use the
+            ConditionalOperator parameter to OR the conditions instead. If you
+            do this, then at least one of the conditions must evaluate to true,
+            rather than all of them.)
 
-        + Value - The attribute value for Amazon DynamoDB to check.
-        + Exists - Causes Amazon DynamoDB to evaluate the value before
-              attempting a conditional operation:
+        If the Expected map evaluates to true, then the conditional operation
+            succeeds; otherwise, it fails.
 
-            + If Exists is `True`, Amazon DynamoDB will check to see if that
-                  attribute value already exists in the table. If it is found, then
-                  the operation succeeds. If it is not found, the operation fails
-                  with a ConditionalCheckFailedException .
-            + If Exists is `False`, Amazon DynamoDB assumes that the attribute
-                  value does not exist in the table. If in fact the value does not
-                  exist, then the assumption is valid and the operation succeeds. If
-                  the value is found, despite the assumption that it does not exist,
-                  the operation fails with a ConditionalCheckFailedException .
-          The default setting for Exists is `True`. If you supply a Value all by
-              itself, Amazon DynamoDB assumes the attribute exists: You don't
-              have to set Exists to `True`, because it is implied. Amazon
-              DynamoDB returns a ValidationException if:
-
-            + Exists is `True` but there is no Value to check. (You expect a value
-                  to exist, but don't specify what that value is.)
-            + Exists is `False` but you also specify a Value . (You cannot expect
-                  an attribute to have a value, while also expecting it not to
-                  exist.)
+        Each item in Expected represents an attribute name for DynamoDB to
+            check, along with an AttributeValueList and a ComparisonOperator :
 
 
+        + AttributeValueList - One or more values to evaluate against the
+              supplied attribute. The number of values in the list depends on the
+              ComparisonOperator being used. For type Number, value comparisons
+              are numeric. String value comparisons for greater than, equals, or
+              less than are based on ASCII character code values. For example,
+              `a` is greater than `A`, and `aa` is greater than `B`. For a list
+              of code values, see
+              `http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters`_.
+              For Binary, DynamoDB treats each byte of the binary data as
+              unsigned when it compares binary values, for example when
+              evaluating query expressions.
+        + ComparisonOperator - A comparator for evaluating attributes in the
+              AttributeValueList . When performing the comparison, DynamoDB uses
+              strongly consistent reads. The following comparison operators are
+              available: `EQ | NE | LE | LT | GE | GT | NOT_NULL | NULL |
+              CONTAINS | NOT_CONTAINS | BEGINS_WITH | IN | BETWEEN` The following
+              are descriptions of each comparison operator.
 
-        If you specify more than one condition for Exists , then all of the
-            conditions must evaluate to true. (In other words, the conditions
-            are ANDed together.) Otherwise, the conditional operation will
-            fail.
+            + `EQ` : Equal. AttributeValueList can contain only one AttributeValue
+                of type String, Number, Binary, String Set, Number Set, or Binary
+                Set. If an item contains an AttributeValue of a different type than
+                the one specified in the request, the value does not match. For
+                example, `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}`
+                does not equal `{"NS":["6", "2", "1"]}`. > <li>
+            + `NE` : Not equal. AttributeValueList can contain only one
+                AttributeValue of type String, Number, Binary, String Set, Number
+                Set, or Binary Set. If an item contains an AttributeValue of a
+                different type than the one specified in the request, the value
+                does not match. For example, `{"S":"6"}` does not equal
+                `{"N":"6"}`. Also, `{"N":"6"}` does not equal `{"NS":["6", "2",
+                "1"]}`. > <li>
+            + `LE` : Less than or equal. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `LT` : Less than. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `GE` : Greater than or equal. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `GT` : Greater than. AttributeValueList can contain only one
+                AttributeValue of type String, Number, or Binary (not a set). If an
+                item contains an AttributeValue of a different type than the one
+                specified in the request, the value does not match. For example,
+                `{"S":"6"}` does not equal `{"N":"6"}`. Also, `{"N":"6"}` does not
+                compare to `{"NS":["6", "2", "1"]}`. > <li>
+            + `NOT_NULL` : The attribute exists.
+            + `NULL` : The attribute does not exist.
+            + `CONTAINS` : checks for a subsequence, or value in a set.
+                  AttributeValueList can contain only one AttributeValue of type
+                  String, Number, or Binary (not a set). If the target attribute of
+                  the comparison is a String, then the operation checks for a
+                  substring match. If the target attribute of the comparison is
+                  Binary, then the operation looks for a subsequence of the target
+                  that matches the input. If the target attribute of the comparison
+                  is a set ("SS", "NS", or "BS"), then the operation checks for a
+                  member of the set (not as a substring).
+            + `NOT_CONTAINS` : checks for absence of a subsequence, or absence of a
+                  value in a set. AttributeValueList can contain only one
+                  AttributeValue of type String, Number, or Binary (not a set). If
+                  the target attribute of the comparison is a String, then the
+                  operation checks for the absence of a substring match. If the
+                  target attribute of the comparison is Binary, then the operation
+                  checks for the absence of a subsequence of the target that matches
+                  the input. If the target attribute of the comparison is a set
+                  ("SS", "NS", or "BS"), then the operation checks for the absence of
+                  a member of the set (not as a substring).
+            + `BEGINS_WITH` : checks for a prefix. AttributeValueList can contain
+                only one AttributeValue of type String or Binary (not a Number or a
+                set). The target attribute of the comparison must be a String or
+                Binary (not a Number or a set). > <li>
+            + `IN` : checks for exact matches. AttributeValueList can contain more
+                  than one AttributeValue of type String, Number, or Binary (not a
+                  set). The target attribute of the comparison must be of the same
+                  type and exact value to match. A String never matches a String set.
+            + `BETWEEN` : Greater than or equal to the first value, and less than
+                  or equal to the second value. AttributeValueList must contain two
+                  AttributeValue elements of the same type, either String, Number, or
+                  Binary (not a set). A target attribute matches if the target value
+                  is greater than, or equal to, the first element and less than, or
+                  equal to, the second element. If an item contains an AttributeValue
+                  of a different type than the one specified in the request, the
+                  value does not match. For example, `{"S":"6"}` does not compare to
+                  `{"N":"6"}`. Also, `{"N":"6"}` does not compare to `{"NS":["6",
+                  "2", "1"]}`
+
+
+
+        For usage examples of AttributeValueList and ComparisonOperator , see
+            `Conditional Expressions`_ in the Amazon DynamoDB Developer Guide.
+
+
+        For backward compatibility with previous DynamoDB releases, the
+            following parameters can be used instead of AttributeValueList and
+            ComparisonOperator :
+
+
+        + Value - A value for DynamoDB to compare with an attribute.
+        + Exists - Causes DynamoDB to evaluate the value before attempting the
+              conditional operation:
+
+            + If Exists is `True`, DynamoDB will check to see if that attribute
+                  value already exists in the table. If it is found, then the
+                  condition evaluates to true; otherwise the condition evaluate to
+                  false.
+            + If Exists is `False`, DynamoDB assumes that the attribute value does
+                  not exist in the table. If in fact the value does not exist, then
+                  the assumption is valid and the condition evaluates to true. If the
+                  value is found, despite the assumption that it does not exist, the
+                  condition evaluates to false.
+
+
+
+        Even though DynamoDB continues to accept the Value and Exists
+            parameters, they are now deprecated. We recommend that you use
+            AttributeValueList and ComparisonOperator instead, since they allow
+            you to construct a much wider range of conditions.
+
+        The Value and Exists parameters are incompatible with
+            AttributeValueList and ComparisonOperator . If you attempt to use
+            both sets of parameters at once, DynamoDB will throw a
+            ValidationException .
+
+        :type conditional_operator: string
+        :param conditional_operator: A logical operator to apply to the
+            conditions in the Expected map:
+
+        + `AND` - If all of the conditions evaluate to true, then the entire
+              map evaluates to true.
+        + `OR` - If at least one of the conditions evaluate to true, then the
+              entire map evaluates to true.
+
+
+        If you omit ConditionalOperator , then `AND` is the default.
+
+        The operation will succeed only if the entire map evaluates to true.
 
         :type return_values: string
         :param return_values:
@@ -1396,15 +2008,17 @@ class DynamoDBConnection(AWSQueryConnection):
               returned.
 
         :type return_consumed_capacity: string
-        :param return_consumed_capacity: If set to `TOTAL`, ConsumedCapacity is
-            included in the response; if set to `NONE` (the default),
-            ConsumedCapacity is not included.
+        :param return_consumed_capacity: If set to `TOTAL`, the response
+            includes ConsumedCapacity data for tables and indexes. If set to
+            `INDEXES`, the response includes ConsumedCapacity for indexes. If
+            set to `NONE` (the default), ConsumedCapacity is not included in
+            the response.
 
         :type return_item_collection_metrics: string
         :param return_item_collection_metrics: If set to `SIZE`, statistics
             about item collections, if any, that were modified during the
             operation are returned in the response. If set to `NONE` (the
-            default), no statistics are returned..
+            default), no statistics are returned.
 
         """
         params = {'TableName': table_name, 'Key': key, }
@@ -1412,6 +2026,8 @@ class DynamoDBConnection(AWSQueryConnection):
             params['AttributeUpdates'] = attribute_updates
         if expected is not None:
             params['Expected'] = expected
+        if conditional_operator is not None:
+            params['ConditionalOperator'] = conditional_operator
         if return_values is not None:
             params['ReturnValues'] = return_values
         if return_consumed_capacity is not None:
@@ -1427,7 +2043,7 @@ class DynamoDBConnection(AWSQueryConnection):
         Updates the provisioned throughput for the given table.
         Setting the throughput for a table helps you manage
         performance and is part of the provisioned throughput feature
-        of Amazon DynamoDB.
+        of DynamoDB.
 
         The provisioned throughput values can be upgraded or
         downgraded based on the maximums and minimums listed in the
@@ -1442,22 +2058,23 @@ class DynamoDBConnection(AWSQueryConnection):
         table returns to the `ACTIVE` state after the UpdateTable
         operation.
 
-        You cannot add, modify or delete local secondary indexes using
-        UpdateTable . Local secondary indexes can only be defined at
-        table creation time.
+        You cannot add, modify or delete indexes using UpdateTable .
+        Indexes can only be defined at table creation time.
 
         :type table_name: string
         :param table_name: The name of the table to be updated.
 
         :type provisioned_throughput: dict
-        :param provisioned_throughput: The provisioned throughput settings for
-            the specified table. The settings can be modified using the
-            UpdateTable operation.
+        :param provisioned_throughput: Represents the provisioned throughput
+            settings for a specified table or index. The settings can be
+            modified using the UpdateTable operation.
         For current minimum and maximum provisioned throughput values, see
             `Limits`_ in the Amazon DynamoDB Developer Guide.
 
         :type global_secondary_index_updates: list
-        :param global_secondary_index_updates:
+        :param global_secondary_index_updates: An array of one or more global
+            secondary indexes on the table, together with provisioned
+            throughput settings for each index.
 
         """
         params = {'TableName': table_name, }
@@ -1481,7 +2098,7 @@ class DynamoDBConnection(AWSQueryConnection):
         response = self._mexe(http_request, sender=None,
                               override_num_retries=self.NumberRetries,
                               retry_handler=self._retry_handler)
-        response_body = response.read()
+        response_body = response.read().decode('utf-8')
         boto.log.debug(response_body)
         if response.status == 200:
             if response_body:
@@ -1497,7 +2114,7 @@ class DynamoDBConnection(AWSQueryConnection):
         status = None
         boto.log.debug("Saw HTTP status: %s" % response.status)
         if response.status == 400:
-            response_body = response.read()
+            response_body = response.read().decode('utf-8')
             boto.log.debug(response_body)
             data = json.loads(response_body)
             if 'ProvisionedThroughputExceededException' in data.get('__type'):
@@ -1506,7 +2123,7 @@ class DynamoDBConnection(AWSQueryConnection):
                     'ProvisionedThroughputExceededException',
                     i
                 )
-                next_sleep = self._exponential_time(i)
+                next_sleep = self._truncated_exponential_time(i)
                 i += 1
                 status = (msg, i, next_sleep)
                 if i == self.NumberRetries:
@@ -1533,12 +2150,13 @@ class DynamoDBConnection(AWSQueryConnection):
             if actual_crc32 != expected_crc32:
                 msg = ("The calculated checksum %s did not match the expected "
                        "checksum %s" % (actual_crc32, expected_crc32))
-                status = (msg, i + 1, self._exponential_time(i))
+                status = (msg, i + 1, self._truncated_exponential_time(i))
         return status
 
-    def _exponential_time(self, i):
+    def _truncated_exponential_time(self, i):
         if i == 0:
             next_sleep = 0
         else:
-            next_sleep = 0.05 * (2 ** i)
+            next_sleep = min(0.05 * (2 ** i),
+                             boto.config.get('Boto', 'max_retry_delay', 60))
         return next_sleep

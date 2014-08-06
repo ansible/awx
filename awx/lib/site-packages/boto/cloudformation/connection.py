@@ -271,7 +271,7 @@ class CloudFormationConnection(AWSQueryConnection):
         :return: Parsed JSON response data
         """
         response = self.make_request(call, params, path, method)
-        body = response.read()
+        body = response.read().decode('utf-8')
         if response.status == 200:
             body = json.loads(body)
             return body

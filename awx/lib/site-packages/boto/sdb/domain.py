@@ -18,11 +18,14 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
+from __future__ import print_function
 
 """
 Represents an SDB Domain
 """
+
 from boto.sdb.queryresultset import SelectResultSet
+from boto.compat import six
 
 class Domain(object):
 
@@ -240,26 +243,26 @@ class Domain(object):
         if not f:
             from tempfile import TemporaryFile
             f = TemporaryFile()
-        print >> f, '<?xml version="1.0" encoding="UTF-8"?>'
-        print >> f, '<Domain id="%s">' % self.name
+        print('<?xml version="1.0" encoding="UTF-8"?>', file=f)
+        print('<Domain id="%s">' % self.name, file=f)
         for item in self:
-            print >> f, '\t<Item id="%s">' % item.name
+            print('\t<Item id="%s">' % item.name, file=f)
             for k in item:
-                print >> f, '\t\t<attribute id="%s">' % k
+                print('\t\t<attribute id="%s">' % k, file=f)
                 values = item[k]
                 if not isinstance(values, list):
                     values = [values]
                 for value in values:
-                    print >> f, '\t\t\t<value><![CDATA[',
-                    if isinstance(value, unicode):
+                    print('\t\t\t<value><![CDATA[', end=' ', file=f)
+                    if isinstance(value, six.text_type):
                         value = value.encode('utf-8', 'replace')
                     else:
-                        value = unicode(value, errors='replace').encode('utf-8', 'replace')
+                        value = six.text_type(value, errors='replace').encode('utf-8', 'replace')
                     f.write(value)
-                    print >> f, ']]></value>'
-                print >> f, '\t\t</attribute>'
-            print >> f, '\t</Item>'
-        print >> f, '</Domain>'
+                    print(']]></value>', file=f)
+                print('\t\t</attribute>', file=f)
+            print('\t</Item>', file=f)
+        print('</Domain>', file=f)
         f.flush()
         f.seek(0)
         return f
@@ -370,8 +373,8 @@ class UploaderThread(Thread):
         try:
             self.db.batch_put_attributes(self.items)
         except:
-            print "Exception using batch put, trying regular put instead"
+            print("Exception using batch put, trying regular put instead")
             for item_name in self.items:
                 self.db.put_attributes(item_name, self.items[item_name])
-        print ".",
+        print(".", end=' ')
         sys.stdout.flush()

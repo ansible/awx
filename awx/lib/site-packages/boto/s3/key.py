@@ -20,20 +20,19 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-
-from __future__ import with_statement
+import email.utils
 import errno
 import hashlib
 import mimetypes
 import os
 import re
-import rfc822
-import StringIO
 import base64
 import binascii
 import math
-import urllib
+from hashlib import md5
 import boto.utils
+from boto.compat import BytesIO, six, urllib, encodebytes
+
 from boto.exception import BotoClientError
 from boto.exception import StorageDataError
 from boto.exception import PleaseRetryException
@@ -44,10 +43,6 @@ from boto import UserAgent
 from boto.utils import compute_md5, compute_hash
 from boto.utils import find_matching_headers
 from boto.utils import merge_headers_by_name
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
 
 
 class Key(object):
@@ -115,7 +110,7 @@ class Key(object):
         self.is_latest = False
         self.last_modified = None
         self.owner = None
-        self.storage_class = 'STANDARD'
+        self._storage_class = None
         self.path = None
         self.resp = None
         self.mode = None
@@ -171,15 +166,38 @@ class Key(object):
 
     def _get_base64md5(self):
         if 'md5' in self.local_hashes and self.local_hashes['md5']:
-            return binascii.b2a_base64(self.local_hashes['md5']).rstrip('\n')
+            md5 = self.local_hashes['md5']
+            if not isinstance(md5, bytes):
+                md5 = md5.encode('utf-8')
+            return binascii.b2a_base64(md5).decode('utf-8').rstrip('\n')
 
     def _set_base64md5(self, value):
         if value:
+            if not isinstance(value, six.string_types):
+                value = value.decode('utf-8')
             self.local_hashes['md5'] = binascii.a2b_base64(value)
         elif 'md5' in self.local_hashes:
             del self.local_hashes['md5']
 
     base64md5 = property(_get_base64md5, _set_base64md5);
+
+    def _get_storage_class(self):
+        if self._storage_class is None and self.bucket:
+            # Attempt to fetch storage class
+            list_items = list(self.bucket.list(self.name.encode('utf-8')))
+            if len(list_items) and getattr(list_items[0], '_storage_class',
+                                           None):
+                self._storage_class = list_items[0]._storage_class
+            else:
+                # Key is not yet saved? Just use default...
+                self._storage_class = 'STANDARD'
+
+        return self._storage_class
+
+    def _set_storage_class(self, value):
+        self._storage_class = value
+
+    storage_class = property(_get_storage_class, _set_storage_class)
 
     def get_md5_from_hexdigest(self, md5_hexdigest):
         """
@@ -187,7 +205,7 @@ class Key(object):
         from just having a precalculated md5_hexdigest.
         """
         digest = binascii.unhexlify(md5_hexdigest)
-        base64md5 = base64.encodestring(digest)
+        base64md5 = encodebytes(digest)
         if base64md5[-1] == '\n':
             base64md5 = base64md5[0:-1]
         return (md5_hexdigest, base64md5)
@@ -370,6 +388,9 @@ class Key(object):
             self.close()
             raise StopIteration
         return data
+
+    # Python 3 iterator support
+    __next__ = next
 
     def read(self, size=0):
         self.open_read()
@@ -801,6 +822,10 @@ class Key(object):
                 chunk = fp.read(bytes_togo)
             else:
                 chunk = fp.read(self.BufferSize)
+
+            if not isinstance(chunk, bytes):
+                chunk = chunk.encode('utf-8')
+
             if spos is None:
                 # read at least something from a non-seekable fp.
                 self.read_from_stream = True
@@ -828,6 +853,9 @@ class Key(object):
                     chunk = fp.read(bytes_togo)
                 else:
                     chunk = fp.read(self.BufferSize)
+
+                if not isinstance(chunk, bytes):
+                    chunk = chunk.encode('utf-8')
 
             self.size = data_len
 
@@ -861,7 +889,9 @@ class Key(object):
         for header in find_matching_headers('User-Agent', headers):
             del headers[header]
         headers['User-Agent'] = UserAgent
-        if self.storage_class != 'STANDARD':
+        # If storage_class is None, then a user has not explicitly requested
+        # a storage class, so we can assume STANDARD here
+        if self._storage_class not in [None, 'STANDARD']:
             headers[provider.storage_class_header] = self.storage_class
         if find_matching_headers('Content-Encoding', headers):
             self.content_encoding = merge_headers_by_name(
@@ -930,10 +960,20 @@ class Key(object):
 
         if 200 <= response.status <= 299:
             self.etag = response.getheader('etag')
+            md5 = self.md5
+            if isinstance(md5, bytes):
+                md5 = md5.decode('utf-8')
 
-            if self.etag != '"%s"' % self.md5:
-                raise provider.storage_data_error(
-                    'ETag from S3 did not match computed MD5')
+            # If you use customer-provided encryption keys, the ETag value that
+            # Amazon S3 returns in the response will not be the MD5 of the
+            # object.
+            server_side_encryption_customer_algorithm = response.getheader(
+                'x-amz-server-side-encryption-customer-algorithm', None)
+            if server_side_encryption_customer_algorithm is None:
+                if self.etag != '"%s"' % md5:
+                    raise provider.storage_data_error(
+                        'ETag from S3 did not match computed MD5. '
+                        '%s vs. %s' % (self.etag, self.md5))
 
             return True
 
@@ -1371,9 +1411,9 @@ class Key(object):
             be encrypted on the server-side by S3 and will be stored
             in an encrypted form while at rest in S3.
         """
-        if isinstance(string_data, unicode):
+        if not isinstance(string_data, bytes):
             string_data = string_data.encode("utf-8")
-        fp = StringIO.StringIO(string_data)
+        fp = BytesIO(string_data)
         r = self.set_contents_from_file(fp, headers, replace, cb, num_cb,
                                         policy, md5, reduced_redundancy,
                                         encrypt_key=encrypt_key)
@@ -1418,7 +1458,7 @@ class Key(object):
             headers/values that will override any headers associated
             with the stored object in the response.  See
             http://goo.gl/EWOPb for details.
-            
+
         :type version_id: str
         :param version_id: The ID of a particular version of the object.
             If this parameter is not supplied but the Key object has
@@ -1461,7 +1501,7 @@ class Key(object):
         if response_headers:
             for key in response_headers:
                 query_args.append('%s=%s' % (
-                    key, urllib.quote(response_headers[key])))
+                    key, urllib.parse.quote(response_headers[key])))
         query_args = '&'.join(query_args)
         self.open('r', headers, query_args=query_args,
                   override_num_retries=override_num_retries)
@@ -1497,7 +1537,7 @@ class Key(object):
                     if i == cb_count or cb_count == -1:
                         cb(data_len, cb_size)
                         i = 0
-        except IOError, e:
+        except IOError as e:
             if e.errno == errno.ENOSPC:
                 raise StorageDataError('Out of space for destination file '
                                        '%s' % fp.name)
@@ -1647,7 +1687,7 @@ class Key(object):
             headers/values that will override any headers associated
             with the stored object in the response.  See
             http://goo.gl/EWOPb for details.
-            
+
         :type version_id: str
         :param version_id: The ID of a particular version of the object.
             If this parameter is not supplied but the Key object has
@@ -1669,8 +1709,8 @@ class Key(object):
         # if last_modified date was sent from s3, try to set file's timestamp
         if self.last_modified is not None:
             try:
-                modified_tuple = rfc822.parsedate_tz(self.last_modified)
-                modified_stamp = int(rfc822.mktime_tz(modified_tuple))
+                modified_tuple = email.utils.parsedate_tz(self.last_modified)
+                modified_stamp = int(email.utils.mktime_tz(modified_tuple))
                 os.utime(fp.name, (modified_stamp, modified_stamp))
             except Exception:
                 pass
@@ -1679,7 +1719,7 @@ class Key(object):
                                cb=None, num_cb=10,
                                torrent=False,
                                version_id=None,
-                               response_headers=None):
+                               response_headers=None, encoding=None):
         """
         Retrieve an object from S3 using the name of the Key object as the
         key in S3.  Return the contents of the object as a string.
@@ -1721,14 +1761,24 @@ class Key(object):
             ``version_id`` attribute to None to always grab the latest
             version from a version-enabled bucket.
 
-        :rtype: string
-        :returns: The contents of the file as a string
+        :type encoding: str
+        :param encoding: The text encoding to use, such as ``utf-8``
+            or ``iso-8859-1``. If set, then a string will be returned.
+            Defaults to ``None`` and returns bytes.
+
+        :rtype: bytes or str
+        :returns: The contents of the file as bytes or a string
         """
-        fp = StringIO.StringIO()
+        fp = BytesIO()
         self.get_contents_to_file(fp, headers, cb, num_cb, torrent=torrent,
                                   version_id=version_id,
                                   response_headers=response_headers)
-        return fp.getvalue()
+        value = fp.getvalue()
+
+        if encoding is not None:
+            value = value.decode(encoding)
+
+        return value
 
     def add_email_grant(self, permission, email_address, headers=None):
         """

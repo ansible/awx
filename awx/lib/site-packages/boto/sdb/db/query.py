@@ -1,3 +1,4 @@
+from boto.compat import six
 # Copyright (c) 2006,2007,2008 Mitch Garnaat http://garnaat.org/
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -41,7 +42,7 @@ class Query(object):
     def next(self):
         if self.__local_iter__ is None:
             self.__local_iter__ = self.__iter__()
-        return self.__local_iter__.next()
+        return next(self.__local_iter__)
 
     def filter(self, property_operator, value):
         self.filters.append((property_operator, value))
@@ -63,7 +64,7 @@ class Query(object):
     def order(self, key):
         self.sort_by = key
         return self
-    
+
     def to_xml(self, doc=None):
         if not doc:
             xmlmanager = self.model_class.get_xmlmanager()

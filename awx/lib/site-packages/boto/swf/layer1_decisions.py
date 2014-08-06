@@ -167,7 +167,7 @@ class Layer1Decisions(object):
         if task_list is not None:
             attrs['taskList'] = {'name': task_list}
         if start_to_close_timeout is not None:
-            attrs['startToCloseTimeout'] = start_to_close_timeout
+            attrs['taskStartToCloseTimeout'] = start_to_close_timeout
         if workflow_type_version is not None:
             attrs['workflowTypeVersion'] = workflow_type_version
         self._data.append(o)

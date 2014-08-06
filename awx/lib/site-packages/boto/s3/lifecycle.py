@@ -19,7 +19,7 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-
+from boto.compat import six
 
 class Rule(object):
     """
@@ -48,7 +48,7 @@ class Rule(object):
         self.id = id
         self.prefix = '' if prefix is None else prefix
         self.status = status
-        if isinstance(expiration, (int, long)):
+        if isinstance(expiration, six.integer_types):
             # retain backwards compatibility???
             self.expiration = Expiration(days=expiration)
         else:

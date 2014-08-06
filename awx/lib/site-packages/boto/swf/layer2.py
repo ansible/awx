@@ -23,6 +23,7 @@ class SWFBase(object):
     domain = None
     aws_access_key_id = None
     aws_secret_access_key = None
+    region = None
 
     def __init__(self, **kwargs):
         # Set default credentials.
@@ -33,8 +34,9 @@ class SWFBase(object):
         for kwarg in kwargs:
             setattr(self, kwarg, kwargs[kwarg])
 
-        self._swf = Layer1(self.aws_access_key_id, 
-                              self.aws_secret_access_key)
+        self._swf = Layer1(self.aws_access_key_id,
+                           self.aws_secret_access_key,
+                           region=self.region)
 
     def __repr__(self):
         rep_str = str(self.name)

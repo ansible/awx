@@ -20,16 +20,12 @@
 # IN THE SOFTWARE.
 #
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
 import boto
 from boto.connection import AWSQueryConnection
 from boto.regioninfo import RegionInfo
 from boto.exception import JSONResponseError
 from boto.rds2 import exceptions
+from boto.compat import json
 
 
 class RDSConnection(AWSQueryConnection):
@@ -1011,7 +1007,7 @@ class RDSConnection(AWSQueryConnection):
         :param subnet_ids: The EC2 Subnet IDs for the DB subnet group.
 
         :type tags: list
-        :param tags: A list of tags.
+        :param tags: A list of tags into tuples.
 
         """
         params = {

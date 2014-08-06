@@ -19,7 +19,6 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-
 import os
 from datetime import datetime, timedelta
 from boto.utils import parse_ts
@@ -84,7 +83,7 @@ class ResultProcessor(object):
                 key_name = output.split(';')[0]
                 key = bucket.lookup(key_name)
                 file_name = os.path.join(path, key_name)
-                print 'retrieving file: %s to %s' % (key_name, file_name)
+                print('retrieving file: %s to %s' % (key_name, file_name))
                 key.get_contents_to_filename(file_name)
             self.num_files += 1
 
@@ -105,10 +104,10 @@ class ResultProcessor(object):
     def get_results_from_bucket(self, path):
         bucket = self.sd.get_obj('output_bucket')
         if bucket:
-            print 'No output queue or domain, just retrieving files from output_bucket'
+            print('No output queue or domain, just retrieving files from output_bucket')
             for key in bucket:
                 file_name = os.path.join(path, key)
-                print 'retrieving file: %s to %s' % (key, file_name)
+                print('retrieving file: %s to %s' % (key, file_name))
                 key.get_contents_to_filename(file_name)
                 self.num_files + 1
 
@@ -123,14 +122,14 @@ class ResultProcessor(object):
             self.get_results_from_bucket(path)
         if self.log_fp:
             self.log_fp.close()
-        print '%d results successfully retrieved.' % self.num_files
+        print('%d results successfully retrieved.' % self.num_files)
         if self.num_files > 0:
             self.avg_time = float(self.total_time)/self.num_files
-            print 'Minimum Processing Time: %d' % self.min_time.seconds
-            print 'Maximum Processing Time: %d' % self.max_time.seconds
-            print 'Average Processing Time: %f' % self.avg_time
+            print('Minimum Processing Time: %d' % self.min_time.seconds)
+            print('Maximum Processing Time: %d' % self.max_time.seconds)
+            print('Average Processing Time: %f' % self.avg_time)
             self.elapsed_time = self.latest_time-self.earliest_time
-            print 'Elapsed Time: %d' % self.elapsed_time.seconds
+            print('Elapsed Time: %d' % self.elapsed_time.seconds)
             tput = 1.0 / ((self.elapsed_time.seconds/60.0) / self.num_files)
-            print 'Throughput: %f transactions / minute' % tput
+            print('Throughput: %f transactions / minute' % tput)
 

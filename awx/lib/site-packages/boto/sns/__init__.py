@@ -22,7 +22,7 @@
 
 # this is here for backward compatibility
 # originally, the SNSConnection class was defined here
-from connection import SNSConnection
+from boto.sns.connection import SNSConnection
 from boto.regioninfo import RegionInfo, get_regions
 
 

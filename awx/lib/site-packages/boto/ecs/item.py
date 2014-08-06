@@ -22,7 +22,7 @@
 
 import xml.sax
 import cgi
-from StringIO import StringIO
+from boto.compat import six, StringIO
 
 class ResponseGroup(xml.sax.ContentHandler):
     """A Generic "Response Group", which can
@@ -90,14 +90,14 @@ class Item(ResponseGroup):
 
     def __init__(self, connection=None):
         """Initialize this Item"""
-        super(Item, self).__init__(connection, "Item")
+        ResponseGroup.__init__(self, connection, "Item")
 
 class ItemSet(ResponseGroup):
     """A special ResponseGroup that has built-in paging, and
     only creates new Items on the "Item" tag"""
 
     def __init__(self, connection, action, params, page=0):
-        super(ItemSet, self).__init__(connection, "Items")
+        ResponseGroup.__init__(self, connection, "Items")
         self.objs = []
         self.iter = None
         self.page = page
@@ -106,6 +106,8 @@ class ItemSet(ResponseGroup):
         self.curItem = None
         self.total_results = 0
         self.total_pages = 0
+        self.is_valid = False
+        self.errors = []
 
     def startElement(self, name, attrs, connection):
         if name == "Item":
@@ -119,7 +121,14 @@ class ItemSet(ResponseGroup):
             self.total_results = value
         elif name == 'TotalPages':
             self.total_pages = value
-        elif name == "Item":
+        elif name == 'IsValid':
+            if value == 'True':
+                self.is_valid = True
+        elif name == 'Code':
+            self.errors.append({'Code': value, 'Message': None})
+        elif name == 'Message':
+            self.errors[-1]['Message'] = value
+        elif name == 'Item':
             self.objs.append(self.curItem)
             self._xml.write(self.curItem.to_xml())
             self.curItem = None
@@ -127,21 +136,23 @@ class ItemSet(ResponseGroup):
             self.curItem.endElement(name, value, connection)
         return None
 
-    def next(self):
+    def __next__(self):
         """Special paging functionality"""
         if self.iter is None:
             self.iter = iter(self.objs)
         try:
-            return self.iter.next()
+            return next(self.iter)
         except StopIteration:
             self.iter = None
             self.objs = []
             if int(self.page) < int(self.total_pages):
                 self.page += 1
                 self._connection.get_response(self.action, self.params, self.page, self)
-                return self.next()
+                return next(self)
             else:
                 raise
+
+    next = __next__
 
     def __iter__(self):
         return self
@@ -150,4 +161,4 @@ class ItemSet(ResponseGroup):
         """Override to first fetch everything"""
         for item in self:
             pass
-        return super(ItemSet, self).to_xml()
+        return ResponseGroup.to_xml(self)

@@ -1,3 +1,4 @@
+from boto.compat import six
 # Copyright (c) 2006,2007 Mitch Garnaat http://garnaat.org/
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -89,4 +90,4 @@ class SelectResultSet(object):
             more_results = self.next_token is not None
 
     def next(self):
-        return self.__iter__().next()
+        return next(self.__iter__())

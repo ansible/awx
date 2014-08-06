@@ -20,7 +20,7 @@
 # IN THE SOFTWARE.
 #
 
-from regioninfo import SQSRegionInfo
+from boto.sqs.regioninfo import SQSRegionInfo
 from boto.regioninfo import get_regions
 
 

@@ -27,9 +27,9 @@ import os
 import boto.glacier
 from boto.compat import json
 from boto.connection import AWSAuthConnection
-from .exceptions import UnexpectedHTTPResponseError
-from .response import GlacierResponse
-from .utils import ResettingFileSender
+from boto.glacier.exceptions import UnexpectedHTTPResponseError
+from boto.glacier.response import GlacierResponse
+from boto.glacier.utils import ResettingFileSender
 
 
 class Layer1(AWSAuthConnection):
@@ -89,12 +89,13 @@ class Layer1(AWSAuthConnection):
         self.region = region
         self.account_id = account_id
         super(Layer1, self).__init__(region.endpoint,
-                                   aws_access_key_id, aws_secret_access_key,
-                                   is_secure, port, proxy, proxy_port,
-                                   proxy_user, proxy_pass, debug,
-                                   https_connection_factory,
-                                   path, provider, security_token,
-                                   suppress_consec_slashes, profile_name=profile_name)
+                                     aws_access_key_id, aws_secret_access_key,
+                                     is_secure, port, proxy, proxy_port,
+                                     proxy_user, proxy_pass, debug,
+                                     https_connection_factory,
+                                     path, provider, security_token,
+                                     suppress_consec_slashes,
+                                     profile_name=profile_name)
 
     def _required_auth_capability(self):
         return ['hmac-v4']
@@ -107,10 +108,10 @@ class Layer1(AWSAuthConnection):
         headers['x-amz-glacier-version'] = self.Version
         uri = '/%s/%s' % (self.account_id, resource)
         response = super(Layer1, self).make_request(verb, uri,
-                                                  params=params,
-                                                  headers=headers,
-                                                  sender=sender,
-                                                  data=data)
+                                                    params=params,
+                                                    headers=headers,
+                                                    sender=sender,
+                                                    data=data)
         if response.status in ok_responses:
             return GlacierResponse(response, response_headers)
         else:
@@ -826,9 +827,9 @@ class Layer1(AWSAuthConnection):
         else:
             sender = None
         return self.make_request('POST', uri, headers=headers,
-                                sender=sender,
-                                data=archive, ok_responses=(201,),
-                                response_headers=response_headers)
+                                 sender=sender,
+                                 data=archive, ok_responses=(201,),
+                                 response_headers=response_headers)
 
     def _is_file_like(self, archive):
         return hasattr(archive, 'seek') and hasattr(archive, 'tell')

@@ -37,6 +37,7 @@ from boto.gs.key import Key as GSKey
 from boto.s3.acl import Policy
 from boto.s3.bucket import Bucket as S3Bucket
 from boto.utils import get_utf8_value
+from boto.compat import six
 
 # constants for http query args
 DEF_OBJ_ACL = 'defaultObjectAcl'
@@ -100,12 +101,12 @@ class Bucket(S3Bucket):
         if generation:
             query_args_l.append('generation=%s' % generation)
         if response_headers:
-            for rk, rv in response_headers.iteritems():
+            for rk, rv in six.iteritems(response_headers):
                 query_args_l.append('%s=%s' % (rk, urllib.quote(rv)))
         try:
             key, resp = self._get_key_internal(key_name, headers,
                                                query_args_l=query_args_l)
-        except GSResponseError, e:
+        except GSResponseError as e:
             if e.status == 403 and 'Forbidden' in e.reason:
                 # If we failed getting an object, let the user know which object
                 # failed rather than just returning a generic 403.

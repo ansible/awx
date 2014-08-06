@@ -21,12 +21,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
-from __future__ import with_statement
-from .exceptions import UploadArchiveError
-from .job import Job
-from .writer import compute_hashes_from_fileobj, resume_file_upload, Writer
-from .concurrent import ConcurrentUploader
-from .utils import minimum_part_size, DEFAULT_PART_SIZE
+import codecs
+from boto.glacier.exceptions import UploadArchiveError
+from boto.glacier.job import Job
+from boto.glacier.writer import compute_hashes_from_fileobj, \
+                                resume_file_upload, Writer
+from boto.glacier.concurrent import ConcurrentUploader
+from boto.glacier.utils import minimum_part_size, DEFAULT_PART_SIZE
 import os.path
 
 
@@ -54,8 +55,6 @@ class Vault(object):
         if response_data:
             for response_name, attr_name, default in self.ResponseDataElements:
                 value = response_data[response_name]
-                if isinstance(value, unicode):
-                    value = value.encode('utf8')
                 setattr(self, attr_name, value)
         else:
             for response_name, attr_name, default in self.ResponseDataElements:
@@ -227,7 +226,7 @@ class Vault(object):
         for part_desc in part_list_response['Parts']:
             part_index = self._range_string_to_part_index(
                 part_desc['RangeInBytes'], part_size)
-            part_tree_hash = part_desc['SHA256TreeHash'].decode('hex')
+            part_tree_hash = codecs.decode(part_desc['SHA256TreeHash'], 'hex_codec')
             part_hash_map[part_index] = part_tree_hash
 
         if not file_obj:
@@ -343,9 +342,9 @@ class Vault(object):
             rparams = {}
 
             if start_date is not None:
-                rparams['StartDate'] = start_date.isoformat()
+                rparams['StartDate'] = start_date.strftime('%Y-%m-%dT%H:%M:%S%Z')
             if end_date is not None:
-                rparams['EndDate'] = end_date.isoformat()
+                rparams['EndDate'] = end_date.strftime('%Y-%m-%dT%H:%M:%S%Z')
             if limit is not None:
                 rparams['Limit'] = limit
 

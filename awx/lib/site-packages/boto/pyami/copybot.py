@@ -94,4 +94,3 @@ class CopyBot(ScriptBase):
         if boto.config.getbool(self.name, 'exit_on_completion', True):
             ec2 = boto.connect_ec2()
             ec2.terminate_instances([self.instance_id])
-

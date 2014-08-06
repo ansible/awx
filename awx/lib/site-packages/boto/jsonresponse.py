@@ -21,7 +21,7 @@
 # IN THE SOFTWARE.
 
 import xml.sax
-import utils
+from boto import utils
 
 class XmlHandler(xml.sax.ContentHandler):
 
@@ -49,6 +49,8 @@ class XmlHandler(xml.sax.ContentHandler):
         self.current_text += content
 
     def parse(self, s):
+        if not isinstance(s, bytes):
+            s = s.encode('utf-8')
         xml.sax.parseString(s, self)
         
 class Element(dict):

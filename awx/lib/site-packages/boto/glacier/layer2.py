@@ -21,8 +21,8 @@
 # IN THE SOFTWARE.
 #
 
-from .layer1 import Layer1
-from .vault import Vault
+from boto.glacier.layer1 import Layer1
+from boto.glacier.vault import Vault
 
 
 class Layer2(object):

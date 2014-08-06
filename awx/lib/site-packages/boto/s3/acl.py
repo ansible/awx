@@ -32,6 +32,7 @@ class Policy(object):
 
     def __init__(self, parent=None):
         self.parent = parent
+        self.namespace = None
         self.acl = None
 
     def __repr__(self):
@@ -50,6 +51,9 @@ class Policy(object):
         return "<Policy: %s>" % ", ".join(grants)
 
     def startElement(self, name, attrs, connection):
+        if name == 'AccessControlPolicy':
+            self.namespace = attrs.get('xmlns', None)
+            return None      
         if name == 'Owner':
             self.owner = User(self)
             return self.owner
@@ -68,7 +72,10 @@ class Policy(object):
             setattr(self, name, value)
 
     def to_xml(self):
-        s = '<AccessControlPolicy>'
+        if self.namespace is not None:
+            s = '<AccessControlPolicy xmlns="{0}">'.format(self.namespace)
+        else:
+            s = '<AccessControlPolicy>'     
         s += self.owner.to_xml()
         s += self.acl.to_xml()
         s += '</AccessControlPolicy>'

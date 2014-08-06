@@ -47,9 +47,9 @@ class TableBatchGenerator(object):
         self.consistent_read = consistent_read
 
     def _queue_unprocessed(self, res):
-        if not u'UnprocessedKeys' in res:
+        if u'UnprocessedKeys' not in res:
             return
-        if not self.table.name in res[u'UnprocessedKeys']:
+        if self.table.name not in res[u'UnprocessedKeys']:
             return
 
         keys = res[u'UnprocessedKeys'][self.table.name][u'Keys']
@@ -68,7 +68,7 @@ class TableBatchGenerator(object):
             res = batch.submit()
 
             # parse the results
-            if not self.table.name in res[u'Responses']:
+            if self.table.name not in res[u'Responses']:
                 continue
             self.consumed_units += res[u'Responses'][self.table.name][u'ConsumedCapacityUnits']
             for elem in res[u'Responses'][self.table.name][u'Items']:

@@ -20,12 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+from boto.compat import six
+
 class BootstrapAction(object):
     def __init__(self, name, path, bootstrap_action_args):
         self.name = name
         self.path = path
 
-        if isinstance(bootstrap_action_args, basestring):
+        if isinstance(bootstrap_action_args, six.string_types):
             bootstrap_action_args = [bootstrap_action_args]
 
         self.bootstrap_action_args = bootstrap_action_args

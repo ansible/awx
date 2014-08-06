@@ -109,7 +109,7 @@ def test_float():
     assert tt.name == t.name
     assert tt.value == t.value
     return t
-    
+
 def test_required():
     global _objects
     t = TestRequired()

@@ -264,13 +264,13 @@ class Layer2(object):
         """
         dynamodb_key = {}
         dynamodb_value = self.dynamizer.encode(hash_key)
-        if dynamodb_value.keys()[0] != schema.hash_key_type:
+        if list(dynamodb_value.keys())[0] != schema.hash_key_type:
             msg = 'Hashkey must be of type: %s' % schema.hash_key_type
             raise TypeError(msg)
         dynamodb_key['HashKeyElement'] = dynamodb_value
         if range_key is not None:
             dynamodb_value = self.dynamizer.encode(range_key)
-            if dynamodb_value.keys()[0] != schema.range_key_type:
+            if list(dynamodb_value.keys())[0] != schema.range_key_type:
                 msg = 'RangeKey must be of type: %s' % schema.range_key_type
                 raise TypeError(msg)
             dynamodb_key['RangeKeyElement'] = dynamodb_value

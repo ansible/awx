@@ -19,6 +19,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+from boto.compat import six
+
 
 class Blob(object):
     """Blob object"""
@@ -37,18 +39,17 @@ class Blob(object):
         return f
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return six.text_type(self).encode('utf-8')
 
     def __unicode__(self):
         if hasattr(self.file, "get_contents_as_string"):
             value = self.file.get_contents_as_string()
         else:
             value = self.file.getvalue()
-        if isinstance(value, unicode):
+        if isinstance(value, six.text_type):
             return value
         else:
             return value.decode('utf-8')
-
 
     def read(self):
         if hasattr(self.file, "get_contents_as_string"):
@@ -60,7 +61,7 @@ class Blob(object):
         return self.file.readline()
 
     def next(self):
-        return self.file.next()
+        return next(self.file)
 
     def __iter__(self):
         return iter(self.file)

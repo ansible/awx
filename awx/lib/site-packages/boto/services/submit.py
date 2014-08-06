@@ -18,7 +18,6 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-
 import time
 import os
 
@@ -77,12 +76,12 @@ class Submitter(object):
                 for file in files:
                     fullpath = os.path.join(root, file)
                     if status:
-                        print 'Submitting %s' % fullpath
+                        print('Submitting %s' % fullpath)
                     self.submit_file(fullpath, metadata, cb, num_cb, prefix)
                     total += 1
         elif os.path.isfile(path):
             self.submit_file(path, metadata, cb, num_cb)
             total += 1
         else:
-            print 'problem with %s' % path
+            print('problem with %s' % path)
         return (metadata['Batch'], total)

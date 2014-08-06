@@ -64,10 +64,13 @@ in the format in which it would be stored in SQS.
 """
 
 import base64
-import StringIO
-from boto.sqs.attributes import Attributes
-from boto.exception import SQSDecodeError
+
 import boto
+
+from boto.compat import StringIO
+from boto.sqs.attributes import Attributes
+from boto.sqs.messageattributes import MessageAttributes
+from boto.exception import SQSDecodeError
 
 class RawMessage(object):
     """
@@ -84,6 +87,8 @@ class RawMessage(object):
         self.receipt_handle = None
         self.md5 = None
         self.attributes = Attributes(self)
+        self.message_attributes = MessageAttributes(self)
+        self.md5_message_attributes = None
 
     def __len__(self):
         return len(self.encode(self._body))
@@ -91,6 +96,8 @@ class RawMessage(object):
     def startElement(self, name, attrs, connection):
         if name == 'Attribute':
             return self.attributes
+        if name == 'MessageAttribute':
+            return self.message_attributes
         return None
 
     def endElement(self, name, value, connection):
@@ -100,8 +107,10 @@ class RawMessage(object):
             self.id = value
         elif name == 'ReceiptHandle':
             self.receipt_handle = value
-        elif name == 'MD5OfMessageBody':
+        elif name == 'MD5OfBody':
             self.md5 = value
+        elif name == 'MD5OfMessageAttributes':
+            self.md5_message_attributes = value
         else:
             setattr(self, name, value)
 
@@ -154,11 +163,11 @@ class Message(RawMessage):
     """
 
     def encode(self, value):
-        return base64.b64encode(value)
+        return base64.b64encode(value.encode('utf-8')).decode('utf-8')
 
     def decode(self, value):
         try:
-            value = base64.b64decode(value)
+            value = base64.b64decode(value.encode('utf-8')).decode('utf-8')
         except:
             boto.log.warning('Unable to decode message')
             return value
@@ -184,7 +193,7 @@ class MHMessage(Message):
     def decode(self, value):
         try:
             msg = {}
-            fp = StringIO.StringIO(value)
+            fp = StringIO(value)
             line = fp.readline()
             while line:
                 delim = line.find(':')
@@ -248,12 +257,12 @@ class EncodedMHMessage(MHMessage):
 
     def decode(self, value):
         try:
-            value = base64.b64decode(value)
+            value = base64.b64decode(value.encode('utf-8')).decode('utf-8')
         except:
             raise SQSDecodeError('Unable to decode message', self)
         return super(EncodedMHMessage, self).decode(value)
 
     def encode(self, value):
         value = super(EncodedMHMessage, self).encode(value)
-        return base64.b64encode(value)
+        return base64.b64encode(value.encode('utf-8')).decode('utf-8')
 

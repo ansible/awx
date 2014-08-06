@@ -21,8 +21,8 @@
 
 import boto
 
-from connection import FileConnection as Connection
-from key import Key
-from bucket import Bucket
+from boto.file.connection import FileConnection as Connection
+from boto.file.key import Key
+from boto.file.bucket import Bucket
 
 __all__ = ['Connection', 'Key', 'Bucket']

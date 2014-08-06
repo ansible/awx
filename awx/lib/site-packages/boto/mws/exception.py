@@ -1,4 +1,4 @@
-# Copyright (c) 2012 Andy Davidoff http://www.disruptek.com/
+# Copyright (c) 2012-2014 Andy Davidoff http://www.disruptek.com/
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -19,19 +19,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 from boto.exception import BotoServerError
+from boto.mws.response import ResponseFactory
 
 
-class ResponseErrorFactory(BotoServerError):
+class ResponseErrorFactory(ResponseFactory):
 
-    def __new__(cls, *args, **kw):
-        error = BotoServerError(*args, **kw)
-        try:
-            newclass = globals()[error.error_code]
-        except KeyError:
-            newclass = ResponseError
-        obj = newclass.__new__(newclass, *args, **kw)
-        obj.__dict__.update(error.__dict__)
-        return obj
+    def __call__(self, status, reason, body=None):
+        server = BotoServerError(status, reason, body=body)
+        supplied = self.find_element(server.error_code, '', ResponseError)
+        print(supplied.__name__)
+        return supplied(status, reason, body=body)
 
 
 class ResponseError(BotoServerError):
@@ -41,16 +38,14 @@ class ResponseError(BotoServerError):
     retry = False
 
     def __repr__(self):
-        return '{0}({1}, {2},\n\t{3})'.format(self.__class__.__name__,
-                                              self.status, self.reason,
-                                              self.error_message)
+        return '{0.__name__}({1.reason}: "{1.message}")' \
+            .format(self.__class__, self)
 
     def __str__(self):
-        return 'MWS Response Error: {0.status} {0.__class__.__name__} {1}\n' \
-               '{2}\n' \
-               '{0.error_message}'.format(self,
-                                          self.retry and '(Retriable)' or '',
-                                          self.__doc__.strip())
+        doc = self.__doc__ and self.__doc__.strip() + "\n" or ''
+        return '{1.__name__}: {0.reason} {2}\n{3}' \
+               '{0.message}'.format(self, self.__class__,
+                                    self.retry and '(Retriable)' or '', doc)
 
 
 class RetriableResponseError(ResponseError):

@@ -20,11 +20,6 @@
 # IN THE SOFTWARE.
 #
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
 import base64
 import boto
 
@@ -32,6 +27,7 @@ from boto.connection import AWSQueryConnection
 from boto.regioninfo import RegionInfo
 from boto.exception import JSONResponseError
 from boto.kinesis import exceptions
+from boto.compat import json
 
 
 class KinesisConnection(AWSQueryConnection):
@@ -293,7 +289,8 @@ class KinesisConnection(AWSQueryConnection):
         # Base64 decode the data
         if b64_decode:
             for record in response.get('Records', []):
-                record['Data'] = base64.b64decode(record['Data'])
+                record['Data'] = base64.b64decode(
+                    record['Data'].encode('utf-8')).decode('utf-8')
 
         return response
 
@@ -594,7 +591,8 @@ class KinesisConnection(AWSQueryConnection):
         if sequence_number_for_ordering is not None:
             params['SequenceNumberForOrdering'] = sequence_number_for_ordering
         if b64_encode:
-            params['Data'] = base64.b64encode(params['Data'])
+            params['Data'] = base64.b64encode(
+                params['Data'].encode('utf-8')).decode('utf-8')
         return self.make_request(action='PutRecord',
                                  body=json.dumps(params))
 
@@ -695,7 +693,7 @@ class KinesisConnection(AWSQueryConnection):
             headers=headers, data=body)
         response = self._mexe(http_request, sender=None,
                               override_num_retries=10)
-        response_body = response.read()
+        response_body = response.read().decode('utf-8')
         boto.log.debug(response.getheaders())
         boto.log.debug(response_body)
         if response.status == 200:

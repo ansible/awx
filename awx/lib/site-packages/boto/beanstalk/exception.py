@@ -4,12 +4,14 @@ from boto.exception import BotoServerError
 
 
 def simple(e):
-    err = json.loads(e.error_message)
-    code = err['Error']['Code']
+    code = e.code
+
+    if code.endswith('Exception'):
+        code = code.rstrip('Exception')
 
     try:
         # Dynamically get the error class.
-        simple_e = getattr(sys.modules[__name__], code)(e, err)
+        simple_e = getattr(sys.modules[__name__], code)(e)
     except AttributeError:
         # Return original exception on failure.
         return e
@@ -18,12 +20,9 @@ def simple(e):
 
 
 class SimpleException(BotoServerError):
-    def __init__(self, e, err):
+    def __init__(self, e):
         super(SimpleException, self).__init__(e.status, e.reason, e.body)
-        self.body = e.error_message
-        self.request_id = err['RequestId']
-        self.error_code = err['Error']['Code']
-        self.error_message = err['Error']['Message']
+        self.error_message = self.message
 
     def __repr__(self):
         return self.__class__.__name__ + ': ' + self.error_message

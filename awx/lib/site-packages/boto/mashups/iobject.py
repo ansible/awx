@@ -18,7 +18,6 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-
 import os
 
 def int_val_fn(v):
@@ -33,7 +32,7 @@ class IObject(object):
     def choose_from_list(self, item_list, search_str='',
                          prompt='Enter Selection'):
         if not item_list:
-            print 'No Choices Available'
+            print('No Choices Available')
             return
         choice = None
         while not choice:
@@ -41,19 +40,19 @@ class IObject(object):
             choices = []
             for item in item_list:
                 if isinstance(item, basestring):
-                    print '[%d] %s' % (n, item)
+                    print('[%d] %s' % (n, item))
                     choices.append(item)
                     n += 1
                 else:
                     obj, id, desc = item
                     if desc:
                         if desc.find(search_str) >= 0:
-                            print '[%d] %s - %s' % (n, id, desc)
+                            print('[%d] %s - %s' % (n, id, desc))
                             choices.append(obj)
                             n += 1
                     else:
                         if id.find(search_str) >= 0:
-                            print '[%d] %s' % (n, id)
+                            print('[%d] %s' % (n, id))
                             choices.append(obj)
                             n += 1
             if choices:
@@ -67,12 +66,12 @@ class IObject(object):
                             return None
                         choice = choices[int_val-1]
                     except ValueError:
-                        print '%s is not a valid choice' % val
+                        print('%s is not a valid choice' % val)
                     except IndexError:
-                        print '%s is not within the range[1-%d]' % (val,
-                                                                    len(choices))
+                        print('%s is not within the range[1-%d]' % (val,
+                                                                    len(choices)))
             else:
-                print "No objects matched your pattern"
+                print("No objects matched your pattern")
                 search_str = ''
         return choice
 
@@ -83,7 +82,7 @@ class IObject(object):
             if validation_fn:
                 okay = validation_fn(val)
                 if not okay:
-                    print 'Invalid value: %s' % val
+                    print('Invalid value: %s' % val)
             else:
                 okay = True
         return val
@@ -105,7 +104,7 @@ class IObject(object):
                 else:
                     val = ''
             else:
-                print 'Invalid value: %s' % val
+                print('Invalid value: %s' % val)
                 val = ''
         return val
 

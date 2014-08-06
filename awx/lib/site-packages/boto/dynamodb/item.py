@@ -35,7 +35,7 @@ class Item(dict):
     :ivar range_key_name: The name of the RangeKey associated with this item.
     :ivar table: The Table this item belongs to.
     """
-    
+
     def __init__(self, table, hash_key=None, range_key=None, attrs=None):
         self.table = table
         self._updates = None

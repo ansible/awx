@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Paramiko; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
-
+from __future__ import print_function
 
 import socket
 import sys
@@ -51,7 +51,7 @@ def posix_shell(chan):
                 try:
                     x = chan.recv(1024)
                     if len(x) == 0:
-                        print '\r\n*** EOF\r\n',
+                        print('\r\n*** EOF\r\n', end=' ')
                         break
                     sys.stdout.write(x)
                     sys.stdout.flush()

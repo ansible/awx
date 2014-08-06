@@ -72,4 +72,3 @@ class SourceAttribute(object):
             valid = '|'.join(self.ValidDataFunctions)
             raise ValueError('data_function must be one of: %s' % valid)
         self._data_function = value
-

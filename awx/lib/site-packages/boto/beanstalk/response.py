@@ -1,5 +1,6 @@
 """Classify responses from layer1 and strict type values."""
 from datetime import datetime
+from boto.compat import six
 
 
 class BaseObject(object):
@@ -7,7 +8,7 @@ class BaseObject(object):
     def __repr__(self):
         result = self.__class__.__name__ + '{ '
         counter = 0
-        for key, value in self.__dict__.iteritems():
+        for key, value in six.iteritems(self.__dict__):
             # first iteration no comma
             counter += 1
             if counter > 1:

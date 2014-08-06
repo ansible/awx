@@ -9,7 +9,7 @@ def beanstalk_wrapper(func, name):
     def _wrapped_low_level_api(*args, **kwargs):
         try:
             response = func(*args, **kwargs)
-        except BotoServerError, e:
+        except BotoServerError as e:
             raise exception.simple(e)
         # Turn 'this_is_a_function_name' into 'ThisIsAFunctionNameResponse'.
         cls_name = ''.join([part.capitalize() for part in name.split('_')]) + 'Response'

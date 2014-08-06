@@ -27,5 +27,3 @@ class ListElement(list):
     def endElement(self, name, value, connection):
         if name == 'member':
             self.append(value)
-    
-    

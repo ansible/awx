@@ -20,16 +20,12 @@
 # IN THE SOFTWARE.
 #
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
 import boto
 from boto.connection import AWSQueryConnection
 from boto.regioninfo import RegionInfo
 from boto.exception import JSONResponseError
 from boto.support import exceptions
+from boto.compat import json
 
 
 class SupportConnection(AWSQueryConnection):
@@ -577,7 +573,7 @@ class SupportConnection(AWSQueryConnection):
             headers=headers, data=body)
         response = self._mexe(http_request, sender=None,
                               override_num_retries=10)
-        response_body = response.read()
+        response_body = response.read().decode('utf-8')
         boto.log.debug(response_body)
         if response.status == 200:
             if response_body:
@@ -588,4 +584,3 @@ class SupportConnection(AWSQueryConnection):
             exception_class = self._faults.get(fault_name, self.ResponseError)
             raise exception_class(response.status, response.reason,
                                   body=json_body)
-

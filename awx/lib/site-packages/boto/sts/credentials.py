@@ -113,10 +113,10 @@ class Credentials(object):
             the credentials contained in the file, the permissions
             of the file will be set to readable/writable by owner only.
         """
-        fp = open(file_path, 'wb')
+        fp = open(file_path, 'w')
         json.dump(self.to_dict(), fp)
         fp.close()
-        os.chmod(file_path, 0600)
+        os.chmod(file_path, 0o600)
 
     def is_expired(self, time_offset_seconds=0):
         """

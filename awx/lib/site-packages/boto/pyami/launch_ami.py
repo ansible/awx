@@ -29,7 +29,7 @@ import boto
 usage_string = """
 SYNOPSIS
     launch_ami.py -a ami_id [-b script_bucket] [-s script_name]
-                  [-m module] [-c class_name] [-r] 
+                  [-m module] [-c class_name] [-r]
                   [-g group] [-k key_name] [-n num_instances]
                   [-w] [extra_data]
     Where:
@@ -68,7 +68,7 @@ SYNOPSIS
 """
 
 def usage():
-    print usage_string
+    print(usage_string)
     sys.exit()
 
 def main():
@@ -80,16 +80,16 @@ def main():
                                     'reload', 'script_name', 'wait'])
     except:
         usage()
-    params = {'module_name' : None,
-              'script_name' : None,
-              'class_name' : None,
-              'script_bucket' : None,
-              'group' : 'default',
-              'keypair' : None,
-              'ami' : None,
-              'num_instances' : 1,
-              'input_queue_name' : None,
-              'output_queue_name' : None}
+    params = {'module_name': None,
+              'script_name': None,
+              'class_name': None,
+              'script_bucket': None,
+              'group': 'default',
+              'keypair': None,
+              'ami': None,
+              'num_instances': 1,
+              'input_queue_name': None,
+              'output_queue_name': None}
     reload = None
     wait = None
     for o, a in opts:
@@ -124,18 +124,18 @@ def main():
     required = ['ami']
     for pname in required:
         if not params.get(pname, None):
-            print '%s is required' % pname
+            print('%s is required' % pname)
             usage()
     if params['script_name']:
         # first copy the desired module file to S3 bucket
         if reload:
-            print 'Reloading module %s to S3' % params['script_name']
+            print('Reloading module %s to S3' % params['script_name'])
         else:
-            print 'Copying module %s to S3' % params['script_name']
+            print('Copying module %s to S3' % params['script_name'])
         l = imp.find_module(params['script_name'])
         c = boto.connect_s3()
         bucket = c.get_bucket(params['script_bucket'])
-        key = bucket.new_key(params['script_name']+'.py')
+        key = bucket.new_key(params['script_name'] + '.py')
         key.set_contents_from_file(l[0])
         params['script_md5'] = key.md5
     # we have everything we need, now build userdata string
@@ -155,24 +155,23 @@ def main():
         r = img.run(user_data=s, key_name=params['keypair'],
                     security_groups=[params['group']],
                     max_count=params.get('num_instances', 1))
-        print 'AMI: %s - %s (Started)' % (params['ami'], img.location)
-        print 'Reservation %s contains the following instances:' % r.id
+        print('AMI: %s - %s (Started)' % (params['ami'], img.location))
+        print('Reservation %s contains the following instances:' % r.id)
         for i in r.instances:
-            print '\t%s' % i.id
+            print('\t%s' % i.id)
         if wait:
             running = False
             while not running:
                 time.sleep(30)
                 [i.update() for i in r.instances]
                 status = [i.state for i in r.instances]
-                print status
+                print(status)
                 if status.count('running') == len(r.instances):
                     running = True
             for i in r.instances:
-                print 'Instance: %s' % i.ami_launch_index
-                print 'Public DNS Name: %s' % i.public_dns_name
-                print 'Private DNS Name: %s' % i.private_dns_name
+                print('Instance: %s' % i.ami_launch_index)
+                print('Public DNS Name: %s' % i.public_dns_name)
+                print('Private DNS Name: %s' % i.private_dns_name)
 
 if __name__ == "__main__":
     main()
-

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-from connection import CloudFormationConnection
+from boto.cloudformation.connection import CloudFormationConnection
 from boto.regioninfo import RegionInfo, get_regions, load_regions
 
 RegionData = load_regions().get('cloudformation')

@@ -32,13 +32,12 @@ class ScriptBase(object):
         if self.last_command.status != 0:
             boto.log.error('Error running command: "%s". Output: "%s"' % (command, self.last_command.output))
             if notify:
-                self.notify('Error encountered', \
-                        'Error running the following command:\n\t%s\n\nCommand output:\n\t%s' % \
-                        (command, self.last_command.output))
+                self.notify('Error encountered',
+                            'Error running the following command:\n\t%s\n\nCommand output:\n\t%s' % \
+                            (command, self.last_command.output))
             if exit_on_error:
                 sys.exit(-1)
         return self.last_command.status
 
     def main(self):
         pass
-

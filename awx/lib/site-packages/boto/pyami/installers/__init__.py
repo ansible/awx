@@ -61,4 +61,3 @@ class Installer(ScriptBase):
         Do whatever is necessary to "install" the package.
         """
         raise NotImplementedError
-

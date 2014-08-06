@@ -156,7 +156,7 @@ class Cors(handler.ContentHandler):
             s += '<' + collection + '>'
             # If collection elements has type string, append atomic value,
             # otherwise, append sequence of values in named tags.
-            if isinstance(elements_or_value, types.StringTypes):
+            if isinstance(elements_or_value, str):
               s += elements_or_value
             else:
               for (name, value) in elements_or_value:
