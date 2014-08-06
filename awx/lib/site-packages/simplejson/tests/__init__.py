@@ -3,18 +3,15 @@ import unittest
 import doctest
 import sys
 
-class OptionalExtensionTestSuite(unittest.TestSuite):
+
+class NoExtensionTestSuite(unittest.TestSuite):
     def run(self, result):
         import simplejson
-        run = unittest.TestSuite.run
-        run(self, result)
-        if simplejson._import_c_make_encoder() is None:
-            TestMissingSpeedups().run(result)
-        else:
-            simplejson._toggle_speedups(False)
-            run(self, result)
-            simplejson._toggle_speedups(True)
+        simplejson._toggle_speedups(False)
+        result = unittest.TestSuite.run(self, result)
+        simplejson._toggle_speedups(True)
         return result
+
 
 class TestMissingSpeedups(unittest.TestCase):
     def runTest(self):
@@ -22,6 +19,7 @@ class TestMissingSpeedups(unittest.TestCase):
             "PyPy doesn't need speedups! :)"
         elif hasattr(self, 'skipTest'):
             self.skipTest('_speedups.so is missing!')
+
 
 def additional_tests(suite=None):
     import simplejson
@@ -36,34 +34,45 @@ def additional_tests(suite=None):
 
 
 def all_tests_suite():
-    suite = unittest.TestLoader().loadTestsFromNames([
-        'simplejson.tests.test_bigint_as_string',
-        'simplejson.tests.test_check_circular',
-        'simplejson.tests.test_decode',
-        'simplejson.tests.test_default',
-        'simplejson.tests.test_dump',
-        'simplejson.tests.test_encode_basestring_ascii',
-        'simplejson.tests.test_encode_for_html',
-        'simplejson.tests.test_errors',
-        'simplejson.tests.test_fail',
-        'simplejson.tests.test_float',
-        'simplejson.tests.test_indent',
-        'simplejson.tests.test_pass1',
-        'simplejson.tests.test_pass2',
-        'simplejson.tests.test_pass3',
-        'simplejson.tests.test_recursion',
-        'simplejson.tests.test_scanstring',
-        'simplejson.tests.test_separators',
-        'simplejson.tests.test_speedups',
-        'simplejson.tests.test_unicode',
-        'simplejson.tests.test_decimal',
-        'simplejson.tests.test_tuple',
-        'simplejson.tests.test_namedtuple',
-        'simplejson.tests.test_tool',
-        'simplejson.tests.test_for_json',
-    ])
-    suite = additional_tests(suite)
-    return OptionalExtensionTestSuite([suite])
+    def get_suite():
+        return additional_tests(
+            unittest.TestLoader().loadTestsFromNames([
+                'simplejson.tests.test_bitsize_int_as_string',
+                'simplejson.tests.test_bigint_as_string',
+                'simplejson.tests.test_check_circular',
+                'simplejson.tests.test_decode',
+                'simplejson.tests.test_default',
+                'simplejson.tests.test_dump',
+                'simplejson.tests.test_encode_basestring_ascii',
+                'simplejson.tests.test_encode_for_html',
+                'simplejson.tests.test_errors',
+                'simplejson.tests.test_fail',
+                'simplejson.tests.test_float',
+                'simplejson.tests.test_indent',
+                'simplejson.tests.test_pass1',
+                'simplejson.tests.test_pass2',
+                'simplejson.tests.test_pass3',
+                'simplejson.tests.test_recursion',
+                'simplejson.tests.test_scanstring',
+                'simplejson.tests.test_separators',
+                'simplejson.tests.test_speedups',
+                'simplejson.tests.test_unicode',
+                'simplejson.tests.test_decimal',
+                'simplejson.tests.test_tuple',
+                'simplejson.tests.test_namedtuple',
+                'simplejson.tests.test_tool',
+                'simplejson.tests.test_for_json',
+            ]))
+    suite = get_suite()
+    import simplejson
+    if simplejson._import_c_make_encoder() is None:
+        suite.addTest(TestMissingSpeedups())
+    else:
+        suite = unittest.TestSuite([
+            suite,
+            NoExtensionTestSuite([get_suite()]),
+        ])
+    return suite
 
 
 def main():

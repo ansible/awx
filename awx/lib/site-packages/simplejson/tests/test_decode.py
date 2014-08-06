@@ -86,3 +86,14 @@ class TestDecode(TestCase):
         self.assertEqual(
             ({'a': {}}, 11),
             cls().raw_decode(" \n{\"a\": {}}"))
+
+    def test_bounds_checking(self):
+        # https://github.com/simplejson/simplejson/issues/98
+        j = json.decoder.JSONDecoder()
+        for i in [4, 5, 6, -1, -2, -3, -4, -5, -6]:
+            self.assertRaises(ValueError, j.scan_once, '1234', i)
+            self.assertRaises(ValueError, j.raw_decode, '1234', i)
+        x, y = sorted(['128931233', '472389423'], key=id)
+        diff = id(x) - id(y)
+        self.assertRaises(ValueError, j.scan_once, y, diff)
+        self.assertRaises(ValueError, j.raw_decode, y, i)

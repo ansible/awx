@@ -116,12 +116,14 @@ class JSONEncoder(object):
     """
     item_separator = ', '
     key_separator = ': '
+
     def __init__(self, skipkeys=False, ensure_ascii=True,
-            check_circular=True, allow_nan=True, sort_keys=False,
-            indent=None, separators=None, encoding='utf-8', default=None,
-            use_decimal=True, namedtuple_as_object=True,
-            tuple_as_array=True, bigint_as_string=False,
-            item_sort_key=None, for_json=False, ignore_nan=False):
+                 check_circular=True, allow_nan=True, sort_keys=False,
+                 indent=None, separators=None, encoding='utf-8', default=None,
+                 use_decimal=True, namedtuple_as_object=True,
+                 tuple_as_array=True, bigint_as_string=False,
+                 item_sort_key=None, for_json=False, ignore_nan=False,
+                 int_as_string_bitcount=None):
         """Constructor for JSONEncoder, with sensible defaults.
 
         If skipkeys is false, then it is a TypeError to attempt
@@ -180,6 +182,10 @@ class JSONEncoder(object):
         or lower than -2**53 will be encoded as strings. This is to avoid the
         rounding that happens in Javascript otherwise.
 
+        If int_as_string_bitcount is a positive number (n), then int of size
+        greater than or equal to 2**n or lower than or equal to -2**n will be
+        encoded as strings.
+
         If specified, item_sort_key is a callable used to sort the items in
         each dictionary. This is useful if you want to sort items other than
         in alphabetical order by key.
@@ -207,6 +213,7 @@ class JSONEncoder(object):
         self.item_sort_key = item_sort_key
         self.for_json = for_json
         self.ignore_nan = ignore_nan
+        self.int_as_string_bitcount = int_as_string_bitcount
         if indent is not None and not isinstance(indent, string_types):
             indent = indent * ' '
         self.indent = indent
@@ -315,8 +322,9 @@ class JSONEncoder(object):
 
             return text
 
-
         key_memo = {}
+        int_as_string_bitcount = (
+            53 if self.bigint_as_string else self.int_as_string_bitcount)
         if (_one_shot and c_make_encoder is not None
                 and self.indent is None):
             _iterencode = c_make_encoder(
@@ -324,17 +332,17 @@ class JSONEncoder(object):
                 self.key_separator, self.item_separator, self.sort_keys,
                 self.skipkeys, self.allow_nan, key_memo, self.use_decimal,
                 self.namedtuple_as_object, self.tuple_as_array,
-                self.bigint_as_string, self.item_sort_key,
-                self.encoding, self.for_json, self.ignore_nan,
-                Decimal)
+                int_as_string_bitcount,
+                self.item_sort_key, self.encoding, self.for_json,
+                self.ignore_nan, Decimal)
         else:
             _iterencode = _make_iterencode(
                 markers, self.default, _encoder, self.indent, floatstr,
                 self.key_separator, self.item_separator, self.sort_keys,
                 self.skipkeys, _one_shot, self.use_decimal,
                 self.namedtuple_as_object, self.tuple_as_array,
-                self.bigint_as_string, self.item_sort_key,
-                self.encoding, self.for_json,
+                int_as_string_bitcount,
+                self.item_sort_key, self.encoding, self.for_json,
                 Decimal=Decimal)
         try:
             return _iterencode(o, 0)
@@ -372,7 +380,8 @@ class JSONEncoderForHTML(JSONEncoder):
 def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
         _key_separator, _item_separator, _sort_keys, _skipkeys, _one_shot,
         _use_decimal, _namedtuple_as_object, _tuple_as_array,
-        _bigint_as_string, _item_sort_key, _encoding, _for_json,
+        _int_as_string_bitcount, _item_sort_key,
+        _encoding,_for_json,
         ## HACK: hand-optimized bytecode; turn globals into locals
         _PY3=PY3,
         ValueError=ValueError,
@@ -391,6 +400,26 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
         raise TypeError("item_sort_key must be None or callable")
     elif _sort_keys and not _item_sort_key:
         _item_sort_key = itemgetter(0)
+
+    if (_int_as_string_bitcount is not None and
+        (_int_as_string_bitcount <= 0 or
+         not isinstance(_int_as_string_bitcount, integer_types))):
+        raise TypeError("int_as_string_bitcount must be a positive integer")
+
+    def _encode_int(value):
+        skip_quoting = (
+            _int_as_string_bitcount is None
+            or
+            _int_as_string_bitcount < 1
+        )
+        if (
+            skip_quoting or
+            (-1 << _int_as_string_bitcount)
+            < value <
+            (1 << _int_as_string_bitcount)
+        ):
+            return str(value)
+        return '"' + str(value) + '"'
 
     def _iterencode_list(lst, _current_indent_level):
         if not lst:
@@ -426,10 +455,7 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
             elif value is False:
                 yield buf + 'false'
             elif isinstance(value, integer_types):
-                yield ((buf + str(value))
-                       if (not _bigint_as_string or
-                           (-1 << 53) < value < (1 << 53))
-                           else (buf + '"' + str(value) + '"'))
+                yield buf + _encode_int(value)
             elif isinstance(value, float):
                 yield buf + _floatstr(value)
             elif _use_decimal and isinstance(value, Decimal):
@@ -540,10 +566,7 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
             elif value is False:
                 yield 'false'
             elif isinstance(value, integer_types):
-                yield (str(value)
-                       if (not _bigint_as_string or
-                           (-1 << 53) < value < (1 << 53))
-                           else ('"' + str(value) + '"'))
+                yield _encode_int(value)
             elif isinstance(value, float):
                 yield _floatstr(value)
             elif _use_decimal and isinstance(value, Decimal):
@@ -585,10 +608,7 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
         elif o is False:
             yield 'false'
         elif isinstance(o, integer_types):
-            yield (str(o)
-                   if (not _bigint_as_string or
-                       (-1 << 53) < o < (1 << 53))
-                       else ('"' + str(o) + '"'))
+            yield _encode_int(o)
         elif isinstance(o, float):
             yield _floatstr(o)
         else:
