@@ -143,7 +143,7 @@ class HtmlBlockPreprocessor(Preprocessor):
         """
         Same effect as concatenating the strings in items,
         finding the character to which stringindex refers in that string,
-        and returning the item in which that character resides.
+        and returning the index of the item in which that character resides.
         """
         items.append('dummy')
         i, count = 0, 0
@@ -175,8 +175,8 @@ class HtmlBlockPreprocessor(Preprocessor):
                     if len(items) - right_listindex <= 1:  # last element
                         right_listindex -= 1
                     placeholder = self.markdown.htmlStash.store('\n\n'.join(
-                        items[i:right_listindex]))
-                    del items[i:right_listindex]
+                        items[i:right_listindex + 1]))
+                    del items[i:right_listindex + 1]
                     items.insert(i, placeholder)
         return items
 

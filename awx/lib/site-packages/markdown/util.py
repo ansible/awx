@@ -30,7 +30,7 @@ BLOCK_LEVEL_ELEMENTS = re.compile("^(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul"
                                   "|hr|hr/|style|li|dt|dd|thead|tbody"
                                   "|tr|th|td|section|footer|header|group|figure"
                                   "|figcaption|aside|article|canvas|output"
-                                  "|progress|video)$", re.IGNORECASE)
+                                  "|progress|video|nav)$", re.IGNORECASE)
 # Placeholders
 STX = '\u0002'  # Use STX ("Start of text") for start-of-placeholder
 ETX = '\u0003'  # Use ETX ("End of text") for end-of-placeholder

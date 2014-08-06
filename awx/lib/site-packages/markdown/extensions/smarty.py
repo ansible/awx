@@ -73,7 +73,7 @@ from ..util import parseBoolValue
 # Constants for quote education.
 punctClass = r"""[!"#\$\%'()*+,-.\/:;<=>?\@\[\\\]\^_`{|}~]"""
 endOfWordClass = r"[\s.,;:!?)]"
-closeClass = r"[^\ \t\r\n\[\{\(\-\u0002\u0003]"
+closeClass = "[^\ \t\r\n\[\{\(\-\u0002\u0003]"
 
 openingQuotesBase = (
    '(\s'              # a  whitespace char
@@ -150,14 +150,14 @@ class SmartyExtension(Extension):
             md.inlinePatterns.add(name, pattern, after)
 
     def educateDashes(self, md):
-        emDashesPattern = SubstituteTextPattern(r'(?<!-)---(?!-)', '&mdash;', md)
-        enDashesPattern = SubstituteTextPattern(r'(?<!-)--(?!-)', '&ndash;', md)
+        emDashesPattern = SubstituteTextPattern(r'(?<!-)---(?!-)', ('&mdash;',), md)
+        enDashesPattern = SubstituteTextPattern(r'(?<!-)--(?!-)', ('&ndash;',), md)
         md.inlinePatterns.add('smarty-em-dashes', emDashesPattern, '>entity')
         md.inlinePatterns.add('smarty-en-dashes', enDashesPattern,
             '>smarty-em-dashes')
 
     def educateEllipses(self, md):
-        ellipsesPattern = SubstituteTextPattern(r'(?<!\.)\.{3}(?!\.)', '&hellip;', md)
+        ellipsesPattern = SubstituteTextPattern(r'(?<!\.)\.{3}(?!\.)', ('&hellip;',), md)
         md.inlinePatterns.add('smarty-ellipses', ellipsesPattern, '>entity')
 
     def educateQuotes(self, md):

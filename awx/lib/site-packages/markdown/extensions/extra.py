@@ -75,12 +75,9 @@ class MarkdownInHtmlProcessor(BlockProcessor):
         # Build list of indexes of each nest within the parent element.
         nest_index = []  # a list of tuples: (left index, right index)
         i = self.parser.blockprocessors.tag_counter + 1
-        is_nest = self.parser.markdown.htmlStash.tag_data[i]['left_index']
-        while len(self.parser.markdown.htmlStash.tag_data) > i and is_nest:
-            left_child_index = \
-                self.parser.markdown.htmlStash.tag_data[i]['left_index']
-            right_child_index = \
-                self.parser.markdown.htmlStash.tag_data[i]['right_index']
+        while len(self._tag_data) > i and self._tag_data[i]['left_index']:
+            left_child_index = self._tag_data[i]['left_index']
+            right_child_index = self._tag_data[i]['right_index']
             nest_index.append((left_child_index - 1, right_child_index))
             i += 1
 
@@ -92,35 +89,32 @@ class MarkdownInHtmlProcessor(BlockProcessor):
                  block[nest_index[-1][1]:], True)                      # nest
 
     def run(self, parent, blocks, tail=None, nest=False):
+        self._tag_data = self.parser.markdown.htmlStash.tag_data
+
         self.parser.blockprocessors.tag_counter += 1
-        tag_data = self.parser.markdown.htmlStash.tag_data[
-            self.parser.blockprocessors.tag_counter]
+        tag = self._tag_data[self.parser.blockprocessors.tag_counter]
 
         # Create Element
-        markdown_value = tag_data['attrs'].pop('markdown')
-        element = util.etree.SubElement(parent, tag_data['tag'],
-                                        tag_data['attrs'])
+        markdown_value = tag['attrs'].pop('markdown')
+        element = util.etree.SubElement(parent, tag['tag'], tag['attrs'])
 
         # Slice Off Block
         if nest:
             self.parser.parseBlocks(parent, tail)  # Process Tail
             block = blocks[1:]
         else:  # includes nests since a third level of nesting isn't supported
-            block = blocks[tag_data['left_index'] + 1:
-                           tag_data['right_index']]
-            del blocks[:tag_data['right_index']]
+            block = blocks[tag['left_index'] + 1: tag['right_index']]
+            del blocks[:tag['right_index']]
 
         # Process Text
         if (self.parser.blockprocessors.contain_span_tags.match(  # Span Mode
-                tag_data['tag']) and markdown_value != 'block') or \
+                tag['tag']) and markdown_value != 'block') or \
                 markdown_value == 'span':
             element.text = '\n'.join(block)
         else:                                                     # Block Mode
             i = self.parser.blockprocessors.tag_counter + 1
-            if len(self.parser.markdown.htmlStash.tag_data) > i and self.\
-                    parser.markdown.htmlStash.tag_data[i]['left_index']:
-                first_subelement_index = self.parser.markdown.htmlStash.\
-                    tag_data[i]['left_index'] - 1
+            if len(self._tag_data) > i and self._tag_data[i]['left_index']:
+                first_subelement_index = self._tag_data[i]['left_index'] - 1
                 self.parser.parseBlocks(
                     element, block[:first_subelement_index])
                 if not nest:
