@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+   Copyright 2005-2010 VMware, Inc.  All rights reserved.
+-->
+<definitions targetNamespace="urn:vim25Service"
+   xmlns="http://schemas.xmlsoap.org/wsdl/"
+   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+   xmlns:interface="urn:vim25"
+>
+   <import location="vim.wsdl" namespace="urn:vim25" />
+   <service name="VimService">
+      <port binding="interface:VimBinding" name="VimPort">
+         <soap:address location="https://localhost/sdk/vimService" />
+      </port>
+   </service>
+</definitions>

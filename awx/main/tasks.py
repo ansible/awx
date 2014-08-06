@@ -512,6 +512,10 @@ class RunJob(BaseTask):
         elif cloud_cred and cloud_cred.kind == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.username
             env['AZURE_CERT_PATH'] = kwargs['private_data_file']
+        elif cloud_cred and cloud_cred.kind == 'vmware':
+            env['VMWARE_USER'] = cloud_cred.username
+            env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
+            env['VMWARE_HOST'] = cloud_cred.host
 
         return env
 

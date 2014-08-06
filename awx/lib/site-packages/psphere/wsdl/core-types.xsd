@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+   Copyright 2005-2010 VMware, Inc.  All rights reserved.
+-->
+<schema
+   targetNamespace="urn:vim25"
+   xmlns="http://www.w3.org/2001/XMLSchema"
+   xmlns:vim25="urn:vim25"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   elementFormDefault="qualified"
+>
+   <complexType name="DynamicArray">
+      <sequence>
+         <element name="dynamicType" type="xsd:string" minOccurs="0" />
+         <element name="val" type="xsd:anyType" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="DynamicData">
+      <sequence>
+         <element name="dynamicType" type="xsd:string" minOccurs="0" />
+         <element name="dynamicProperty" type="vim25:DynamicProperty" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="DynamicProperty">
+      <sequence>
+         <element name="name" type="xsd:string" />
+         <element name="val" type="xsd:anyType" />
+      </sequence>
+   </complexType>
+   <complexType name="ArrayOfDynamicProperty">
+      <sequence>
+         <element name="DynamicProperty" type="vim25:DynamicProperty" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="KeyAnyValue">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="key" type="xsd:string" />
+               <element name="value" type="xsd:anyType" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfKeyAnyValue">
+      <sequence>
+         <element name="KeyAnyValue" type="vim25:KeyAnyValue" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="LocalizableMessage">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="key" type="xsd:string" />
+               <element name="arg" type="vim25:KeyAnyValue" minOccurs="0" maxOccurs="unbounded" />
+               <element name="message" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfLocalizableMessage">
+      <sequence>
+         <element name="LocalizableMessage" type="vim25:LocalizableMessage" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="HostCommunication">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="HostNotConnected">
+      <complexContent>
+         <extension base="vim25:HostCommunication">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="HostNotReachable">
+      <complexContent>
+         <extension base="vim25:HostCommunication">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="InvalidArgument">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+               <element name="invalidProperty" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="InvalidRequest">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="InvalidType">
+      <complexContent>
+         <extension base="vim25:InvalidRequest">
+            <sequence>
+               <element name="argument" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ManagedObjectNotFound">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+               <element name="obj" type="vim25:ManagedObjectReference" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="MethodNotFound">
+      <complexContent>
+         <extension base="vim25:InvalidRequest">
+            <sequence>
+               <element name="receiver" type="vim25:ManagedObjectReference" />
+               <element name="method" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="NotEnoughLicenses">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="NotImplemented">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="NotSupported">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="RequestCanceled">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="SecurityError">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="SystemError">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+               <element name="reason" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="UnexpectedFault">
+      <complexContent>
+         <extension base="vim25:RuntimeFault">
+            <sequence>
+               <element name="faultName" type="xsd:string" />
+               <element name="fault" type="vim25:LocalizedMethodFault" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="LocalizedMethodFault">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="fault" type="vim25:MethodFault" />
+               <element name="localizedMessage" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="MethodFault">
+      <sequence>
+         <element name="dynamicType" type="xsd:string" minOccurs="0" />
+         <element name="dynamicProperty" type="vim25:DynamicProperty" minOccurs="0" maxOccurs="unbounded" />
+         <element name="faultCause" type="vim25:LocalizedMethodFault" minOccurs="0" />
+         <element name="faultMessage" type="vim25:LocalizableMessage" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="ArrayOfMethodFault">
+      <sequence>
+         <element name="MethodFault" type="vim25:MethodFault" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="RuntimeFault">
+      <complexContent>
+         <extension base="vim25:MethodFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ManagedObjectReference">
+      <simpleContent>
+         <extension base="xsd:string">
+            <attribute name="type" type="xsd:string"/>
+         </extension>
+      </simpleContent>
+   </complexType>
+   <complexType name="ArrayOfString">
+      <sequence>
+         <element name="string" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="ArrayOfAnyType">
+      <sequence>
+         <element name="anyType" type="xsd:anyType" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="ArrayOfManagedObjectReference">
+      <sequence>
+         <element name="ManagedObjectReference" type="vim25:ManagedObjectReference" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="ArrayOfByte">
+      <sequence>
+         <element name="byte" type="xsd:byte" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="ArrayOfInt">
+      <sequence>
+         <element name="int" type="xsd:int" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="ArrayOfLong">
+      <sequence>
+         <element name="long" type="xsd:long" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="ArrayOfShort">
+      <sequence>
+         <element name="short" type="xsd:short" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+</schema>

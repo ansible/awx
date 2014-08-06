@@ -149,7 +149,11 @@ angular.module('CredentialFormDefinition', [])
                 label: 'Host',
                 type: 'text',
                 ngShow: "kind.value == 'vmware'",
-                autocomplete: false
+                autocomplete: false,
+                awRequiredWhen: {
+                    variable: 'host_required',
+                    init: false
+                }
             },
             "username": {
                 labelBind: 'usernameLabel',
@@ -216,7 +220,11 @@ angular.module('CredentialFormDefinition', [])
                 ask: false,
                 clear: false,
                 associated: 'password_confirm',
-                autocomplete: false
+                autocomplete: false,
+                awRequiredWhen: {
+                    variable: "password_required",
+                    init: false
+                }
             },
             "password_confirm": {
                 label: 'Confirm Password',
@@ -226,7 +234,11 @@ angular.module('CredentialFormDefinition', [])
                 editRequired: false,
                 awPassMatch: true,
                 associated: 'password',
-                autocomplete: false
+                autocomplete: false,
+                awRequiredWhen: {
+                    variable: "password_required",
+                    init: false
+                }
             },
             "ssh_password": {
                 label: 'SSH Password',

@@ -39,6 +39,9 @@ angular.module('CredentialsHelper', ['Utilities'])
             scope.subscription_required = false;
             scope.key_description = "Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
             scope.key_hint= "drag and drop an SSH private key file on the field below";
+            scope.host_required = false;
+            scope.password_required = false;
+
             if (!Empty(scope.kind)) {
                 // Apply kind specific settings
                 switch (scope.kind.value) {
@@ -71,6 +74,11 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.key_required = true;
                     scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Windows Azure console.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
                     scope.key_hint= "drag and drop a management certificate file on the field below";
+                    break;
+                case 'vmware':
+                    scope.username_required = true;
+                    scope.host_required = true;
+                    scope.password_required = true;
                     break;
                 }
             }

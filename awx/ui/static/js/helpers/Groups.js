@@ -252,8 +252,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     }]);
                     $('#source_form').addClass('squeeze');
                 }
-                if (scope.source.value === 'rax' || scope.source.value === 'ec2'|| scope.source.value==='gce' || scope.source.value === 'azure') {
-                    kind = (scope.source.value === 'rax') ? 'rax' : (scope.source.value==='gce') ? 'gce' : (scope.source.value==='azure') ? 'azure' : 'aws';
+                if (scope.source.value === 'rax' || scope.source.value === 'ec2'|| scope.source.value==='gce' || scope.source.value === 'azure' || scope.source.value === 'vmware') {
+                    kind = (scope.source.value === 'rax') ? 'rax' : (scope.source.value==='gce') ? 'gce' : (scope.source.value==='azure') ? 'azure' : (scope.source.value === 'vmware') ? 'vmware' : 'aws' ;
                     url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;
                     LookUpInit({
                         url: url,

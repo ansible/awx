@@ -736,11 +736,12 @@ class InventorySourceOptions(BaseModel):
     '''
 
     SOURCE_CHOICES = [
-        ('file',  _('Local File, Directory or Script')),
-        ('rax',   _('Rackspace Cloud Servers')),
-        ('ec2',   _('Amazon EC2')),
-        ('gce',   _('Google Compute Engine')),
-        ('azure', _('Windows Azure')),
+        ('file',   _('Local File, Directory or Script')),
+        ('rax',    _('Rackspace Cloud Servers')),
+        ('ec2',    _('Amazon EC2')),
+        ('gce',    _('Google Compute Engine')),
+        ('azure',  _('Windows Azure')),
+        ('vmware', _('VMWare')),
     ]
 
     class Meta:
@@ -838,6 +839,13 @@ class InventorySourceOptions(BaseModel):
         regions = list(getattr(settings, 'AZURE_REGION_CHOICES', []))
         regions.insert(0, ('all', 'All'))
         return regions
+
+    @classmethod
+    def get_vmware_region_choices(self):
+        """Return a complete list of regions in VMWare, as a list of two-tuples
+        (but note that VMWare doesn't actually have regions!).
+        """
+        return [('all', 'All')]
 
     def clean_credential(self):
         if not self.source:

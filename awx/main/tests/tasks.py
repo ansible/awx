@@ -1048,6 +1048,9 @@ class RunJobTest(BaseCeleryTest):
         elif kind == 'azure':
             env_var1 = 'AZURE_SUBSCRIPTION_ID'
             env_var2 = 'AZURE_CERT_PATH'
+        elif kind == 'vmware':
+            env_var1 = 'VMWARE_USER'
+            env_var2 = 'VMWARE_PASSWORD'
         self.create_test_cloud_credential(name='%s cred' % kind, kind=kind,
                                           username='my %s access' % kind,
                                           password='my %s secret' % kind,
@@ -1076,6 +1079,9 @@ class RunJobTest(BaseCeleryTest):
 
     def test_azure_cloud_credential_environment_variables(self):
         self._test_cloud_credential_environment_variables('azure')
+
+    def test_vmware_cloud_credential_environment_variables(self):
+        self._test_cloud_credential_environment_variables('vmware')
 
     def test_run_async_job(self):
         self.create_test_project(TEST_ASYNC_OK_PLAYBOOK)

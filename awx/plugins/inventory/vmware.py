@@ -31,6 +31,11 @@ except ImportError:
 
 def save_cache(cache_item, data, config):
     ''' saves item to cache '''
+
+    # Sanity check: Is caching enabled? If not, don't cache.
+    if not config.has_option('defaults', 'cache_dir'):
+        return
+
     dpath = config.get('defaults', 'cache_dir')
     try:
         cache = open('/'.join([dpath,cache_item]), 'w')
@@ -42,6 +47,11 @@ def save_cache(cache_item, data, config):
 
 def get_cache(cache_item, config):
     ''' returns cached item  '''
+
+    # Sanity check: Is caching enabled? If not, return None.
+    if not config.has_option('defaults', 'cache_dir'):
+        return
+
     dpath = config.get('defaults', 'cache_dir')
     inv = {}
     try:
@@ -138,8 +148,8 @@ def get_inventory(client, config):
             for vm in host.vm:
                 inv['all']['hosts'].append(vm.name)
                 inv[vm_group].append(vm.name)
-                if vm.tag:
-                    taggroup = 'vmware_' + vm.tag
+                for tag in vm.tag:
+                    taggroup = 'vmware_' + tag.key.lower()
                     if taggroup in inv:
                         inv[taggroup].append(vm.name)
                     else:
@@ -183,13 +193,15 @@ if __name__ == '__main__':
     config = ConfigParser.SafeConfigParser(
         defaults={'host': '', 'user': '', 'password': ''},
     )
+    for section in ('auth', 'defaults'):
+        config.add_section(section)
     for configfilename in [os.path.abspath(sys.argv[0]).rstrip('.py') + '.ini', 'vmware.ini']:
         if os.path.exists(configfilename):
             config.read(configfilename)
             break
 
     try:
-        client =  Client(
+        client = Client(
             os.environ.get('VMWARE_HOST', config.get('auth','host')),
             os.environ.get('VMWARE_USER', config.get('auth','user')),
             os.environ.get('VMWARE_PASSWORD', config.get('auth','password')),
