@@ -6,7 +6,6 @@
 # description: support init to manage tower and its related services
 
 ### BEGIN INIT INFO
-# Provides: httpd rabbitmq-server
 # Required-Start: $local_fs $remote_fs $network $named
 # Required-Stop: $local_fs $remote_fs $network
 # Should-Start: distcache
