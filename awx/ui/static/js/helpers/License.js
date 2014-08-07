@@ -73,7 +73,7 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
                 else if (this.getRemainingDays(license.time_remaining) < 15) {
                     title = "License Warning";
                     html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for using Ansible Tower. The Ansible Tower license " +
-                        "has " +  this.getRemainingDays(license.time_remaining) + " remaining. Once the license expires you will no longer be able to add managed hosts or run playbooks.</p>" +
+                        "has " +  this.getRemainingDays(license.time_remaining) + " days remaining. Once the license expires you will no longer be able to add managed hosts or run playbooks.</p>" +
                         "<p>Extend your Ansible Tower license by visiting <a href=\"ansible.com/license\" target=\"_blank\">ansible.com/license</a>.";
                 }
                 else if (license.free_instances <= 0) {
