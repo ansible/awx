@@ -49,54 +49,65 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
         },
 
         getHTML: function(license, includeFormButton) {
-            var title, html, result = {};
+
+            var title, html, result = {}, license_is_valid=false;
+
             if (license && typeof license === 'object' && Object.keys(license).length > 0 && license.valid_key !== undefined) {
                 // we have a license
                 if (!license.valid_key) {
                     title = "Invalid License";
-                    html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>The Ansible Tower license is invalid. Please visit " +
-                        "<a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a> to obtain a valid license key.";
+                    html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>The Ansible Tower license is invalid.</p>";
                 }
                 else if (this.getRemainingDays(license.time_remaining) <= 0) {
                     if (parseInt(license.grace_period_remaining,10) > 86400) {
                         title = "License Expired";
                         html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for using Ansible Tower. The Ansible Tower license " +
-                        "has expired. You will no longer be able to add managed hosts or run playbooks after " + this.getRemainingDays(license.grace_period_remaining) + " days</p>" +
-                        "<p>Please visit <a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a> to purchse a valid license.";
+                        "has expired. You will no longer be able to add managed hosts or run playbooks after " + this.getRemainingDays(license.grace_period_remaining) + " days</p>";
                     } else {
                         title = "License Expired";
                         html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for using Ansible Tower. The Ansible Tower license " +
                         "has expired, and the 30 day grace period has been exceeded. To continue using Tower to run playbooks and add managed hosts a " +
-                        "valid license key is required.</p><p>Please visit <a href=\"ansible.com/license\" target=\"_blank\">ansible.com/license</a> to purchse a license.";
+                        "valid license key is required.</p>";
                     }
                 }
                 else if (this.getRemainingDays(license.time_remaining) < 15) {
                     title = "License Warning";
                     html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for using Ansible Tower. The Ansible Tower license " +
-                        "has " +  this.getRemainingDays(license.time_remaining) + " days remaining. Once the license expires you will no longer be able to add managed hosts or run playbooks.</p>" +
-                        "<p>Extend your Ansible Tower license by visiting <a href=\"ansible.com/license\" target=\"_blank\">ansible.com/license</a>.";
+                        "has " +  this.getRemainingDays(license.time_remaining) + " days remaining. Once the license expires you will no longer be able to add managed hosts or run playbooks.</p>";
                 }
                 else if (license.free_instances <= 0) {
                     title = "Host Count Exceeded";
                     html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>The Ansible Tower license has reached capacity for the number of " +
-                        "managed hosts allowed. No additional hosts can be added.</p><p>To extend the Ansible Tower license please visit " +
-                        "<a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a>.";
+                        "managed hosts allowed. No additional hosts can be added.</p>";
                 } else {
                     // license is valid. the following text is displayed in the license viewer
                     title = "Update License";  // not actually used
-                    html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>The Ansible Tower license is valid. To extend or renew the license " +
-                        "visit <a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a>.";
+                    html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>The Ansible Tower license is valid.</p>";
+                    license_is_valid = true;
                 }
             } else {
                 // No license
                 title = "License Required";
                 html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for trying Ansible Tower. Without a valid license you will not be able to add managed hosts or " +
-                    "run playbooks. A <strong>FREE</strong> trial license is available for various infrastructure sizes, as well as free unlimited use for up to ten nodes.<p>" +
-                    "<p>Visit <a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a> to obtain a license key.";
+                    "run playbooks. A <strong>FREE</strong> trial license is available for various infrastructure sizes, as well as free unlimited use for up to ten nodes.</p>";
             }
 
             if (IsAdmin()) {
-                html += " Copy and paste the license key in the field below and click the Submit button.";
+                if (license_is_valid) {
+                    html += "<p>If you need to update or extend the Ansible Tower license, please visit <a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a>. " +
+                        "Copy and paste the new license key in the field below and click the Submit button.</p>";
+                } else {
+                    html += "<p>Please visit <a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a> to obtain a valid license key. " +
+                        "Copy and paste the license key in the field below and click the Submit button.";
+                }
+            } else {
+                if (license_is_valid) {
+                    html += "<p>If you need to update or extend the Ansible Tower license, please visit <a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a>. A system administrator " +
+                        "can install the new license by choosing View License on the Account Menu and clicking on the Update License tab.";
+                } else {
+                    html += "<p>Please visit <a href=\"http://ansible.com/license\" target=\"_blank\">ansible.com/license</a> to obtain a valid license key. A system administrator " +
+                        "can install the new license by choosing View License on the Account Menu and clicking on the Update License tab.";
+                }
             }
             html += "</p></div>";
 
@@ -436,7 +447,10 @@ function ($location, $rootScope, $compile, GenerateForm, Rest, Alert, GetBasePat
             }
 
             license = license_info;
-            if (!license.valid_key) {
+            if (license.valid_key === undefined) {
+                scope.license_status = 'Missing License Key';
+                scope.status_color = 'license-invalid';
+            } else if (!license.valid_key) {
                 scope.license_status = 'Invalid License Key';
                 scope.status_color = 'license-invalid';
             } else if (license.date_expired !== undefined && license.date_expired) {
