@@ -49,7 +49,9 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                         var winHeight = $(window).height(),
                         available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
                         $('.graph-container').height(available_height/2);
-                        host_pie_chart.update();
+                        if(host_pie_chart){
+                            host_pie_chart.update();
+                        }
                     }
                 });
 
@@ -104,16 +106,16 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                     winHeight = $(window).height();
                     available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
                     $('.graph-container:eq(1)').height(available_height/2);
-                    $('.host-pie-chart svg').replaceWith('<canvas id="circlecanvas" width="100" height="100"></canvas>');
+                    $('.host-pie-chart svg').replaceWith('<canvas id="circlecanvas" width="120" height="120"></canvas>');
 
                     canvas = document.getElementById("circlecanvas");
                     context = canvas.getContext("2d");
-                    context.arc(50, 50, 50, 0, Math.PI * 2, false);
+                    context.arc(55, 55, 50, 0, Math.PI * 2, false);
                     context.lineWidth = 1;
                     context.strokeStyle = '#1778c3';
                     context.stroke();
                     context.font = "12px Open Sans";
-                    context.fillText("No Host data",10,50);
+                    context.fillText("No Host data",18,55);
 
                     scope.$emit('WidgetLoaded');
                 }
