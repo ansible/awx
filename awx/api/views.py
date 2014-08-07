@@ -64,6 +64,7 @@ def api_exception_handler(exc):
 
 class ApiRootView(APIView):
 
+    authentication_classes = []
     permission_classes = (AllowAny,)
     view_name = 'REST API'
 
@@ -82,6 +83,7 @@ class ApiRootView(APIView):
 
 class ApiV1RootView(APIView):
 
+    authentication_classes = []
     permission_classes = (AllowAny,)
     view_name = 'Version 1'
 

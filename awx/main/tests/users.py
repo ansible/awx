@@ -53,12 +53,22 @@ class UsersTest(BaseTest):
     def test_auth_token_login(self):
         auth_token_url = reverse('api:auth_token_view')
         user_me_url = reverse('api:user_me_list')
+        api_url = reverse('api:api_root_view')
+        api_v1_url = reverse('api:api_v1_root_view')
 
         # Always returns a 405 for any GET request, regardless of credentials.
         self.get(auth_token_url, expect=405, auth=None)
         self.get(auth_token_url, expect=405, auth=self.get_invalid_credentials())
         self.get(auth_token_url, expect=405, auth=self.get_normal_credentials())
-        
+
+        # /api/ and /api/v1 should work and ignore any credenials passed.
+        self.get(api_url, expect=200, auth=None)
+        self.get(api_url, expect=200, auth=self.get_invalid_credentials())
+        self.get(api_url, expect=200, auth=self.get_normal_credentials())
+        self.get(api_v1_url, expect=200, auth=None)
+        self.get(api_v1_url, expect=200, auth=self.get_invalid_credentials())
+        self.get(api_v1_url, expect=200, auth=self.get_normal_credentials())
+
         # Posting without username/password fields or invalid username/password
         # returns a 400 error.
         data = {}
