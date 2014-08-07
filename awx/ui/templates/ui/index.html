@@ -157,6 +157,7 @@
   <script src="{{ STATIC_URL }}js/helpers/JobTemplates.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/HostEventsViewer.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/License.js"></script>
+  <script src="{{ STATIC_URL }}js/helpers/AboutAnsible.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/JobStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/DashboardCounts.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/HostPieChart.js"></script>
@@ -184,6 +185,7 @@
         <a href="#inventories" id="main_inventories_link">Inventories</a></li>
         <a href="#job_templates" id="main_job_templates_link">Job Templates</a></li>
         <a href="#jobs" id="main_jobs_link">Jobs</a></li>
+        <a href="" id="main_about" ng-click ="viewAboutTower()"> About Tower</a> </li>
         <a href="" id="main_view_user" ng-click="viewCurrentUser()">Account Settings</a></li>
         <a href="" id="main_view_license" ng-click="viewLicense()">View License</a></li>
         <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" id="main_contact_support" target="_blank">Contact Support</a></li>
@@ -220,6 +222,7 @@
                         <li ng-show="current_user.username" class="collapsed-option">
                             <a href="" id="account-menu-link">Hello, <span ng-bind="current_user.username"></span> <span class="caret"></span></a>
                             <ul class="nav navbar-nav" id="account-submenu">
+                               <li><a href="" id="main_about" ng-click ="viewAboutTower()"> About Tower</a> </li>
                                <li><a id="main_view_user" href="" ng-click="viewCurrentUser()">Account Settings</a></li>
                                <li><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
                                <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a></li>
@@ -235,6 +238,7 @@
                         <li class="dropdown" ng-show="current_user.username">
                             <a href="" id="account-menu-link" class="dropdown-toggle" data-toggle="dropdown">Hello, <span ng-bind="current_user.username"></span> <span class="caret"></span></a>
                             <ul class="dropdown-menu" id="account-submenu">
+                               <li><a href="" id="main_about" ng-click ="viewAboutTower()"> About Tower</a> </li>
                                <li><a id="main_view_user" href="" ng-click="viewCurrentUser()">Account Settings</a></li>
                                <li><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
                                <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a></li>
@@ -395,6 +399,8 @@
 
     <div id="help-modal-dialog" style="display: none;"></div>
     <div id="license-modal-dialog" style="display: none;"></div>
+    <div id="about-modal-dialog" style="display: none;" ng-include="'static/partials/about.html '"></div>
+
 
   </div><!-- container -->
 

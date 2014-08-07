@@ -113,7 +113,8 @@ angular.module('Tower', [
     'SocketIO',
     'lrInfiniteScroll',
     'LoadConfigHelper',
-    'SocketHelper'
+    'SocketHelper',
+    'AboutAnsibleHelpModal'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -421,9 +422,10 @@ angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'LicenseViewer',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'LicenseViewer', 'AboutAnsibleHelp',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
-        LoadConfig, Store, ShowSocketHelp, LicenseViewer) {
+        LoadConfig, Store, ShowSocketHelp, LicenseViewer, AboutAnsibleHelp) {
+
 
             var e, html, sock, checkCount = 0;
 
@@ -541,6 +543,10 @@ angular.module('Tower', [
                 }
 
                 activateTab();
+
+                $rootScope.viewAboutTower = function(){
+                    AboutAnsibleHelp();
+                };
 
                 $rootScope.viewCurrentUser = function () {
                     $location.path('/users/' + $rootScope.current_user.id);
