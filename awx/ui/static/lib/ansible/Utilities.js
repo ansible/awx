@@ -99,6 +99,9 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     action();
                 }
             });
+            $('#alert-modal2').on('shown.bs.modal', function () {
+                $('#alert2_ok_btn').focus();
+            });
             $(document).bind('keydown', function (e) {
                 if (e.keyCode === 27) {
                     $('#alert-modal2').modal('hide');
@@ -122,7 +125,9 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     action();
                 }
             });
-
+            $('#alert-modal').on('shown.bs.modal', function () {
+                $('#alert_ok_btn').focus();
+            });
             $(document).bind('keydown', function (e) {
                 if (e.keyCode === 27) {
                     $('#alert-modal').modal('hide');

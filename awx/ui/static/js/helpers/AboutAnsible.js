@@ -58,15 +58,21 @@ angular.module('AboutAnsibleHelpModal', ['RestServices', 'Utilities','ModalDialo
                         paddedStr = paddedStr + " ";
                     }
                     $('#about-modal-version').html(paddedStr);
+                    scope.modalOK = function(){
+                        $('#about-modal-dialog').dialog('close');
+                    };
                     CreateDialog({
                         id: 'about-modal-dialog',
                         scope: scope,
-                        buttons: [],
-                        width: 730,
-                        height: 320,
+                        // buttons: [],
+                        width: 700,
+                        height: 380,
                         minWidth: 300,
                         // title:  , //'<img src="static/img/tower_login_logo.png">' ,//'About Ansible',
-                        callback: 'DialogReady'
+                        callback: 'DialogReady',
+                        onOpen: function(){
+                            $('#dialog-ok-button').focus();
+                        }
                     });
                 });
 
