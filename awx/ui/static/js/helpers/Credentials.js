@@ -41,6 +41,7 @@ angular.module('CredentialsHelper', ['Utilities'])
             scope.key_hint= "drag and drop an SSH private key file on the field below";
             scope.host_required = false;
             scope.password_required = false;
+            scope.hostLabel = '';
 
             if (!Empty(scope.kind)) {
                 // Apply kind specific settings
@@ -79,6 +80,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.username_required = true;
                     scope.host_required = true;
                     scope.password_required = true;
+                    scope.hostLabel = "vCenter Host";
                     break;
                 }
             }

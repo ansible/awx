@@ -146,7 +146,7 @@ angular.module('CredentialFormDefinition', [])
                 apiField: 'passwowrd'
             },
             "host": {
-                label: 'Host',
+                labelBind: 'hostLabel',
                 type: 'text',
                 ngShow: "kind.value == 'vmware'",
                 autocomplete: false,
