@@ -968,8 +968,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                                 item: item
                             });
                         }
-                        scope.hostResultsLoading = false;
                     });
+
+                    scope.hostResultsLoading = false;
+
                     if (callback) {
                         scope.$emit(callback);
                     }
@@ -1024,8 +1026,10 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                         failed: event.failures,
                         status: (event.failed) ? 'failed' : 'successful'
                     });
-                    scope.hostSummariesLoading = false;
                 });
+
+                scope.hostSummariesLoading = false;
+
                 if (callback) {
                     scope.$emit(callback);
                 }
