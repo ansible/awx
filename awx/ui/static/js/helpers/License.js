@@ -62,26 +62,41 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
                     if (parseInt(license.grace_period_remaining,10) > 86400) {
                         title = "License Expired";
                         html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for using Ansible Tower. The Ansible Tower license " +
-                        "has expired. You will no longer be able to add managed hosts or run playbooks after " + this.getRemainingDays(license.grace_period_remaining) + " days</p>";
+                        "has expired. ";
+                        // trial licenses don't get a grace period
+                        if (license.trial) {
+                            html += "Managed hosts cannot be added and playbooks will no longer run.</p>";
+                        } else {
+                            html += "After " + this.getRemainingDays(license.grace_period_remaining) + " grace days managed hosts cannot be added and playbooks will no longer run.</p>";
+                        }
                     } else {
                         title = "License Expired";
                         html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for using Ansible Tower. The Ansible Tower license " +
-                        "has expired, and the 30 day grace period has been exceeded. To continue using Tower to run playbooks and add managed hosts a " +
-                        "valid license key is required.</p>";
+                        "has expired";
+                        // trial licenses don't get a grace period
+                        html += (!license.trial) ? ", and the 30 day grace period has been exceeded." : ".";
+                        html += " To continue using Tower to run playbooks and add managed hosts a valid license key is required.</p>";
                     }
                 }
                 else if (this.getRemainingDays(license.time_remaining) < 15) {
+                    // Warning: license expiring in less than 15 days
                     title = "License Warning";
                     html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Thank you for using Ansible Tower. The Ansible Tower license " +
-                        "has " +  this.getRemainingDays(license.time_remaining) + " days remaining. Once the license expires you will no longer be able to add managed hosts or run playbooks.</p>";
+                        "has " +  this.getRemainingDays(license.time_remaining) + " days remaining. ";
+                    // trial licenses don't get a grace period
+                    if (license.trial) {
+                        html += "After the license expires playbooks will no longer run and managed hosts cannot be added.</p>";
+                    } else {
+                        html += "After a short grace period of 30 days, playbooks will no longer run and managed hosts cannot be added.</p>";
+                    }
                 }
                 else if (license.free_instances <= 0) {
                     title = "Host Count Exceeded";
                     html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>The Ansible Tower license has reached capacity for the number of " +
-                        "managed hosts allowed. No additional hosts can be added.</p>";
+                        "managed hosts allowed. No additional hosts can be added. Existing playbooks can still be run against hosts already in inventory.</p>";
                 } else {
                     // license is valid. the following text is displayed in the license viewer
-                    title = "Update License";  // not actually used
+                    title = "Update License";
                     html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>The Ansible Tower license is valid.</p>";
                     license_is_valid = true;
                 }
@@ -156,12 +171,10 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
             var license = Store('license'),
                 notify = this.shouldNotify(license),
                 self = this,
-                scope, height, html, buttons, submitKey;
+                scope, height, html, buttons;
 
             self.scope = $rootScope.$new();
             scope = self.scope;
-
-            submitKey = this.postLicense;
 
             if (license && typeof license === 'object' && Object.keys(license).length > 0) {
                 if (license.tested) {
@@ -181,7 +194,6 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
 
             scope.flashMessage = null;
             scope.parseType = 'json';
-            scope.license_json = " ";
 
             scope.removeLicenseDialogReady = scope.$on('LicenseDialogReady', function() {
                 var e = angular.element(document.getElementById('license-modal-dialog'));
@@ -190,7 +202,7 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
             });
 
             scope.submitLicenseKey = function() {
-                submitKey(scope.license_json);
+                self.postLicense(scope.license_json);
             };
 
             if (IsAdmin()) {
@@ -222,37 +234,33 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
 
             height = (IsAdmin()) ? 600 : 350;
 
-            CreateDialog({
-                scope: scope,
-                buttons: buttons,
-                width: 700,
-                height: height,
-                minWidth: 400,
-                title: html.title,
-                id: 'license-modal-dialog',
-                clonseOnEscape: false,
-                onClose: function() {
-                    if (scope.codeMirror) {
-                        scope.codeMirror.destroy();
-                    }
-                    $('#license-modal-dialog').empty();
-                },
-                onResizeStop: function() {
-                    if (IsAdmin()) {
-                        TextareaResize({
-                            scope: scope,
-                            textareaId: 'license_license_json',
-                            modalId: 'license-modal-dialog',
-                            formId: 'license-notification-body',
-                            fld: 'license_json',
-                            parse: true,
-                            onChange: function() { scope.license_json_api_error = ''; }
-                        });
-                    }
-                },
-                onOpen: function() {
-                    if (IsAdmin()) {
-                        setTimeout(function() {
+            if (scope.removeLicenseReady) {
+                scope.removeLicenseReady();
+            }
+            scope.removeLicenseReady = scope.$on('LicenseReady', function(e, data) {
+
+                scope.license_json = " ";
+                if (data.license_info && data.license_info.valid_key !== undefined) {
+                    scope.license_json = JSON.stringify(data.license_info, null, ' ');
+                }
+
+                CreateDialog({
+                    scope: scope,
+                    buttons: buttons,
+                    width: 700,
+                    height: height,
+                    minWidth: 400,
+                    title: html.title,
+                    id: 'license-modal-dialog',
+                    clonseOnEscape: false,
+                    onClose: function() {
+                        if (scope.codeMirror) {
+                            scope.codeMirror.destroy();
+                        }
+                        $('#license-modal-dialog').empty();
+                    },
+                    onResizeStop: function() {
+                        if (IsAdmin()) {
                             TextareaResize({
                                 scope: scope,
                                 textareaId: 'license_license_json',
@@ -262,20 +270,60 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
                                 parse: true,
                                 onChange: function() { scope.license_json_api_error = ''; }
                             });
-                            $('#cm-license_json-container .CodeMirror textarea').focus();
-                        }, 300);
-                    } else {
-                        $('#license-ok-button').focus();
-                    }
-                },
-                callback: 'LicenseDialogReady'
+                        }
+                    },
+                    onOpen: function() {
+                        if (IsAdmin()) {
+                            setTimeout(function() {
+                                TextareaResize({
+                                    scope: scope,
+                                    textareaId: 'license_license_json',
+                                    modalId: 'license-modal-dialog',
+                                    formId: 'license-notification-body',
+                                    fld: 'license_json',
+                                    parse: true,
+                                    onChange: function() { scope.license_json_api_error = ''; }
+                                });
+                                $('#cm-license_json-container .CodeMirror textarea').focus();
+                            }, 300);
+                        } else {
+                            $('#license-ok-button').focus();
+                        }
+                    },
+                    callback: 'LicenseDialogReady'
+                });
             });
+
+            self.GetLicense('LicenseReady');
+
+        },
+
+        GetLicense: function(callback, inScope) {
+            // Retrieve license detail
+            var self = this,
+                scope = (inScope) ? inScope : self.scope,
+                url = GetBasePath('config');
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function (data) {
+                    if (scope && callback) {
+                        scope.$emit(callback, data);
+                    }
+                    else if (scope) {
+                        scope.$emit('CheckLicenseReady', data);
+                    }
+                })
+                .error(function (data, status) {
+                    ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                        msg: 'Failed to retrieve license. GET status: ' + status
+                    });
+                });
         }
     };
 }])
 
-.factory('LicenseViewer', ['$location', '$rootScope', '$compile', 'GenerateForm', 'Rest', 'Alert', 'GetBasePath', 'ProcessErrors', 'FormatDate', 'Prompt', 'Empty', 'LicenseForm', 'IsAdmin', 'CreateDialog', 'CheckLicense', 'TextareaResize',
-function ($location, $rootScope, $compile, GenerateForm, Rest, Alert, GetBasePath, ProcessErrors, FormatDate, Prompt, Empty, LicenseForm, IsAdmin, CreateDialog, CheckLicense, TextareaResize) {
+.factory('LicenseViewer', ['$location', '$rootScope', '$compile', '$filter', 'GenerateForm', 'Rest', 'Alert', 'GetBasePath', 'ProcessErrors', 'FormatDate', 'Prompt', 'Empty', 'LicenseForm', 'IsAdmin', 'CreateDialog', 'CheckLicense', 'TextareaResize',
+function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, GetBasePath, ProcessErrors, FormatDate, Prompt, Empty, LicenseForm, IsAdmin, CreateDialog, CheckLicense, TextareaResize) {
     return {
 
         createDialog: function(html) {
@@ -292,12 +340,12 @@ function ($location, $rootScope, $compile, GenerateForm, Rest, Alert, GetBasePat
                 e = angular.element(document.getElementById('license-modal-dialog'));
                 e.empty().html(html);
 
-                if (scope.license_status === 'Invalid License Key') {
+                if (scope.license_status === 'Invalid License Key' || scope.license_status === 'Missing License Key') {
                     $('#license_tabs li:eq(1)').hide();
                 }
 
                 scope.parseType = 'json';
-                scope.license_json = " ";
+                scope.license_json = JSON.stringify(self.license, null, ' ');
                 h = CheckLicense.getHTML(self.getLicense(),true).body;
                 $('#license-modal-dialog #license_tabs').append("<li><a id=\"update_license_link\" ng-click=\"toggleTab($event, 'update_license_link', 'license_tabs')\" href=\"#update_license\" data-toggle=\"tab\">Update License</a></li>");
                 $('#license-modal-dialog .tab-content').append("<div class=\"tab-pane\" id=\"update_license\"></div>");
@@ -394,7 +442,7 @@ function ($location, $rootScope, $compile, GenerateForm, Rest, Alert, GetBasePat
             self.form = angular.copy(LicenseForm);
 
             for (fld in self.form.fields) {
-                if (fld !== 'time_remaining' && fld !== 'license_status') {
+                if (fld !== 'time_remaining' && fld !== 'license_status' && fld !== 'tower_version') {
                     if (Empty(license_info[fld])) {
                         delete self.form.fields[fld];
                     }
@@ -414,8 +462,8 @@ function ($location, $rootScope, $compile, GenerateForm, Rest, Alert, GetBasePat
             return html;
         },
 
-        loadDefaultScope: function(license_info) {
-            var fld, dt, days, remainder, hours, minutes, seconds, license,
+        loadDefaultScope: function(license_info, version) {
+            var fld, dt, days, license,
                 self = this,
                 scope = this.getScope();
 
@@ -425,19 +473,18 @@ function ($location, $rootScope, $compile, GenerateForm, Rest, Alert, GetBasePat
                 }
             }
 
+            scope.tower_version = version;
+
             if (scope.license_date) {
                 dt = new Date(parseInt(scope.license_date, 10) * 1000); // expects license_date in seconds
                 scope.license_date = FormatDate(dt);
-                scope.time_remaining = scope.time_remaining * 1000;
-                days = parseInt(scope.time_remaining / 86400000, 10);
-                remainder = scope.time_remaining - (days * 86400000);
-                hours = parseInt(remainder / 3600000, 10);
-                remainder = remainder - (hours * 3600000);
-                minutes = parseInt(remainder / 60000, 10);
-                remainder = remainder - (minutes * 60000);
-                seconds = parseInt(remainder / 1000, 10);
-                scope.time_remaining = days + ' days ' + ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2) + ':' +
-                  ('0' + seconds).slice(-2);
+                scope.time_remaining = parseInt(scope.time_remaining,10) * 1000;
+                if (scope.time_remaining < 0) {
+                    days = 0;
+                } else {
+                    days = Math.floor(scope.time_remaining / 86400000);
+                }
+                scope.time_remaining = $filter('number')(days, 0) + ' days';
             }
 
             if (parseInt(scope.free_instances) <= 0) {
@@ -472,8 +519,9 @@ function ($location, $rootScope, $compile, GenerateForm, Rest, Alert, GetBasePat
             return this.scope;
         },
 
-        setLicense: function(license_info) {
+        setLicense: function(license_info, version) {
             this.license = license_info;
+            this.version = version;
         },
 
         getLicense: function() {
@@ -488,34 +536,14 @@ function ($location, $rootScope, $compile, GenerateForm, Rest, Alert, GetBasePat
                 scope.removeLicenseDataReady();
             }
             scope.removeLicenseDataReady = scope.$on('LicenseDataReady', function(e, data) {
-                data.license_info.tower_version = data.version;
-                self.setLicense(data.license_info);
-                var html = self.getDefaultHTML(data.license_info);
-                self.loadDefaultScope(data.license_info);
+                var html, version;
+                version = data.version.replace(/-\d*$/,'');
+                self.setLicense(data.license_info, version);
+                html = self.getDefaultHTML(data.license_info);
+                self.loadDefaultScope(data.license_info, version);
                 self.createDialog(html);
             });
-            self.GetLicense();
-        },
-
-        GetLicense: function(callback) {
-            // Retrieve license detail
-            var scope = this.getScope(),
-                url = GetBasePath('config');
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function (data) {
-                    if (scope && callback) {
-                        scope.$emit(callback, data);
-                    }
-                    else if (scope) {
-                        scope.$emit('LicenseDataReady', data);
-                    }
-                })
-                .error(function (data, status) {
-                    ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to retrieve license. GET status: ' + status
-                    });
-                });
+            CheckLicense.GetLicense('LicenseDataReady', scope);
         }
     };
 }]);

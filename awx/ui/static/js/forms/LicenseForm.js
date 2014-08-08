@@ -49,7 +49,7 @@ angular.module('LicenseFormDefinition', [])
                 tab: 'license'
             },
             time_remaining: {
-                label: 'Time Left',
+                label: 'Time Remaining',
                 type: 'text',
                 readonly: true,
                 tab: 'license'

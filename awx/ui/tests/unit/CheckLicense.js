@@ -22,7 +22,7 @@
         time_remaining: 0,
         grace_period_remaining: (86400 * 2),
         free_instances: 10,
-        expects: 'after 2 days'
+        expects: '2 grace days'
     }, {
         desc: 'valid license with time remaining = 15 days',
         valid_key: true,
@@ -51,6 +51,63 @@
         grace_period_remaining: 0,
         free_instances: 0,
         expects: 'license has reached capacity'
+    }, {
+        desc: 'expired trial license with > 1 day grace period',
+        valid_key: true,
+        trial: true,
+        time_remaining: 0,
+        grace_period_remaining: (86400 * 2),
+        free_instances: 10,
+        notExpects: 'grace days'
+    } , {
+        desc: 'expired trial license with < 1 day grace period',
+        valid_key: true,
+        trial: true,
+        time_remaining: 0,
+        grace_period_remaining: 0,
+        free_instances: 10,
+        notExpects: '30 day grace period'
+    }, {
+        desc: 'trial license with time remaining = 15 days',
+        trial: true,
+        valid_key: true,
+        time_remaining: (86400 * 15),
+        grace_period_remaining: 0,
+        free_instances: 10,
+        notExpects: 'grace period'
+    }, {
+        desc: 'trial license with time remaining < 15 days',
+        valid_key: true,
+        trial: true,
+        time_remaining: (86400 * 10) ,
+        grace_period_remaining: 0,
+        free_instances: 10,
+        notExpects: 'grace period'
+    }];
+
+var should_notify = [{
+        desc: 'should notify when license expired',
+        valid_key: true,
+        time_remaining: 0,
+        grace_period_remaining: 85000,
+        free_instances: 10
+    }, {
+        desc: 'should notify when license time remaining < 15 days',
+        valid_key: true,
+        time_remaining: (86400 * 10) ,
+        grace_period_remaining: 0,
+        free_instances: 10
+    }, {
+        desc: 'should notify when host count <= 0',
+        valid_key: true,
+        time_remaining: (86400 * 200) ,
+        grace_period_remaining: 0,
+        free_instances: 0
+    }, {
+        desc: 'should notify when license is invalid',
+        valid_key: false
+    },{
+        desc: 'should notify when license is empty',
     }];
 
 describe('Unit:CheckLicense', function() {
@@ -77,10 +134,34 @@ describe('Unit:CheckLicense', function() {
         expect(CheckLicense.getAdmin).not.toBe(null);
     }));
 
+    it('should have a shouldNotify method', inject(function(CheckLicense) {
+        expect(CheckLicense.shouldNotify).not.toBe(null);
+    }));
+
+    it('should not notify when license valid, time remaining > 15 days and host count > 0', inject(function(CheckLicense) {
+        expect(CheckLicense.shouldNotify({
+            valid_key: true,
+            time_remaining: (86400 * 20),
+            grace_period_remaining: 0,
+            free_instances: 10 })).toBe(false);
+    }));
+
+    should_notify.forEach(function(lic) {
+        it(lic.desc, inject(function(CheckLicense) {
+            expect(CheckLicense.shouldNotify(lic)).toBe(true);
+        }));
+    });
+
     licenses.forEach(function(lic) {
         it(lic.desc, inject(function(CheckLicense) {
-            var r = new RegExp(lic.expects);
-            expect(CheckLicense.getHTML(lic).body).toMatch(r);
+            var r;
+            if (lic.expects) {
+                r = new RegExp(lic.expects);
+                expect(CheckLicense.getHTML(lic).body).toMatch(r);
+            } else {
+                r = new RegExp(lic.notExpects);
+                expect(CheckLicense.getHTML(lic).body).not.toMatch(r);
+            }
         }));
     });
 
