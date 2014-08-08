@@ -252,7 +252,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
     if ($scope.selectPlaybookUnregister) {
         $scope.selectPlaybookUnregister();
     }
-    $scope.selectPlaybookUnregister = $scope.$watch('project_name', function (oldval, newval) {
+    $scope.selectPlaybookUnregister = $scope.$watch('project_name', function (newval, oldval) {
         selectPlaybook(oldval, newval);
         checkSCMStatus(oldval, newval);
     });
@@ -467,7 +467,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     if ($scope.watchProjectUnregister) {
         $scope.watchProjectUnregister();
     }
-    $scope.watchProjectUnregister = $scope.$watch('project_name', function (oldValue, newValue) {
+    $scope.watchProjectUnregister = $scope.$watch('project_name', function (newValue, oldValue) {
         if (oldValue !== newValue && newValue !== '' && newValue !== null && newValue !== undefined) {
             $scope.playbook = null;
             getPlaybooks($scope.project);
