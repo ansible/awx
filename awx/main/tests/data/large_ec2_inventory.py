@@ -867,9 +867,9 @@ inv_list = {
   "www-test.axialmarket.com": [
     "ec2-54-234-233-19.compute-1.amazonaws.com"
   ],
-  #'_meta': {
-  #  'hostvars': {}
-  #}
+  '_meta': {
+    'hostvars': {}
+  }
 }
 
 host_vars = {
