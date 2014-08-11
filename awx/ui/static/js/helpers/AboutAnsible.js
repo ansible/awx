@@ -44,16 +44,13 @@ angular.module('AboutAnsibleHelpModal', ['RestServices', 'Utilities','ModalDialo
                 scope.removeBuildAboutDialog = scope.$on('BuildAboutDialog', function(e, data) {
                     var spaces, i, j,
                     paddedStr  = "",
-                    str = data.version;
+                    version = data.version.replace(/-\d*$/,'');
 
-                    if(str.search('-')){
-                        str = str.substr(0,str.search('-'));
-                    }
-                    spaces = Math.floor((16-str.length)/2);
+                    spaces = Math.floor((16-version.length)/2);
                     for( i=0; i<=spaces; i++){
                         paddedStr = paddedStr +" ";
                     }
-                    paddedStr = paddedStr+str;
+                    paddedStr = paddedStr+version;
                     for( j = paddedStr.length; j<16; j++){
                         paddedStr = paddedStr + " ";
                     }
@@ -65,7 +62,7 @@ angular.module('AboutAnsibleHelpModal', ['RestServices', 'Utilities','ModalDialo
                         id: 'about-modal-dialog',
                         scope: scope,
                         // buttons: [],
-                        width: 700,
+                        width: 710,
                         height: 380,
                         minWidth: 300,
                         resizable: false,
@@ -74,6 +71,8 @@ angular.module('AboutAnsibleHelpModal', ['RestServices', 'Utilities','ModalDialo
                         onOpen: function(){
                             $('#dialog-ok-button').focus();
                             $('#about-modal-dialog').scrollTop(0);
+                            $('#about-modal-dialog').css('overflow-x', 'hidden');
+                            $('.ui-widget-overlay').css('width', '100%');
                         }
                     });
                 });
