@@ -29,7 +29,7 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
                 { value: "failed", name: "Failed" },
                 { value: "ok", name: "OK" },
                 { value: "unreachable", name: "Unreachable" }
-                ];
+            ];
             scope.host_events_search_name = params.name;
             status = (params.status) ?  params.status : 'all';
             scope.host_events_status_options.every(function(opt, idx) {
