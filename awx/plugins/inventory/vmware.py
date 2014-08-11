@@ -200,21 +200,33 @@ if __name__ == '__main__':
             config.read(configfilename)
             break
 
-    try:
-        client = Client(
-            os.environ.get('VMWARE_HOST', config.get('auth','host')),
-            os.environ.get('VMWARE_USER', config.get('auth','user')),
-            os.environ.get('VMWARE_PASSWORD', config.get('auth','password')),
-        )
-    except Exception, e:
-        client = None
-        #print >> STDERR "Unable to login (only cache avilable): %s", str(e)
+    auth_host, auth_user, auth_password = None, None, None
 
-    # acitually do the work
+    # Read our authentication information from the INI file, if it exists.
+    try:
+        auth_host = config.get('auth', 'host')
+        auth_user = config.get('auth', 'user')
+        auth_password = config.get('auth', 'password')
+    except Exception:
+        pass
+
+    # If any of the VMWare environment variables are set, they trump
+    # the INI configuration.
+    if 'VMWARE_HOST' in os.environ:
+        auth_host = os.environ['VMWARE_HOST']
+    if 'VMWARE_USER' in os.environ:
+        auth_user = os.environ['VMWARE_USER']
+    if 'VMWARE_PASSWORD' in os.environ:
+        auth_password = os.environ['VMWARE_PASSWORD']
+
+    # Create the VMWare client.
+    client = Client(auth_host, auth_user, auth_password)
+
+    # Actually do the work.
     if hostname is None:
         inventory = get_inventory(client, config)
     else:
         inventory = get_single_host(client, config, hostname)
 
-    # return to ansible
+    # Return to Ansible.
     print inventory
