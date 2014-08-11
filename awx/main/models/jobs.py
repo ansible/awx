@@ -286,7 +286,10 @@ class Job(UnifiedJob, JobOptions):
     def task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
-        count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
+        if obj.launch_type == 'callback':
+            count_hosts = 1
+        else:
+            count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
         return min(count_hosts, 5 if self.forks == 0 else self.forks) * 10
 
     @property
