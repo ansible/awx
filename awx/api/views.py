@@ -772,6 +772,15 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
             if changed:
                 raise PermissionDenied('Cannot change %s' % ', '.join(changed.keys()))
 
+    def destroy(self, request, *args, **kwargs):
+        obj = User.objects.get(pk=kwargs['pk'])
+        can_delete = request.user.can_access(User, 'delete', obj)
+        if not can_delete:
+            raise PermissionDenied('Cannot delete user')
+        for own_credential in Credential.objects.filter(user=obj):
+            own_credential.mark_inactive()
+        return super(UserDetail, self).destroy(request, *args, **kwargs)
+
 class CredentialList(ListCreateAPIView):
 
     model = Credential
