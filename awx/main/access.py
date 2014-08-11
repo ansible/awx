@@ -1086,7 +1086,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
     
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        project_qs = self.user.get_queryset(Project).filter(scm_type__in=('',))
+        project_qs = self.user.get_queryset(Project).filter(scm_type__in=[s[0] for s in Project.SCM_TYPE_CHOICES])
         inventory_source_qs = self.user.get_queryset(InventorySource).filter(source__in=CLOUD_INVENTORY_SOURCES)
         job_template_qs = self.user.get_queryset(JobTemplate)
         qs = qs.filter(Q(Project___in=project_qs) |
