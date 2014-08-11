@@ -22,7 +22,7 @@ function OrganizationsList($routeParams, $scope, $rootScope, $location, $log, Re
         defaultUrl = GetBasePath('organizations'),
         url;
 
-    generate.inject(OrganizationList, { mode: mode, scope: $scope });
+    generate.inject(OrganizationList, { mode: mode, scope: $scope, breadCrumbs:((mode === 'select') ? true : false) });
     $rootScope.flashMessage = null;
     LoadBreadCrumbs();
 
