@@ -20,10 +20,28 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
                 url = params.url,
                 title = params.title, //optional
                 fixHeight, buildTable,
-                lastID, setStatus, buildRow;
+                lastID, setStatus, buildRow, status;
 
+            // initialize the status dropdown
+            scope.host_events_status_options = [
+                { value: "all", name: "All" },
+                { value: "changed", name: "Changed" },
+                { value: "failed", name: "Failed" },
+                { value: "ok", name: "OK" },
+                { value: "unreachable", name: "Unreachable" }
+                ];
             scope.host_events_search_name = params.name;
-            scope.host_events_search_status = (params.status) ?  params.status : 'all';
+            status = (params.status) ?  params.status : 'all';
+            scope.host_events_status_options.every(function(opt, idx) {
+                if (opt.value === status) {
+                    scope.host_events_search_status = scope.host_events_status_options[idx];
+                    return false;
+                }
+                return true;
+            });
+            if (!scope.host_events_search_status) {
+                scope.host_events_search_status = scope.host_events_status_options[0];
+            }
 
             $log.debug('job_id: ' + job_id + ' url: ' + url + ' title: ' + title + ' name: ' + name + ' status: ' + status);
 
@@ -224,19 +242,19 @@ angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventView
                 url += '?host_name__isnull=false';
             }
 
-            if (scope.host_events_search_status === 'changed') {
+            if (scope.host_events_search_status.value === 'changed') {
                 url += '&event__icontains=runner&changed=true';
             }
-            else if (scope.host_events_search_status === 'failed') {
+            else if (scope.host_events_search_status.value === 'failed') {
                 url += '&event__icontains=runner&failed=true';
             }
-            else if (scope.host_events_search_status === 'ok') {
+            else if (scope.host_events_search_status.value === 'ok') {
                 url += '&event=runner_on_ok&changed=false';
             }
-            else if (scope.host_events_search_status === 'unreachable') {
+            else if (scope.host_events_search_status.value === 'unreachable') {
                 url += '&event=runner_on_unreachable';
             }
-            else if (!scope.host_events_search_status) {
+            else if (scope.host_events_search_status.value === 'all') {
                 url += '&event__icontains=runner&not__event=runner_on_skipped';
             }
 

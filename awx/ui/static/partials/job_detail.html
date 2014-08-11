@@ -429,13 +429,8 @@
             </div>
             <div class="form-group" id="status-field">
                 <label>Status</label>
-                <select id="host-events-search-status" class="form-control input-sm" ng-model="host_events_search_status" name="host-events-search-name" ng-change="searchEvents()">
-                    <option value="all">All</option>
-                    <option value="changed">Changed</option>
-                    <option value="failed">Failed</option>
-                    <option value="ok">OK</option>
-                    <option value="unreachable">Unreachable</option>
-                </select>
+                <select id="host-events-search-status" class="form-control input-sm" ng-model="host_events_search_status" name="host-events-search-name" ng-change="searchEvents()"
+                    ng-options="opt.name for opt in host_events_status_options track by opt.value"></select>
             </div>
             <div class="form-group" id="search-indicator" ng-show="hostViewSearching"><i class="fa fa-lg fa-spin fa-cog"></i></div>
         </div>

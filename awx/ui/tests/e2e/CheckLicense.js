@@ -7,17 +7,22 @@
  *
  */
 
- /* global describe, it, expect, browser */
+ /* global describe, it, expect, by, browser, element, beforeEach */
 
 
 describe('E2E:CheckLicense', function() {
-    it('should present login dialog', function() {
+    beforeEach(function() {
         browser.get('http://localhost:8013');
-        var msg = $('#login-modal .login-alert:eq(1)');
-        expect(msg.getText()).toMatch(/Please sign in/);
+    });
 
-        /*element(by.model('login_username')).sendKeys('admin');
-        element(by.model('login_password')).sendKeys('password');
-        element(by.id('login-button')).click();*/
+    it('should present login dialog', function() {
+        var msg = element.all(by.css('#login-modal .login-alert'));
+        expect(msg.get(0).getText()).toMatch(/Please sign in/);
+    });
+
+    it('should login', function() {
+        element(by.model('login_username')).sendKeys('admin');
+        element(by.model('login_password')).sendKeys('password01!');
+        element(by.id('login-button')).click();
     });
 });
