@@ -21,6 +21,7 @@ include awx/ui/static/js/config.js
 include tools/scripts/request_tower_configuration.sh
 include tools/scripts/ansible-tower
 include tools/munin_monitors/*
+include tools/sosreport/*
 include COPYING
 prune awx/public
 prune awx/projects
