@@ -16,13 +16,15 @@ describe('E2E:CheckLicense', function() {
     });
 
     it('should present login dialog', function() {
-        var msg = element.all(by.css('#login-modal .login-alert'));
-        expect(msg.get(0).getText()).toMatch(/Please sign in/);
+        var labels = element.all(by.css('#login-modal .modal-body label'));
+        expect(labels.get(0).getText()).toMatch(/Username/);
     });
 
     it('should login', function() {
         element(by.model('login_username')).sendKeys('admin');
         element(by.model('login_password')).sendKeys('password01!');
         element(by.id('login-button')).click();
+        var user = element(by.css('#account-menu [ng-bind="current_user.username"]'));
+        expect(user.getText()).toMatch(/admin/);
     });
 });
