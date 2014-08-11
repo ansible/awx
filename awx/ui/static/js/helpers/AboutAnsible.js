@@ -68,10 +68,12 @@ angular.module('AboutAnsibleHelpModal', ['RestServices', 'Utilities','ModalDialo
                         width: 700,
                         height: 380,
                         minWidth: 300,
+                        resizable: false,
                         // title:  , //'<img src="static/img/tower_login_logo.png">' ,//'About Ansible',
                         callback: 'DialogReady',
                         onOpen: function(){
                             $('#dialog-ok-button').focus();
+                            $('#about-modal-dialog').scrollTop(0);
                         }
                     });
                 });

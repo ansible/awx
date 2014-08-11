@@ -49,6 +49,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 callback = params.callback,
                 beforeDestroy = params.beforeDestroy,
                 closeOnEscape = (params.closeOnEscape === undefined) ? false : params.closeOnEscape,
+                resizable = (params.resizable === undefined) ? true : params.resizable,
                 buttons,
                 id = params.id,
                 x, y, wh, ww;
@@ -87,6 +88,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 minWidth: minWidth,
                 title: title,
                 closeOnEscape: closeOnEscape,
+                resizable: resizable,
                 create: function () {
                     // Fix the close button
                     $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
