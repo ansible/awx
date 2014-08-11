@@ -35,7 +35,7 @@ from awx.main.fields import AutoOneToOneField
 from awx.main.models.base import *
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import *
-from awx.main.utils import encrypt_field, ignore_inventory_computed_fields
+from awx.main.utils import encrypt_field, ignore_inventory_computed_fields, _inventory_updates
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate']
 
@@ -963,7 +963,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         if new_instance and self.inventory and replace_text in self.name:
             self.name = self.name.replace(replace_text, str(self.pk))
             self.save(update_fields=['name'])
-        self.inventory.update_computed_fields(update_groups=False, update_hosts=False)
+        if not getattr(_inventory_updates, 'is_updating', False):
+            self.inventory.update_computed_fields(update_groups=False, update_hosts=False)
 
     def _get_current_status(self):
         if self.source:

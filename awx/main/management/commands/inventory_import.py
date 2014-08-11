@@ -1177,6 +1177,8 @@ class Command(NoArgsCommand):
             self.all_group.debug_tree()
 
             # Merge/overwrite inventory into database.
+            if settings.SQL_DEBUG:
+                self.logger.warning('loading into database...')
             with ignore_inventory_computed_fields():
                 if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
                     self.load_into_database()

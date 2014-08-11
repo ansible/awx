@@ -847,6 +847,29 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertNotEqual(new_inv.total_groups, 0)
         self.assertElapsedLessThan(30)
 
+    @unittest.skipIf(getattr(settings, 'LOCAL_DEVELOPMENT', False),
+                     'Skip this test in local development environments, '
+                     'which may vary widely on memory.')
+    def test_splunk_inventory(self):
+        settings.DEBUG = True
+        new_inv = self.organizations[0].inventories.create(name='splunk')
+        self.assertEqual(new_inv.hosts.count(), 0)
+        self.assertEqual(new_inv.groups.count(), 0)
+        inv_file = os.path.join(os.path.dirname(__file__), 'data',
+                                                'splunk_inventory.py')
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=inv_file, verbosity=0)
+        self.assertEqual(result, None, stdout + stderr)
+        # Check that inventory is populated as expected within a reasonable
+        # amount of time.  Computed fields should also be updated.
+        new_inv = Inventory.objects.get(pk=new_inv.pk)
+        self.assertNotEqual(new_inv.hosts.count(), 0)
+        self.assertNotEqual(new_inv.groups.count(), 0)
+        self.assertNotEqual(new_inv.total_hosts, 0)
+        self.assertNotEqual(new_inv.total_groups, 0)
+        self.assertElapsedLessThan(120)
+
     def _get_ngroups_for_nhosts(self, n):
         if n > 0:
             return min(n, 10) + ((n - 1) / 10 + 1) + ((n - 1) / 100 + 1) + ((n - 1) / 1000 + 1)

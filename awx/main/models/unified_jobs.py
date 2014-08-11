@@ -35,7 +35,7 @@ from djcelery.models import TaskMeta
 # AWX
 from awx.main.models.base import *
 from awx.main.models.schedules import Schedule
-from awx.main.utils import decrypt_field, get_type_for_model, emit_websocket_notification
+from awx.main.utils import decrypt_field, get_type_for_model, emit_websocket_notification, _inventory_updates
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 
@@ -201,10 +201,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
         # Update status and last_updated fields.
-        updated_fields = self._set_status_and_last_job_run(save=False)
-        for field in updated_fields:
-            if field not in update_fields:
-                update_fields.append(field)
+        if not getattr(_inventory_updates, 'is_updating', False):
+            updated_fields = self._set_status_and_last_job_run(save=False)
+            for field in updated_fields:
+                if field not in update_fields:
+                    update_fields.append(field)
         # Do the actual save.
         super(UnifiedJobTemplate, self).save(*args, **kwargs)
 
