@@ -33,7 +33,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         ('scm',    _('Source Control')),
         ('aws',    _('Amazon Web Services')),
         ('rax',    _('Rackspace')),
-        ('vmware', _('VMWare')),
+        ('vmware', _('VMware')),
         ('gce',    _('Google Compute Engine')),
         ('azure',  _('Windows Azure')),
     ]
