@@ -7,6 +7,13 @@
  *
  */
 
+ /**
+ * @ngdoc overview
+ * @name jobstatusgraph
+ * @description this is hte job status graph widget
+ *
+*/
+
 'use strict';
 
 angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
@@ -24,9 +31,9 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 // html = "<div class=\"graph-container\">\n";
 
                 html = "<div class=\"row\">\n";
-                html += "<div id=\"job-status-title\" class=\"h6 col-xs-8 text-center\"><b>Job Status</b></div>\n";  // for All Jobs, Past Month
+                html += "<div id=\"job-status-title\" class=\"h6 col-xs-4 col-md-6 text-center\"><b>Job Status</b></div>\n";  // for All Jobs, Past Month
 
-                html += "<div class=\"h6 col-xs-2 \">\n";
+                html += "<div class=\"h6 col-xs-4 col-md-3\">\n";
                 html += "<div class=\"dropdown\">\n";
                 html += "<a id=\"type-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
                 html += "Job Type<span class=\"caret\"></span>\n";
@@ -42,7 +49,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 html += "</div>\n"; //end of filter div
 
-                html += "<div class=\"h6 col-xs-2 \">\n";
+                html += "<div class=\"h6 col-xs-4 col-md-3\">\n";
                 html += "<div class=\"dropdown\">\n";
                 html += "<a id=\"period-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
                 html += "Period<span class=\"caret\"></span>\n";
