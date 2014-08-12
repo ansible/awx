@@ -14,7 +14,7 @@ angular.module('LicenseUpdateFormDefinition', [])
 
         fields: {
             license_json: {
-                label: 'License Key:',
+                label: 'License File',
                 type: 'textarea',
                 addRequired: true,
                 editRequird: true,
