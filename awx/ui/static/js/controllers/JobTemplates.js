@@ -467,13 +467,17 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     if ($scope.watchProjectUnregister) {
         $scope.watchProjectUnregister();
     }
-    $scope.watchProjectUnregister = $scope.$watch('project_name', function (newValue, oldValue) {
-        if (oldValue !== newValue && newValue !== '' && newValue !== null && newValue !== undefined) {
-            $scope.playbook = null;
+    $scope.watchProjectUnregister = $scope.$watch('project', function (newValue, oldValue) {
+        if (newValue !== oldValue) {
+            if (!Empty(oldValue)) {
+                $scope.playbook = null;
+            }
             getPlaybooks($scope.project);
             checkSCMStatus();
         }
     });
+
+
 
     // Turn off 'Wait' after both cloud credential and playbook list come back
     if ($scope.removeJobTemplateLoadFinished) {
