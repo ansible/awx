@@ -142,9 +142,6 @@ def get_tasks():
 def rebuild_graph(message):
     ''' Regenerate the task graph by refreshing known tasks from Tower, purging orphaned running tasks,
     and creatingdependencies for new tasks before generating directed edge relationships between those tasks '''
-    all_sorted_tasks = get_tasks()
-    if not len(all_sorted_tasks):
-        return None
 
     inspector = inspect()
     if not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
@@ -152,6 +149,10 @@ def rebuild_graph(message):
     else:
         print("Ignoring celery task inspector")
         active_task_queues = None
+
+    all_sorted_tasks = get_tasks()
+    if not len(all_sorted_tasks):
+        return None
 
     active_tasks = []
     if active_task_queues is not None:
