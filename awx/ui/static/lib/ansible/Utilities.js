@@ -103,7 +103,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 $('#alert2_ok_btn').focus();
             });
             $(document).bind('keydown', function (e) {
-                if (e.keyCode === 27) {
+                if (e.keyCode === 27 || e.keyCode === 13) {
                     $('#alert-modal2').modal('hide');
                 }
             });
@@ -129,7 +129,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 $('#alert_ok_btn').focus();
             });
             $(document).bind('keydown', function (e) {
-                if (e.keyCode === 27) {
+                if (e.keyCode === 27 || e.keyCode === 13) {
                     $('#alert-modal').modal('hide');
                 }
             });
