@@ -44,7 +44,7 @@ angular.module('AboutAnsibleHelpModal', ['RestServices', 'Utilities','ModalDialo
                 scope.removeBuildAboutDialog = scope.$on('BuildAboutDialog', function(e, data) {
                     var spaces, i, j,
                     paddedStr  = "",
-                    version = data.version.replace(/-\d*$/,'');
+                    version = data.version.replace(/-.*$/,'');
 
                     spaces = Math.floor((16-version.length)/2);
                     for( i=0; i<=spaces; i++){

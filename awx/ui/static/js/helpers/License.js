@@ -537,7 +537,7 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
             }
             scope.removeLicenseDataReady = scope.$on('LicenseDataReady', function(e, data) {
                 var html, version;
-                version = data.version.replace(/-\d*$/,'');
+                version = data.version.replace(/-.*$/,'');
                 self.setLicense(data.license_info, version);
                 html = self.getDefaultHTML(data.license_info);
                 self.loadDefaultScope(data.license_info, version);
