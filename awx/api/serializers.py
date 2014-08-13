@@ -615,6 +615,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
     playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
     scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
+    status = ChoiceField(source='status', choices=Project.PROJECT_STATUS_CHOICES, read_only=True, required=False)
     last_update_failed = serializers.Field(source='last_update_failed')
     last_updated = serializers.Field(source='last_updated')
 
@@ -984,7 +985,8 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
 
 class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
-    
+
+    status = ChoiceField(source='status', choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True, required=False)
     last_update_failed = serializers.Field(source='last_update_failed')
     last_updated = serializers.Field(source='last_updated')
 
@@ -1217,6 +1219,8 @@ class JobOptionsSerializer(BaseSerializer):
 
 
 class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
+
+    status = ChoiceField(source='status', choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES, read_only=True, required=False)
 
     class Meta:
         model = JobTemplate

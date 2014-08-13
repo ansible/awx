@@ -20,6 +20,7 @@ from django.db import models
 from django.db import transaction
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.contrib.contenttypes.models import ContentType
+from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
@@ -47,20 +48,30 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     Concrete base class for unified job templates.
     '''
 
-    STATUS_CHOICES = [
-        # Common to all:
+    COMMON_STATUS_CHOICES = [
         ('never updated', 'Never Updated'),     # A job has never been run using this template.
         ('running', 'Running'),                 # A job is currently running (or pending/waiting) using this template.
         ('failed', 'Failed'),                   # The last completed job using this template failed (failed, error, canceled).
         ('successful', 'Successful'),           # The last completed job using this template succeeded.
-        # For Project only:
+    ]
+
+    PROJECT_STATUS_CHOICES = COMMON_STATUS_CHOICES + [
         ('ok', 'OK'),                           # Project is not configured for SCM and path exists.
         ('missing', 'Missing'),                 # Project path does not exist.
-        # For Inventory Source only:
+    ]
+
+    INVENTORY_SOURCE_STATUS_CHOICES = COMMON_STATUS_CHOICES + [
         ('none', _('No External Source')),      # Inventory source is not configured to update from an external source.
+    ]
+
+    JOB_TEMPLATE_STATUS_CHOICES = COMMON_STATUS_CHOICES
+
+    DEPRECATED_STATUS_CHOICES = [
         # No longer used for Project / Inventory Source:
         ('updating', _('Updating')),            # Same as running.
     ]
+
+    ALL_STATUS_CHOICES = SortedDict(PROJECT_STATUS_CHOICES + INVENTORY_SOURCE_STATUS_CHOICES + JOB_TEMPLATE_STATUS_CHOICES + DEPRECATED_STATUS_CHOICES).items()
 
     class Meta:
         app_label = 'main'
@@ -119,7 +130,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     )
     status = models.CharField(
         max_length=32,
-        choices=STATUS_CHOICES,
+        choices=ALL_STATUS_CHOICES,
         default='ok',
         editable=False,
     )
