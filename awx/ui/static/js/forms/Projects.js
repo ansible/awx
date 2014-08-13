@@ -145,7 +145,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                         '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
                         '<li>ssh://server.example.com/path</li></ul>' +
                         '<p><strong>Note:</strong> Mercurial does not support password authentication for SSH. ' +
-                        'If applicable, add the username, password and key below. Do not put the username and key in the URL. ' +
+                        'Do not put the username and key in the URL. ' +
                         'If using Bitbucket and SSH, do not supply your Bitbucket username.',
                     show: "scm_type.value == 'hg'"
                 }]
