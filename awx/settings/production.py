@@ -4,6 +4,7 @@
 # Production settings for AWX project.
 
 # Python
+import errno
 import sys
 import traceback
 
@@ -74,13 +75,18 @@ try:
 except ImportError:
     traceback.print_exc()
     sys.exit(1)
-except IOError:
+except IOError, e:
     from django.core.exceptions import ImproperlyConfigured
     included_file = locals().get('__included_file__', '')
     if (not included_file or included_file == settings_file) and not os.path.exists(settings_file):
-        if 'AWX_SETTINGS_FILE' not in os.environ:
+        if e.errno == errno.EACCES:
+            MUST_BE_ROOT_OR_AWX = True
+        elif 'AWX_SETTINGS_FILE' not in os.environ:
             msg = 'No AWX configuration found at %s.' % settings_file
             msg += '\nDefine the AWX_SETTINGS_FILE environment variable to '
             msg += 'specify an alternate path.'
             raise ImproperlyConfigured(msg)
-    raise
+        else:
+            raise
+    else:
+        raise

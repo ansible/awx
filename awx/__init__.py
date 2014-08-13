@@ -74,8 +74,18 @@ def manage():
     # Prepare the AWX environment.
     prepare_env()
     # Now run the command (or display the version).
+    from django.conf import settings
     from django.core.management import execute_from_command_line
     if len(sys.argv) >= 2 and sys.argv[1] in ('version', '--version'): # pragma: no cover
         sys.stdout.write('%s\n' % __version__)
+    # If running as a user without permission to read settings, display an
+    # error message.  Allow --help to still work.
+    elif getattr(settings, 'MUST_BE_ROOT_OR_AWX', False):
+        if len(sys.argv) == 1 or len(sys.argv) >= 2 and sys.argv[1] in ('-h', '--help'):
+            execute_from_command_line(sys.argv)
+            sys.stdout.write('\n')
+        prog = os.path.basename(sys.argv[0])
+        sys.stdout.write('%s must be run as root or awx.\n' % prog)
+        sys.exit(1)
     else:
         execute_from_command_line(sys.argv)
