@@ -175,7 +175,7 @@ angular.module('CredentialFormDefinition', [])
                     init: false
                 },
                 autocomplete: false,
-                awPopOver: '<p>The e-mail address assigned to the Google Compute Engine <b><i>service account.</b></i></p>',
+                awPopOver: '<p>The email address assigned to the Google Compute Engine <b><i>service account.</b></i></p>',
                 dataTitle: 'Email',
                 dataPlacement: 'right',
                 dataContainer: "body"
