@@ -15,8 +15,8 @@ angular.module('InventoriesListDefinition', [])
         iterator: 'inventory',
         selectTitle: 'Add Inventories',
         editTitle: 'Inventories',
-        selectInstructions: "Click on a row to select it, and click Finished when done. Use the green <i class=\"icon-plus\"></i> " +
-            "button to create a new row.",
+        selectInstructions: "Click on a row to select it, and click Finished when done. Click the <i class=\"icon-plus\"></i> " +
+            "button to create a new inventory.",
         index: false,
         hover: true,
 

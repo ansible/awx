@@ -15,6 +15,9 @@ angular.module('OrganizationListDefinition', [])
         name: 'organizations',
         iterator: 'organization',
         selectTitle: 'Add Organizations',
+        selectInstructions: '<p>Select existing organizations by clicking each organization or checking the related checkbox. When finished, ' +
+            'click the blue <em>Select</em> button, located bottom right.</p><p>Create a new organization by clicking the ' +
+            '<i class=\"fa fa-plus\"></i> button.</p><div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>',
         editTitle: 'Organizations',
         hover: true,
         index: false,

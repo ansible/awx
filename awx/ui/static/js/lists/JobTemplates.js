@@ -16,8 +16,8 @@ angular.module('JobTemplatesListDefinition', [])
         iterator: 'job_template',
         selectTitle: 'Add Job Template',
         editTitle: 'Job Templates',
-        selectInstructions: "Click on a row to select it, and click Finished when done. Use the green <i class=\"icon-plus\"></i> " +
-            "button to create a new row.",
+        selectInstructions: "Click on a row to select it, and click Finished when done. Use the <i class=\"icon-plus\"></i> " +
+            "button to create a new job template.",
         index: false,
         hover: true,
 

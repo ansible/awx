@@ -15,8 +15,8 @@ angular.module('TeamsListDefinition', [])
         iterator: 'team',
         selectTitle: 'Add Team',
         editTitle: 'Teams',
-        selectInstructions: "Click on a row to select it, and click Finished when done. Use the green <i class=\"icon-plus\"></i> " +
-            "button to create a new row.",
+        selectInstructions: "Click on a row to select it, and click Finished when done. Click the <i class=\"icon-plus\"></i> " +
+            "button to create a new team.",
         index: false,
         hover: true,
 
