@@ -53,13 +53,20 @@ class MemObject(object):
         self.name = name
         self.source_dir = source_dir
     
-    def load_vars(self, path):
-        if os.path.exists(path) and os.path.isfile(path):
+    def load_vars(self, base_path):
+        all_vars = {}
+        for suffix in ('', '.yml', '.yaml', '.json'):
+            path = ''.join([base_path, suffix])
+            if not os.path.exists(path):
+                continue
+            if not os.path.isfile(path):
+                continue
             vars_name = os.path.basename(os.path.dirname(path))
             logger.debug('Loading %s from %s', vars_name, path)
             try:
                 v = yaml.safe_load(file(path, 'r').read())
-                return v if hasattr(v, 'items') else {}
+                if hasattr(v, 'items'): # is a dict
+                    all_vars.update(v)
             except yaml.YAMLError, e:
                 if hasattr(e, 'problem_mark'):
                     logger.error('Invalid YAML in %s:%s col %s', path,
@@ -68,7 +75,7 @@ class MemObject(object):
                 else:
                     logger.error('Error loading YAML from %s', path)
                 raise
-        return {}
+        return all_vars
 
 
 class MemGroup(MemObject):
