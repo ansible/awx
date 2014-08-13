@@ -75,18 +75,24 @@ try:
 except ImportError:
     traceback.print_exc()
     sys.exit(1)
-except IOError, e:
+except IOError:
     from django.core.exceptions import ImproperlyConfigured
     included_file = locals().get('__included_file__', '')
-    if (not included_file or included_file == settings_file) and not os.path.exists(settings_file):
-        if e.errno == errno.EACCES:
-            MUST_BE_ROOT_OR_AWX = True
-        elif 'AWX_SETTINGS_FILE' not in os.environ:
+    if (not included_file or included_file == settings_file):
+        # The import doesn't always give permission denied, so try to open the
+        # settings file directly.
+        try: 
+            e = None
+            open(settings_file)
+        except IOError, e:
+            pass
+        if e and e.errno == errno.EACCES:
+            SECRET_KEY = 'permission-denied'
+            LOGGING = {}
+        else:
             msg = 'No AWX configuration found at %s.' % settings_file
             msg += '\nDefine the AWX_SETTINGS_FILE environment variable to '
             msg += 'specify an alternate path.'
             raise ImproperlyConfigured(msg)
-        else:
-            raise
     else:
         raise
