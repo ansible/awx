@@ -404,6 +404,7 @@ class BaseTask(Task):
                 except OSError:
                     pass
                 try:
+                    stdout_handle.flush()
                     stdout_handle.close()
                 except Exception:
                     pass
