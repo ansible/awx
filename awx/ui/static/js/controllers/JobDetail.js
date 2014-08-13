@@ -232,7 +232,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    var idx, event, status, status_text, item;
+                    var idx, event, status, status_text, item, msg;
                     if (data.results.length > 0) {
                         lastEventId =  data.results[0].id;
                     }
@@ -272,6 +272,15 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             }
                         }
 
+                        msg = '';
+                        if (event.event_data && event.event_data.res) {
+                            if (typeof event.event_data.res === 'object') {
+                                msg = event.event_data.res.msg;
+                            } else {
+                                msg = event.event_data.res;
+                            }
+                        }
+
                         if (event.event !== "runner_on_no_hosts") {
                             task.hostResults[event.id] = {
                                 id: event.id,
@@ -281,7 +290,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                                 task_id: event.parent,
                                 name: event.event_data.host,
                                 created: event.created,
-                                msg: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '' ,
+                                msg: msg,
                                 item: item
                             };
                         }
@@ -1099,7 +1108,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 .success(function(data) {
                     scope.next_host_results = data.next;
                     data.results.forEach(function(row) {
-                        var status, status_text, item;
+                        var status, status_text, item, msg;
                         if (row.event === "runner_on_skipped") {
                             status = 'skipped';
                         }
@@ -1129,6 +1138,14 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             item = row.event_data.res.item;
                             if (typeof item === "object") {
                                 item = JSON.stringify(item);
+                            }
+                        }
+                        msg = '';
+                        if (row.event_data && row.event_data.res) {
+                            if (typeof row.event_data.res === 'object') {
+                                msg = row.event_data.res.msg;
+                            } else {
+                                msg = row.event_data.res;
                             }
                         }
                         scope.hostResults.push({

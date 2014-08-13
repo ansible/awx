@@ -46,9 +46,22 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
     return function(params) {
 
         var scope = params.scope,
-            event = params.event;
+            event = params.event,
+            msg;
 
         $log.debug('processing event: ' + event.id);
+
+        function getMsg(event) {
+            var msg = '';
+            if (event.event_data && event.event_data.res) {
+                if (typeof event.event_data.res === 'object') {
+                    msg = event.event_data.res.msg;
+                } else {
+                    msg = event.event_data.res;
+                }
+            }
+            return msg;
+        }
 
         switch (event.event) {
             case 'playbook_on_start':
@@ -72,6 +85,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
             case 'runner_on_ok':
             case 'runner_on_async_ok':
+                msg = getMsg(event);
                 UpdateHostStatus({
                     scope: scope,
                     name: event.event_data.host,
@@ -81,7 +95,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     id: event.id,
                     created: event.created,
                     modified: event.modified,
-                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '',
+                    message: msg,
                     item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
                 break;
@@ -98,6 +112,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 break;
 
             case 'runner_on_unreachable':
+                msg = getMsg(event);
                 UpdateHostStatus({
                     scope: scope,
                     name: event.event_data.host,
@@ -107,13 +122,14 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     id: event.id,
                     created: event.created,
                     modified: event.modified,
-                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '',
+                    message: msg,
                     item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
                 break;
 
             case 'runner_on_error':
             case 'runner_on_async_failed':
+                msg = getMsg(event);
                 UpdateHostStatus({
                     scope: scope,
                     name: event.event_data.host,
@@ -123,7 +139,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     id: event.id,
                     created: event.created,
                     modified: event.modified,
-                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '',
+                    message: msg,
                     item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
                 break;
@@ -140,6 +156,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 break;
 
             case 'runner_on_skipped':
+                msg = getMsg(event);
                 UpdateHostStatus({
                     scope: scope,
                     name: event.event_data.host,
@@ -149,7 +166,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     id: event.id,
                     created: event.created,
                     modified: event.modified,
-                    message: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '',
+                    message: msg,
                     item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
         }
@@ -462,14 +479,17 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             modified = params.modified,
             created = params.created,
             msg = params.message,
-            item = params.item;
+            item = params.item,
+            h, host;
 
+        /*
         scope.host_summary.ok += (status === 'successful') ? 1 : 0;
         scope.host_summary.changed += (status === 'changed') ? 1 : 0;
         scope.host_summary.unreachable += (status === 'unreachable') ? 1 : 0;
         scope.host_summary.failed += (status === 'failed') ? 1 : 0;
         scope.host_summary.total  = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
             scope.host_summary.failed;
+        */
 
         if (scope.jobData.hostSummaries[host_id] !== undefined) {
             scope.jobData.hostSummaries[host_id].ok += (status === 'successful') ? 1 : 0;
@@ -491,6 +511,28 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 status: (status === 'failed' || status === 'unreachable') ? 'failed' : 'successful'
             };
         }
+
+        scope.host_summary.ok = 0;
+        scope.host_summary.changed = 0;
+        scope.host_summary.unreachable = 0;
+        scope.host_summary.failed = 0;
+        for (h in scope.jobData.hostSummaries) {
+            host = scope.jobData.hostSummaries[h];
+            if (host.ok > 0 && host.failed === 0 && host.unreachable === 0 && host.changed === 0) {
+                scope.host_summary.ok++;
+            }
+            if (host.changed > 0 && host.failed === 0 && host.unreachable === 0) {
+                scope.host_summary.changed++;
+            }
+            if (host.failed > 0) {
+                scope.host_summary.failed++;
+            }
+            if (host.unreachable > 0) {
+                scope.host_summary.unreachable++;
+            }
+        }
+        scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
+            scope.host_summary.failed;
 
         UpdateTaskStatus({
             scope: scope,
@@ -920,7 +962,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 .success(function(data) {
                     scope.next_host_results = data.next;
                     data.results.forEach(function(event) {
-                        var status, status_text, item;
+                        var status, status_text, item, msg;
                         if (event.event === "runner_on_skipped") {
                             status = 'skipped';
                         }
@@ -955,6 +997,15 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                             }
                         }
 
+                        msg = '';
+                        if (event.event_data && event.event_data.res) {
+                            if (typeof event.event_data.res === 'object') {
+                                msg = event.event_data.res.msg;
+                            } else {
+                                msg = event.event_data.res;
+                            }
+                        }
+
                         if (event.event !== "runner_on_no_hosts") {
                             scope.hostResults.push({
                                 id: event.id,
@@ -964,7 +1015,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                                 task_id: event.parent,
                                 name: event.event_data.host,
                                 created: event.created,
-                                msg: (event.event_data && event.event_data.res) ? event.event_data.res.msg : '',
+                                msg: msg,
                                 item: item
                             });
                         }
@@ -1048,19 +1099,23 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             host;
         scope.host_summary.ok = 0;
         for (host in data.ok) {
-            scope.host_summary.ok += data.ok[host];
+            if (!data.changed[host] && !data.dark[host] && !data.failures[host]) {
+                scope.host_summary.ok += 1;
+            }
         }
         scope.host_summary.changed = 0;
         for (host in data.changed) {
-            scope.host_summary.changed += data.changed[host];
+            if (!data.dark[host] && !data.failures[host]) {
+                scope.host_summary.changed += 1;
+            }
         }
         scope.host_summary.unreachable = 0;
         for (host in data.dark) {
-            scope.host_summary.unreachable += data.dark[host];
+            scope.host_summary.unreachable += 1;
         }
         scope.host_summary.failed = 0;
         for (host in data.failures) {
-            scope.host_summary.failed += data.failures[host];
+            scope.host_summary.failed += 1;
         }
         scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed +
             scope.host_summary.unreachable + scope.host_summary.failed;
@@ -1072,6 +1127,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         var scope = params.scope,
             resize = params.resize,
             width, height, svg_height, svg_width, svg_radius, svg, graph_data = [];
+
+        console.log('drawing graph');
+        console.log(scope.host_summary);
 
         // Ready the data
         if (scope.host_summary.ok) {
@@ -1092,7 +1150,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             graph_data.push({
                 label: 'Unreachable',
                 value: (scope.host_summary.unreachable === scope.host_summary.total) ? 1 : scope.host_summary.unreachable,
-                color: '#FF3366'
+                color: '#FF0000'
             });
         }
         if (scope.host_summary.failed) {
