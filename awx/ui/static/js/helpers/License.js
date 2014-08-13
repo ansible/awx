@@ -70,15 +70,15 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
                     if (parseInt(license.grace_period_remaining,10) > 86400) {
                         // trial licenses don't get a grace period
                         if (license.trial) {
-                            html += "<p>Don't worry- your existing history and content has not been affected, but playbooks will no longer run and new hosts cannot be added. " +
+                            html += "<p>Don't worry &mdash; your existing history and content has not been affected, but playbooks will no longer run and new hosts cannot be added. " +
                                 "If you are ready to upgrade, " + contact_us + " or visit " + pricing + " to see all of your license options. Thanks!</p>";
                         } else {
-                            html += "<p>Don't worry- your existing history and content has not been affected, but in " + this.getRemainingDays(license.grace_period_remaining) + " days playbooks will no longer " +
+                            html += "<p>Don't worry &mdash; your existing history and content has not been affected, but in " + this.getRemainingDays(license.grace_period_remaining) + " days playbooks will no longer " +
                                 "run and new hosts cannot be added. If you are ready to upgrade, " + contact_us + " " +
                                 "or visit <a href=\"http://www.ansible.com/pricing\" target=\"_blank\">ansible.com/pricing <i class=\"fa fa-external-link\"></i></a> to see all of your license options. Thanks!</p>";
                         }
                     } else {
-                        html += "<p>Don’t worry- your existing history and content has not been affected, but playbooks will no longer run and new hosts cannot be added. If you are ready to renew or upgrade, contact us " +
+                        html += "<p>Don’t worry &mdash; your existing history and content has not been affected, but playbooks will no longer run and new hosts cannot be added. If you are ready to renew or upgrade, contact us " +
                             "at " + renew + ". Thanks!</p>";
                     }
                 }
@@ -109,7 +109,7 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
                 }
             } else {
                 // No license
-                title = "License Required";
+                title = "Add Your License";
                 html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Now that you’ve successfully installed or upgraded Ansible Tower, the next step is to add a license file.</p>" +
                     "<p>If you don’t have a license file yet, visit " + pricing + " to see all of our free and paid license options.</p>";
             }
@@ -244,7 +244,7 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
                 CreateDialog({
                     scope: scope,
                     buttons: buttons,
-                    width: 700,
+                    width: 675,
                     height: height,
                     minWidth: 400,
                     title: html.title,
@@ -370,7 +370,7 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
             CreateDialog({
                 scope: scope,
                 buttons: buttons,
-                width: 700,
+                width: 675,
                 height: 600,
                 minWidth: 400,
                 title: 'Ansible Tower License',
