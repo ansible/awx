@@ -155,7 +155,6 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
             scope.removeEventReady = scope.$on('EventReady', function(e, data) {
                 var btns;
                 scope.events = data;
-
                 if (event_id) {
                     // find and show the selected event
                     data.every(function(row, idx) {
@@ -295,8 +294,14 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                     scope.next_event_set = data.next;
                     scope.prev_event_set = data.previous;
                     data.results.forEach(function(event) {
-                        var key, event_data = {};
+                        var msg, key, event_data = {};
                         if (event.event_data.res) {
+                            if (typeof event.event_data.res !== 'object') {
+                                // turn event_data.res into an object
+                                msg = event.event_data.res;
+                                event.event_data.res = {};
+                                event.event_data.res.msg = msg;
+                            }
                             for (key in event.event_data) {
                                 if (key !== "res") {
                                     event.event_data.res[key] = event.event_data[key];
@@ -475,6 +480,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 return (found) ? html : '';
             }
             html = parseJSON(event);
+
             e = angular.element(document.getElementById(id));
             e.empty();
             if (html) {
