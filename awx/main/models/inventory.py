@@ -41,6 +41,8 @@ __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate']
 
 logger = logging.getLogger('awx.main.models.inventory')
 
+LETTERS = 'abcdefghijklmnopqrstuvwxyz'
+
 
 class Inventory(CommonModel):
     '''
