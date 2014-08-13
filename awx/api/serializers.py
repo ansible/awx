@@ -34,6 +34,7 @@ from rest_framework import serializers
 from polymorphic import PolymorphicModel
 
 # AWX
+from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import *
 from awx.main.utils import update_scm_url, get_type_for_model, get_model_for_type
 
@@ -109,7 +110,7 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
     '''
     Custom metaclass to enable attribute inheritance from Meta objects on
     serializer base classes.
-    
+
     Also allows for inheriting or updating field lists from base class(es):
 
         class Meta:
@@ -288,7 +289,7 @@ class BaseSerializer(serializers.ModelSerializer):
             # Can be raised by the reverse accessor for a OneToOneField.
             except ObjectDoesNotExist:
                 pass
-        return summary_fields 
+        return summary_fields
 
     def get_created(self, obj):
         if obj is None:
@@ -423,7 +424,7 @@ class UnifiedJobSerializer(BaseSerializer):
 
 
 class UnifiedJobListSerializer(UnifiedJobSerializer):
-    
+
     class Meta:
         exclude = ('*', 'job_args', 'job_cwd', 'job_env', 'result_traceback',
                    'result_stdout')
@@ -512,7 +513,7 @@ class UserSerializer(BaseSerializer):
         if not obj.password:
             obj.set_unusable_password()
         return super(UserSerializer, self).save_object(obj, **kwargs)
-    
+
     def get_related(self, obj):
         res = super(UserSerializer, self).get_related(obj)
         res.update(dict(
@@ -576,7 +577,7 @@ class OrganizationSerializer(BaseSerializer):
 
 
 class ProjectOptionsSerializer(BaseSerializer):
-    
+
     class Meta:
         fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch',
                   'scm_clean', 'scm_delete_on_update', 'credential')
@@ -876,7 +877,7 @@ class GroupSerializer(BaseSerializerWithVariables):
 
 
 class GroupTreeSerializer(GroupSerializer):
-    
+
     children = serializers.SerializerMethodField('get_children')
 
     class Meta:
@@ -930,7 +931,7 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
 
 
 class InventorySourceOptionsSerializer(BaseSerializer):
-    
+
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_vars', 'credential',
                   'source_regions', 'overwrite', 'overwrite_vars')
@@ -1091,7 +1092,7 @@ class PermissionSerializer(BaseSerializer):
         if obj.team and obj.team.active:
             res['team']        = reverse('api:team_detail', args=(obj.team.pk,))
         if obj.project and obj.project.active:
-            res['project']     = reverse('api:project_detail', args=(obj.project.pk,)) 
+            res['project']     = reverse('api:project_detail', args=(obj.project.pk,))
         if obj.inventory and obj.inventory.active:
             res['inventory']   = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         return res
@@ -1389,7 +1390,7 @@ class ScheduleSerializer(BaseSerializer):
 
     def validate_unified_job_template(self, attrs, source):
         ujt = attrs[source]
-        if type(ujt) == InventorySource and ujt.source not in ('rax', 'ec2',):
+        if type(ujt) == InventorySource and ujt.source not in CLOUD_PROVIDERS:
             raise serializers.ValidationError('Inventory Source must be a cloud resource')
         return attrs
 
