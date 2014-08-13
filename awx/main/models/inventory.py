@@ -12,6 +12,8 @@ import re
 import shlex
 import uuid
 import copy
+import random
+
 # PyYAML
 import yaml
 
