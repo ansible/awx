@@ -438,7 +438,7 @@ GCE_INSTANCE_ID_VAR = None
 
 
 # -------------------
-# -- Windows Azure --
+# -- Microsoft Azure --
 # -------------------
 
 # It's not possible to get zones in Azure without authenticating, so we
@@ -461,12 +461,12 @@ AZURE_REGION_CHOICES = [
 AZURE_REGIONS_BLACKLIST = []
 
 # Inventory variable name/value for determining whether a host is active
-# in Windows Azure.
+# in Microsoft Azure.
 AZURE_ENABLED_VAR = 'status'
 AZURE_ENABLED_VALUE = 'created'
 
 # Filter for allowed group and host names when importing inventory from
-# Windows Azure.
+# Microsoft Azure.
 AZURE_GROUP_FILTER = r'^.+$'
 AZURE_HOST_FILTER = r'^.+$'
 AZURE_EXCLUDE_EMPTY_GROUPS = True

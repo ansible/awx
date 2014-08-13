@@ -740,7 +740,7 @@ class InventorySourceOptions(BaseModel):
         ('rax',    _('Rackspace Cloud Servers')),
         ('ec2',    _('Amazon EC2')),
         ('gce',    _('Google Compute Engine')),
-        ('azure',  _('Windows Azure')),
+        ('azure',  _('Microsoft Azure')),
         ('vmware', _('VMWare')),
     ]
 
@@ -829,7 +829,7 @@ class InventorySourceOptions(BaseModel):
 
     @classmethod
     def get_azure_region_choices(self):
-        """Return a complete list of regions in Windows Azure, as a list of
+        """Return a complete list of regions in Microsoft Azure, as a list of
         two-tuples.
         """
         # It's not possible to get a list of regions from Azure without

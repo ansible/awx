@@ -35,7 +35,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         ('rax',    _('Rackspace')),
         ('vmware', _('VMware')),
         ('gce',    _('Google Compute Engine')),
-        ('azure',  _('Windows Azure')),
+        ('azure',  _('Microsoft Azure')),
     ]
 
     PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock',

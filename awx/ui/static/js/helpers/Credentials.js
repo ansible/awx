@@ -73,7 +73,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.sshKeyDataLabel = 'Management Certificate';
                     scope.subscription_required = true;
                     scope.key_required = true;
-                    scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Windows Azure console.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
+                    scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
                     scope.key_hint= "drag and drop a management certificate file on the field below";
                     break;
                 case 'vmware':

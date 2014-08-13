@@ -818,7 +818,7 @@ class RunInventoryUpdate(BaseTask):
         """Return private data needed for inventory update.
         If no private data is needed, return None.
         """
-        # If this is Windows Azure or GCE, return the RSA key
+        # If this is Microsoft Azure or GCE, return the RSA key
         if inventory_update.source in ('azure', 'gce'):
             credential = inventory_update.credential
             return decrypt_field(credential, 'ssh_key_data')
