@@ -33,3 +33,5 @@ Data will be returned in the following format:
 
 Each element contains an epoch timestamp represented in seconds and a numerical value indicating
 the number of events during that time period
+
+{% include "api/_new_in_awx.md" %}

@@ -9,8 +9,8 @@ the following fields (some fields may not be visible to all users):
   use when creating/editing a project.
 * `time_zone`: The configured time zone for the server.
 * `license_info`: Information about the current license.
-* `version`: Version of Ansible Tower (AWX) package installed.
+* `version`: Version of Ansible Tower package installed.
 
-Make a POST request to this resource as a super user to install or update the
-existing license.  The license data itself can be POSTed as a normal json data
-structure.
+(_New in Ansible Tower 2.0.0_) Make a POST request to this resource as a super
+user to install or update the existing license.  The license data itself can
+be POSTed as a normal json data structure.

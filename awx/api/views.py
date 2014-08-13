@@ -402,6 +402,7 @@ class ScheduleUnifiedJobsList(SubListAPIView):
     parent_model = Schedule
     relationship = 'unifiedjob_set'
     view_name = 'Schedule Jobs List'
+    new_in_148 = True
 
 class AuthTokenView(APIView):
 
