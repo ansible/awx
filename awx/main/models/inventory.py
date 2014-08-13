@@ -589,7 +589,10 @@ class Group(CommonModelNameNotUnique):
                     for direct_child in group_children[group]:
                         linked_children.append((group, direct_child))
                 marked_groups.append(group)
-            Group.objects.filter(id__in=marked_groups).update(active=False)
+            Group.objects.filter(id__in=marked_groups).update(
+                active=False,
+                name='deleted_' + ''.join([random.choice(LETTERS) for i in range(0,50)]),
+            )
             Host.objects.filter(id__in=marked_hosts).update(active=False)
             Group.parents.through.objects.filter(to_group__id__in=marked_groups)
             Group.hosts.through.objects.filter(group__id__in=marked_groups)
