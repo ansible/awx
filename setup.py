@@ -23,17 +23,14 @@ if os.path.exists("/etc/debian_version"):
     sysinit = "/etc/init.d"
     webconfig  = "/etc/apache2/conf.d"
     sosconfig = "/usr/share/sosreport/sos/plugins"
-    sosfile = "tower-sos3.py"
     shutil.copy("config/awx-munin-ubuntu.conf", "config/awx-munin.conf")
 else:
     sysinit = "/etc/rc.d/init.d"
     webconfig  = "/etc/httpd/conf.d"
     if os.path.exists("/usr/lib/python2.7/site-packages"):
         sosconfig = "/usr/lib/python2.7/site-packages/sos/plugins"
-        sosfile = "tower-sos3.py"
     else:
         sosconfig = "/usr/lib/python2.6/site-packages/sos/plugins"
-        sosfile = "tower-sos2.py"
     shutil.copy("config/awx-munin-el.conf", "config/awx-munin.conf")
 
 #####################################################################
@@ -222,7 +219,7 @@ setup(
                                         "tools/munin_monitors/taskmanager_alive"]),
             ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
             ("%s" % sysinit, ["tools/scripts/ansible-tower"]),
-            ("%s" % sosconfig, ["tools/sosreport/%s" % sosfile]),
+            ("%s" % sosconfig, ["tools/sosreport/tower.py"]),
         ]
     ),
     options = {
