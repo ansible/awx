@@ -263,38 +263,7 @@
     <!-- login modal -->
     <div id="login-modal" class="modal fade">
        <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header login-header">
-                <img src="{{ STATIC_URL }}img/tower_console_logo.png" />
-              </div>
-              <div class="modal-body">
-                  <div class="login-alert" ng-show="(sessionExpired == false)">Welcome to Ansible Tower! &nbsp;Please sign in.</div>
-                  <div class="login-alert" ng-show="(sessionExpired == true)">Your session timed out due to inactivity. Please sign in.</div>
-                  <form id="login-form" name="loginForm" class="form-horizontal" autocomplete="off" novalidate >
-                      <div class="form-group">
-                          <label class="control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk">Username</label>
-                          <div class="col-md-8 col-sm-8 col-xs-9">
-                              <input type="text" name="login_username" class="form-control" ng-model="login_username"
-                                  id="login-username" autocomplete="off" required>
-                              <div class="error" ng-show="loginForm.login_username.$dirty && loginForm.login_username.$error.required">A value is required!</div>
-                              <div class="error api-error" ng-bind="usernameError"></div>
-                          </div>
-                      </div>
-                      <div class="form-group">
-                          <label class="control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk">Password</label>
-                          <div class="col-md-8 col-sm-8 col-xs-9">
-                              <input type="password" name="login_password" id="login-password" class="form-control"
-                                  ng-model="login_password" required autocomplete="off">
-                              <div class="error" ng-show="loginForm.login_password.$dirty && loginForm.login_password.$error.required">A value is required!</div>
-                              <div class="error api-error" ng-bind="passwordError"></div>
-                          </div>
-                      </div>
-                  </form>
-              </div>
-              <div class="modal-footer">
-                <button ng-click="systemLogin(login_username, login_password)" id="login-button" class="btn btn-primary"><i class="fa fa-sign-in"></i> Sign In</button>
-              </div>
-          </div><!-- modal-content -->
+          <div class="modal-content" id="login-modal-content"></div><!-- modal-content -->
        </div><!-- modal-dialog -->
     </div><!-- modal -->
 
@@ -397,6 +366,7 @@
        </div><!-- modal-dialog -->
     </div><!-- modal -->
 
+    <div id="login-modal-dialog" style="display: none;"></div>
     <div id="help-modal-dialog" style="display: none;"></div>
     <div id="license-modal-dialog" style="display: none;"></div>
     <div id="about-modal-dialog" style="display: none;" ng-include="'static/partials/cowsay-about.html '"></div>

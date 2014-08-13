@@ -75,11 +75,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  * alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
  * clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
  */
-.factory('Alert', ['$rootScope', '$compile', '$sce', function ($rootScope) {
+.factory('Alert', ['$rootScope', function ($rootScope) {
     return function (hdr, msg, cls, action, secondAlert, disableButtons) {
-        var scope = $rootScope.$new(), alertClass, e;
+        var scope = $rootScope.$new(), alertClass;
         if (secondAlert) {
-            e = angular.element(document.getElementById('alert-modal2'));
 
             $('#alertHeader2').html(hdr);
             $('#alert2-modal-msg').html(msg);
@@ -108,7 +107,6 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 }
             });
         } else {
-            e = angular.element(document.getElementById('alert-modal'));
 
             $('#alertHeader').html(hdr);
             $('#alert-modal-msg').html(msg);

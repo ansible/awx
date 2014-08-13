@@ -59,13 +59,15 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 var scope = angular.element(document.getElementById('main-view')).scope();
                 scope.$destroy();
                 $rootScope.$destroy();
-                $cookieStore.remove('token');
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');
                 $cookieStore.remove('lastPath');
+                $cookieStore.remove('lastPath', '/home');
+                $cookieStore.remove('token');
                 $cookieStore.put('userLoggedIn', false);
                 $cookieStore.put('sessionExpired', false);
-                $cookieStore.remove('lastPath', '/home');
+                $cookieStore.put('token', '');
+                $cookieStore.put('current_user', {});
                 $rootScope.current_user = {};
                 $rootScope.license_tested = undefined;
                 $rootScope.userLoggedIn = false;
@@ -73,6 +75,8 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 $rootScope.token = null;
                 $rootScope.token_expires = null;
                 $rootScope.lastPath = '/home';
+                $rootScope.login_username = null;
+                $rootScope.login_password = null;
             },
 
             getLicense: function () {
