@@ -169,6 +169,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         }
         else {
             api_complete = true;  //trigger events to start processing
+            if ($rootScope.jobDetailInterval) {
+                window.clearInterval($rootScope.jobDetailInterval);
+            }
             $rootScope.jobDetailInterval = setInterval(function() {
                 UpdateDOM({ scope: scope });
             }, 2000);
