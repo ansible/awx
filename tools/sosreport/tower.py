@@ -2,9 +2,9 @@
 # All Rights Reserved.
 
 import sos
-from pkg_resources import parse_version
+from distutils.version import LooseVersion
 
-if parse_version(sos.__version__) >= parse_version('3.0'):
+if LooseVersion(sos.__version__) >= LooseVersion('3.0'):
     from sos.plugins import Plugin, RedHatPlugin, UbuntuPlugin
 
     class tower(Plugin, RedHatPlugin, UbuntuPlugin):
