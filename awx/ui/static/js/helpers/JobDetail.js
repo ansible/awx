@@ -1128,9 +1128,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             resize = params.resize,
             width, height, svg_height, svg_width, svg_radius, svg, graph_data = [];
 
-        console.log('drawing graph');
-        console.log(scope.host_summary);
-
         // Ready the data
         if (scope.host_summary.ok) {
             graph_data.push({
