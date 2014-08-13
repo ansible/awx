@@ -1,7 +1,7 @@
 # Copyright (c) 2014 Ansible, Inc.
 # All Rights Reserved.
 
-import collections
+from ordereddict import OrderedDict
 import copy
 import functools
 
@@ -65,7 +65,7 @@ def paginated(method):
 
             # Compile the results into a dictionary with pagination
             # information.
-            answer = collections.OrderedDict((
+            answer = OrderedDict((
                 ('count', count),
                 ('next', next_),
                 ('previous', prev),
