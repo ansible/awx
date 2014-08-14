@@ -176,7 +176,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         """
         host = self.host or ''
         if not host and self.kind == 'vmware':
-            raise ValidationError('Host required for VMWare credential.')
+            raise ValidationError('Host required for VMware credential.')
         return host
 
     def clean_username(self):
@@ -187,7 +187,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
             raise ValidationError('Username required for Rackspace '
                                   'credential.')
         if not username and self.kind == 'vmware':
-            raise ValidationError('Username required for VMWare credential.')
+            raise ValidationError('Username required for VMware credential.')
         return username
 
     def clean_password(self):
@@ -197,7 +197,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         if not password and self.kind == 'rax':
             raise ValidationError('API key required for Rackspace credential.')
         if not password and self.kind == 'vmware':
-            raise ValidationError('Password required for VMWare credential.')
+            raise ValidationError('Password required for VMware credential.')
         return password
 
     def _validate_ssh_private_key(self, data):

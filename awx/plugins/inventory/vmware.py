@@ -210,7 +210,7 @@ if __name__ == '__main__':
     except Exception:
         pass
 
-    # If any of the VMWare environment variables are set, they trump
+    # If any of the VMware environment variables are set, they trump
     # the INI configuration.
     if 'VMWARE_HOST' in os.environ:
         auth_host = os.environ['VMWARE_HOST']
@@ -219,7 +219,7 @@ if __name__ == '__main__':
     if 'VMWARE_PASSWORD' in os.environ:
         auth_password = os.environ['VMWARE_PASSWORD']
 
-    # Create the VMWare client.
+    # Create the VMware client.
     client = Client(auth_host, auth_user, auth_password)
 
     # Actually do the work.

@@ -757,7 +757,7 @@ class InventorySourceOptions(BaseModel):
         ('ec2',    _('Amazon EC2')),
         ('gce',    _('Google Compute Engine')),
         ('azure',  _('Microsoft Azure')),
-        ('vmware', _('VMWare')),
+        ('vmware', _('VMware')),
     ]
 
     class Meta:
@@ -858,8 +858,8 @@ class InventorySourceOptions(BaseModel):
 
     @classmethod
     def get_vmware_region_choices(self):
-        """Return a complete list of regions in VMWare, as a list of two-tuples
-        (but note that VMWare doesn't actually have regions!).
+        """Return a complete list of regions in VMware, as a list of two-tuples
+        (but note that VMware doesn't actually have regions!).
         """
         return [('all', 'All')]
 
