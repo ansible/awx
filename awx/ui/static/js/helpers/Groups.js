@@ -938,7 +938,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                                         data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                                 }
                             }
-                            modal_scope.$emit('groupVariablesLoaded');  // JT-- "groupVariablesLoaded" is where the schedule info is loaded, so I make a call after the sources_scope.source has been loaded
+
                             sources_scope.sourceChange(); //set defaults that rely on source value
 
                             if (data.source_regions) {
@@ -968,6 +968,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                                 $('#s2id_source_source_regions').select2('data', master.source_regions);
                             }
                             sources_scope.group_update_url = data.related.update;
+                            modal_scope.$emit('groupVariablesLoaded');  // JT-- "groupVariablesLoaded" is where the schedule info is loaded, so I make a call after the sources_scope.source has been loaded
                             //Wait('stop');
                         })
                         .error(function (data, status) {
@@ -976,6 +977,8 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                                 msg: 'Failed to retrieve inventory source. GET status: ' + status });
                         });
                 }
+                else
+                    modal_scope.$emit('groupVariablesLoaded');  // JT-- "groupVariablesLoaded" is where the schedule info is loaded, so I make a call after the sources_scope.source has been loaded
             });
 
             if (sources_scope.removeScopeSourceTypeOptionsReady) {
