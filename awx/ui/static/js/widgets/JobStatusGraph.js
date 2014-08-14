@@ -31,9 +31,9 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                 // html = "<div class=\"graph-container\">\n";
 
                 html = "<div class=\"row\">\n";
-                html += "<div id=\"job-status-title\" class=\"h6 col-xs-4 col-md-6 text-center\"><b>Job Status</b></div>\n";  // for All Jobs, Past Month
+                html += "<div id=\"job-status-title\" class=\"h6 col-xs-2 col-sm-3 col-lg-4 text-center\"><b>Job Status</b></div>\n";  // for All Jobs, Past Month
 
-                html += "<div class=\"h6 col-xs-4 col-md-3\">\n";
+                html += "<div class=\"h6 col-xs-5 col-sm-5 col-lg-4\">\n";
                 html += "<div class=\"dropdown\">\n";
                 html += "Job Type: <a id=\"type-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
                 html += "All<span class=\"caret\"></span>\n";
@@ -49,7 +49,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 html += "</div>\n"; //end of filter div
 
-                html += "<div class=\"h6 col-xs-4 col-md-3\">\n";
+                html += "<div class=\"h6 col-xs-5 col-sm-4 col-lg-4\">\n";
                 html += "<div class=\"dropdown\">\n";
                 html += "Period: <a id=\"period-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
                 html += "Past Month<span class=\"caret\"></span>\n";
