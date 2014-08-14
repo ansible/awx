@@ -852,7 +852,11 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 setTimeout(function() { textareaResize('group_variables', properties_scope); }, 300);
             });
 
-            // After the group record is loaded, retrieve related data
+
+            // After the group record is loaded, retrieve related data.
+            // jt-- i'm changing this to act sequentially: first load properties, then sources, then schedule
+            // I accomplished this by adding "LoadSourceData" which will run the source retrieval code after the property
+            // variables are set.
             if (modal_scope.groupLoadedRemove) {
                 modal_scope.groupLoadedRemove();
             }
@@ -864,7 +868,8 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                         .success(function (data) {
                             properties_scope.variables = ParseVariableString(data);
                             master.variables = properties_scope.variables;
-                            modal_scope.$emit('groupVariablesLoaded');
+                            modal_scope.$emit('LoadSourceData');
+                            //modal_scope.$emit('groupVariablesLoaded');    jt- this needs to get called after sources are loaded
                         })
                         .error(function (data, status) {
                             properties_scope.variables = null;
@@ -874,9 +879,17 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 } else {
                     properties_scope.variables = "---";
                     master.variables = properties_scope.variables;
-                    properties_scope.$emit('groupVariablesLoaded');
+                    modal_scope.$emit('LoadSourceData');
+                    //properties_scope.$emit('groupVariablesLoaded');
                 }
+            });
 
+
+            // JT -- this gets called after the properties & properties variables are loaded, and is emitted from (groupLoaded)
+            if (modal_scope.removeLoadSourceData) {
+                modal_scope.removeLoadSourceData();
+            }
+            modal_scope.removeLoadSourceData = modal_scope.$on('LoadSourceData', function () {
                 if (sources_scope.source_url) {
                     // get source data
                     Rest.setUrl(sources_scope.source_url);
@@ -925,7 +938,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                                         data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                                 }
                             }
-
+                            modal_scope.$emit('groupVariablesLoaded');  // JT-- "groupVariablesLoaded" is where the schedule info is loaded, so I make a call after the sources_scope.source has been loaded
                             sources_scope.sourceChange(); //set defaults that rely on source value
 
                             if (data.source_regions) {
@@ -1256,7 +1269,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
             // Change the lookup and regions when the source changes
             sources_scope.sourceChange = function () {
-                parent_scope.showSchedulesTab = (mode === 'edit' && sources_scope.source && sources_scope.source.value) ? true : false;
+                parent_scope.showSchedulesTab = (mode === 'edit' &&  sources_scope.source && sources_scope.source.value) ? true : false;
                 SourceChange({ scope: sources_scope, form: SourceForm });
             };
 
