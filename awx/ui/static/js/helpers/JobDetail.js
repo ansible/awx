@@ -104,7 +104,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 UpdatePlayStatus({
                     scope: scope,
                     play_id: event.parent,
-                    failed: true,
+                    failed: false,
                     changed: false,
                     modified: event.modified,
                     no_hosts: true
@@ -384,22 +384,21 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             play;
 
         if (scope.jobData.plays[id] !== undefined) {
-            play = scope.jobData.plays[scope.activePlay];
+            play = scope.jobData.plays[id];
             if (failed) {
                 play.status = 'failed';
                 play.status_text = 'Failed';
             }
             else if (play.status !== 'changed' && play.status !== 'failed') {
                 // once the status becomes 'changed' or 'failed' don't modify it
+                play.status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
                 if (no_hosts) {
-                    play.status = 'no-matching-hosts';
                     play.status_text = 'No matching hosts';
-                }
-                else {
-                    play.status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
+                } else {
                     play.status_text = (changed) ? 'Changed' : (failed) ? 'Failed' : 'OK';
                 }
             }
+            play.taskCount = (play.taskCount > 0) ? play.taskCount : 1;  // set to a minimum of 1 to force drawing
             play.status_tip = "Event ID: " + play.id + "<br />Status: " + play.status_text;
             play.finished = modified;
             play.elapsed = GetElapsed({

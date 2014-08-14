@@ -386,6 +386,10 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             // this is not the first task
                             play.tasks[event.id].hostCount = play.tasks[play.firstTask].hostCount;
                         }
+                        if (play.tasks[event.id].hostCount === 0) {
+                            play.tasks[event.id].status_text = 'No matching hosts';
+                            play.tasks[event.id].status_tip = "Event ID: " + event.id + "<br />Status: No matching hosts";
+                        }
                         play.taskCount++;
                         SetTaskStyles({
                             task: play.tasks[event.id]
@@ -491,9 +495,15 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
                     scope.jobData.plays[event.id].hostCount = ok + changed + failed + skipped;
 
-                    if (scope.jobData.plays[event.id].hostCount > 0 || event.unreachable_count > 0) {
+                    if (scope.jobData.plays[event.id].hostCount > 0 || event.unreachable_count > 0 || scope.job_status.status === 'successful' ||
+                        scope.job_status.status === 'failed' || scope.job_status.status === 'error' || scope.job_status.status === 'canceled') {
                         // force the play to be on the 'active' list
                         scope.jobData.plays[event.id].taskCount = 1;
+                    }
+
+                    if (scope.jobData.plays[event.id].hostCount === 0 && event.unreachable_count === 0) {
+                        scope.jobData.plays[event.id].status_text = 'No matching hosts';
+                        scope.jobData.plays[event.id].status_tip = "Event ID: " + event.id + "<br />Status: No matching hosts";
                     }
 
                     scope.host_summary.ok += ok;
