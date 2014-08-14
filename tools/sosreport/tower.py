@@ -38,7 +38,10 @@ if LooseVersion(sos.__version__) >= LooseVersion('3.0'):
                 self.add_copy_spec(path)
 
             for command in commands:
-                self.collect_ext_output(command)
+                if hasattr(self, 'add_cmd_output'):
+                    self.add_cmd_output(command)
+                else:
+                    self.collect_ext_output(command)
 
 else:
     import sos.plugintools
