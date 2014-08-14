@@ -410,7 +410,8 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
             Prompt({
                 hdr: hdr,
                 body: "<div class=\"alert alert-info\">Are you sure you want to delete the <em>" + schedule.name  + "</em> schedule?</div>",
-                action: action
+                action: action,
+                backdrop: false
             });
 
         };

@@ -22,11 +22,13 @@ angular.module('PromptDialog', ['Utilities'])
             return function (params) {
 
                 var dialog = angular.element(document.getElementById('prompt-modal')),
-                    scope = dialog.scope(), cls;
+                    scope = dialog.scope(), cls, local_backdrop;
 
                 scope.promptHeader = params.hdr;
                 scope.promptBody = $sce.trustAsHtml(params.body);
                 scope.promptAction = params.action;
+
+                local_backdrop = (params.backdrop === undefined) ? "static" : params.backdrop;
 
                 cls = (params['class'] === null || params['class'] === undefined) ? 'btn-danger' : params['class'];
 
@@ -34,7 +36,7 @@ angular.module('PromptDialog', ['Utilities'])
 
                 $('#prompt-modal').off('hidden.bs.modal');
                 $('#prompt-modal').modal({
-                    backdrop: 'static',
+                    backdrop: local_backdrop,
                     keyboard: true,
                     show: true
                 });

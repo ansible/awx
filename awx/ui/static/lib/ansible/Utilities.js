@@ -76,20 +76,21 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  * clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
  */
 .factory('Alert', ['$rootScope', function ($rootScope) {
-    return function (hdr, msg, cls, action, secondAlert, disableButtons) {
-        var scope = $rootScope.$new(), alertClass;
+    return function (hdr, msg, cls, action, secondAlert, disableButtons, backdrop) {
+        var scope = $rootScope.$new(), alertClass, local_backdrop;
         if (secondAlert) {
 
             $('#alertHeader2').html(hdr);
             $('#alert2-modal-msg').html(msg);
 
             alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
+            local_backdrop = (backdrop === undefined) ? "static" : backdrop;
 
             $('#alert2-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal2').modal({
                 show: true,
                 keyboard: true,
-                backdrop: 'static'
+                backdrop: local_backdrop
             });
             scope.disableButtons2 = (disableButtons) ? true : false;
 
@@ -111,11 +112,13 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             $('#alertHeader').html(hdr);
             $('#alert-modal-msg').html(msg);
             alertClass = (cls) ? cls : 'alert-danger'; //default alert class is alert-danger
+            local_backdrop = (backdrop === undefined) ? "static" : backdrop;
+
             $('#alert-modal-msg').attr({ "class": "alert " + alertClass });
             $('#alert-modal').modal({
                 show: true,
                 keyboard: true,
-                backdrop: 'static'
+                backdrop: local_backdrop
             });
 
             $('#alert-modal').on('hidden.bs.modal', function () {

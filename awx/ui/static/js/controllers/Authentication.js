@@ -155,7 +155,7 @@ function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope,
         $('.api-error').empty();
         var token;
         if (Empty(username) || Empty(password)) {
-            Alert('Error!', 'Please provide a username and password before attempting to login.', 'alert-danger', setLoginFocus);
+            Alert('Error!', 'Please provide a username and password before attempting to login.', 'alert-danger', setLoginFocus, null, null, false);
         } else {
             Wait('start');
             Authorization.retrieveToken(username, password)
@@ -185,7 +185,7 @@ function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope,
                             ' and accessible.';
                         }
                         scope.reset();
-                        Alert(hdr, msg, 'alert-danger', setLoginFocus);
+                        Alert(hdr, msg, 'alert-danger', setLoginFocus, null, null, false);
                     }
                 });
         }
