@@ -491,7 +491,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
                     scope.jobData.plays[event.id].hostCount = ok + changed + failed + skipped;
 
-                    if (scope.jobData.plays[event.id].hostCount > 0) {
+                    if (scope.jobData.plays[event.id].hostCount > 0 || event.unreachable_count > 0) {
                         // force the play to be on the 'active' list
                         scope.jobData.plays[event.id].taskCount = 1;
                     }
@@ -506,6 +506,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 if (scope.activePlay && scope.jobData.plays[scope.activePlay]) {
                     scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
                 }
+                console.log(scope.jobData.plays);
                 scope.$emit('LoadTasks', events_url);
             })
             .error( function(data, status) {
