@@ -506,7 +506,6 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 if (scope.activePlay && scope.jobData.plays[scope.activePlay]) {
                     scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
                 }
-                console.log(scope.jobData.plays);
                 scope.$emit('LoadTasks', events_url);
             })
             .error( function(data, status) {
