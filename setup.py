@@ -22,16 +22,17 @@ munin_plugin_conf_path = "/etc/munin/plugin-conf.d"
 if os.path.exists("/etc/debian_version"):
     sysinit = "/etc/init.d"
     webconfig  = "/etc/apache2/conf.d"
-    sosconfig = "/usr/share/sosreport/sos/plugins"
     shutil.copy("config/awx-munin-ubuntu.conf", "config/awx-munin.conf")
+    # sosreport-3.1 (and newer) look in '/usr/share/sosreport/sos/plugins'
+    # sosreport-3.0 looks in '/usr/lib/python2.7/dist-packages/sos/plugins'
+    # debian/<package>.links will create symlinks to support both versions
+    sosconfig = "/usr/share/sosreport/sos/plugins"
 else:
     sysinit = "/etc/rc.d/init.d"
     webconfig  = "/etc/httpd/conf.d"
-    if os.path.exists("/usr/lib/python2.7/site-packages"):
-        sosconfig = "/usr/lib/python2.7/site-packages/sos/plugins"
-    else:
-        sosconfig = "/usr/lib/python2.6/site-packages/sos/plugins"
     shutil.copy("config/awx-munin-el.conf", "config/awx-munin.conf")
+    # The .spec will create symlinks to support multiple versions of sosreport
+    sosconfig = "/usr/share/sosreport/sos/plugins"
 
 #####################################################################
 # Helper Functions
