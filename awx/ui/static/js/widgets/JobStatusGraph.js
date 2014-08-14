@@ -35,8 +35,8 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 html += "<div class=\"h6 col-xs-4 col-md-3\">\n";
                 html += "<div class=\"dropdown\">\n";
-                html += "<a id=\"type-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
-                html += "Job Type<span class=\"caret\"></span>\n";
+                html += "Job Type: <a id=\"type-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
+                html += "All<span class=\"caret\"></span>\n";
                 html += "  </a>\n";
 
                 html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"type-dropdown\">\n";
@@ -51,8 +51,8 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 html += "<div class=\"h6 col-xs-4 col-md-3\">\n";
                 html += "<div class=\"dropdown\">\n";
-                html += "<a id=\"period-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
-                html += "Period<span class=\"caret\"></span>\n";
+                html += "Period: <a id=\"period-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">\n";
+                html += "Past Month<span class=\"caret\"></span>\n";
                 html += "  </a>\n";
 
                 html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"period-dropdown\">\n";
@@ -185,7 +185,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                         "src": "url(/static/fonts/OpenSans-Regular.ttf)"
                                     });
 
-                                    //On click, update with new data
+                                    // when the Period drop down filter is used, create a new graph based on the
                                     d3.selectAll(".n")
                                         .on("click", function() {
                                             period = this.getAttribute("id");
