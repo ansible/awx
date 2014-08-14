@@ -304,7 +304,6 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             msg: 'Call to ' + url + '. GET returned: ' + status });
                     });
             } else {
-                console.log('no tasks loaded!');
                 scope.$emit('LoadHostSummaries');
             }
         } else {
