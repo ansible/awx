@@ -23,7 +23,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
         collapse: true,
         collapseTitle: "Properties",
         collapseMode: 'edit',
-        collapseOpen: true,   //Always open first panel
+        collapseOpenFirst: true,   //Always open first panel
 
         actions: {
             submit: {
