@@ -12,5 +12,5 @@ EOM
 esac
 
 printf "rabbit.value "
-ps ax | grep rabbitmq-server | grep -v grep | wc -l
+ps ax | grep rabbitmq | grep -v grep | wc -l
 printf "\n"
