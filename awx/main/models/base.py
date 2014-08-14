@@ -180,6 +180,7 @@ class BaseModel(models.Model):
                 # It's safe to send `update_fields` here since signal listeners
                 # are required to take **kwargs.
                 signals.pre_save.send(sender=origin, instance=self,
+                                      created=False,
                                       raw=kwargs.get('raw', False),
                                       using=kwargs.get('using', None),
                                       update_fields=update_fields)
@@ -196,6 +197,7 @@ class BaseModel(models.Model):
             # Send the post-save signal.
             if not meta.auto_created:
                 signals.post_save.send(sender=origin, instance=self,
+                                       created=False,
                                        raw=kwargs.get('raw', False),
                                        using=kwargs.get('using', None),
                                        update_fields=update_fields)
