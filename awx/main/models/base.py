@@ -12,6 +12,7 @@ import yaml
 import django
 from django.conf import settings
 from django.db import models
+from django.db.models import signals
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
