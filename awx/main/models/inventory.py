@@ -43,8 +43,6 @@ __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate']
 
 logger = logging.getLogger('awx.main.models.inventory')
 
-LETTERS = 'abcdefghijklmnopqrstuvwxyz'
-
 
 class Inventory(CommonModel):
     '''
@@ -593,10 +591,21 @@ class Group(CommonModelNameNotUnique):
                     for direct_child in group_children[group]:
                         linked_children.append((group, direct_child))
                 marked_groups.append(group)
-            Group.objects.filter(id__in=marked_groups).update(
-                active=False,
-                name='deleted_' + ''.join([random.choice(LETTERS) for i in range(0,50)]),
-            )
+
+            # There is no good way to use a group name based on the old name
+            # with Manager.update, so we must use a raw query to do so.
+            cursor = connection.cursor()
+            cursor.execute("""
+                UPDATE "main_group"
+                SET "active" = false,
+                    "name" = 'deleted_' || "name" || '{dt}'
+                WHERE "id" IN ({ids})
+            """.format(
+                dt=datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ'),
+                ids=','.join([str(i) for i in marked_groups]),
+            ))
+
+            # Update related items.
             Host.objects.filter(id__in=marked_hosts).update(active=False)
             Group.parents.through.objects.filter(to_group__id__in=marked_groups)
             Group.hosts.through.objects.filter(group__id__in=marked_groups)
@@ -948,18 +957,22 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             self.inventory = self.group.inventory
             if 'inventory' not in update_fields:
                 update_fields.append('inventory')
-        # Set name automatically.
+
+        # Set the name automatically.
+        # Since the name isn't user-visible, we just set the name to the
+        # inventory name and the group ID, which is guaranteed never to have
+        # a conflict.
         replace_text = '__replace_%s__' % now()
         old_name_re = re.compile(r'^inventory_source \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.*?$')
         if not self.name or old_name_re.match(self.name):
             if self.inventory and self.group:
-                self.name = '%s (%s)' % (self.group.name, self.inventory.name)
+                self.name = '%s: group %d' % (self.inventory.name, self.group.id)
             elif self.inventory and self.pk:
-                self.name = '%s (%s)' % (self.inventory.name, self.pk)
+                self.name = '%s: inventory source %d' % (self.inventory.name, self.pk)
             elif self.inventory:
                 self.name = '%s (%s)' % (self.inventory.name, replace_text)
             elif self.pk:
-                self.name = 'inventory source (%s)' % self.pk
+                self.name = 'inventory source %d' % self.pk
             else:
                 self.name = 'inventory source (%s)' % replace_text
             if 'name' not in update_fields:
