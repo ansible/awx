@@ -1197,8 +1197,8 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     scope.next_host_summaries = data.next;
                     data.results.forEach(function(row) {
                         var name;
-                        if (event.host_name) {
-                            name = event.host_name;
+                        if (row.host_name) {
+                            name = row.host_name;
                         }
                         else {
                             name = "<deleted host>";
