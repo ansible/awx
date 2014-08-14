@@ -391,10 +391,11 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             }
             else if (play.status !== 'changed' && play.status !== 'failed') {
                 // once the status becomes 'changed' or 'failed' don't modify it
-                play.status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
                 if (no_hosts) {
+                    play.status = 'no-matching-hosts';
                     play.status_text = 'No matching hosts';
                 } else {
+                    play.status = (changed) ? 'changed' : (failed) ? 'failed' : 'successful';
                     play.status_text = (changed) ? 'Changed' : (failed) ? 'Failed' : 'OK';
                 }
             }
@@ -1259,7 +1260,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             filteredListX = [],
             filteredListA = [],
             filteredListB = [],
-            idx, key, keys, newKeys, tasks;
+            idx, key, keys, newKeys, tasks, t;
 
         function listSort(a,b) {
             if (parseInt(a,10) < parseInt(b,10))
@@ -1275,7 +1276,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
             // Only draw tasks that are in the 'active' list
             for (key in tasks) {
-                if (tasks[key].reportedHosts > 0 || tasks[key].status === 'no-matching-hosts') {
+                t = tasks[key];
+                if (t.reportedHosts > 0 || t.hostCount > 0 || t.successfulCount >0 || t.failedCount > 0 ||
+                    t.changedCount > 0 || t.skippedCount > 0 || t.unreachableCount > 0) {
                     filteredListX[key] = tasks[key];
                 }
             }

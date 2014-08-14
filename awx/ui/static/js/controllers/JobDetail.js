@@ -222,87 +222,92 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     }
     scope.removeLoadHosts = scope.$on('LoadHosts', function() {
         if (scope.activeTask) {
+
             var play = scope.jobData.plays[scope.activePlay],
                 task = play.tasks[scope.activeTask],
                 url;
 
-            url = scope.job.related.job_events + '?parent=' + task.id + '&';
-            url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=-host__name';
+            if (play && task) {
+                url = scope.job.related.job_events + '?parent=' + task.id + '&';
+                url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=-host__name';
 
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    var idx, event, status, status_text, item, msg;
-                    if (data.results.length > 0) {
-                        lastEventId =  data.results[0].id;
-                    }
-                    scope.next_host_results = data.next;
-                    for (idx=data.results.length - 1; idx >= 0; idx--) {
-                        event = data.results[idx];
-                        if (event.event === "runner_on_skipped") {
-                            status = 'skipped';
+                Rest.setUrl(url);
+                Rest.get()
+                    .success(function(data) {
+                        var idx, event, status, status_text, item, msg;
+                        if (data.results.length > 0) {
+                            lastEventId =  data.results[0].id;
                         }
-                        else if (event.event === "runner_on_unreachable") {
-                            status = 'unreachable';
-                        }
-                        else {
-                            status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
-                        }
-                        switch(status) {
-                            case "successful":
-                                status_text = 'OK';
-                                break;
-                            case "changed":
-                                status_text = "Changed";
-                                break;
-                            case "failed":
-                                status_text = "Failed";
-                                break;
-                            case "unreachable":
-                                status_text = "Unreachable";
-                                break;
-                            case "skipped":
-                                status_text = "Skipped";
-                        }
+                        scope.next_host_results = data.next;
+                        for (idx=data.results.length - 1; idx >= 0; idx--) {
+                            event = data.results[idx];
+                            if (event.event === "runner_on_skipped") {
+                                status = 'skipped';
+                            }
+                            else if (event.event === "runner_on_unreachable") {
+                                status = 'unreachable';
+                            }
+                            else {
+                                status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                            }
+                            switch(status) {
+                                case "successful":
+                                    status_text = 'OK';
+                                    break;
+                                case "changed":
+                                    status_text = "Changed";
+                                    break;
+                                case "failed":
+                                    status_text = "Failed";
+                                    break;
+                                case "unreachable":
+                                    status_text = "Unreachable";
+                                    break;
+                                case "skipped":
+                                    status_text = "Skipped";
+                            }
 
-                        if (event.event_data && event.event_data.res) {
-                            item = event.event_data.res.item;
-                            if (typeof item === "object") {
-                                item = JSON.stringify(item);
+                            if (event.event_data && event.event_data.res) {
+                                item = event.event_data.res.item;
+                                if (typeof item === "object") {
+                                    item = JSON.stringify(item);
+                                }
+                            }
+
+                            msg = '';
+                            if (event.event_data && event.event_data.res) {
+                                if (typeof event.event_data.res === 'object') {
+                                    msg = event.event_data.res.msg;
+                                } else {
+                                    msg = event.event_data.res;
+                                }
+                            }
+
+                            if (event.event !== "runner_on_no_hosts") {
+                                task.hostResults[event.id] = {
+                                    id: event.id,
+                                    status: status,
+                                    status_text: status_text,
+                                    host_id: event.host,
+                                    task_id: event.parent,
+                                    name: event.event_data.host,
+                                    created: event.created,
+                                    msg: msg,
+                                    item: item
+                                };
                             }
                         }
-
-                        msg = '';
-                        if (event.event_data && event.event_data.res) {
-                            if (typeof event.event_data.res === 'object') {
-                                msg = event.event_data.res.msg;
-                            } else {
-                                msg = event.event_data.res;
-                            }
-                        }
-
-                        if (event.event !== "runner_on_no_hosts") {
-                            task.hostResults[event.id] = {
-                                id: event.id,
-                                status: status,
-                                status_text: status_text,
-                                host_id: event.host,
-                                task_id: event.parent,
-                                name: event.event_data.host,
-                                created: event.created,
-                                msg: msg,
-                                item: item
-                            };
-                        }
-                    }
-                    scope.$emit('LoadHostSummaries');
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        }
-        else {
+                        scope.$emit('LoadHostSummaries');
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + '. GET returned: ' + status });
+                    });
+            } else {
+                console.log('no tasks loaded!');
+                scope.$emit('LoadHostSummaries');
+            }
+        } else {
             scope.$emit('LoadHostSummaries');
         }
     });
@@ -314,98 +319,104 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         if (scope.activePlay) {
             var play = scope.jobData.plays[scope.activePlay], url;
 
-            url = scope.job.url + 'job_tasks/?event_id=' + play.id;
-            url += '&page_size=' + scope.tasksMaxRows + '&order_by=id';
+            if (play) {
+                url = scope.job.url + 'job_tasks/?event_id=' + play.id;
+                url += '&page_size=' + scope.tasksMaxRows + '&order_by=id';
 
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    scope.next_tasks = data.next;
-                    if (data.results.length > 0) {
-                        lastEventId = data.results[data.results.length - 1].id;
-                        if (scope.liveEventProcessing) {
-                            scope.activeTask = data.results[data.results.length - 1].id;
+                Rest.setUrl(url);
+                Rest.get()
+                    .success(function(data) {
+                        scope.next_tasks = data.next;
+                        if (data.results.length > 0) {
+                            lastEventId = data.results[data.results.length - 1].id;
+                            if (scope.liveEventProcessing) {
+                                scope.activeTask = data.results[data.results.length - 1].id;
+                            }
+                            else {
+                                scope.activeTask = data.results[0].id;
+                            }
+                            scope.selectedTask = scope.activeTask;
                         }
-                        else {
-                            scope.activeTask = data.results[0].id;
-                        }
-                        scope.selectedTask = scope.activeTask;
-                    }
-                    data.results.forEach(function(event, idx) {
-                        var end, elapsed, status, status_text;
+                        data.results.forEach(function(event, idx) {
+                            var end, elapsed, status, status_text;
 
-                        if (play.firstTask === undefined  || play.firstTask === null) {
-                            play.firstTask = event.id;
-                            play.hostCount = (event.host_count) ? event.host_count : 0;
-                        }
+                            if (play.firstTask === undefined  || play.firstTask === null) {
+                                play.firstTask = event.id;
+                                play.hostCount = (event.host_count) ? event.host_count : 0;
+                            }
 
-                        if (idx < data.length - 1) {
-                            // end date = starting date of the next event
-                            end = data[idx + 1].created;
-                        }
-                        else {
-                            // no next event (task), get the end time of the play
-                            end = scope.jobData.plays[scope.activePlay].finished;
-                        }
+                            if (idx < data.length - 1) {
+                                // end date = starting date of the next event
+                                end = data[idx + 1].created;
+                            }
+                            else {
+                                // no next event (task), get the end time of the play
+                                end = scope.jobData.plays[scope.activePlay].finished;
+                            }
 
-                        if (end) {
-                            elapsed = GetElapsed({
-                                start: event.created,
-                                end: end
+                            if (end) {
+                                elapsed = GetElapsed({
+                                    start: event.created,
+                                    end: end
+                                });
+                            }
+                            else {
+                                elapsed = '00:00:00';
+                            }
+
+                            status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
+                            status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
+
+                            play.tasks[event.id] = {
+                                id: event.id,
+                                play_id: scope.activePlay,
+                                name: event.name,
+                                status: status,
+                                status_text: status_text,
+                                status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
+                                created: event.created,
+                                modified: event.modified,
+                                finished: end,
+                                elapsed: elapsed,
+                                hostCount: (event.host_count) ? event.host_count : 0,
+                                reportedHosts: (event.reported_hosts) ? event.reported_hosts : 0,
+                                successfulCount: (event.successful_count) ? event.successful_count : 0,
+                                failedCount: (event.failed_count) ? event.failed_count : 0,
+                                changedCount: (event.changed_count) ? event.changed_count : 0,
+                                skippedCount: (event.skipped_count) ? event.skipped_count : 0,
+                                unreachableCount: (event.unreachable_count) ? event.unreachable_count : 0,
+                                taskActiveClass: '',
+                                hostResults: {}
+                            };
+                            if (play.firstTask !== event.id) {
+                                // this is not the first task
+                                play.tasks[event.id].hostCount = play.tasks[play.firstTask].hostCount;
+                            }
+                            if (play.tasks[event.id].reportedHosts === 0 && play.tasks[event.id].successfulCount === 0 &&
+                                play.tasks[event.id].failedCount === 0 && play.tasks[event.id].changedCount === 0 &&
+                                play.tasks[event.id].skippedCount === 0 && play.tasks[event.id].unreachableCount === 0) {
+                                play.tasks[event.id].status = 'no-matching-hosts';
+                                play.tasks[event.id].status_text = 'No matching hosts';
+                                play.tasks[event.id].status_tip = "Event ID: " + event.id + "<br />Status: No matching hosts";
+                            }
+                            play.taskCount++;
+                            SetTaskStyles({
+                                task: play.tasks[event.id]
                             });
-                        }
-                        else {
-                            elapsed = '00:00:00';
-                        }
-
-                        status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
-                        status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
-
-                        play.tasks[event.id] = {
-                            id: event.id,
-                            play_id: scope.activePlay,
-                            name: event.name,
-                            status: status,
-                            status_text: status_text,
-                            status_tip: "Event ID: " + event.id + "<br />Status: " + status_text,
-                            created: event.created,
-                            modified: event.modified,
-                            finished: end,
-                            elapsed: elapsed,
-                            hostCount: (event.host_count) ? event.host_count : 0,
-                            reportedHosts: (event.reported_hosts) ? event.reported_hosts : 0,
-                            successfulCount: (event.successful_count) ? event.successful_count : 0,
-                            failedCount: (event.failed_count) ? event.failed_count : 0,
-                            changedCount: (event.changed_count) ? event.changed_count : 0,
-                            skippedCount: (event.skipped_count) ? event.skipped_count : 0,
-                            unreachableCount: (event.unreachable_count) ? event.unreachable_count : 0,
-                            taskActiveClass: '',
-                            hostResults: {}
-                        };
-                        if (play.firstTask !== event.id) {
-                            // this is not the first task
-                            play.tasks[event.id].hostCount = play.tasks[play.firstTask].hostCount;
-                        }
-                        if (play.tasks[event.id].hostCount === 0) {
-                            play.tasks[event.id].status_text = 'No matching hosts';
-                            play.tasks[event.id].status_tip = "Event ID: " + event.id + "<br />Status: No matching hosts";
-                        }
-                        play.taskCount++;
-                        SetTaskStyles({
-                            task: play.tasks[event.id]
                         });
+                        if (scope.activeTask && scope.jobData.plays[scope.activePlay] && scope.jobData.plays[scope.activePlay].tasks[scope.activeTask]) {
+                            scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
+                        }
+                        scope.$emit('LoadHosts');
+                    })
+                    .error(function(data) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + '. GET returned: ' + status });
                     });
-                    if (scope.activeTask && scope.jobData.plays[scope.activePlay] && scope.jobData.plays[scope.activePlay].tasks[scope.activeTask]) {
-                        scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
-                    }
-                    scope.$emit('LoadHosts');
-                })
-                .error(function(data) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        }
-        else {
+            } else {
+                scope.$emit('LoadHostSummaries');
+            }
+        } else {
             scope.$emit('LoadHostSummaries');
         }
     });
@@ -502,6 +513,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     }
 
                     if (scope.jobData.plays[event.id].hostCount === 0 && event.unreachable_count === 0) {
+                        scope.jobData.plays[event.id].status = 'no-matching-hosts';
                         scope.jobData.plays[event.id].status_text = 'No matching hosts';
                         scope.jobData.plays[event.id].status_tip = "Event ID: " + event.id + "<br />Status: No matching hosts";
                     }
