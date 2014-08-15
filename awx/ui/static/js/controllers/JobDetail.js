@@ -956,7 +956,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
             url: scope.job.related.job_events,
             parent_id: scope.selectedTask,
             event_id: id,
-            title: 'Host Events'
+            title: 'Host Event'
         });
     };
 

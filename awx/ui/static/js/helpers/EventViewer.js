@@ -221,7 +221,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                     callback: 'ModalReady',
                     id: 'eventviewer-modal-dialog',
                     // onResizeStop: resizeText,
-                    title: ( (title) ? title : 'Event Details' ),
+                    title: ( (title) ? title : 'Host Event' ),
                     buttons: btns,
                     closeOnEscape: true,
                     onResizeStop: function() {
