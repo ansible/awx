@@ -11,12 +11,14 @@
 
 angular.module('AccessHelper', ['RestServices', 'Utilities'])
 
-    .factory('CheckAccess', ['$rootScope', 'Alert', 'Rest', 'GetBasePath', 'ProcessErrors', function ($rootScope, Alert, Rest, GetBasePath, ProcessErrors) {
+    .factory('CheckAccess', ['$rootScope', 'Alert', 'Rest', 'GetBasePath', 'ProcessErrors', '$cookieStore', function ($rootScope, Alert, Rest, GetBasePath, ProcessErrors, $cookieStore) {
         return function (params) {
             // set PermissionAddAllowed to true or false based on user access. admins and org admins are granted
             // accesss.
-            var me = $rootScope.current_user,
-                scope = params.scope;
+            var scope = params.scope, me;
+
+            // uer may have refreshed the browser, in which case retrieve current user info from session cookie
+            me = ($rootScope.current_user) ? $rootScope.current_user : $cookieStore.get('current_user');
 
             if (me.is_superuser) {
                 scope.PermissionAddAllowed = true;

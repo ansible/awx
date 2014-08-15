@@ -693,7 +693,7 @@ angular.module('GeneratorHelpers', [])
         html += "</div>\n";
         html += "<div id=\"accordion" + idx + "\" class=\"panel-collapse collapse in\">\n";
         html += "<div class=\"panel-body\" ";
-        html += (bind) ? "ng-bind-html-unsafe=\"" + bind + "\" " : "";
+        html += (bind) ? "ng-bind-html=\"" + bind + "\" " : "";
         html += ">\n";
         html += (!bind) ? content : "";
         html += "</div>\n";
