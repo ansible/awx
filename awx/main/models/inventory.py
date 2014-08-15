@@ -743,7 +743,7 @@ class InventorySourceOptions(BaseModel):
         ('ec2',    _('Amazon EC2')),
         ('gce',    _('Google Compute Engine')),
         ('azure',  _('Microsoft Azure')),
-        ('vmware', _('VMware')),
+        ('vmware', _('VMware vCenter')),
     ]
 
     class Meta:
