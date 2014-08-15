@@ -54,6 +54,7 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
                 contact_us = "<a href=\"http://www.ansible.com/contact-us\" target=\"_black\">contact us <i class=\"fa fa-external-link\"></i></a>",
                 renew = "<a href=\"http://www.ansible.com/renew\" target=\"_blank\">ansible.com/renew <i class=\"fa fa-external-link\"></i></a>",
                 pricing = "<a href=\"http://www.ansible.com/pricing\" target=\"_blank\">ansible.com/pricing <i class=\"fa fa-external-link\"></i></a>",
+                license_link = "<a href=\"http://www.ansible.com/license\" target=\"_blank\">click here</a>",
                 result = {},
                 license_is_valid=false;
 
@@ -110,8 +111,9 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
             } else {
                 // No license
                 title = "Add Your License";
-                html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Now that you’ve successfully installed or upgraded Ansible Tower, the next step is to add a license file.</p>" +
-                    "<p>If you don’t have a license file yet, visit " + pricing + " to see all of our free and paid license options.</p>";
+                html = "<div id=\"license-notification-body\"><div style=\"margin-top:5px; margin-bottom:25px;\"><p>Now that you’ve successfully installed or upgraded Ansible Tower, the next step is to add a license file. " +
+                    "If you don’t have a license file yet, " + license_link + " to see all of our free and paid license options.</p>" +
+                    "<p style=\"margin-top:15px; margin-bottom 15px; text-align:center;\"><a href=\"http://ansible.com/license\" target=\"_blank\" class=\"btn btn-danger free-button\">Get a Free Tower Trial License</a></p>";
             }
 
             if (IsAdmin()) {
