@@ -13,11 +13,18 @@
 function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
     Timer, Empty) {
 
-    var setLoginFocus, lastPath, sessionExpired,
+    var setLoginFocus, lastPath, sessionExpired, loginAgain,
         e, html, scope = $rootScope.$new();
 
     setLoginFocus = function () {
         $('#login-username').focus();
+    };
+
+    loginAgain = function() {
+        Authorization.logout();
+        setTimeout(function() {
+            window.location = '/#/logout';  // if we get here, force user back to re-login
+        }, 500);
     };
 
     scope.sessionExpired = (Empty($rootScope.sessionExpired)) ? $cookieStore.get('sessionExpired') : $rootScope.sessionExpired;
@@ -53,8 +60,8 @@ function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope,
         "<img src=\"" + $basePath + "img/tower_console_logo.png\" />" +
         "</div>\n" +
         "<div class=\"modal-body\" id=\"login-modal-body\">\n" +
-        "<div class=\"login-alert\" ng-show=\"(sessionExpired == false)\">Welcome to Ansible Tower! &nbsp;Please sign in.</div>\n" +
-        "<div class=\"login-alert\" ng-show=\"(sessionExpired == true)\">Your session timed out due to inactivity. Please sign in.</div>\n" +
+        "<div class=\"login-alert\" ng-show=\"!sessionExpired\">Welcome to Ansible Tower! &nbsp;Please sign in.</div>\n" +
+        "<div class=\"login-alert\" ng-show=\"sessionExpired\">Your session timed out due to inactivity. Please sign in.</div>\n" +
         "<form id=\"login-form\" name=\"loginForm\" class=\"form-horizontal\" autocomplete=\"off\" novalidate >\n" +
         "<div class=\"form-group\">\n" +
         "<label class=\"control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk\">Username</label>\n" +
@@ -129,7 +136,7 @@ function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope,
             })
             .error(function () {
                 Wait('stop');
-                Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
+                Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', loginAgain);
             });
     });
 
@@ -146,7 +153,7 @@ function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope,
             })
             .error(function (data, status) {
                 Wait('stop');
-                Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
+                Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', loginAgain);
             });
     });
 
