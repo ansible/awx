@@ -9,7 +9,6 @@ import shlex
 import yaml
 
 # Django
-import django
 from django.conf import settings
 from django.db import models
 from django.db.models import signals
@@ -148,69 +147,15 @@ class BaseModel(models.Model):
         return update_fields
 
     def save(self, *args, **kwargs):
-        """Save the model instance to the database.
-
-        Additionally, if `update_fields` is present but we are on a version
-        of Django that doesn't yet support it, handle support for it
-        ourselves.
-        """
-        # If we're trying to use update_fields and Django doesn't yet support
-        # it, then we need to do the save using the manager's update method,
-        # which is the only way to save only individual fields on earlier
-        # versions of Django.
-        update_fields = kwargs.get('update_fields', None)
-        if update_fields is not None and django.VERSION < (1, 5):
-            # Sanity check: If update_fields is empty, do nothing.
-            if len(update_fields) == 0:
-                return
-
-            # We need to manually send the pre_save signal; Django won't do it
-            # using a manager update.
-            #
-            # This code is copied from Django itself.
-            # See: django/db/models/base.py
-            #
-            # Django's copyright and license are found here:
-            # https://github.com/django/django/blob/master/LICENSE
-            cls = origin = self.__class__
-            if cls._meta.proxy:
-                cls = cls._meta.concrete_model
-            meta = cls._meta
-            if not meta.auto_created:
-                # It's safe to send `update_fields` here since signal listeners
-                # are required to take **kwargs.
-                signals.pre_save.send(sender=origin, instance=self,
-                                      created=False,
-                                      raw=kwargs.get('raw', False),
-                                      using=kwargs.get('using', None),
-                                      update_fields=update_fields)
-            # (end copied code)
-
-            # Actually update the record. We do this with an update off of
-            # the manager. Also, since update_fields in 1.5+ requires the
-            # record already exist, I do not need to check for that here.
-            to_update = {}
-            for field in update_fields:
-                to_update[field] = getattr(self, field)
-            cls.objects.filter(pk=self.pk).update(**to_update)
-
-            # Send the post-save signal.
-            if not meta.auto_created:
-                signals.post_save.send(sender=origin, instance=self,
-                                       created=False,
-                                       raw=kwargs.get('raw', False),
-                                       using=kwargs.get('using', None),
-                                       update_fields=update_fields)
-
-            # Now we're done; return None.
-            return
-
-        # This is either Django 1.5+, or not using update_fields.
-        # Either way, we're in good shape.
-        if 'update_fields' in kwargs and kwargs['update_fields'] is None:
+        # For compatibility with Django 1.4.x, attempt to handle any calls to
+        # save that pass update_fields.
+        try:
+            super(BaseModel, self).save(*args, **kwargs)
+        except TypeError:
+            if 'update_fields' not in kwargs:
+                raise
             kwargs.pop('update_fields')
-        return super(BaseModel, self).save(*args, **kwargs)
-
+            super(BaseModel, self).save(*args, **kwargs)
 
 class CreatedModifiedModel(BaseModel):
     '''
