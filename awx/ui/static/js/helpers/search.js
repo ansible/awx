@@ -298,12 +298,14 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             if (scope.removePrepareSearch) {
                 scope.removePrepareSearch();
             }
-            scope.removePrepareSearch = scope.$on('prepareSearch', function (e, iterator, page, load, calcOnly, deferWaitStop) {
+            scope.removePrepareSearch = scope.$on('prepareSearch', function (e, iterator, page, load, calcOnly, deferWaitStop, spinner) {
                 //
                 // Start building the search key/value pairs. This will process each search widget, if the
                 // selected field is an object type (used on activity stream).
                 //
-                Wait('start');
+                if (spinner) {
+                    Wait('start');
+                }
                 scope[iterator + 'SearchParams'] = '';
                 var i, modifier,
                     widgets = (list.searchWidgets) ? list.searchWidgets : 1;
@@ -456,16 +458,18 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
              *   @calcOnly:      optional, set to true when you want to calc or figure out search params without executing the search
              *   @deferWaitStop: optional, when true refresh.js will NOT issue Wait('stop'), thus leaving the spinner. Caller is then
              *                             responsible for stopping the spinner post refresh.
+             *   @spinner:       optional, if false, don't show the spinner.
              */
-            scope.search = function (iterator, page, load, calcOnly, deferWaitStop) {
+            scope.search = function (iterator, page, load, calcOnly, deferWaitStop, spinner) {
                 page = page || null;
                 load = (load || !scope[set] || scope[set].length === 0) ? true : false;
                 calcOnly = (calcOnly) ? true : false;
                 deferWaitStop = (deferWaitStop) ? true : false;
+                spinner = (spinner === undefined) ? true : spinner;
                 if (load) {
                     scope[set] = [];  //clear the list array to make sure 'Loading' is the only thing visible on the list
                 }
-                scope.$emit('prepareSearch', iterator, page, load, calcOnly, deferWaitStop);
+                scope.$emit('prepareSearch', iterator, page, load, calcOnly, deferWaitStop, spinner);
             };
 
 

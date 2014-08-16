@@ -45,18 +45,23 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         Wait('stop');
-
         if ($scope.projects) {
+            console.log('here');
             $scope.projects.forEach(function(project, i) {
-
                 $scope.projects[i].statusIcon = GetProjectIcon(project.status);
                 $scope.projects[i].statusTip = GetProjectToolTip(project.status);
+                $scope.projects[i].scm_update_tooltip = "Start an SCM update";
+                $scope.projects[i].scm_schedule_tooltip = "Schedule future SCM updates";
+                $scope.projects[i].scm_type_class = "";
 
                 if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
                     $scope.projects[i].statusTip = 'Canceled. Click for details';
                 }
 
+                console.log('project: ' + project.name + ' status: ' + project.status);
                 if (project.status === 'running' || project.status === 'updating') {
+                    $scope.projects[i].scm_update_tooltip = "SCM update currently running";
+                    $scope.projects[i].scm_type_class = "btn-disabled";
                 }
 
                 $scope.project_scm_type_options.forEach(function(type) {
@@ -68,14 +73,6 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                             $scope.projects[i].scm_type_class = 'btn-disabled';
                             $scope.projects[i].statusTip = 'Not configured for SCM';
                             $scope.projects[i].statusIcon = 'none';
-                        } else if (type.label === "Running" || type.label === "Updating") {
-                            $scope.projects[i].scm_update_tooltip = "SCM update currently running";
-                            $scope.projects[i].scm_type_class = 'btn-disabled';
-                            $scope.projects[i].scm_schedule_tooltip = "Schedule future SCM updates";
-                        } else {
-                            $scope.projects[i].scm_update_tooltip = "Start an SCM update";
-                            $scope.projects[i].scm_schedule_tooltip = "Schedule future SCM updates";
-                            $scope.projects[i].scm_type_class = "";
                         }
                     }
                 });
@@ -89,7 +86,6 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     }
     $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
         var project;
-        Wait('stop');
         $log.debug(data);
         if ($scope.projects) {
             // Assuming we have a list of projects available
@@ -99,7 +95,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                 $log.debug('Received event for project: ' + project.name);
                 $log.debug('Status changed to: ' + data.status);
                 if (data.status === 'successful' || data.status === 'failed') {
-                    $scope.refresh();
+                    $scope.search(list.iterator, null, null, null, null, false);
                 }
                 else {
                     project.scm_update_tooltip = "SCM update currently running";
@@ -340,14 +336,15 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     };
 
     $scope.refresh = function () {
-        Wait('start');
+        /*Wait('start');
         $scope.projectLoading = false;
         Refresh({
             scope: $scope,
             set: 'projects',
             iterator: 'project',
             url: $scope.current_url
-        });
+        });*/
+        $scope.search(list.iterator);
     };
 
     $scope.SCMUpdate = function (project_id, event) {
