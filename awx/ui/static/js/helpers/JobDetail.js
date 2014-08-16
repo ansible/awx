@@ -712,6 +712,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         Rest.get()
             .success(function(data) {
                 scope.next_plays = data.next;
+                scope.plays = [];
                 data.results.forEach(function(event, idx) {
                     var status, status_text, start, end, elapsed;
 
@@ -801,7 +802,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url, play;
 
         scope.tasks = [];
-        scope.tasksMap = {};
 
         if (scope.selectedPlay) {
             url = scope.job.url + 'job_tasks/?event_id=' + scope.selectedPlay;
@@ -823,6 +823,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             Rest.get()
                 .success(function(data) {
                     scope.next_tasks = data.next;
+                    scope.tasks = [];
                     data.results.forEach(function(event, idx) {
                         var end, elapsed, status, status_text;
 
@@ -948,7 +949,6 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url;
 
         scope.hostResults = [];
-        scope.hostResultsMap = {};
 
         if (scope.selectedTask) {
             // If we have a selected task, then get the list of hosts
@@ -961,6 +961,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             Rest.get()
                 .success(function(data) {
                     scope.next_host_results = data.next;
+                    scope.hostResults = [];
                     data.results.forEach(function(event) {
                         var status, status_text, item, msg;
                         if (event.event === "runner_on_skipped") {
@@ -1060,6 +1061,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         Rest.get()
             .success(function(data) {
                 scope.next_host_summaries = data.next;
+                scope.hosts = [];
                 data.results.forEach(function(event) {
                     var name;
                     if (event.host_name) {
