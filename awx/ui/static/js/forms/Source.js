@@ -93,8 +93,8 @@ angular.module('SourceFormDefinition', [])
                     ngShow: "source.value !== '' && source.value !== null",
                     addRequired: false,
                     editRequired: false,
-                    awPopOver: '<p>When checked all child groups and hosts not found on the remote source will be deleted from ' +
-                        'the local inventory.</p><p>Unchecked any local child hosts and groups not found on the external source will ' +
+                    awPopOver: '<p>If checked, all child groups and hosts not found on the external source will be deleted from ' +
+                        'the local inventory.</p><p>When not checked, local child hosts and groups not found on the external source will ' +
                         'remain untouched by the inventory update process.</p>',
                     dataTitle: 'Overwrite',
                     dataContainer: 'body',
@@ -108,7 +108,7 @@ angular.module('SourceFormDefinition', [])
                     addRequired: false,
                     editRequired: false,
                     awPopOver: '<p>If checked, all variables for child groups and hosts will be removed and replaced by those ' +
-                        'found on the external source.</p><p>When not checked a merge will be performed, combining local variables with ' +
+                        'found on the external source.</p><p>When not checked, a merge will be performed, combining local variables with ' +
                         'those found on the external source.</p>',
                     dataTitle: 'Overwrite Variables',
                     dataContainer: 'body',
