@@ -466,6 +466,7 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
                         }
                     })
                     .error(function() {
+                        Wait('stop');
                         $('#prompt-modal').modal('hide');
                         // Ignore the error. The job most likely already finished.
                         // ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
@@ -479,13 +480,15 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
                             scope.$emit(callback, action_label);
                         }
                         else {
-                            scope.refreshJobs();
+                            scope.search(scope.iterator);
                         }
                     })
                     .error(function (data, status) {
+                        Wait('stop');
                         $('#prompt-modal').modal('hide');
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
-                            ' failed. DELETE returned status: ' + status });
+                        // Ignore the error. The job most likely already finished.
+                        //ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
+                        //    ' failed. DELETE returned status: ' + status });
                     });
             }
         };
@@ -494,8 +497,8 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
             scope.removeCancelNotAllowed();
         }
         scope.removeCancelNotAllowed = scope.$on('CancelNotAllowed', function() {
-            Alert('Job Completed', 'The job completed. Click the <i class="fa fa-refresh fa-lg"></i> button to view ' +
-                'the latest status.', 'alert-info');
+            Wait('stop');
+            Alert('Job Completed', 'The request to cancel the job could not be submitted. The job already completed.', 'alert-info');
         });
 
         if (scope.removeCancelJob) {

@@ -524,8 +524,9 @@ angular.module('Tower', [
                         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
-                        if (!/^\/(login|logout)/.test(next.$$route.originalPath)) {
+                        if (next && next.$$route && (!/^\/(login|logout)/.test(next.$$route.originalPath))) {
                             // if not headed to /login or /logout, then check the license
+                            console.log(next);
                             CheckLicense.test();
                         }
                     }

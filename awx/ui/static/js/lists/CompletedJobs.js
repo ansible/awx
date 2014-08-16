@@ -46,7 +46,7 @@ angular.module('CompletedJobsDefinition', [])
                 ]
             },
             finished: {
-                label: 'Finished On',
+                label: 'Finished',
                 noLink: true,
                 searchable: false,
                 filter: "date:'MM/dd HH:mm:ss'",

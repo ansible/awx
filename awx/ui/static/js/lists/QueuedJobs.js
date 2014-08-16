@@ -43,7 +43,7 @@ angular.module('QueuedJobsDefinition', [])
                 nosort: true
             },
             created: {
-                label: 'Created On',
+                label: 'Created',
                 noLink: true,
                 searchable: false,
                 filter: "date:'MM/dd HH:mm:ss'",

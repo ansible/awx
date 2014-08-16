@@ -31,7 +31,11 @@ function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, C
         job_socket.init();
         job_socket.on("status_changed", function(data) {
             if (api_complete) {
+                console.log('here');
+                console.log(data);
                 processEvent(data);
+            } else {
+                console.log('api not completed!');
             }
         });
         schedule_socket = Socket({
@@ -45,7 +49,6 @@ function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, C
             }
         });
     }
-    openSockets();
 
     $rootScope.checkSocketConnectionInterval = setInterval(function() {
         if (job_socket.checkStatus() === 'error' || checkCount > 2) {
@@ -65,6 +68,7 @@ function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, C
     }, 3000);
 
     function processEvent(event) {
+        console.log(event);
         switch(event.status) {
             case 'running':
                 running_scope.search('running_job');
@@ -81,7 +85,7 @@ function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, C
             case 'canceled':
                 completed_scope.search('completed_job');
                 running_scope.search('running_job');
-                break;
+                queued_scope.search('queued_job');
         }
     }
 
@@ -94,6 +98,7 @@ function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, C
         listCount++;
         if (listCount === 4) {
             api_complete = true;
+            openSockets();
         }
     });
 
