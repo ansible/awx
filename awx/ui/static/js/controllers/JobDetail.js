@@ -39,6 +39,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.hostResultsLoading = true;
     scope.hostSummariesLoading = true;
 
+    // Turn on the 'Waiting...' message until events begin arriving
+    scope.waiting = true;
+
     scope.liveEventProcessing = true;     // true while job is active and live events are arriving
     scope.pauseLiveEvents = false;        // control play/pause state of event processing
 
@@ -93,6 +96,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         event_socket.init();
         event_socket.on("job_events-" + job_id, function(data) {
             if (api_complete && data.id > lastEventId) {
+                scope.waiting = false;
                 data.event = data.event_name;
                 DigestEvent({ scope: scope, event: data });
             }
@@ -430,7 +434,6 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         scope.host_summary.unreachable = 0;
         scope.host_summary.failed = 0;
         scope.host_summary.total = 0;
-
         scope.jobData.plays = {};
 
         var url = scope.job.url  + 'job_plays/?order_by=id';
@@ -627,6 +630,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     scope.job_status.finished = data.finsished;
                     scope.liveEventProcessing = false;
                     scope.pauseLiveEvents = false;
+                    scope.waiting = false;
                 }
                 else {
                     scope.job_status.finished = null;
