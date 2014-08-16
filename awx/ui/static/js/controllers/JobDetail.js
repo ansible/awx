@@ -631,6 +631,10 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     scope.liveEventProcessing = false;
                     scope.pauseLiveEvents = false;
                     scope.waiting = false;
+                    scope.playsLoading = false;
+                    scope.tasksLoading = false;
+                    scope.hostResultsLoading = false;
+                    scope.hostSummariesLoading = false;
                 }
                 else {
                     scope.job_status.finished = null;
