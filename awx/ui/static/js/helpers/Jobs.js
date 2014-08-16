@@ -483,7 +483,7 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
                             scope.search(scope.iterator);
                         }
                     })
-                    .error(function (data, status) {
+                    .error(function () {
                         Wait('stop');
                         $('#prompt-modal').modal('hide');
                         // Ignore the error. The job most likely already finished.

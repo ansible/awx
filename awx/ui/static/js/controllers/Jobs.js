@@ -31,11 +31,7 @@ function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, C
         job_socket.init();
         job_socket.on("status_changed", function(data) {
             if (api_complete) {
-                console.log('here');
-                console.log(data);
                 processEvent(data);
-            } else {
-                console.log('api not completed!');
             }
         });
         schedule_socket = Socket({
@@ -68,7 +64,6 @@ function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, C
     }, 3000);
 
     function processEvent(event) {
-        console.log(event);
         switch(event.status) {
             case 'running':
                 running_scope.search('running_job');

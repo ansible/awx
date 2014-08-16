@@ -526,7 +526,6 @@ angular.module('Tower', [
                         }
                         if (next && next.$$route && (!/^\/(login|logout)/.test(next.$$route.originalPath))) {
                             // if not headed to /login or /logout, then check the license
-                            console.log(next);
                             CheckLicense.test();
                         }
                     }
