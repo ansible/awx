@@ -46,7 +46,6 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         Wait('stop');
         if ($scope.projects) {
-            console.log('here');
             $scope.projects.forEach(function(project, i) {
                 $scope.projects[i].statusIcon = GetProjectIcon(project.status);
                 $scope.projects[i].statusTip = GetProjectToolTip(project.status);
@@ -58,7 +57,6 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                     $scope.projects[i].statusTip = 'Canceled. Click for details';
                 }
 
-                console.log('project: ' + project.name + ' status: ' + project.status);
                 if (project.status === 'running' || project.status === 'updating') {
                     $scope.projects[i].scm_update_tooltip = "SCM update currently running";
                     $scope.projects[i].scm_type_class = "btn-disabled";
