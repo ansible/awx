@@ -35,11 +35,11 @@ logger = logging.getLogger('awx.main.commands.inventory_import')
 
 LICENSE_MESSAGE = '''\
 Number of licensed instances exceeded, would bring available instances to %(new_count)d, system is licensed for %(available_instances)d.
-See http://www.ansible.com/ansible-tower for license extension information.'''
+See http://www.ansible.com/renew for license extension information.'''
 
 DEMO_LICENSE_MESSAGE = '''\
 Demo mode free license count exceeded, would bring available instances to %(new_count)d, demo mode allows %(available_instances)d.
-See http://www.ansible.com/ansible-tower for licensing information.'''
+See http://www.ansible.com/renew for licensing information.'''
 
 
 class MemObject(object):
