@@ -720,9 +720,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
                     start = event.started;
 
-                    if (idx < data.length - 1) {
+                    if (idx < data.results.length - 1) {
                         // end date = starting date of the next event
-                        end = data[idx + 1].started;
+                        end = data.results[idx + 1].started;
                     }
                     else if (JobIsFinished(scope)) {
                         // this is the last play and the job already finished
@@ -832,9 +832,9 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                             play.hostCount = (event.host_count) ? event.host_count : 0;
                         }
 
-                        if (idx < data.length - 1) {
+                        if (idx < data.results.length - 1) {
                             // end date = starting date of the next event
-                            end = data[idx + 1].created;
+                            end = data.resuls[idx + 1].created;
                         }
                         else {
                             // no next event (task), get the end time of the play

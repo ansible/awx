@@ -348,9 +348,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                                 play.hostCount = (event.host_count) ? event.host_count : 0;
                             }
 
-                            if (idx < data.length - 1) {
+                            if (idx < data.results.length - 1) {
                                 // end date = starting date of the next event
-                                end = data[idx + 1].created;
+                                end = data.results[idx + 1].created;
                             }
                             else {
                                 // no next event (task), get the end time of the play
@@ -466,9 +466,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
                     start = event.started;
 
-                    if (idx < data.length - 1) {
+                    if (idx < data.results.length - 1) {
                         // end date = starting date of the next event
-                        end = data[idx + 1].started;
+                        end = data.results[idx + 1].started;
                     }
                     else if (JobIsFinished(scope)) {
                         // this is the last play and the job already finished
@@ -627,7 +627,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 scope.job_status.explanation = data.job_explanation;
 
                 if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
-                    scope.job_status.finished = data.finsished;
+                    scope.job_status.finished = data.finished;
                     scope.liveEventProcessing = false;
                     scope.pauseLiveEvents = false;
                     scope.waiting = false;
@@ -1011,9 +1011,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                         status_text = (event.failed) ? 'Failed' : (event.changed) ? 'Changed' : 'OK';
                         start = event.started;
 
-                        if (idx < data.length - 1) {
+                        if (idx < data.results.length - 1) {
                             // end date = starting date of the next event
-                            end = data[idx + 1].started;
+                            end = data.results[idx + 1].started;
                         }
                         else if (JobIsFinished(scope)) {
                             // this is the last play and the job already finished
@@ -1072,9 +1072,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     scope.next_tasks = data.next;
                     data.results.forEach(function(event, idx) {
                         var end, elapsed, status, status_text;
-                        if (idx < data.length - 1) {
+                        if (idx < data.results.length - 1) {
                             // end date = starting date of the next event
-                            end = data[idx + 1].created;
+                            end = data.results[idx + 1].created;
                         }
                         else {
                             // no next event (task), get the end time of the play
