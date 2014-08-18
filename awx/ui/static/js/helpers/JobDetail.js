@@ -835,7 +835,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
                         if (idx < data.results.length - 1) {
                             // end date = starting date of the next event
-                            end = data.resuls[idx + 1].created;
+                            end = data.results[idx + 1].created;
                         }
                         else {
                             // no next event (task), get the end time of the play
