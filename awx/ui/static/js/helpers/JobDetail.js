@@ -50,6 +50,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             msg;
 
         $log.debug('processing event: ' + event.id);
+        $log.debug(event);
 
         function getMsg(event) {
             var msg = '';
@@ -88,7 +89,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 msg = getMsg(event);
                 UpdateHostStatus({
                     scope: scope,
-                    name: event.event_data.host,
+                    name: event.host_name,
                     host_id: event.host,
                     task_id: event.parent,
                     status: ( (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful' ),
@@ -115,7 +116,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 msg = getMsg(event);
                 UpdateHostStatus({
                     scope: scope,
-                    name: event.event_data.host,
+                    name: event.host_name,
                     host_id: event.host,
                     task_id: event.parent,
                     status: 'unreachable',
@@ -132,7 +133,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 msg = getMsg(event);
                 UpdateHostStatus({
                     scope: scope,
-                    name: event.event_data.host,
+                    name: event.host_name,
                     host_id: event.host,
                     task_id: event.parent,
                     status: 'failed',
@@ -159,7 +160,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 msg = getMsg(event);
                 UpdateHostStatus({
                     scope: scope,
-                    name: event.event_data.host,
+                    name: event.host_name,
                     host_id: event.host,
                     task_id: event.parent,
                     status: 'skipped',
@@ -491,17 +492,17 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             scope.host_summary.failed;
         */
 
-        if (scope.jobData.hostSummaries[host_id] !== undefined) {
-            scope.jobData.hostSummaries[host_id].ok += (status === 'successful') ? 1 : 0;
-            scope.jobData.hostSummaries[host_id].changed += (status === 'changed') ? 1 : 0;
-            scope.jobData.hostSummaries[host_id].unreachable += (status === 'unreachable') ? 1 : 0;
-            scope.jobData.hostSummaries[host_id].failed += (status === 'failed') ? 1 : 0;
+        if (scope.jobData.hostSummaries[name] !== undefined) {
+            scope.jobData.hostSummaries[name].ok += (status === 'successful') ? 1 : 0;
+            scope.jobData.hostSummaries[name].changed += (status === 'changed') ? 1 : 0;
+            scope.jobData.hostSummaries[name].unreachable += (status === 'unreachable') ? 1 : 0;
+            scope.jobData.hostSummaries[name].failed += (status === 'failed') ? 1 : 0;
             if (status === 'failed' || status === 'unreachable') {
-                scope.jobData.hostSummaries[host_id].status = 'failed';
+                scope.jobData.hostSummaries[name].status = 'failed';
             }
         }
         else {
-            scope.jobData.hostSummaries[host_id] = {
+            scope.jobData.hostSummaries[name] = {
                 id: host_id,
                 name: name,
                 ok: (status === 'successful') ? 1 : 0,
@@ -1071,8 +1072,8 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                         name = "<deleted host>";
                     }
                     scope.hosts.push({
-                        id: event.host,
-                        name: name,
+                        id: name,
+                        name: event.host_name,
                         ok: event.ok,
                         changed: event.changed,
                         unreachable: event.dark,

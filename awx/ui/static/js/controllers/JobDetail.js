@@ -204,7 +204,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                         name = "<deleted host>";
                     }
                     scope.jobData.hostSummaries[event.id] = {
-                        id: event.host,
+                        id: name,
                         name: name,
                         ok: event.ok,
                         changed: event.changed,
@@ -1223,7 +1223,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             name = "<deleted host>";
                         }
                         scope.hosts.push({
-                            id: row.host,
+                            id: name,
                             name: name,
                             ok: row.ok,
                             changed: row.changed,
