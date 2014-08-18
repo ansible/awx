@@ -289,7 +289,7 @@ AUTH_LDAP_TEAM_MAP = {
 try:
     path = os.path.expanduser(os.path.expandvars('~/.ssh/id_rsa'))
     TEST_SSH_KEY_DATA = file(path, 'rb').read()
-except OSError:
+except IOError:
     TEST_SSH_KEY_DATA = ''
 
 TEST_GIT_USERNAME = ''
