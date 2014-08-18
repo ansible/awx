@@ -278,7 +278,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     connect = (/\/$/.test(url)) ? '?' : '&';
                     url += connect + scope[iterator + 'ExtraParms'];
                 }
-                url = url.replace(/\&\&/g, '&');
+                url = url.replace(/\&\&/g, '&').replace(/\?\&/,'?');
                 if (calcOnly) {
                     scope.$emit('searchParamsReady', url);
                 }
@@ -405,6 +405,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                             } else if ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'select') &&
                                 Empty(scope[iterator + 'SearchSelectValue' + modifier].value) && !/\_\_$/.test(scope[iterator + 'SearchParams']) ) {
                                 scope[iterator + 'SearchParams'] += '=iexact=';
+                            } else if (list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'in') {
+                                if (!/\_\_$/.test(scope[iterator + 'SearchParams'])) {
+                                    scope[iterator + 'SearchParams'] += '__';
+                                }
+                                scope[iterator + 'SearchParams'] += 'in=';
                             } else if (/\_\_$/.test(scope[iterator + 'SearchParams'])) {
                                 scope[iterator + 'SearchParams'] += 'icontains=';
                             } else {
