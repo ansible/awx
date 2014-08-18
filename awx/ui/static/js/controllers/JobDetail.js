@@ -203,7 +203,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     else {
                         name = "<deleted host>";
                     }
-                    scope.jobData.hostSummaries[event.id] = {
+                    scope.jobData.hostSummaries[name] = {
                         id: name,
                         name: name,
                         ok: event.ok,

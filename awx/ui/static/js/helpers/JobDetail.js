@@ -503,7 +503,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         }
         else {
             scope.jobData.hostSummaries[name] = {
-                id: host_id,
+                id: name,
                 name: name,
                 ok: (status === 'successful') ? 1 : 0,
                 changed: (status === 'changed') ? 1 : 0,
