@@ -319,7 +319,7 @@ function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, Lo
         }
 
         if ($routeParams.status) {
-            scope[list.iterator + 'ExtraParms'] = '&inventory_source__status__icontains=' + $routeParams.status;
+            scope[list.iterator + 'ExtraParms'] = 'inventory_source__status__icontains=' + $routeParams.status;
         }
     }
 

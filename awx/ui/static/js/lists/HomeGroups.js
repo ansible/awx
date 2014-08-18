@@ -60,14 +60,23 @@ angular.module('HomeGroupListDefinition', [])
                 label: 'Source',
                 searchType: 'select',
                 searchOptions: [{
-                    name: "ec2",
+                    name: "Amazon Web Services",
                     value: "ec2"
                 }, {
                     name: "none",
                     value: ""
                 }, {
-                    name: "rax",
+                    name: "Rackspace",
                     value: "rax"
+                },{
+                    name: "VMware",
+                    value: "vmware"
+                },{
+                    name: "Google Compute Engine",
+                    value: "gce"
+                },{
+                    name: "Microsoft Azure",
+                    value: "azure"
                 }],
                 sourceModel: 'inventory_source',
                 sourceField: 'source',
@@ -76,7 +85,7 @@ angular.module('HomeGroupListDefinition', [])
             has_external_source: {
                 label: 'Has external source?',
                 searchType: 'in',
-                searchValue: 'ec2,rax',
+                searchValue: 'ec2,rax,vmware,azure,gce',
                 searchOnly: true,
                 sourceModel: 'inventory_source',
                 sourceField: 'source'
