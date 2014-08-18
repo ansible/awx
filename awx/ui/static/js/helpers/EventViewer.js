@@ -254,7 +254,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
             });
 
             url += (/\/$/.test(url)) ? '?' : '&';
-            url += (parent_id) ? 'parent=' + parent_id + '&page_size=50&order_by=id' : 'page_size=50&order_by=id';
+            url += (parent_id) ? 'parent=' + parent_id + '&page_size=50&order=host_name' : 'page_size=50&order=host_name';
 
             GetEvent({
                 url: url,
