@@ -137,6 +137,10 @@ class CallbackReceiver(object):
         if not event or 'job_id' not in data:
             return
         try:
+            verbose = Job.objects.get(id=data['job_id']).verbosity
+        except Exception, e:
+            verbose = 0
+        try:
             if not isinstance(data['created'], datetime.datetime):
                 data['created'] = parse_datetime(data['created'])
             if not data['created'].tzinfo:
@@ -152,6 +156,10 @@ class CallbackReceiver(object):
             try:
                 if event == 'playbook_on_stats':
                     transaction.commit()
+                print data
+                if verbose == 0 and res in data['event_data'] and 'invocation' in data['event_data']['res'] and \
+                   'module_args' in data['event_data']['res']['invocation']:
+                    data['event_data']['res']['invocation']['module_args'] = ""
                 job_event = JobEvent(**data)
                 if parent_id is not None:
                     job_event.parent = JobEvent.objects.get(id=parent_id)
