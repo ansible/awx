@@ -12,7 +12,7 @@ class Migration(SchemaMigration):
         db.add_column(u'main_jobevent', 'counter',
                       self.gf('django.db.models.fields.PositiveIntegerField')(default=0),
                       keep_default=False)
-
+        db.create_index(u'main_jobevent', ['counter'])
 
     def backwards(self, orm):
         # Deleting field 'JobEvent.counter'
