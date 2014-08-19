@@ -583,6 +583,10 @@ angular.module('Tower', [
                         $log.debug('Job ' + data.unified_job_id + ' status changed to ' + data.status);
                         $rootScope.$emit('JobStatusChange', data);
                     });
+                    sock.on("summary_complete", function(data) {
+                        $log.debug('Job summary_complete ' + data.unified_job_id);
+                        $rootScope.$emit('JobSummaryComplete', data);
+                    });
                 }
 
                 openSocket();

@@ -70,6 +70,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.host_summary.total = 0;
 
     scope.jobData = {};
+    scope.jobData.hostSummaries = {};
 
     verbosity_options = [
         { value: 0, label: 'Default' },
@@ -140,6 +141,15 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         }
     });
 
+    if ($rootScope.removeJobSummaryComplete) {
+        $rootScope.removeJobSummaryComplete();
+    }
+    $rootScope.removeJobSummaryComplete = $rootScope.$on('JobSummaryComplete', function() {
+        // the job host summary should now be available from the API
+        $log.debug('Trigging reload of job_host_summaries');
+        scope.$emit('LoadHostSummaries');
+    });
+
 
     if (scope.removeInitialLoadComplete) {
         scope.removeInitialLoadComplete();
@@ -189,12 +199,14 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         var url = scope.job.related.job_host_summaries + '?';
         url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
 
-        scope.jobData.hostSummaries = {};
-
         Rest.setUrl(url);
         Rest.get()
             .success(function(data) {
                 scope.next_host_summaries = data.next;
+                if (data.results.length > 0) {
+                    // only dump what's in memory when job_host_summaries is available.
+                    scope.jobData.hostSummaries = {};
+                }
                 data.results.forEach(function(event) {
                     var name;
                     if (event.host_name) {
