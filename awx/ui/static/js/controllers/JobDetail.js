@@ -245,7 +245,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
             if (play && task) {
                 url = scope.job.related.job_events + '?parent=' + task.id + '&';
-                url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name';
+                url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name,counter';
 
                 Rest.setUrl(url);
                 Rest.get()
@@ -309,6 +309,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                                     name: event.event_data.host,
                                     created: event.created,
                                     msg: msg,
+                                    counter: counter,
                                     item: item
                                 };
                             }

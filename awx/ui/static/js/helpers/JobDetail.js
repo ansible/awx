@@ -97,6 +97,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     created: event.created,
                     modified: event.modified,
                     message: msg,
+                    counter: event.counter,
                     item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
                 break;
@@ -124,6 +125,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     created: event.created,
                     modified: event.modified,
                     message: msg,
+                    counter: event.counter,
                     item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
                 break;
@@ -141,6 +143,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     created: event.created,
                     modified: event.modified,
                     message: msg,
+                    counter: event.counter,
                     item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
                 break;
@@ -168,6 +171,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                     created: event.created,
                     modified: event.modified,
                     message: msg,
+                    counter: event.counter,
                     item: (event.event_data && event.event_data.res) ? event.event_data.res.item : ''
                 });
         }
@@ -481,6 +485,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             created = params.created,
             msg = params.message,
             item = params.item,
+            counter = params.counter,
             h, host;
 
         /*
@@ -551,6 +556,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             status: status,
             name: name,
             created: created,
+            counter: counter,
             message: msg,
             item: item
         });
@@ -566,6 +572,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             event_id = params.event_id,
             status = params.status,
             created = params.created,
+            counter = params.counter,
             name = params.name,
             msg = params.message,
             item = params.item,
@@ -610,6 +617,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
                 task_id: task_id,
                 name: name,
                 created: created,
+                counter: counter,
                 msg: msg,
                 item: item
             };
@@ -956,7 +964,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url = scope.job.related.job_events + '?parent=' + scope.selectedTask + '&';
             url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
             url += (scope.search_host_status === 'failed') ? 'failed=true&' : '';
-            url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name';
+            url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name,counter';
             scope.hostResultsLoading = true;
             Rest.setUrl(url);
             Rest.get()
@@ -1374,10 +1382,17 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             }
             keys = Object.keys(filteredListB);
             keys.sort(function compare(a, b) {
-                if (filteredListB[a].name < filteredListB[b].name)
-                    return -1;
-                if (filteredListB[a].name > filteredListB[b].name)
-                    return 1;
+                if (filteredListB[a].name === filteredListB[b].name) {
+                    if (filteredListB[a].counter < filteredListB[b].counter)
+                        return -1;
+                    if (filteredListB[a].counter >filteredListB[b].counter)
+                        return 1;
+                } else {
+                    if (filteredListB[a].name < filteredListB[b].name)
+                        return -1;
+                    if (filteredListB[a].name > filteredListB[b].name)
+                        return 1;
+                }
                 // a must be equal to b
                 return 0;
             });
