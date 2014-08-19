@@ -99,6 +99,10 @@ function SocketsController ($scope, $compile, ClearScope, Socket) {
         jobs_scope.messages.push(data);
     });
 
+    jobs_socket.on("summary_complete", function(data) {
+        jobs_scope.messages.push(data);
+    });
+
     job_events_scope.jobs_list = [];
 
     job_events_scope.subscribeToJobEvent = function() {

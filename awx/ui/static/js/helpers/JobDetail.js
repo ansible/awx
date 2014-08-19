@@ -705,7 +705,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
 
         scope.plays = [];
 
-        url = scope.job.url + 'job_plays/?page_size=' + scope.playsMaxRows + '&order_by=id';
+        url = scope.job.url + 'job_plays/?page_size=' + scope.playsMaxRows + '&order=id';
         url += (scope.search_play_name) ? '&play__icontains=' + scope.search_play_name : '';
         url += (scope.search_play_status === 'failed') ? '&failed=true' : '';
         scope.playsLoading = true;
@@ -808,7 +808,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url = scope.job.url + 'job_tasks/?event_id=' + scope.selectedPlay;
             url += (scope.search_task_name) ? '&task__icontains=' + scope.search_task_name : '';
             url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
-            url += '&page_size=' + scope.tasksMaxRows + '&order_by=id';
+            url += '&page_size=' + scope.tasksMaxRows + '&order=id';
 
             scope.plays.every(function(p, idx) {
                 if (p.id === scope.selectedPlay) {
@@ -956,7 +956,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             url = scope.job.related.job_events + '?parent=' + scope.selectedTask + '&';
             url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
             url += (scope.search_host_status === 'failed') ? 'failed=true&' : '';
-            url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=host__name';
+            url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name';
             scope.hostResultsLoading = true;
             Rest.setUrl(url);
             Rest.get()
@@ -1053,7 +1053,7 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
         url = scope.job.related.job_host_summaries + '?';
         url += (scope.search_host_summary_name) ? 'host_name__icontains=' + scope.search_host_summary_name + '&': '';
         url += (scope.search_host_summary_status === 'failed') ? 'failed=true&' : '';
-        url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host_name';
+        url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
 
         scope.hosts = [];
         scope.hostSummariesLoading = true;
@@ -1372,18 +1372,17 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             else {
                 filteredListB = filteredListA;
             }
-
             keys = Object.keys(filteredListB);
-            keys.sort(function(a,b) {
-                if (filteredListB[a].name + filteredListB[a].item > filteredListB[b].name + filteredListB[b].item)
+            keys.sort(function compare(a, b) {
+                if (filteredListB[a].name < filteredListB[b].name)
                     return -1;
-                if (filteredListB[a].name + filteredListB[a].item < filteredListB[b].name + filteredListB[b].item)
+                if (filteredListB[a].name > filteredListB[b].name)
                     return 1;
                 // a must be equal to b
                 return 0;
             });
             while (idx < keys.length && result.length < scope.hostResultsMaxRows) {
-                result.unshift(filteredListB[keys[idx]]);
+                result.push(filteredListB[keys[idx]]);
                 idx++;
             }
         }

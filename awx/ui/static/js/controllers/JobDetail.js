@@ -187,7 +187,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     }
     scope.removeHostSummaries = scope.$on('LoadHostSummaries', function() {
         var url = scope.job.related.job_host_summaries + '?';
-        url += '&page_size=' + scope.hostSummariesMaxRows + '&order_by=host_name';
+        url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
 
         scope.jobData.hostSummaries = {};
 
@@ -233,7 +233,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
             if (play && task) {
                 url = scope.job.related.job_events + '?parent=' + task.id + '&';
-                url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order_by=-host__name';
+                url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name';
 
                 Rest.setUrl(url);
                 Rest.get()
@@ -324,7 +324,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
 
             if (play) {
                 url = scope.job.url + 'job_tasks/?event_id=' + play.id;
-                url += '&page_size=' + scope.tasksMaxRows + '&order_by=id';
+                url += '&page_size=' + scope.tasksMaxRows + '&order=id';
 
                 Rest.setUrl(url);
                 Rest.get()
