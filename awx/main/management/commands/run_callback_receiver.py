@@ -157,7 +157,7 @@ class CallbackReceiver(object):
                 if event == 'playbook_on_stats':
                     transaction.commit()
                 print data
-                if verbose == 0 and res in data['event_data'] and 'invocation' in data['event_data']['res'] and \
+                if verbose == 0 and 'res' in data['event_data'] and 'invocation' in data['event_data']['res'] and \
                    'module_args' in data['event_data']['res']['invocation']:
                     data['event_data']['res']['invocation']['module_args'] = ""
                 job_event = JobEvent(**data)
