@@ -283,6 +283,19 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         else:
             ssh_key_data = self.ssh_key_data
         if ssh_key_data:
+            # Sanity check: GCE, in particular, provides JSON-encoded private
+            # keys, which developers will be tempted to copy and paste rather
+            # than JSON decode.
+            #
+            # These end in a unicode-encoded final character that gets double
+            # escaped due to being in a Python 2 bytestring, and that causes
+            # Python's key parsing to barf. Detect this issue and correct it.
+            if r'\u003d' in ssh_key_data:
+                ssh_key_data = ssh_key_data.replace(r'\u003d', '=')
+                self.ssh_key_data = ssh_key_data
+
+            # Validate the private key to ensure that it looks like something
+            # that we can accept.
             self._validate_ssh_private_key(ssh_key_data)
         return self.ssh_key_data # No need to return decrypted version here.
 
