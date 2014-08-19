@@ -58,15 +58,13 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 // should prevent content flash from the prior user.
                 var scope = angular.element(document.getElementById('main-view')).scope();
                 scope.$destroy();
-                $rootScope.$destroy();
+                //$rootScope.$destroy();
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');
                 $cookieStore.remove('lastPath');
-                $cookieStore.remove('lastPath', '/home');
                 $cookieStore.remove('token');
                 $cookieStore.put('userLoggedIn', false);
                 $cookieStore.put('sessionExpired', false);
-                $cookieStore.put('token', '');
                 $cookieStore.put('current_user', {});
                 $rootScope.current_user = {};
                 $rootScope.license_tested = undefined;

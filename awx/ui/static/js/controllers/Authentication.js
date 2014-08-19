@@ -23,8 +23,9 @@ function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope,
     loginAgain = function() {
         Authorization.logout();
         setTimeout(function() {
+            //$location.url('/logout');
             window.location = '/#/logout';  // if we get here, force user back to re-login
-        }, 500);
+        }, 1000);
     };
 
     scope.sessionExpired = (Empty($rootScope.sessionExpired)) ? $cookieStore.get('sessionExpired') : $rootScope.sessionExpired;
@@ -152,6 +153,7 @@ function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope,
                 scope.$emit('AuthorizationGetLicense');
             })
             .error(function (data, status) {
+                Authorization.logout();
                 Wait('stop');
                 Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', loginAgain);
             });
