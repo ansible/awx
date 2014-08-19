@@ -557,6 +557,10 @@ class JobEvent(CreatedModifiedModel):
         on_delete=models.SET_NULL,
         editable=False,
     )
+    counter = models.PositiveIntegerField(
+        default=0,
+    )
+
 
     def get_absolute_url(self):
         return reverse('api:job_event_detail', args=(self.pk,))

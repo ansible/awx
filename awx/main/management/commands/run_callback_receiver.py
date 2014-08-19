@@ -150,7 +150,7 @@ class CallbackReceiver(object):
         if settings.DEBUG:
             print data
         for key in data.keys():
-            if key not in ('job_id', 'event', 'event_data', 'created'):
+            if key not in ('job_id', 'event', 'event_data', 'created', 'counter'):
                 data.pop(key)
         for retry_count in xrange(11):
             try:

@@ -85,6 +85,7 @@ class CallbackModule(object):
         self.socket = None
         self._init_logging()
         self._init_connection()
+        self.counter = 0
 
     def _init_logging(self):
         try:
@@ -114,10 +115,12 @@ class CallbackModule(object):
         self.socket.connect(self.callback_consumer_port)
 
     def _post_job_event_queue_msg(self, event, event_data):
+        self.counter += 1
         msg = {
             'job_id': self.job_id,
             'event': event,
             'event_data': event_data,
+            'counter': self.counter,
             'created': datetime.datetime.utcnow().isoformat(),
         }
         active_pid = os.getpid()
