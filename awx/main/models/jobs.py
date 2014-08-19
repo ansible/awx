@@ -40,6 +40,7 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import *
 from awx.main.models.unified_jobs import *
 from awx.main.utils import encrypt_field, decrypt_field, ignore_inventory_computed_fields
+from awx.main.utils import emit_websocket_notification
 
 # Celery
 from celery import chain
@@ -795,4 +796,5 @@ class JobEvent(CreatedModifiedModel):
                     if update_fields:
                         host_summary.save(update_fields=update_fields)
             job.inventory.update_computed_fields()
+            emit_websocket_notification('/socket.io/jobs', 'summary_complete', dict(unified_job_id=job.id))
 
