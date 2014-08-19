@@ -309,7 +309,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                                     name: event.event_data.host,
                                     created: event.created,
                                     msg: msg,
-                                    counter: counter,
+                                    counter: event.counter,
                                     item: item
                                 };
                             }
