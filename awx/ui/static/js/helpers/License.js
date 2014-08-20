@@ -94,6 +94,10 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
                     } else {
                         html += "<p>After this license expires, playbooks will no longer run and hosts cannot be added.  If you are ready to renew or upgrade, contact us at " + renew + ". Thanks!</p>";
                     }
+
+                    // If there is exactly one day remaining, change "days remaining"
+                    // to "day remaining".
+                    html = html.replace('has 1 days remaining', 'has 1 day remaining');
                 }
                 else if (license.free_instances <= 0) {
                     title = "Host Count Exceeded";
