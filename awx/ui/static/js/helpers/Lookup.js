@@ -48,14 +48,14 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
             }
 
             name = list.iterator.charAt(0).toUpperCase() + list.iterator.substring(1);
-            
+
             watchUrl = (/\/$/.test(defaultUrl)) ? defaultUrl + '?' : defaultUrl + '&';
             watchUrl += form.fields[field].sourceField + '__' + 'iexact=:value';
 
             $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-url', watchUrl);
             $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-source', field);
 
-            
+
             parent_scope['lookUp' + name] = function () {
 
                 var master = {},
@@ -78,7 +78,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                 name = list.iterator.charAt(0).toUpperCase() + list.iterator.substring(1);
                 hdr = (params.hdr) ? params.hdr : 'Select ' + name;
 
-                // Show pop-up 
+                // Show pop-up
                 buttons = [{
                     label: "Cancel",
                     icon: "fa-times",
@@ -155,7 +155,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                         }
                     }
 
-                    // List generator creates the list, resetting it and losing the previously selected value. 
+                    // List generator creates the list, resetting it and losing the previously selected value.
                     // If the selected value is in the current set, find it and mark selected.
                     if (!Empty(parent_scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField])) {
                         scope[list.name].forEach(function(elem) {
@@ -178,7 +178,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                 scope.selectAction = function () {
                     var i, found = false;
                     for (i = 0; i < scope[list.name].length; i++) {
-                        if (scope[list.name][i].checked === '1') {
+                        if (scope[list.name][i].checked === '1' || scope[list.name][i].checked===1) {
                             found = true;
                             parent_scope[field] = scope[list.name][i].id;
                             if (parent_scope[form.name + '_form'] && form.fields[field] && form.fields[field].sourceModel) {
