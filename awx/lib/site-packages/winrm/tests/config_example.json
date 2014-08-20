@@ -1,0 +1,6 @@
+{
+    "endpoint": "http://windows-host:5985/wsman",
+    "transport": "plaintext",
+    "username": "username_without_domain",
+    "password": "password_as_plain_text"
+}
