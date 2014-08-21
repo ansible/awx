@@ -129,7 +129,8 @@ function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, U
         form: form,
         current_item: ($routeParams.organization_id !== undefined) ? $routeParams.organization_id : null,
         list: OrganizationList,
-        field: 'organization'
+        field: 'organization',
+        input_type: 'radio'
     });
 
     if ($routeParams.organization_id) {

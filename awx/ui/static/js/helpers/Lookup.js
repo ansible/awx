@@ -13,6 +13,7 @@
  *      hdr: <optional. modal dialog header>
  *      postAction: optional function to run after selection made,
  *      callback: optional label to $emit() on parent scope
+ *      input_type: optional string that specifies whether lookup should have checkboxes or radio buttons. defaults to 'checkbox' --- added by JT 8/21/14
  *  })
  */
 
@@ -31,6 +32,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                 instructions = params.instructions,
                 postAction = params.postAction,
                 callback = params.callback,
+                input_type = (params.input_type) ? params.input_type: "checkbox",
                 defaultUrl, name, watchUrl;
 
             if (params.url) {
@@ -72,7 +74,8 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                     mode: 'lookup',
                     id: 'lookup-modal-dialog',
                     scope: scope,
-                    instructions: instructions
+                    instructions: instructions,
+                    input_type: input_type
                 });
 
                 name = list.iterator.charAt(0).toUpperCase() + list.iterator.substring(1);

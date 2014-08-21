@@ -260,7 +260,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         scope: scope,
                         form: form,
                         list: CredentialList,
-                        field: 'credential'
+                        field: 'credential',
+                        input_type: "radio"
                     });
                     if ($('#group_tabs .active a').text() === 'Source' && scope.source.value === 'ec2') {
                         callback = function(){ Wait('stop'); };

@@ -129,7 +129,8 @@ function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routePar
         form: form,
         current_item: null,
         list: InventoryList,
-        field: 'inventory'
+        field: 'inventory',
+        input_type: 'radio'
     });
 
     LookUpInit({
@@ -249,7 +250,8 @@ function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routePa
                 form: form,
                 current_item: data.inventory,
                 list: InventoryList,
-                field: 'inventory'
+                field: 'inventory',
+                input_type: "radio"
             });
 
             LookUpInit({

@@ -434,7 +434,8 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
         scope: $scope,
         form: form,
         list: OrganizationList,
-        field: 'organization'
+        field: 'organization',
+        input_type: 'radio'
     });
 
     LookUpInit({
@@ -442,7 +443,8 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
         url: GetBasePath('credentials') + '?kind=scm',
         form: form,
         list: CredentialList,
-        field: 'credential'
+        field: 'credential',
+        input_type: "radio"
     });
 
     // Save
@@ -545,7 +547,11 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
         relatedSets = {};
 
     SchedulesList.well = false;
-    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
+    generator.inject(form, {
+        mode: 'edit',
+        related: true,
+        scope: $scope
+    });
     generator.reset();
 
     $scope.project_local_paths = [];
@@ -597,7 +603,8 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
             scope: $scope,
             form: form,
             list: CredentialList,
-            field: 'credential'
+            field: 'credential',
+            input_type: 'radio'
         });
 
         $scope.pathRequired = ($scope.scm_type.value === '') ? true : false;

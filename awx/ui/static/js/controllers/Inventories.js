@@ -400,7 +400,8 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routePar
         form: form,
         current_item: ($routeParams.organization_id) ? $routeParams.organization_id : null,
         list: OrganizationList,
-        field: 'organization'
+        field: 'organization',
+        input_type: 'radio'
     });
 
     // Save

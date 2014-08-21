@@ -159,7 +159,8 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
         form: form,
         current_item: (!Empty($routeParams.user_id)) ? $routeParams.user_id : null,
         list: UserList,
-        field: 'user'
+        field: 'user',
+        input_type: 'radio'
     });
 
     LookUpInit({
@@ -314,7 +315,8 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
             form: form,
             current_item: (!Empty($scope.user_id)) ? $scope.user_id : null,
             list: UserList,
-            field: 'user'
+            field: 'user',
+            input_type: 'radio'
         });
 
         LookUpInit({

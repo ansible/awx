@@ -161,7 +161,8 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         form: form,
         current_item: null,
         list: InventoryList,
-        field: 'inventory'
+        field: 'inventory',
+        input_type: "radio"
     });
 
     // Clone the CredentialList object for use with cloud_credential. Cloning
@@ -177,7 +178,8 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         current_item: null,
         list: CloudCredentialList,
         field: 'cloud_credential',
-        hdr: 'Select Cloud Credential'
+        hdr: 'Select Cloud Credential',
+        input_type: 'radio'
     });
 
     LookUpInit({
@@ -187,7 +189,8 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         current_item: null,
         list: CredentialList,
         field: 'credential',
-        hdr: 'Select Machine Credential'
+        hdr: 'Select Machine Credential',
+        input_type: "radio"
     });
 
     // Update playbook select whenever project value changes
@@ -262,7 +265,8 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         form: form,
         current_item: null,
         list: ProjectList,
-        field: 'project'
+        field: 'project',
+        input_type: "radio"
     });
 
     function saveCompleted() {
@@ -535,7 +539,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             current_item: $scope.cloud_credential,
             list: CloudCredentialList,
             field: 'cloud_credential',
-            hdr: 'Select Cloud Credential'
+            hdr: 'Select Cloud Credential',
+            input_type: "radio"
         });
         $scope.$emit('jobTemplateLoadFinished');
     });
@@ -639,7 +644,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     form: form,
                     current_item: data.inventory,
                     list: InventoryList,
-                    field: 'inventory'
+                    field: 'inventory',
+                    input_type: "radio"
                 });
 
                 LookUpInit({
@@ -649,7 +655,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     current_item: data.credential,
                     list: CredentialList,
                     field: 'credential',
-                    hdr: 'Select Machine Credential'
+                    hdr: 'Select Machine Credential',
+                    input_type: "radio"
                 });
 
                 LookUpInit({
@@ -657,7 +664,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     form: form,
                     current_item: data.project,
                     list: ProjectList,
-                    field: 'project'
+                    field: 'project',
+                    input_type: "radio"
                 });
 
                 RelatedSearchInit({

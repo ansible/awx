@@ -7,13 +7,13 @@
  *  Controller functions for the Team model.
  *
  */
- 
+
 'use strict';
 
 function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, TeamList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit, Wait,
     Stream) {
-    
+
     ClearScope();
 
     var list = TeamList,
@@ -22,7 +22,7 @@ function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Aler
         paths = $location.path().replace(/^\//, '').split('/'),
         mode = (paths[0] === 'teams') ? 'edit' : 'select',
         url;
-    
+
     generator.inject(list, { mode: mode, scope: $scope });
     $scope.selected = [];
 
@@ -121,7 +121,7 @@ function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, T
         form = TeamForm,
         generator = GenerateForm,
         scope = generator.inject(form, { mode: 'add', related: false });
-    
+
     $rootScope.flashMessage = null;
     generator.reset();
     LoadBreadCrumbs();
@@ -131,7 +131,8 @@ function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, T
         form: form,
         current_item: null,
         list: OrganizationList,
-        field: 'organization'
+        field: 'organization',
+        input_type: 'radio'
     });
 
     // Save
@@ -173,7 +174,7 @@ TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
     LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
     OrganizationList, Wait, Stream) {
-    
+
     ClearScope();
 
     var defaultUrl = GetBasePath('teams'),
@@ -253,7 +254,8 @@ function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
                 form: form,
                 current_item: data.organization,
                 list: OrganizationList,
-                field: 'organization'
+                field: 'organization',
+                input_type: 'radio'
             });
 
             $scope.organization_url = data.related.organization;
