@@ -1472,10 +1472,7 @@ class ActivityStreamSerializer(BaseSerializer):
         if obj is None:
             return {}
         try:
-            d_changes = json.loads(obj.changes)
-            if 'variables' in d_changes:
-                d_changes['variables'] = json.loads(d_changes['variables'])
-            return d_changes
+            return json.loads(obj.changes)
         except Exception, e:
             logger.warn("Error deserializing activity stream json changes")
         return {}
