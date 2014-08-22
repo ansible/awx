@@ -32,7 +32,7 @@ SECRET_KEY = None
 ALLOWED_HOSTS = []
 
 # Production should only use minified JS for UI.
-USE_MINIFIED_JS = True 
+USE_MINIFIED_JS = True
 
 # URL used by inventory script and callback plugin to access API.
 INTERNAL_API_URL = 'http://127.0.0.1:80'
@@ -81,7 +81,7 @@ except IOError:
     if (not included_file or included_file == settings_file):
         # The import doesn't always give permission denied, so try to open the
         # settings file directly.
-        try: 
+        try:
             e = None
             open(settings_file)
         except IOError, e:
