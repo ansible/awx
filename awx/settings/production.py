@@ -32,7 +32,7 @@ SECRET_KEY = None
 ALLOWED_HOSTS = []
 
 # Production should only use minified JS for UI.
-USE_MINIFIED_JS = True 
+USE_MINIFIED_JS = True
 
 # URL used by inventory script and callback plugin to access API.
 INTERNAL_API_URL = 'http://127.0.0.1:80'
@@ -48,24 +48,24 @@ LOGGING['handlers']['rotating_file'] = {
     'level': 'WARNING',
     'class':'logging.handlers.RotatingFileHandler',
     'filters': ['require_debug_false'],
-    'filename': '/var/log/awx/tower_warnings.log',
+    'filename': '/var/log/tower/tower_warnings.log',
     'maxBytes': 1024*1024*5, # 5 MB
     'backupCount': 5,
     'formatter':'simple',
 }
 
 # Load settings from any .py files in the global conf.d directory specified in
-# the environment, defaulting to /etc/awx/conf.d/.
-settings_dir = os.environ.get('AWX_SETTINGS_DIR', '/etc/awx/conf.d/')
+# the environment, defaulting to /etc/tower/conf.d/.
+settings_dir = os.environ.get('AWX_SETTINGS_DIR', '/etc/tower/conf.d/')
 settings_files = os.path.join(settings_dir, '*.py')
 
 # Load remaining settings from the global settings file specified in the
-# environment, defaulting to /etc/awx/settings.py.
+# environment, defaulting to /etc/tower/settings.py.
 settings_file = os.environ.get('AWX_SETTINGS_FILE',
-                               '/etc/awx/settings.py')
+                               '/etc/tower/settings.py')
 
-# Attempt to load settings from /etc/awx/settings.py first, followed by
-# /etc/awx/conf.d/*.py.
+# Attempt to load settings from /etc/tower/settings.py first, followed by
+# /etc/tower/conf.d/*.py.
 try:
     include(
         settings_file,
@@ -81,7 +81,7 @@ except IOError:
     if (not included_file or included_file == settings_file):
         # The import doesn't always give permission denied, so try to open the
         # settings file directly.
-        try: 
+        try:
             e = None
             open(settings_file)
         except IOError, e:

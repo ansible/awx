@@ -13,7 +13,7 @@ from awx import __version__
 build_timestamp = os.getenv("BUILD",datetime.datetime.now().strftime('-%Y%m%d%H%M'))
 
 # Paths we'll use later
-etcpath = "/etc/awx"
+etcpath = "/etc/tower"
 homedir = "/var/lib/awx"
 sharedir = "/usr/share/awx"
 munin_plugin_path = "/etc/munin/plugins/"
