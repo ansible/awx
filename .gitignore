@@ -11,6 +11,7 @@ awx/ui/static/js/local_config.js
 awx/ui/static/css/awx.min.css
 awx/main/fixtures
 awx/tower_warnings.log
+tower/tower_warnings.log
 celerybeat-schedule
 
 # Python & setuptools
