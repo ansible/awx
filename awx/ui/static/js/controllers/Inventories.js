@@ -569,10 +569,10 @@ function InventoriesEdit ($log, $scope, $location, $routeParams, $compile, Gener
     $scope.removeInventoryLoaded = $scope.$on('InventoryLoaded', function() {
         var e, rows;
 
-        /*LoadBreadCrumbs({
+        LoadBreadCrumbs({
             path: $location.path(),
             title: '{{ inventory.name }}'
-        });*/
+        });
         $scope.group_breadcrumbs[0].name = $scope.inventory.name;
 
         // Build page breadcrumbs
