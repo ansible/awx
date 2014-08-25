@@ -458,12 +458,12 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                         }
                     });
                     if (section === 'Results') {
-                        // Add result fields that might be not be found the form object
-                        // to results.
+                        // Add to result fields that might not be found in the form object.
                         for (key in obj) {
                             h = '';
                             if (key !== 'host_id' && key !== 'parent' && key !== 'event' && key !== 'src' && key !== 'md5sum' &&
-                                key !== 'stdout' && key !== 'traceback' && key !== 'stderr' && key !== 'cmd' && key !=='changed' && key !== "verbose_override") {
+                                key !== 'stdout' && key !== 'traceback' && key !== 'stderr' && key !== 'cmd' && key !=='changed' && key !== "verbose_override" &&
+                                key !== 'feature_result') {
                                 if (!EventsViewerForm.fields[key]) {
                                     h = parseItem(obj[key], key, key);
                                     if (h) {
