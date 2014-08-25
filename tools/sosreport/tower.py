@@ -19,12 +19,12 @@ if LooseVersion(sos.__version__) >= LooseVersion('3.0'):
                          "supervisorctl status",   # tower process status
                          "tree -d /var/lib/awx",   # show me the dirs
                          "ls -ll /var/lib/awx",    # check permissions
-                         "ls -ll /etc/awx"
+                         "ls -ll /etc/tower"
                        ]
 
             dirs = [
-                    "/etc/awx/",
-                    "/var/log/awx",
+                    "/etc/tower/",
+                    "/var/log/tower",
                     "/var/log/httpd",
                     "/var/log/apache2",
                     "/var/log/rabbitmq",
@@ -58,12 +58,12 @@ else:
                          "supervisorctl status",   # tower process status
                          "tree -d /var/lib/awx",   # show me the dirs
                          "ls -ll /var/lib/awx",    # check permissions
-                         "ls -ll /etc/awx"
+                         "ls -ll /etc/tower"
                        ]
 
             dirs = [
-                    "/etc/awx/",
-                    "/var/log/awx",
+                    "/etc/tower/",
+                    "/var/log/tower",
                     "/var/log/httpd",
                     "/var/log/apache2",
                     "/var/log/rabbitmq",

@@ -573,7 +573,7 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
                     // The license is invalid. Stop the user from logging in.
                     status = 'alert-danger';
                     hdr = 'License Error';
-                    msg = '<p>There is a problem with the /etc/awx/license file on your Tower server. Check to make sure Tower can access ' +
+                    msg = '<p>There is a problem with the /etc/tower/license file on your Tower server. Check to make sure Tower can access ' +
                         'the file.</p>' + purchase_msg;
                     Alert(hdr, msg, status, null, false, true);
                 } else if (license.demo !== undefined && license.demo === true) {
