@@ -463,7 +463,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                         for (key in obj) {
                             h = '';
                             if (key !== 'host_id' && key !== 'parent' && key !== 'event' && key !== 'src' && key !== 'md5sum' &&
-                                key !== 'stdout' && key !== 'traceback' && key !== 'stderr') {
+                                key !== 'stdout' && key !== 'traceback' && key !== 'stderr' && key !== 'cmd' && key !=='changed' && key !== "verbose_override") {
                                 if (!EventsViewerForm.fields[key]) {
                                     h = parseItem(obj[key], key, key);
                                     if (h) {

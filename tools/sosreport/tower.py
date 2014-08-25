@@ -24,7 +24,11 @@ if LooseVersion(sos.__version__) >= LooseVersion('3.0'):
 
             dirs = [
                     "/etc/awx/",
-                    "/var/log/supervisor/",
+                    "/var/log/awx",
+                    "/var/log/httpd",
+                    "/var/log/apache2",
+                    "/var/log/rabbitmq",
+                    "/var/log/supervisor",
                     "/var/log/syslog",
                     "/var/log/udev",
                     "/var/log/kern*",
@@ -59,7 +63,11 @@ else:
 
             dirs = [
                     "/etc/awx/",
-                    "/var/log/supervisor/",
+                    "/var/log/awx",
+                    "/var/log/httpd",
+                    "/var/log/apache2",
+                    "/var/log/rabbitmq",
+                    "/var/log/supervisor",
                     "/var/log/syslog",
                     "/var/log/udev",
                     "/var/log/kern*",
