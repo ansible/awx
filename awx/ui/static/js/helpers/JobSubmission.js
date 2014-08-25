@@ -113,7 +113,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             function buildHtml() {
                 var fld, field, html;
                 html = "";
-                html += "<div class=\"alert alert-info\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
+                html += "<div class=\"alert alert-info\" ng-keydown=\"keydown($event)\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
                 html += "<form name=\"password_form\" novalidate>\n";
 
                 passwords.forEach(function(password) {
@@ -125,6 +125,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
                     html += "<input type=\"password\" ";
                     html += "ng-model=\"" + fld + '" ';
+                    html += "ng-keydown=\"keydown($event)\" ";
                     html += 'name="' + fld + '" ';
                     html += "class=\"password-field form-control input-sm\" ";
                     html += (field.associated) ? "ng-change=\"clearPWConfirm('" + field.associated + "')\" " : "";
@@ -145,6 +146,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                         html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
                         html += "<input type=\"password\" ";
                         html += "ng-model=\"" + fld + '" ';
+                        html += "ng-keydown=\"keydown($event)\" ";
                         html += 'name="' + fld + '" ';
                         html += "class=\"form-control input-sm\" ";
                         html += "ng-change=\"checkStatus()\" ";
@@ -204,6 +206,11 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 $('#password-modal').dialog('open');
                 $('#password-accept-button').attr({ "disabled": "disabled" });
             });
+            scope.keydown = function(e){
+                if(e.keyCode===13){
+                    scope.passwordAccept();
+                }
+            };
 
             scope.passwordAccept = function() {
                 if (!scope.password_form.$invalid) {
