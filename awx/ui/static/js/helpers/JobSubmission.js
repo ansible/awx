@@ -113,7 +113,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             function buildHtml() {
                 var fld, field, html;
                 html = "";
-                html += "<div class=\"alert alert-info\" ng-keydown=\"keydown($event)\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
+                html += "<div class=\"alert alert-info\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
                 html += "<form name=\"password_form\" novalidate>\n";
 
                 passwords.forEach(function(password) {
