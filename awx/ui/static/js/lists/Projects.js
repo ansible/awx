@@ -40,7 +40,7 @@ angular.module('ProjectsListDefinition', [])
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: "col-lg-6 col-md-4 col-sm-6 col-xs-6",
+                columnClass: "col-lg-5 col-md-4 col-sm-6 col-xs-6",
                 modalColumnClass: 'col-md-8'
             },
             last_updated: {
@@ -56,7 +56,7 @@ angular.module('ProjectsListDefinition', [])
                 searchType: 'select',
                 searchOptions: [], // will be set by Options call to projects resource
                 excludeModal: true,
-                columnClass: 'col-md-2 hidden-sm hidden-xs'
+                columnClass: 'col-lg-2 col-md-2 hidden-sm hidden-xs'
             }
         },
 
@@ -102,6 +102,9 @@ angular.module('ProjectsListDefinition', [])
         },
 
         fieldActions: {
+
+            columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-4',
+
             scm_update: {
                 ngClick: 'SCMUpdate(project.id, $event)',
                 awToolTip: "{{ project.scm_update_tooltip }}",
