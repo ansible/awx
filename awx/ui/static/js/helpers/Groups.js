@@ -149,6 +149,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     status_tip = 'Sync not performed. Click <i class="fa fa-exchange"></i> to start it now.';
                     break;
                 case 'none':
+                case 'ok':
                 case '':
                     launch_class = 'btn-disabled';
                     stat = 'n/a';

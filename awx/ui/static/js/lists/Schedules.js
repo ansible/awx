@@ -43,12 +43,13 @@ angular.module('SchedulesListDefinition', [])
                 filter: "date:'MM/dd/yy HH:mm:ss'",
                 searchable: false,
                 columnClass: "col-md-2 col-sm-3 hidden-xs"
-            },
+            }
+            /*,
             id: {
                 label: 'ID',
                 searchType: 'int',
                 searchOnly: true
-            }
+            }*/
         },
 
         actions: {
