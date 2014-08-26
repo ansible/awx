@@ -9,6 +9,7 @@ from distutils.version import StrictVersion as Version
 import json
 import logging
 import os
+import signal
 import pipes
 import re
 import stat
@@ -340,7 +341,10 @@ class BaseTask(Task):
             # Refresh model instance from the database (to check cancel flag).
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
-                child.terminate(canceled)
+                os.kill(child.pid, signal.SIGINT)
+                time.sleep(3)
+                # The following line causes orphaned ansible processes
+                # child.terminate(canceled)
                 canceled = True
             if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
                 child.close(True)
