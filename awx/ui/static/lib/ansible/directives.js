@@ -300,8 +300,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     html: true,
                     container: container
                 });
-            }
-            else {
+            } else {
                 $(element).popover({
                     placement: placement,
                     delay: 0,
@@ -312,6 +311,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     container: container
                 });
             }
+            $(element).attr('tabindex',-1);
             $(element).click(function() {
                 var self = $(this);
                 try {
