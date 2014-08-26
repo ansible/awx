@@ -374,7 +374,6 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         } else {
                             scope[iterator + 'ShowStartBtn' + modifier] = true;
                         }
-
                         if ((!scope[iterator + 'SelectShow' + modifier] && !Empty(scope[iterator + 'SearchValue' + modifier])) ||
                             (scope[iterator + 'SelectShow' + modifier] && scope[iterator + 'SearchSelectValue' + modifier]) ||
                             (list.fields[scope[iterator + 'SearchField' + modifier]] &&

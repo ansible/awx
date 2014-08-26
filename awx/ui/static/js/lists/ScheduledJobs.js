@@ -45,8 +45,15 @@ angular.module('ScheduledJobsDefinition', [])
                 sourceModel: 'unified_job_template',
                 sourceField: 'unified_job_type',
                 ngBind: 'schedule.type_label',
-                searchable: false,
-                nosort: true
+                searchField: 'unified_job_template__polymorphic_ctype__name',
+                searchLable: 'Type',
+                searchable: true,
+                searchType: 'select',
+                searchOptions: [
+                    { value: 'inventory source', name: 'Inventory Sync' },
+                    { value: 'job template', name: 'Playbook Run' },
+                    { value: 'project', name: 'SCM Update' }
+                ]
             },
             name: {
                 label: 'Name',
