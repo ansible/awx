@@ -778,19 +778,19 @@ angular.module('GeneratorHelpers', [])
 
             // Reset button for drop-down
             html += "<div class=\"input-group-btn\" ng-show=\"" + iterator + "SelectShow" + modifier + "\" >\n";
-            html += "<button type=\"button\" class=\"btn btn-default btn-small\" ng-click=\"resetSearch('" + iterator + "')\" " +
+            html += "<button type=\"button\" class=\"btn btn-default btn-small\" id=\"search-reset-button\" ng-click=\"resetSearch('" + iterator + "')\" " +
                 "aw-tool-tip=\"Clear the search\" data-placement=\"top\"><i class=\"fa fa-times\"></i></button>\n";
             html += "</div><!-- input-group-btn -->\n";
 
             html += "</div><!-- input-group -->\n";
 
-            html += "<a class=\"search-reset-start\" ng-click=\"resetSearch('" + iterator + "')\"" +
+            html += "<a class=\"search-reset-start\" id=\"search-submit-button\" ng-click=\"resetSearch('" + iterator + "')\"" +
                 "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +
                 iterator + "ShowStartBtn" + modifier + " || " +
                 iterator + "HideAllStartBtn" + modifier + "\"" +
                 "><i class=\"fa fa-times\"></i></a>\n";
 
-            html += "<a class=\"search-reset-start\" ng-click=\"search('" + iterator + "')\"" +
+            html += "<a class=\"search-reset-start\" id=\"search-reset-button\" ng-click=\"search('" + iterator + "')\"" +
                 "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +
                 "!" + iterator + "ShowStartBtn" + modifier + " || " +
                 iterator + "HideAllStartBtn" + modifier + "\"" +
