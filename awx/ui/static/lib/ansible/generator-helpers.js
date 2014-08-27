@@ -817,22 +817,22 @@ angular.module('GeneratorHelpers', [])
             html += "<!-- Paginate Widget -->\n";
             html += "<div class=\"row page-row\">\n";
             html += "<div class=\"col-lg-8 col-md-8\">\n";
-            html += "<ul class=\"pagination\" ng-hide=\"" + iterator + "HidePaginator || " + iterator + "_num_pages <= 1\">\n";
-            html += "<li ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" +
+            html += "<ul id=\"pagination-widget\" class=\"pagination\" ng-hide=\"" + iterator + "HidePaginator || " + iterator + "_num_pages <= 1\">\n";
+            html += "<li id=\"first-page-set\" ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" +
                 "<i class=\"fa fa-angle-double-left\"></i></a></li>\n";
-            html += "<li ng-hide=\"" + iterator + "_page -1 <= 0\"><a href " +
+            html += "<li id=\"previous-page\" ng-hide=\"" + iterator + "_page -1 <= 0\"><a href " +
                 "ng-click=\"getPage(" + iterator + "_page - 1,'" + set + "','" + iterator + "')\">" +
                 "<i class=\"fa fa-angle-left\"></i></a></li>\n";
-            html += "<li ng-repeat=\"page in " + iterator + "_page_range\" ng-class=\"pageIsActive(page,'" + iterator + "')\">" +
+            html += "<li  id=\"{{ 'link-to-page-' + page }}\" ng-repeat=\"page in " + iterator + "_page_range\" ng-class=\"pageIsActive(page,'" + iterator + "')\">" +
                 "<a href ng-click=\"getPage(page,'" + set + "','" + iterator + "')\">{{ page }}</a></li>\n";
-            html += "<li ng-hide=\"" + iterator + "_page + 1 > " + iterator + "_num_pages\"><a href ng-click=\"" +
+            html += "<li id=\"next-page\" ng-hide=\"" + iterator + "_page + 1 > " + iterator + "_num_pages\"><a href ng-click=\"" +
                 "getPage(" + iterator + "_page + 1,'" + set + "','" + iterator + "')\"><i class=\"fa fa-angle-right\"></i></a></li>\n";
-            html += "<li ng-hide=\"" + iterator + "_page +4 >= " + iterator + "_num_pages\"><a href ng-click=\"" +
+            html += "<li id=\"last-page-set\" ng-hide=\"" + iterator + "_page +4 >= " + iterator + "_num_pages\"><a href ng-click=\"" +
                 "getPage(" + iterator + "_num_pages,'" + set + "','" + iterator + "')\"><i class=\"fa fa-angle-double-right\"></i></a></li>\n";
             html += "</ul>\n";
             html += "</div>\n";
             html += "<div class=\"col-lg-4 col-md-4\" ng-hide=\"" + iterator + "_mode == 'lookup'\">\n";
-            html += "<div class=\"page-label\">\n";
+            html += "<div id=\"page-label-container\" class=\"page-label\">\n";
             html += "Page {{ " + iterator + "_page }} of {{ " + iterator + "_num_pages }} ({{ " + iterator + "_total_rows | number:0 }} items)";
             html += "</div>\n";
             html += "</div>\n";
