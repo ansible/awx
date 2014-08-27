@@ -401,6 +401,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                             } else if (list.fields[scope[iterator + 'SearchField' + modifier]].searchType &&
                                 list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'gtzero') {
                                 scope[iterator + 'SearchParams'] += 'gt=0';
+                            } else if (list.fields[scope[iterator + 'SearchField' + modifier]].searchType &&
+                                list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'isnull') {
+                                scope[iterator + 'SearchParams'] += 'isnull=';
                             } else if ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchType === 'select') &&
                                 Empty(scope[iterator + 'SearchSelectValue' + modifier].value) && !/\_\_$/.test(scope[iterator + 'SearchParams']) ) {
                                 scope[iterator + 'SearchParams'] += '=iexact=';

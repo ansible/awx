@@ -47,12 +47,10 @@ angular.module('StreamListDefinition', [])
                 searchable: false,
                 columnClass: 'col-lg-7'
             },
-            system_event: {
+            actor: {
                 label: 'System event',
                 searchOnly: true,
                 searchType: 'isnull',
-                sourceModel: 'actor',
-                sourceField: 'username',
                 searchWidget: 1
             },
 
@@ -264,5 +262,5 @@ angular.module('StreamListDefinition', [])
                 dataPlacement: 'top'
             }
         }
-        
+
     });
