@@ -21,6 +21,14 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
         collapseOpen: true,
 
         actions: {
+            scm_update: {
+                mode: 'edit',
+                ngClick: 'SCMUpdate()',
+                awToolTip: "{{ scm_update_tooltip }}",
+                dataTipWatch: "scm_update_tooltip",
+                ngClass: "scm_type_class",
+                dataPlacement: 'top'
+            },
             stream: {
                 'class': "btn-primary btn-xs activity-btn",
                 ngClick: "showActivity()",

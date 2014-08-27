@@ -491,13 +491,13 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
                         }
                     })
                     .error(function (data, status) {
-                        ProcessErrors($scope, data, status, ProjectsForm, { hdr: 'Error!',
+                        ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                             msg: 'Failed to add organization to project. POST returned status: ' + status });
                     });
             })
             .error(function (data, status) {
                 Wait('stop');
-                ProcessErrors($scope, data, status, ProjectsForm, { hdr: 'Error!',
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                     msg: 'Failed to create new project. POST returned status: ' + status });
             });
     };
@@ -533,7 +533,7 @@ ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', 
 function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit, GetChoices,
-    Empty, DebugForm, Wait, Stream, SchedulesControllerInit, SchedulesListInit, SchedulesList) {
+    Empty, DebugForm, Wait, Stream, SchedulesControllerInit, SchedulesListInit, SchedulesList, ProjectUpdate) {
 
     ClearScope('htmlTemplate');
 
@@ -676,6 +676,19 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
                     scope: $scope,
                     relatedSets: relatedSets
                 });
+
+                $scope.scm_update_tooltip = "Start an SCM update";
+                $scope.scm_type_class = "";
+                if (data.status === 'running' || data.status === 'updating') {
+                    $scope.scm_update_tooltip = "SCM update currently running";
+                    $scope.scm_type_class = "btn-disabled";
+                }
+                if (Empty(data.scm_type)) {
+                    $scope.scm_update_tooltip = 'Manual projects do not require an SCM update';
+                    $scope.scm_type_class = "btn-disabled";
+                }
+
+                $scope.project_obj = data;
                 $scope.$emit('projectLoaded');
             })
             .error(function (data, status) {
@@ -695,6 +708,29 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
         callback: 'choicesReady'
     });
 
+    // Handle project update status changes
+    if ($rootScope.removeJobStatusChange) {
+        $rootScope.removeJobStatusChange();
+    }
+    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, data) {
+        if ($scope.project_obj && data.project_id === $scope.project_obj.id) {
+            // This is the affected project
+            $log.debug('Received event for project: ' + $scope.project_obj.name);
+            $log.debug('Status changed to: ' + data.status);
+            // Set the status and re-evaluate the update button tooltip and class
+            $scope.project_obj.status = data.status;
+            $scope.scm_update_tooltip = "Start an SCM update";
+            $scope.scm_type_class = "";
+            if (data.status === 'running' || data.status === 'updating') {
+                $scope.scm_update_tooltip = "SCM update currently running";
+                $scope.scm_type_class = "btn-disabled";
+            }
+            if (Empty($scope.project_obj.scm_type)) {
+                $scope.scm_update_tooltip = 'Manual projects do not require an SCM update';
+                $scope.scm_type_class = "btn-disabled";
+            }
+        }
+    });
 
     // Save changes to the parent
     $scope.formSave = function () {
@@ -726,6 +762,12 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
         Rest.put(params)
             .success(function() {
                 Wait('stop');
+                /*$scope.scm_update_tooltip = "Start an SCM update";
+                $scope.scm_type_class = "";
+                if (Empty($scope.scm_type)) {
+                    $scope.scm_update_tooltip = 'Manual projects do not require an SCM update';
+                    $scope.scm_type_class = "btn-disabled";
+                }*/
                 ReturnToCaller();
             })
             .error(function (data, status) {
@@ -781,6 +823,16 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
         }
     };
 
+    $scope.SCMUpdate = function () {
+        if ($scope.project_obj.scm_type === "Manual" || Empty($scope.project_obj.scm_type)) {
+            // ignore
+        } else if ($scope.project_obj.status === 'updating' || $scope.project_obj.status === 'running' || $scope.project_obj.status === 'pending') {
+            Alert('Update in Progress', 'The SCM update process is running.', 'alert-info');
+        } else {
+            ProjectUpdate({ scope: $scope, project_id: $scope.project_obj.id });
+        }
+    };
+
     // Reset the form
     $scope.formReset = function () {
         $rootScope.flashMessage = null;
@@ -795,5 +847,5 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
 ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'ClearScope',
     'GetBasePath', 'ReturnToCaller', 'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
-    'DebugForm', 'Wait', 'Stream', 'SchedulesControllerInit', 'SchedulesListInit', 'SchedulesList'
+    'DebugForm', 'Wait', 'Stream', 'SchedulesControllerInit', 'SchedulesListInit', 'SchedulesList', 'ProjectUpdate'
 ];

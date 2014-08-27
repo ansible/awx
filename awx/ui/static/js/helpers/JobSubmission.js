@@ -559,6 +559,10 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
                 // Refresh the project list after update request submitted
                 Wait('stop');
+                if (/\d$/.test($location.path())) {
+                    //Request submitted from projects/N page. Navigate back to the list so user can see status
+                    $location.path('/projects');
+                }
                 if (scope.socketStatus === 'error') {
                     Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
                         'To monitor the update status, refresh the page by clicking the <i class="fa fa-refresh"></i> button.', 'alert-info');
