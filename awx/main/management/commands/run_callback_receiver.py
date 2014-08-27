@@ -187,6 +187,8 @@ class CallbackReceiver(object):
             if messages_processed >= MAX_REQUESTS:
                 print("Shutting down message receiver")
                 pool_subscriber.close()
+                pool_context.term()
+                time.sleep(0.1)
                 sys.exit(0)
 
 class Command(NoArgsCommand):
