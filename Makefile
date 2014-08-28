@@ -196,8 +196,11 @@ minjs: node_modules
 	$(GRUNT)
 
 # Check .js files for errors and lint
-lintjs: node_modules
-	$(GRUNT) jshint
+jshint: node_modules
+	$(GRUNT) $@
+
+ngdocs: node_modules
+	$(GRUNT) $@
 
 # Build a pip-installable package into dist/ with a timestamped version number.
 dev_build:
