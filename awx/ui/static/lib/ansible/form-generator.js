@@ -1489,7 +1489,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                 html += "<td class=\"actions\">";
                 for (act in collection.fieldActions) {
                     fAction = collection.fieldActions[act];
-                    html += "<a ";
+                    html += "<a id=\"" + ((fAction.id) ? fAction.id : act + "-action") + "\" ";
                     html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
                     html += (fAction.ngClick) ? this.attr(fAction, 'ngClick') : "";
                     html += (fAction.ngHref) ? this.attr(fAction, 'ngHref') : "";
