@@ -1,83 +1,19 @@
 
-1.0.6 / 2014-06-19
-==================
+0.9.17 / 2014-05-22
+===================
 
- * test fixes on internet explorer
- * fixes for duplicate event propagation from manager instance [Rase-]
+ * bump
 
-1.0.5 / 2014-06-16
-==================
+0.9.16 / 2013-06-06
+===================
 
- * package: bump `engine.io-client` for better deps and smaller build
- * handle io.connect(null, opts) correctly [audreyt]
- * url: fix incorrect ports in certain connections [holic]
- * manager: propagate all reconnection events to sockets [Rase-]
- * index: added BC for `force new connection`
- * socket: fix event buffering while in disconnected state [kevin-roark]
- * package: stop using tarballs in dependencies [reid]
- * manager: relay `connect_error` and `connect_timeout` to sockets
+  * transports: fix escaping for tests
 
-1.0.4 / 2014-06-02
-==================
+0.9.15 / 2013-06-06
+===================
 
- * update build
-
-1.0.3 / 2014-05-31
-==================
-
- * package; bump `socket.io-parser` for binary ACK fix
- * package: bump `engine.io-client` for binary UTF8 fix
-
-1.0.2 / 2014-05-28
-==================
-
- * package: bump `socket.io-parser` for windows fix
-
-1.0.1 / 2014-05-28
-==================
-
- * override npm tag
-
-1.0.0 / 2014-05-28
-==================
-
- * stable release
-
-1.0.0-pre5 / 2014-05-22
-=======================
-
- * package: bump `engine.io-client` for parser fixes
-
-1.0.0-pre4 / 2014-05-19
-=======================
-
- * build
-
-1.0.0-pre3 / 2014-05-17
-=======================
-
- * package: bump parser
- * package: bump engine.io-client
-
-1.0.0-pre2 / 2014-04-27
-=======================
-
- * package: bump `engine.io-client`
- * package: bump `zuul`
- * allows user-level query string parameters to be in socket.request
- * package: bump `socket.io-parser`
- * package: bump `engine.io-client` for android fix
- * tidy up .gitignore
-
-1.0.0-pre / 2014-03-14
-======================
-
- * implemented `engine.io-client`
- * implemented `socket.io-parser`
- * implemented `json3` to avoid env pollution
- * implemented `debug`
- * added binary support
- * added `browserify` support
+  * transports: added unescaping for escaped htmlfile
+  * skipped 12-14 to match socket.io server version
 
 0.9.11 / 2012-11-02
 ===================

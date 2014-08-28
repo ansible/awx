@@ -7,11 +7,19 @@
  *  Controller functions for user authentication.
  *
  */
+
 /**
  * @ngdoc function
  * @name controllers.function:Authentication
- * @description This controller's for authenticating users
-*/
+ * @description
+ * Controller for handling /#/login and /#/logout routes.
+ *
+ * Tower (app.js) checks if the user is authenticated and whether the user session is in an unexpired state. If either condition is not true,
+ * the user is redirected to /#/login.
+ *
+ * Functions for checking the session state are found in [lib/ansible/AuthService.js](/static/docs/api/lib.ansible.function:AuthService)
+ *
+ */
 'use strict';
 
 function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,

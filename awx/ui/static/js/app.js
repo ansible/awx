@@ -532,8 +532,8 @@ angular.module('Tower', [
                     activateTab();
                 });
 
-                if (!Authorization.getToken()) {
-                    // When the app first loads, redirect to login page
+                if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {
+                    // User not authenticated, redirect to login page
                     $rootScope.sessionExpired = false;
                     $cookieStore.put('sessionExpired', false);
                     $location.path('/login');
