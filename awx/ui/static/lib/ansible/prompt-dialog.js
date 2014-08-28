@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:prompt-dialog
+ *  @description
  * PromptDialog
  * Prompt the user with a Yes/No dialog to confirm an action such
  * as Delete.  Assumes a hidden dialog already exists in $scope.
@@ -15,7 +19,12 @@
  */
 
 'use strict';
-
+/**
+* @ngdoc method
+* @name lib.ansible.function:prompt-dialog#PromptDialog
+* @methodOf lib.ansible.function:prompt-dialog
+* @description discuss difference b/t this and other modals
+*/
 angular.module('PromptDialog', ['Utilities'])
     .factory('Prompt', ['$sce',
         function ($sce) {

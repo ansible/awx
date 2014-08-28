@@ -1,6 +1,11 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+   /**
+ * @ngdoc function
+ * @name helpers.function:refresh-related
+ * @description
+ * discussion
  *  RefreshRelatedHelper
  *
  *  Used to refresh a related set whenever pagination or filter options change.

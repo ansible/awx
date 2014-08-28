@@ -1,8 +1,14 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
- * Dashboard.js
- *
+ */
+    /**
+ * @ngdoc overview
+ * @name widgets
+ * @description Various widgets, including widgets on the dashboard
+    /**
+ * @ngdoc function
+ * @name widgets.function:DashboardCounts
+ * @description
  * The dashboard widget with stats across the top
  *
  */

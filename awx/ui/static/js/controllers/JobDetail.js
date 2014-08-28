@@ -4,7 +4,11 @@
  *  JobDetail.js
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:JobDetail
+ * @description This controller's for the Job Detail Page
+*/
 'use strict';
 
 function JobDetailController ($location, $rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,

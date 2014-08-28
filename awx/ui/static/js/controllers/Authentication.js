@@ -7,7 +7,11 @@
  *  Controller functions for user authentication.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:Authentication
+ * @description This controller's for authenticating users
+*/
 'use strict';
 
 function Authenticate($log, $cookieStore, $compile, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,

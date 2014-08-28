@@ -1,6 +1,10 @@
 /**************************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:Timer
+ *  @description
  *  Timer.js
  *
  *  Use to track user idle time and expire session. Timeout
@@ -8,7 +12,12 @@
  *
  */
 'use strict';
-
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Timer#TimerService
+ * @methodOf lib.ansible.function:Timer
+ * @description
+ */
 angular.module('TimerService', ['ngCookies', 'Utilities'])
     .factory('Timer', ['$rootScope', '$cookieStore', '$location', 'GetBasePath', 'Empty',
         function ($rootScope, $cookieStore) {

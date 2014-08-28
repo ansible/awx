@@ -1,7 +1,11 @@
 /************************************
  *
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:inventoryTree
+ *  @description
  *  InventoryTree.js
  *
  *  Build data for the tree selector table used on inventory detail page.

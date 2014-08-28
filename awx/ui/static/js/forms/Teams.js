@@ -6,6 +6,11 @@
  *  Form definition for Team model
  *
  */
+  /**
+ * @ngdoc function
+ * @name forms.function:Teams
+ * @description This form is for adding/editing teams
+*/
 angular.module('TeamFormDefinition', [])
     .value('TeamForm', {
 

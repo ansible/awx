@@ -6,6 +6,11 @@
  *
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:Organizations
+ * @description This form is for adding/editing an organization
+*/
 angular.module('OrganizationFormDefinition', [])
     .value('OrganizationForm', {
 
@@ -46,7 +51,7 @@ angular.module('OrganizationFormDefinition', [])
             }
         },
 
-        buttons: { //for now always generates <button> tags 
+        buttons: { //for now always generates <button> tags
             save: {
                 ngClick: 'formSave()', //$scope.function to call on click, optional
                 ngDisabled: true //Disable when $pristine or $invalid, optional

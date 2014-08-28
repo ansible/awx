@@ -6,12 +6,17 @@
  *  Form definition for LogViewer.js helper
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:LogViewerOptions
+ * @description This form is for the page to view logs
+*/
 angular.module('LogViewerOptionsDefinition', [])
     .value('LogViewerOptionsForm', {
 
         name: 'status',
         well: false,
-        
+
         fields: {
             "job_template": {
                 label: "Job Template",

@@ -4,6 +4,11 @@
  *  JobEventsForm.js
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:EventsViewer
+ * @description This form is for events on the job detail page
+*/
 angular.module('EventsViewerFormDefinition', [])
     .value('EventsViewerForm', {
 

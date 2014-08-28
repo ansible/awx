@@ -1,13 +1,22 @@
 /************************************
  * Copyright (c) 2014 AnsibleWorks, Inc.
  *
+ */
+ /**
+ * @ngdoc overview
+ * @name controllers
+ * @description These are all the controllers that are used throughout the application
  *
+*/
+/**
+ * @ngdoc function
+ * @name controllers.function:Admins
+ * @description This controller's for administrators
  *  Admins.js
  *
  *  Controller functions for ading Admins to an Organization.
  *
- */
-
+*/
 'use strict';
 
 function AdminsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, AdminList, GenerateList, LoadBreadCrumbs,

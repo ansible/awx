@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+    /**
+ * @ngdoc function
+ * @name widgets.function:InventorySyncStatus
+ * @description
  * InventorySyncStatus.js
  *
  * Dashboard widget showing object counts and license availability.

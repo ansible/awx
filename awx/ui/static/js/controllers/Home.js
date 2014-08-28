@@ -8,8 +8,23 @@
  *
  */
 
+
+/**
+ * @ngdoc function
+ * @name controllers.function:Home
+ * @description This controller's for the dashboard
+*/
 'use strict';
 
+/**
+ * @ngdoc method
+ * @name controllers.function:Home#Home
+ * @methodOf controllers.function:Home
+ * @description this function loads all the widgets on the dashboard.
+ *  dashboardReady (emit) - this is called when the preliminary parts of the dashboard have been loaded, and loads each of the widgets. Note that the
+ *                  Host count graph should only be loaded if the user is a super user
+ *
+*/
 function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, DashboardCounts, HostGraph, JobStatusGraph, HostPieChart, DashboardJobs,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button){
 
@@ -76,6 +91,8 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             Wait('stop');
         }
     });
+
+
 
     if ($scope.removeDashboardReady) {
         $scope.removeDashboardReady();
@@ -162,6 +179,13 @@ Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location',
 ];
 
 
+/**
+ * @ngdoc method
+ * @name controllers.function:Home#HomeGroups
+ * @methodOf controllers.function:Home
+ * @description This controls the 'home/groups' page that is loaded from the dashboard
+ *
+*/
 function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
     Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store, Socket) {
@@ -594,7 +618,13 @@ HomeGroups.$inject = ['$log', '$scope', '$filter', '$compile', '$location', '$ro
     'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store', 'Socket'
 ];
 
-
+/**
+ * @ngdoc method
+ * @name controllers.function:Home#HomeHosts
+ * @methodOf controllers.function:Home
+ * @description This loads the page for 'home/hosts'
+ *
+*/
 function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Stream, Find, ShowJobSummary, ViewJob) {
 

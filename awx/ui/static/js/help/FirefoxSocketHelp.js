@@ -6,7 +6,11 @@
  *  Help object for socket connection troubleshooting
  *
  */
-
+ /**
+ * @ngdoc function
+ * @name help.function:FirefoxSocketHelp
+ * @description This help modal gives instructions on what the user should do if not connected to the web sockets while using Firefox.
+*/
 'use strict';
 
 angular.module('FFSocketHelpDefinition', [])

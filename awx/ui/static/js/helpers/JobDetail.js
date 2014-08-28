@@ -6,8 +6,10 @@
  *  Helper moduler for JobDetails controller
  *
  */
-
-/*
+   /**
+ * @ngdoc function
+ * @name helpers.function:JobDetail
+ * @description    helper moduler for jobdetails controller
     # Playbook events will be structured to form the following hierarchy:
     # - playbook_on_start (once for each playbook file)
     #   - playbook_on_vars_prompt (for each play, but before play starts, we

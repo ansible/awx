@@ -2,7 +2,11 @@
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  *  ParseHelper
- *
+ */
+    /**
+ * @ngdoc function
+ * @name helpers.function:Parse
+ * @description
  *  Show the CodeMirror variable editor and allow
  *  toggle between JSON and YAML
  *

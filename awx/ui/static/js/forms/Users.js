@@ -6,6 +6,11 @@
  *
  *
  */
+  /**
+ * @ngdoc function
+ * @name forms.function:Users
+ * @description This form is for adding/editing users
+*/
 angular.module('UserFormDefinition', [])
     .value('UserForm', {
 

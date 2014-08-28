@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+    /**
+ * @ngdoc function
+ * @name helpers.function:search
+ * @description
  *  SearchHelper
  *
  *  All the parts for controlling the search widget on

@@ -7,6 +7,11 @@
  *
  *
  */
+  /**
+ * @ngdoc function
+ * @name forms.function:Projects
+ * @description This form is for adding/editing projects
+*/
 angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
     .value('ProjectsFormObject', {
 

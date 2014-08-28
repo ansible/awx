@@ -1,12 +1,21 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- * Dashboard.js
+ * aboutansible.js
  *
- * The new dashboard
+ * The new about menu
  *
  */
-
+  /**
+ * @ngdoc overview
+ * @name helpers
+ * @description These are helpers...figure it out :)
+*/
+ /**
+ * @ngdoc function
+ * @name helpers.function:AboutAnsible
+ * @description This is the code for the About Ansible modal window that pops up with cowsay giving company/tower info and copyright information.
+*/
 'use strict';
 
 angular.module('AboutAnsibleHelpModal', ['RestServices', 'Utilities','ModalDialog'])

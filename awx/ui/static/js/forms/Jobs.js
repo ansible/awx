@@ -6,6 +6,11 @@
  *
  *  @dict
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:Jobs
+ * @description This form is for adding/editing a Job
+*/
 angular.module('JobFormDefinition', [])
     .value('JobForm', {
 
@@ -18,7 +23,7 @@ angular.module('JobFormDefinition', [])
         collapseMode: 'edit',
         collapseTitle: 'Job Status',
         collapseOpenFirst: true,   //Always open first panel
-        
+
         navigationLinks: {
             details: {
                 href: "/#/jobs/{{ job_id }}",
@@ -105,7 +110,7 @@ angular.module('JobFormDefinition', [])
                 iterator: 'job',
                 index: false,
                 open: false,
-                
+
                 fields: { }
             }
         }

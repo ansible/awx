@@ -6,6 +6,11 @@
  *
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:Inventories
+ * @description This form is for adding/editing an inventory
+*/
 angular.module('InventoryFormDefinition', [])
     .value('InventoryForm', {
 

@@ -1,7 +1,11 @@
 /************************************
  *
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:Modal
+ *  @description
  *  Modal.js
  *
  *  Create a draggable, resizable modal dialog using jQueryUI.
@@ -14,7 +18,10 @@
 angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
 
     /**
-     *
+     * @ngdoc method
+     * @name lib.ansible.function:Modal#CreateDialog
+     * @methodOf lib.ansible.function:Modal
+     * @description
      * CreateDialog({
      *     id:          - id attribute value of the target DOM element
      *     scope:       - Required, $scope associated with the #id DOM element

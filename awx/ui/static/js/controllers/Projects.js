@@ -7,7 +7,11 @@
  *  Controller functions for the Projects model.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:Projects
+ * @description This controller's for the projects page
+*/
 'use strict';
 
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs,

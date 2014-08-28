@@ -1,11 +1,20 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:RestServices
+ *  @description
  * Generic accessor for Ansible Commander services
  *
  */
 'use strict';
-
+/**
+* @ngdoc method
+* @name lib.ansible.function:RestServices#Rest
+* @methodOf lib.ansible.function:RestServices
+* @description discuss reason to use this over built in functions with angular/jquery
+*/
 angular.module('RestServices', ['ngCookies', 'AuthService'])
     .factory('Rest', ['$http', '$rootScope', '$cookieStore', '$q', 'Authorization',
         function ($http, $rootScope, $cookieStore, $q, Authorization) {

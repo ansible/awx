@@ -3,14 +3,18 @@
  *
  *  EventsHelper
  *
- *  EventView - show the job_events form in a modal dialog
+ *
  *
  */
- 
+   /**
+ * @ngdoc function
+ * @name helpers.function:Events
+ * @description    EventView - show the job_events form in a modal dialog
+*/
 'use strict';
 
 angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefinition', 'JobEventsFormDefinition'])
-    
+
     .factory('EventView', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm',
         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'JobEventDataForm', 'Empty', 'JobEventsForm',
         function ($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,

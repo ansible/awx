@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+     /**
+ * @ngdoc function
+ * @name helpers.function:Variables
+ * @description
  *  VariablesHelper
  *
  *

@@ -7,6 +7,17 @@
  *
  */
 
+  /**
+ * @ngdoc overview
+ * @name help
+ * @description These are the modal windows that are shown to the user to give additional guidance on certain tasks that might not be straightforward.
+*/
+
+ /**
+ * @ngdoc function
+ * @name help.function:ChromeSocketHelp
+ * @description This help modal gives instructions on what the user should do if not connected to the web sockets while using Chrome.
+*/
 'use strict';
 
 angular.module('ChromeSocketHelpDefinition', [])

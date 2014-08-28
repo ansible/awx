@@ -1,7 +1,11 @@
 /************************************
  *
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:Utilities
+ *  @description
  *  Utility functions
  *
  */
@@ -12,7 +16,11 @@
 
 angular.module('Utilities', ['RestServices', 'Utilities'])
 
-/*
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#ClearScope
+ * @methodOf lib.ansible.function:Utilities
+ * @description
  *  Place to remove things that might be lingering from a prior tab or view.
  *  This used to destroy the scope, but that causes issues in angular 1.2.x
  */
@@ -42,7 +50,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 }])
 
 
-/* Empty()
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#Empty
+ * @methodOf lib.ansible.function:Utilities
+ * @description Empty()
  *
  * Test if a value is 'empty'. Returns true if val is null | '' | undefined.
  * Only works on non-Ojbect types.
@@ -56,7 +68,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
-
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#ToggleClass
+ * @methodOf lib.ansible.function:Utilities
+ * @description
+ */
 .factory('ToggleClass', function () {
     return function (selector, cssClass) {
         // Toggles the existance of a css class on a given element
@@ -69,8 +86,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 })
 
 
-/*
- * Pass in the header and message you want displayed on TB modal dialog found in index.html.
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#Alert
+ * @methodOf lib.ansible.function:Utilities
+ * @description Pass in the header and message you want displayed on TB modal dialog found in index.html.
  * Assumes an #id of 'alert-modal'. Pass in an optional TB alert class (i.e. alert-danger, alert-success,
  * alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
  * clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
@@ -140,7 +160,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     };
 }])
 
-
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#ProcessErrors
+ * @methodOf lib.ansible.function:Utilities
+ * @description For handling errors that are returned from the API
+*/
 .factory('ProcessErrors', ['$rootScope', '$cookieStore', '$log', '$location', 'Alert', 'Wait',
     function ($rootScope, $cookieStore, $log, $location, Alert, Wait) {
         return function (scope, data, status, form, defaultMsg) {
@@ -314,11 +339,14 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
-
-/* Display a help dialog
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#HelpDialog
+ * @methodOf lib.ansible.function:Utilities
+ * @description Display a help dialog
  *
  * HelpDialog({ defn: <HelpDefinition> })
- *
+ * discuss difference b/t this and other modal windows/dialogs
  */
 .factory('HelpDialog', ['$rootScope', '$compile', '$location', 'Store',
     function ($rootScope, $compile, $location, Store) {
@@ -500,7 +528,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 ])
 
 
-/*
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#ReturnToCaller
+ * @methodOf lib.ansible.function:Utilities
+ * @description
  * Split the current path by '/' and use the array elements from 0 up to and
  * including idx as the new path.  If no idx value supplied, use 0 to length - 1.
  *
@@ -521,7 +553,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 ])
 
 
-/*
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#FormatDate
+ * @methodOf lib.ansible.function:Utilities
+ * @description
  * Wrapper for data filter- an attempt to insure all dates display in
  * the same format. Pass in date object or string. See: http://docs.angularjs.org/api/ng.filter:date
  */
@@ -533,7 +569,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
-/*
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#Wait
+ * @methodOf lib.ansible.function:Utilities
+ * @description
  * Display a spinning icon in the center of the screen to freeze the
  * UI while waiting on async things to complete (i.e. API calls).
  * Wait('start' | 'stop');
@@ -612,9 +652,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
-/*
- * Make an Options call to the API and retrieve dropdown options
- *
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#GetChoices
+ * @methodOf lib.ansible.function:Utilities
+ * @description Make an Options call to the API and retrieve dropdown options
  * GetChoices({
  *     scope:       Parent $scope
  *     url:         API resource to access
@@ -665,7 +707,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
-/*
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#Find
+ * @methodOf lib.ansible.function:Utilities
+ * @description
  * Search an array of objects, returning the matchting object or null
  *
  *  Find({ list: [], key: "key", val: <key value> });
@@ -692,7 +738,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
-/*
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#DebugForm
+ * @methodOf lib.ansible.function:Utilities
+ * @description
  * DebugForm({ form: <form object>, scope: <current scope object> });
  *
  * Use to log the $pristine and $valid properties of each form element. Helpful when form
@@ -723,7 +773,11 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 ])
 
 
-/* Store
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#Store
+ * @methodOf lib.ansible.function:Utilities
+ * @description Store
  *
  * Wrapper for local storage. All local storage requests flow through here so that we can
  * stringify/unstringify objects and respond to future issues in one place. For example,
@@ -733,7 +787,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  * store(key,value) will store the value using the key
  *
  * store(key) retrieves the value of the key
- *
+ * discuss use case
  */
 .factory('Store', ['Empty',
     function (Empty) {
@@ -750,10 +804,13 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
-/*
- *
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Utilities#ApplyEllipsis
+ * @methodOf lib.ansible.function:Utilities
+ * @description
  * ApplyEllipsis()
- *
+ * discuss significance
  */
 .factory('ApplyEllipsis', [
     function () {

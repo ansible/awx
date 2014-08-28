@@ -4,7 +4,11 @@
  *  PaginationHelpers.js
  *
  */
-
+   /**
+ * @ngdoc function
+ * @name helpers.function:PaginationHelpers
+ * @description  pagination
+*/
 'use strict';
 
 angular.module('PaginationHelpers', ['Utilities', 'RefreshHelper', 'RefreshRelatedHelper'])

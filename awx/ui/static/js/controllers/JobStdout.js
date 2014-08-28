@@ -4,7 +4,11 @@
  *  JobStdout.js
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:JobStdout
+ * @description This controller's for the standard out page that can be displayed when a job runs
+*/
 'use strict';
 
 function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, Socket) {

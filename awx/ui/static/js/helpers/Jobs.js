@@ -6,7 +6,11 @@
  *  Routines shared by job related controllers
  *
  */
-
+   /**
+ * @ngdoc function
+ * @name helpers.function:Jobs
+ * @description    routines shared by job related controllers
+*/
 'use strict';
 
 angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers',

@@ -3,9 +3,14 @@
  *
  *  md5helper
  *
- *  Run md5Setup({ scope: , master:, check_field:, default_val: }) 
+ */
+    /**
+ * @ngdoc function
+ * @name helpers.function:md5
+ * @description
+ *  Run md5Setup({ scope: , master:, check_field:, default_val: })
  *  to initialize md5 fields (checkbox and text field).
- *
+ * discussion
  */
 
 'use strict';
@@ -13,7 +18,7 @@
 angular.module('md5Helper', ['RestServices', 'Utilities', 'angular-md5'])
     .factory('md5Setup', ['md5', function (md5) {
         return function (params) {
-          
+
             var scope = params.scope,
                 master = params.master,
                 check_field = params.check_field,

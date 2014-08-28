@@ -21,7 +21,11 @@
 **    with this program; if not, write to the Free Software Foundation, Inc.,
 **    59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 **
-**
+**/
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:pwdmeter
+ *  @description
 **    CLH 09/05/13 - Set required strength in config.js
 **        02/10/14 - Applied jsHint
 */

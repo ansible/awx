@@ -6,12 +6,17 @@
  *  Form definition for LogViewer.js helper
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:LogViewerStatus
+ * @description Form definition for LogViewer.js helper
+*/
 angular.module('LogViewerStatusDefinition', [])
     .value('LogViewerStatusForm', {
 
         name: 'status',
         well: false,
-        
+
         fields: {
             "name": {
                 label: "Name",
@@ -51,5 +56,5 @@ angular.module('LogViewerStatusDefinition', [])
                 readonly: true
             }
         }
-        
+
     });

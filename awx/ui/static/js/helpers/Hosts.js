@@ -8,6 +8,11 @@
  */
 
 /* jshint loopfunc: true */
+   /**
+ * @ngdoc function
+ * @name helpers.function:Hosts
+ * @description    Routines that handle host add/edit/delete on the Inventory detail page.
+*/
 
 'use strict';
 

@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+    /**
+ * @ngdoc function
+ * @name helpers.function:SocketHelper
+ * @description
  *  SocketHelper.js
  *
  *  Show web socket troubleshooting help

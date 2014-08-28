@@ -5,7 +5,12 @@
 *  SocketsController- simple test of socket connection
 *
 */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:Sockets
+ * @description This controller's for controlling websockets
+ * discuss
+*/
 'use strict';
 
 function SocketsController ($scope, $compile, ClearScope, Socket) {

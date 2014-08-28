@@ -4,10 +4,14 @@
  *
  *  helpers/License.js
  *
- *  Routines for checking and reporting license status
+ *
  *
  */
-
+   /**
+ * @ngdoc function
+ * @name helpers.function:License
+ * @description    Routines for checking and reporting license status
+*/
 'use strict';
 
 angular.module('LicenseHelper', ['RestServices', 'Utilities', 'LicenseUpdateFormDefinition', 'FormGenerator', 'ParseHelper', 'ModalDialog', 'VariablesHelper', 'LicenseFormDefinition', 'AccessHelper'])

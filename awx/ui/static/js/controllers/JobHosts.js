@@ -7,20 +7,24 @@
  *  Controller functions for the Job Hosts Summary model.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:JobHosts
+ * @description This controller's for the job hosts page
+*/
 'use strict';
 
 function JobHostSummaryList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobHostList, GenerateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Refresh,
     JobStatusToolTip) {
-    
+
     ClearScope();
-    
+
     var list = JobHostList,
         defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_host_summaries/',
         view = GenerateList,
         inventory;
-        
+
     $scope.job_id = $routeParams.id;
     $scope.host_id = null;
 
@@ -56,7 +60,7 @@ function JobHostSummaryList($scope, $rootScope, $location, $log, $routeParams, R
     }
     $scope.removeJobReady = $scope.$on('JobReady', function() {
         view.inject(list, { mode: 'edit', scope: $scope });
-        
+
         SearchInit({
             scope: $scope,
             set: 'jobhosts',

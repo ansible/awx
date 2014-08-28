@@ -3,12 +3,14 @@
  *
  *  ChildrenHelper
  *
- *  Used in job_events to expand/collapse children by setting the
+ */
+ /**
+ * @ngdoc function
+ * @name helpers.function:Children
+ * @descriptionUsed in job_events to expand/collapse children by setting the
  *  'show' attribute of each job_event in the set of job_events.
  *  See the filter in job_events.js list.
- *
- */
-
+*/
 'use strict';
 
 angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
@@ -93,7 +95,7 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
                 }
                 return true;
             });
-            
+
             // Expand or collapse children based on clicked element's icon
             if (/plus-square-o/.test(set[clicked].ngicon)) {
                 // Expand: lookup and display children

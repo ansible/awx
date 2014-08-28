@@ -4,7 +4,11 @@
  *  JobSubmission.js
  *
  */
-
+   /**
+ * @ngdoc function
+ * @name helpers.function:JobSubmission
+ * @description
+*/
 'use strict';
 
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',

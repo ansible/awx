@@ -7,7 +7,11 @@
  *  To get the JobTemplateForm object: JobTemplateForm();
  *
  */
-
+/**
+ * @ngdoc function
+ * @name forms.function:JobTemplate
+ * @description This form is for adding/editing a Job Template
+*/
 'use strict';
 
 angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'CompletedJobsDefinition'])

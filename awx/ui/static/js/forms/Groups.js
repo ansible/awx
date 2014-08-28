@@ -6,6 +6,11 @@
  *
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:Groups
+ * @description This form is for adding/editing a Group on the inventory page
+*/
 angular.module('GroupFormDefinition', [])
     .value('GroupForm', {
 
@@ -15,7 +20,7 @@ angular.module('GroupFormDefinition', [])
         cancelButton: false,
         name: 'group',
         well: false,
-        
+
         fields: {
             name: {
                 label: 'Name',

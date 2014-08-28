@@ -2,7 +2,11 @@
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  *  Permissions.js
- *
+ */
+    /**
+ * @ngdoc function
+ * @name helpers.function:Permissions
+ * @description
  *  Functions shared amongst Permission related controllers
  *
  */

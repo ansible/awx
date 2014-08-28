@@ -6,7 +6,11 @@
  *  Controller functions for User model.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:Users
+ * @description This controller's the Users page
+*/
 'use strict';
 
 function UsersList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, UserList, GenerateList, LoadBreadCrumbs,

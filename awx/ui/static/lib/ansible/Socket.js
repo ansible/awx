@@ -1,6 +1,10 @@
 /**************************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:Socket
+ *  @description
  *  Socket.js
  *
  *  Wrapper for lib/socket.io-client/dist/socket.io.js.
@@ -9,7 +13,12 @@
 /* global io */
 
 'use strict';
-
+/**
+ * @ngdoc method
+ * @name lib.ansible.function:Socket#SocketIO
+ * @methodOf lib.ansible.function:Socket
+ * @description
+ */
 angular.module('SocketIO', ['AuthService', 'Utilities'])
 
     .factory('Socket', ['$rootScope', '$location', '$log', 'Authorization', 'Store', function ($rootScope, $location, $log, Authorization, Store) {

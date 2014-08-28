@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+    /**
+ * @ngdoc function
+ * @name widgets.function:SCMSyncStatus
+ * @description
  * SCMSyncStatus.js
  *
  * Dashboard widget showing object counts and license availability.

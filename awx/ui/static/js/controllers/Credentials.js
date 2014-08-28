@@ -6,7 +6,11 @@
  *  Controller functions for the Credential model.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:Credentials
+ * @description This controller's for the credentials page
+*/
 'use strict';
 
 function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,

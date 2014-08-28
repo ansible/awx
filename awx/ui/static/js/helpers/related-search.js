@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+    /**
+ * @ngdoc function
+ * @name helpers.function:related-search
+ * @description
  *  RelatedSearchHelper
  *
  *  All the parts for controlling the search widget on
@@ -41,7 +45,7 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                                     break;
                                 }
                             }
-                            
+
                             if (Empty(scope[iterator + 'SearchField'])) {
                                 // A field marked as key may not be 'searchable'. Find the first searchable field.
                                 for (fld in form.related[set].fields) {
@@ -84,7 +88,7 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
 
                 // Functions to handle search widget changes
                 scope.setSearchField = function (iterator, fld, label) {
-                    
+
                     var f, related;
 
                     for (related in form.related) {
@@ -111,7 +115,7 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                     }
 
                     if (f.searchType !== undefined && f.searchType === 'int') {
-                        //scope[iterator + 'HideSearchType'] = true;   
+                        //scope[iterator + 'HideSearchType'] = true;
                         scope[iterator + 'SearchType'] = 'int';
                     }
 
@@ -223,7 +227,7 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                     });
 
                     // Toggle the icon for the clicked column
-                    // and set the sort direction  
+                    // and set the sort direction
                     icon = $('#' + iterator + '-' + fld + '-header i');
                     direction = '';
                     if (icon.hasClass('fa-sort')) {

@@ -2,7 +2,11 @@
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  *  ProjectPathHelper
- *
+ */
+    /**
+ * @ngdoc function
+ * @name helpers.function:ProjectPath
+ * @description
  *  Use GetProjectPath({ scope: <scope>, master: <master obj> }) to
  *  load scope.project_local_paths (array of options for drop-down) and
  *  scope.base_dir (readonly field).
@@ -47,7 +51,7 @@ angular.module('ProjectPathHelper', ['RestServices', 'Utilities'])
                             });
                         }
                         if (scope.local_path) {
-                            // List only includes paths not assigned to projects, so add the 
+                            // List only includes paths not assigned to projects, so add the
                             // path assigned to the current project.
                             opts.push({
                                 label: scope.local_path,

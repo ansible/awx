@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+/**
+ * @ngdoc function
+ * @name helpers.function:teams
+ * @description
  *  TeamHelper
  *  Routines shared amongst the team controllers
  */
@@ -39,7 +43,7 @@ angular.module('TeamHelper', ['RestServices', 'Utilities', 'OrganizationListDefi
 
                 scope.$on('TeamRefreshFinished', function (e, results) {
                     // Loop through the result set (sent to us by the search helper) and
-                    // lookup the id and name of each organization. After each lookup 
+                    // lookup the id and name of each organization. After each lookup
                     // completes, call resultFound.
 
                     var i, lookup_results = [], url;

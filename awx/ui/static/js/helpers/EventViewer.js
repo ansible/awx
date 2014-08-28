@@ -4,7 +4,11 @@
  *  EventsViewer.js
  *
  */
-
+   /**
+ * @ngdoc function
+ * @name helpers.function:EventViewer
+ * @description eventviewerhelper
+*/
 'use strict';
 
 angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFormDefinition', 'HostsHelper'])

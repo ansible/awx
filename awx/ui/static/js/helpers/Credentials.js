@@ -3,10 +3,13 @@
  *
  *  Credentials.js
  *
- *  Functions shared amongst Credential related controllers
  *
  */
-
+  /**
+ * @ngdoc function
+ * @name helpers.function:Credentials
+ * @description   Functions shared amongst Credential related controllers
+*/
 'use strict';
 
 angular.module('CredentialsHelper', ['Utilities'])

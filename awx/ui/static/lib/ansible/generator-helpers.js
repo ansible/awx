@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:generator-helpers
+ *  @description
  * GeneratorHelpers
  *
  * Functions shared between FormGenerator and ListGenerator

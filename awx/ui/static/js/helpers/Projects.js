@@ -2,7 +2,11 @@
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  *  ProjectsHelper
- *
+ */
+   /**
+ * @ngdoc function
+ * @name helpers.function:Projects
+ * @description
  *  Use GetProjectPath({ scope: <scope>, master: <master obj> }) to
  *  load scope.project_local_paths (array of options for drop-down) and
  *  scope.base_dir (readonly field).

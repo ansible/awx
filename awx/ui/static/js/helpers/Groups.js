@@ -6,7 +6,11 @@
  *  Routines that handle group add/edit/delete on the Inventory tree widget.
  *
  */
-
+   /**
+ * @ngdoc function
+ * @name helpers.function:Groups
+ * @description    inventory tree widget add/edit/delete
+*/
 'use strict';
 
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition', 'SearchHelper',

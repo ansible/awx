@@ -7,7 +7,11 @@
  *  Controller functions for the Team model.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:Teams
+ * @description This controller's for teams
+*/
 'use strict';
 
 function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, TeamList, GenerateList, LoadBreadCrumbs,

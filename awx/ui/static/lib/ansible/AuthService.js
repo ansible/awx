@@ -1,7 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
- *  AuthService.js
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:AuthService
+ *  @description  AuthService.js
  *
  *  User authentication functions
  *

@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:form-generator
+ *  @description
  * FormGenerator
  *
  * Pass in a form definition and get back an html template. Use the.inject() method

@@ -2,7 +2,17 @@
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  *
- *  Read /api and /api/X to discover all the base paths needed
+ */
+ /**
+ *  @ngdoc overview
+ *  @name lib.ansible
+ *  @description lib files
+ *
+ */
+ /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:api-loader
+ *  @description Read /api and /api/X to discover all the base paths needed
  *  to access the primary model objects.
  *
  */

@@ -7,7 +7,11 @@
  *  Controller functions for Permissions model.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:Permissions
+ * @description This controller's for permissions
+*/
 'use strict';
 
 function PermissionsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, PermissionList,

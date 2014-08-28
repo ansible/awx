@@ -7,7 +7,11 @@
  *  Controller functions for the Inventory model.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:Jobs
+ * @description This controller's for the jobs page
+*/
 'use strict';
 
 function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope,

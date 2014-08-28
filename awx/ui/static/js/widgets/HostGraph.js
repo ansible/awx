@@ -1,11 +1,13 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
- * Dashboard.js
- *
- * The new dashboard
+ */
+    /**
+ * @ngdoc function
+ * @name widgets.function:HostGraph
+ * @description
  *
  */
+
 
 'use strict';
 

@@ -6,6 +6,11 @@
  *
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:Hosts
+ * @description This form is for adding/editing a host on the inventory page
+*/
 angular.module('HostFormDefinition', [])
     .value('HostForm', {
 
@@ -77,7 +82,7 @@ angular.module('HostFormDefinition', [])
             }
         },
 
-        buttons: { //for now always generates <button> tags 
+        buttons: { //for now always generates <button> tags
            /*
             save: {
                 ngClick: 'formSave()', //$scope.function to call on click, optional

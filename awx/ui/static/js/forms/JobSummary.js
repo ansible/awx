@@ -6,13 +6,19 @@
  *  Display job status info in a dialog
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:JobSummary
+ * @description Display job status info in a dialog
+*/
+
 angular.module('JobSummaryDefinition', [])
     .value('JobSummary', {
-        
+
         editTitle: '{{ id }} - {{ name }}',
         name: 'jobs',
         well: false,
-        
+
         fields: {
             status: {
                 //label: 'Job Status',

@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+    /**
+ * @ngdoc function
+ * @name widgets.function:HostPieChart
+ * @description
  * HostPieChart.js
  *
  * file for the host status pie chart

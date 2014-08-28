@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+     /**
+ * @ngdoc function
+ * @name helpers.function:Users
+ * @description
  *  UserHelper
  *  Routines shared amongst the user controllers
  *
@@ -12,7 +16,7 @@ angular.module('UserHelper', ['UserFormDefinition'])
     .factory('ResetForm', ['UserForm',
         function (UserForm) {
             return function () {
-                // Restore form to default conditions.  Run before applying LDAP configuration. 
+                // Restore form to default conditions.  Run before applying LDAP configuration.
                 // LDAP may manage some or all of these fields in which case the user cannot
                 // make changes to their values in AWX.
 

@@ -7,7 +7,11 @@
  *  Controller functions for the Job Template model.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:JobTemplate
+ * @description This controller's for the Job Template page
+*/
 'use strict';
 
 function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobTemplateList,

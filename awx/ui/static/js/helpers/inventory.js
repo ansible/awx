@@ -1,13 +1,15 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  InventoryHelper
+ */
+   /**
+ * @ngdoc function
+ * @name helpers.function:Inventory
+ * @description   InventoryHelper
  *  Routines for building the tree. Everything related to the tree is here except
  *  for the menu piece. The routine for building the menu is in InventoriesEdit controller
  *  (controllers/Inventories.js)
- *
- */
-
+*/
 'use strict';
 
 angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', 'ListGenerator', 'AuthService',

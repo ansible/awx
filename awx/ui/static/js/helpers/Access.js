@@ -6,6 +6,11 @@
  *  Routines for checking user access
  *
  */
+  /**
+ * @ngdoc function
+ * @name helpers.function:Access
+ * @description  routines checking user access
+*/
 
 'use strict';
 

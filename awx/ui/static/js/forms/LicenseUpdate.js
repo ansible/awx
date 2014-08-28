@@ -6,6 +6,11 @@
  *
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:LicenseUpdate
+ * @description This form is for updating a license
+*/
 angular.module('LicenseUpdateFormDefinition', [])
     .value('LicenseUpdateForm', {
 

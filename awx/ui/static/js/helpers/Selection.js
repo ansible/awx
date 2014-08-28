@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+    /**
+ * @ngdoc function
+ * @name helpers.function:Selection
+ * @description
  *  SelectionHelper
  *  Used in list controllers where the list might also be used as a selection list.
  *
@@ -80,9 +84,9 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
             // Add the selections
             scope.finishSelection = function () {
                 Rest.setUrl(target_url);
-                
+
                 var queue = [], j;
-                
+
                 scope.formModalActionDisabled = true;
                 scope.disableSelectBtn = true;
 

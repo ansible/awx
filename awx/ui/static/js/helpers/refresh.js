@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+    /**
+ * @ngdoc function
+ * @name helpers.function:refresh
+ * @description
  *  RefreshHelper
  *
  *  Used to refresh a related set whenever pagination or filter options change.

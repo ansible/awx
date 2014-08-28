@@ -7,15 +7,19 @@
  *  Controller functions for the Job Events model.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:JobEvent
+ * @description This controller's for the job event page
+*/
 'use strict';
 
 function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList, GenerateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
     FormatDate, EventView, Refresh, Wait) {
-    
+
     ClearScope();
-    
+
     var list = JobEventList,
         defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_events/', //?parent__isnull=1';
         generator = GenerateList,
@@ -44,7 +48,7 @@ function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log, $rout
 
     function formatJSON(eventData) {
         //turn JSON event data into an html form
-        
+
         var i, n, rows, fld, txt,
             html = '',
             found = false;
@@ -125,9 +129,9 @@ function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log, $rout
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         // Initialize the parent levels
-        
+
         generator.inject(list, { mode: 'edit', scope: $scope });
-        
+
         var set = $scope[list.name], i;
         for (i = 0; i < set.length; i++) {
             set[i].event_display = set[i].event_display.replace(/^\u00a0*/g, '');
@@ -207,7 +211,7 @@ function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log, $rout
     });
 
     page = ($routeParams.page) ? parseInt($routeParams.page,10) - 1 : null;
-    
+
     PaginateInit({
         scope: $scope,
         list: list,
@@ -258,13 +262,13 @@ JobEventsList.$inject = ['$sce', '$filter', '$scope', '$rootScope', '$location',
 
 function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventsForm, GenerateForm,
     Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate, EventView, Wait) {
-    
+
     ClearScope();
 
     var form = JobEventsForm,
         generator = GenerateForm,
         defaultUrl = GetBasePath('base') + 'job_events/' + $routeParams.event_id + '/';
-    
+
     generator.inject(form, { mode: 'edit', related: true, scope: $scope});
     generator.reset();
 

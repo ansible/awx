@@ -7,6 +7,11 @@
  *
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:Permissions
+ * @description This form is for adding/editing persmissions
+*/
 angular.module('PermissionFormDefinition', [])
     .value('PermissionsForm', {
 

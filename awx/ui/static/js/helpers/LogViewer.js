@@ -4,7 +4,11 @@
  *  LogViewer.js
  *
  */
-
+   /**
+ * @ngdoc function
+ * @name helpers.function:LogViewer
+ * @description    logviewer
+*/
 'use strict';
 
 angular.module('LogViewerHelper', ['ModalDialog', 'Utilities', 'FormGenerator', 'VariablesHelper'])

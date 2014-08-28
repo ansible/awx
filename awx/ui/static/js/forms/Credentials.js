@@ -5,6 +5,11 @@
  *  Form definition for Credential model
  *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:Credentials
+ * @description This form is for adding/editing a Credential
+*/
 angular.module('CredentialFormDefinition', [])
     .value('CredentialForm', {
 

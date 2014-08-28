@@ -3,7 +3,12 @@
  *
  *  LookupHelper
  *  Build a lookup dialog
- *
+ */
+
+   /**
+ * @ngdoc function
+ * @name helpers.function:Lookup
+ * @description
  *  LookUpInit( {
  *      scope: <caller's scope>,
  *      form: <form object>,

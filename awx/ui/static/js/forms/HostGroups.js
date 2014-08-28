@@ -4,11 +4,16 @@
  *  HostGroups.js
  *  Form definition for Host model
  *
- *  
+ *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:HostGroups
+ * @description This form is for groups of hosts on the inventory page
+*/
 angular.module('HostGroupsFormDefinition', [])
     .value('HostGroupsForm', {
-        
+
         editTitle: 'Host Groups',
         name: 'host',
         well: false,
@@ -35,7 +40,7 @@ angular.module('HostGroupsFormDefinition', [])
             }
         },
 
-        buttons: { //for now always generates <button> tags 
+        buttons: { //for now always generates <button> tags
             save: {
                 ngClick: 'formSave()',
                 ngDisabled: true

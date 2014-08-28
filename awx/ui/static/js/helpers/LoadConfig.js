@@ -1,10 +1,14 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+    /**
+ * @ngdoc function
+ * @name helpers.function:LoadConfig
+ * @description   Attempts to load local_config.js. If not found, loads config.js. Then evaluates the loaded
+ *  javascript, putting the result in $AnsibleConfig.
  *  LoadConfigHelper
  *
- *  Attempts to load local_config.js. If not found, loads config.js. Then evaluates the loaded
- *  javascript, putting the result in $AnsibleConfig.
+ *
  *
  */
 

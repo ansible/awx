@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+  /**
+ *  @ngdoc function
+ *  @name lib.ansible.function:list-generator
+ *  @description
  * ListGenerator
  * Pass in a list definition from ListDefinitions and out pops an html template.
  * Use inject method to generate the html and inject into the current view.

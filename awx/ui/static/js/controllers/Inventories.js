@@ -7,7 +7,11 @@
  *  Controller functions for the Inventory model.
  *
  */
-
+/**
+ * @ngdoc function
+ * @name controllers.function:Inventories
+ * @description This controller's for the Inventory page
+*/
 'use strict';
 
 function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $compile, $filter, Rest, Alert, InventoryList, GenerateList,

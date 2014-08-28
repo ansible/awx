@@ -4,11 +4,16 @@
  *  ProjectStatus.js
  *  Form definition for Project Status -JSON view
  *
- *  
+ *
  */
+  /**
+ * @ngdoc function
+ * @name forms.function:ProjectStatus
+ * @description This form is for adding/editing project status
+*/
 angular.module('ProjectStatusDefinition', [])
     .value('ProjectStatusForm', {
-    
+
         name: 'project_update',
         editTitle: 'SCM Status',
         well: false,

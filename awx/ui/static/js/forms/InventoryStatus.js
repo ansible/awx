@@ -4,11 +4,16 @@
  *  InventoryStatus.js
  *
  *  Use to show inventory sync status
- *  
+ *
  */
+ /**
+ * @ngdoc function
+ * @name forms.function:InventoryStatus
+ * @description This form is for adding/editing an InventoryStatus
+*/
 angular.module('InventoryStatusDefinition', [])
     .value('InventoryStatusForm', {
-    
+
         name: 'inventory_update',
         editTitle: 'Inventory Status',
         well: false,

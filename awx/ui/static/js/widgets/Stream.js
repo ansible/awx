@@ -1,6 +1,10 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
- *
+ */
+    /**
+ * @ngdoc function
+ * @name widgets.function:Stream
+ * @description
  *  Stream.js
  *
  *  Activity stream widget that can be called from anywhere
