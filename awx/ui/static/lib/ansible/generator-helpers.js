@@ -837,7 +837,7 @@ angular.module('GeneratorHelpers', [])
             html += "</div>\n";
             html += "<div class=\"col-lg-4 col-md-4\" ng-hide=\"" + iterator + "_mode == 'lookup'\">\n";
             html += "<div id=\"page-label-container\" class=\"page-label\">\n";
-            html += "Page {{ " + iterator + "_page }} of {{ " + iterator + "_num_pages }} ({{ " + iterator + "_total_rows | number:0 }} items)";
+            html += "Page <span id=\"current-page\">{{ " + iterator + "_page }}</span> of <span id=\"total-pages\">{{ " + iterator + "_num_pages }}</span> (<span id=\"total-items\">{{ " + iterator + "_total_rows | number:0 }}</span> items)";
             html += "</div>\n";
             html += "</div>\n";
             html += "</div>\n";

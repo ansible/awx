@@ -619,7 +619,7 @@ angular.module('Tower', [
             });
 
             if (!$AnsibleConfig) {
-                // there may be leg time loading the config file, so temporarily use what's in local storage
+                // there may be time lag when loading the config file, so temporarily use what's in local storage
                 $AnsibleConfig = Store('AnsibleConfig');
             }
 
