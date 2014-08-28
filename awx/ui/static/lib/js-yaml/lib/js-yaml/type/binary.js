@@ -6,10 +6,7 @@
 // A trick for browserified version.
 // Since we make browserifier to ignore `buffer` module, NodeBuffer will be undefined
 var NodeBuffer = require('buffer').Buffer;
-
 var Type       = require('../type');
-
-
 
 var BASE64_PADDING = '=';
 
@@ -27,41 +24,29 @@ var BASE64_BINTABLE = [
 var BASE64_CHARTABLE =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.split('');
 
-
-function resolveYamlBinary(state) {
-  var value, code, idx = 0, result = [], leftbits, leftdata,
-      object = state.result;
+function resolveYamlBinary(data) {
+  var code, idx = 0, len = data.length, leftbits;
 
   leftbits = 0; // number of bits decoded, but yet to be appended
-  leftdata = 0; // bits decoded, but yet to be appended
 
   // Convert one by one.
-  for (idx = 0; idx < object.length; idx += 1) {
-    code = object.charCodeAt(idx);
-    value = BASE64_BINTABLE[code & 0x7F];
+  for (idx = 0; idx < len; idx += 1) {
+    code = data.charCodeAt(idx);
 
     // Skip LF(NL) || CR
-    if (0x0A !== code && 0x0D !== code) {
-      // Fail on illegal characters
-      if (-1 === value) {
-        return false;
-      }
+    if (0x0A === code || 0x0D === code) { continue; }
 
-      // Collect data into leftdata, update bitcount
-      leftdata = (leftdata << 6) | value;
-      leftbits += 6;
+    // Fail on illegal characters
+    if (-1 === BASE64_BINTABLE[code & 0x7F]) {
+      return false;
+    }
 
-      // If we have 8 or more bits, append 8 bits to the result
-      if (leftbits >= 8) {
-        leftbits -= 8;
+    // update bitcount
+    leftbits += 6;
 
-        // Append if not padding.
-        if (BASE64_PADDING !== object.charAt(idx)) {
-          result.push((leftdata >> leftbits) & 0xFF);
-        }
-
-        leftdata &= (1 << leftbits) - 1;
-      }
+    // If we have 8 or more bits, append 8 bits to the result
+    if (leftbits >= 8) {
+      leftbits -= 8;
     }
   }
 
@@ -69,16 +54,48 @@ function resolveYamlBinary(state) {
   if (leftbits) {
     return false;
   } else {
-    // Wrap into Buffer for NodeJS and leave Array for browser
-    if (NodeBuffer) {
-      state.result = new NodeBuffer(result);
-    } else {
-      state.result = result;
-    }
     return true;
   }
 }
 
+function constructYamlBinary(data) {
+  var value, code, idx = 0, len = data.length, result = [], leftbits, leftdata;
+
+  leftbits = 0; // number of bits decoded, but yet to be appended
+  leftdata = 0; // bits decoded, but yet to be appended
+
+  // Convert one by one.
+  for (idx = 0; idx < len; idx += 1) {
+    code = data.charCodeAt(idx);
+    value = BASE64_BINTABLE[code & 0x7F];
+
+    // Skip LF(NL) || CR
+    if (0x0A === code || 0x0D === code) { continue; }
+
+    // Collect data into leftdata, update bitcount
+    leftdata = (leftdata << 6) | value;
+    leftbits += 6;
+
+    // If we have 8 or more bits, append 8 bits to the result
+    if (leftbits >= 8) {
+      leftbits -= 8;
+
+      // Append if not padding.
+      if (BASE64_PADDING !== data.charAt(idx)) {
+        result.push((leftdata >> leftbits) & 0xFF);
+      }
+
+      leftdata &= (1 << leftbits) - 1;
+    }
+  }
+
+  // Wrap into Buffer for NodeJS and leave Array for browser
+  if (NodeBuffer) {
+    return new NodeBuffer(result);
+  }
+
+  return result;
+}
 
 function representYamlBinary(object /*, style*/) {
   var result = '', index, length, rest;
@@ -111,15 +128,14 @@ function representYamlBinary(object /*, style*/) {
   return result;
 }
 
-
 function isBinary(object) {
   return NodeBuffer && NodeBuffer.isBuffer(object);
 }
 
-
 module.exports = new Type('tag:yaml.org,2002:binary', {
-  loadKind: 'scalar',
-  loadResolver: resolveYamlBinary,
-  dumpPredicate: isBinary,
-  dumpRepresenter: representYamlBinary
+  kind: 'scalar',
+  resolve: resolveYamlBinary,
+  construct: constructYamlBinary,
+  predicate: isBinary,
+  represent: representYamlBinary
 });

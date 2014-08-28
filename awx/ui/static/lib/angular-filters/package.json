@@ -1,0 +1,44 @@
+{
+  "author": {
+    "name": "Francesco Pontillo",
+    "email": "francescopontillo@gmail.com",
+    "url": "https://github.com/frapontillo"
+  },
+  "name": "angular-filters",
+  "description": "A collection of filters for AngularJS.",
+  "version": "1.1.0",
+  "homepage": "https://github.com/frapontillo/angular-filters",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/frapontillo/angular-filters.git"
+  },
+  "keywords": [
+    "angularjs",
+    "angular",
+    "filter"
+  ],
+  "bugs": {
+    "url": "https://github.com/frapontillo/angular-filters/issues"
+  },
+  "licenses": [
+    {
+      "type": "Apache License 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  ],
+  "readmeFilename": "README.md",
+  "engines": {
+    "node": ">= 0.10.15"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-karma": "~0.6.2",
+    "matchdep": "~0.3.0",
+    "grunt-ngmin": "0.0.3"
+  }
+}

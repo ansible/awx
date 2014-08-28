@@ -1,7 +1,8 @@
 JS-YAML - YAML 1.2 parser and serializer for JavaScript
 =======================================================
 
-[![Build Status](https://secure.travis-ci.org/nodeca/js-yaml.png)](http://travis-ci.org/nodeca/js-yaml)
+[![Build Status](https://travis-ci.org/nodeca/js-yaml.svg?branch=master)](https://travis-ci.org/nodeca/js-yaml)
+[![NPM version](https://img.shields.io/npm/v/js-yaml.svg)](https://www.npmjs.org/package/js-yaml)
 
 [Online Demo](http://nodeca.github.com/js-yaml/)
 
@@ -102,8 +103,8 @@ options:
 
 - `filename` _(default: null)_ - string to be used as a file path in
   error/warning messages.
-- `strict` _(default - false)_ makes the loader to throw errors instead of
-  warnings.
+- `onWarning` _(default: null)_ - function to call on warning messages.
+  Loader will throw on warnings if this function is not provided.
 - `schema` _(default: `DEFAULT_SAFE_SCHEMA`)_ - specifies a schema to use.
   - `FAILSAFE_SCHEMA` - only strings, arrays and plain objects:
     http://www.yaml.org/spec/1.2/spec.html#id2802346
@@ -264,7 +265,7 @@ So, the following YAML document cannot be loaded.
 ```
 
 
-Breaking changes in 2.x.x -> 3.0.x
+Breaking changes in 2.x.x -> 3.x.x
 ----------------------------------
 
 If your have not used __custom__ tags or loader classes and not loaded yaml

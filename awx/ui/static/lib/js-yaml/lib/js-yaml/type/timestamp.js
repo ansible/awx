@@ -1,8 +1,6 @@
 'use strict';
 
-
 var Type = require('../type');
-
 
 var YAML_TIMESTAMP_REGEXP = new RegExp(
   '^([0-9][0-9][0-9][0-9])'          + // [1] year
@@ -16,15 +14,27 @@ var YAML_TIMESTAMP_REGEXP = new RegExp(
   '(?:[ \\t]*(Z|([-+])([0-9][0-9]?)' + // [8] tz [9] tz_sign [10] tz_hour
   '(?::([0-9][0-9]))?))?)?$');         // [11] tz_minute
 
-
-function resolveYamlTimestamp(state) {
+function resolveYamlTimestamp(data) {
   var match, year, month, day, hour, minute, second, fraction = 0,
-      delta = null, tz_hour, tz_minute, data;
+      delta = null, tz_hour, tz_minute, date;
 
-  match = YAML_TIMESTAMP_REGEXP.exec(state.result);
+  match = YAML_TIMESTAMP_REGEXP.exec(data);
 
   if (null === match) {
     return false;
+  }
+
+  return true;
+}
+
+function constructYamlTimestamp(data) {
+  var match, year, month, day, hour, minute, second, fraction = 0,
+      delta = null, tz_hour, tz_minute, date;
+
+  match = YAML_TIMESTAMP_REGEXP.exec(data);
+
+  if (null === match) {
+    throw new Error('Date resolve error');
   }
 
   // match: [1] year [2] month [3] day
@@ -34,8 +44,7 @@ function resolveYamlTimestamp(state) {
   day = +(match[3]);
 
   if (!match[4]) { // no hour
-    state.result = new Date(Date.UTC(year, month, day));
-    return true;
+    return new Date(Date.UTC(year, month, day));
   }
 
   // match: [4] hour [5] minute [6] second [7] fraction
@@ -63,25 +72,23 @@ function resolveYamlTimestamp(state) {
     }
   }
 
-  data = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
+  date = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
 
   if (delta) {
-    data.setTime(data.getTime() - delta);
+    date.setTime(date.getTime() - delta);
   }
 
-  state.result = data;
-  return true;
+  return date;
 }
-
 
 function representYamlTimestamp(object /*, style*/) {
   return object.toISOString();
 }
 
-
 module.exports = new Type('tag:yaml.org,2002:timestamp', {
-  loadKind: 'scalar',
-  loadResolver: resolveYamlTimestamp,
-  dumpInstanceOf: Date,
-  dumpRepresenter: representYamlTimestamp
+  kind: 'scalar',
+  resolve: resolveYamlTimestamp,
+  construct: constructYamlTimestamp,
+  instanceOf: Date,
+  represent: representYamlTimestamp
 });

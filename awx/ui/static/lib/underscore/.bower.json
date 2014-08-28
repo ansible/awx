@@ -1,6 +1,6 @@
 {
   "name": "underscore",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "main": "underscore.js",
   "keywords": [
     "util",
@@ -10,24 +10,23 @@
     "browser"
   ],
   "ignore": [
-    "underscore-min.js",
     "docs",
     "test",
     "*.yml",
-    "*.map",
     "CNAME",
     "index.html",
     "favicon.ico",
     "CONTRIBUTING.md"
   ],
   "homepage": "https://github.com/jashkenas/underscore",
-  "_release": "1.6.0",
+  "_release": "1.7.0",
   "_resolution": {
     "type": "version",
-    "tag": "1.6.0",
-    "commit": "1f4bf626f23a99f7a676f5076dc1b1475554c8f7"
+    "tag": "1.7.0",
+    "commit": "da996e665deb0b69b257e80e3e257c04fde4191c"
   },
   "_source": "git://github.com/jashkenas/underscore.git",
-  "_target": "*",
-  "_originalSource": "underscore"
+  "_target": "~1.7.0",
+  "_originalSource": "underscore",
+  "_direct": true
 }

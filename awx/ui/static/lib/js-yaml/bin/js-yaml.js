@@ -46,9 +46,10 @@ cli.addArgument(['-t', '--trace'], {
   action: 'storeTrue'
 });
 
-
 cli.addArgument(['file'], {
-  help:   'File to read, utf-8 encoded without BOM'
+  help:   'File to read, utf-8 encoded without BOM',
+  nargs:  '?',
+  defaultValue: '-'
 });
 
 
@@ -60,8 +61,25 @@ var options = cli.parseArgs();
 
 ////////////////////////////////////////////////////////////////////////////////
 
+function readFile(filename, encoding, callback) {
+  if (options.file === '-') {
+    // read from stdin
 
-fs.readFile(options.file, 'utf8', function (error, input) {
+    var chunks = [];
+
+    process.stdin.on('data', function(chunk) {
+      chunks.push(chunk);
+    });
+
+    process.stdin.on('end', function() {
+      return callback(null, Buffer.concat(chunks).toString(encoding));
+    });
+  } else {
+    fs.readFile(filename, encoding, callback);
+  }
+}
+
+readFile(options.file, 'utf8', function (error, input) {
   var output, isYaml;
 
   if (error) {

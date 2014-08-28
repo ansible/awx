@@ -8,7 +8,7 @@ var yaml = require('../lib/js-yaml');
 
 
 try {
-  var filename = path.join(__dirname, 'sample_document.yaml'),
+  var filename = path.join(__dirname, 'sample_document.yml'),
       contents = fs.readFileSync(filename, 'utf8'),
       data     = yaml.load(contents);
 

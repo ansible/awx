@@ -1,26 +1,23 @@
 'use strict';
 
-
 var YAMLException = require('./exception');
 
-
 var TYPE_CONSTRUCTOR_OPTIONS = [
-  'loadKind',
-  'loadResolver',
-  'dumpInstanceOf',
-  'dumpPredicate',
-  'dumpRepresenter',
-  'dumpDefaultStyle',
-  'dumpStyleAliases'
+  'kind',
+  'resolve',
+  'construct',
+  'instanceOf',
+  'predicate',
+  'represent',
+  'defaultStyle',
+  'styleAliases'
 ];
-
 
 var YAML_NODE_KINDS = [
   'scalar',
   'sequence',
   'mapping'
 ];
-
 
 function compileStyleAliases(map) {
   var result = {};
@@ -36,7 +33,6 @@ function compileStyleAliases(map) {
   return result;
 }
 
-
 function Type(tag, options) {
   options = options || {};
 
@@ -47,19 +43,19 @@ function Type(tag, options) {
   });
 
   // TODO: Add tag format check.
-  this.tag              = tag;
-  this.loadKind         = options['loadKind']         || null;
-  this.loadResolver     = options['loadResolver']     || null;
-  this.dumpInstanceOf   = options['dumpInstanceOf']   || null;
-  this.dumpPredicate    = options['dumpPredicate']    || null;
-  this.dumpRepresenter  = options['dumpRepresenter']  || null;
-  this.dumpDefaultStyle = options['dumpDefaultStyle'] || null;
-  this.dumpStyleAliases = compileStyleAliases(options['dumpStyleAliases'] || null);
+  this.tag          = tag;
+  this.kind         = options['kind']         || null;
+  this.resolve      = options['resolve']      || function () { return true; };
+  this.construct    = options['construct']    || function (data) { return data; };
+  this.instanceOf   = options['instanceOf']   || null;
+  this.predicate    = options['predicate']    || null;
+  this.represent    = options['represent']    || null;
+  this.defaultStyle = options['defaultStyle'] || null;
+  this.styleAliases = compileStyleAliases(options['styleAliases'] || null);
 
-  if (-1 === YAML_NODE_KINDS.indexOf(this.loadKind)) {
-    throw new YAMLException('Unknown loadKind "' + this.loadKind + '" is specified for "' + tag + '" YAML type.');
+  if (-1 === YAML_NODE_KINDS.indexOf(this.kind)) {
+    throw new YAMLException('Unknown kind "' + this.kind + '" is specified for "' + tag + '" YAML type.');
   }
 }
-
 
 module.exports = Type;

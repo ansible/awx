@@ -22,85 +22,6 @@ var CHOMPING_STRIP = 2;
 var CHOMPING_KEEP  = 3;
 
 
-var CHAR_TAB                  = 0x09;   /* Tab */
-var CHAR_LINE_FEED            = 0x0A;   /* LF */
-var CHAR_CARRIAGE_RETURN      = 0x0D;   /* CR */
-var CHAR_SPACE                = 0x20;   /* Space */
-var CHAR_EXCLAMATION          = 0x21;   /* ! */
-var CHAR_DOUBLE_QUOTE         = 0x22;   /* " */
-var CHAR_SHARP                = 0x23;   /* # */
-var CHAR_PERCENT              = 0x25;   /* % */
-var CHAR_AMPERSAND            = 0x26;   /* & */
-var CHAR_SINGLE_QUOTE         = 0x27;   /* ' */
-var CHAR_ASTERISK             = 0x2A;   /* * */
-var CHAR_PLUS                 = 0x2B;   /* + */
-var CHAR_COMMA                = 0x2C;   /* , */
-var CHAR_MINUS                = 0x2D;   /* - */
-var CHAR_DOT                  = 0x2E;   /* . */
-var CHAR_SLASH                = 0x2F;   /* / */
-var CHAR_DIGIT_ZERO           = 0x30;   /* 0 */
-var CHAR_DIGIT_ONE            = 0x31;   /* 1 */
-var CHAR_DIGIT_NINE           = 0x39;   /* 9 */
-var CHAR_COLON                = 0x3A;   /* : */
-var CHAR_LESS_THAN            = 0x3C;   /* < */
-var CHAR_GREATER_THAN         = 0x3E;   /* > */
-var CHAR_QUESTION             = 0x3F;   /* ? */
-var CHAR_COMMERCIAL_AT        = 0x40;   /* @ */
-var CHAR_CAPITAL_A            = 0x41;   /* A */
-var CHAR_CAPITAL_F            = 0x46;   /* F */
-var CHAR_CAPITAL_L            = 0x4C;   /* L */
-var CHAR_CAPITAL_N            = 0x4E;   /* N */
-var CHAR_CAPITAL_P            = 0x50;   /* P */
-var CHAR_CAPITAL_U            = 0x55;   /* U */
-var CHAR_LEFT_SQUARE_BRACKET  = 0x5B;   /* [ */
-var CHAR_BACKSLASH            = 0x5C;   /* \ */
-var CHAR_RIGHT_SQUARE_BRACKET = 0x5D;   /* ] */
-var CHAR_UNDERSCORE           = 0x5F;   /* _ */
-var CHAR_GRAVE_ACCENT         = 0x60;   /* ` */
-var CHAR_SMALL_A              = 0x61;   /* a */
-var CHAR_SMALL_B              = 0x62;   /* b */
-var CHAR_SMALL_E              = 0x65;   /* e */
-var CHAR_SMALL_F              = 0x66;   /* f */
-var CHAR_SMALL_N              = 0x6E;   /* n */
-var CHAR_SMALL_R              = 0x72;   /* r */
-var CHAR_SMALL_T              = 0x74;   /* t */
-var CHAR_SMALL_U              = 0x75;   /* u */
-var CHAR_SMALL_V              = 0x76;   /* v */
-var CHAR_SMALL_X              = 0x78;   /* x */
-var CHAR_LEFT_CURLY_BRACKET   = 0x7B;   /* { */
-var CHAR_VERTICAL_LINE        = 0x7C;   /* | */
-var CHAR_RIGHT_CURLY_BRACKET  = 0x7D;   /* } */
-
-
-var SIMPLE_ESCAPE_SEQUENCES = {};
-
-SIMPLE_ESCAPE_SEQUENCES[CHAR_DIGIT_ZERO]   = '\x00';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_SMALL_A]      = '\x07';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_SMALL_B]      = '\x08';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_SMALL_T]      = '\x09';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_TAB]          = '\x09';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_SMALL_N]      = '\x0A';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_SMALL_V]      = '\x0B';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_SMALL_F]      = '\x0C';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_SMALL_R]      = '\x0D';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_SMALL_E]      = '\x1B';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_SPACE]        = ' ';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_DOUBLE_QUOTE] = '\x22';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_SLASH]        = '/';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_BACKSLASH]    = '\x5C';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_CAPITAL_N]    = '\x85';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_UNDERSCORE]   = '\xA0';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_CAPITAL_L]    = '\u2028';
-SIMPLE_ESCAPE_SEQUENCES[CHAR_CAPITAL_P]    = '\u2029';
-
-
-var HEXADECIMAL_ESCAPE_SEQUENCES = {};
-
-HEXADECIMAL_ESCAPE_SEQUENCES[CHAR_SMALL_X]   = 2;
-HEXADECIMAL_ESCAPE_SEQUENCES[CHAR_SMALL_U]   = 4;
-HEXADECIMAL_ESCAPE_SEQUENCES[CHAR_CAPITAL_U] = 8;
-
-
 var PATTERN_NON_PRINTABLE         = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x84\x86-\x9F\uD800-\uDFFF\uFFFE\uFFFF]/;
 var PATTERN_NON_ASCII_LINE_BREAKS = /[\x85\u2028\u2029]/;
 var PATTERN_FLOW_INDICATORS       = /[,\[\]\{\}]/;
@@ -108,23 +29,106 @@ var PATTERN_TAG_HANDLE            = /^(?:!|!!|![a-z\-]+!)$/i;
 var PATTERN_TAG_URI               = /^(?:!|[^,\[\]\{\}])(?:%[0-9a-f]{2}|[0-9a-z\-#;\/\?:@&=\+\$,_\.!~\*'\(\)\[\]])*$/i;
 
 
+function is_EOL(c) {
+  return (c === 0x0A/* LF */) || (c === 0x0D/* CR */);
+}
+
+function is_WHITE_SPACE(c) {
+  return (c === 0x09/* Tab */) || (c === 0x20/* Space */);
+}
+
+function is_WS_OR_EOL(c) {
+  return (c === 0x09/* Tab */) ||
+         (c === 0x20/* Space */) ||
+         (c === 0x0A/* LF */) ||
+         (c === 0x0D/* CR */);
+}
+
+function is_FLOW_INDICATOR(c) {
+  return 0x2C/* , */ === c ||
+         0x5B/* [ */ === c ||
+         0x5D/* ] */ === c ||
+         0x7B/* { */ === c ||
+         0x7D/* } */ === c;
+}
+
+function fromHexCode(c) {
+  var lc;
+
+  if ((0x30/* 0 */ <= c) && (c <= 0x39/* 9 */)) {
+    return c - 0x30;
+  }
+
+  lc = c | 0x20;
+  if ((0x61/* a */ <= lc) && (lc <= 0x66/* f */)) {
+    return lc - 0x61 + 10;
+  }
+
+  return -1;
+}
+
+function escapedHexLen(c) {
+  if (c === 0x78/* x */) { return 2; }
+  if (c === 0x75/* u */) { return 4; }
+  if (c === 0x55/* U */) { return 8; }
+  return 0;
+}
+
+function fromDecimalCode(c) {
+  if ((0x30/* 0 */ <= c) && (c <= 0x39/* 9 */)) {
+    return c - 0x30;
+  }
+
+  return -1;
+}
+
+function simpleEscapeSequence(c) {
+ return (c === 0x30/* 0 */) ? '\x00' :
+        (c === 0x61/* a */) ? '\x07' :
+        (c === 0x62/* b */) ? '\x08' :
+        (c === 0x74/* t */) ? '\x09' :
+        (c === 0x09/* Tab */) ? '\x09' :
+        (c === 0x6E/* n */) ? '\x0A' :
+        (c === 0x76/* v */) ? '\x0B' :
+        (c === 0x66/* f */) ? '\x0C' :
+        (c === 0x72/* r */) ? '\x0D' :
+        (c === 0x65/* e */) ? '\x1B' :
+        (c === 0x20/* Space */) ? ' ' :
+        (c === 0x22/* " */) ? '\x22' :
+        (c === 0x2F/* / */) ? '/' :
+        (c === 0x5C/* \ */) ? '\x5C' :
+        (c === 0x4E/* N */) ? '\x85' :
+        (c === 0x5F/* _ */) ? '\xA0' :
+        (c === 0x4C/* L */) ? '\u2028' :
+        (c === 0x50/* P */) ? '\u2029' : '';
+}
+
+var simpleEscapeCheck = new Array(256); // integer, for fast access
+var simpleEscapeMap = new Array(256);
+for (var i = 0; i < 256; i++) {
+  simpleEscapeCheck[i] = simpleEscapeSequence(i) ? 1 : 0;
+  simpleEscapeMap[i] = simpleEscapeSequence(i);
+}
+
+
 function State(input, options) {
-  this.input    = input;
+  this.input = input;
 
-  this.filename = options['filename'] || null;
-  this.schema   = options['schema']   || DEFAULT_FULL_SCHEMA;
-  this.strict   = options['strict']   || false;
-  this.legacy   = options['legacy']   || false;
+  this.filename  = options['filename']  || null;
+  this.schema    = options['schema']    || DEFAULT_FULL_SCHEMA;
+  this.onWarning = options['onWarning'] || null;
+  this.legacy    = options['legacy']    || false;
 
-  this.implicitTypes     = this.schema.compiledImplicit;
-  this.typeMap           = this.schema.compiledTypeMap;
+  this.implicitTypes = this.schema.compiledImplicit;
+  this.typeMap       = this.schema.compiledTypeMap;
 
   this.length     = input.length;
   this.position   = 0;
   this.line       = 0;
   this.lineStart  = 0;
   this.lineIndent = 0;
-  this.character  = input.charCodeAt(0 /*position*/);
+
+  this.documents = [];
 
   /*
   this.version;
@@ -152,10 +156,10 @@ function throwError(state, message) {
 function throwWarning(state, message) {
   var error = generateError(state, message);
 
-  if (state.strict) {
-    throw error;
+  if (state.onWarning) {
+    state.onWarning.call(null, error);
   } else {
-    console.warn(error.toString());
+    throw error;
   }
 }
 
@@ -288,13 +292,16 @@ function storeMappingPair(state, _result, keyTag, keyNode, valueNode) {
 }
 
 function readLineBreak(state) {
-  if (CHAR_LINE_FEED === state.character) {
-    state.position += 1;
-  } else if (CHAR_CARRIAGE_RETURN === state.character) {
-    if (CHAR_LINE_FEED === state.input.charCodeAt(state.position + 1)) {
-      state.position += 2;
-    } else {
-      state.position += 1;
+  var ch;
+
+  ch = state.input.charCodeAt(state.position);
+
+  if (0x0A/* LF */ === ch) {
+    state.position++;
+  } else if (0x0D/* CR */ === ch) {
+    state.position++;
+    if (0x0A/* LF */ === state.input.charCodeAt(state.position)) {
+      state.position++;
     }
   } else {
     throwError(state, 'a line break is expected');
@@ -302,32 +309,33 @@ function readLineBreak(state) {
 
   state.line += 1;
   state.lineStart = state.position;
-  state.character = state.input.charCodeAt(state.position);
 }
 
 function skipSeparationSpace(state, allowComments, checkIndent) {
-  var lineBreaks = 0;
+  var lineBreaks = 0,
+      ch = state.input.charCodeAt(state.position);
 
-  while (state.position < state.length) {
-    while (CHAR_SPACE === state.character || CHAR_TAB === state.character) {
-      state.character = state.input.charCodeAt(++state.position);
+  while (0 !== ch) {
+    while (is_WHITE_SPACE(ch)) {
+      ch = state.input.charCodeAt(++state.position);
     }
 
-    if (allowComments && CHAR_SHARP === state.character) {
-      do { state.character = state.input.charCodeAt(++state.position); }
-      while (state.position < state.length &&
-             CHAR_LINE_FEED !== state.character &&
-             CHAR_CARRIAGE_RETURN !== state.character);
+    if (allowComments && 0x23/* # */ === ch) {
+      do {
+        ch = state.input.charCodeAt(++state.position);
+      } while (ch !== 0x0A/* LF */ && ch !== 0x0D/* CR */ && 0 !== ch);
     }
 
-    if (CHAR_LINE_FEED === state.character || CHAR_CARRIAGE_RETURN === state.character) {
+    if (is_EOL(ch)) {
       readLineBreak(state);
-      lineBreaks += 1;
+
+      ch = state.input.charCodeAt(state.position);
+      lineBreaks++;
       state.lineIndent = 0;
 
-      while (CHAR_SPACE === state.character) {
-        state.lineIndent += 1;
-        state.character = state.input.charCodeAt(++state.position);
+      while (0x20/* Space */ === ch) {
+        state.lineIndent++;
+        ch = state.input.charCodeAt(++state.position);
       }
 
       if (state.lineIndent < checkIndent) {
@@ -342,21 +350,22 @@ function skipSeparationSpace(state, allowComments, checkIndent) {
 }
 
 function testDocumentSeparator(state) {
-  var _position, _character;
+  var _position = state.position,
+      ch;
 
-  if (state.position === state.lineStart &&
-      (CHAR_MINUS === state.character || CHAR_DOT === state.character) &&
-      state.input.charCodeAt(state.position + 1) === state.character &&
-      state.input.charCodeAt(state.position + 2) === state.character) {
+  ch = state.input.charCodeAt(_position);
 
-    _position = state.position + 3;
-    _character = state.input.charCodeAt(_position);
+  // Condition state.position === state.lineStart is tested
+  // in parent on each call, for efficiency. No needs to test here again.
+  if ((0x2D/* - */ === ch || 0x2E/* . */ === ch) &&
+      state.input.charCodeAt(_position + 1) === ch &&
+      state.input.charCodeAt(_position+ 2) === ch) {
 
-    if (_position >= state.length ||
-        CHAR_SPACE           === _character ||
-        CHAR_TAB             === _character ||
-        CHAR_LINE_FEED       === _character ||
-        CHAR_CARRIAGE_RETURN === _character) {
+    _position += 3;
+
+    ch = state.input.charCodeAt(_position);
+
+    if (ch === 0 || is_WS_OR_EOL(ch)) {
       return true;
     }
   }
@@ -383,45 +392,32 @@ function readPlainScalar(state, nodeIndent, withinFlowCollection) {
       _lineStart,
       _lineIndent,
       _kind = state.kind,
-      _result = state.result;
+      _result = state.result,
+      ch;
 
-  if (CHAR_SPACE                === state.character ||
-      CHAR_TAB                  === state.character ||
-      CHAR_LINE_FEED            === state.character ||
-      CHAR_CARRIAGE_RETURN      === state.character ||
-      CHAR_COMMA                === state.character ||
-      CHAR_LEFT_SQUARE_BRACKET  === state.character ||
-      CHAR_RIGHT_SQUARE_BRACKET === state.character ||
-      CHAR_LEFT_CURLY_BRACKET   === state.character ||
-      CHAR_RIGHT_CURLY_BRACKET  === state.character ||
-      CHAR_SHARP                === state.character ||
-      CHAR_AMPERSAND            === state.character ||
-      CHAR_ASTERISK             === state.character ||
-      CHAR_EXCLAMATION          === state.character ||
-      CHAR_VERTICAL_LINE        === state.character ||
-      CHAR_GREATER_THAN         === state.character ||
-      CHAR_SINGLE_QUOTE         === state.character ||
-      CHAR_DOUBLE_QUOTE         === state.character ||
-      CHAR_PERCENT              === state.character ||
-      CHAR_COMMERCIAL_AT        === state.character ||
-      CHAR_GRAVE_ACCENT         === state.character) {
+  ch = state.input.charCodeAt(state.position);
+
+  if (is_WS_OR_EOL(ch)             ||
+      is_FLOW_INDICATOR(ch)        ||
+      0x23/* # */           === ch ||
+      0x26/* & */           === ch ||
+      0x2A/* * */           === ch ||
+      0x21/* ! */           === ch ||
+      0x7C/* | */           === ch ||
+      0x3E/* > */           === ch ||
+      0x27/* ' */           === ch ||
+      0x22/* " */           === ch ||
+      0x25/* % */           === ch ||
+      0x40/* @ */           === ch ||
+      0x60/* ` */           === ch) {
     return false;
   }
 
-  if (CHAR_QUESTION === state.character ||
-      CHAR_MINUS === state.character) {
+  if (0x3F/* ? */ === ch || 0x2D/* - */ === ch) {
     following = state.input.charCodeAt(state.position + 1);
 
-    if (CHAR_SPACE                 === following ||
-        CHAR_TAB                   === following ||
-        CHAR_LINE_FEED             === following ||
-        CHAR_CARRIAGE_RETURN       === following ||
-        withinFlowCollection &&
-        (CHAR_COMMA                === following ||
-         CHAR_LEFT_SQUARE_BRACKET  === following ||
-         CHAR_RIGHT_SQUARE_BRACKET === following ||
-         CHAR_LEFT_CURLY_BRACKET   === following ||
-         CHAR_RIGHT_CURLY_BRACKET  === following)) {
+    if (is_WS_OR_EOL(following) ||
+        withinFlowCollection && is_FLOW_INDICATOR(following)) {
       return false;
     }
   }
@@ -431,44 +427,27 @@ function readPlainScalar(state, nodeIndent, withinFlowCollection) {
   captureStart = captureEnd = state.position;
   hasPendingContent = false;
 
-  while (state.position < state.length) {
-    if (CHAR_COLON === state.character) {
-      following = state.input.charCodeAt(state.position + 1);
+  while (0 !== ch) {
+    if (0x3A/* : */ === ch) {
+      following = state.input.charCodeAt(state.position+1);
 
-      if (CHAR_SPACE                 === following ||
-          CHAR_TAB                   === following ||
-          CHAR_LINE_FEED             === following ||
-          CHAR_CARRIAGE_RETURN       === following ||
-          withinFlowCollection &&
-          (CHAR_COMMA                === following ||
-           CHAR_LEFT_SQUARE_BRACKET  === following ||
-           CHAR_RIGHT_SQUARE_BRACKET === following ||
-           CHAR_LEFT_CURLY_BRACKET   === following ||
-           CHAR_RIGHT_CURLY_BRACKET  === following)) {
+      if (is_WS_OR_EOL(following) ||
+          withinFlowCollection && is_FLOW_INDICATOR(following)) {
         break;
       }
 
-    } else if (CHAR_SHARP === state.character) {
+    } else if (0x23/* # */ === ch) {
       preceding = state.input.charCodeAt(state.position - 1);
 
-      if (CHAR_SPACE           === preceding ||
-          CHAR_TAB             === preceding ||
-          CHAR_LINE_FEED       === preceding ||
-          CHAR_CARRIAGE_RETURN === preceding) {
+      if (is_WS_OR_EOL(preceding)) {
         break;
       }
 
     } else if ((state.position === state.lineStart && testDocumentSeparator(state)) ||
-               withinFlowCollection &&
-               (CHAR_COMMA                === state.character ||
-                CHAR_LEFT_SQUARE_BRACKET  === state.character ||
-                CHAR_RIGHT_SQUARE_BRACKET === state.character ||
-                CHAR_LEFT_CURLY_BRACKET   === state.character ||
-                CHAR_RIGHT_CURLY_BRACKET  === state.character)) {
+               withinFlowCollection && is_FLOW_INDICATOR(ch)) {
       break;
 
-    } else if (CHAR_LINE_FEED === state.character ||
-               CHAR_CARRIAGE_RETURN === state.character) {
+    } else if (is_EOL(ch)) {
       _line = state.line;
       _lineStart = state.lineStart;
       _lineIndent = state.lineIndent;
@@ -476,13 +455,13 @@ function readPlainScalar(state, nodeIndent, withinFlowCollection) {
 
       if (state.lineIndent >= nodeIndent) {
         hasPendingContent = true;
+        ch = state.input.charCodeAt(state.position);
         continue;
       } else {
         state.position = captureEnd;
         state.line = _line;
         state.lineStart = _lineStart;
         state.lineIndent = _lineIndent;
-        state.character = state.input.charCodeAt(state.position);
         break;
       }
     }
@@ -494,11 +473,11 @@ function readPlainScalar(state, nodeIndent, withinFlowCollection) {
       hasPendingContent = false;
     }
 
-    if (CHAR_SPACE !== state.character && CHAR_TAB !== state.character) {
+    if (!is_WHITE_SPACE(ch)) {
       captureEnd = state.position + 1;
     }
 
-    state.character = state.input.charCodeAt(++state.position);
+    ch = state.input.charCodeAt(++state.position);
   }
 
   captureSegment(state, captureStart, captureEnd, false);
@@ -513,41 +492,42 @@ function readPlainScalar(state, nodeIndent, withinFlowCollection) {
 }
 
 function readSingleQuotedScalar(state, nodeIndent) {
-  var captureStart, captureEnd;
+  var ch,
+      captureStart, captureEnd;
 
-  if (CHAR_SINGLE_QUOTE !== state.character) {
+  ch = state.input.charCodeAt(state.position);
+
+  if (0x27/* ' */ !== ch) {
     return false;
   }
 
   state.kind = 'scalar';
   state.result = '';
-  state.character = state.input.charCodeAt(++state.position);
+  state.position++;
   captureStart = captureEnd = state.position;
 
-  while (state.position < state.length) {
-    if (CHAR_SINGLE_QUOTE === state.character) {
+  while (0 !== (ch = state.input.charCodeAt(state.position))) {
+    if (0x27/* ' */ === ch) {
       captureSegment(state, captureStart, state.position, true);
-      state.character = state.input.charCodeAt(++state.position);
+      ch = state.input.charCodeAt(++state.position);
 
-      if (CHAR_SINGLE_QUOTE === state.character) {
+      if (0x27/* ' */ === ch) {
         captureStart = captureEnd = state.position;
-        state.character = state.input.charCodeAt(++state.position);
+        state.position++;
       } else {
         return true;
       }
 
-    } else if (CHAR_LINE_FEED === state.character ||
-               CHAR_CARRIAGE_RETURN === state.character) {
+    } else if (is_EOL(ch)) {
       captureSegment(state, captureStart, captureEnd, true);
       writeFoldedLines(state, skipSeparationSpace(state, false, nodeIndent));
       captureStart = captureEnd = state.position;
-      state.character = state.input.charCodeAt(state.position);
 
     } else if (state.position === state.lineStart && testDocumentSeparator(state)) {
       throwError(state, 'unexpected end of the document within a single quoted scalar');
 
     } else {
-      state.character = state.input.charCodeAt(++state.position);
+      state.position++;
       captureEnd = state.position;
     }
   }
@@ -559,53 +539,48 @@ function readDoubleQuotedScalar(state, nodeIndent) {
   var captureStart,
       captureEnd,
       hexLength,
-      hexIndex,
-      hexOffset,
-      hexResult;
+      hexResult,
+      tmp, tmpEsc,
+      ch;
 
-  if (CHAR_DOUBLE_QUOTE !== state.character) {
+  ch = state.input.charCodeAt(state.position);
+
+  if (0x22/* " */ !== ch) {
     return false;
   }
 
   state.kind = 'scalar';
   state.result = '';
-  state.character = state.input.charCodeAt(++state.position);
+  state.position++;
   captureStart = captureEnd = state.position;
 
-  while (state.position < state.length) {
-    if (CHAR_DOUBLE_QUOTE === state.character) {
+  while (0 !== (ch = state.input.charCodeAt(state.position))) {
+    if (0x22/* " */ === ch) {
       captureSegment(state, captureStart, state.position, true);
-      state.character = state.input.charCodeAt(++state.position);
+      state.position++;
       return true;
 
-    } else if (CHAR_BACKSLASH === state.character) {
+    } else if (0x5C/* \ */ === ch) {
       captureSegment(state, captureStart, state.position, true);
-      state.character = state.input.charCodeAt(++state.position);
+      ch = state.input.charCodeAt(++state.position);
 
-      if (CHAR_LINE_FEED       === state.character ||
-          CHAR_CARRIAGE_RETURN === state.character) {
+      if (is_EOL(ch)) {
         skipSeparationSpace(state, false, nodeIndent);
 
-      } else if (SIMPLE_ESCAPE_SEQUENCES[state.character]) {
-        state.result += SIMPLE_ESCAPE_SEQUENCES[state.character];
-        state.character = state.input.charCodeAt(++state.position);
+        //TODO: rework to inline fn with no type cast?
+      } else if (ch < 256 && simpleEscapeCheck[ch]) {
+        state.result += simpleEscapeMap[ch];
+        state.position++;
 
-      } else if (HEXADECIMAL_ESCAPE_SEQUENCES[state.character]) {
-        hexLength = HEXADECIMAL_ESCAPE_SEQUENCES[state.character];
+      } else if ((tmp = escapedHexLen(ch)) > 0) {
+        hexLength = tmp;
         hexResult = 0;
 
-        for (hexIndex = 1; hexIndex <= hexLength; hexIndex += 1) {
-          hexOffset = (hexLength - hexIndex) * 4;
-          state.character = state.input.charCodeAt(++state.position);
+        for (; hexLength > 0; hexLength--) {
+          ch = state.input.charCodeAt(++state.position);
 
-          if (CHAR_DIGIT_ZERO <= state.character && state.character <= CHAR_DIGIT_NINE) {
-            hexResult |= (state.character - CHAR_DIGIT_ZERO) << hexOffset;
-
-          } else if (CHAR_CAPITAL_A <= state.character && state.character <= CHAR_CAPITAL_F) {
-            hexResult |= (state.character - CHAR_CAPITAL_A + 10) << hexOffset;
-
-          } else if (CHAR_SMALL_A <= state.character && state.character <= CHAR_SMALL_F) {
-            hexResult |= (state.character - CHAR_SMALL_A + 10) << hexOffset;
+          if ((tmp = fromHexCode(ch)) >= 0) {
+            hexResult = (hexResult << 4) + tmp;
 
           } else {
             throwError(state, 'expected hexadecimal character');
@@ -613,7 +588,7 @@ function readDoubleQuotedScalar(state, nodeIndent) {
         }
 
         state.result += String.fromCharCode(hexResult);
-        state.character = state.input.charCodeAt(++state.position);
+        state.position++;
 
       } else {
         throwError(state, 'unknown escape sequence');
@@ -621,18 +596,16 @@ function readDoubleQuotedScalar(state, nodeIndent) {
 
       captureStart = captureEnd = state.position;
 
-    } else if (CHAR_LINE_FEED === state.character ||
-               CHAR_CARRIAGE_RETURN === state.character) {
+    } else if (is_EOL(ch)) {
       captureSegment(state, captureStart, captureEnd, true);
       writeFoldedLines(state, skipSeparationSpace(state, false, nodeIndent));
       captureStart = captureEnd = state.position;
-      state.character = state.input.charCodeAt(state.position);
 
     } else if (state.position === state.lineStart && testDocumentSeparator(state)) {
       throwError(state, 'unexpected end of the document within a double quoted scalar');
 
     } else {
-      state.character = state.input.charCodeAt(++state.position);
+      state.position++;
       captureEnd = state.position;
     }
   }
@@ -652,22 +625,20 @@ function readFlowCollection(state, nodeIndent) {
       isMapping,
       keyNode,
       keyTag,
-      valueNode;
+      valueNode,
+      ch;
 
-  switch (state.character) {
-  case CHAR_LEFT_SQUARE_BRACKET:
-    terminator = CHAR_RIGHT_SQUARE_BRACKET;
+  ch = state.input.charCodeAt(state.position);
+
+  if (ch === 0x5B/* [ */) {
+    terminator = 0x5D/* ] */;
     isMapping = false;
     _result = [];
-    break;
-
-  case CHAR_LEFT_CURLY_BRACKET:
-    terminator = CHAR_RIGHT_CURLY_BRACKET;
+  } else if (ch === 0x7B/* { */) {
+    terminator = 0x7D/* } */;
     isMapping = true;
     _result = {};
-    break;
-
-  default:
+  } else {
     return false;
   }
 
@@ -675,13 +646,15 @@ function readFlowCollection(state, nodeIndent) {
     state.anchorMap[state.anchor] = _result;
   }
 
-  state.character = state.input.charCodeAt(++state.position);
+  ch = state.input.charCodeAt(++state.position);
 
-  while (state.position < state.length) {
+  while (0 !== ch) {
     skipSeparationSpace(state, true, nodeIndent);
 
-    if (state.character === terminator) {
-      state.character = state.input.charCodeAt(++state.position);
+    ch = state.input.charCodeAt(state.position);
+
+    if (ch === terminator) {
+      state.position++;
       state.tag = _tag;
       state.kind = isMapping ? 'mapping' : 'sequence';
       state.result = _result;
@@ -693,16 +666,12 @@ function readFlowCollection(state, nodeIndent) {
     keyTag = keyNode = valueNode = null;
     isPair = isExplicitPair = false;
 
-    if (CHAR_QUESTION === state.character) {
+    if (0x3F/* ? */ === ch) {
       following = state.input.charCodeAt(state.position + 1);
 
-      if (CHAR_SPACE === following ||
-          CHAR_TAB === following ||
-          CHAR_LINE_FEED === following ||
-          CHAR_CARRIAGE_RETURN === following) {
+      if (is_WS_OR_EOL(following)) {
         isPair = isExplicitPair = true;
-        state.position += 1;
-        state.character = following;
+        state.position++;
         skipSeparationSpace(state, true, nodeIndent);
       }
     }
@@ -713,9 +682,11 @@ function readFlowCollection(state, nodeIndent) {
     keyNode = state.result;
     skipSeparationSpace(state, true, nodeIndent);
 
-    if ((isExplicitPair || state.line === _line) && CHAR_COLON === state.character) {
+    ch = state.input.charCodeAt(state.position);
+
+    if ((isExplicitPair || state.line === _line) && 0x3A/* : */ === ch) {
       isPair = true;
-      state.character = state.input.charCodeAt(++state.position);
+      ch = state.input.charCodeAt(++state.position);
       skipSeparationSpace(state, true, nodeIndent);
       composeNode(state, nodeIndent, CONTEXT_FLOW_IN, false, true);
       valueNode = state.result;
@@ -731,9 +702,11 @@ function readFlowCollection(state, nodeIndent) {
 
     skipSeparationSpace(state, true, nodeIndent);
 
-    if (CHAR_COMMA === state.character) {
+    ch = state.input.charCodeAt(state.position);
+
+    if (0x2C/* , */ === ch) {
       readNext = true;
-      state.character = state.input.charCodeAt(++state.position);
+      ch = state.input.charCodeAt(++state.position);
     } else {
       readNext = false;
     }
@@ -749,39 +722,38 @@ function readBlockScalar(state, nodeIndent) {
       detectedIndent = false,
       textIndent     = nodeIndent,
       emptyLines     = 0,
-      atMoreIndented = false;
+      atMoreIndented = false,
+      tmp,
+      ch;
 
-  switch (state.character) {
-  case CHAR_VERTICAL_LINE:
+  ch = state.input.charCodeAt(state.position);
+
+  if (ch === 0x7C/* | */) {
     folding = false;
-    break;
-
-  case CHAR_GREATER_THAN:
+  } else if (ch === 0x3E/* > */) {
     folding = true;
-    break;
-
-  default:
+  } else {
     return false;
   }
 
   state.kind = 'scalar';
   state.result = '';
 
-  while (state.position < state.length) {
-    state.character = state.input.charCodeAt(++state.position);
+  while (0 !== ch) {
+    ch = state.input.charCodeAt(++state.position);
 
-    if (CHAR_PLUS === state.character || CHAR_MINUS === state.character) {
+    if (0x2B/* + */ === ch || 0x2D/* - */ === ch) {
       if (CHOMPING_CLIP === chomping) {
-        chomping = (CHAR_PLUS === state.character) ? CHOMPING_KEEP : CHOMPING_STRIP;
+        chomping = (0x2B/* + */ === ch) ? CHOMPING_KEEP : CHOMPING_STRIP;
       } else {
         throwError(state, 'repeat of a chomping mode identifier');
       }
 
-    } else if (CHAR_DIGIT_ZERO <= state.character && state.character <= CHAR_DIGIT_NINE) {
-      if (CHAR_DIGIT_ZERO === state.character) {
+    } else if ((tmp = fromDecimalCode(ch)) >= 0) {
+      if (tmp === 0) {
         throwError(state, 'bad explicit indentation width of a block scalar; it cannot be less than one');
       } else if (!detectedIndent) {
-        textIndent = nodeIndent + (state.character - CHAR_DIGIT_ONE);
+        textIndent = nodeIndent + tmp - 1;
         detectedIndent = true;
       } else {
         throwError(state, 'repeat of an indentation width identifier');
@@ -792,34 +764,34 @@ function readBlockScalar(state, nodeIndent) {
     }
   }
 
-  if (CHAR_SPACE === state.character || CHAR_TAB === state.character) {
-    do { state.character = state.input.charCodeAt(++state.position); }
-    while (CHAR_SPACE === state.character || CHAR_TAB === state.character);
+  if (is_WHITE_SPACE(ch)) {
+    do { ch = state.input.charCodeAt(++state.position); }
+    while (is_WHITE_SPACE(ch));
 
-    if (CHAR_SHARP === state.character) {
-      do { state.character = state.input.charCodeAt(++state.position); }
-      while (state.position < state.length &&
-             CHAR_LINE_FEED !== state.character &&
-             CHAR_CARRIAGE_RETURN !== state.character);
+    if (0x23/* # */ === ch) {
+      do { ch = state.input.charCodeAt(++state.position); }
+      while (!is_EOL(ch) && (0 !== ch));
     }
   }
 
-  while (state.position < state.length) {
+  while (0 !== ch) {
     readLineBreak(state);
     state.lineIndent = 0;
 
+    ch = state.input.charCodeAt(state.position);
+
     while ((!detectedIndent || state.lineIndent < textIndent) &&
-           (CHAR_SPACE === state.character)) {
-      state.lineIndent += 1;
-      state.character = state.input.charCodeAt(++state.position);
+           (0x20/* Space */ === ch)) {
+      state.lineIndent++;
+      ch = state.input.charCodeAt(++state.position);
     }
 
     if (!detectedIndent && state.lineIndent > textIndent) {
       textIndent = state.lineIndent;
     }
 
-    if (CHAR_LINE_FEED === state.character || CHAR_CARRIAGE_RETURN === state.character) {
-      emptyLines += 1;
+    if (is_EOL(ch)) {
+      emptyLines++;
       continue;
     }
 
@@ -827,16 +799,12 @@ function readBlockScalar(state, nodeIndent) {
     if (state.lineIndent < textIndent) {
 
       // Perform the chomping.
-      switch (chomping) {
-      case CHOMPING_KEEP:
+      if (chomping === CHOMPING_KEEP) {
         state.result += common.repeat('\n', emptyLines);
-        break;
-
-      case CHOMPING_CLIP:
+      } else if (chomping === CHOMPING_CLIP) {
         if (detectedIndent) { // i.e. only if the scalar is not empty.
           state.result += '\n';
         }
-        break;
       }
 
       // Break this `while` cycle and go to the funciton's epilogue.
@@ -847,7 +815,7 @@ function readBlockScalar(state, nodeIndent) {
     if (folding) {
 
       // Lines starting with white space characters (more-indented lines) are not folded.
-      if (CHAR_SPACE === state.character || CHAR_TAB === state.character) {
+      if (is_WHITE_SPACE(ch)) {
         atMoreIndented = true;
         state.result += common.repeat('\n', emptyLines + 1);
 
@@ -884,12 +852,12 @@ function readBlockScalar(state, nodeIndent) {
     emptyLines = 0;
     captureStart = state.position;
 
-    do { state.character = state.input.charCodeAt(++state.position); }
-    while (state.position < state.length &&
-           CHAR_LINE_FEED !== state.character &&
-           CHAR_CARRIAGE_RETURN !== state.character);
+    do { ch = state.input.charCodeAt(++state.position); }
+    while (!is_EOL(ch) && (0 !== ch));
 
     captureSegment(state, captureStart, state.position, false);
+
+    ch = state.input.charCodeAt(state.position);
   }
 
   return true;
@@ -900,33 +868,34 @@ function readBlockSequence(state, nodeIndent) {
       _tag      = state.tag,
       _result   = [],
       following,
-      detected  = false;
+      detected  = false,
+      ch;
 
   if (null !== state.anchor) {
     state.anchorMap[state.anchor] = _result;
   }
 
-  while (state.position < state.length) {
-    if (CHAR_MINUS !== state.character) {
+  ch = state.input.charCodeAt(state.position);
+
+  while (0 !== ch) {
+
+    if (0x2D/* - */ !== ch) {
       break;
     }
 
     following = state.input.charCodeAt(state.position + 1);
 
-    if (CHAR_SPACE           !== following &&
-        CHAR_TAB             !== following &&
-        CHAR_LINE_FEED       !== following &&
-        CHAR_CARRIAGE_RETURN !== following) {
+    if (!is_WS_OR_EOL(following)) {
       break;
     }
 
     detected = true;
-    state.position += 1;
-    state.character = following;
+    state.position++;
 
     if (skipSeparationSpace(state, true, -1)) {
       if (state.lineIndent <= nodeIndent) {
         _result.push(null);
+        ch = state.input.charCodeAt(state.position);
         continue;
       }
     }
@@ -936,7 +905,9 @@ function readBlockSequence(state, nodeIndent) {
     _result.push(state.result);
     skipSeparationSpace(state, true, -1);
 
-    if ((state.line === _line || state.lineIndent > nodeIndent) && state.position < state.length) {
+    ch = state.input.charCodeAt(state.position);
+
+    if ((state.line === _line || state.lineIndent > nodeIndent) && (0 !== ch)) {
       throwError(state, 'bad indentation of a sequence entry');
     } else if (state.lineIndent < nodeIndent) {
       break;
@@ -953,7 +924,7 @@ function readBlockSequence(state, nodeIndent) {
   }
 }
 
-function readBlockMapping(state, nodeIndent) {
+function readBlockMapping(state, nodeIndent, flowIndent) {
   var following,
       allowCompact,
       _line,
@@ -963,13 +934,16 @@ function readBlockMapping(state, nodeIndent) {
       keyNode       = null,
       valueNode     = null,
       atExplicitKey = false,
-      detected      = false;
+      detected      = false,
+      ch;
 
   if (null !== state.anchor) {
     state.anchorMap[state.anchor] = _result;
   }
 
-  while (state.position < state.length) {
+  ch = state.input.charCodeAt(state.position);
+
+  while (0 !== ch) {
     following = state.input.charCodeAt(state.position + 1);
     _line = state.line; // Save the current line.
 
@@ -977,14 +951,9 @@ function readBlockMapping(state, nodeIndent) {
     // Explicit notation case. There are two separate blocks:
     // first for the key (denoted by "?") and second for the value (denoted by ":")
     //
-    if ((CHAR_QUESTION        === state.character ||
-         CHAR_COLON           === state.character) &&
-        (CHAR_SPACE           === following ||
-         CHAR_TAB             === following ||
-         CHAR_LINE_FEED       === following ||
-         CHAR_CARRIAGE_RETURN === following)) {
+    if ((0x3F/* ? */ === ch || 0x3A/* : */  === ch) && is_WS_OR_EOL(following)) {
 
-      if (CHAR_QUESTION === state.character) {
+      if (0x3F/* ? */ === ch) {
         if (atExplicitKey) {
           storeMappingPair(state, _result, keyTag, keyNode, null);
           keyTag = keyNode = valueNode = null;
@@ -995,7 +964,7 @@ function readBlockMapping(state, nodeIndent) {
         allowCompact = true;
 
       } else if (atExplicitKey) {
-        // i.e. CHAR_COLON === character after the explicit key.
+        // i.e. 0x3A/* : */ === character after the explicit key.
         atExplicitKey = false;
         allowCompact = true;
 
@@ -1004,25 +973,24 @@ function readBlockMapping(state, nodeIndent) {
       }
 
       state.position += 1;
-      state.character = following;
+      ch = following;
 
     //
     // Implicit notation case. Flow-style node as the key first, then ":", and the value.
     //
-    } else if (composeNode(state, nodeIndent, CONTEXT_FLOW_OUT, false, true)) {
+    } else if (composeNode(state, flowIndent, CONTEXT_FLOW_OUT, false, true)) {
+
       if (state.line === _line) {
-        while (CHAR_SPACE === state.character ||
-               CHAR_TAB === state.character) {
-          state.character = state.input.charCodeAt(++state.position);
+        ch = state.input.charCodeAt(state.position);
+
+        while (is_WHITE_SPACE(ch)) {
+          ch = state.input.charCodeAt(++state.position);
         }
 
-        if (CHAR_COLON === state.character) {
-          state.character = state.input.charCodeAt(++state.position);
+        if (0x3A/* : */ === ch) {
+          ch = state.input.charCodeAt(++state.position);
 
-          if (CHAR_SPACE           !== state.character &&
-              CHAR_TAB             !== state.character &&
-              CHAR_LINE_FEED       !== state.character &&
-              CHAR_CARRIAGE_RETURN !== state.character) {
+          if (!is_WS_OR_EOL(ch)) {
             throwError(state, 'a whitespace character is expected after the key-value separator within a block mapping');
           }
 
@@ -1075,9 +1043,10 @@ function readBlockMapping(state, nodeIndent) {
       }
 
       skipSeparationSpace(state, true, -1);
+      ch = state.input.charCodeAt(state.position);
     }
 
-    if (state.lineIndent > nodeIndent && state.position < state.length) {
+    if (state.lineIndent > nodeIndent && (0 !== ch)) {
       throwError(state, 'bad indentation of a mapping entry');
     } else if (state.lineIndent < nodeIndent) {
       break;
@@ -1108,9 +1077,12 @@ function readTagProperty(state) {
       isVerbatim = false,
       isNamed    = false,
       tagHandle,
-      tagName;
+      tagName,
+      ch;
 
-  if (CHAR_EXCLAMATION !== state.character) {
+  ch = state.input.charCodeAt(state.position);
+
+  if (0x21/* ! */ !== ch) {
     return false;
   }
 
@@ -1118,16 +1090,16 @@ function readTagProperty(state) {
     throwError(state, 'duplication of a tag property');
   }
 
-  state.character = state.input.charCodeAt(++state.position);
+  ch = state.input.charCodeAt(++state.position);
 
-  if (CHAR_LESS_THAN === state.character) {
+  if (0x3C/* < */ === ch) {
     isVerbatim = true;
-    state.character = state.input.charCodeAt(++state.position);
+    ch = state.input.charCodeAt(++state.position);
 
-  } else if (CHAR_EXCLAMATION === state.character) {
+  } else if (0x21/* ! */ === ch) {
     isNamed = true;
     tagHandle = '!!';
-    state.character = state.input.charCodeAt(++state.position);
+    ch = state.input.charCodeAt(++state.position);
 
   } else {
     tagHandle = '!';
@@ -1136,23 +1108,19 @@ function readTagProperty(state) {
   _position = state.position;
 
   if (isVerbatim) {
-    do { state.character = state.input.charCodeAt(++state.position); }
-    while (state.position < state.length && CHAR_GREATER_THAN !== state.character);
+    do { ch = state.input.charCodeAt(++state.position); }
+    while (0 !== ch && 0x3E/* > */ !== ch);
 
     if (state.position < state.length) {
       tagName = state.input.slice(_position, state.position);
-      state.character = state.input.charCodeAt(++state.position);
+      ch = state.input.charCodeAt(++state.position);
     } else {
       throwError(state, 'unexpected end of the stream within a verbatim tag');
     }
   } else {
-    while (state.position < state.length &&
-           CHAR_SPACE           !== state.character &&
-           CHAR_TAB             !== state.character &&
-           CHAR_LINE_FEED       !== state.character &&
-           CHAR_CARRIAGE_RETURN !== state.character) {
+    while (0 !== ch && !is_WS_OR_EOL(ch)) {
 
-      if (CHAR_EXCLAMATION === state.character) {
+      if (0x21/* ! */ === ch) {
         if (!isNamed) {
           tagHandle = state.input.slice(_position - 1, state.position + 1);
 
@@ -1167,7 +1135,7 @@ function readTagProperty(state) {
         }
       }
 
-      state.character = state.input.charCodeAt(++state.position);
+      ch = state.input.charCodeAt(++state.position);
     }
 
     tagName = state.input.slice(_position, state.position);
@@ -1201,9 +1169,12 @@ function readTagProperty(state) {
 }
 
 function readAnchorProperty(state) {
-  var _position;
+  var _position,
+      ch;
 
-  if (CHAR_AMPERSAND !== state.character) {
+  ch = state.input.charCodeAt(state.position);
+
+  if (0x26/* & */ !== ch) {
     return false;
   }
 
@@ -1211,20 +1182,11 @@ function readAnchorProperty(state) {
     throwError(state, 'duplication of an anchor property');
   }
 
-  state.character = state.input.charCodeAt(++state.position);
+  ch = state.input.charCodeAt(++state.position);
   _position = state.position;
 
-  while (state.position < state.length &&
-         CHAR_SPACE                !== state.character &&
-         CHAR_TAB                  !== state.character &&
-         CHAR_LINE_FEED            !== state.character &&
-         CHAR_CARRIAGE_RETURN      !== state.character &&
-         CHAR_COMMA                !== state.character &&
-         CHAR_LEFT_SQUARE_BRACKET  !== state.character &&
-         CHAR_RIGHT_SQUARE_BRACKET !== state.character &&
-         CHAR_LEFT_CURLY_BRACKET   !== state.character &&
-         CHAR_RIGHT_CURLY_BRACKET  !== state.character) {
-    state.character = state.input.charCodeAt(++state.position);
+  while (0 !== ch && !is_WS_OR_EOL(ch) && !is_FLOW_INDICATOR(ch)) {
+    ch = state.input.charCodeAt(++state.position);
   }
 
   if (state.position === _position) {
@@ -1236,26 +1198,22 @@ function readAnchorProperty(state) {
 }
 
 function readAlias(state) {
-  var _position, alias;
+  var _position, alias,
+      len = state.length,
+      input = state.input,
+      ch;
 
-  if (CHAR_ASTERISK !== state.character) {
+  ch = state.input.charCodeAt(state.position);
+
+  if (0x2A/* * */ !== ch) {
     return false;
   }
 
-  state.character = state.input.charCodeAt(++state.position);
+  ch = state.input.charCodeAt(++state.position);
   _position = state.position;
 
-  while (state.position < state.length &&
-         CHAR_SPACE                !== state.character &&
-         CHAR_TAB                  !== state.character &&
-         CHAR_LINE_FEED            !== state.character &&
-         CHAR_CARRIAGE_RETURN      !== state.character &&
-         CHAR_COMMA                !== state.character &&
-         CHAR_LEFT_SQUARE_BRACKET  !== state.character &&
-         CHAR_RIGHT_SQUARE_BRACKET !== state.character &&
-         CHAR_LEFT_CURLY_BRACKET   !== state.character &&
-         CHAR_RIGHT_CURLY_BRACKET  !== state.character) {
-    state.character = state.input.charCodeAt(++state.position);
+  while (0 !== ch && !is_WS_OR_EOL(ch) && !is_FLOW_INDICATOR(ch)) {
+    ch = state.input.charCodeAt(++state.position);
   }
 
   if (state.position === _position) {
@@ -1350,7 +1308,7 @@ function composeNode(state, parentIndent, nodeContext, allowToSeek, allowCompact
     if (isIndented) {
       if (allowBlockCollections &&
           (readBlockSequence(state, blockIndent) ||
-           readBlockMapping(state, blockIndent)) ||
+           readBlockMapping(state, blockIndent, flowIndent)) ||
           readFlowCollection(state, flowIndent)) {
         hasContent = true;
       } else {
@@ -1394,21 +1352,23 @@ function composeNode(state, parentIndent, nodeContext, allowToSeek, allowCompact
         // non-specific tag is only assigned to plain scalars. So, it isn't
         // needed to check for 'kind' conformity.
 
-        if (type.loadResolver && type.loadResolver(state)) { // `state.result` updated in resolver if matched
+        if (type.resolve(state.result)) { // `state.result` updated in resolver if matched
+          state.result = type.construct(state.result);
           state.tag = type.tag;
           break;
         }
-
       }
     } else if (_hasOwnProperty.call(state.typeMap, state.tag)) {
       type = state.typeMap[state.tag];
 
-      if (null !== state.result && type.loadKind !== state.kind) {
-        throwError(state, 'unacceptable node kind for !<' + state.tag + '> tag; it should be "' + type.loadKind + '", not "' + state.kind + '"');
+      if (null !== state.result && type.kind !== state.kind) {
+        throwError(state, 'unacceptable node kind for !<' + state.tag + '> tag; it should be "' + type.kind + '", not "' + state.kind + '"');
       }
 
-      if (type.loadResolver && !type.loadResolver(state)) { // `state.result` updated in resolver if matched
+      if (!type.resolve(state.result)) { // `state.result` updated in resolver if matched
         throwError(state, 'cannot resolve a node with !<' + state.tag + '> explicit tag');
+      } else {
+        state.result = type.construct(state.result);
       }
     } else {
       throwWarning(state, 'unknown tag !<' + state.tag + '>');
@@ -1418,35 +1378,34 @@ function composeNode(state, parentIndent, nodeContext, allowToSeek, allowCompact
   return null !== state.tag || null !== state.anchor || hasContent;
 }
 
-function readDocument(state, iterator) {
+function readDocument(state) {
   var documentStart = state.position,
       _position,
       directiveName,
       directiveArgs,
-      hasDirectives = false;
+      hasDirectives = false,
+      ch;
 
   state.version = null;
   state.checkLineBreaks = state.legacy;
   state.tagMap = {};
   state.anchorMap = {};
 
-  while (state.position < state.length) {
+  while (0 !== (ch = state.input.charCodeAt(state.position))) {
     skipSeparationSpace(state, true, -1);
 
-    if (state.lineIndent > 0 || CHAR_PERCENT !== state.character) {
+    ch = state.input.charCodeAt(state.position);
+
+    if (state.lineIndent > 0 || 0x25/* % */ !== ch) {
       break;
     }
 
     hasDirectives = true;
-    state.character = state.input.charCodeAt(++state.position);
+    ch = state.input.charCodeAt(++state.position);
     _position = state.position;
 
-    while (state.position < state.length &&
-           CHAR_SPACE           !== state.character &&
-           CHAR_TAB             !== state.character &&
-           CHAR_LINE_FEED       !== state.character &&
-           CHAR_CARRIAGE_RETURN !== state.character) {
-      state.character = state.input.charCodeAt(++state.position);
+    while (0 !== ch && !is_WS_OR_EOL(ch)) {
+      ch = state.input.charCodeAt(++state.position);
     }
 
     directiveName = state.input.slice(_position, state.position);
@@ -1456,37 +1415,31 @@ function readDocument(state, iterator) {
       throwError(state, 'directive name must not be less than one character in length');
     }
 
-    while (state.position < state.length) {
-      while (CHAR_SPACE === state.character || CHAR_TAB === state.character) {
-        state.character = state.input.charCodeAt(++state.position);
+    while (0 !== ch) {
+      while (is_WHITE_SPACE(ch)) {
+        ch = state.input.charCodeAt(++state.position);
       }
 
-      if (CHAR_SHARP === state.character) {
-        do { state.character = state.input.charCodeAt(++state.position); }
-        while (state.position < state.length &&
-               CHAR_LINE_FEED !== state.character &&
-               CHAR_CARRIAGE_RETURN !== state.character);
+      if (0x23/* # */ === ch) {
+        do { ch = state.input.charCodeAt(++state.position); }
+        while (0 !== ch && !is_EOL(ch));
         break;
       }
 
-      if (CHAR_LINE_FEED === state.character || CHAR_CARRIAGE_RETURN === state.character) {
+      if (is_EOL(ch)) {
         break;
       }
 
       _position = state.position;
 
-      while (state.position < state.length &&
-             CHAR_SPACE           !== state.character &&
-             CHAR_TAB             !== state.character &&
-             CHAR_LINE_FEED       !== state.character &&
-             CHAR_CARRIAGE_RETURN !== state.character) {
-        state.character = state.input.charCodeAt(++state.position);
+      while (0 !== ch && !is_WS_OR_EOL(ch)) {
+        ch = state.input.charCodeAt(++state.position);
       }
 
       directiveArgs.push(state.input.slice(_position, state.position));
     }
 
-    if (state.position < state.length) {
+    if (0 !== ch) {
       readLineBreak(state);
     }
 
@@ -1500,11 +1453,10 @@ function readDocument(state, iterator) {
   skipSeparationSpace(state, true, -1);
 
   if (0 === state.lineIndent &&
-      CHAR_MINUS === state.character &&
-      CHAR_MINUS === state.input.charCodeAt(state.position + 1) &&
-      CHAR_MINUS === state.input.charCodeAt(state.position + 2)) {
+      0x2D/* - */ === state.input.charCodeAt(state.position) &&
+      0x2D/* - */ === state.input.charCodeAt(state.position + 1) &&
+      0x2D/* - */ === state.input.charCodeAt(state.position + 2)) {
     state.position += 3;
-    state.character = state.input.charCodeAt(state.position);
     skipSeparationSpace(state, true, -1);
 
   } else if (hasDirectives) {
@@ -1519,18 +1471,18 @@ function readDocument(state, iterator) {
     throwWarning(state, 'non-ASCII line breaks are interpreted as content');
   }
 
-  iterator(state.result);
+  state.documents.push(state.result);
 
   if (state.position === state.lineStart && testDocumentSeparator(state)) {
-    if (CHAR_DOT === state.character) {
+
+    if (0x2E/* . */ === state.input.charCodeAt(state.position)) {
       state.position += 3;
-      state.character = state.input.charCodeAt(state.position);
       skipSeparationSpace(state, true, -1);
     }
     return;
   }
 
-  if (state.position < state.length) {
+  if (state.position < (state.length - 1)) {
     throwError(state, 'end of the stream or a document separator is expected');
   } else {
     return;
@@ -1538,9 +1490,15 @@ function readDocument(state, iterator) {
 }
 
 
-
-function loadAll(input, iterator, options) {
+function loadDocuments(input, options) {
+  input = String(input);
   options = options || {};
+
+  if (0 !== input.length &&
+      0x0A/* LF */ !== input.charCodeAt(input.length - 1) &&
+      0x0D/* CR */ !== input.charCodeAt(input.length - 1)) {
+    input += '\n';
+  }
 
   var state = new State(input, options);
 
@@ -1548,32 +1506,41 @@ function loadAll(input, iterator, options) {
     throwError(state, 'the stream contains non-printable characters');
   }
 
-  while (CHAR_SPACE === state.character) {
+  // Use 0 as string terminator. That significantly simplifies bounds check.
+  state.input += '\0';
+
+  while (0x20/* Space */ === state.input.charCodeAt(state.position)) {
     state.lineIndent += 1;
-    state.character = state.input.charCodeAt(++state.position);
+    state.position += 1;
   }
 
-  while (state.position < state.length) {
-    readDocument(state, iterator);
+  while (state.position < (state.length - 1)) {
+    readDocument(state);
+  }
+
+  return state.documents;
+}
+
+
+function loadAll(input, iterator, options) {
+  var documents = loadDocuments(input, options), index, length;
+
+  for (index = 0, length = documents.length; index < length; index += 1) {
+    iterator(documents[index]);
   }
 }
 
 
 function load(input, options) {
-  var result = null, received = false;
+  var documents = loadDocuments(input, options), index, length;
 
-  function iterator(data) {
-    if (!received) {
-      result = data;
-      received = true;
-    } else {
-      throw new YAMLException('expected a single document in the stream, but found more');
-    }
+  if (0 === documents.length) {
+    return undefined;
+  } else if (1 === documents.length) {
+    return documents[0];
+  } else {
+    throw new YAMLException('expected a single document in the stream, but found more');
   }
-
-  loadAll(input, iterator, options);
-
-  return result;
 }
 
 

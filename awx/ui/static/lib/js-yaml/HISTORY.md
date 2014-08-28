@@ -1,3 +1,31 @@
+3.2.1 / 2014-08-24
+------------------
+
+- Nothig new. Just fix npm publish error.
+
+
+3.2.0 / 2014-08-24
+------------------
+
+- Added input piping support to CLI.
+- Fixed typo, that could cause hand on initial indent (#139).
+
+
+3.1.0 / 2014-07-07
+------------------
+
+- 1.5x-2x speed boost.
+- Removed deprecated `require('xxx.yml')` support.
+- Significant code cleanup and refactoring.
+- Internal API changed. If you used custom types - see updated examples.
+  Others are not affected.
+- Even if the input string has no trailing line break character,
+  it will be parsed as if it has one.
+- Added benchmark scripts.
+- Moved bower files to /dist folder
+- Bugfixes.
+
+
 3.0.2 / 2014-02-27
 ------------------
 

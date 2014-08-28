@@ -1,20 +1,21 @@
 
-ALL_TESTS = $(shell find test/ -name '*.test.js')
+REPORTER = dot
 
-run-tests:
-	@./node_modules/.bin/expresso \
-		-I lib \
-		-I support \
-		--serial \
-		$(TESTS)
+build: socket.io.js
+
+socket.io.js: lib/*.js package.json
+	@./support/browserify.sh > socket.io.js
 
 test:
-	@$(MAKE) TESTS="$(ALL_TESTS)" run-tests
+	@./node_modules/.bin/mocha \
+		--reporter $(REPORTER) \
+		--bail \
+		test/index.js
+	@./node_modules/.bin/zuul -- test/index.js
 
-test-acceptance:
-	@node support/test-runner/app $(TRANSPORT)
-
-build:
-	@node ./bin/builder.js
+test-cov:
+	@./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- \
+		--reporter $(REPORTER) \
+		test/
 
 .PHONY: test

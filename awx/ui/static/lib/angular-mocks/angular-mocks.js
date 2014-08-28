@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.2.21
+ * @license AngularJS v1.2.23
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -1786,7 +1786,7 @@ angular.module('ngMockE2E', ['ng']).config(['$provide', function($provide) {
  * use the `passThrough` request handler of `when` instead of `respond`.
  *
  * Additionally, we don't want to manually have to flush mocked out requests like we do during unit
- * testing. For this reason the e2e $httpBackend automatically flushes mocked out requests
+ * testing. For this reason the e2e $httpBackend flushes mocked out requests
  * automatically, closely simulating the behavior of the XMLHttpRequest object.
  *
  * To setup the application to run with this http backend, you have to create a module that depends
@@ -2003,6 +2003,7 @@ if(window.jasmine || window.mocha) {
    * @description
    *
    * *NOTE*: This function is also published on window for easy access.<br>
+   * *NOTE*: This function is declared ONLY WHEN running tests with jasmine or mocha
    *
    * This function registers a module configuration code. It collects the configuration information
    * which will be used when the injector is created by {@link angular.mock.inject inject}.
@@ -2045,6 +2046,7 @@ if(window.jasmine || window.mocha) {
    * @description
    *
    * *NOTE*: This function is also published on window for easy access.<br>
+   * *NOTE*: This function is declared ONLY WHEN running tests with jasmine or mocha
    *
    * The inject function wraps a function into an injectable function. The inject() creates new
    * instance of {@link auto.$injector $injector} per test, which is then used for

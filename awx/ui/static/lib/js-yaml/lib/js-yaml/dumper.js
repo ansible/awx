@@ -81,8 +81,8 @@ function compileStyleMap(schema, map) {
 
     type = schema.compiledTypeMap[tag];
 
-    if (type && _hasOwnProperty.call(type.dumpStyleAliases, style)) {
-      style = type.dumpStyleAliases[style];
+    if (type && _hasOwnProperty.call(type.styleAliases, style)) {
+      style = type.styleAliases[style];
     }
 
     result[tag] = style;
@@ -139,7 +139,7 @@ function testImplicitResolving(state, str) {
   for (index = 0, length = state.implicitTypes.length; index < length; index += 1) {
     type = state.implicitTypes[index];
 
-    if (type.loadResolver && type.loadResolver({ result: str })) {
+    if (type.resolve(str)) {
       return true;
     }
   }
@@ -378,19 +378,19 @@ function detectType(state, object, explicit) {
   for (index = 0, length = typeList.length; index < length; index += 1) {
     type = typeList[index];
 
-    if ((type.dumpInstanceOf  || type.dumpPredicate) &&
-        (!type.dumpInstanceOf || (('object' === typeof object) && (object instanceof type.dumpInstanceOf))) &&
-        (!type.dumpPredicate  || type.dumpPredicate(object))) {
+    if ((type.instanceOf  || type.predicate) &&
+        (!type.instanceOf || (('object' === typeof object) && (object instanceof type.instanceOf))) &&
+        (!type.predicate  || type.predicate(object))) {
 
       state.tag = explicit ? type.tag : '?';
 
-      if (type.dumpRepresenter) {
-        style = state.styleMap[type.tag] || type.dumpDefaultStyle;
+      if (type.represent) {
+        style = state.styleMap[type.tag] || type.defaultStyle;
 
-        if ('[object Function]' === _toString.call(type.dumpRepresenter)) {
-          _result = type.dumpRepresenter(object, style);
-        } else if (_hasOwnProperty.call(type.dumpRepresenter, style)) {
-          _result = type.dumpRepresenter[style](object, style);
+        if ('[object Function]' === _toString.call(type.represent)) {
+          _result = type.represent(object, style);
+        } else if (_hasOwnProperty.call(type.represent, style)) {
+          _result = type.represent[style](object, style);
         } else {
           throw new YAMLException('!<' + type.tag + '> tag resolver accepts not "' + style + '" style');
         }
@@ -445,7 +445,7 @@ function writeNode(state, level, object, block, compact) {
   } else if (state.skipInvalid) {
     return false;
   } else {
-    throw new YAMLException('unacceptabe kind of an object to dump ' + type);
+    throw new YAMLException('unacceptable kind of an object to dump ' + type);
   }
 
   if (null !== state.tag && '?' !== state.tag) {

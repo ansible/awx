@@ -1,16 +1,13 @@
 'use strict';
 
-
 var Type = require('../type');
-
 
 var _hasOwnProperty = Object.prototype.hasOwnProperty;
 var _toString       = Object.prototype.toString;
 
-
-function resolveYamlOmap(state) {
+function resolveYamlOmap(data) {
   var objectKeys = [], index, length, pair, pairKey, pairHasKey,
-      object = state.result;
+      object = data;
 
   for (index = 0, length = object.length; index < length; index += 1) {
     pair = object[index];
@@ -44,8 +41,7 @@ function resolveYamlOmap(state) {
   return true;
 }
 
-
 module.exports = new Type('tag:yaml.org,2002:omap', {
-  loadKind: 'sequence',
-  loadResolver: resolveYamlOmap
+  kind: 'sequence',
+  resolve: resolveYamlOmap
 });

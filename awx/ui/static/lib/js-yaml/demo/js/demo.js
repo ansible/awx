@@ -7,23 +7,14 @@ window.runDemo = function runDemo() {
   var source, result, initial, permalink, timer1, timer2 = null,
       fallback = document.getElementById('source').value || '';
 
-  // add sexy constructor
-  var sexyType = new jsyaml.Type('!sexy', {
-    loadKind: 'sequence', // See node kinds in YAML spec: http://www.yaml.org/spec/1.2/spec.html#kind//
-    loadResolver: function (state) {
-      // You can access actual data from YAML via `state.result`.
-      // After the resolving, you should put the resolved value into `state.result`.
-      var index, length;
-
-      for (index = 0, length = state.result.length; index < length; index += 1) {
-        state.result[index] = 'sexy ' + state.result[index];
-      }
-      
-      return true;
+  var SexyYamlType = new jsyaml.Type('!sexy', {
+    kind: 'sequence', // See node kinds in YAML spec: http://www.yaml.org/spec/1.2/spec.html#kind//
+    construct: function (data) {
+      return data.map(function (string) { return 'sexy ' + string; });
     }
   });
 
-  var SEXY_SCHEMA = jsyaml.Schema.create([ sexyType ]);
+  var SEXY_SCHEMA = jsyaml.Schema.create([ SexyYamlType ]);
 
   function parse() {
     var str, obj;

@@ -7,7 +7,7 @@ var util = require('util');
 var yaml = require('../lib/js-yaml');
 
 
-// Let define a couple of classes...
+// Let's define a couple of classes.
 
 function Point(x, y, z) {
   this.klass = 'Point';
@@ -31,55 +31,57 @@ function Space(height, width, points) {
 }
 
 
-// Let's define YAML types to load and dump our Point/Space objects.
+// Then define YAML types to load and dump our Point/Space objects.
 
-var pointYamlType = new yaml.Type('!point', {
-  //
-  // The information used to load a Point.
-  //
-  loadKind: 'sequence', // See node kinds in YAML spec: http://www.yaml.org/spec/1.2/spec.html#kind//
-  loadResolver: function (state) {
-    // You can access actual data from YAML via `state.result`.
-    // After the resolving, you should put the resolved value into `state.result`.
+var PointYamlType = new yaml.Type('!point', {
+  // Loader must parse sequence nodes only for this type (i.e. arrays in JS terminology).
+  // Other available kinds are 'scalar' (string) and 'mapping' (object).
+  // http://www.yaml.org/spec/1.2/spec.html#kind//
+  kind: 'sequence',
 
-    if (3 === state.result.length) { // `state.result`
-      state.result = new Point(state.result[0], state.result[1], state.result[2]);
-      return true; // Resolved successfully.
-    } else {
-      return false; // Can't resolve.
-    }
+  // Loader must check if the input object is suitable for this type.
+  resolve: function (data) {
+    // `data` may be either:
+    // - Null in case of an "empty node" (http://www.yaml.org/spec/1.2/spec.html#id2786563)
+    // - Array since we specified `kind` to 'sequence'
+    return data !== null && data.length === 3;
   },
-  //
-  // The information used to dump a Point.
-  //
-  dumpInstanceOf: Point, // Dump only instances of Point constructor as this YAML type.
-  dumpRepresenter: function (point) {
-    // Represent in YAML as three-element sequence.
+
+  // If a node is resolved, use it to create a Point instance.
+  construct: function (data) {
+    return new Point(data[0], data[1], data[2]);
+  },
+
+  // Dumper must process instances of Point by rules of this YAML type.
+  instanceOf: Point,
+
+  // Dumper must represent Point objects as three-element sequence in YAML.
+  represent: function (point) {
     return [ point.x, point.y, point.z ];
   }
 });
 
 
-var spaceYamlType = new yaml.Type('!space', {
-  loadKind: 'mapping',
-  loadResolver: function (state) {
-    state.result = new Space(state.result.height, state.result.width, state.result.points);
-    return true;
+var SpaceYamlType = new yaml.Type('!space', {
+  kind: 'mapping',
+  construct: function (data) {
+    data = data || {}; // in case of empty node
+    return new Space(data.height || 0, data.width || 0, data.points || []);
   },
-  dumpInstanceOf: Space
-  // `dumpRepresenter` is omitted here. So, Space objects will be dumped as is.
+  instanceOf: Space
+  // `represent` is omitted here. So, Space objects will be dumped as is.
   // That is regular mapping with three key-value pairs but with !space tag.
 });
 
 
 // After our types are defined, it's time to join them into a schema.
 
-var SPACE_SCHEMA = yaml.Schema.create([ spaceYamlType, pointYamlType ]);
+var SPACE_SCHEMA = yaml.Schema.create([ SpaceYamlType, PointYamlType ]);
 
 
 // And read a document using that schema.
 
-fs.readFile(path.join(__dirname, 'custom_types.yaml'), 'utf8', function (error, data) {
+fs.readFile(path.join(__dirname, 'custom_types.yml'), 'utf8', function (error, data) {
   var loaded;
 
   if (!error) {
@@ -95,6 +97,6 @@ fs.readFile(path.join(__dirname, 'custom_types.yaml'), 'utf8', function (error, 
 
 module.exports.Point         = Point;
 module.exports.Space         = Space;
-module.exports.pointYamlType = pointYamlType;
-module.exports.spaceYamlType = spaceYamlType;
+module.exports.PointYamlType = PointYamlType;
+module.exports.SpaceYamlType = SpaceYamlType;
 module.exports.SPACE_SCHEMA  = SPACE_SCHEMA;

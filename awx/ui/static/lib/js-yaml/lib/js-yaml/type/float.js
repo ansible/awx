@@ -1,8 +1,7 @@
 'use strict';
 
-
-var Type = require('../type');
-
+var common = require('../common');
+var Type   = require('../type');
 
 var YAML_FLOAT_PATTERN = new RegExp(
   '^(?:[-+]?(?:[0-9][0-9_]*)\\.[0-9_]*(?:[eE][-+][0-9]+)?' +
@@ -11,16 +10,19 @@ var YAML_FLOAT_PATTERN = new RegExp(
   '|[-+]?\\.(?:inf|Inf|INF)' +
   '|\\.(?:nan|NaN|NAN))$');
 
+function resolveYamlFloat(data) {
+  var value, sign, base, digits;
 
-function resolveYamlFloat(state) {
-  var value, sign, base, digits,
-      object = state.result;
-
-  if (!YAML_FLOAT_PATTERN.test(object)) {
+  if (!YAML_FLOAT_PATTERN.test(data)) {
     return false;
   }
+  return true;
+}
 
-  value  = object.replace(/_/g, '').toLowerCase();
+function constructYamlFloat(data) {
+  var value, sign, base, digits;
+
+  value  = data.replace(/_/g, '').toLowerCase();
   sign   = '-' === value[0] ? -1 : 1;
   digits = [];
 
@@ -29,12 +31,10 @@ function resolveYamlFloat(state) {
   }
 
   if ('.inf' === value) {
-    state.result = (1 === sign) ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
-    return true;
+    return (1 === sign) ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
 
   } else if ('.nan' === value) {
-    state.result = NaN;
-    return true;
+    return NaN;
 
   } else if (0 <= value.indexOf(':')) {
     value.split(':').forEach(function (v) {
@@ -49,15 +49,12 @@ function resolveYamlFloat(state) {
       base *= 60;
     });
 
-    state.result = sign * value;
-    return true;
+    return sign * value;
 
   } else {
-    state.result = sign * parseFloat(value, 10);
-    return true;
+    return sign * parseFloat(value, 10);
   }
 }
-
 
 function representYamlFloat(object, style) {
   if (isNaN(object)) {
@@ -87,22 +84,23 @@ function representYamlFloat(object, style) {
     case 'camelcase':
       return '-.Inf';
     }
+  } else if (common.isNegativeZero(object)) {
+    return '-0.0';
   } else {
     return object.toString(10);
   }
 }
 
-
 function isFloat(object) {
   return ('[object Number]' === Object.prototype.toString.call(object)) &&
-         (0 !== object % 1);
+         (0 !== object % 1 || common.isNegativeZero(object));
 }
 
-
 module.exports = new Type('tag:yaml.org,2002:float', {
-  loadKind: 'scalar',
-  loadResolver: resolveYamlFloat,
-  dumpPredicate: isFloat,
-  dumpRepresenter: representYamlFloat,
-  dumpDefaultStyle: 'lowercase'
+  kind: 'scalar',
+  resolve: resolveYamlFloat,
+  construct: constructYamlFloat,
+  predicate: isFloat,
+  represent: representYamlFloat,
+  defaultStyle: 'lowercase'
 });

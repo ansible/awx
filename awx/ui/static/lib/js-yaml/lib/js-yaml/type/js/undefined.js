@@ -1,28 +1,27 @@
 'use strict';
 
-
 var Type = require('../../type');
 
-
-function resolveJavascriptUndefined(state) {
-  state.result = undefined;
+function resolveJavascriptUndefined() {
   return true;
 }
 
-
-function representJavascriptUndefined(/*object, explicit*/) {
-  return '';
+function constructJavascriptUndefined() {
+  return undefined;
 }
 
+function representJavascriptUndefined() {
+  return '';
+}
 
 function isUndefined(object) {
   return 'undefined' === typeof object;
 }
 
-
 module.exports = new Type('tag:yaml.org,2002:js/undefined', {
-  loadKind: 'scalar',
-  loadResolver: resolveJavascriptUndefined,
-  dumpPredicate: isUndefined,
-  dumpRepresenter: representJavascriptUndefined
+  kind: 'scalar',
+  resolve: resolveJavascriptUndefined,
+  construct: constructJavascriptUndefined,
+  predicate: isUndefined,
+  represent: representJavascriptUndefined
 });
