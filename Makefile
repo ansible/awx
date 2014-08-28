@@ -48,6 +48,7 @@ clean:
 	rm -rf build rpm-build *.egg-info
 	rm -rf debian deb-build
 	rm -f awx/ui/static/{js,css}/awx*.{js,css}
+	rm -rf awx/ui/static/docs
 	rm -rf node_modules package.json Gruntfile.js bower.json
 	find . -type f -regex ".*\.py[co]$$" -delete
 
