@@ -241,6 +241,7 @@ angular.module('StreamListDefinition', [])
         actions: {
             refresh: {
                 mode: 'all',
+                id: 'activity-stream-refresh-btn',
                 'class': 'btn-xs',
                 awToolTip: "Refresh the page",
                 ngClick: "refreshStream()"
