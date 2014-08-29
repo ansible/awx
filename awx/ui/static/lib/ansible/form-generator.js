@@ -21,10 +21,11 @@
  *
  * | Parameter | Required | Description |
  * | --------- | -------- | ----------- |
- * | mode | Y | 'add', 'edit' or 'modal'. Use add when creating new data - creating a new orgranization, for example. Use edit when modifying existing data. Modal is deprecated. Use the 'id' option to inject a form into a modal dialog. |
- * | id | | The ID attribute value of the DOM elment that will receive the generated HTML. If provided, form generator will inject the HTML it genertates into the DOM element identified by the string value provided. Do not preceed the value with '#' |
  * | html |  | String of HTML to be injected. Overrides HTML that would otherwise be generated using the form object. (Not sure if this is actually used anywhere.) |
+ * | id | | The ID attribute value of the DOM elment that will receive the generated HTML. If provided, form generator will inject the HTML it genertates into the DOM element identified by the string value provided. Do not preceed the value with '#' |
+ * | mode | Y | 'add', 'edit' or 'modal'. Use add when creating new data - creating a new orgranization, for example. Use edit when modifying existing data. Modal is deprecated. Use the 'id' option to inject a form into a modal dialog. |
  * | scope |  | Reference to $scope object. Will be passed to $compile and associated with any angular directives contained within the generated HTML. |
+ * | breadCrumbs | | true or false. If false, breadcrumbs will not be inlcluded in the generated HTML. |
  *
  * # Generate HTML Only
  *
@@ -40,6 +41,23 @@
  *
  * Call GenerateFrom.reset() to clear user input, remove error messages and return the angular form object back to a pristine state. This is should be called when the user clicks the Reset button.
  *
+ * # Form definitions
+ *
+ * See forms/*.js for examples.
+ *
+ * The form object can have the following attributes:
+ *
+ * | Atribute | Description |
+ * | -------- | ----------- |
+ * | addTitle | Title to use in breadcrumbs when the form mode is 'add' |
+ * | editTitle | Title to use in breadcrumbs when the form mode is 'edit' |
+ * | name | Name to give the form object. Used to create the id and name attribute values in the <form> element. |
+ * | well | true or false. If true, wraps the with &lt;div class=&quot;aw-form-well&quot;&gt;&lt;/div&gt; |
+ * | collapse | true or false. If true, places the form inside a jQueryUI accordion |
+ * | collapseTitle | Text to use in the &lt;h3&gt; element of the accordion. Typically this will be 'Properties' |
+ * | collapseMode | 'add' or 'edit'. If the value of the mode parameter passed into .inject() or .buildHTML() matches collapseMode, the &lt;form&gt; will be placed in an accordion. |
+ * | collapseOpen |  true or false. If true, the accordion will be open the first time the user views the form, or if no state information is found in local storage for the accordion. Subsequent views will depend on accordion state found in local storage. Each time user opens/closes an accordion the state is saved in local storage. |
+ * | collapseOpenFirst | true or false. If true, the collapse will be open everytime the accordion is viewed, regardless of state data found in local storage. |
  *
  */
 
