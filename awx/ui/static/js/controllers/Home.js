@@ -25,12 +25,12 @@
  *                  Host count graph should only be loaded if the user is a super user
  *
 */
-function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, DashboardCounts, HostGraph, JobStatusGraph, HostPieChart, DashboardJobs,
+function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, HostGraph, JobStatusGraph, HostPieChart, DashboardJobs,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button){
 
     ClearScope('home');
 
-    var buttons, html, e, waitCount, loadedCount,borderStyles;
+    var buttons, html, e, waitCount, loadedCount,borderStyles, jobs_scope, schedule_scope;
 
     // Add buttons to the top of the Home page. We're using lib/ansible/generator_helpers.js-> Buttons()
     // to build buttons dynamically and insure all styling and icons match the rest of the application.
@@ -77,8 +77,12 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
     if ($scope.removeWidgetLoaded) {
         $scope.removeWidgetLoaded();
     }
-    $scope.removeWidgetLoaded = $scope.$on('WidgetLoaded', function () {
+    $scope.removeWidgetLoaded = $scope.$on('WidgetLoaded', function (e, label, jobscope, schedulescope) {
         // Once all the widgets report back 'loaded', turn off Wait widget
+        if(label==="dashboard_jobs"){
+            jobs_scope = jobscope;
+            schedule_scope = schedulescope;
+        }
         loadedCount++;
         if (loadedCount === waitCount) {
             $(window).resize(_.debounce(function() {
@@ -91,8 +95,6 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             Wait('stop');
         }
     });
-
-
 
     if ($scope.removeDashboardReady) {
         $scope.removeDashboardReady();
@@ -135,8 +137,6 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
         else{
             $('#dash-host-count-graph').remove(); //replaceWith("<div id='dash-host-count-graph' class='left-side col-sm-12 col-xs-12'></div>");
         }
-
-
         DashboardJobs({
             scope: $scope,
             target: 'dash-jobs-list',
@@ -148,6 +148,23 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
             dashboard: data
         });
 
+    });
+
+    if ($rootScope.removeJobStatusChange) {
+        $rootScope.removeJobStatusChange();
+    }
+    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function() {
+        jobs_scope.refreshJobs();
+        $scope.$emit('ReloadJobStatusGraph');
+
+    });
+
+    if ($rootScope.removeScheduleChange) {
+        $rootScope.removeScheduleChange();
+    }
+    $rootScope.removeScheduleChange = $rootScope.$on('ScheduleChange', function() {
+        schedule_scope.refreshSchedules();
+        $scope.$emit('ReloadJobStatusGraph');
     });
 
     $scope.showActivity = function () {
@@ -174,7 +191,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, Wait, Dashb
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'DashboardCounts', 'HostGraph','JobStatusGraph', 'HostPieChart', 'DashboardJobs',
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'HostGraph','JobStatusGraph', 'HostPieChart', 'DashboardJobs',
     'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
 ];
 

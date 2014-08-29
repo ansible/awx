@@ -5,8 +5,8 @@
  *  config.js
  *
  *  Gobal configuration variables for controlling application behavior.
- * 
- *  Do NOT change this file, unless the changes should be included in 
+ *
+ *  Do NOT change this file, unless the changes should be included in
  *  production builds. For development, copy this file to local_config.js,
  *  and make changes.  git will ignore local_config.js
  *

@@ -55,7 +55,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
             listCount++;
             if (listCount === 1) {
                 //api_complete = true;
-                scope.$emit('WidgetLoaded');
+                scope.$emit('WidgetLoaded', "dashboard_jobs",  jobs_scope, scheduled_scope);
             }
         });
 

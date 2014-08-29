@@ -81,6 +81,13 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                         });
                 }
 
+                if ($rootScope.removeReloadJobStatusGraph) {
+                    $rootScope.removeReloadJobStatusGraph();
+                }
+                $rootScope.removeReloadJobStatusGraph = $rootScope.$on('ReloadJobStatusGraph', function() {
+                    createGraph();
+                });
+
                 element = angular.element(document.getElementById(target));
                 element.html(html);
                 $compile(element)(scope);
