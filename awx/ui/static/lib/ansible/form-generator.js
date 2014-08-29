@@ -5,10 +5,41 @@
  *  @ngdoc function
  *  @name lib.ansible.function:form-generator
  *  @description
- * FormGenerator
  *
- * Pass in a form definition and get back an html template. Use the.inject() method
- * to add the template to the DOM and compile.
+ * Generate form HTML from a form object. Form objects are found in /forms.
+ *
+ * #Generate and Inject Form
+ *
+ * To generate a form and inject it into the DOM the default method call is:
+ *
+ * ```
+ * GenerateForm.inject(form, { mode: 'edit', related: true, scope: $scope});
+ * ```
+ * Expects 2 parameters where the first is a reference to a form object, and the second is an object of key/value parameter pairs. Returns the $scope object associated with the generated HTML.
+ *
+ * Parameters that can be passed:
+ *
+ * | Parameter | Required | Description |
+ * | --------- | -------- | ----------- |
+ * | mode | Y | 'add', 'edit' or 'modal'. Use add when creating new data - creating a new orgranization, for example. Use edit when modifying existing data. Modal is deprecated. Use the 'id' option to inject a form into a modal dialog. |
+ * | id | | The ID attribute value of the DOM elment that will receive the generated HTML. If provided, form generator will inject the HTML it genertates into the DOM element identified by the string value provided. Do not preceed the value with '#' |
+ * | html |  | String of HTML to be injected. Overrides HTML that would otherwise be generated using the form object. (Not sure if this is actually used anywhere.) |
+ * | scope |  | Reference to $scope object. Will be passed to $compile and associated with any angular directives contained within the generated HTML. |
+ *
+ * # Generate HTML Only
+ *
+ * To generate the HTML only and not inject it into the DOM use the buildHTML() method:
+ *
+ * ```
+ * GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
+ * ```
+ *
+ * Pass the same parameters as above. Returns a string containing the generated HTML.
+ *
+ * # Reset Form
+ *
+ * Call GenerateFrom.reset() to clear user input, remove error messages and return the angular form object back to a pristine state. This is should be called when the user clicks the Reset button.
+ *
  *
  */
 
@@ -38,7 +69,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
 
             inject: function (form, options) {
                 //
-                // Use to inject the form as html into the view.  View MUST have an ng-bind for 'htmlTemplate'.t
+                // Use to inject the form as html into the view.  View MUST have an ng-bind for 'htmlTemplate'.
                 // Returns scope of form.
                 //
 
