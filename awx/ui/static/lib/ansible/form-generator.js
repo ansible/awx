@@ -47,6 +47,12 @@
 
 angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator'])
 
+/**
+* @ngdoc method
+* @name lib.ansible.function:form#GenerateForm
+* @methodOf lib.ansible.function:form
+* @description this is the most commonly used function when generating the html for forms
+*/
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'GenerateList', 'SearchWidget', 'PaginateWidget', 'Attr',
     'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty', 'SelectIcon', 'Store',
     function ($rootScope, $location, $compile, GenerateList, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink,

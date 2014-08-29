@@ -131,7 +131,10 @@ angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/jobs.html',
                 controller: 'JobsListController'
             }).
+            // when('/portal', {
+            //     controller: 'Portal'
 
+            // })
             when('/jobs/:id', {
                 templateUrl: urlPrefix + 'partials/job_detail.html',
                 controller: 'JobDetailController'

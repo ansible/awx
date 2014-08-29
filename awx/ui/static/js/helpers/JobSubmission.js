@@ -376,7 +376,13 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
     };
 }])
-
+/**
+* @ngdoc method
+* @name helpers.function:JobSubmission#PlaybookRun
+* @methodOf helpers.function:JobSubmission
+* @description The playbook Run function is run when the user clicks the launch button
+*
+*/
 // Submit request to run a playbook
 .factory('PlaybookRun', ['$location','$routeParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors', 'Wait', 'Empty', 'PromptForCredential', 'PromptForVars',
     function ($location, $routeParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty, PromptForCredential, PromptForVars) {

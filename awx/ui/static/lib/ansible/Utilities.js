@@ -204,7 +204,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 else {
                     Alert('Error!', data.__all__);
                 }
-            } else if (form) {
+            } else if (form) {  //if no error code is detected it begins to loop through to see where the api threw an error
                 fieldErrors = false;
                 for (field in form.fields) {
                     if (data[field] && form.fields[field].tab) {
