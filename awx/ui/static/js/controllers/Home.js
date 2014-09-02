@@ -69,10 +69,8 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 
     if (!$routeParams.login) {
         // If we're not logging in, start the Wait widget. Otherwise, it's already running.
-        Wait('start');
+        //Wait('start');
     }
-
-
 
     if ($scope.removeWidgetLoaded) {
         $scope.removeWidgetLoaded();
@@ -86,13 +84,12 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
         loadedCount++;
         if (loadedCount === waitCount) {
             $(window).resize(_.debounce(function() {
-                Wait('start');
                 $scope.$emit('ResizeJobGraph');
                 $scope.$emit('ResizeHostGraph');
                 $scope.$emit('ResizeHostPieGraph');
+                Wait('stop');
             }, 500));
             $(window).resize();
-            Wait('stop');
         }
     });
 
@@ -182,7 +179,6 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
                 $scope.$emit('dashboardReady', data);
             })
             .error(function (data, status) {
-                Wait('stWaitop');
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
             });
     };

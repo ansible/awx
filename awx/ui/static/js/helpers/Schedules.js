@@ -557,6 +557,7 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 id = params.id,
                 url = params.url,
                 pageSize = params.pageSize || 5,
+                spinner = (params.spinner === undefined) ? true : params.spinner,
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 e, html;
 
@@ -627,6 +628,6 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 scope[list.iterator + 'SearchFieldLabel'] = 'ID';
             }
 
-            scope.search(list.iterator);
+            scope.search(list.iterator, null, null, null, null, spinner);
         };
     }]);

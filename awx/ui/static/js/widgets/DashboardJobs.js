@@ -73,7 +73,8 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
                 list: JobsList,
                 id: 'active-jobs',
                 url: GetBasePath('unified_jobs') + '?status__in=running,completed,failed,successful,error,canceled',
-                pageSize: max_rows
+                pageSize: max_rows,
+                spinner: false
             });
             LoadSchedulesScope({
                 parent_scope: scope,
@@ -81,7 +82,8 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
                 list: ScheduledJobsList,
                 id: 'scheduled-jobs-tab',
                 url: GetBasePath('schedules') + '?next_run__isnull=false',
-                pageSize: max_rows
+                pageSize: max_rows,
+                spinner: false
             });
 
             $(window).resize(_.debounce(function() {
@@ -162,9 +164,9 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
         function resizeDashboardJobsWidget() {
             setDashboardJobsHeight();
             jobs_scope[JobsList.iterator + '_page_size'] = max_rows;
-            jobs_scope.changePageSize(JobsList.name, JobsList.iterator);
+            jobs_scope.changePageSize(JobsList.name, JobsList.iterator, false);
             scheduled_scope[ScheduledJobsList.iterator + '_page_size'] = max_rows;
-            scheduled_scope.changePageSize(ScheduledJobsList.name, ScheduledJobsList.iterator);
+            scheduled_scope.changePageSize(ScheduledJobsList.name, ScheduledJobsList.iterator, false);
         }
 
 

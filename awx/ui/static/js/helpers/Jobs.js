@@ -359,6 +359,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             pageSize = params.pageSize || 5,
             base = $location.path().replace(/^\//, '').split('/')[0],
             search_params = params.searchParams,
+            spinner = (params.spinner === undefined) ? true : params.spinner,
             e, html, key;
 
         // Add the search widget. We want it arranged differently, so we're injecting and compiling it separately
@@ -416,7 +417,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 scope[key] = search_params[key];
             }
         }
-        scope.search(list.iterator);
+        scope.search(list.iterator, null, null, null, null, spinner);
     };
 }])
 

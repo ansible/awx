@@ -147,14 +147,16 @@ angular.module('PaginationHelpers', ['Utilities', 'RefreshHelper', 'RefreshRelat
                 return (page === scope[iterator + '_page']) ? 'active' : '';
             };
 
-            scope.changePageSize = function (set, iterator) {
+            scope.changePageSize = function (set, iterator, spinner) {
                 // Called whenever a new page size is selected
                 scope[iterator + '_page'] = 1;
                 var new_url = scope[iterator + '_url'].replace(/\?page_size\=\d+/, ''),
                     connect = (/\/$/.test(new_url)) ? '?' : '&';
                 new_url += (scope[iterator + 'SearchParams']) ? connect + scope[iterator + 'SearchParams'] + '&page_size=' + scope[iterator + '_page_size'] :
                     connect + 'page_size=' + scope[iterator + '_page_size'];
-                Wait('start');
+                if (spinner === undefined  || spinner === true) {
+                    Wait('start');
+                }
                 Refresh({ scope: scope, set: set, iterator: iterator, url: new_url });
             };
         };
