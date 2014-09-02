@@ -26,8 +26,9 @@
  * | mode | Y | 'add', 'edit' or 'modal'. Use add when creating new data - creating a new orgranization, for example. Use edit when modifying existing data. Modal is deprecated. Use the 'id' option to inject a form into a modal dialog. |
  * | scope |  | Reference to $scope object. Will be passed to $compile and associated with any angular directives contained within the generated HTML. |
  * | breadCrumbs | | true or false. If false, breadcrumbs will not be inlcluded in the generated HTML. |
+ * | showButtons | | true or false. If false, buttons defined in the buttons object will not be included in the generated HTML. |
  *
- * # Generate HTML Only
+ * #Generate HTML Only
  *
  * To generate the HTML only and not inject it into the DOM use the buildHTML() method:
  *
@@ -37,40 +38,103 @@
  *
  * Pass the same parameters as above. Returns a string containing the generated HTML.
  *
- * # Reset Form
+ * #Reset Form
  *
  * Call GenerateFrom.reset() to clear user input, remove error messages and return the angular form object back to a pristine state. This is should be called when the user clicks the Reset button.
  *
- * # Form definitions
+ * #Form definitions
  *
  * See forms/*.js for examples.
  *
  * The form object can have the following attributes:
  *
- * | Atribute | Description |
- * | -------- | ----------- |
+ * | Attribute | Description |
+ * | --------- | ----------- |
  * | addTitle | Title to use in breadcrumbs when the form mode is 'add' |
- * | editTitle | Title to use in breadcrumbs when the form mode is 'edit' |
- * | name | Name to give the form object. Used to create the id and name attribute values in the <form> element. |
- * | well | true or false. If true, wraps the with &lt;div class=&quot;aw-form-well&quot;&gt;&lt;/div&gt; |
+ * | breadCrumbs | true or false. Breadcrumbs are included at the top of the page by default. If set to false, breadcrumbs will not be included at the top of the page. |
  * | collapse | true or false. If true, places the form inside a jQueryUI accordion |
- * | collapseTitle | Text to use in the &lt;h3&gt; element of the accordion. Typically this will be 'Properties' |
  * | collapseMode | 'add' or 'edit'. If the value of the mode parameter passed into .inject() or .buildHTML() matches collapseMode, the &lt;form&gt; will be placed in an accordion. |
  * | collapseOpen |  true or false. If true, the accordion will be open the first time the user views the form, or if no state information is found in local storage for the accordion. Subsequent views will depend on accordion state found in local storage. Each time user opens/closes an accordion the state is saved in local storage. |
  * | collapseOpenFirst | true or false. If true, the collapse will be open everytime the accordion is viewed, regardless of state data found in local storage. |
+ * | collapseTitle | Text to use in the &lt;h3&gt; element of the accordion. Typically this will be 'Properties' |
+ * | name | Name to give the form object. Used to create the id and name attribute values in the <form> element. |
+ * | showActions | true or false. By default actions found in the actions object will be displayed at the top of the page. If set to false, actions will not be displayed. |
+ * | twoColumns | true or false. By default fields are placed in a single vertical column following the Basic Example in the [Bootstrap form documentation](http://getbootstrap.com/css/#forms). Set to true for a 2 column layout as seen on the Job Templates detail page.|
+ * | well | true or false. If true, wraps the with &lt;div class=&quot;aw-form-well&quot;&gt;&lt;/div&gt; |
  *
+ * The form object will contain a fields object to hold the definiation of each field in the form. Attributes on a field object determine the HTML generated for the actual &lt;input&gt; or &lt;textarea&gt; element. Fields can have the following attributes:
+ *
+ * | Attribute | Description |
+ * | --------- | ----------- |
+ * | addRequired | true or false. If true, set the required attribute when mode is 'add'. |
+ * | awPopOver | Adds aw-pop-over directive. Set to a string containing the text or html to be evaluated by the directive. |
+ * | awPopOverWatch | Causes the awPopOver directive to add a $scope.$watch on the specified scop variable. When the value of the variable changes the popover text will be updated with the change. |
+ * | awRequiredWhen | Adds aw-required-when directive. Set to an object to be evaluated by the directive. |
+ * | capitalize | true or false. If true, apply the 'capitalize' filter to the field. |
+ * | class | String cotaining one or more CSS class values. |
+ * | column | If the twoColumn option is being used, supply an integer value of 1 or 2 representing the column in which to place the field. 1 places the field in the left column, and 2 places it on the right. |
+ * | dataContainer | Used with awPopOver. String providing the containment parameter. |
+ * | dataPlacement | Used with awPopOver and awToolTip. String providing the placement parameter (i.e. left, right, top, bottom, etc.). |
+ * | dataTitle | Used with awPopOver. String value for the title of the popover. |
+ * | default | Default value to place in the field when the form is in 'add' mode. |
+ * | editRequird | true or false. If true, set the required attribute when mode is 'edit'. |
+ * | falseValue | For radio buttons and checkboxes. Value to set the model to when the checkbox or radio button is not selected. |
+ * | genMD5 | true or false. If true, places the field in an input group with a button that when clicked replaces the field contents with an MD5 has key. Used with host_config_key on the job templates detail page. |
+ * | integer | Adds the integer directive to validate that the value entered is of type integer. Add min and max to supply lower and upper range bounds to the entered value. |
+ * | label | Text to use as &lt;label&gt; element for the field |
+ * | ngChange | Adds ng-change directive. Set to the JS expression to be evaluated by ng-change. |
+ * | ngClick | Adds ng-click directive. Set to the JS expression to be evaluated by ng-click. |
+ * | ngHide | Adds ng-hide directive. Set to the JS expression to be evaluated by ng-hide. |
+ * | ngShow | Adds ng-show directive. Set to the JS expression to be evaluated by ng-show. |
+ * | readonly | Defaults to false. When true the readonly attribute is set, disallowing changes to field content. |
+ * | rows | Integer value used to set the row attribute for a textarea. |
+ * | sourceModel | Used in conjunction with sourceField when the data for the field is part of the summary_fields object returned by the API. Set to the name of the summary_fields object that contains the field. For example, the job_templates object returned by the API contains summary_fields.inventory. |
+ * | sourceField | String containing the summary_field.object.field name from the API summary_field object. For example, if a fields should be associated to the summary_fields.inventory.name, set the sourceModel to 'inventory' and the sourceField to 'name'. |
+ * | spinner | true or false. If true, adds aw-spinner directive. Optionally add min and max attributes to control the range of allowed values. |
+ * | type | String containing one of the following types defined in buildField: alertblock, hidden, text, password, email, textarea, select, number, checkbox, checkbox_group, radio, radio_group, lookup, custom. |
+ * | trueValue | For radio buttons and checkboxes. Value to set the model to when the checkbox or radio button is selected. |
+ *
+ * The form object contains a buttons object for defining any buttons to be included in the generated HTML. Generally all forms will have a Reset and a Submit button. If no buttons should be generated define buttons as an empty object, or set the showButtons option to false.
+ *
+ * The icon used for the button is determined by SelectIcon() found in lib/ansible/generator-helpers.js.
+ *
+ * | Attribute | Description |
+ * | --------- | ----------- |
+ * | class | If the name of the button is reset or save, the class is automatically set to the correct bootstrap btn class for the color. Otherwise, provide a string with any classes to be added to the &lt;button&gt element. |
+ * | label | For reset and save buttons the label is automatically set. For other types of buttons set label to the text string that should appear in the button. |
+ * | ngClick | Adds the ng-click directive to the button. Set to the JS expression for the ng-click directive to evaluate. |
+ * | ngDisabled | Only partially implemented at this point. For buttons other than reset, the ng-disabled directive is always added. The button will be disabled when the form is in an invalid state. |
+ *
+ * The form object may contain an actions object. The action object can contain one or more button definitions for buttons to appear in the top-right corner of the form. This may include activity stream, refresh, properties, etc. Each button object defined in actions may have the following attributes:
+ *
+ * | Attribute | Description |
+ * | --------- | ----------- |
+ * | awToolTip | Text or html to display in the button tooltip. Adds the aw-tool-tip directive. |
+ * | class | Optional classes to add to the &lt;button&gt; element. |
+ * | dataPlacement | Set the placement attribute of the tooltip - left, right, top, bottom, etc. |
+ * | ngClick | Set to the JS expression to be evaluated by the ng-click directive. |
+ * | mode | Set to edit or add, depending on which mode the button  |
+ * |
+ *
+ * The form object may contain a related object. The related object contains one or more list objects defining sublists to display in accordions. For example, the Organization form contains a related users list and admins list.
+ *
+ * As originally conceived sublists were stored inside the form definition without regard to any list definitions found in the lists folder. In other words, lists/Users.js is completely different from the related.users object found in forms/Organizations.js. In reality they
+ * are very similar and lists/Users.js should be used to generate the users sublist on the organizations detail page.
+ *
+ * One approach to making this work and using list definintion inside a from was implemented in forms/JobTemplates.js. In controllers/JobTemplates.js within JobTemplatesEdit() the form object is created by calling the JobTemplateForm() method found in forms/JobTemplates.js. The
+ * method injects the SchedulesList and CompletedJobsList into the form object as related sets. Going forward this approach or similar should be used whenever a sublist needs to be added to a form.
+ *
+ * #Variable editing
+ *
+ * If the field type is textarea and the name is one of variables, extra_vars, inventory_variables or source_vars, then the parse type radio button group is added. This is the radio button group allowing the user to switch between JSON and YAML.
+ *
+ * Applying CodeMirror to the text area is handled by ParseTypeChange() found in helpers/Parse.js. Within the controller will be a call to ParseTypeChange that creates the CodeMirror object and sets up the required $scope methods for handles getting, settting and type conversion.
  */
 
 'use strict';
 
 angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator'])
 
-/**
-* @ngdoc method
-* @name lib.ansible.function:form#GenerateForm
-* @methodOf lib.ansible.function:form
-* @description this is the most commonly used function when generating the html for forms
-*/
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'GenerateList', 'SearchWidget', 'PaginateWidget', 'Attr',
     'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty', 'SelectIcon', 'Store',
     function ($rootScope, $location, $compile, GenerateList, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink,
