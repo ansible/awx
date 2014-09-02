@@ -589,6 +589,28 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         }
     });
 
+    if (scope.removeGetCreatedByNames) {
+        scope.removeGetCreatedByNames();
+    }
+    scope.removeGetCreatedByNames = scope.$on('GetCreatedByNames', function(e, data) {
+        var url;
+        data = data.slice(0, data.length-1);
+        data = data.slice(data.lastIndexOf('/')+1, data.length);
+        url = GetBasePath('users') + data + '/';
+        scope.users_url = '/#/users/' + data;
+        Rest.setUrl(url);
+        Rest.get()
+            .success( function(data) {
+                scope.created_by = data.username;
+            })
+            .error( function(data, status) {
+                scope.credential_name = '';
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + '. GET returned: ' + status });
+            });
+    });
+
+
     if (scope.removeLoadJob) {
         scope.removeLoadJob();
     }
@@ -668,6 +690,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 }
                 //scope.setSearchAll('host');
                 scope.$emit('LoadPlays', data.related.job_events);
+                scope.$emit('GetCreatedByNames', data.related.created_by);
                 if (!scope.credential_name) {
                     scope.$emit('GetCredentialNames', data);
                 }

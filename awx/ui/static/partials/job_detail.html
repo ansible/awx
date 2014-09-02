@@ -56,6 +56,13 @@
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">{{ job_type }}</div>
                         </div>
 
+                        <div class="form-group toggle-show" style="display:none;" ng-show="created_by">
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Launched By</label>
+                            <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
+                                <a href="{{ users_url }}" aw-tool-tip="Edit the User" data-placement="top">{{ created_by }}</a>
+                            </div>
+                        </div>
+
                         <div class="form-group toggle-show" style="display:none;" ng-show="inventory_name">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Inventory</label>
                             <div class="col-lg-10- col-md-10 col-sm-10 col-xs-9">
