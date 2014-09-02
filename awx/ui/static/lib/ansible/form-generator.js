@@ -1118,7 +1118,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         html += "<span class=\"input-group-btn\">\n";
                         html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field, 'ngClick');
                         html += (field.readonly || field.showonly) ? " disabled " : "";
-                        html += "><i class=\"fa fa-search\"></i></button>\n";
+                        html += "id=\"" + fld + "-lookup-btn\"><i class=\"fa fa-search\"></i></button>\n";
                         html += "</span>\n";
                         html += "<input type=\"text\" class=\"form-control input-medium lookup\" ";
                         html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
