@@ -16,9 +16,6 @@ import uuid
 # PyYAML
 import yaml
 
-# ZeroMQ
-import zmq
-
 # Django
 from django.conf import settings
 from django.db import models
