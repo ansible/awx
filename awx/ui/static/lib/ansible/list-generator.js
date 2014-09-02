@@ -310,6 +310,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                 html += "<tr ng-class=\"" + list.iterator;
                 html += (options.mode === 'lookup' || options.mode === 'select') ? ".success_class" : ".active_class";
                 html += "\" ";
+                html += "id=\"{{ " + list.iterator + ".id }}\" ";
                 html += "class=\"" + list.iterator + "_class\" ";
                 html += "ng-repeat=\"" + list.iterator + " in " + list.name;
                 html += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";

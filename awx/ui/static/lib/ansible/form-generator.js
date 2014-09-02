@@ -1586,7 +1586,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                 html += "</thead>";
                 html += "<tbody>\n";
 
-                html += "<tr ng-repeat=\"" + collection.iterator + " in " + itm + "\" >\n";
+                html += "<tr ng-repeat=\"" + collection.iterator + " in " + itm + "\" ";
+                html += "id=\"{{ " + collection.iterator + ".id }}\">\n";
                 if (collection.index === undefined || collection.index !== false) {
                     html += "<td>{{ $index + ((" + collection.iterator + "_page - 1) * " +
                         collection.iterator + "_page_size) + 1 }}.</td>\n";
