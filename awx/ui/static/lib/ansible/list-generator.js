@@ -5,10 +5,94 @@
  *  @ngdoc function
  *  @name lib.ansible.function:list-generator
  *  @description
- * ListGenerator
- * Pass in a list definition from ListDefinitions and out pops an html template.
- * Use inject method to generate the html and inject into the current view.
+ * #ListGenerator
  *
+ * Use GenerateList.inject(list_object, { key:value }) to generate HTML from a list object and inject it into the DOM. Returns the $scope of the new list.
+ *
+ * Pass in a list object and a JSON object of key:value parameters. List objects are found in lists/*.js. Possible parameters include:
+ *
+ * | Parameter | Required | Description |
+ * | --------- | -------- | ----------- |
+ * | activityStream | | Used in widgets/stream.js to create the list contained within the activity stream widget. |
+ * | breadCrumbs | | true or false. Set to false, if breadcrumbs should not be included in the generated HTML. |
+ * | hdr | | Deprecated. Was used when list generator created the lookup dialog. This was moved to helpers/Lookup.js. |
+ * | id | | DOM element ID attribute value. Use to inject the list into a custom DOM element. Otherwise, the HTML for a list will be injected into the DOM element with an ID attribute of 'htmlTemplate'. |
+ * | listSize  | | Bootstrap size class to apply to the grid column containing the action buttons, which generally appears to the right of the search widget. Defaults to 'col-lg-8 col-md-6 col-sm-4 col-xs-3'. |
+ * | mode | Yes | One of 'edit', 'lookup', 'select', or 'summary'. Generally this will be 'edit'. helpers/Lookup.js uses 'lookup' to generate the lookup dialog. The 'select' option is used in certain controllers when multiple objects are being added to a parent object. For example, building a select list of Users that can be added to an Oranization. 'summary' is no longer used. |
+ * | scope |  | If the HTML will be injected into the DOM by list generator, pass in an optional $scope to be used in conjuction with $compile. The list will be associated with the scope value. Otherwise, the scope of the DOM element will be fetched passed to $compile. |
+ * | showSearch | | true or false. Set to false, if the search widget should not be included in the generated HTML. |
+ * | searchSize | | Bootstrap size class (e.g. col-lg-3, col-md-4, col-sm-5, etc.) to apply to the search widget. Defaults to 'col-lg-4 col-md-6 col-sm-8 col-xs-9'. |
+ *
+ * #HTML only
+ *
+ * Use the buildHTML() method to get a string containing the generated HTML for a list object. buldHTML() expects the same parameters as the inject method. For example:
+ * ```
+ *     var html = GenerateList.buildHTML({
+ *         mode: 'edit',
+ *         breadCrumbs: false,
+ *         showSearch: false
+ *     });
+ * ```
+ *
+ * #List Objects
+ *
+ * List objects are found in lists/*.js. Any API endpoint that returns a collection or array is represented with a list object. Examples inlcude Organizations, Credentials, Inventories, etc.
+ * A list can have the following attributes:
+ *
+ * | Attribute | Description |
+ * | --------- | ----------- |
+ * | hover | true or false. If true, 'table-hover' class will be added to the &lt;table&gt; element. |
+ * | index | true or false. If false, the index column, which adds a sequential number to each table row starting with 1, will not be added to the table. |
+ * | iterator | String containing a descriptive name of a single row in the collection - inventory, organization, credential, etc. Used to generate name and ID attributes in the list HTML. |
+ * | name | Name of the collection. Generally matches the endpoint name - inventories, organizations, etc. Will match the $scope variable containing the array of rows comprising the collection. |
+ * | selectTitle | Descriptive title used when mode is 'select'. |
+ * | selectInstructions | Text and HTML used to create popover for help button when mode is 'select'. |
+ * | editTitle | Descriptive title used when mode is 'edit'. |
+ *
+ * ##Fields
+ *
+ * A list contains a fields object. Each column in the list is defined as a separate object within the fields object. A field definition may contain the following attributes:
+ *
+ * | Attribute | Description |
+ * | --------- | ----------- |
+ * | columnClass | String of CSS class names to add to the &lt;td&gt; elemnts of the table column. |
+ * | columnClick | Adds an ng-click directive to the &lt;td&gt; element. |
+ * | excludeModal | true or false. If false, the field will not be included in the generated HTML when the mode is 'lookup' |
+ * | key | true or false. If set to true, helpers/search.js will use the field name as the default sort order when generating the API request. |
+ * | label | Text string used as the column header text. |
+ * | linkTo | Wraps the field value with an &lt;a&gt; element. Set to the value of the href attribute. |
+ * | ngClick | Wraps the field value with an &lt;a&gt; and adds the ng-click directive. Set to the JS expression that ng-click will evaluate. |
+ * | nosort | true or false. Setting to false removes the ability to sort the table by the column. |
+ * | searchable | true or fasel. Set to false if the field should not be included as in option in the search widget. |
+ * | searchOnly | true or false. Set to true if the field should be included in the search widget but not included as a column in the generated HTML &lt;table&gt;. |
+ * | searchOptions | Array of { name: 'Descriptive Name', value: 'api_value' } objects used to generate &lt;options&gt; for the &lt;select&gt; when searchType is 'select'. |
+ * | searchType | One of the available search types defined in helpers/search.js. |
+ * | sourceField | Name of the attribute within summary_fields.<source_model> that the field maps to in the API response object. Used in conjunction with sourceModel. |
+ * | sourceModel | Name of the summary_fields object that the field maps to in the API response object. |
+ *
+ * ##Field Actions
+ *
+ * A list contains a fieldActions object. Each icon found in the Actions column is defined as an object within the feildActions object. fieldActions can have a columnClass attribute,
+ * which may contain a string of CSS class names to add to the action &lt;td&gt; element. It may also contain a label attribute, which can be set to false to suppress the Actions column header.
+ *
+ * Feld action items can have the following attributes:
+ *
+ * | Attribute | Description |
+ * | --------- | ----------- |
+ * | awToolTip | Adds the aw-tool-tip directive. Set to the value of the HTML or text to dislay in the tooltip. |
+ * | 'class' | Set to a string containing any CSS classes to add to the &lt;a&gt; element. |
+ * | dataPlacement | Set to the Bootstrip tooltip placement - right, left, top, bottom, etc. |
+ * | dataTipWatch | Set to the $scope variable that contains the text and HTML to display in the tooltip. A $scope.$watch will be added to the variable so that anytime its value changes the tooltip will change. |
+ * | iconClass | By default the CSS icon class is set by the SelectIcon() method in lib/ansible/generator-helpers.js. The icon is based on the action name. Use iconClass to override the default value. |
+ * | mode | One of 'all' or 'edit'. Will generally be 'all'. Note that field actions are not displayed when the list is in 'lookup' mode. |
+ * | ngClass | Adds the ng-class directive. Set to the JS expressino that ng-class will evaluate. |
+ * | ngShow | Adds the ng-show directive. Set to the JS expression that ng-show will evaluate. |
+ *
+ * ##Actions
+ *
+ * A list can contain an actions object. The actions object contains an object for each action button displayed in the top-right corner of the list container. An action can have the same
+ * attributes as an action defined in fieldAction. Both are actions. Clicking on an action evaluates the JS found in the ngClick attribute. In both cases icon is generated automatically by the SelectIcon() method in lib/ansible/generator-helpers.js.
+ * The real difference is that an &lt;a&gt element is used to generate fieldAction items while a &lt;button&gt; element is used for action items.
  */
 
 'use strict';
