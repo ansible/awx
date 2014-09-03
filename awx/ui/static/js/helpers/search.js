@@ -36,6 +36,19 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 sort_order = params.sort_order || '',
                 widgets, i, modifier;
 
+
+            // add 'selected' class to the selected li element
+            function setSelectedItem(iterator, label, modifier) {
+                // add 'selected' class to the selected li element
+                $('#' + iterator + 'SearchDropdown' + modifier + ' li').each(function() {
+                    $(this).removeClass('selected');
+                    var link = $(this).find('a');
+                    if (label === link.text()) {
+                        $(this).addClass('selected');
+                    }
+                });
+            }
+
             function setDefaults(widget) {
                 // Set default values
                 var f, fld, fka, modifier;
@@ -130,6 +143,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         scope[iterator + 'InputHide' + modifier] = true;
                     }
                 }
+
+                setSelectedItem(iterator, scope[iterator + 'SearchFieldLabel' + modifier], modifier);
             }
 
             if (setWidgets) {
@@ -231,8 +246,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     scope[iterator + 'ShowStartBtn' + modifier] = false;
                 }
 
-                scope.search(iterator);
+                setSelectedItem(iterator, label, modifier);
 
+                scope.search(iterator);
             };
 
             scope.resetSearch = function (iterator) {

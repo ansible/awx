@@ -30,6 +30,19 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                     relatedSets = params.relatedSets,
                     form = params.form, f;
 
+
+
+                // add 'selected' class to the selected li element
+                function setSelectedItem(iterator, label) {
+                    $('#' + iterator + 'SearchDropdown' + ' li').each(function() {
+                        $(this).removeClass('selected');
+                        var link = $(this).find('a');
+                        if (label === link.text()) {
+                            $(this).addClass('selected');
+                        }
+                    });
+                }
+
                 // Set default values
                 function setDefaults(inIterator) {
                     var iterator, f, fld, set;
@@ -75,6 +88,8 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                             if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType === 'gtzero') {
                                 scope[iterator + "InputHide"] = true;
                             }
+
+                            setSelectedItem(iterator, scope[iterator + 'SearchFieldLabel']);
                         }
                     }
                 }
@@ -118,6 +133,8 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                         //scope[iterator + 'HideSearchType'] = true;
                         scope[iterator + 'SearchType'] = 'int';
                     }
+
+                    setSelectedItem(iterator, label);
 
                     scope.search(iterator);
 
