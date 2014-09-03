@@ -102,7 +102,7 @@ class CallbackReceiver(object):
                 else:
                     parent = None
                 if parent is not None:
-                    message['parent'] = parent
+                    message['parent'] = parent.id
                 if 'created' in message:
                     del(message['created'])
                 if message['event'] in ('playbook_on_start', 'playbook_on_play_start',
@@ -158,9 +158,9 @@ class CallbackReceiver(object):
                     data['event_data']['res']['invocation']['module_args'] = ""
                 job_event = JobEvent(**data)
                 if parent_id is not None:
-                    job_event.parent_id = parent_id
+                    job_event.parent = JobEvent.objects.get(id=parent_id)
                 job_event.save(post_process=True)
-                return job_event.id
+                return job_event
             except DatabaseError as e:
                 transaction.rollback()
                 print('Database error saving job event, retrying in '
