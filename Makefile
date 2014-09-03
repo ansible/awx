@@ -17,7 +17,7 @@ GIT_REMOTE_URL=$(shell git config --get remote.origin.url)
 AWS_INSTANCE_COUNT ?= 10
 
 ifneq ($(OFFICIAL),yes)
-BUILD=dev$(DATE)
+BUILD=0.dev$(DATE)
 SDIST_TAR_FILE=$(NAME)-$(VERSION)-$(BUILD).tar.gz
 SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(BUILD)
 RPM_PKG_RELEASE=$(BUILD)
