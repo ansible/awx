@@ -251,7 +251,9 @@ def process_graph(graph, task_capacity):
             print("Started Node: %s (capacity hit: %s) Remaining Capacity: %s" % (str(node_obj), str(impact), str(remaining_volume)))
 
 def run_taskmanager(command_port):
-    ''' Receive task start and finish signals to rebuild a dependency graph and manage the actual running of tasks '''
+    """Receive task start and finish signals to rebuild a dependency graph
+    and manage the actual running of tasks.
+    """
     def shutdown_handler():
         def _handler(signum, frame):
             signal.signal(signum, signal.SIG_DFL)
