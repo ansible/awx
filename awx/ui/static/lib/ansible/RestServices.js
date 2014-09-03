@@ -1,20 +1,58 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  */
-  /**
+/**
  *  @ngdoc function
  *  @name lib.ansible.function:RestServices
  *  @description
- * Generic accessor for Ansible Commander services
+ *
+ * A wrapper for angular's $http service. Post user authentication API requests should go through Rest rather than directly using $http. The goal is to decouple
+ * the application from $http, allowing Rest or anything that provides the same methods to handle setting authentication headers and performing tasks such as checking
+ * for an expired authentication token. Having this buffer between the application and $http will prove useful should the authentication scheme change.
+ *
+ * #.setUrl(<url>)
+ *
+ * Before calling an action methods (i.e. get, put, post, destroy, options) to send the request, call setUrl. Pass a string containing the URL endpoint and any parameters.
+ * Note that $http will automaticall encode the URL, replacing spaces and special characters with appropriate %hex codes. Example URL values might include:
+ *
+ * ```
+ *    /api/v1/inventories/9/
+ *    /api/v1/credentials/?name=SSH Key&kind=ssh
+ * ```
+ *
+ * When constructing the URL be sure to use the GetBasePath() method found in lib/ansible/Utilities.js. GetBasePath uses the response objects from /api and
+ * /api/<version>/to construct the base portion of the path. This way the API version number and base endpoints are not hard-coded within the application.
+ *
+ * #Action methods: .get(), put(<JSON data object>), .post(<JSON data object>), .destroy(<JSON data object>), options()
+ *
+ * Use the method matching the REST action to be performed. In the case of put, post and destroy a JSON object can be passed as a parameter. If included,
+ * it will be sent as part of the request.
+ *
+ * In every case a call to an action method returns a promise object, allowing the caller to pass reponse functions to the promise methods. The functions can inspect
+ * the respoinse details and initiate action. For example:
+ *
+ * ```
+ *     var url = GetBasePath('inventories') + $routeParams.id + '/';
+ *     Rest.setUrl(url);
+ *     Rest.get()
+ *          .success(function(data) {
+ *             // review the data object and take action
+ *         })
+ *         .error(function(status, data) {
+ *             // handle the error - typically a call to ProcessErrors() found in lib/ansible/Utitlties.js
+ *         });
+ * ```
+ *
+ * ##Options Reqeusts
+ *
+ * options() requests are used by the GetChoices() method found in lib/ansible/Utilities.js. Sending an Options request to an API endpoint returns an object that includes
+ * possible values for fields that are typically presented in the UI as dropdowns or &lt;select&gt; elements. GetChoices will inspect the response object for the request
+ * field and return an array of { label: 'Choice Label', value: 'choice 1' } objects.
  *
  */
+
 'use strict';
-/**
-* @ngdoc method
-* @name lib.ansible.function:RestServices#Rest
-* @methodOf lib.ansible.function:RestServices
-* @description discuss reason to use this over built in functions with angular/jquery
-*/
+
 angular.module('RestServices', ['ngCookies', 'AuthService'])
     .factory('Rest', ['$http', '$rootScope', '$cookieStore', '$q', 'Authorization',
         function ($http, $rootScope, $cookieStore, $q, Authorization) {
