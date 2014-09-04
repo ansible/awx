@@ -236,7 +236,7 @@ function OrganizationsEdit($scope, $rootScope, $compile, $location, $log, $route
 
     $scope.showActivity = function () {
         Stream({
-            $scope: $scope
+            scope: $scope
         });
     };
 
