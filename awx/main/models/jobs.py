@@ -189,6 +189,18 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                     needed.append(pw)
         return bool(self.credential and not len(needed))
 
+    @property
+    def passwords_needed_to_start(self):
+        '''Return list of password field names needed to start the job.'''
+        needed = []
+        if self.credential:
+            for pw in self.credential.passwords_needed:
+                if pw == 'password':
+                    needed.append('ssh_password')
+                else:
+                    needed.append(pw)
+        return needed
+
     def _can_update(self):
         return self.can_start_without_user_input()
 

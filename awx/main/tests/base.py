@@ -302,7 +302,7 @@ class BaseTestMixin(object):
             self.assertFalse(response.content)
         #if return_response_object:
         #    return response
-        if response.status_code not in [ 202, 204, 405 ] and method_name != 'head' and response.content:
+        if response.status_code not in [ 204, 405 ] and method_name != 'head' and response.content:
             # no JSON responses in these at least for now, 409 should probably return some (FIXME)
             if response['Content-Type'].startswith('application/json'):
                 obj = json.loads(response.content)

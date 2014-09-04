@@ -681,6 +681,32 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
         # FIXME: Check other credentials and optional fields.
 
+    def test_launch_job_template(self):
+        url = reverse('api:job_template_list')
+        data = dict(
+            name         = 'launched job template',
+            job_type     = PERM_INVENTORY_DEPLOY,
+            inventory    = self.inv_eng.pk,
+            project      = self.proj_dev.pk,
+            playbook     = self.proj_dev.playbooks[0],
+        )
+        with self.current_user(self.user_sue):
+            response = self.post(url, data, expect=201)
+            detail_url = reverse('api:job_template_detail',
+                                 args=(response['id'],))
+            self.assertEquals(response['url'], detail_url)
+
+        launch_url = reverse('api:job_template_launch',
+                             args=(response['id'],))
+
+        # Invalid auth can't trigger the launch endpoint
+        self.check_invalid_auth(launch_url, {}, methods=('post',))
+
+        with self.current_user(self.user_sue):
+            response = self.post(launch_url, {}, expect=202)
+            j = Job.objects.get(pk=response['job'])
+            self.assertTrue(j.status == 'new')
+
 class JobTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_get_job_list(self):

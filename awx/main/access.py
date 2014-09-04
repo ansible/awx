@@ -920,6 +920,26 @@ class JobTemplateAccess(BaseAccess):
 
         return True
 
+    def can_start(self, obj):
+        reader = TaskSerializer()
+        validation_info = reader.from_file()
+
+        if 'test' in sys.argv or 'jenkins' in sys.argv:
+            validation_info['free_instances'] = 99999999
+            validation_info['time_remaining'] = 99999999
+            validation_info['grace_period_remaining'] = 99999999
+
+        if validation_info.get('time_remaining', None) is None:
+            raise PermissionDenied("license is missing")
+        if validation_info.get("grace_period_remaining") <= 0:
+            raise PermissionDenied("license has expired")
+        if validation_info.get('free_instances', 0) < 0:
+            raise PermissionDenied("Host Count exceeds available instances")
+
+        dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and \
+                     self.user.can_access(Project, 'read', obj.project)
+        return self.can_read(obj) and dep_access
+
     def can_change(self, obj, data):
         return self.can_read(obj) and self.can_add(data)
 
