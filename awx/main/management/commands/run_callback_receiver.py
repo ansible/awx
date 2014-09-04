@@ -28,7 +28,7 @@ from awx.main.models import *
 # ZeroMQ
 import zmq
 
-MAX_REQUESTS = 20000
+MAX_REQUESTS = 10000
 WORKERS = 4
 
 class CallbackReceiver(object):
@@ -122,6 +122,10 @@ class CallbackReceiver(object):
                         w = Process(target=self.callback_worker, args=(queue_actual_worker[1],))
                         w.daemon = True
                         w.start()
+
+                        signal.signal(signal.SIGINT, shutdown_handler([w]))
+                        signal.signal(signal.SIGTERM, shutdown_handler([w]))
+
                         queue_actual_worker[2] = w
                 last_parent_events[message['job_id']] = job_parent_events
             consumer_subscriber.send("1")
