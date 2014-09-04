@@ -199,19 +199,15 @@ def rebuild_graph(message):
     # Rebuild graph
     graph = SimpleDAG()
     for task in running_tasks:
-        print("Adding running task: %s to graph" % str(task))
         graph.add_node(task)
-    print("Waiting Tasks: %s" % str(waiting_tasks))
     for wait_task in waiting_tasks:
         node_dependencies = []
         for node in graph:
             if wait_task.is_blocked_by(node['node_object']):
-                print("Waiting task %s is blocked by %s" % (str(wait_task), node['node_object']))
                 node_dependencies.append(node['node_object'])
         graph.add_node(wait_task)
         for dependency in node_dependencies:
             graph.add_edge(wait_task, dependency)
-    print("Graph Edges: %s" % str(graph.edges))
     if settings.DEBUG:
         graph.generate_graphviz_plot()
     return graph
