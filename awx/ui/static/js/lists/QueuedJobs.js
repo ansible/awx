@@ -24,7 +24,6 @@ angular.module('QueuedJobsDefinition', [])
                 label: 'ID',
                 ngClick:"viewJobLog(queued_job.id)",
                 key: true,
-                desc: true,
                 searchType: 'int',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2',
                 awToolTip: "{{ queued_job.status_tip }}",
@@ -76,10 +75,10 @@ angular.module('QueuedJobsDefinition', [])
                 awToolTip: 'Relaunch using the same parameters',
                 dataPlacement: 'top'
             },
-            "delete": {
+            'cancel': {
                 mode: 'all',
                 ngClick: 'deleteJob(queued_job.id)',
-                awToolTip: 'Delete the job',
+                awToolTip: 'Cancel the job',
                 dataPlacement: 'top'
             },
             job_details: {

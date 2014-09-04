@@ -511,7 +511,7 @@ function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
         }
         scope.removeCancelJob = scope.$on('CancelJob', function() {
             var body;
-            body = (action_label === 'cancel') ? "Submit the request to cancel" : "Delete";
+            body = (action_label === 'cancel' || job.status === 'new') ? "Submit the request to cancel" : "Delete";
             Prompt({
                 hdr: hdr,
                 body: "<div class=\"alert alert-info\">" + body + " job #" + id + " " + job.name  + "?</div>",
