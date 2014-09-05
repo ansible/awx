@@ -1011,6 +1011,9 @@ class JobAccess(BaseAccess):
                 add_data.setdefault('credential', job_template.credential.pk)
         else:
             job_template = None
+            # Only admins can create jobs without job templates
+            if not self.user.is_superuser:
+                return False
 
         # Check that the user would be able to add a job template with the
         # same data.
