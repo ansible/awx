@@ -979,6 +979,30 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
         # FIXME: Test with other users, test when passwords are required.
 
+    def test_job_relaunch(self):
+        job = self.make_job(self.jt_ops_east_run, self.user_sue, 'success')
+        url = reverse('api:job_relaunch', args=(job.pk,))
+        with self.current_user(self.user_sue):
+            response = self.post(url, {}, expect=202)
+            j = Job.objects.get(pk=response['job'])
+            self.assertTrue(j.status == 'successful')
+        # Test with a job that prompts for SSH and sudo passwords.
+        job = self.make_job(self.jt_sup_run, self.user_sue, 'success')
+        url = reverse('api:job_start', args=(job.pk,))
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            self.assertEqual(set(response['passwords_needed_to_start']),
+                             set(['ssh_password', 'sudo_password']))
+            data = dict()
+            response = self.post(url, data, expect=400)
+            data['ssh_password'] = 'sshpass'
+            response = self.post(url, data, expect=400)
+            data2 = dict(sudo_password='sudopass')
+            response = self.post(url, data2, expect=400)
+            data.update(data2)
+            response = self.post(url, data, expect=202)
+            job = Job.objects.get(pk=job.pk)
+
     def test_job_cancel(self):
         #job = self.job_ops_east_run
         job = self.make_job(self.jt_ops_east_run, self.user_sue, 'new')
