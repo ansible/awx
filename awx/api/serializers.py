@@ -1233,6 +1233,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             jobs = reverse('api:job_template_jobs_list', args=(obj.pk,)),
             schedules = reverse('api:job_template_schedules_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
+            launch = reverse('api:job_template_launch', args=(obj.pk,)),
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
@@ -1264,6 +1265,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             res['start'] = reverse('api:job_start', args=(obj.pk,))
         if obj.can_cancel or True:
             res['cancel'] = reverse('api:job_cancel', args=(obj.pk,))
+        res['relaunch'] = reverse('api:job_relaunch', args=(obj.pk,))
         return res
 
     def from_native(self, data, files):

@@ -1349,7 +1349,7 @@ class JobTemplateLaunch(GenericAPIView):
         data['ask_variables_on_launch'] = obj.ask_variables_on_launch
         return Response(data)
 
-    def post(self, request, *args, **obj):
+    def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
@@ -1597,6 +1597,31 @@ class JobCancel(GenericAPIView):
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
+
+class JobRelaunch(GenericAPIView):
+
+    model = Job
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = {}
+        data['passwords_needed_to_start'] = obj.passwords_needed_to_start
+        data['ask_variables_on_launch'] = obj.ask_variables_on_launch
+        return Response(data)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(self.model, 'start', obj):
+            raise PermissionDenied()
+        new_job = obj.copy()
+        result = new_job.signal_start(**request.DATA)
+        if not result:
+            data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data = dict(job=new_job.id)
+            return Response(data, status=status.HTTP_202_ACCEPTED)
+
 
 class BaseJobHostSummariesList(SubListAPIView):
 

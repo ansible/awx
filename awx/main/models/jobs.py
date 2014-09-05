@@ -366,6 +366,11 @@ class Job(UnifiedJob, JobOptions):
                     dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
 
+    def copy(self):
+        presets = {}
+        for kw in self.job_template._get_unified_job_field_names():
+            presets[kw] = getattr(self, kw)
+        return self.job_template.create_unified_job(**presets)
 
 class JobHostSummary(CreatedModifiedModel):
     '''
