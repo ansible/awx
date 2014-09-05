@@ -639,7 +639,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     @property
     def can_cancel(self):
-        return bool(self.status in ('pending', 'waiting', 'running'))
+        return bool(self.status in ('new', 'pending', 'waiting', 'running'))
 
     def _force_cancel(self):
         # Update the status to 'canceled' if we can detect that the job
@@ -681,7 +681,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if self.can_cancel:
             if not self.cancel_flag:
                 self.cancel_flag = True
-                self.save(update_fields=['cancel_flag'])
+                self.status = 'canceled'
+                self.save(update_fields=['cancel_flag', 'status'])
                 self.socketio_emit_status("canceled")
             if settings.BROKER_URL.startswith('amqp://'):
                 self._force_cancel()
