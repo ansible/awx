@@ -3,6 +3,7 @@
 
 # Python
 import datetime
+import glob
 import json
 import os
 import re
@@ -1454,6 +1455,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
         group.name = 'AWS Inventory'
         group.save()
         self.group = group
+        cache_path_pattern = os.path.join(tempfile.gettempdir(), 'awx_ec2_*')
+        old_cache_paths = set(glob.glob(cache_path_pattern))
         inventory_source = self.update_inventory_source(self.group,
             source='ec2', credential=credential, source_regions=source_regions,
             source_vars='---') # nested_groups is true by default.
@@ -1475,8 +1478,12 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.assertTrue('keys' in child_names)
         self.assertTrue('security_groups' in child_names)
         self.assertTrue('tags' in child_names)
-        # Print out group/host tree for debugging.
+        # Make sure we clean up the cache path when finished (when one is not
+        # provided explicitly via source_vars).
+        new_cache_paths = set(glob.glob(cache_path_pattern))
+        self.assertEqual(old_cache_paths, new_cache_paths)
         return
+        # Print out group/host tree for debugging.
         print
         def draw_tree(g, d=0):
             print ('  ' * d) + '+ ' + g.name

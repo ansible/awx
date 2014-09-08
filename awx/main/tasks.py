@@ -12,6 +12,7 @@ import os
 import signal
 import pipes
 import re
+import shutil
 import stat
 import tempfile
 import time
@@ -210,13 +211,21 @@ class BaseTask(Task):
         for this task.
         '''
 
+    def build_private_data_dir(self, instance, **kwargs):
+        '''
+        Create a temporary directory for job-related files.
+        '''
+        path = tempfile.mkdtemp(prefix='ansible_tower_')
+        os.chmod(path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
+        return path
+
     def build_private_data_file(self, instance, **kwargs):
         '''
         Create a temporary file containing the private data.
         '''
         private_data = self.build_private_data(instance, **kwargs)
         if private_data is not None:
-            handle, path = tempfile.mkstemp()
+            handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
             f = os.fdopen(handle, 'w')
             f.write(private_data)
             f.close()
@@ -383,6 +392,7 @@ class BaseTask(Task):
                     raise RuntimeError('not starting %s task' % instance.status)
             # Fetch ansible version once here to support version-dependent features.
             kwargs['ansible_version'] = get_ansible_version()
+            kwargs['private_data_dir'] = self.build_private_data_dir(instance, **kwargs)
             kwargs['private_data_file'] = self.build_private_data_file(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
             args = self.build_args(instance, **kwargs)
@@ -402,9 +412,9 @@ class BaseTask(Task):
             if status != 'canceled':
                 tb = traceback.format_exc()
         finally:
-            if kwargs.get('private_data_file', ''):
+            if kwargs.get('private_data_dir', ''):
                 try:
-                    os.remove(kwargs['private_data_file'])
+                    shutil.rmtree(kwargs['private_data_dir'], True)
                 except OSError:
                     pass
                 try:
@@ -846,7 +856,9 @@ class RunInventoryUpdate(BaseTask):
             ec2_opts.setdefault('all_rds_instances', 'False')
             ec2_opts.setdefault('rds', 'False')
             ec2_opts.setdefault('nested_groups', 'True')
-            ec2_opts.setdefault('cache_path', tempfile.mkdtemp(prefix='awx_ec2_'))
+            if 'cache_path' not in ec2_opts:
+                cache_path = tempfile.mkdtemp(prefix='ec2_cache', dir=kwargs.get('private_data_dir', None))
+                ec2_opts['cache_path'] = cache_path
             ec2_opts.setdefault('cache_max_age', '300')
             for k,v in ec2_opts.items():
                 cp.set(section, k, str(v))
