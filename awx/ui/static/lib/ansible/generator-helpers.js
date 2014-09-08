@@ -822,16 +822,22 @@ angular.module('GeneratorHelpers', [])
             html += "<div class=\"row page-row\">\n";
             html += "<div id=\"" + iterator + "-pagination\" class=\"col-lg-8 col-md-8\">\n";
             html += "<ul id=\"pagination-widget\" class=\"pagination\" ng-hide=\"" + iterator + "HidePaginator || " + iterator + "_num_pages <= 1\">\n";
-            html += "<li id=\"first-page-set\" ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" +
+            html += "<li ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href id=\"first-page-set\" ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" +
                 "<i class=\"fa fa-angle-double-left\"></i></a></li>\n";
-            html += "<li id=\"previous-page\" ng-hide=\"" + iterator + "_page -1 <= 0\"><a href " +
-                "ng-click=\"getPage(" + iterator + "_page - 1,'" + set + "','" + iterator + "')\">" +
+
+            html += "<li ng-hide=\"" + iterator + "_page -1 <= 0\"><a href " +
+                "id=\"previous-page\" ng-click=\"getPage(" + iterator + "_page - 1,'" + set + "','" + iterator + "')\">" +
                 "<i class=\"fa fa-angle-left\"></i></a></li>\n";
-            html += "<li  id=\"{{ 'link-to-page-' + page }}\" ng-repeat=\"page in " + iterator + "_page_range\" ng-class=\"pageIsActive(page,'" + iterator + "')\">" +
-                "<a href ng-click=\"getPage(page,'" + set + "','" + iterator + "')\">{{ page }}</a></li>\n";
-            html += "<li id=\"next-page\" ng-hide=\"" + iterator + "_page + 1 > " + iterator + "_num_pages\"><a href ng-click=\"" +
+
+            // html += "<li ng-repeat=\"page in " + iterator + "_page_range\" ng-class=\"pageIsActive(page,'" + iterator + "')\">" +
+            //     "<a href id=\"{{ 'link-to-page-' + page }}\" ng-click=\"getPage(page,'" + set + "','" + iterator + "')\">{{ page }}</a></li>\n";
+            html += "<li ng-repeat=\"page in " + iterator + "_page_range\" ng-class=\"pageIsActive(page,'" + iterator + "')\">" +
+                "<a href id=\"{{ 'page-' + page }}\" ng-click=\"getPage(page,'" + set + "','" + iterator + "')\">{{ page }}</a></li>\n";
+
+            html += "<li ng-hide=\"" + iterator + "_page + 1 > " + iterator + "_num_pages\"><a href id=\"next-page\"  ng-click=\"" +
                 "getPage(" + iterator + "_page + 1,'" + set + "','" + iterator + "')\"><i class=\"fa fa-angle-right\"></i></a></li>\n";
-            html += "<li id=\"last-page-set\" ng-hide=\"" + iterator + "_page +4 >= " + iterator + "_num_pages\"><a href ng-click=\"" +
+
+            html += "<li ng-hide=\"" + iterator + "_page +4 >= " + iterator + "_num_pages\"><a href id=\"last-page-set\"  ng-click=\"" +
                 "getPage(" + iterator + "_num_pages,'" + set + "','" + iterator + "')\"><i class=\"fa fa-angle-double-right\"></i></a></li>\n";
             html += "</ul>\n";
             html += "</div>\n";
