@@ -1020,7 +1020,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             job.save()
             with self.current_user(self.user_sue):
                 response = self.get(url)
-                if status in ('pending', 'running'):
+                if status in ('new', 'pending', 'waiting', 'running'):
                     self.assertTrue(response['can_cancel'])
                     response = self.post(url, {}, expect=202)
                 else:

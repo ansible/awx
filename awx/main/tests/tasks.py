@@ -778,9 +778,6 @@ class RunJobTest(BaseCeleryTest):
         job.save()
         self.assertEqual(job.status, 'new')
         self.assertEqual(job.cancel_flag, False)
-        # Calling cancel before start has no effect.
-        self.assertFalse(job.cancel())
-        self.assertEqual(job.cancel_flag, False)
         self.assertFalse(job.passwords_needed_to_start)
         job.cancel_flag = True
         job.save()
