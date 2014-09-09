@@ -1373,6 +1373,23 @@ class JobTemplateSchedulesList(SubListCreateAPIView):
     parent_key = 'unified_job_template'
     new_in_148 = True
 
+class JobTemplateSurveySpec(GenericAPIView):
+
+    model = JobTemplate
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj.survey_enabled:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(obj.survey_spec)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(self.model, 'change', obj):
+            raise PermissionDenied()
+        print request.DATA
+        return Response()
+
 class JobTemplateActivityStreamList(SubListAPIView):
 
     model = ActivityStream

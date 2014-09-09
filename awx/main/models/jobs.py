@@ -151,9 +151,19 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         blank=True,
         default='',
     )
+
     ask_variables_on_launch = models.BooleanField(
         blank=True,
         default=False,
+    )
+
+    survey_enabled = models.BooleanField(
+        default=False,
+    )
+
+    survey_spec = JSONField(
+        blank=True,
+        default={},
     )
 
     @classmethod

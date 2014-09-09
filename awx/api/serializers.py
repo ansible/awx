@@ -1225,7 +1225,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
     class Meta:
         model = JobTemplate
-        fields = ('*', 'host_config_key', 'ask_variables_on_launch')
+        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'survey_enabled')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -1237,6 +1237,8 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         ))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
+        if obj.survey_enabled:
+            res['survey_spec'] = reverse('api:job_template_survey_spec', args=(obj.pk,))
         return res
 
 

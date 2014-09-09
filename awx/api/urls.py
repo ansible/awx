@@ -134,6 +134,7 @@ job_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/jobs/$',                      'job_template_jobs_list'),
     url(r'^(?P<pk>[0-9]+)/callback/$',                  'job_template_callback'),
     url(r'^(?P<pk>[0-9]+)/schedules/$',                 'job_template_schedules_list'),
+    url(r'^(?P<pk>[0-9]+)/survey_spec/$',               'job_template_survey_spec'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'job_template_activity_stream_list'),
 )
 
