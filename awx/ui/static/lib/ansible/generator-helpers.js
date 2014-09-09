@@ -819,9 +819,9 @@ angular.module('GeneratorHelpers', [])
                 set = params.set,
                 html = '';
             html += "<!-- Paginate Widget -->\n";
-            html += "<div class=\"row page-row\">\n";
-            html += "<div id=\"" + iterator + "-pagination\" class=\"col-lg-8 col-md-8\">\n";
-            html += "<ul id=\"pagination-widget\" class=\"pagination\" ng-hide=\"" + iterator + "HidePaginator || " + iterator + "_num_pages <= 1\">\n";
+            html += "<div id=\"" + iterator + "-pagination\" class=\"row page-row\">\n";
+            html += "<div class=\"col-lg-8 col-md-8\">\n";
+            html += "<ul id=\"pagination-links\" class=\"pagination\" ng-hide=\"" + iterator + "HidePaginator || " + iterator + "_num_pages <= 1\">\n";
             html += "<li ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href id=\"first-page-set\" ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" +
                 "<i class=\"fa fa-angle-double-left\"></i></a></li>\n";
 
@@ -842,7 +842,7 @@ angular.module('GeneratorHelpers', [])
             html += "</ul>\n";
             html += "</div>\n";
             html += "<div class=\"col-lg-4 col-md-4\" ng-hide=\"" + iterator + "_mode == 'lookup'\">\n";
-            html += "<div id=\"page-label-container\" class=\"page-label\">\n";
+            html += "<div id=\"pagination-labels\" class=\"page-label\">\n";
             html += "Page <span id=\"current-page\">{{ " + iterator + "_page }}</span> of <span id=\"total-pages\">{{ " + iterator + "_num_pages }}</span> (<span id=\"total-items\">{{ " + iterator + "_total_rows | number:0 }}</span> items)";
             html += "</div>\n";
             html += "</div>\n";
