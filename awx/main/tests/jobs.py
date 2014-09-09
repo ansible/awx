@@ -47,6 +47,98 @@ TEST_ASYNC_PLAYBOOK = '''
     poll: 1
 '''
 
+TEST_SIMPLE_REQUIRED_SURVEY = '''
+[
+    {
+	"type": "text",
+	"question_name": "favorite color",
+	"question_description": "What is your favorite color?",
+	"variable": "favorite_color",
+	"choices": "",
+	"min": "",
+	"max": "",
+	"required": true,
+	"default": "blue"
+    }
+]
+'''
+
+TEST_SIMPLE_NONREQUIRED_SURVEY = '''
+[
+    {
+	"type": "text",
+	"question_name": "unladen swallow",
+	"question_description": "What is the airspeed velocity of an unladen swallow?",
+	"variable": "unladen_swallow",
+	"choices": "",
+	"min": "",
+	"max": "",
+	"required": false,
+	"default": "european"
+    }
+]
+'''
+
+TEST_SURVEY_REQUIREMENTS = '''
+[
+    {
+	"type": "text",
+	"question_name": "cantbeshort",
+	"question_description": "What is a long answer",
+	"variable": "long_answer",
+	"choices": "",
+	"min": 5,
+	"max": "",
+	"required": false,
+	"default": "yes"
+    },
+    {
+	"type": "text",
+	"question_name": "cantbelong",
+	"question_description": "What is a short answer",
+	"variable": "short_answer",
+	"choices": "",
+	"min": "",
+	"max": 5,
+	"required": false,
+	"default": "yes"
+    },
+    {
+	"type": "text",
+	"question_name": "reqd",
+	"question_description": "I should be required",
+	"variable": "reqd_answer",
+	"choices": "",
+	"min": "",
+	"max": "",
+	"required": true,
+	"default": "yes"
+    },
+    {
+	"type": "multiplechoice",
+	"question_name": "achoice",
+	"question_description": "Need one of these",
+	"variable": "single_choice",
+	"choices": ["one", "two"],
+	"min": "",
+	"max": "",
+	"required": false,
+	"default": "yes"
+    },
+    {
+	"type": "multiselect",
+	"question_name": "mchoice",
+	"question_description": "Can have multiples of these",
+	"variable": "multi_choice",
+	"choices": ["one", "two", "three"],
+	"min": "",
+	"max": "",
+	"required": false,
+	"default": "yes"
+    }
+]
+'''
+
 class BaseJobTestMixin(BaseTestMixin):
     ''''''
 
@@ -680,6 +772,55 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             response = self.post(url, data, expect=201)
 
         # FIXME: Check other credentials and optional fields.
+
+    def test_post_job_template_survey(self):
+        url = reverse('api:job_template_list')
+        data = dict(
+            name         = 'launched job template',
+            job_type     = PERM_INVENTORY_DEPLOY,
+            inventory    = self.inv_eng.pk,
+            project      = self.proj_dev.pk,
+            playbook     = self.proj_dev.playbooks[0],
+            survey_enabled = True,
+        )
+        with self.current_user(self.user_sue):
+            response = self.post(url, data, expect=201)
+            new_jt_id = response['id']
+            detail_url = reverse('api:job_template_detail',
+                                 args=(new_jt_id,))
+            self.assertEquals(response['url'], detail_url)
+        url = reverse('api:job_template_survey_spec', args=(new_jt_id,))
+        with self.current_user(self.user_sue):
+            response = self.post(url, json.loads(TEST_SIMPLE_REQUIRED_SURVEY), expect=200)
+            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
+            response = self.get(launch_url)
+            self.assertTrue('favorite_color' in response['variables_needed_to_start'])
+
+        with self.current_user(self.user_sue):
+            response = self.post(url, json.loads(TEST_SIMPLE_NONREQUIRED_SURVEY), expect=200)
+            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
+            response = self.get(launch_url)
+            self.assertTrue(len(response['variables_needed_to_start']) == 0)
+
+        with self.current_user(self.user_sue):
+            response = self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
+            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
+            # Short answer but requires a long answer
+            response = self.post(launch_url, dict(long_answer='a', reqd_answer="foo"), expect=400)
+            # Long answer but requires a short answer
+            response = self.post(launch_url, dict(short_answer='thisissomelongtext', reqd_answer="foo"), expect=400)
+            # Long answer but missing required answer
+            response = self.post(launch_url, dict(long_answer='thisissomelongtext'), expect=400)
+            # Wrong choice in single choice
+            response = self.post(launch_url, dict(reqd_answer="foo", single_choice="three"), expect=400)
+            # Wrong choice in multi choice
+            response = self.post(launch_url, dict(reqd_answer="foo", multi_choice=["four"]), expect=400)
+            # Wrong type for multi choicen
+            response = self.post(launch_url, dict(reqd_answer="foo", multi_choice="two"), expect=400)
+            # Right choice in single choice
+            repsonse = self.post(launch_url, dict(reqd_answer="foo", single_choice="two"), expect=202)
+            # Right choices in multi choice
+            response = self.post(launch_url, dict(reqd_answer="foo", multi_choice=["one", "two"]), expect=202)
 
     def test_launch_job_template(self):
         url = reverse('api:job_template_list')
