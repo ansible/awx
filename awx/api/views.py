@@ -1347,12 +1347,22 @@ class JobTemplateLaunch(GenericAPIView):
         data['can_start_without_user_input'] = obj.can_start_without_user_input()
         data['passwords_needed_to_start'] = obj.passwords_needed_to_start
         data['ask_variables_on_launch'] = obj.ask_variables_on_launch
+        data['variables_needed_to_start'] = obj.variables_needed_to_start
         return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
+        if obj.survey_enabled:
+            if request.DATA == "":
+                request_data = {}
+            else:
+                request_data = request.DATA
+            validation_errors = obj.survey_variable_validation(request_data)
+            if validation_errors:
+                return Response(dict(errors=validation_errors),
+                                status=status.HTTP_400_BAD_REQUEST)
         new_job = obj.create_unified_job()
         result = new_job.signal_start(**request.DATA)
         if not result:
@@ -1385,9 +1395,10 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'change', obj):
+        if not request.user.can_access(self.model, 'change', obj, request.DATA):
             raise PermissionDenied()
-        print request.DATA
+        obj.survey_spec = json.dumps(request.DATA)
+        obj.save()
         return Response()
 
 class JobTemplateActivityStreamList(SubListAPIView):

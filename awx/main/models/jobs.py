@@ -211,6 +211,59 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                     needed.append(pw)
         return needed
 
+    @property
+    def variables_needed_to_start(self):
+        vars = []
+        if self.survey_enabled:
+            for survey_element in self.survey_spec:
+                if survey_element['required']:
+                    vars.append(survey_element['variable'])
+        return vars
+
+    def survey_variable_validation(self, data):
+        errors = []
+        if not self.survey_enabled:
+            return errors
+        for survey_element in self.survey_spec:
+            if survey_element['variable'] not in data and \
+               survey_element['required']:
+                errors.append("'%s' value missing" % survey_element['variable'])
+            elif survey_element['type'] in ["textarea", "text"]:
+                if survey_element['min'] != "" and survey_element['variable'] in data and \
+                   len(data[survey_element['variable']]) < survey_element['min']:
+                    errors.append("'%s' value %s is too small (must be at least %s)" %
+                                  (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
+                if survey_element['max'] != "" and survey_element['variable'] in data and \
+                   len(data[survey_element['variable']]) > survey_element['max']:
+                    errors.append("'%s' value %s is too large (must be no more than%s)" %
+                                  (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
+            elif survey_element['type'] == 'integer':
+                if survey_element['min'] != "" and survey_element['variable'] in data and \
+                   data[survey_element['variable']] < survey_element['min']:
+                    errors.append("'%s' value %s is too small (must be at least %s)" %
+                                  (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
+                if survey_element['max'] != "" and survey_element['variable'] in data and \
+                   len(data[survey_element['variable']]) > survey_element['max']:
+                    errors.append("'%s' value %s is too large (must be no more than%s)" %
+                                  (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
+            elif survey_element['type'] == 'multiselect':
+                if survey_element['variable'] in data:
+                    if type(data[survey_element['variable']]) != list:
+                        errors.append("'%s' value is expected to be a list" % survey_element['variable'])
+                    else:
+                        for val in data[survey_element['variable']]:
+                            if val not in survey_element['choices']:
+                                errors.append("Value %s for %s expected to be one of %s" % (val, survey_element['variable'],
+                                                                                            survey_element['choices']))
+            elif survey_element['type'] == 'multiplechoice':
+                if survey_element['variable'] in data:
+                    if data[survey_element['variable']] not in survey_element['choices']:
+                        errors.append("Value %s for %s expected to be one of %s" % (data[survey_element['variable']],
+                                                                                    survey_element['variable'],
+                                                                                    survey_element['choices']))
+        return errors
+
+
     def _can_update(self):
         return self.can_start_without_user_input()
 
