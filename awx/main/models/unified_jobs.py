@@ -623,7 +623,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         Notify the task runner system to begin work on this task.
         '''
         from awx.main.tasks import notify_task_runner
-        if hasattr(settings, 'CELERY_UNIT_TEST'):
+        if getattr(settings, 'CELERY_UNIT_TEST', False):
             return self.start(None, **kwargs)
         if not self.can_start:
             return False

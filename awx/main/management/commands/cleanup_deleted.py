@@ -88,7 +88,7 @@ class Command(BaseCommand):
         self.logger.addHandler(handler)
         self.logger.propagate = False
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def handle(self, *args, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()

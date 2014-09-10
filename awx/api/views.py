@@ -1414,6 +1414,10 @@ class JobTemplateCallback(GenericAPIView):
     model = JobTemplate
     permission_classes = (JobTemplateCallbackPermission,)
 
+    @transaction.non_atomic_requests
+    def dispatch(self, *args, **kwargs):
+        return super(JobTemplateCallback, self).dispatch(*args, **kwargs)
+
     def find_matching_hosts(self):
         '''
         Find the host(s) in the job template's inventory that match the remote
@@ -1535,14 +1539,22 @@ class JobTemplateCallback(GenericAPIView):
             # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         limit = ':&'.join(filter(None, [job_template.limit, host.name]))
-        job = job_template.create_job(limit=limit, launch_type='callback')
-        result = job.signal_start(inventory_sources_already_updated=inventory_sources_already_updated)
+
+        # Everything is fine; actually create the job.
+        with transaction.atomic():
+            job = job_template.create_job(limit=limit, launch_type='callback')
+
+        # Send a signal to celery that the job should be started.
+        isau = inventory_sources_already_updated
+        result = job.signal_start(inventory_sources_already_updated=isau)
         if not result:
             data = dict(msg='Error starting job!')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            headers = {'Location': job.get_absolute_url()}
-            return Response(status=status.HTTP_202_ACCEPTED, headers=headers)
+
+        # Return the location of the new job.
+        headers = {'Location': job.get_absolute_url()}
+        return Response(status=status.HTTP_202_ACCEPTED, headers=headers)
+
 
 class JobTemplateJobsList(SubListCreateAPIView):
 

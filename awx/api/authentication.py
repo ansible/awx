@@ -9,6 +9,7 @@ from rest_framework import HTTP_HEADER_ENCODING
 # AWX
 from awx.main.models import Job, AuthToken
 
+
 class TokenAuthentication(authentication.TokenAuthentication):
     '''
     Custom token authentication using tokens that expire and are associated

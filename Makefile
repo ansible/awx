@@ -157,11 +157,11 @@ pyflakes:
 
 # Run all API unit tests.
 test:
-	$(PYTHON) manage.py test -v2 main
+	$(PYTHON) manage.py test -v2 awx.main.tests
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
-	coverage run manage.py test -v2 main
+	coverage run manage.py test -v2 awx.main.tests
 
 # Output test coverage as HTML (into htmlcov directory).
 coverage_html:
@@ -169,7 +169,7 @@ coverage_html:
 
 # Run UI unit tests using Selenium.
 test_ui:
-	$(PYTHON) manage.py test -v2 ui
+	$(PYTHON) manage.py test -v2 awx.ui.tests
 
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:

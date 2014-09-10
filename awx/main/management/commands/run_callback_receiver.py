@@ -130,16 +130,25 @@ class CallbackReceiver(object):
                 last_parent_events[message['job_id']] = job_parent_events
             consumer_subscriber.send("1")
 
-    @transaction.commit_on_success
     def process_job_event(self, data):
+        # Sanity check: Do we need to do anything at all?
         event = data.get('event', '')
         parent_id = data.get('parent', None)
         if not event or 'job_id' not in data:
             return
+
+        # Get the correct "verbose" value from the job.
+        # If for any reason there's a problem, just use 0.
         try:
             verbose = Job.objects.get(id=data['job_id']).verbosity
         except Exception, e:
             verbose = 0
+
+        # Convert the datetime for the job event's creation appropriately,
+        # and include a time zone for it.
+        #
+        # In the event of any issue, throw it out, and Django will just save
+        # the current time.
         try:
             if not isinstance(data['created'], datetime.datetime):
                 data['created'] = parse_datetime(data['created'])
@@ -147,31 +156,44 @@ class CallbackReceiver(object):
                 data['created'] = data['created'].replace(tzinfo=FixedOffset(0))
         except (KeyError, ValueError):
             data.pop('created', None)
+
+        # Print the data to stdout if we're in DEBUG mode.
         if settings.DEBUG:
             print data
+
+        # Sanity check: Don't honor keys that we don't recognize.
         for key in data.keys():
-            if key not in ('job_id', 'event', 'event_data', 'created', 'counter'):
+            if key not in ('job_id', 'event', 'event_data',
+                           'created', 'counter'):
                 data.pop(key)
+
+        # Save any modifications to the job event to the database.
+        # If we get a database error of some kind, try again.
         for retry_count in xrange(11):
             try:
-                if event == 'playbook_on_stats':
-                    transaction.commit()
-                if verbose == 0 and 'res' in data['event_data'] and 'invocation' in data['event_data']['res'] and \
-                   'module_args' in data['event_data']['res']['invocation']:
-                    data['event_data']['res']['invocation']['module_args'] = ""
-                job_event = JobEvent(**data)
-                if parent_id is not None:
-                    job_event.parent = JobEvent.objects.get(id=parent_id)
-                job_event.save(post_process=True)
-                return job_event
+                with transaction.atomic():
+                    # If we're not in verbose mode, wipe out any module
+                    # arguments.
+                    i = data['event_data'].get('res', {}).get('invocation', {})
+                    if verbose == 0 and 'module_args' in i:
+                        i['module_args'] = ''
+
+                    # Create a new JobEvent object.
+                    job_event = JobEvent(**data)
+                    if parent_id is not None:
+                        job_event.parent = JobEvent.objects.get(id=parent_id)
+                    job_event.save(post_process=True)
+
+                    # Retrun the job event object.
+                    return job_event
             except DatabaseError as e:
-                transaction.rollback()
+                # Log the error and try again.
                 print('Database error saving job event, retrying in '
                       '1 second (retry #%d): %s', retry_count + 1, e)
                 time.sleep(1)
-        else:
-            print('Failed to save job event after %d retries.',
-                  retry_count)
+
+        # We failed too many times, and are giving up.
+        print('Failed to save job event after %d retries.', retry_count)
         return None
 
     def callback_worker(self, queue_actual):

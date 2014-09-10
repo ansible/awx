@@ -105,7 +105,7 @@ class Command(NoArgsCommand):
         self.logger.addHandler(handler)
         self.logger.propagate = False
 
-    @transaction.commit_on_success
+    @transaction.atomic
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()

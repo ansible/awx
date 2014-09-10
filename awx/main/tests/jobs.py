@@ -12,11 +12,12 @@ import urlparse
 import uuid
 
 # Django
+import django.test
 from django.contrib.auth.models import User as DjangoUser
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.db.models import Q
-import django.test
 from django.test.client import Client
 from django.test.utils import override_settings
 
@@ -998,20 +999,11 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         # and that jobs come back nicely serialized with related resources and so on ...
         # that we can drill all the way down and can get at host failure lists, etc ...
 
-# Need to disable transaction middleware for testing so that the callback
-# management command will be able to read the database changes made to start
-# the job.  It won't be an issue normally, because the task will be running
-# asynchronously; the start API call will update the database, queue the task,
-# then return immediately (committing the transaction) before celery has even
-# woken up to run the new task.
-MIDDLEWARE_CLASSES = filter(lambda x: not x.endswith('TransactionMiddleware'),
-                            settings.MIDDLEWARE_CLASSES)
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    CALLBACK_CONSUMER_PORT='',
-                   ANSIBLE_TRANSPORT='local',
-                   MIDDLEWARE_CLASSES=MIDDLEWARE_CLASSES)
+                   ANSIBLE_TRANSPORT='local')
 class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
     '''Job API tests that need to use the celery task backend.'''
 
@@ -1274,8 +1266,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                   ANSIBLE_TRANSPORT='local',
-                   MIDDLEWARE_CLASSES=MIDDLEWARE_CLASSES)
+                   ANSIBLE_TRANSPORT='local')
 class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
     '''Job template callback tests for empheral hosts.'''
 
@@ -1416,7 +1407,12 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         host_ip = self.get_test_ips_for_host(host.name)[0]
         jobs_qs = job_template.jobs.filter(launch_type='callback').order_by('-pk')
         self.assertEqual(jobs_qs.count(), 0)
+
+        # Create the job itself.
         result = self.post(url, data, expect=202, remote_addr=host_ip)
+
+        # Establish that we got back what we expect, and made the changes
+        # that we expect.
         self.assertTrue('Location' in result.response, result.response)
         self.assertEqual(jobs_qs.count(), 1)
         job = jobs_qs[0]
@@ -1613,8 +1609,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                   ANSIBLE_TRANSPORT='local')#,
-                   #MIDDLEWARE_CLASSES=MIDDLEWARE_CLASSES)
+                   ANSIBLE_TRANSPORT='local')
 class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
     '''Job test of transaction locking using the celery task backend.'''
 

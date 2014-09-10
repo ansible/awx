@@ -498,8 +498,6 @@ class RunJobTest(BaseCeleryTest):
                                  host_pks)
         if async:
             qs = job_events.filter(event='runner_on_async_poll')
-            if not async_nowait:
-                self.assertTrue(qs.count())
             for evt in qs:
                 self.assertEqual(evt.host, self.host)
                 self.assertTrue(evt.play, evt)

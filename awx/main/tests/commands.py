@@ -156,9 +156,7 @@ class BaseCommandMixin(object):
         result = None
         try:
             result = command_runner(name, *args, **options)
-        except Exception, e:
-            result = e
-        except SystemExit, e:
+        except Exception as e:
             result = e
         finally:
             captured_stdout = sys.stdout.getvalue()
@@ -166,10 +164,6 @@ class BaseCommandMixin(object):
             sys.stdin = original_stdin
             sys.stdout = original_stdout
             sys.stderr = original_stderr
-        # For Django 1.4.x, convert sys.exit(1) and stderr message to the
-        # CommandError(msg) exception used by Django 1.5 and later.
-        if isinstance(result, SystemExit) and captured_stderr:
-            result = CommandError(captured_stderr)
         return result, captured_stdout, captured_stderr
 
 class DumpDataTest(BaseCommandMixin, BaseTest):

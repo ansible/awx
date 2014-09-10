@@ -32,6 +32,7 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),
         # Test database cannot be :memory: for celery/inventory tests to work.
         'TEST_NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'),
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -114,8 +115,6 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 )
 
 MIDDLEWARE_CLASSES += (
-    'django.middleware.transaction.TransactionMiddleware',
-    # Middleware loaded after this point will be subject to transactions.
     'awx.main.middleware.ActivityStreamMiddleware',
     'crum.CurrentRequestUserMiddleware',
 )
@@ -238,13 +237,6 @@ EMAIL_USE_TLS = False
 try:
     import debug_toolbar
     INSTALLED_APPS += ('debug_toolbar',)
-    # Add debug toolbar middleware before Transaction middleware.
-    new_mc = []
-    for mc in MIDDLEWARE_CLASSES:
-        if mc == 'django.middleware.transaction.TransactionMiddleware':
-            new_mc.append('debug_toolbar.middleware.DebugToolbarMiddleware')
-        new_mc.append(mc)
-    MIDDLEWARE_CLASSES = tuple(new_mc)
 except ImportError:
     pass
 

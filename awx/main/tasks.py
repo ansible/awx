@@ -154,24 +154,25 @@ def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     i = i[0]
     i.update_computed_fields(update_hosts=should_update_hosts)
 
-class BaseTask(Task):
 
+class BaseTask(Task):
     name = None
     model = None
     abstract = True
 
-    @transaction.commit_on_success
-    def update_model(self, pk, **updates):
-        '''
-        Reload model from database and update the given fields.
-        '''
+    def update_model(self, pk, _attempt=0, **updates):
+        """Reload the model instance from the database and update the
+        given fields.
+        """
         output_replacements = updates.pop('output_replacements', None) or []
-        # Commit outstanding transaction so that we fetch the latest object
-        # from the database.
-        transaction.commit()
-        for retry_count in xrange(5):
-            try:
+
+        try:
+            with transaction.atomic():
+                # Retrieve the model instance.
                 instance = self.model.objects.get(pk=pk)
+
+                # Update the appropriate fields and save the model
+                # instance, then return the new instance.
                 if updates:
                     update_fields = ['modified']
                     for field, value in updates.items():
@@ -183,17 +184,25 @@ class BaseTask(Task):
                         if field == 'status':
                             update_fields.append('failed')
                     instance.save(update_fields=update_fields)
-                    transaction.commit()
                 return instance
-            except DatabaseError as e:
-                transaction.rollback()
-                logger.debug('Database error updating %s, retrying in 5 '
-                             'seconds (retry #%d): %s',
-                             self.model._meta.object_name, retry_count + 1, e)
+        except DatabaseError as e:
+            # Log out the error to the debug logger.
+            logger.debug('Database error updating %s, retrying in 5 '
+                         'seconds (retry #%d): %s',
+                         self.model._meta.object_name, retry_count + 1, e)
+
+            # Attempt to retry the update, assuming we haven't already
+            # tried too many times.
+            if _attempt < 5:
                 time.sleep(5)
-        else:
-            logger.error('Failed to update %s after %d retries.',
-                         self.model._meta.object_name, retry_count)
+                return self.update_model(pk,
+                    _attempt=_attempt + 1,
+                    output_replacements=output_replacements,
+                    **updates
+                )
+            else:
+                logger.error('Failed to update %s after %d retries.',
+                             self.model._meta.object_name, retry_count)
 
     def signal_finished(self, pk):
         pass
@@ -375,6 +384,7 @@ class BaseTask(Task):
         Run the job/task and capture its output.
         '''
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
+
         instance.socketio_emit_status("running")
         status, tb = 'error', ''
         output_replacements = []

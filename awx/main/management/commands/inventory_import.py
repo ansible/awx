@@ -1125,7 +1125,6 @@ class Command(NoArgsCommand):
                 self.logger.error(LICENSE_MESSAGE % d)
             raise CommandError('License count exceeded!')
 
-    @transaction.commit_on_success
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
@@ -1171,10 +1170,11 @@ class Command(NoArgsCommand):
 
             # Update inventory update for this command line invocation.
             with ignore_inventory_computed_fields():
-                if self.inventory_update:
-                    self.inventory_update.status = 'running'
-                    self.inventory_update.save()
-                    transaction.commit()
+                iu = self.inventory_update
+                if iu and iu.status != 'running':
+                    with transaction.atomic():
+                        self.inventory_update.status = 'running'
+                        self.inventory_update.save()
 
             # Load inventory from source.
             self.all_group = load_inventory_source(self.source, None,
@@ -1183,35 +1183,41 @@ class Command(NoArgsCommand):
                                                    self.exclude_empty_groups)
             self.all_group.debug_tree()
 
-            # Merge/overwrite inventory into database.
-            if settings.SQL_DEBUG:
-                self.logger.warning('loading into database...')
-            with ignore_inventory_computed_fields():
-                if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
-                    self.load_into_database()
-                else:
-                    with disable_activity_stream():
+            # Ensure that this is managed as an atomic SQL transaction,
+            # and thus properly rolled back if there is an issue.
+            with transaction.atomic():
+                # Merge/overwrite inventory into database.
+                if settings.SQL_DEBUG:
+                    self.logger.warning('loading into database...')
+                with ignore_inventory_computed_fields():
+                    if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
                         self.load_into_database()
+                    else:
+                        with disable_activity_stream():
+                            self.load_into_database()
+                    if settings.SQL_DEBUG:
+                        queries_before2 = len(connection.queries)
+                    self.inventory.update_computed_fields()
+                    if settings.SQL_DEBUG:
+                        self.logger.warning('update computed fields took %d queries',
+                                            len(connection.queries) - queries_before2)
+                self.check_license()
+     
+                if self.inventory_source.group:
+                    inv_name = 'group "%s"' % (self.inventory_source.group.name)
+                else:
+                    inv_name = '"%s" (id=%s)' % (self.inventory.name,
+                                                 self.inventory.id)
                 if settings.SQL_DEBUG:
-                    queries_before2 = len(connection.queries)
-                self.inventory.update_computed_fields()
-                if settings.SQL_DEBUG:
-                    self.logger.warning('update computed fields took %d queries',
-                                        len(connection.queries) - queries_before2)
-            self.check_license()
- 
-            if self.inventory_source.group:
-                inv_name = 'group "%s"' % (self.inventory_source.group.name)
-            else:
-                inv_name = '"%s" (id=%s)' % (self.inventory.name,
-                                             self.inventory.id)
-            if settings.SQL_DEBUG:
-                self.logger.warning('Inventory import completed for %s in %0.1fs',
-                                    inv_name, time.time() - begin)
-            else:
-                self.logger.info('Inventory import completed for %s in %0.1fs',
-                                 inv_name, time.time() - begin)
-            status = 'successful'
+                    self.logger.warning('Inventory import completed for %s in %0.1fs',
+                                        inv_name, time.time() - begin)
+                else:
+                    self.logger.info('Inventory import completed for %s in %0.1fs',
+                                     inv_name, time.time() - begin)
+                status = 'successful'
+
+            # If we're in debug mode, then log the queries and time
+            # used to do the operation.
             if settings.SQL_DEBUG:
                 queries_this_import = connection.queries[queries_before:]
                 sqltime = sum(float(x['time']) for x in queries_this_import)
@@ -1236,7 +1242,6 @@ class Command(NoArgsCommand):
                 self.inventory_update.result_traceback = tb
                 self.inventory_update.status = status
                 self.inventory_update.save(update_fields=['status', 'result_traceback'])
-                transaction.commit()
             
         if exc and isinstance(exc, CommandError):
             sys.exit(1)
