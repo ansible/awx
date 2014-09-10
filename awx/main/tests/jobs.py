@@ -582,7 +582,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
                            'cloud_credential', 'forks', 'limit', 'verbosity',
                            'extra_vars', 'ask_variables_on_launch', 'job_tags',
                            'host_config_key', 'status', 'next_job_run',
-                           'has_schedules', 'last_job_run', 'last_job_failed')
+                           'has_schedules', 'last_job_run', 'last_job_failed', 'survey_enabled')
 
     def test_get_job_template_list(self):
         url = reverse('api:job_template_list')
