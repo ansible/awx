@@ -1,0 +1,11 @@
+# PIP requirements for running Tower unittests in jenkins.
+# Install using "pip --no-index -r jenkins.txt".
+
+python-ldap
+ansible
+coverage
+pyzmq
+python-memcached
+pyflakes
+pep8
+pylint

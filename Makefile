@@ -84,6 +84,19 @@ requirements_pypi:
 	    sudo pip install -r requirements/dev.txt; \
 	fi
 
+# Install third-party requirements needed for running unittests in jenkins
+# (using locally downloaded packages).
+requirements_jenkins: requirements
+	@if [ "$(VIRTUAL_ENV)" ]; then \
+	    (cd requirements && pip install --no-index -r jenkins.txt); \
+	    (cd requirements && pip install -U pycrypto); \
+	    $(PYTHON) fix_virtualenv_setuptools.py; \
+	else \
+	    (cd requirements && sudo pip install --no-index -r jenkins.txt); \
+	    (cd requirements && sudo pip install --no-index -U pycrypto); \
+	fi
+	npm install -g csslint jshint
+
 # "Install" ansible-tower package in development mode.  Creates link to working
 # copy in site-packages and installs awx-manage command.
 develop:
