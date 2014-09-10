@@ -4,7 +4,7 @@
 -U distribute
 
 # Packages used for both development and production:
-Django>=1.4
+Django>=1.6.7,<1.7
 
 # The following packages and their dependencies are bundled with AWX
 # (in awx/lib/site-packages):

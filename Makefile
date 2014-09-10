@@ -65,7 +65,7 @@ push:
 requirements:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    (cd requirements && pip install --no-index setuptools-2.2.tar.gz); \
-	    (cd requirements && pip install --no-index Django-1.5.5.tar.gz); \
+	    (cd requirements && pip install --no-index Django-1.6.7.tar.gz); \
 	    (cd requirements && pip install --no-index -r dev_local.txt); \
 	    $(PYTHON) fix_virtualenv_setuptools.py; \
 	else \
@@ -77,7 +77,7 @@ requirements:
 requirements_pypi:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    pip install setuptools==2.2; \
-	    pip install Django==1.5.5; \
+	    pip install Django\>=1.6.7,\<1.7; \
 	    pip install -r requirements/dev.txt; \
 	    $(PYTHON) fix_virtualenv_setuptools.py; \
 	else \

@@ -4,7 +4,7 @@
 # May need to install these packages separately the first time:
 setuptools-2.2.tar.gz
 distribute-0.7.3.zip
-Django-1.5.5.tar.gz
+Django-1.6.7.tar.gz
 
 # The following packages are bundled with AWX (in awx/lib/site-packages):
   # For Python2.6 support:
