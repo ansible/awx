@@ -215,7 +215,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
     def variables_needed_to_start(self):
         vars = []
         if self.survey_enabled:
-            for survey_element in self.survey_spec:
+            for survey_element in self.survey_spec["spec"]:
                 if survey_element['required']:
                     vars.append(survey_element['variable'])
         return vars
@@ -224,7 +224,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         errors = []
         if not self.survey_enabled:
             return errors
-        for survey_element in self.survey_spec:
+        if 'title' not in self.survey_spec:
+            errors.append("'title' missing from survey spec")
+        if 'description' not in self.survey_spec:
+            errors.append("'description' missing from survey spec")
+        for survey_element in self.survey_spec["spec"]:
             if survey_element['variable'] not in data and \
                survey_element['required']:
                 errors.append("'%s' value missing" % survey_element['variable'])

@@ -49,24 +49,31 @@ TEST_ASYNC_PLAYBOOK = '''
 '''
 
 TEST_SIMPLE_REQUIRED_SURVEY = '''
-[
-    {
-	"type": "text",
-	"question_name": "favorite color",
-	"question_description": "What is your favorite color?",
-	"variable": "favorite_color",
-	"choices": "",
-	"min": "",
+{
+    "title": "Simple",
+    "description": "Description",
+    "spec": [
+        {
+    	"type": "text",
+    	"question_name": "favorite color",
+    	"question_description": "What is your favorite color?",
+    	"variable": "favorite_color",
+    	"choices": "",
+    	"min": "",
 	"max": "",
 	"required": true,
 	"default": "blue"
-    }
-]
+        }
+    ]
+}
 '''
 
 TEST_SIMPLE_NONREQUIRED_SURVEY = '''
-[
-    {
+{
+    "title": "Simple",
+    "description": "Description",
+    "spec": [
+        {
 	"type": "text",
 	"question_name": "unladen swallow",
 	"question_description": "What is the airspeed velocity of an unladen swallow?",
@@ -76,13 +83,17 @@ TEST_SIMPLE_NONREQUIRED_SURVEY = '''
 	"max": "",
 	"required": false,
 	"default": "european"
-    }
-]
+        }
+    ]
+}
 '''
 
 TEST_SURVEY_REQUIREMENTS = '''
-[
-    {
+{
+    "title": "Simple",
+    "description": "Description",
+    "spec": [
+        {
 	"type": "text",
 	"question_name": "cantbeshort",
 	"question_description": "What is a long answer",
@@ -92,8 +103,8 @@ TEST_SURVEY_REQUIREMENTS = '''
 	"max": "",
 	"required": false,
 	"default": "yes"
-    },
-    {
+        },
+        {
 	"type": "text",
 	"question_name": "cantbelong",
 	"question_description": "What is a short answer",
@@ -103,8 +114,8 @@ TEST_SURVEY_REQUIREMENTS = '''
 	"max": 5,
 	"required": false,
 	"default": "yes"
-    },
-    {
+        },
+        {
 	"type": "text",
 	"question_name": "reqd",
 	"question_description": "I should be required",
@@ -114,8 +125,8 @@ TEST_SURVEY_REQUIREMENTS = '''
 	"max": "",
 	"required": true,
 	"default": "yes"
-    },
-    {
+        },
+        {
 	"type": "multiplechoice",
 	"question_name": "achoice",
 	"question_description": "Need one of these",
@@ -125,8 +136,8 @@ TEST_SURVEY_REQUIREMENTS = '''
 	"max": "",
 	"required": false,
 	"default": "yes"
-    },
-    {
+        },
+        {
 	"type": "multiselect",
 	"question_name": "mchoice",
 	"question_description": "Can have multiples of these",
@@ -136,8 +147,8 @@ TEST_SURVEY_REQUIREMENTS = '''
 	"max": "",
 	"required": false,
 	"default": "yes"
-    },
-    {
+        },
+        {
         "type": "integer",
         "question_name": "integerchoice",
         "question_description": "I need an int here",
@@ -147,8 +158,8 @@ TEST_SURVEY_REQUIREMENTS = '''
         "max": 5,
         "required": false,
         "default": ""
-    },
-    {
+        },
+        {
         "type": "float",
         "question_name": "float",
         "question_description": "I need a float here",
@@ -158,8 +169,8 @@ TEST_SURVEY_REQUIREMENTS = '''
         "max": 5,
         "required": false,
         "default": ""
-    },
-    {
+        },
+        {
         "type": "json",
         "question_name": "jsonanswer",
         "question_description": "This answer should validate as json",
@@ -169,8 +180,9 @@ TEST_SURVEY_REQUIREMENTS = '''
         "max": "",
         "required": false,
         "default": ""
-    }
-]
+        }
+    ]
+}
 '''
 
 class BaseJobTestMixin(BaseTestMixin):
