@@ -15,14 +15,13 @@ import mock
 
 from awx.api.views import JobJobTasksList
 from awx.main.models import Job, JobTemplate, JobEvent
-from awx.main.tests.jobs import BaseJobTestMixin, MIDDLEWARE_CLASSES
+from awx.main.tests.jobs import BaseJobTestMixin
 
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    CALLBACK_CONSUMER_PORT='',
-                   ANSIBLE_TRANSPORT='local',
-                   MIDDLEWARE_CLASSES=MIDDLEWARE_CLASSES)
+                   ANSIBLE_TRANSPORT='local')
 class JobTasksTests(BaseJobTestMixin, LiveServerTestCase):
     """A set of tests to ensure that the job_tasks endpoint, available at
     `/api/v1/jobs/{id}/job_tasks/`, works as expected.
