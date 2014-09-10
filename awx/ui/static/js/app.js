@@ -114,7 +114,9 @@ angular.module('Tower', [
     'lrInfiniteScroll',
     'LoadConfigHelper',
     'SocketHelper',
-    'AboutAnsibleHelpModal'
+    'AboutAnsibleHelpModal',
+    'SurveyMakerFormDefinition',
+    'SurveyQuestionFormDefinition'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -132,9 +134,10 @@ angular.module('Tower', [
                 controller: 'JobsListController'
             }).
             // when('/portal', {
+            //     templateUrl: urlPrefix + 'partials/portal.html'
             //     controller: 'Portal'
+            // }).
 
-            // })
             when('/jobs/:id', {
                 templateUrl: urlPrefix + 'partials/job_detail.html',
                 controller: 'JobDetailController'
@@ -158,6 +161,16 @@ angular.module('Tower', [
             when('/job_templates/:template_id', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: 'JobTemplatesEdit'
+            }).
+
+             when('/job_templates/add/survey', {
+                templateUrl: urlPrefix + 'partials/survey_maker.html',
+                controller: 'SurveyMakerAdd'
+            }).
+
+            when('/job_templates/:template_id/survey', {
+                templateUrl: urlPrefix + 'partials/survey_maker.html',
+                controller: 'SurveyMakerAdd'
             }).
 
             when('/job_templates/:id/schedules', {

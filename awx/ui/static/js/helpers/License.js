@@ -11,6 +11,12 @@
  * @ngdoc function
  * @name helpers.function:License
  * @description    Routines for checking and reporting license status
+ *          CheckLicense.test() is called in app.js, in line 532, which is when the license is checked. The license information is
+ *          stored in local storage using 'Store()'.
+ *
+ *
+ *
+ *
 */
 'use strict';
 

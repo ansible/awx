@@ -335,6 +335,11 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
             $scope[fld] = master[fld];
         }
     };
+
+    //navigate to the survey maker
+    $scope.navigateToSurvey = function() {
+        $location.path($location.path() + '/survey');
+    };
 }
 
 JobTemplatesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
@@ -811,6 +816,11 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             scope: $scope,
             id: id
         });
+    };
+
+    //navigate to the survey maker
+    $scope.navigateToSurvey = function() {
+        $location.path($location.path() + '/survey');
     };
 
     // Related set: Delete button
