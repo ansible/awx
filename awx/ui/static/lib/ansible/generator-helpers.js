@@ -788,13 +788,13 @@ angular.module('GeneratorHelpers', [])
 
             html += "</div><!-- input-group -->\n";
 
-            html += "<a class=\"search-reset-start\" id=\"search-submit-button\" ng-click=\"resetSearch('" + iterator + "')\"" +
+            html += "<a class=\"search-reset-start\" id=\"search-reset-button\" ng-click=\"resetSearch('" + iterator + "')\"" +
                 "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +
                 iterator + "ShowStartBtn" + modifier + " || " +
                 iterator + "HideAllStartBtn" + modifier + "\"" +
                 "><i class=\"fa fa-times\"></i></a>\n";
 
-            html += "<a class=\"search-reset-start\" id=\"search-reset-button\" ng-click=\"search('" + iterator + "')\"" +
+            html += "<a class=\"search-reset-start\" id=\"search-submit-button\" ng-click=\"search('" + iterator + "')\"" +
                 "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +
                 "!" + iterator + "ShowStartBtn" + modifier + " || " +
                 iterator + "HideAllStartBtn" + modifier + "\"" +
