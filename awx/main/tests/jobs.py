@@ -136,6 +136,39 @@ TEST_SURVEY_REQUIREMENTS = '''
 	"max": "",
 	"required": false,
 	"default": "yes"
+    },
+    {
+        "type": "integer",
+        "question_name": "integerchoice",
+        "question_description": "I need an int here",
+        "variable": "int_answer",
+        "choices": "",
+        "min": 1,
+        "max": 5,
+        "required": false,
+        "default": ""
+    },
+    {
+        "type": "float",
+        "question_name": "float",
+        "question_description": "I need a float here",
+        "variable": "float_answer",
+        "choices": "",
+        "min": 2,
+        "max": 5,
+        "required": false,
+        "default": ""
+    },
+    {
+        "type": "json",
+        "question_name": "jsonanswer",
+        "question_description": "This answer should validate as json",
+        "variable": "json_answer",
+        "choices": "",
+        "min": "",
+        "max": "",
+        "required": false,
+        "default": ""
     }
 ]
 '''
@@ -806,22 +839,42 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         with self.current_user(self.user_sue):
             response = self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
             launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
+            # Just the required answer should work
+            self.post(launch_url, dict(reqd_answer="foo"), expect=202)
             # Short answer but requires a long answer
-            response = self.post(launch_url, dict(long_answer='a', reqd_answer="foo"), expect=400)
+            self.post(launch_url, dict(long_answer='a', reqd_answer="foo"), expect=400)
             # Long answer but requires a short answer
-            response = self.post(launch_url, dict(short_answer='thisissomelongtext', reqd_answer="foo"), expect=400)
+            self.post(launch_url, dict(short_answer='thisissomelongtext', reqd_answer="foo"), expect=400)
             # Long answer but missing required answer
-            response = self.post(launch_url, dict(long_answer='thisissomelongtext'), expect=400)
+            self.post(launch_url, dict(long_answer='thisissomelongtext'), expect=400)
+            # Integer that's not big enough
+            self.post(launch_url, dict(int_answer=0, reqd_answer="foo"), expect=400)
+            # Integer that's too big
+            self.post(launch_url, dict(int_answer=10, reqd_answer="foo"), expect=400)
+            # Integer that's just riiiiight
+            self.post(launch_url, dict(int_answer=3, reqd_answer="foo"), expect=202)
+            # Integer answer that's the wrong type
+            self.post(launch_url, dict(int_answer="test", reqd_answer="foo"), expect=400)
+            # Float that's too big
+            self.post(launch_url, dict(float_answer=10.5, reqd_answer="foo"), expect=400)
+            # Float that's too small
+            self.post(launch_url, dict(float_answer=1.995, reqd_answer="foo"), expect=400)
+            # float that's just riiiiight
+            self.post(launch_url, dict(float_answer=2.01, reqd_answer="foo"), expect=202)
+            # float answer that's the wrong type
+            self.post(launch_url, dict(float_answer="test", reqd_answer="foo"), expect=400)
             # Wrong choice in single choice
-            response = self.post(launch_url, dict(reqd_answer="foo", single_choice="three"), expect=400)
+            self.post(launch_url, dict(reqd_answer="foo", single_choice="three"), expect=400)
             # Wrong choice in multi choice
-            response = self.post(launch_url, dict(reqd_answer="foo", multi_choice=["four"]), expect=400)
+            self.post(launch_url, dict(reqd_answer="foo", multi_choice=["four"]), expect=400)
             # Wrong type for multi choicen
-            response = self.post(launch_url, dict(reqd_answer="foo", multi_choice="two"), expect=400)
+            self.post(launch_url, dict(reqd_answer="foo", multi_choice="two"), expect=400)
             # Right choice in single choice
-            repsonse = self.post(launch_url, dict(reqd_answer="foo", single_choice="two"), expect=202)
+            self.post(launch_url, dict(reqd_answer="foo", single_choice="two"), expect=202)
             # Right choices in multi choice
-            response = self.post(launch_url, dict(reqd_answer="foo", multi_choice=["one", "two"]), expect=202)
+            self.post(launch_url, dict(reqd_answer="foo", multi_choice=["one", "two"]), expect=202)
+            # Nested json
+            self.post(launch_url, dict(json_answer=dict(test="val", num=1), reqd_answer="foo"), expect=202)
 
     def test_launch_job_template(self):
         url = reverse('api:job_template_list')
