@@ -4,7 +4,7 @@ import sys
 from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
-from django.db import models
+from django.db import models, transaction
 from django.utils.encoding import smart_text
 
 class Migration(DataMigration):
@@ -62,6 +62,11 @@ class Migration(DataMigration):
 
     def forwards(self, orm):
         "Write your forwards methods here."
+
+        # South seems to perform migrations with autocommit off in some cases.
+        # That breaks this migration, so ensure it's turned on.
+        old_autocommit = transaction.get_autocommit()
+        transaction.set_autocommit(True)
 
         # Copy Project old to new.
         print('Migrating Projects...', end='')
@@ -382,11 +387,14 @@ class Migration(DataMigration):
                 a_s.new_job.add(new_job)
         print('')
 
+        # Restore autocommit to what it was.
+        transaction.set_autocommit(old_autocommit)
+
     def backwards(self, orm):
         "Write your backwards methods here."
 
         # FIXME: Would like to have this, but not required.
-        raise NotImplementedError()
+        raise RuntimeError("This migration is not reversable")
 
     models = {
         u'auth.group': {
