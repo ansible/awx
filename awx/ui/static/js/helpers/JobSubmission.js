@@ -389,7 +389,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         return function (params) {
             var scope = params.scope,
                 id = params.id,
-                base = $location.path().replace(/^\//, '').split('/')[0],
+                //base = $location.path().replace(/^\//, '').split('/')[0],
                 url,
                 job_template,
                 new_job_id,
@@ -398,13 +398,14 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 prompt_for_vars = false,
                 passwords;
 
-            if (base === 'job_templates') {
-                url = GetBasePath('job_templates');
-            }
-            else {
-                url = GetBasePath('jobs');
-            }
-            url += id + '/';
+            // if (base === 'job_templates') {
+            //     url = GetBasePath('job_templates');
+            // }
+            // else {
+            //     url = GetBasePath('jobs');
+            // }
+            // url += id + '/';
+            url = GetBasePath('job_templates')+ id + '/launch/';
 
             if (scope.removePostTheJob) {
                 scope.removePostTheJob();
@@ -536,14 +537,27 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             Rest.setUrl(url);
             Rest.get()
                 .success(function (data) {
-                    delete data.id;
-                    job_template = data;
-                    if (Empty(data.credential)) {
-                        scope.$emit('PromptForCredential');
-                    } else {
-                        // We have what we need, submit the job
-                        scope.$emit('PostTheJob');
+                    // new_job_id = data.id;
+                    launch_url = url;//data.related.start;
+                    prompt_for_vars = data.ask_variables_on_launch;
+                    // new_job = data;
+                    if (data.passwords_needed_to_start.length > 0) {
+                        scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
                     }
+                    else if (data.ask_variables_on_launch) {
+                        scope.$emit('PromptForVars');
+                    }
+                    else {
+                        scope.$emit('StartPlaybookRun');
+                    }
+                    // delete data.id;
+                    // job_template = data;
+                    // if (Empty(data.credential)) {
+                    //     scope.$emit('PromptForCredential');
+                    // } else {
+                    //     // We have what we need, submit the job
+                    //     scope.$emit('PostTheJob');
+                    // }
                 })
                 .error(function (data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
