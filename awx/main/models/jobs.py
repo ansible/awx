@@ -52,8 +52,9 @@ __all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent']
 
 class JobOptions(BaseModel):
     '''
+    Common options for job templates and jobs.
     '''
-    
+
     class Meta:
         abstract = True
 
@@ -115,6 +116,20 @@ class JobOptions(BaseModel):
         blank=True,
         default='',
     )
+    force_handlers = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    skip_tags = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    start_at_task = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -134,6 +149,18 @@ class JobOptions(BaseModel):
                 'Amazon Web Services or Rackspace.',
             )
         return cred
+
+    @property
+    def passwords_needed_to_start(self):
+        '''Return list of password field names needed to start the job.'''
+        needed = []
+        if self.credential:
+            for pw in self.credential.passwords_needed:
+                if pw == 'password':
+                    needed.append('ssh_password')
+                else:
+                    needed.append(pw)
+        return needed
 
 
 class JobTemplate(UnifiedJobTemplate, JobOptions):
@@ -174,7 +201,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'job_type', 'inventory', 'project',
                 'playbook', 'credential', 'cloud_credential', 'forks',
-                'limit', 'verbosity', 'extra_vars', 'job_tags']
+                'limit', 'verbosity', 'extra_vars', 'job_tags',
+                'force_handlers', 'skip_tags', 'start_at_task']
 
     def create_job(self, **kwargs):
         '''
@@ -190,26 +218,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
-        needed = []
-        if self.credential:
-            for pw in self.credential.passwords_needed:
-                if pw == 'password':
-                    needed.append('ssh_password')
-                else:
-                    needed.append(pw)
-        return bool(self.credential and not len(needed))
-
-    @property
-    def passwords_needed_to_start(self):
-        '''Return list of password field names needed to start the job.'''
-        needed = []
-        if self.credential:
-            for pw in self.credential.passwords_needed:
-                if pw == 'password':
-                    needed.append('ssh_password')
-                else:
-                    needed.append(pw)
-        return needed
+        return bool(self.credential and not len(self.passwords_needed_to_start))
 
     @property
     def variables_needed_to_start(self):
@@ -336,18 +345,6 @@ class Job(UnifiedJob, JobOptions):
         if self.job_template is not None:
             return self.job_template.ask_variables_on_launch
         return False
-
-    @property
-    def passwords_needed_to_start(self):
-        '''Return list of password field names needed to start the job.'''
-        needed = []
-        if self.credential:
-            for pw in self.credential.passwords_needed:
-                if pw == 'password':
-                    needed.append('ssh_password')
-                else:
-                    needed.append(pw)
-        return needed
 
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start

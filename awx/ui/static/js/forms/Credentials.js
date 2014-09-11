@@ -309,10 +309,29 @@ angular.module('CredentialFormDefinition', [])
                 awPassMatch: true,
                 associated: 'ssh_key_unlock'
             },
+            "login_method": {
+                label: "Login Method", // FIXME: Confirm this label is ok?
+                type: 'radio_group',
+                ngChange: "loginMethodChange()",
+                options: [{
+                    label: 'None', // FIXME: Maybe 'Default' or 'SSH only' instead?
+                    value: '',
+                    selected: true
+                }, {
+                    label: 'Sudo',
+                    value: 'sudo'
+                }, {
+                    label: 'Su',
+                    value: 'su'
+                }],
+                awPopOver: "<p>A credential may optionally provide a sudo username and password or su username and password to use when running a playbook.</p>",
+                dataPlacement: 'right',
+                dataContainer: "body"
+            },
             "sudo_username": {
                 label: 'Sudo Username',
                 type: 'text',
-                ngShow: "kind.value == 'ssh'",
+                ngShow: "kind.value == 'ssh' && login_method == 'sudo'",
                 addRequired: false,
                 editRequired: false,
                 autocomplete: false
@@ -320,7 +339,7 @@ angular.module('CredentialFormDefinition', [])
             "sudo_password": {
                 label: 'Sudo Password',
                 type: 'password',
-                ngShow: "kind.value == 'ssh'",
+                ngShow: "kind.value == 'ssh' && login_method == 'sudo'",
                 addRequired: false,
                 editRequired: false,
                 ngChange: "clearPWConfirm('sudo_password_confirm')",
@@ -332,11 +351,41 @@ angular.module('CredentialFormDefinition', [])
             "sudo_password_confirm": {
                 label: 'Confirm Sudo Password',
                 type: 'password',
-                ngShow: "kind.value == 'ssh'",
+                ngShow: "kind.value == 'ssh' && login_method == 'sudo'",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
                 associated: 'sudo_password',
+                autocomplete: false
+            },
+            "su_username": {
+                label: 'Su Username',
+                type: 'text',
+                ngShow: "kind.value == 'ssh' && login_method == 'su'",
+                addRequired: false,
+                editRequired: false,
+                autocomplete: false
+            },
+            "su_password": {
+                label: 'Su Password',
+                type: 'password',
+                ngShow: "kind.value == 'ssh' && login_method == 'su'",
+                addRequired: false,
+                editRequired: false,
+                ngChange: "clearPWConfirm('su_password_confirm')",
+                ask: true,
+                clear: true,
+                associated: 'su_password_confirm',
+                autocomplete: false
+            },
+            "su_password_confirm": {
+                label: 'Confirm Su Password',
+                type: 'password',
+                ngShow: "kind.value == 'ssh' && login_method == 'su'",
+                addRequired: false,
+                editRequired: false,
+                awPassMatch: true,
+                associated: 'su_password',
                 autocomplete: false
             },
             "project": {

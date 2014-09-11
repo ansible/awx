@@ -1135,13 +1135,15 @@ class CredentialSerializer(BaseSerializer):
     ssh_key_data = serializers.WritableField(required=False, default='')
     ssh_key_unlock = serializers.WritableField(required=False, default='')
     sudo_password = serializers.WritableField(required=False, default='')
+    su_password = serializers.WritableField(required=False, default='')
     vault_password = serializers.WritableField(required=False, default='')
 
     class Meta:
         model = Credential
         fields = ('*', 'user', 'team', 'kind', 'cloud', 'host', 'username',
                   'password', 'project', 'ssh_key_data', 'ssh_key_unlock',
-                  'sudo_username', 'sudo_password', 'vault_password')
+                  'sudo_username', 'sudo_password', 'su_username',
+                  'su_password', 'vault_password')
 
     def to_native(self, obj):
         ret = super(CredentialSerializer, self).to_native(obj)
@@ -1180,7 +1182,8 @@ class JobOptionsSerializer(BaseSerializer):
     class Meta:
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
                   'credential', 'cloud_credential', 'forks', 'limit',
-                  'verbosity', 'extra_vars', 'job_tags')
+                  'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
+                  'skip_tags', 'start_at_task')
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
@@ -1296,6 +1299,9 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             data.setdefault('verbosity', job_template.verbosity)
             data.setdefault('extra_vars', job_template.extra_vars)
             data.setdefault('job_tags', job_template.job_tags)
+            data.setdefault('force_handlers', job_template.force_handlers)
+            data.setdefault('skip_tags', job_template.skip_tags)
+            data.setdefault('start_at_task', job_template.start_at_task)
         return super(JobSerializer, self).from_native(data, files)
 
     def to_native(self, obj):

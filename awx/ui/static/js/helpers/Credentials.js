@@ -102,6 +102,9 @@ angular.module('CredentialsHelper', ['Utilities'])
                 scope.sudo_username = null;
                 scope.sudo_password = null;
                 scope.sudo_password_confirm = null;
+                scope.su_username = null;
+                scope.su_password = null;
+                scope.su_password_confirm = null;
             }
 
             // Collapse or open help widget based on whether scm value is selected
@@ -137,6 +140,24 @@ angular.module('CredentialsHelper', ['Utilities'])
                 scope.user_required = true;
                 scope.team = null;
                 scope.team_name = null;
+            }
+        };
+    }
+])
+
+
+.factory('LoginMethodChange', [
+    function () {
+        return function (params) {
+            var scope = params.scope,
+                login_method = scope.login_method;
+            if (login_method !== 'sudo') {
+                scope.sudo_username = null;
+                scope.sudo_password = null;
+            }
+            if (login_method !== 'su') {
+              scope.su_username = null;
+              scope.su_password = null;
             }
         };
     }

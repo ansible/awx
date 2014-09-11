@@ -622,13 +622,16 @@ class BaseJobTestMixin(BaseTestMixin):
 
 class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
-    JOB_TEMPLATE_FIELDS = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
-                           'modified', 'name', 'description', 'job_type',
-                           'inventory', 'project', 'playbook', 'credential',
-                           'cloud_credential', 'forks', 'limit', 'verbosity',
-                           'extra_vars', 'ask_variables_on_launch', 'job_tags',
-                           'host_config_key', 'status', 'next_job_run',
-                           'has_schedules', 'last_job_run', 'last_job_failed', 'survey_enabled')
+    JOB_TEMPLATE_FIELDS = ('id', 'type', 'url', 'related', 'summary_fields',
+                           'created', 'modified', 'name', 'description',
+                           'job_type', 'inventory', 'project', 'playbook',
+                           'credential', 'use_su_credential', 'sudo_su_flag',
+                           'cloud_credential', 'force_handlers', 'forks',
+                           'limit', 'verbosity', 'extra_vars',
+                           'ask_variables_on_launch', 'job_tags', 'skip_tags',
+                           'start_at_task', 'host_config_key', 'status',
+                           'next_job_run', 'has_schedules', 'last_job_run',
+                           'last_job_failed', 'survey_enabled')
 
     def test_get_job_template_list(self):
         url = reverse('api:job_template_list')

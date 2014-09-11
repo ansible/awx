@@ -136,7 +136,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeP
 
 function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList,
-    GetBasePath, GetChoices, Empty, KindChange, OwnerChange, FormSave) {
+    GetBasePath, GetChoices, Empty, KindChange, OwnerChange, LoginMethodChange, FormSave) {
 
     ClearScope();
 
@@ -209,6 +209,17 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
         OwnerChange({ scope: $scope });
     }
 
+    if (!Empty($routeParams.su_username) || !Empty($routeParams.su_password)) {
+        $scope.login_method = 'su';
+        LoginMethodChange({ scope: $scope });
+    } else if (!Empty($routeParams.sudo_username) || !Empty($routeParams.sudo_password)) {
+        $scope.login_method = 'sudo';
+        LoginMethodChange({ scope: $scope });
+    } else {
+        $scope.login_method = '';
+        LoginMethodChange({ scope: $scope });
+    }
+
     // Handle Kind change
     $scope.kindChange = function () {
         KindChange({ scope: $scope, form: form, reset: true });
@@ -226,6 +237,11 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
     // Handle Owner change
     $scope.ownerChange = function () {
         OwnerChange({ scope: $scope });
+    };
+
+    // Handle Login Method change
+    $scope.loginMethodChange = function () {
+        LoginMethodChange({ scope: $scope });
     };
 
     // Reset defaults
@@ -266,13 +282,13 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
 
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList', 'SearchInit', 'PaginateInit',
-    'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange', 'FormSave'
+    'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange', 'LoginMethodChange', 'FormSave'
 ];
 
 
 function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
-    KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave, Stream, Wait) {
+    KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, LoginMethodChange, FormSave, Stream, Wait) {
 
     ClearScope();
 
@@ -338,6 +354,7 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
             reset: false
         });
         OwnerChange({ scope: $scope });
+        LoginMethodChange({ scope: $scope });
         Wait('stop');
     });
 
@@ -376,6 +393,15 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
                     $scope.owner = 'team';
                 }
                 master.owner = $scope.owner;
+
+                if (!Empty($scope.su_username) || !Empty($scope.su_password)) {
+                    $scope.login_method = 'su';
+                } else if (!Empty($scope.sudo_username) || !Empty($scope.sudo_password)) {
+                      $scope.login_method = 'sudo';
+                } else {
+                    $scope.login_method = '';
+                }
+                master.login_method = $scope.login_method;
 
                 for (i = 0; i < $scope.credential_kind_options.length; i++) {
                     if ($scope.credential_kind_options[i].value === data.kind) {
@@ -445,6 +471,11 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
         OwnerChange({ scope: $scope });
     };
 
+    // Handle Login Method change
+    $scope.loginMethodChange = function () {
+        LoginMethodChange({ scope: $scope });
+    };
+
     // Handle Kind change
     $scope.kindChange = function () {
         KindChange({ scope: $scope, form: form, reset: true });
@@ -459,6 +490,7 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
         setAskCheckboxes();
         KindChange({ scope: $scope, form: form, reset: false });
         OwnerChange({ scope: $scope });
+        LoginMethodChange({ scope: $scope });
     };
 
     // Related set: Add button
@@ -538,5 +570,5 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
 CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices', 'KindChange', 'UserList', 'TeamList', 'LookUpInit',
-    'Empty', 'OwnerChange', 'FormSave', 'Stream', 'Wait'
+    'Empty', 'OwnerChange', 'LoginMethodChange', 'FormSave', 'Stream', 'Wait'
 ];

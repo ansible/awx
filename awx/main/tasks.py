@@ -479,13 +479,13 @@ class RunJob(BaseTask):
 
     def build_passwords(self, job, **kwargs):
         '''
-        Build a dictionary of passwords for SSH private key, SSH user, sudo
+        Build a dictionary of passwords for SSH private key, SSH user, sudo/su
         and ansible-vault.
         '''
         passwords = super(RunJob, self).build_passwords(job, **kwargs)
         creds = job.credential
         if creds:
-            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password', 'vault_password'):
+            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password', 'su_password', 'vault_password'):
                 if field == 'ssh_password':
                     value = kwargs.get(field, decrypt_field(creds, 'password'))
                 else:
@@ -550,10 +550,11 @@ class RunJob(BaseTask):
         optionally using ssh-agent for public/private key authentication.
         '''
         creds = job.credential
-        ssh_username, sudo_username = '', ''
+        ssh_username, sudo_username, su_username = '', '', ''
         if creds:
             ssh_username = kwargs.get('username', creds.username)
             sudo_username = kwargs.get('sudo_username', creds.sudo_username)
+            su_username = kwargs.get('su_username', creds.su_username)
         # Always specify the normal SSH user as root by default.  Since this
         # task is normally running in the background under a service account,
         # it doesn't make sense to rely on ansible-playbook's default of using
@@ -567,9 +568,12 @@ class RunJob(BaseTask):
         args.extend(['-u', ssh_username])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
-        # However, we should only specify sudo user if explicitly given by the
-        # credentials, otherwise, the playbook will be forced to run using
-        # sudo, which may not always be the desired behavior.
+        # We only specify sudo/su user and password if explicitly given by the
+        # credential.  Credential should never specify both sudo and su.
+        if su_username:
+            args.extend(['-R', su_username])
+        if 'su_password' in kwargs.get('passwords', {}):
+            args.append('--ask-su-pass')
         if sudo_username:
             args.extend(['-U', sudo_username])
         if 'sudo_password' in kwargs.get('passwords', {}):
@@ -591,12 +595,18 @@ class RunJob(BaseTask):
 
         if job.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % job.forks)
+        if job.force_handlers:
+            args.append('--force-handlers')
         if job.limit:
             args.extend(['-l', job.limit])
         if job.verbosity:
             args.append('-%s' % ('v' * min(3, job.verbosity)))
         if job.job_tags:
             args.extend(['-t', job.job_tags])
+        if job.skip_tags:
+            args.append('--skip-tags=%s' % job.skip_tags)
+        if job.start_at_task:
+            args.append('--start-at-task=%s' % job.start_at_task)
 
         # Define special extra_vars for Tower, combine with job.extra_vars.
         extra_vars = {
@@ -642,6 +652,7 @@ class RunJob(BaseTask):
         d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
         d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
         d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'sudo_password'
+        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'su_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'

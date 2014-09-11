@@ -39,6 +39,24 @@ TEST_PLAYBOOK2 = '''- name: test failed
     command: test 1 = 0
 '''
 
+TEST_PLAYBOOK_WITH_TAGS = u'''
+- name: test with tags
+  hosts: test-group
+  gather_facts: False
+  tasks:
+  - name: should fail but skipped using --start-at-task="start here"
+    command: test 1 = 0
+    tags: runme
+  - name: start here
+    command: test 1 = 1
+    tags: runme
+  - name: should fail but skipped using --skip-tags=skipme
+    command: test 1 = 0
+    tags: skipme
+  - name: should fail but skipped without runme tag
+    command: test 1 = 0
+'''
+
 TEST_EXTRA_VARS_PLAYBOOK = '''
 - name: test extra vars
   hosts: test-group
@@ -315,6 +333,8 @@ class RunJobTest(BaseCeleryTest):
             'password': '',
             'sudo_username': '',
             'sudo_password': '',
+            'su_username': '',
+            'su_password': '',
             'vault_password': '',
         }
         opts.update(kwargs)
@@ -796,7 +816,8 @@ class RunJobTest(BaseCeleryTest):
     def test_extra_job_options(self):
         self.create_test_project(TEST_EXTRA_VARS_PLAYBOOK)
         # Test with extra_vars containing misc whitespace.
-        job_template = self.create_test_job_template(forks=3, verbosity=2,
+        job_template = self.create_test_job_template(force_handlers=True,
+                                                     forks=3, verbosity=2,
                                                      extra_vars=u'{\n\t"abc": 1234\n}')
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
@@ -804,9 +825,10 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('--forks=3' in job.job_args)
-        self.assertTrue('-vv' in job.job_args)
-        self.assertTrue('-e' in job.job_args)
+        self.assertTrue('"--force-handlers"' in job.job_args)
+        self.assertTrue('"--forks=3"' in job.job_args)
+        self.assertTrue('"-vv"' in job.job_args)
+        self.assertTrue('"-e"' in job.job_args)
         # Test with extra_vars as key=value (old format).
         job_template2 = self.create_test_job_template(extra_vars='foo=1')
         job2 = self.create_test_job(job_template=job_template2)
@@ -833,7 +855,7 @@ class RunJobTest(BaseCeleryTest):
         job = Job.objects.get(pk=job.pk)
         self.assertTrue(len(job.job_args) > 1024)
         self.check_job_result(job, 'successful')
-        self.assertTrue('-e' in job.job_args)
+        self.assertTrue('"-e"' in job.job_args)
 
     def test_limit_option(self):
         self.create_test_project(TEST_PLAYBOOK)
@@ -844,7 +866,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'failed')
-        self.assertTrue('-l' in job.job_args)
+        self.assertTrue('"-l"' in job.job_args)
 
     def test_limit_option_with_group_pattern_and_ssh_key(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA)
@@ -856,8 +878,23 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('--private-key=' in job.job_args)
+        self.assertTrue('"--private-key=' in job.job_args)
         self.assertFalse('ssh-agent' in job.job_args)
+
+    def test_tag_and_task_options(self):
+        self.create_test_project(TEST_PLAYBOOK_WITH_TAGS)
+        job_template = self.create_test_job_template(job_tags='runme',
+                                                     skip_tags='skipme',
+                                                     start_at_task='start here')
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        job = Job.objects.get(pk=job.pk)
+        self.check_job_result(job, 'successful')
+        self.assertTrue('"-t"' in job.job_args)
+        self.assertTrue('"--skip-tags=' in job.job_args)
+        self.assertTrue('"--start-at-task=' in job.job_args)
 
     def test_ssh_username_and_password(self):
         self.create_test_credential(username='sshuser', password='sshpass')
@@ -869,8 +906,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('-u' in job.job_args)
-        self.assertTrue('--ask-pass' in job.job_args)
+        self.assertTrue('"-u"' in job.job_args)
+        self.assertTrue('"--ask-pass"' in job.job_args)
 
     def test_ssh_ask_password(self):
         self.create_test_credential(password='ASK')
@@ -885,7 +922,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start(ssh_password='sshpass'))
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('--ask-pass' in job.job_args)
+        self.assertTrue('"--ask-pass"' in job.job_args)
 
     def test_sudo_username_and_password(self):
         self.create_test_credential(sudo_username='sudouser',
@@ -900,8 +937,12 @@ class RunJobTest(BaseCeleryTest):
         # Job may fail if current user doesn't have password-less sudo
         # privileges, but we're mainly checking the command line arguments.
         self.check_job_result(job, ('successful', 'failed'))
-        self.assertTrue('-U' in job.job_args)
-        self.assertTrue('--ask-sudo-pass' in job.job_args)
+        self.assertTrue('"-U"' in job.job_args)
+        self.assertTrue('"--ask-sudo-pass"' in job.job_args)
+        self.assertFalse('"-s"' in job.job_args)
+        self.assertFalse('"-R"' in job.job_args)
+        self.assertFalse('"--ask-su-pass"' in job.job_args)
+        self.assertFalse('"-S"' in job.job_args)
 
     def test_sudo_ask_password(self):
         self.create_test_credential(sudo_password='ASK')
@@ -911,13 +952,58 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.status, 'new')
         self.assertTrue(job.passwords_needed_to_start)
         self.assertTrue('sudo_password' in job.passwords_needed_to_start)
+        self.assertFalse('su_password' in job.passwords_needed_to_start)
         self.assertFalse(job.signal_start())
         self.assertTrue(job.signal_start(sudo_password='sudopass'))
         job = Job.objects.get(pk=job.pk)
         # Job may fail if current user doesn't have password-less sudo
         # privileges, but we're mainly checking the command line arguments.
         self.assertTrue(job.status in ('successful', 'failed'))
-        self.assertTrue('--ask-sudo-pass' in job.job_args)
+        self.assertTrue('"--ask-sudo-pass"' in job.job_args)
+        self.assertFalse('"-s"' in job.job_args)
+        self.assertFalse('"-R"' in job.job_args)
+        self.assertFalse('"--ask-su-pass"' in job.job_args)
+        self.assertFalse('"-S"' in job.job_args)
+
+    def test_su_username_and_password(self):
+        self.create_test_credential(su_username='suuser',
+                                    su_password='supass')
+        self.create_test_project(TEST_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        job = Job.objects.get(pk=job.pk)
+        # Job may fail, but we're mainly checking the command line arguments.
+        self.check_job_result(job, ('successful', 'failed'))
+        self.assertTrue('"-R"' in job.job_args)
+        self.assertTrue('"--ask-su-pass"' in job.job_args)
+        self.assertFalse('"-S"' in job.job_args)
+        self.assertFalse('"-U"' in job.job_args)
+        self.assertFalse('"--ask-sudo-pass"' in job.job_args)
+        self.assertFalse('"-s"' in job.job_args)
+
+    def test_su_ask_password(self):
+        self.create_test_credential(su_password='ASK')
+        self.create_test_project(TEST_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertTrue(job.passwords_needed_to_start)
+        self.assertTrue('su_password' in job.passwords_needed_to_start)
+        self.assertFalse('sudo_password' in job.passwords_needed_to_start)
+        self.assertFalse(job.signal_start())
+        self.assertTrue(job.signal_start(su_password='supass'))
+        job = Job.objects.get(pk=job.pk)
+        # Job may fail, but we're mainly checking the command line arguments.
+        self.assertTrue(job.status in ('successful', 'failed'))
+        self.assertTrue('"--ask-su-pass"' in job.job_args)
+        self.assertFalse('"-S"' in job.job_args)
+        self.assertFalse('"-R"' in job.job_args)
+        self.assertFalse('"-U"' in job.job_args)
+        self.assertFalse('"--ask-sudo-pass"' in job.job_args)
+        self.assertFalse('"-s"' in job.job_args)
 
     def test_unlocked_ssh_key(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA)
@@ -929,7 +1015,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('--private-key=' in job.job_args)
+        self.assertTrue('"--private-key=' in job.job_args)
         self.assertFalse('ssh-agent' in job.job_args)
 
     def test_locked_ssh_key_with_password(self):
@@ -991,10 +1077,10 @@ class RunJobTest(BaseCeleryTest):
         job = Job.objects.get(pk=job.pk)
         if Version(self.ansible_version) >= Version('1.5'):
             self.check_job_result(job, 'successful')
-            self.assertTrue('--ask-vault-pass' in job.job_args)
+            self.assertTrue('"--ask-vault-pass"' in job.job_args)
         else:
             self.check_job_result(job, 'failed')
-            self.assertFalse('--ask-vault-pass' in job.job_args)
+            self.assertFalse('"--ask-vault-pass"' in job.job_args)
 
     def test_vault_ask_password(self):
         self.create_test_credential(vault_password='ASK')
@@ -1010,10 +1096,10 @@ class RunJobTest(BaseCeleryTest):
         job = Job.objects.get(pk=job.pk)
         if Version(self.ansible_version) >= Version('1.5'):
             self.check_job_result(job, 'successful')
-            self.assertTrue('--ask-vault-pass' in job.job_args)
+            self.assertTrue('"--ask-vault-pass"' in job.job_args)
         else:
             self.check_job_result(job, 'failed')
-            self.assertFalse('--ask-vault-pass' in job.job_args)
+            self.assertFalse('"--ask-vault-pass"' in job.job_args)
 
     def test_vault_bad_password(self):
         self.create_test_credential(vault_password='not it')
@@ -1026,9 +1112,9 @@ class RunJobTest(BaseCeleryTest):
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'failed')
         if Version(self.ansible_version) >= Version('1.5'):
-            self.assertTrue('--ask-vault-pass' in job.job_args)
+            self.assertTrue('"--ask-vault-pass"' in job.job_args)
         else:
-            self.assertFalse('--ask-vault-pass' in job.job_args)
+            self.assertFalse('"--ask-vault-pass"' in job.job_args)
 
     def _test_cloud_credential_environment_variables(self, kind):
         if kind == 'aws':

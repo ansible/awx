@@ -174,9 +174,11 @@ class CallbackReceiver(object):
                 with transaction.atomic():
                     # If we're not in verbose mode, wipe out any module
                     # arguments.
-                    i = data['event_data'].get('res', {}).get('invocation', {})
-                    if verbose == 0 and 'module_args' in i:
-                        i['module_args'] = ''
+                    res = data['event_data'].get('res', {})
+                    if isinstance(res, dict):
+                        i = res.get('invocation', {})
+                        if verbose == 0 and 'module_args' in i:
+                            i['module_args'] = ''
 
                     # Create a new JobEvent object.
                     job_event = JobEvent(**data)
