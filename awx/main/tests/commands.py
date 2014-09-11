@@ -20,8 +20,6 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.utils.timezone import now
 from django.test.utils import override_settings
-import django.db.backends.sqlite3.base
-import django.db
 
 # AWX
 from awx.main.models import *
@@ -867,7 +865,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
     @unittest.skipIf(getattr(settings, 'LOCAL_DEVELOPMENT', False),
                      'Skip this test in local development environments, '
                      'which may vary widely on memory.')
-    @unittest.skipIf(django.db.backend == django.db.backends.sqlite3.base,
+    @unittest.skipIf(settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
                      'Skip this test if we are on sqlite')
     def test_splunk_inventory(self):
         new_inv = self.organizations[0].inventories.create(name='splunk')
