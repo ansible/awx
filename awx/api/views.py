@@ -1642,6 +1642,10 @@ class JobRelaunch(GenericAPIView):
 
     model = Job
 
+    @transaction.non_atomic_requests
+    def dispatch(self, *args, **kwargs):
+        return super(JobRelaunch, self).dispatch(*args, **kwargs)
+
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         data = {}
