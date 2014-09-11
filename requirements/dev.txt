@@ -27,7 +27,7 @@ Django>=1.6.7,<1.7
 
 # Development-only packages:
 django-debug-toolbar
-django-devserver
+django-devserver>0.7
 unittest2
 django-jenkins<0.15
 ipython
