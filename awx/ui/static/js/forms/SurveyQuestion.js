@@ -15,7 +15,7 @@ angular.module('SurveyQuestionFormDefinition', [])
     .value('SurveyQuestionForm', {
 
         addTitle: 'Add Question',
-        editTitle: '{{ inventory_name }}',
+        editTitle: '{{ survey_name }}',
         name: 'question_unique',
         well: true,
         twoColumns: true,
@@ -33,13 +33,13 @@ angular.module('SurveyQuestionFormDefinition', [])
         // },
 
         fields: {
-            question_text: {
+            question_name: {
                 realName: 'question_text',
                 label: 'Question Text',
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: true,
+                capitalize: false,
                 column: 1
             },
             question_description: {
@@ -51,7 +51,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 editRequired: false,
                 column: 2
             },
-            response_variable_name: {
+            variable: {
                 label: 'Answer Variable Name',
                 type: 'text',
                 addRequired: true,
@@ -65,7 +65,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 //     init: "true"
                 // }
             },
-            answer_type: {
+            type: {
                 realName: 'answer_type',
                 label: 'Answer Type',
                 type: 'select',
@@ -75,23 +75,23 @@ angular.module('SurveyQuestionFormDefinition', [])
                 column: 1
 
             },
-            answer_options_text: {
-                realName: 'answer_options',
-                label: 'Answer Options',
-                type: 'text',
-                addRequired: true,
-                editRequired: true,
-                ngHide: 'answer_type.type!=="text" ',
-                column: 1
-            },
-            answer_options_multiple_choice: {
+            // answer_options_text: {
+            //     realName: 'answer_options',
+            //     label: 'Answer Options',
+            //     type: 'text',
+            //     addRequired: true,
+            //     editRequired: true,
+            //     ngHide: 'answer_type.type!=="text" ',
+            //     column: 1
+            // },
+            choices: {
                 realName: 'answer_options',
                 label: 'Multiple Choice Options',
                 type: 'textarea',
                 rows: 3,
                 addRequired: true,
                 editRequired: true,
-                ngShow: 'answer_type.type==="mc" ',
+                ngShow: 'type.type==="multipleselect" || type.type==="multiplechoice" ',
                 awPopOver: '<p>Type an option on each line.</p>'+
                             '<p>For example the following input:<br><br>Apple<br>\n Banana<br>\n Cherry<br><br>would be displayed as:</p>\n'+
                             '<ol><li>Apple</li><li>Banana</li><li>Cherry</li><ol>',
@@ -107,26 +107,26 @@ angular.module('SurveyQuestionFormDefinition', [])
                 control: '<div class="row">'+
                                 '<div class="col-xs-6"><label for="minimum"><span class="label-text">Minimum</span></label><input id="answer_min" type="number" class="form-control"></div>'+
                                 '<div class="col-xs-6"><label for="minimum"><span class="label-text">Maximum</span></label><input id="answer_max" type="number" class="form-control"></div></div>',
-                ngShow: 'answer_type.type==="number" ',
+                ngShow: 'type.type==="integer" || type.type==="float" ',
                 addRequired: true,
                 editRequired: true,
                 column: 1
             },
-            answer_options_json: {
-                realName: 'answer_options',
-                label: 'Answer Options',
-                type: 'textarea',
-                rows: 3,
-                ngShow: 'answer_type.type==="json" ',
-                addRequired: true,
-                editRequired: true,
-                awPopOver: '<p>Insert some good JSON!</p>',
-                dataTitle: 'Answer Options',
-                dataPlacement: 'right',
-                dataContainer: "body",
-                column: 1
-            },
-            default_answer: {
+            // answer_options_json: {
+            //     realName: 'answer_options',
+            //     label: 'Answer Options',
+            //     type: 'textarea',
+            //     rows: 3,
+            //     ngShow: 'type.type==="json" ',
+            //     addRequired: true,
+            //     editRequired: true,
+            //     awPopOver: '<p>Insert some good JSON!</p>',
+            //     dataTitle: 'Answer Options',
+            //     dataPlacement: 'right',
+            //     dataContainer: "body",
+            //     column: 1
+            // },
+            default: {
                 realName: 'default_answer',
                 label: 'Default Answer',
                 type: 'text',
@@ -134,12 +134,19 @@ angular.module('SurveyQuestionFormDefinition', [])
                 editRequired: false,
                 column: 1
             },
-            is_required: {
-                label: 'Answer required or optional',
-                type: 'custom',
-                column: 2,
-                control: '<div><label for="required"><span class="label-text">Required</span></label><input id="answer_required" type="radio" checked=true></div>'+
-                                '<div><label for="optional"><span class="label-text">Optional</span></label><input id="answer_optional" type="radio"></div>',
+            required: {
+                realName: 'default_answer',
+                label: 'Required',
+                type: 'checkbox',
+                // checked: true,
+                addRequired: false,
+                editRequired: false,
+                column: 2
+                // label: 'Answer required or optional',
+                // type: 'custom',
+                // column: 2,
+                // control: '<div><label for="required"><span class="label-text">Required</span></label><input id="answer_required" type="radio" checked=true></div>'+
+                //                 '<div><label for="optional"><span class="label-text">Optional</span></label><input id="answer_optional" type="radio"></div>',
 
             }
         //     answer_options: {

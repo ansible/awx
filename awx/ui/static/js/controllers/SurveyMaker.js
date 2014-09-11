@@ -23,28 +23,34 @@ function SurveyMakerAdd($scope, $rootScope, $compile, $location, $log, $routePar
     // Inject dynamic view
     var generator = GenerateForm,
         form = SurveyMakerForm,
-        base = $location.path().replace(/^\//, '').split('/')[0];
+        base = $location.path().replace(/^\//, '').split('/')[0],
+        id = $location.path().replace(/^\//, '').split('/')[1];
 
     $scope.survey_questions=[];
 
     $scope.answer_types=[
         {name: 'Text' , type: 'text'},
-        {name: 'Textarea', type: 'text'},
-        {name: 'Multiple Choice (single select)', type: 'mc'},
-        {name: 'Multiple Choice (multiple select)', type: 'mc'},
+        {name: 'Textarea', type: 'textarea'},
+        {name: 'Multiple Choice (single select)', type: 'multiplechoice'},
+        {name: 'Multiple Choice (multiple select)', type: 'multiselect'},
         {name: 'JSON', type: 'json'},
-        {name: 'Integer', type: 'number'},
+        {name: 'Integer', type: 'integer'},
         {name: 'Float', type: 'number'}
     ];
 
 
     generator.inject(form, { mode: 'add', related: false, scope: $scope});
     generator.reset();
-
     // LoadBreadCrumbs();
+    // LoadBreadCrumbs({
+    //                 path: '/job_templates/' + id + '/survey',
+    //                 title: 'jared rocks', // $scope.job_id + ' - ', //+ data.summary_fields.job_template.name,
+    //                 altPath:  '/job_templates/' + id + '/survey',
+    //             });
 
     $scope.addQuestion = function(){
-        GenerateForm.inject(SurveyQuestionForm, {mode:'add', id:'new_question', scope:$scope, breadCrumbs: false});
+
+        GenerateForm.inject(SurveyQuestionForm, {mode:'modal', id:'new_question', scope:$scope, breadCrumbs: false});
     };
     $scope.addQuestion();
 
@@ -84,49 +90,54 @@ function SurveyMakerAdd($scope, $rootScope, $compile, $location, $log, $routePar
     //         "border-radius": "4px"
     //     });
     // });
-    $scope.finalizeQuestion= function(data){
-        var html = '<div class="question_final">';
-        // angular.forEach(data, function(value, key) {
-        //     html+='<label for="question_text"><span class="label-text">'+data.label+'</span></label>'+data.question_text;
-        // });
-        html+='<label for="question_text"><span class="label-text">Question Text</span></label>'+data.question_text;
-        html+='<label for="question_text"><span class="label-text">Question Question</span></label>'+data.question_description;
-        html+='<label for="question_text"><span class="label-text">Answer Response Variable</span></label>'+data.response_variable_name;
-        html+='<label for="question_text"><span class="label-text">Answer Type</span></label>'+data.answer_type;
-        html+='<label for="question_text"><span class="label-text">Answer Options</span></label>'+data.answer_option_text;
-        html+='<label for="question_text"><span class="label-text">Answer Options</span></label>'+data.answer_option_number;
-        html+='<label for="question_text"><span class="label-text">Answer Options</span></label>'+data.answer_option_multiple_choice;
-        html+='<label for="question_text"><span class="label-text">Default Answer</span></label>'+data.default_answer;
-        html+='<label for="question_text"><span class="label-text">Answer Required</span></label>'+data.is_required;
+    $scope.finalizeQuestion= function(data, labels){
+        var key,
+        html = '<div class="question_final row">';
+
+        for (key in data) {
+            html+='<div class="col-xs-6"><label for="question_text"><span class="label-text">'+labels[key] +':  </span></label>'+data[key]+'</div>\n';
+        }
+
         html+='</div>';
 
         $('#finalized_questions').before(html);
         $('#add_question_btn').show();
         $('#add_question_btn').removeAttr('disabled');
-        $('#add_question_btn').on("click" , function(){
+        $('#survey_maker_save_btn').removeAttr('disabled');
+    };
+
+    $('#add_question_btn').on("click" , function(){
             $scope.addQuestion();
             $('#add_question_btn').attr('disabled', 'disabled');
         });
-    };
+
     $scope.submitQuestion = function(){
         var form = SurveyQuestionForm,
-        data = {}, labels={}, fld;
+        data = {},
+        labels={},
+        min= "min",
+        max = "max",
+        fld;
         //generator.clearApiErrors();
         Wait('start');
 
         try {
             for (fld in form.fields) {
                 if($scope[fld]){
-                    data[fld] = $scope[fld];
-                   // labels[fld] = form.fields[fld].label;
+                    if(fld === "type"){
+                        data[fld] = $scope[fld].type;
+                        if($scope[fld].type==="integer" || $scope[fld].type==="float"){
+                            data[min] = $('#answer_min').val();
+                            data[max] = $('#answer_max').val();
+                            labels[min]= "Min";
+                            labels[max]= "Max";
+                        }
+                    }
+                    else{
+                        data[fld] = $scope[fld];
+                    }
+                    labels[fld] = form.fields[fld].label;
                 }
-                // if (form.fields[fld].type === 'select' && fld !== 'playbook') {
-                //     data[fld] = $scope[fld].value;
-                // } else {
-                //     if (fld !== 'variables') {
-                //         data[fld] = $scope[fld];
-                //     }
-                // }
             }
             Wait('stop');
             $scope.survey_questions.push(data);
@@ -145,22 +156,17 @@ function SurveyMakerAdd($scope, $rootScope, $compile, $location, $log, $routePar
     $scope.formSave = function () {
         generator.clearApiErrors();
         Wait('start');
-        var url = GetBasePath(base);
-        url += (base !== 'organizations') ? $routeParams.project_id + '/organizations/' : '';
+        var url = GetBasePath(base)+ id + '/survey_spec/';
+
         Rest.setUrl(url);
-        Rest.post({ name: $scope.name, description: $scope.description })
-            .success(function (data) {
+        Rest.post({ name: $scope.survey_name, description: $scope.survey_description, spec:$scope.survey_questions })
+            .success(function () {
                 Wait('stop');
-                if (base === 'organizations') {
-                    $rootScope.flashMessage = "New organization successfully created!";
-                    $location.path('/organizations/' + data.id);
-                } else {
-                    ReturnToCaller(1);
-                }
+                $location.path("/job_templates/"+id);
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to add new organization. Post returned status: ' + status });
+                    msg: 'Failed to add new survey. Post returned status: ' + status });
             });
     };
 
@@ -174,6 +180,226 @@ function SurveyMakerAdd($scope, $rootScope, $compile, $location, $log, $routePar
 SurveyMakerAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'SurveyMakerForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'Wait', 'SurveyQuestionForm'
 ];
+
+function SurveyMakerEdit($scope, $rootScope, $compile, $location, $log, $routeParams, SurveyMakerForm,
+    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath,
+    ReturnToCaller, Wait, SurveyQuestionForm) {
+
+    ClearScope();
+
+    // Inject dynamic view
+    var generator = GenerateForm,
+        form = SurveyMakerForm,
+        base = $location.path().replace(/^\//, '').split('/')[0],
+        id = $location.path().replace(/^\//, '').split('/')[1];
+
+    $scope.survey_questions=[];
+
+    $scope.answer_types=[
+        {name: 'Text' , type: 'text'},
+        {name: 'Textarea', type: 'textarea'},
+        {name: 'Multiple Choice (single select)', type: 'multiplechoice'},
+        {name: 'Multiple Choice (multiple select)', type: 'multiselect'},
+        {name: 'JSON', type: 'json'},
+        {name: 'Integer', type: 'integer'},
+        {name: 'Float', type: 'number'}
+    ];
+
+
+    generator.inject(form, { mode: 'edit', related: false, scope: $scope});
+    generator.reset();
+    // LoadBreadCrumbs();
+    // LoadBreadCrumbs({
+    //                 path: '/job_templates/' + id + '/survey',
+    //                 title: 'jared rocks', // $scope.job_id + ' - ', //+ data.summary_fields.job_template.name,
+    //                 altPath:  '/job_templates/' + id + '/survey',
+    //             });
+
+    $scope.addQuestion = function(){
+
+        GenerateForm.inject(SurveyQuestionForm, {mode:'add', id:'new_question', scope:$scope, breadCrumbs: false});
+    };
+    // $scope.addQuestion();
+
+// $('#question_shadow').mouseenter(function(){
+//     $('#question_shadow').css({
+//         "opacity": "1",
+//         "border": "1px solid",
+//         "border-color": "rgb(204,204,204)",
+//         "border-radius": "4px"
+//     });
+//     $('#question_add_btn').show();
+// });
+
+// $('#question_shadow').mouseleave(function(){
+//     $('#question_shadow').css({
+//         "opacity": ".4",
+//         "border": "1px dashed",
+//         "border-color": "rgb(204,204,204)",
+//         "border-radius": "4px"
+//     });
+//     $('#question_add_btn').hide();
+// })
+
+
+    // $('#question_shadow').on("click" , function(){
+    //     // var survey_width = $('#survey_maker_question_area').width()-10,
+    //     // html = "";
+
+    //     // $('#add_question_btn').attr('disabled', 'disabled')
+    //     // $('#survey_maker_question_area').append(html);
+    //     addQuestion();
+    //     $('#question_shadow').hide();
+    //     $('#question_shadow').css({
+    //         "opacity": ".4",
+    //         "border": "1px dashed",
+    //         "border-color": "rgb(204,204,204)",
+    //         "border-radius": "4px"
+    //     });
+    // });
+    $scope.finalizeQuestion= function(data){
+        var key,
+        labels={
+            "type": "Type",
+            "question_name": "Question Text",
+            "question_description": "Question Description",
+            "variable": "Answer Varaible Name",
+            "choices": "Choices",
+            "min": "Min",
+            "max": "Max",
+            "required": "Required",
+            "default": "Default Answer"
+        },
+        html = '<div class="question_final row">';
+
+        for (key in data) {
+            html+='<div class="col-xs-6"><label for="question_text"><span class="label-text">'+labels[key] +':  </span></label>'+data[key]+'</div>\n';
+        }
+
+        html+='</div>';
+
+        $('#finalized_questions').before(html);
+        $('#add_question_btn').show();
+        $('#add_question_btn').removeAttr('disabled');
+        $('#survey_maker_save_btn').removeAttr('disabled');
+    };
+
+    $('#add_question_btn').on("click" , function(){
+            $scope.addQuestion();
+            $('#add_question_btn').attr('disabled', 'disabled');
+        });
+
+    Wait('start');
+
+    Rest.setUrl(GetBasePath(base)+ id + '/survey_spec/');
+    Rest.get()
+        .success(function (data) {
+            var i;
+            $scope.survey_name = data.name;
+            $scope.survey_description = data.description;
+            $scope.survey_questions = data.spec;
+            for(i=0; i<$scope.survey_questions.length; i++){
+                $scope.finalizeQuestion($scope.survey_questions[i]);
+            }
+            Wait('stop');
+            // LoadBreadCrumbs({ path: '/organizations/' + id, title: data.name });
+            // for (fld in form.fields) {
+            //     if (data[fld]) {
+            //         $scope[fld] = data[fld];
+            //         master[fld] = data[fld];
+            //     }
+            // }
+
+            // related = data.related;
+            // for (set in form.related) {
+            //     if (related[set]) {
+            //         relatedSets[set] = {
+            //             url: related[set],
+            //             iterator: form.related[set].iterator
+            //         };
+            //     }
+            // }
+
+            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
+            // RelatedSearchInit({ scope: $scope, form: form, relatedSets: relatedSets });
+            // RelatedPaginateInit({ scope: $scope, relatedSets: relatedSets });
+            // $scope.$emit('organizationLoaded');
+        })
+        .error(function (data, status) {
+            ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
+        });
+
+    $scope.submitQuestion = function(){
+        var form = SurveyQuestionForm,
+        data = {},
+        labels={},
+        min= "min",
+        max = "max",
+        fld;
+        //generator.clearApiErrors();
+        Wait('start');
+
+        try {
+            for (fld in form.fields) {
+                if($scope[fld]){
+                    if(fld === "type"){
+                        data[fld] = $scope[fld].type;
+                        if($scope[fld].type==="integer" || $scope[fld].type==="float"){
+                            data[min] = $('#answer_min').val();
+                            data[max] = $('#answer_max').val();
+                            labels[min]= "Min";
+                            labels[max]= "Max";
+                        }
+                    }
+                    else{
+                        data[fld] = $scope[fld];
+                    }
+                    labels[fld] = form.fields[fld].label;
+                }
+            }
+            Wait('stop');
+            $scope.survey_questions.push(data);
+            $('#new_question .aw-form-well').remove();
+            // for(fld in form.fields){
+            //     $scope[fld] = '';
+            // }
+            $scope.finalizeQuestion(data , labels);
+
+        } catch (err) {
+            Wait('stop');
+            Alert("Error", "Error parsing extra variables. Parser returned: " + err);
+        }
+    };
+    // Save
+    $scope.formSave = function () {
+        generator.clearApiErrors();
+        Wait('start');
+        var url = GetBasePath(base)+ id + '/survey_spec/';
+
+        Rest.setUrl(url);
+        Rest.post({ name: $scope.survey_name, description: $scope.survey_description, spec:$scope.survey_questions })
+            .success(function () {
+                Wait('stop');
+                $location.path("/job_templates/"+id);
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                    msg: 'Failed to add new survey. Post returned status: ' + status });
+            });
+    };
+
+    // Cancel
+    $scope.formReset = function () {
+        $rootScope.flashMessage = null;
+        generator.reset();
+    };
+}
+
+SurveyMakerEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'SurveyMakerForm',
+    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'Wait', 'SurveyQuestionForm'
+];
+
 
 
 // function OrganizationsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, GenerateForm, Rest,

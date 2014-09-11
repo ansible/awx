@@ -405,7 +405,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             //     url = GetBasePath('jobs');
             // }
             // url += id + '/';
+
             url = GetBasePath('job_templates')+ id + '/launch/';
+
 
             if (scope.removePostTheJob) {
                 scope.removePostTheJob();

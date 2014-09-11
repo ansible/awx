@@ -18,32 +18,33 @@ angular.module('SurveyMakerFormDefinition', [])
         editTitle: 'Edit Survey', //Title in edit mode
         name: 'survey_maker', //entity or model name in singular form
         well: true,
-        collapse: true,
-        collapseTitle: "Properties",
-        collapseMode: 'edit',
-        collapseOpen: true,
+        //breadCrumbs:true,
+        // collapse: true,
+        // collapseTitle: "Properties",
+        // collapseMode: 'edit',
+        // collapseOpen: true,
 
-        actions: {
-            stream: {
-                'class': "btn-primary btn-xs activity-btn",
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                dataPlacement: "top",
-                icon: "icon-comments-alt",
-                mode: 'edit',
-                iconSize: 'large'
-            }
-        },
+        // actions: {
+        //     stream: {
+        //         'class': "btn-primary btn-xs activity-btn",
+        //         ngClick: "showActivity()",
+        //         awToolTip: "View Activity Stream",
+        //         dataPlacement: "top",
+        //         icon: "icon-comments-alt",
+        //         mode: 'edit',
+        //         iconSize: 'large'
+        //     }
+        // },
 
         fields: {
-            name: {
+            survey_name: {
                 label: 'Survey Name',
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
                 capitalize: false
             },
-            description: {
+            survey_description: {
                 label: 'Survey Description',
                 type: 'text',
                 addRequired: false,

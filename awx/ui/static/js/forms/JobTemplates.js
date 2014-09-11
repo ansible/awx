@@ -240,19 +240,51 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
                 dataTitle: 'Prompt for Extra Variables',
                 dataContainer: "body"
             },
-            enable_survey: {
+            // survey_enabled: {
+            //     type: 'custom',
+            //     column: 2,
+            //     control: '<div class="form-group">'+
+            //         '<div class="checkbox">'+
+            //         '<label><input type="checkbox" ng-model="survey_enabled" name="survey_enabled" id="job_templates_survey_enabled_chbox" class="ng-valid ng-valid-api-error ng-dirty" ng-true-value="true" ng-false-value="false">'+
+            //         '<span class="label-text">Enable Survey</span><a id="awp-survey_enabled" href="" aw-pop-over="<p>If checked, user will be prompted at job launch with a survey of questions related to the job.</p>'+
+            //         '<div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>" data-placement="right" data-container="body" data-title="Enable Survey" class="help-link" data-original-title="" title="" tabindex="-1">'+
+            //         '<i class="fa fa-question-circle"></i></a> </label>'+
+            //         '<div class="error api-error ng-binding" id="job_templates-survey_enabled-api-error" ng-bind="survey_enabled_api_error"></div>'+
+            //         '<button type="button" class="btn btn-sm btn-default" id="job_templates_edit_survey_btn" ng-click="navigateToSurvey()"><i class="fa fa-pencil"></i>  Create Survey</button>'+
+            //         '</div>'+
+            //         '</div>'
+            // },
+            survey_enabled: {
+                label: 'Enable Survey',
+                type: 'checkbox',
+                addRequired: false,
+                editRequird: false,
+                trueValue: 'true',
+                falseValue: 'false',
+                column: 2,
+                awPopOver: "<p>If checked, user will be prompted at job launch with a series of questions related to the job.</p>",
+                dataPlacement: 'right',
+                dataTitle: 'Enable Survey',
+                dataContainer: "body"
+            },
+            create_survey: {
                 type: 'custom',
                 column: 2,
-                control: '<div class="form-group">'+
-                    '<div class="checkbox">'+
-                    '<label><input type="checkbox" ng-model="enable_survey" name="enable_survey" id="job_templates_enable_survey_chbox" class="ng-valid ng-valid-api-error ng-dirty" ng-true-value="true" ng-false-value="false">'+
-                    '<span class="label-text">Enable Survey</span><a id="awp-enable_survey" href="" aw-pop-over="<p>If checked, user will be prompted at job launch with a survey of questions related to the job.</p>'+
-                    '<div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>" data-placement="right" data-container="body" data-title="Enable Survey" class="help-link" data-original-title="" title="" tabindex="-1">'+
-                    '<i class="fa fa-question-circle"></i></a> </label>'+
-                    '<div class="error api-error ng-binding" id="job_templates-enable_survey-api-error" ng-bind="enable_survey_api_error"></div>'+
-                    '<button type="button" class="btn btn-sm btn-default" id="job_templates_edit_survey_btn" ng-click="navigateToSurvey()"><i class="fa fa-pencil"></i>  Edit Survey</button>'+
-                    '</div>'+
-                    '</div>'
+                control: '<button type="button" class="btn btn-sm btn-primary" id="job_templates_create_survey_btn" ng-show="survey_enabled" ng-click="addSurvey()"><i class="fa fa-pencil"></i>   Create Survey</button>'+
+                        '<button style="display:none;" type="button" class="btn btn-sm btn-primary" id="job_templates_edit_survey_btn" ng-show="survey_enabled" ng-click="editSurvey()"><i class="fa fa-pencil"></i>   Edit Survey</button>'+
+                        '<button style="display:none;margin-left:5px" type="button" class="btn btn-sm btn-primary" id="job_templates_delete_survey_btn" ng-show="survey_enabled" ng-click="deleteSurvey()"><i class="fa fa-trash-o"></i>   Delete Survey</button>'
+                // label: 'Create Survey',
+                // type: 'text',
+                // addRequired: false,
+                // editRequired: false,
+                // // readonly: true,
+                // // ngShow: "survey_enabled",
+                // column: 2,
+                // awPopOver: "survey_help",
+                // awPopOverWatch: "survey_help",
+                // dataPlacement: 'right',
+                // dataTitle: 'Provisioning Callback URL',
+                // dataContainer: "body"
             },
             allow_callbacks: {
                 label: 'Allow Provisioning Callbacks',

@@ -163,14 +163,14 @@ angular.module('Tower', [
                 controller: 'JobTemplatesEdit'
             }).
 
-             when('/job_templates/add/survey', {
+             when('/job_templates/:template_id/survey/add', {
                 templateUrl: urlPrefix + 'partials/survey_maker.html',
                 controller: 'SurveyMakerAdd'
             }).
 
-            when('/job_templates/:template_id/survey', {
+            when('/job_templates/:template_id/survey/edit', {
                 templateUrl: urlPrefix + 'partials/survey_maker.html',
-                controller: 'SurveyMakerAdd'
+                controller: 'SurveyMakerEdit'
             }).
 
             when('/job_templates/:id/schedules', {
