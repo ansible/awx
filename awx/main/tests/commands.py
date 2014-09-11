@@ -862,10 +862,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertNotEqual(new_inv.total_groups, 0)
         self.assertElapsedLessThan(30)
 
-    @unittest.skipIf(getattr(settings, 'LOCAL_DEVELOPMENT', False),
-                     'Skip this test in local development environments, '
-                     'which may vary widely on memory.')
-    @unittest.skipIf(settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3',
+    @unittest.skipIf(hasattr(django.db.backend, 'sqlite3'),
                      'Skip this test if we are on sqlite')
     def test_splunk_inventory(self):
         new_inv = self.organizations[0].inventories.create(name='splunk')
