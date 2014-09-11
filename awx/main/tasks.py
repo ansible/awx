@@ -14,6 +14,7 @@ import pipes
 import re
 import shutil
 import stat
+import subprocess
 import tempfile
 import time
 import traceback
@@ -304,6 +305,67 @@ class BaseTask(Task):
             args = ['ssh-agent', 'sh', '-c', cmd]
         return args
 
+    def should_use_proot(self, instance, **kwargs):
+        '''
+        Return whether this task should use proot.
+        '''
+        return False
+
+    def check_proot_installed(self):
+        '''
+        Check that proot is installed.
+        '''
+        cmd = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '--version']
+        try:
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            result = proc.communicate()
+            return bool(proc.returncode == 0)
+        except (OSError, ValueError):
+            return False
+
+    def build_proot_temp_dir(self, instance, **kwargs):
+        '''
+        Create a temporary directory for proot to use.
+        '''
+        path = tempfile.mkdtemp(prefix='ansible_tower_proot_')
+        os.chmod(path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
+        return path
+
+    def wrap_args_with_proot(self, args, cwd, **kwargs):
+        '''
+        Wrap existing command line with proot to restrict access to:
+         - /etc/tower (to prevent obtaining db info or secret key)
+         - /var/lib/awx (except for current project)
+         - /var/log/tower
+         - /tmp (except for own tmp files)
+        '''
+        new_args = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '-r', '/']
+        hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log/tower',
+                      tempfile.gettempdir(), settings.PROJECTS_ROOT,
+                      settings.JOBOUTPUT_ROOT]
+        hide_paths.extend(getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
+        for path in sorted(set(hide_paths)):
+            if not os.path.exists(path):
+                continue
+            if os.path.isdir(path):
+                new_path = tempfile.mkdtemp(dir=kwargs['proot_temp_dir'])
+                os.chmod(new_path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
+            else:
+                handle, new_path = tempfile.mkstemp(dir=kwargs['proot_temp_dir'])
+                os.close(handle)
+                os.chmod(new_path, stat.S_IRUSR|stat.S_IWUSR)
+            new_args.extend(['-b', '%s:%s' % (new_path, path)])
+        show_paths = [cwd, kwargs['private_data_dir']]
+        show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
+        for path in sorted(set(show_paths)):
+            if not os.path.exists(path):
+                continue
+            new_args.extend(['-b', '%s:%s' % (path, path)])
+        new_args.extend(['-w', cwd])
+        new_args.extend(args)
+        return new_args
+
     def build_args(self, instance, **kwargs):
         raise NotImplementedError
 
@@ -415,6 +477,12 @@ class BaseTask(Task):
                 os.makedirs(settings.JOBOUTPUT_ROOT)
             stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, str(uuid.uuid1()) + ".out")
             stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
+            if self.should_use_proot(instance, **kwargs):
+                if not self.check_proot_installed():
+                    raise RuntimeError('proot is not installed')
+                kwargs['proot_temp_dir'] = self.build_proot_temp_dir(instance, **kwargs)
+                args = self.wrap_args_with_proot(args, cwd, **kwargs)
+                safe_args = self.wrap_args_with_proot(safe_args, cwd, **kwargs)
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
                                          job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
             status = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
@@ -427,11 +495,16 @@ class BaseTask(Task):
                     shutil.rmtree(kwargs['private_data_dir'], True)
                 except OSError:
                     pass
+            if kwargs.get('proot_temp_dir', ''):
                 try:
-                    stdout_handle.flush()
-                    stdout_handle.close()
-                except Exception:
+                    shutil.rmtree(kwargs['proot_temp_dir'], True)
+                except OSError:
                     pass
+            try:
+                stdout_handle.flush()
+                stdout_handle.close()
+            except Exception:
+                pass
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements)
         self.post_run_hook(instance, **kwargs)
@@ -657,6 +730,12 @@ class RunJob(BaseTask):
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
         return d
+
+    def should_use_proot(self, instance, **kwargs):
+        '''
+        Return whether this task should use proot.
+        '''
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def post_run_hook(self, job, **kwargs):
         '''

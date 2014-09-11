@@ -5,6 +5,7 @@ import os
 import sys
 import glob
 from datetime import timedelta
+import tempfile
 
 # Update this module's local settings from the global settings module.
 from django.conf import global_settings
@@ -312,6 +313,18 @@ AWX_TASK_ENV = {}
 
 # Flag to enable/disable updating hosts M2M when saving job events.
 CAPTURE_JOB_EVENT_HOSTS = False
+
+# Enable proot support for running jobs (playbook runs only).
+AWX_PROOT_ENABLED = False
+
+# Command/path to proot.
+AWX_PROOT_CMD = 'proot'
+
+# Additional paths to hide from jobs using proot.
+AWX_PROOT_HIDE_PATHS = []
+
+# Additional paths to show for jobs using proot.
+AWX_PROOT_SHOW_PATHS = []
 
 # Not possible to get list of regions without authenticating, so use this list
 # instead (based on docs from:

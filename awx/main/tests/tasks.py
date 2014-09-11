@@ -3,6 +3,7 @@
 
 # Python
 from distutils.version import StrictVersion as Version
+import json
 import os
 import shutil
 import tempfile
@@ -137,6 +138,51 @@ TEST_ASYNC_NOWAIT_PLAYBOOK = '''
     command: sleep 4
     async: 8
     poll: 0
+'''
+
+TEST_PROOT_PLAYBOOK = '''
+- name: test proot environment
+  hosts: test-group
+  gather_facts: false
+  connection: local
+  tasks:
+  - name: list projects directory
+    command: ls -1 "{{ projects_root }}"
+    register: projects_ls
+  - name: check that only one project directory is visible
+    assert:
+      that:
+      - "projects_ls.stdout_lines|length == 1"
+      - "projects_ls.stdout_lines[0] == '{{ project_path }}'"
+  - name: list job output directory
+    command: ls -1 "{{ joboutput_root }}"
+    register: joboutput_ls
+  - name: check that we see an empty job output directory
+    assert:
+      that:
+      - "not joboutput_ls.stdout"
+  - name: check for other project path
+    stat: path={{ other_project_path }}
+    register: other_project_stat
+  - name: check that other project path was not found
+    assert:
+      that:
+      - "not other_project_stat.stat.exists"
+  - name: check for temp path
+    stat: path={{ temp_path }}
+    register: temp_stat
+  - name: check that temp path was not found
+    assert:
+      that:
+      - "not temp_stat.stat.exists"
+  - name: try to run a tower-manage command
+    command: tower-manage validate
+    ignore_errors: true
+    register: tower_manage_validate
+  - name: check that tower-manage command failed
+    assert:
+      that:
+      - "tower_manage_validate|failed"
 '''
 
 TEST_PLAYBOOK_WITH_ROLES = '''
@@ -1283,3 +1329,48 @@ class RunJobTest(BaseCeleryTest):
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
         self.check_job_events(job, 'ok', 1, 3, has_roles=True)
+
+    def test_run_job_with_proot(self):
+        # Enable proot for this test.
+        settings.AWX_PROOT_ENABLED = True
+        # Hide local settings path.
+        settings.AWX_PROOT_HIDE_PATHS = [os.path.join(settings.BASE_DIR, 'settings')]
+        # Create another project alongside the one we're using to verify it
+        # is hidden. 
+        self.create_test_project(TEST_PLAYBOOK)
+        other_project_path = self.project.local_path
+        # Create a temp directory that should not be visible to the playbook.
+        temp_path = tempfile.mkdtemp()
+        self._temp_paths.append(temp_path)
+        # Create our test project and job template.
+        self.create_test_project(TEST_PROOT_PLAYBOOK)
+        project_path = self.project.local_path
+        job_template = self.create_test_job_template()
+        extra_vars = {
+            'projects_root': settings.PROJECTS_ROOT,
+            'joboutput_root': settings.JOBOUTPUT_ROOT,
+            'project_path': project_path,
+            'other_project_path': other_project_path,
+            'temp_path': temp_path,
+        }
+        job = self.create_test_job(job_template=job_template, verbosity=3,
+                                   extra_vars=json.dumps(extra_vars))
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        job = Job.objects.get(pk=job.pk)
+        self.check_job_result(job, 'successful')
+
+    def test_run_job_with_proot_not_installed(self):
+        # Enable proot for this test, specify invalid proot cmd.
+        settings.AWX_PROOT_ENABLED = True
+        settings.AWX_PROOT_CMD = 'PR00T'
+        self.create_test_project(TEST_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        job = Job.objects.get(pk=job.pk)
+        self.assertEqual(job.status, 'error')
+
