@@ -214,8 +214,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
     @property
     def variables_needed_to_start(self):
         vars = []
-        if self.survey_enabled:
-            for survey_element in self.survey_spec["spec"]:
+        if self.survey_enabled and 'spec' in self.survey_spec:
+            for survey_element in self.survey_spec['spec']:
                 if survey_element['required']:
                     vars.append(survey_element['variable'])
         return vars
