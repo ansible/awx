@@ -65,6 +65,13 @@ varb=B
 
 [all:vars]
 vara=A
+
+[others]
+10.11.12.13
+10.12.14.16:8022
+fe80::1610:9fff:fedd:654b
+[fe80::1610:9fff:fedd:b654]:1022
+::1
 '''
 
 TEST_INVENTORY_INI_WITH_HOST_PATTERNS = '''\
@@ -539,12 +546,14 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertEqual(result, None, stdout + stderr)
         # Check that inventory is populated as expected.
         new_inv = Inventory.objects.get(pk=new_inv.pk)
-        expected_group_names = set(['servers', 'dbservers', 'webservers'])
+        expected_group_names = set(['servers', 'dbservers', 'webservers', 'others'])
         group_names = set(new_inv.groups.values_list('name', flat=True))
         self.assertEqual(expected_group_names, group_names)
         expected_host_names = set(['web1.example.com', 'web2.example.com',
                                    'web3.example.com', 'db1.example.com',
-                                   'db2.example.com'])
+                                   'db2.example.com', '10.11.12.13',
+                                   '10.12.14.16', 'fe80::1610:9fff:fedd:654b',
+                                   'fe80::1610:9fff:fedd:b654', '::1'])
         host_names = set(new_inv.hosts.values_list('name', flat=True))
         self.assertEqual(expected_host_names, host_names)
         if source and os.path.isdir(source):
@@ -560,8 +569,10 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                                 {'ansible_ssh_host': 'w1.example.net'})
             elif host.name in ('db1.example.com', 'db2.example.com') and source and os.path.isdir(source):
                 self.assertEqual(host.variables_dict, {'test_host_name': host.name})
-            elif host.name == 'web3.example.com':
+            elif host.name in ('web3.example.com', 'fe80::1610:9fff:fedd:b654'):
                 self.assertEqual(host.variables_dict, {'ansible_ssh_port': 1022})
+            elif host.name == '10.12.14.16':
+                self.assertEqual(host.variables_dict, {'ansible_ssh_port': 8022})
             else:
                 self.assertEqual(host.variables_dict, {})
         for group in new_inv.groups.all():
@@ -624,14 +635,17 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         # Check that inventory is populated as expected.
         new_inv = Inventory.objects.get(pk=new_inv.pk)
         expected_group_names = set(['servers', 'dbservers', 'webservers',
-                                    'lbservers'])
+                                    'lbservers', 'others'])
         if overwrite:
             expected_group_names.remove('lbservers')
         group_names = set(new_inv.groups.filter(active=True).values_list('name', flat=True))
         self.assertEqual(expected_group_names, group_names)
         expected_host_names = set(['web1.example.com', 'web2.example.com',
                                    'web3.example.com', 'db1.example.com',
-                                   'db2.example.com', 'lb.example.com'])
+                                   'db2.example.com', 'lb.example.com',
+                                   '10.11.12.13', '10.12.14.16',
+                                   'fe80::1610:9fff:fedd:654b',
+                                   'fe80::1610:9fff:fedd:b654', '::1'])
         if overwrite:
             expected_host_names.remove('lb.example.com')
         host_names = set(new_inv.hosts.filter(active=True).values_list('name', flat=True))
@@ -644,8 +658,10 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
             if host.name == 'web1.example.com':
                 self.assertEqual(host.variables_dict,
                                 {'ansible_ssh_host': 'w1.example.net'})
-            elif host.name == 'web3.example.com':
+            elif host.name in ('web3.example.com', 'fe80::1610:9fff:fedd:b654'):
                 self.assertEqual(host.variables_dict, {'ansible_ssh_port': 1022})
+            elif host.name == '10.12.14.16':
+                self.assertEqual(host.variables_dict, {'ansible_ssh_port': 8022})
             elif host.name == 'lb.example.com':
                 self.assertEqual(host.variables_dict, {'lbvar': 'ni!'})
             else:

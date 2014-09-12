@@ -93,8 +93,7 @@ class MemGroup(MemObject):
         # maps host and group names to hosts to prevent redudant additions
         self.all_hosts = {}
         self.all_groups = {}
-
-        group_vars = os.path.join(self.source_dir, 'group_vars', self.name)
+        group_vars = os.path.join(source_dir, 'group_vars', self.name)
         self.variables = self.load_vars(group_vars)
         logger.debug('Loaded group: %s', self.name)
         
@@ -149,14 +148,13 @@ class MemHost(MemObject):
     In-memory representation of an inventory host.
     '''
 
-    def __init__(self, name, source_dir):
+    def __init__(self, name, source_dir, port=None):
         super(MemHost, self).__init__(name, source_dir)
         self.variables = {}
         self.instance_id = None
-        if ':' in name:
-            tokens = name.split(':')
-            self.name = tokens[0]
-            self.variables['ansible_ssh_port'] = int(tokens[1])
+        self.name = name
+        if port:
+            self.variables['ansible_ssh_port'] = port
         host_vars = os.path.join(source_dir, 'host_vars', name)
         self.variables.update(self.load_vars(host_vars))
         logger.debug('Loaded host: %s', self.name)
@@ -173,19 +171,29 @@ class BaseLoader(object):
         self.all_group = all_group or MemGroup('all', self.source_dir)
         self.group_filter_re = group_filter_re
         self.host_filter_re = host_filter_re
+        self.ipv6_port_re = re.compile(r'^\[([A-Fa-f0-9:]{3,})\]:(\d+?)$')
 
     def get_host(self, name):
         '''
         Return a MemHost instance from host name, creating if needed.  If name
-        contains brackets, they will not be interpreted as a host pattern.
+        contains brackets, they will NOT be interpreted as a host pattern.
         '''
-        host_name = name.split(':')[0]
+        m = self.ipv6_port_re.match(name)
+        if m:
+            host_name = m.groups()[0]
+            port = int(m.groups()[1])
+        elif name.count(':') == 1:
+            host_name = name.split(':')[0]
+            port = int(name.split(':')[1])
+        else:
+            host_name = name
+            port = None
         if self.host_filter_re and not self.host_filter_re.match(host_name):
             logger.debug('Filtering host %s', host_name)
             return None
         host = None
         if not host_name in self.all_group.all_hosts:
-            host = MemHost(name, self.source_dir)
+            host = MemHost(host_name, self.source_dir, port)
             self.all_group.all_hosts[host_name] = host
         return self.all_group.all_hosts[host_name]
 
@@ -201,6 +209,9 @@ class BaseLoader(object):
                         yield ''.join([str(i), j])
             else:
                 yield ''
+        if self.ipv6_port_re.match(name):
+            yield self.get_host(name)
+            return
         pattern_re = re.compile(r'(\[(?:(?:\d+\:\d+)|(?:[A-Za-z]\:[A-Za-z]))(?:\:\d+)??\])')
         iters = []
         for s in re.split(pattern_re, name):
