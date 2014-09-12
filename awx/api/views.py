@@ -19,6 +19,7 @@ from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.utils.datastructures import SortedDict
 from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
 
 # Django REST Framework
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -1414,6 +1415,7 @@ class JobTemplateCallback(GenericAPIView):
     model = JobTemplate
     permission_classes = (JobTemplateCallbackPermission,)
 
+    @csrf_exempt
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(JobTemplateCallback, self).dispatch(*args, **kwargs)
