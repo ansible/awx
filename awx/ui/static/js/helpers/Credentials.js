@@ -156,8 +156,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                 scope.sudo_password = null;
             }
             if (login_method !== 'su') {
-              scope.su_username = null;
-              scope.su_password = null;
+                scope.su_username = null;
+                scope.su_password = null;
             }
         };
     }

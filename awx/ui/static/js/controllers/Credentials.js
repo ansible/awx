@@ -397,7 +397,7 @@ function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routePa
                 if (!Empty($scope.su_username) || !Empty($scope.su_password)) {
                     $scope.login_method = 'su';
                 } else if (!Empty($scope.sudo_username) || !Empty($scope.sudo_password)) {
-                      $scope.login_method = 'sudo';
+                    $scope.login_method = 'sudo';
                 } else {
                     $scope.login_method = '';
                 }
