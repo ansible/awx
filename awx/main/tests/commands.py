@@ -12,6 +12,8 @@ import tempfile
 import time
 import urlparse
 import unittest
+if not hasattr(unittest, 'skipIf'):
+    import unittest2 as unittest
 
 # Django
 import django
