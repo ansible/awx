@@ -1644,6 +1644,7 @@ class JobRelaunch(GenericAPIView):
 
     model = Job
 
+    @csrf_exempt
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(JobRelaunch, self).dispatch(*args, **kwargs)
