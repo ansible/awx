@@ -25,6 +25,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         Rest.setUrl(url);
         Rest.post(passwords)
             .success(function(data) {
+                scope.new_job_id = data.job;
                 scope.$emit(callback, data);
             })
             .error(function (data, status) {
@@ -261,6 +262,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             scope = parent_scope.$new(),
             callback = params.callback,
             job = params.job,
+            url = params.url,
             e, helpContainer, html;
 
         html = GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
@@ -360,7 +362,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         scope.varsAccept = function() {
             job.extra_vars = ToJSON(scope.parseType, scope.variables, true);
             Wait('start');
-            Rest.setUrl(GetBasePath('jobs') + job.id + '/');
+            //Rest.setUrl(GetBasePath('jobs') + job.id + '/');
+            Rest.setUrl(url);
             Rest.put(job)
                 .success(function() {
                     Wait('stop');
@@ -389,24 +392,26 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         return function (params) {
             var scope = params.scope,
                 id = params.id,
-                //base = $location.path().replace(/^\//, '').split('/')[0],
+                base = $location.path().replace(/^\//, '').split('/')[0],
                 url,
                 job_template,
+                extra_vars,
                 new_job_id,
                 new_job,
                 launch_url,
                 prompt_for_vars = false,
                 passwords;
+            scope.job_template_id = id;
 
-            // if (base === 'job_templates') {
-            //     url = GetBasePath('job_templates');
-            // }
-            // else {
-            //     url = GetBasePath('jobs');
-            // }
-            // url += id + '/';
+            if (base === 'job_templates') {
+                url = GetBasePath('job_templates') + id + '/launch/';
+            }
+            else {
+                url = GetBasePath('jobs') + id + '/relaunch/';
+            }
+            //url += id + '/';
 
-            url = GetBasePath('job_templates')+ id + '/launch/';
+            //url = GetBasePath('job_templates')+ id + '/launch/';
 
 
             if (scope.removePostTheJob) {
@@ -473,7 +478,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function() {
                 //var base = $location.path().replace(/^\//, '').split('/')[0];
-                $location.path('/jobs/' + new_job_id);
+                $location.path('/jobs/' + scope.new_job_id);
             });
 
             if (scope.removeStartPlaybookRun) {
@@ -514,9 +519,10 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     // call prompt with callback of StartPlaybookRun, passwords
                     PromptForVars({
                         scope: scope,
-                        job: new_job,
-                        variables: job_template.extra_vars,
-                        callback: 'StartPlaybookRun'
+                        job: {id:scope.job_template_id},
+                        variables: extra_vars,
+                        callback: 'StartPlaybookRun',
+                        url: url
                     });
                 }
                 else {
@@ -542,6 +548,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     // new_job_id = data.id;
                     launch_url = url;//data.related.start;
                     prompt_for_vars = data.ask_variables_on_launch;
+                    extra_vars = data.variables_needed_to_start;
                     // new_job = data;
                     if (data.passwords_needed_to_start.length > 0) {
                         scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
