@@ -769,7 +769,7 @@ angular.module('GeneratorHelpers', [])
 
             html += "<select id=\"search_value_select\" ng-show=\"" + iterator + "SelectShow" + modifier + "\" " +
                 "ng-model=\"" + iterator + "SearchSelectValue" + modifier + "\" ng-change=\"search('" + iterator + "')\" ";
-            html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts" + modifier + "\" class=\"form-control search-select";
+            html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts track by c.value" + modifier + "\" class=\"form-control search-select";
             html += "\"></select>\n";
 
 

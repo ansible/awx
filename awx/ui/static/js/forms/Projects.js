@@ -83,7 +83,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             scm_type: {
                 label: 'SCM Type',
                 type: 'select',
-                ngOptions: 'type.label for type in scm_type_options',
+                ngOptions: 'type.label for type in scm_type_options track by type.value',
                 ngChange: 'scmChange()',
                 addRequired: true,
                 editRequired: true

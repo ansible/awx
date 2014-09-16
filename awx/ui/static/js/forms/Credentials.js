@@ -87,7 +87,7 @@ angular.module('CredentialFormDefinition', [])
                 label: 'Type',
                 excludeModal: true,
                 type: 'select',
-                ngOptions: 'kind.label for kind in credential_kind_options',
+                ngOptions: 'kind.label for kind in credential_kind_options track by kind.value', //  select as label for value in array 'kind.label for kind in credential_kind_options',
                 ngChange: 'kindChange()',
                 addRequired: true,
                 editRequired: true,

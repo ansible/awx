@@ -188,6 +188,32 @@ angular.module('RestServices', ['ngCookies', 'AuthService'])
                         }, 401);
                     }
                 },
+                patch: function (data) {
+                    var token = Authorization.getToken(),
+                        expired = this.checkExpired();
+                    if (expired) {
+                        return this.createResponse({
+                            detail: 'Token is expired'
+                        }, 401);
+                    } else if (token) {
+                        this.setHeader({
+                            Authorization: 'Token ' + token
+                        });
+                        this.setHeader({
+                            "X-Auth-Token": 'Token ' + token
+                        });
+                        return $http({
+                            method: 'PATCH',
+                            url: this.url,
+                            headers: this.headers,
+                            data: data
+                        });
+                    } else {
+                        return this.createResponse({
+                            detail: 'Invalid token'
+                        }, 401);
+                    }
+                },
                 destroy: function (data) {
                     var token = Authorization.getToken(),
                         expired = this.checkExpired();

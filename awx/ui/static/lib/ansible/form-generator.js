@@ -637,6 +637,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                     html += (field.falseValue !== undefined) ? Attr(field, 'falseValue') : "";
                     html += (field.checked) ? "checked " : "";
                     html += (field.readonly) ? "disabled " : "";
+                    html += (field.ngChange) ? "ng-change=\"" +field.ngChange + "\" " : "";
                     html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                     html += " > ";
 

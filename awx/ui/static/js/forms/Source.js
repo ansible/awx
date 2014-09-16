@@ -25,7 +25,7 @@ angular.module('SourceFormDefinition', [])
             source: {
                 label: 'Source',
                 type: 'select',
-                ngOptions: 'source.label for source in source_type_options',
+                ngOptions: 'source.label for source in source_type_options track by source.value',
                 ngChange: 'sourceChange()',
                 addRequired: false,
                 editRequired: false
