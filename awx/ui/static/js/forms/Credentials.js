@@ -312,6 +312,7 @@ angular.module('CredentialFormDefinition', [])
             "login_method": {
                 label: "Login Method", // FIXME: Confirm this label is ok?
                 type: 'radio_group',
+                ngShow: "kind.value == 'ssh'",
                 ngChange: "loginMethodChange()",
                 options: [{
                     label: 'None', // FIXME: Maybe 'Default' or 'SSH only' instead?
