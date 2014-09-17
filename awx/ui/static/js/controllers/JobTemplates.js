@@ -111,7 +111,7 @@ JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$route
 function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath,
     InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty, ToJSON,
-    CallbackHelpInit) {
+    CallbackHelpInit, Store) {
 
     ClearScope();
 
@@ -124,6 +124,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         selectPlaybook, checkSCMStatus,
         callback;
 
+    $scope.Store = Store;
     CallbackHelpInit({ scope: $scope });
 
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
@@ -273,6 +274,118 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         input_type: "radio"
     });
 
+    if ($scope.removeLoadJobs) {
+        $scope.rmoveLoadJobs();
+    }
+    $scope.removeLoadJobs = $scope.$on('LoadJobs', function() {
+        // Retrieve detail record and prepopulate the form
+        var i, fld, data = $scope.Store("saved_job_template_for_survey").fields;
+        for (fld in form.fields) {
+            if (fld !== 'variables' && data[fld] !== null && data[fld] !== undefined) {
+                if (form.fields[fld].type === 'select') {
+                    if(fld==="playbook"){
+                        $scope[fld+"_options"] = data[fld+"_options"];
+                        for (i = 0; i < $scope[fld + '_options'].length; i++) {
+                            if (data[fld] === $scope[fld + '_options'][i]) {
+                                $scope[fld] = $scope[fld + '_options'][i];
+                            }
+                        }
+                    }
+                    if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
+                        for (i = 0; i < $scope[fld + '_options'].length; i++) {
+                            if (data[fld] === $scope[fld + '_options'][i].value) {
+                                $scope[fld] = $scope[fld + '_options'][i];
+                            }
+                        }
+                    } else {
+                        $scope[fld] = data[fld];
+                    }
+                } else {
+                    $scope[fld] = data[fld];
+                    if ( fld === "inventory" || fld === 'project' || fld === "credential" || fld === "cloud_credential"){
+                        $scope[fld+"_name"] = data[fld+"_name"];
+                    }
+
+                    // if (fld === 'variables') {
+                    //     // Parse extra_vars, converting to YAML.
+                    //     $scope.variables = ParseVariableString(data.extra_vars);
+                    //     master.variables = $scope.variables;
+                    // }
+                    if(fld ==='survey_enabled'){
+                        $('#job_templates_survey_enabled_chbox').attr('checked', $scope[fld]);
+                        $('#job_templates_delete_survey_btn').show();
+                        $('#job_templates_edit_survey_btn').show();
+                        $('#job_templates_create_survey_btn').hide();
+                        // }
+                    }
+                }
+                master[fld] = $scope[fld];
+            }
+        }
+        // if (fld === 'variables') {
+        //     // Parse extra_vars, converting to YAML.
+        //     $scope.variables = ParseVariableString(data.extra_vars);
+        //     master.variables = $scope.variables;
+        // }
+
+        $scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? 'true' : 'false';
+        master.ask_variables_on_launch = $scope.ask_variables_on_launch;
+
+        // relatedSets = form.relatedSets(data.related);
+
+        if (data.host_config_key) {
+            $scope.example_config_key = data.host_config_key;
+        }
+        // $scope.example_template_id = id;
+        // $scope.setCallbackHelp();
+
+        // $scope.callback_url = $scope.callback_server_path + ((data.related.callback) ? data.related.callback :
+        //     GetBasePath('job_templates') + id + '/callback/');
+        // master.callback_url = $scope.callback_url;
+
+        LookUpInit({
+            scope: $scope,
+            form: form,
+            current_item: data.inventory,
+            list: InventoryList,
+            field: 'inventory',
+            input_type: "radio"
+        });
+
+        LookUpInit({
+            url: GetBasePath('credentials') + '?kind=ssh',
+            scope: $scope,
+            form: form,
+            current_item: data.credential,
+            list: CredentialList,
+            field: 'credential',
+            hdr: 'Select Machine Credential',
+            input_type: "radio"
+        });
+
+        LookUpInit({
+            scope: $scope,
+            form: form,
+            current_item: data.project,
+            list: ProjectList,
+            field: 'project',
+            input_type: "radio"
+        });
+    });
+
+    if(Empty($scope.Store("saved_job_template_for_survey"))===false){
+        $scope.$emit("LoadJobs");
+    }
+
+    $scope.$on("$destroy", function(){
+        // alert('are you sure you wana leave?');
+        if($scope.Store("saved_job_template_for_survey").editing_survey!==true){
+            $scope.Store("saved_job_template_for_survey", false);
+            $scope.Store('survey_for_new_job_template' , false);
+        }
+
+    });
+
     function saveCompleted() {
         setTimeout(function() { $scope.$apply(function() { $location.path('/job_templates'); }); }, 500);
     }
@@ -313,6 +426,24 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
             Rest.post(data)
                 .success(function(data) {
                     $scope.$emit('templateSaveSuccess', data);
+                    $scope.Store("saved_job_template_for_survey", false);
+
+
+                    var url = data.url+ 'survey_spec/',
+                    survey = $scope.Store('survey_for_new_job_template');
+                    Rest.setUrl(url);
+                    Rest.post({ name: survey.name, description: survey.description, spec: survey.spec })
+                        .success(function () {
+                            Wait('stop');
+                            $scope.Store("survey_for_new_job_template", false);
+                            // $location.path("/job_templates/"+id);
+
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                                msg: 'Failed to add new survey. Post returned status: ' + status });
+                        });
+                    // $scope.$emit('templateSaveSuccess', data);
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, form, { hdr: 'Error!',
@@ -335,17 +466,68 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
             $scope[fld] = master[fld];
         }
     };
+    //navigate to the survey maker
+    $scope.editSurvey = function() {
+        $location.path($location.path() + '/survey/edit');
+    };
+    //delete a survey by posting a blank survey
+    $scope.deleteSurvey = function() {
+        // $location.path($location.path() + '/survey/add');
+        // Wait('start');
+        // var url = defaultUrl+ id + '/survey_spec/';
+
+        // Rest.setUrl(url);
+        // Rest.post({})
+            // .success(function () {
+                $scope.Store("survey_for_new_job_template", false);
+                Wait('stop');
+                $('#job_templates_delete_survey_btn').hide();
+                $('#job_templates_edit_survey_btn').hide();
+                $('#job_templates_create_survey_btn').show();
+
+            // })
+            // .error(function (data, status) {
+            //     ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+            //         msg: 'Failed to add new survey. Post returned status: ' + status });
+            // });
+            };
 
     //navigate to the survey maker
     $scope.addSurvey = function() {
-        $location.path($location.path() + '/survey/add');
+        var data = {}, fld;
+        try {
+            for (fld in form.fields) {
+                if (form.fields[fld].type === 'select' && fld !== 'playbook') {
+                    data[fld] = $scope[fld].value;
+                } else {
+                    if (fld !== 'variables') {
+                        data[fld] = $scope[fld];
+                        if(fld === "inventory" || fld === "project" || fld === "credential" || fld === "cloud_credential" ){
+                            data[fld+"_name"] = $scope[fld + "_name"];
+                        }
+                        if(fld === "playbook"){
+                            data[fld+"_options"] = $scope[fld+"_options"];
+                        }
+                    }
+                }
+            }
+            data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
+            $scope.Store("saved_job_template_for_survey", {
+                "editing_survey" : true,
+                "fields" : data
+            });
+            $location.path($location.path() + '/survey/add');
+        } catch (err) {
+            Wait('stop');
+            Alert("Error", "Error parsing extra variables. Parser returned: " + err);
+        }
     };
 }
 
 JobTemplatesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
-    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit'
+    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit', 'Store'
 ];
 
 
@@ -353,7 +535,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
-    GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit, PlaybookRun)
+    GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit, PlaybookRun, Store)
 {
 
     ClearScope();
@@ -368,6 +550,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         relatedSets = {},
         checkSCMStatus, getPlaybooks, callback,
         choicesCount = 0;
+
+    $scope.Store = Store;
 
     CallbackHelpInit({ scope: $scope });
 
@@ -595,6 +779,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         $scope.removeEnableSurvey();
     }
     $scope.removeEnableSurvey = $scope.$on('EnableSurvey', function(fld) {
+
         $('#job_templates_survey_enabled_chbox').attr('checked', $scope[fld]);
         Rest.setUrl(defaultUrl + id+ '/survey_spec/');
         Rest.get()
@@ -642,8 +827,19 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                             }
                         } else {
                             $scope[fld] = data[fld];
-                            if(fld ==='survey_enabled' && $scope[fld]===true){
-                                $scope.$emit('EnableSurvey', fld);
+                            if(fld ==='survey_enabled'){
+                                // $scope.$emit('EnableSurvey', fld);
+                                $('#job_templates_survey_enabled_chbox').attr('checked', $scope[fld]);
+                                if(Empty(data.related.survey_spec)){
+                                    $('#job_templates_delete_survey_btn').hide();
+                                    $('#job_templates_edit_survey_btn').hide();
+                                    $('#job_templates_create_survey_btn').show();
+                                }
+                                else{
+                                    $('#job_templates_delete_survey_btn').show();
+                                    $('#job_templates_edit_survey_btn').show();
+                                    $('#job_templates_create_survey_btn').hide();
+                                }
                             }
                         }
                         master[fld] = $scope[fld];
@@ -848,6 +1044,31 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         });
     };
 
+    //handler for 'Enable Survey' button
+    $scope.surveyEnabled = function(){
+        Rest.setUrl(defaultUrl + id+ '/');
+        Rest.patch({"survey_enabled": $scope.survey_enabled})
+            .success(function (data) {
+
+                if(Empty(data.related.survey_spec)){
+                    $('#job_templates_delete_survey_btn').hide();
+                    $('#job_templates_edit_survey_btn').hide();
+                    $('#job_templates_create_survey_btn').show();
+                }
+                else{
+                    $('#job_templates_delete_survey_btn').show();
+                    $('#job_templates_edit_survey_btn').show();
+                    $('#job_templates_create_survey_btn').hide();
+                }
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, form, {
+                    hdr: 'Error!',
+                    msg: 'Failed to retrieve save survey_enabled: ' + $routeParams.template_id + '. GET status: ' + status
+                });
+            });
+    };
+
     //navigate to the survey maker
     $scope.addSurvey = function() {
         $location.path($location.path() + '/survey/add');
@@ -855,6 +1076,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
     //navigate to the survey maker
     $scope.editSurvey = function() {
+        $scope.Store("survey_for_new_job_template", false);
         $location.path($location.path() + '/survey/edit');
     };
 
@@ -911,9 +1133,9 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 }
 
 JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
+    'GenerateForm', 'Rest', 'Alert',  'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
     'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices',
-    'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit', 'PlaybookRun'
+    'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit', 'PlaybookRun' , "Store"
 ];

@@ -65,7 +65,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
             job_type: {
                 label: 'Job Type',
                 type: 'select',
-                ngOptions: 'type.label for type in job_type_options',
+                ngOptions: 'type.label for type in job_type_options track by type.value',
                 "default": 0,
                 addRequired: true,
                 editRequired: true,
@@ -106,7 +106,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
             playbook: {
                 label: 'Playbook',
                 type:'select',
-                ngOptions: 'book for book in playbook_options',
+                ngOptions: 'book for book in playbook_options track by book',
                 id: 'playbook-select',
                 awRequiredWhen: {variable: "playbookrequired", init: "true" },
                 column: 1,
@@ -180,7 +180,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
             verbosity: {
                 label: 'Verbosity',
                 type: 'select',
-                ngOptions: 'v.label for v in verbosity_options',
+                ngOptions: 'v.label for v in verbosity_options track by v.value',
                 "default": 0,
                 addRequired: true,
                 editRequired: true,
@@ -261,6 +261,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
                 editRequird: false,
                 trueValue: 'true',
                 falseValue: 'false',
+                ngChange: "surveyEnabled()",
                 column: 2,
                 awPopOver: "<p>If checked, user will be prompted at job launch with a series of questions related to the job.</p>",
                 dataPlacement: 'right',
