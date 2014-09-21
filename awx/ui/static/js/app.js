@@ -109,6 +109,7 @@ angular.module('Tower', [
     'LogViewerOptionsDefinition',
     'EventViewerHelper',
     'HostEventsViewerHelper',
+    'SurveyHelper',
     'JobDetailHelper',
     'SocketIO',
     'lrInfiniteScroll',

@@ -15,7 +15,7 @@ angular.module('SurveyQuestionFormDefinition', [])
     .value('SurveyQuestionForm', {
 
         addTitle: 'Add Question',
-        editTitle: '{{ survey_name }}',
+        // editTitle: '{{ survey_name }}',
         name: 'question_unique',
         well: true,
         twoColumns: true,
@@ -39,7 +39,6 @@ angular.module('SurveyQuestionFormDefinition', [])
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: false,
                 column: 1
             },
             question_description: {
@@ -47,8 +46,8 @@ angular.module('SurveyQuestionFormDefinition', [])
                 label: 'Question Description',
                 type: 'textarea',
                 rows: 2,
-                addRequired: false,
-                editRequired: false,
+                addRequired: true,
+                editRequired: true,
                 column: 2
             },
             variable: {
@@ -91,7 +90,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 rows: 3,
                 addRequired: true,
                 editRequired: true,
-                ngShow: 'type.type==="multipleselect" || type.type==="multiplechoice" ',
+                ngShow: 'type.type==="multiselect" || type.type==="multiplechoice" ',
                 awPopOver: '<p>Type an option on each line.</p>'+
                             '<p>For example the following input:<br><br>Apple<br>\n Banana<br>\n Cherry<br><br>would be displayed as:</p>\n'+
                             '<ol><li>Apple</li><li>Banana</li><li>Cherry</li><ol>',
