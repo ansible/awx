@@ -110,27 +110,27 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 });
 
 
-            scope.saveSurvey = function() {
-                Wait('start');
-                if(scope.mode==="add"){
-                    $('#survey-modal-dialog').dialog('close');
-                    scope.$emit('SurveySaved');
-                }
-                else{
-                    // var url = data.url+ 'survey_spec/';
-                    Rest.setUrl(url);
-                    Rest.post({ name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
-                        .success(function () {
-                            // Wait('stop');
-                            $('#survey-modal-dialog').dialog('close');
-                            scope.$emit('SurveySaved');
-                        })
-                        .error(function (data, status) {
-                            ProcessErrors(scope, data, status, form, { hdr: 'Error!',
-                                msg: 'Failed to add new survey. Post returned status: ' + status });
-                        });
-                }
-            };
+            // scope.saveSurvey = function() {
+            //     Wait('start');
+            //     if(scope.mode==="add"){
+            //         $('#survey-modal-dialog').dialog('close');
+            //         scope.$emit('SurveySaved');
+            //     }
+            //     else{
+            //         // var url = data.url+ 'survey_spec/';
+            //         Rest.setUrl(url);
+            //         Rest.post({ name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
+            //             .success(function () {
+            //                 // Wait('stop');
+            //                 $('#survey-modal-dialog').dialog('close');
+            //                 scope.$emit('SurveySaved');
+            //             })
+            //             .error(function (data, status) {
+            //                 ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+            //                     msg: 'Failed to add new survey. Post returned status: ' + status });
+            //             });
+            //     }
+            // };
 
             Wait('start');
             if(scope.mode === 'add'){
@@ -222,11 +222,11 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.$emit('surveySaved');
             });
 
-            scope.saveSurvey = function() {
-                Wait('start');
-                $('#survey-modal-dialog').dialog('close');
-                scope.$emit('SurveySaved');
-            };
+            // scope.saveSurvey = function() {
+            //     Wait('start');
+            //     $('#survey-modal-dialog').dialog('close');
+            //     scope.$emit('SurveySaved');
+            // };
         };
     }])
 
@@ -367,11 +367,11 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
     }])
 
     /**
-     * Delete a schedule. Prompts user to confirm delete
+     * Delete a survey. Prompts user to confirm delete
      *
-     * DeleteSchedule({
-     *     scope:       $scope containing list of schedules
-     *     id:          id of schedule to delete
+     * DeleteSurvey({
+     *     scope:       $scope containing list of survey form fields
+     *     id:          id of job template that survey is attached to
      *     callback:    $scope.$emit label to call when delete is completed
      * })
      *
@@ -390,6 +390,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.removeSurveyDeleted();
             }
             scope.$on('SurveyDeleted', function(){
+                scope.survey_name = "";
+                scope.survey_description = "";
+                scope.survey_questions = [];
                 Wait('stop');
                 $('#job_templates_delete_survey_btn').hide();
                 $('#job_templates_edit_survey_btn').hide();
@@ -398,12 +401,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
 
             Wait('start');
-            // scope.deleteSurvey = function() {
-            // $location.path($location.path() + '/survey/add');
+
             if(scope.mode==="add"){
-                scope.survey_name = "";
-                scope.survey_description = "";
-                scope.survey_questions = [];
                 scope.$emit("SurveyDeleted");
 
             } else {
@@ -439,13 +438,15 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
 
     .factory('SurveyControllerInit', ['$location', 'DeleteSurvey', 'EditSurvey', 'AddSurvey', 'GenerateForm', 'SurveyQuestionForm', 'Wait', 'Alert',
-        function($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert) {
+            'GetBasePath', 'Rest', 'ProcessErrors' ,
+        function($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert, GetBasePath, Rest, ProcessErrors) {
         return function(params) {
             var scope = params.scope,
-                parent_scope = params.parent_scope,
+                // parent_scope = params.parent_scope,
                 id = params.id,
-                iterator = (params.iterator) ? params.iterator : scope.iterator,
-                base = $location.path().replace(/^\//, '').split('/')[0];
+                url;
+                // iterator = (params.iterator) ? params.iterator : scope.iterator,
+                // base = $location.path().replace(/^\//, '').split('/')[0];
 
             scope.survey_questions = [];
             scope.answer_types=[
@@ -548,22 +549,27 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 }
             };
 
-
-            scope.refreshSchedules = function() {
-                if (base === 'jobs') {
-                    parent_scope.refreshJobs();
+            scope.saveSurvey = function() {
+                Wait('start');
+                if(scope.mode==="add"){
+                    $('#survey-modal-dialog').dialog('close');
+                    scope.$emit('SurveySaved');
                 }
-                else {
-                    scope.search(iterator);
+                else{
+                    url = GetBasePath('job_templates') + id + '/survey_spec/';
+                    Rest.setUrl(url);
+                    Rest.post({ name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
+                        .success(function () {
+                            // Wait('stop');
+                            $('#survey-modal-dialog').dialog('close');
+                            scope.$emit('SurveySaved');
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors(scope, data, status, { hdr: 'Error!',
+                                msg: 'Failed to add new survey. Post returned status: ' + status });
+                        });
                 }
             };
-
-            if (scope.removeSchedulesRefresh) {
-                scope.removeSchedulesRefresh();
-            }
-            scope.$on('SchedulesRefresh', function() {
-                scope.search(iterator);
-            });
         };
     }])
 
