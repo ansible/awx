@@ -114,6 +114,27 @@ class ApiV1RootView(APIView):
         data['activity_stream'] = reverse('api:activity_stream_list')
         return Response(data)
 
+
+class ApiV1PingView(APIView):
+    """A simple view that reports very basic information about this Tower
+    instance, which is acceptable to be public information.
+    """
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+    view_name = 'Ping'
+
+    def get(self, request, format=None):
+        """Return some basic information about this Tower instance.
+
+        Everything returned here should be considered public / insecure, as
+        this requires no auth and is intended for use by the installer process.
+        """
+        return Response({
+            'role': 'standalone',  # FIXME: Make this dynamic.
+            'version': get_awx_version(),
+        })
+
+
 class ApiV1ConfigView(APIView):
 
     permission_classes = (IsAuthenticated,)
