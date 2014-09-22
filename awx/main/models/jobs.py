@@ -233,8 +233,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         errors = []
         if not self.survey_enabled:
             return errors
-        if 'title' not in self.survey_spec:
-            errors.append("'title' missing from survey spec")
+        if 'name' not in self.survey_spec:
+            errors.append("'name' missing from survey spec")
         if 'description' not in self.survey_spec:
             errors.append("'description' missing from survey spec")
         for survey_element in self.survey_spec["spec"]:

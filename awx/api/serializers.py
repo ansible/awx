@@ -1244,6 +1244,12 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             res['survey_spec'] = reverse('api:job_template_survey_spec', args=(obj.pk,))
         return res
 
+    def get_summary_fields(self, obj):
+        d = super(JobTemplateSerializer, self).get_summary_fields(obj)
+        if obj.survey_enabled and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
+            d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
+        return d
+
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
