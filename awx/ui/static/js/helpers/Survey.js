@@ -72,7 +72,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
     }])
 
     .factory('EditSurvey', ['$routeParams','SchedulerInit', 'ShowSurveyModal', 'Wait', 'Rest', 'ProcessErrors', 'GetBasePath', 'GenerateForm', 'SurveyMakerForm',
-    function($routeParams, SchedulerInit, ShowSurveyModal, Wait, Rest, ProcessErrors, GetBasePath, GenerateForm,SurveyMakerForm) {
+            'Empty', 'AddSurvey',
+    function($routeParams, SchedulerInit, ShowSurveyModal, Wait, Rest, ProcessErrors, GetBasePath, GenerateForm,SurveyMakerForm,
+        Empty, AddSurvey) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -150,18 +152,23 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 Rest.setUrl(url);
                 Rest.get()
                     .success(function (data) {
-                            // var i;
-                            generator.inject(form, { id: 'survey-modal-dialog' , mode: 'edit', related: false, scope: scope, breadCrumbs: false });
-                            ShowSurveyModal({ title: "Edit Survey", scope: scope, callback: 'DialogReady' });
+                            if(!Empty(data)){
+                                generator.inject(form, { id: 'survey-modal-dialog' , mode: 'edit', related: false, scope: scope, breadCrumbs: false });
+                                ShowSurveyModal({ title: "Edit Survey", scope: scope, callback: 'DialogReady' });
 
-                            scope.survey_name = data.name;
-                            scope.survey_description = data.description;
-                            scope.survey_questions = data.spec;
-                            for(i=0; i<scope.survey_questions.length; i++){
-                                scope.finalizeQuestion(scope.survey_questions[i], labels);
+                                scope.survey_name = data.name;
+                                scope.survey_description = data.description;
+                                scope.survey_questions = data.spec;
+                                for(i=0; i<scope.survey_questions.length; i++){
+                                    scope.finalizeQuestion(scope.survey_questions[i], labels);
+                                }
+
+                                Wait('stop');
+                            } else {
+                                AddSurvey({
+                                    scope: scope
+                                });
                             }
-
-                            Wait('stop');
 
                         })
                     .error(function (data, status) {
@@ -369,53 +376,50 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
      * })
      *
      */
-    .factory('DeleteSurvey', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Find',
-    function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find) {
+    .factory('DeleteSurvey', ['GetBasePath','Rest', 'Wait', 'ProcessErrors',
+    function(GetBasePath, Rest, Wait, ProcessErrors) {
         return function(params) {
 
             var scope = params.scope,
                 id = params.id,
-                callback = params.callback,
-                action, schedule, list, url, hdr;
+                // callback = params.callback,
+                url;
 
-            if (scope.schedules) {
-                list = scope.schedules;
+
+            if (scope.removeSurveyDeleted) {
+                scope.removeSurveyDeleted();
             }
-            else if (scope.scheduled_jobs) {
-                list = scope.scheduled_jobs;
-            }
-
-            url = GetBasePath('schedules') + id + '/';
-            schedule = Find({list: list, key: 'id', val: id });
-            hdr = 'Delete Schedule';
-
-            action = function () {
-                Wait('start');
-                Rest.setUrl(url);
-                Rest.destroy()
-                    .success(function () {
-                        $('#prompt-modal').modal('hide');
-                        scope.$emit(callback, id);
-                    })
-                    .error(function (data, status) {
-                        try {
-                            $('#prompt-modal').modal('hide');
-                        }
-                        catch(e) {
-                            // ignore
-                        }
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
-                            ' failed. DELETE returned: ' + status });
-                    });
-            };
-
-            Prompt({
-                hdr: hdr,
-                body: "<div class=\"alert alert-info\">Are you sure you want to delete the <em>" + schedule.name  + "</em> schedule?</div>",
-                action: action,
-                backdrop: false
+            scope.$on('SurveyDeleted', function(){
+                Wait('stop');
+                $('#job_templates_delete_survey_btn').hide();
+                $('#job_templates_edit_survey_btn').hide();
+                $('#job_templates_create_survey_btn').show();
             });
 
+
+            Wait('start');
+            // scope.deleteSurvey = function() {
+            // $location.path($location.path() + '/survey/add');
+            if(scope.mode==="add"){
+                scope.survey_name = "";
+                scope.survey_description = "";
+                scope.survey_questions = [];
+                scope.$emit("SurveyDeleted");
+
+            } else {
+                url = GetBasePath('job_templates')+ id + '/survey_spec/';
+
+                Rest.setUrl(url);
+                Rest.post({})
+                    .success(function () {
+                        scope.$emit("SurveyDeleted");
+
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors(scope, data, status, { hdr: 'Error!',
+                            msg: 'Failed to add new survey. Post returned status: ' + status });
+                    });
+            }
         };
     }])
 
@@ -455,11 +459,11 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             ];
 
             scope.deleteSurvey = function() {
-                // DeleteSchedule({
-                //     scope: scope,
-                //     id: id,
-                //     callback: 'SchedulesRefresh'
-                // });
+                DeleteSurvey({
+                    scope: scope,
+                    id: id,
+                    // callback: 'SchedulesRefresh'
+                });
             };
 
             scope.editSurvey = function() {
