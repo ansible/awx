@@ -50,7 +50,7 @@ TEST_ASYNC_PLAYBOOK = '''
 
 TEST_SIMPLE_REQUIRED_SURVEY = '''
 {
-    "title": "Simple",
+    "name": "Simple",
     "description": "Description",
     "spec": [
         {
@@ -70,7 +70,7 @@ TEST_SIMPLE_REQUIRED_SURVEY = '''
 
 TEST_SIMPLE_NONREQUIRED_SURVEY = '''
 {
-    "title": "Simple",
+    "name": "Simple",
     "description": "Description",
     "spec": [
         {
@@ -90,7 +90,7 @@ TEST_SIMPLE_NONREQUIRED_SURVEY = '''
 
 TEST_SURVEY_REQUIREMENTS = '''
 {
-    "title": "Simple",
+    "name": "Simple",
     "description": "Description",
     "spec": [
         {
