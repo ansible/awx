@@ -735,6 +735,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                             html += (field.readonly || field.showonly) ? "readonly " : "";
                             html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
                             html += (field.capitalize) ? "capitalize " : "";
+                            html += (field.awSurveyQuestion) ? "aw-survey-question" : "" ;
                             html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
                             html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
                             html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
@@ -905,7 +906,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                             field.awRequiredWhen.variable + "\" " : "";
                         html += ">\n";
                         html += "<option value=\"\">";
-                        html += (field.defaultOption) ? field.defaultOption : "Choose a " + field.label.toLowerCase();
+                        //for survey maker, needed the select drop down to say "select an answer type"
+                        if(form.name === "question_unique"){
+                            html += (field.defaultOption) ? field.defaultOption : "Choose an " + field.label.toLowerCase();
+                        } else{
+                            html += (field.defaultOption) ? field.defaultOption : "Choose a " + field.label.toLowerCase();
+                        }
                         html += "</option>\n";
                         html += "</select>\n";
                         // Add error messages

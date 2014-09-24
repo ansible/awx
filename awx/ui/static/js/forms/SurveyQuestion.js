@@ -35,27 +35,28 @@ angular.module('SurveyQuestionFormDefinition', [])
         fields: {
             question_name: {
                 realName: 'question_text',
-                label: 'Question Text',
+                label: 'Text',
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                column: 1
+                column: 1,
+                awSurveyQuestion: true
             },
             question_description: {
                 realName: 'question_description',
-                label: 'Question Description',
-                type: 'textarea',
-                rows: 2,
-                addRequired: true,
-                editRequired: true,
-                column: 2
+                label: 'Description',
+                type: 'text',
+                // rows: 2,
+                addRequired: false,
+                editRequired: false,
+                column: 1
             },
             variable: {
                 label: 'Answer Variable Name',
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                column: 2
+                column: 1
                 // sourceModel: 'organization',
                 // sourceField: 'name',
                 // ngClick: 'lookUpOrganization()',
@@ -71,7 +72,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 ngOptions: 'answer_types.name for answer_types in answer_types track by answer_types.type',
                 addRequired: true,
                 editRequired: true,
-                column: 1
+                column: 2
 
             },
             // answer_options_text: {
@@ -97,7 +98,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 dataTitle: 'Multiple Choice Options',
                 dataPlacement: 'right',
                 dataContainer: "body",
-                column: 1
+                column: 2
             },
             answer_options_number: {
                 realName: 'answer_options',
@@ -109,7 +110,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 ngShow: 'type.type==="integer" || type.type==="float" ',
                 addRequired: true,
                 editRequired: true,
-                column: 1
+                column: 2
             },
             // answer_options_json: {
             //     realName: 'answer_options',
@@ -131,16 +132,17 @@ angular.module('SurveyQuestionFormDefinition', [])
                 type: 'text',
                 addRequired: false,
                 editRequired: false,
-                column: 1
+                column: 2
             },
             required: {
-                realName: 'default_answer',
+                realName: 'required_answer',
                 label: 'Required',
                 type: 'checkbox',
                 // checked: true,
                 addRequired: false,
                 editRequired: false,
                 column: 2
+                // trueValue: true
                 // label: 'Answer required or optional',
                 // type: 'custom',
                 // column: 2,
@@ -174,11 +176,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 ngClick: 'submitQuestion()',
                 ngDisabled: true,
                 'class': 'btn btn-sm btn-primary',
-                label: 'Submit Question'
-            },
-            reset: {
-                ngClick: 'questionReset()',
-                ngDisabled: true
+                label: 'Add Question'
             }
         },
 

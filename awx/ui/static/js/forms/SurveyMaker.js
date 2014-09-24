@@ -54,7 +54,7 @@ angular.module('SurveyMakerFormDefinition', [])
                     '<div class="col-sm-12"><label for="survey"><span class="label-text prepend-asterisk">Questions</span></label>'+
                     '<div id="survey_maker_question_area"></div><div id="finalized_questions"></div>'+
                     '<button style="display:none" type="button" class="btn btn-sm btn-primary" id="add_question_btn" ng-click="addNewQuestion()" aw-tool-tip="Create a new question" data-placement="top" data-original-title="" title="" disabled><i class="fa fa-plus fa-lg"></i>  Add Question</button>'+
-                    '<div id="new_question"></div></div></div>'
+                    '<div id="new_question"></div></div></div></div>'
                 // label: 'Survey Name',
                 // type: 'text',
                 // addRequired: true,

@@ -117,7 +117,8 @@ angular.module('Tower', [
     'SocketHelper',
     'AboutAnsibleHelpModal',
     'SurveyMakerFormDefinition',
-    'SurveyQuestionFormDefinition'
+    'SurveyQuestionFormDefinition',
+
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')

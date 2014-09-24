@@ -63,6 +63,32 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     })
 
+    // caplitalize  Add to any input field where the first letter of each
+    //              word should be capitalized. Use in place of css test-transform.
+    //              For some reason "text-transform: capitalize" in breadcrumbs
+    //              causes a break at each blank space. And of course,
+    //              "autocapitalize='word'" only works in iOS. Use this as a fix.
+    .directive('awSurveyQuestion', function() {
+        return {
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$parsers.unshift( function(viewValue) {
+                    var values = viewValue.split(" "),
+                        result = "", i;
+                    result += values[0].charAt(0).toUpperCase() + values[0].substr(1) + ' ';
+                    for (i = 1; i < values.length; i++){
+                        result += values[i] + ' ';
+                    }
+                    result = result.trim();
+                    if (result !== viewValue) {
+                        ctrl.$setViewValue(result);
+                        ctrl.$render();
+                    }
+                    return result;
+                });
+            }
+        };
+    })
     // integer  Validate that input is of type integer. Taken from Angular developer
     //          guide, form examples. Add min and max directives, and this will check
     //          entered values is within the range.

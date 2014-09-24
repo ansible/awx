@@ -864,7 +864,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                             if(fld ==='survey_enabled'){
                                 // $scope.$emit('EnableSurvey', fld);
                                 $('#job_templates_survey_enabled_chbox').attr('checked', $scope[fld]);
-                                if(Empty(data.related.survey_spec)){
+                                if(Empty(data.summary_fields.survey)) {
                                     $('#job_templates_delete_survey_btn').hide();
                                     $('#job_templates_edit_survey_btn').hide();
                                     $('#job_templates_create_survey_btn').show();
@@ -1084,7 +1084,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         Rest.patch({"survey_enabled": $scope.survey_enabled})
             .success(function (data) {
 
-                if(Empty(data.related.survey_spec)){
+                if(Empty(data.summary_fields.survey)){
                     $('#job_templates_delete_survey_btn').hide();
                     $('#job_templates_edit_survey_btn').hide();
                     $('#job_templates_create_survey_btn').show();
@@ -1103,67 +1103,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             });
     };
 
-    //navigate to the survey maker
-    // $scope.addSurvey = function() {
-    //     $location.path($location.path() + '/survey/add');
-    // };
 
-    //navigate to the survey maker
-    // $scope.editSurvey = function() {
-    //     $scope.Store("survey_for_new_job_template", false);
-    //     $location.path($location.path() + '/survey/edit');
-    // };
-
-    // //delete a survey by posting a blank survey
-    // $scope.deleteSurvey = function() {
-    //     // $location.path($location.path() + '/survey/add');
-    //     Wait('start');
-    //     var url = defaultUrl+ id + '/survey_spec/';
-
-    //     Rest.setUrl(url);
-    //     Rest.post({})
-    //         .success(function () {
-    //             Wait('stop');
-    //             $('#job_templates_delete_survey_btn').hide();
-    //             $('#job_templates_edit_survey_btn').hide();
-    //             $('#job_templates_create_survey_btn').show();
-
-    //         })
-    //         .error(function (data, status) {
-    //             ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-    //                 msg: 'Failed to add new survey. Post returned status: ' + status });
-    //         });
-    // };
-
-    // // Related set: Delete button
-    // $scope['delete'] = function (set, itm_id, name, title) {
-    //     $rootScope.flashMessage = null;
-
-    //     var action = function () {
-    //         var url = defaultUrl + id + '/' + set + '/';
-    //         Rest.setUrl(url);
-    //         Rest.post({
-    //             id: itm_id,
-    //             disassociate: 1
-    //         })
-    //             .success(function () {
-    //                 $('#prompt-modal').modal('hide');
-    //                 $scope.search(form.related[set].iterator);
-    //             })
-    //             .error(function (data, status) {
-    //                 $('#prompt-modal').modal('hide');
-    //                 ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-    //                     msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
-    //             });
-    //     };
-
-    //     Prompt({
-    //         hdr: 'Delete',
-    //         body: 'Are you sure you want to remove ' + name + ' from ' + $scope.name + ' ' + title + '?',
-    //         action: action
-    //     });
-
-    // };
 }
 
 JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',

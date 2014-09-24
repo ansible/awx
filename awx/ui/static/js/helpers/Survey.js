@@ -60,7 +60,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 },
                 onOpen: function() {
                     Wait('stop');
-                    $('#survey-tabs a:first').tab('show');
                     //  $('#surveyName').focus();
                     // $('#rrule_nlp_description').dblclick(function() {
                     //     setTimeout(function() { scope.$apply(function() { scope.showRRule = (scope.showRRule) ? false : true; }); }, 100);
@@ -99,38 +98,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.removeDialogReady();
             }
             scope.removeDialogReady = scope.$on('DialogReady', function() {
-                    $('#survey-modal-dialog').dialog('open');
-                // $('#schedulerName').focus();
-                // setTimeout(function() {
-                //     scope.$apply(function() {
-                //         scheduler.setRRule(schedule.rrule);
-                //         scheduler.setName(schedule.name);
-                //     });
-                // }, 300);
-                });
+                $('#survey-modal-dialog').dialog('open');
+            });
 
-
-            // scope.saveSurvey = function() {
-            //     Wait('start');
-            //     if(scope.mode==="add"){
-            //         $('#survey-modal-dialog').dialog('close');
-            //         scope.$emit('SurveySaved');
-            //     }
-            //     else{
-            //         // var url = data.url+ 'survey_spec/';
-            //         Rest.setUrl(url);
-            //         Rest.post({ name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
-            //             .success(function () {
-            //                 // Wait('stop');
-            //                 $('#survey-modal-dialog').dialog('close');
-            //                 scope.$emit('SurveySaved');
-            //             })
-            //             .error(function (data, status) {
-            //                 ProcessErrors(scope, data, status, form, { hdr: 'Error!',
-            //                     msg: 'Failed to add new survey. Post returned status: ' + status });
-            //             });
-            //     }
-            // };
 
             Wait('start');
             if(scope.mode === 'add'){
@@ -162,7 +132,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                                 for(i=0; i<scope.survey_questions.length; i++){
                                     scope.finalizeQuestion(scope.survey_questions[i], labels);
                                 }
-
+                                // scope.addQuestion();
                                 Wait('stop');
                             } else {
                                 AddSurvey({
@@ -190,13 +160,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 generator = GenerateForm,
                 form = SurveyMakerForm;
 
-            // if (!Empty($routeParams.template_id)) {
-            //     url += $routeParams.template_id + '/survey_spec/';
-            // }
-            // else if (!Empty($routeParams.id)) {
-            //     url += $routeParams.id + '/survey_spec/';
-            // }
-
             if (scope.removeDialogReady) {
                 scope.removeDialogReady();
             }
@@ -204,6 +167,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.addQuestion();
                 $('#survey-modal-dialog').dialog('open');
                 // $('#surveyName').focus();
+                // $('#question_unique_required_chbox').prop('checked' , true);
             });
 
             Wait('start');
@@ -222,147 +186,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.$emit('surveySaved');
             });
 
-            // scope.saveSurvey = function() {
-            //     Wait('start');
-            //     $('#survey-modal-dialog').dialog('close');
-            //     scope.$emit('SurveySaved');
-            // };
-        };
-    }])
 
-    .factory('SchedulePost', ['Rest', 'ProcessErrors', 'RRuleToAPI', 'Wait', function(Rest, ProcessErrors, RRuleToAPI, Wait) {
-        return function(params) {
-            var scope = params.scope,
-                url = params.url,
-                scheduler = params.scheduler,
-                mode = params.mode,
-                schedule = (params.schedule) ? params.schedule : {},
-                callback = params.callback,
-                newSchedule, rrule;
-
-            if (scheduler.isValid()) {
-                Wait('start');
-                newSchedule = scheduler.getValue();
-                rrule = scheduler.getRRule();
-                schedule.name = newSchedule.name;
-                schedule.rrule = RRuleToAPI(rrule.toString());
-                schedule.description = (/error/.test(rrule.toText())) ? '' : rrule.toText();
-                Rest.setUrl(url);
-                if (mode === 'add') {
-                    Rest.post(schedule)
-                        .success(function(){
-                            if (callback) {
-                                scope.$emit(callback);
-                            }
-                            else {
-                                Wait('stop');
-                            }
-                        })
-                        .error(function(data, status){
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'POST to ' + url + ' returned: ' + status });
-                        });
-                }
-                else {
-                    Rest.put(schedule)
-                        .success(function(){
-                            if (callback) {
-                                scope.$emit(callback);
-                            }
-                            else {
-                                Wait('stop');
-                            }
-                        })
-                        .error(function(data, status){
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'POST to ' + url + ' returned: ' + status });
-                        });
-                }
-            }
-            else {
-                return false;
-            }
-        };
-    }])
-
-    /**
-     * Inject the scheduler_dialog.html wherever needed
-     */
-    .factory('LoadDialogPartial', ['Rest', '$compile', 'ProcessErrors', function(Rest, $compile, ProcessErrors) {
-        return function(params) {
-
-            var scope = params.scope,
-                element_id = params.element_id,
-                callback = params.callback,
-                url;
-
-            // Add the schedule_dialog.html partial
-            url = '/static/partials/schedule_dialog.html';
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    var e = angular.element(document.getElementById(element_id));
-                    e.append(data);
-                    $compile(e)(scope);
-                    scope.$emit(callback);
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-                });
-        };
-    }])
-
-    /**
-     * Flip a schedule's enable flag
-     *
-     * ToggleSchedule({
-     *     scope:       scope,
-     *     id:          schedule.id to update
-     *     callback:    scope.$emit label to call when update completes
-     * });
-     *
-     */
-    .factory('ToggleSchedule', ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', function(Wait, GetBasePath, ProcessErrors, Rest) {
-        return function(params) {
-            var scope = params.scope,
-                id = params.id,
-                callback = params.callback,
-                url = GetBasePath('schedules') + id +'/';
-
-            // Perform the update
-            if (scope.removeScheduleFound) {
-                scope.removeScheduleFound();
-            }
-            scope.removeScheduleFound = scope.$on('ScheduleFound', function(e, data) {
-                data.enabled = (data.enabled) ? false : true;
-                Rest.put(data)
-                    .success( function() {
-                        if (callback) {
-                            scope.$emit(callback, id);
-                        }
-                        else {
-                            Wait('stop');
-                        }
-                    })
-                    .error( function() {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed to update schedule ' + id + ' PUT returned: ' + status });
-                    });
-            });
-
-            Wait('start');
-
-            // Get the schedule
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    scope.$emit('ScheduleFound', data);
-                })
-                .error(function(data,status){
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to retrieve schedule ' + id + ' GET returned: ' + status });
-                });
         };
     }])
 
@@ -422,24 +246,99 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
         };
     }])
 
-    /**
-     * Convert rrule string to an API agreeable format
+/**
+     * Takes a finalized question and displays it on the survey maker page
+     *
+     * FinalizeQuestion({
+     *     scope:       $scope containing list of survey form fields
+     *     question: question object that was submitted by the question form
+     *     id:          id of job template that survey is attached to
+     *     callback:    $scope.$emit label to call when delete is completed
+     * })
      *
      */
-    .factory('RRuleToAPI', [ function() {
-        return function(rrule) {
-            var response;
-            response = rrule.replace(/(^.*(?=DTSTART))(DTSTART=.*?;)(.*$)/, function(str, p1, p2, p3) {
-                return p2.replace(/\;/,'').replace(/=/,':') + ' ' + 'RRULE:' + p1 + p3;
-            });
-            return response;
+    .factory('FinalizeQuestion', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', '$compile', 'Empty',
+    function(GetBasePath, Rest, Wait, ProcessErrors, $compile, Empty) {
+        return function(params) {
+
+            var scope = params.scope,
+                // id = params.id,
+                question = params.question,
+                // callback = params.callback,
+                // url,
+                // key,
+                element, choices, i, checked,
+                max, min, defaultValue,
+
+            html = '<div class="question_final row">';
+            html += '<div class="col-xs-12"><b>'+question.question_name+'</b></div>\n';
+            if(!Empty(question.question_description)){
+                html += '<div class="col-xs-12">    '+question.question_description+'</div>\n';
+            }
+            defaultValue = (question.default) ? question.default : "";
+
+            if(question.type === 'text' ){
+
+                html+='<div class="row">'+
+                    '<div class="col-xs-8">'+
+                    '<input type="text" placeholder="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid" required="" >'+
+                    '</div></div>';
+            }
+            if(question.type === "textarea"){
+                html+='<div class="row">'+
+                    '<div class="col-xs-8">'+
+                    '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid" required="" rows="3">'+defaultValue+'</textarea>'+
+                    '</div></div>';
+            }
+            if(question.type === 'multiplechoice' || question.type === "multiselect"){
+                choices = question.choices.split(/\n/);
+                element = (question.type==="multiselect") ? "checkbox" : 'radio';
+
+                for( i = 0; i<choices.length; i++){
+                    checked = (!Empty(question.default) && question.default.indexOf(choices[i])!==-1) ? "checked" : "";
+                    html+='<label class="'+element+'-inline">'+
+                    '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+'>' +choices[i]+
+                    '</label>';
+                }
+
+            }
+            if(question.type === 'integer' || question.type === "float"){
+                min = (question.min) ? question.min : "";
+                max = (question.max) ? question.max : "" ;
+                html+='<div class="row">'+
+                    '<div class="col-xs-8">'+
+                    '<input type="number" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
+                    '</div></div>';
+
+            }
+            if(question.type === "json"){
+
+            }
+            html += '<div class="col-xs-12 text-right" id="question_actions">';
+            html += '<a id="edit-action" data-placement="top" ng-click="editQuestion(this)" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-pencil"></i> </a>';
+            html += '<a id="delete-action" data-placement="top" ng-click="deleteQuestion(job_template.id, job_template.name)" aw-tool-tip="Delete template" data-original-title="" title=""><i class="fa fa-trash-o"></i> </a>';
+            html += '<a id="edit-action" data-placement="top" ng-click="moveQuestion(this)" aw-tool-tip="Move up" data-original-title="" title=""><i class="fa fa-sort-desc"></i> </a>';
+            html += '<a id="edit-action" data-placement="top" ng-click="editQuestion(this)" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-sort-asc"></i> </a>';
+            html+='</div></div>';
+
+            $('#finalized_questions').append(html);
+
+            element = angular.element(document.getElementById('finalized_questions'));
+            // element.html(html);
+            $compile(element)(scope);
+            // var questionScope = scope.$new;
+
+            $('#add_question_btn').show();
+            $('#add_question_btn').removeAttr('disabled');
+            $('#survey_maker_save_btn').removeAttr('disabled');
         };
     }])
 
 
     .factory('SurveyControllerInit', ['$location', 'DeleteSurvey', 'EditSurvey', 'AddSurvey', 'GenerateForm', 'SurveyQuestionForm', 'Wait', 'Alert',
-            'GetBasePath', 'Rest', 'ProcessErrors' ,
-        function($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert, GetBasePath, Rest, ProcessErrors) {
+            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion',
+        function($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
+            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion) {
         return function(params) {
             var scope = params.scope,
                 // parent_scope = params.parent_scope,
@@ -456,7 +355,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 {name: 'Multiple Choice (multiple select)', type: 'multiselect'},
                 {name: 'JSON', type: 'json'},
                 {name: 'Integer', type: 'integer'},
-                {name: 'Float', type: 'number'}
+                {name: 'Float', type: 'float'}
             ];
 
             scope.deleteSurvey = function() {
@@ -482,29 +381,27 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 });
             };
             scope.addQuestion = function(){
-                GenerateForm.inject(SurveyQuestionForm, { id:'new_question', scope:scope, breadCrumbs: false});
+                GenerateForm.inject(SurveyQuestionForm, { id:'new_question', mode: 'add' , scope:scope, breadCrumbs: false});
+                scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
+            };
+            scope.editQuestion = function(question){
+                alert('success : ' + question);
             };
 
-            scope.finalizeQuestion= function(data, labels){
-                var key,
-                html = '<div class="question_final row">';
-
-                for (key in data) {
-                    html+='<div class="col-xs-6"><label for="question_text"><span class="label-text">'+labels[key] +':  </span></label>'+data[key]+'</div>\n';
-                }
-
-                html+='</div>';
-
-                $('#finalized_questions').before(html);
-                $('#add_question_btn').show();
-                $('#add_question_btn').removeAttr('disabled');
-                $('#survey_maker_save_btn').removeAttr('disabled');
+            scope.finalizeQuestion= function(data){
+                FinalizeQuestion({
+                    scope: scope,
+                    question: data,
+                    id: id,
+                    //callback?
+                });
             };
 
             scope.addNewQuestion = function(){
             // $('#add_question_btn').on("click" , function(){
                 scope.addQuestion();
                 $('#add_question_btn').attr('disabled', 'disabled');
+                $('#add_question_btn').hide();
             // });
             };
             scope.submitQuestion = function(){
@@ -538,6 +435,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     Wait('stop');
                     scope.survey_questions.push(data);
                     $('#new_question .aw-form-well').remove();
+                    // scope.addQuestion()
+                    $('#add_question_btn').show();
                     // for(fld in form.fields){
                     //     $scope[fld] = '';
                     // }
@@ -571,137 +470,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 }
             };
         };
-    }])
-
-    .factory('SchedulesListInit', [ function() {
-        return function(params) {
-            var scope = params.scope,
-                list = params.list,
-                choices = params.choices;
-            scope[list.name].forEach(function(item, item_idx) {
-                var fld, field,
-                    itm = scope[list.name][item_idx];
-                itm.enabled = (itm.enabled) ? true : false;
-                if (itm.enabled) {
-                    itm.play_tip = 'Schedule is active. Click to stop.';
-                    itm.status = 'active';
-                    itm.status_tip = 'Schedule is active. Click to stop.';
-                }
-                else {
-                    itm.play_tip = 'Schedule is stopped. Click to activate.';
-                    itm.status = 'stopped';
-                    itm.status_tip = 'Schedule is stopped. Click to activate.';
-                }
-                itm.nameTip = item.name + " schedule. Click to edit.";
-                // Copy summary_field values
-                for (field in list.fields) {
-                    fld = list.fields[field];
-                    if (fld.sourceModel) {
-                        if (itm.summary_fields[fld.sourceModel]) {
-                            itm[field] = itm.summary_fields[fld.sourceModel][fld.sourceField];
-                        }
-                    }
-                }
-                // Set the item type label
-                if (list.fields.type) {
-                    choices.every(function(choice) {
-                        if (choice.value === item.type) {
-                            itm.type_label = choice.label;
-                            return false;
-                        }
-                        return true;
-                    });
-                }
-            });
-        };
-    }])
-
-    /**
-     *
-     *  Called from a controller to setup the scope for a schedules list
-     *
-     */
-    .factory('LoadSchedulesScope', ['$compile', '$location', '$routeParams','SearchInit', 'PaginateInit', 'GenerateList', 'SchedulesControllerInit',
-        'SchedulesListInit', 'SearchWidget',
-        function($compile, $location, $routeParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit, SearchWidget) {
-        return function(params) {
-            var parent_scope = params.parent_scope,
-                scope = params.scope,
-                list = params.list,
-                id = params.id,
-                url = params.url,
-                pageSize = params.pageSize || 5,
-                spinner = (params.spinner === undefined) ? true : params.spinner,
-                base = $location.path().replace(/^\//, '').split('/')[0],
-                e, html;
-
-            if (base === 'jobs') {
-                // on jobs page the search widget appears on the right
-                html = SearchWidget({
-                    iterator: list.iterator,
-                    template: params.list,
-                    includeSize: false
-                });
-                e = angular.element(document.getElementById(id + '-search-container')).append(html);
-                $compile(e)(scope);
-                GenerateList.inject(list, {
-                    mode: 'edit',
-                    id: id,
-                    breadCrumbs: false,
-                    scope: scope,
-                    showSearch: false
-                });
-            }
-            else {
-                GenerateList.inject(list, {
-                    mode: 'edit',
-                    id: id,
-                    breadCrumbs: false,
-                    scope: scope,
-                    searchSize: 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
-                    showSearch: true
-                });
-            }
-
-            SearchInit({
-                scope: scope,
-                set: list.name,
-                list: list,
-                url: url
-            });
-
-            PaginateInit({
-                scope: scope,
-                list: list,
-                url: url,
-                pageSize: pageSize
-            });
-
-            scope.iterator = list.iterator;
-
-            if (scope.removePostRefresh) {
-                scope.removePostRefresh();
-            }
-            scope.$on('PostRefresh', function(){
-                SchedulesControllerInit({
-                    scope: scope,
-                    parent_scope: parent_scope,
-                    list: list
-                });
-                SchedulesListInit({
-                    scope: scope,
-                    list: list,
-                    choices: parent_scope.type_choices
-                });
-                parent_scope.$emit('listLoaded');
-            });
-
-            if ($routeParams.id__int) {
-                scope[list.iterator + 'SearchField'] = 'id';
-                scope[list.iterator + 'SearchValue'] = $routeParams.id__int;
-                scope[list.iterator + 'SearchFieldLabel'] = 'ID';
-            }
-
-            scope.search(list.iterator, null, null, null, null, spinner);
-        };
     }]);
+
+
