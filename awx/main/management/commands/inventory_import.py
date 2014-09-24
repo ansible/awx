@@ -955,14 +955,13 @@ class Command(NoArgsCommand):
         mem_host_names_to_update = set(self.all_group.all_hosts.keys())
         for k,v in self.all_group.all_hosts.iteritems():
             instance_id = ''
+            mem_host_name_map[k] = v
             if self.instance_id_var:
                 instance_id = v.variables.get(self.instance_id_var, '')
             if instance_id in self.db_instance_id_map:
                 mem_host_pk_map[self.db_instance_id_map[instance_id]] = v
             elif instance_id:
                 mem_host_instance_id_map[instance_id] = v
-            else:
-                mem_host_name_map[k] = v
 
         # Update all existing hosts where we know the PK based on instance_id.
         all_host_pks = sorted(mem_host_pk_map.keys())
