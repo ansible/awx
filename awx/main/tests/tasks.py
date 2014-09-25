@@ -6,6 +6,7 @@ from distutils.version import StrictVersion as Version
 import json
 import os
 import shutil
+import subprocess
 import tempfile
 
 # Django
@@ -1331,6 +1332,17 @@ class RunJobTest(BaseCeleryTest):
         self.check_job_events(job, 'ok', 1, 3, has_roles=True)
 
     def test_run_job_with_proot(self):
+        # Only run test if proot is installed
+        cmd = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '--version']
+        try:
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            result = proc.communicate()
+            has_proot = bool(proc.returncode == 0)
+        except (OSError, ValueError):
+            has_proot = False
+        if not has_proot:
+            self.skipTest('proot is not installed')
         # Enable proot for this test.
         settings.AWX_PROOT_ENABLED = True
         # Hide local settings path.
