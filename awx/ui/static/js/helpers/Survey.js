@@ -265,8 +265,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 // id = params.id,
                 question = params.question,
                 index = params.index,
-                // url,
-                // key,
+                required,
                 element, choices, i, checked,
                 max, min, defaultValue,
 
@@ -280,8 +279,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             }
 
 
-
-            html = '<div class="col-xs-12"><b>'+question.question_name+'</b></div>\n';
+            required = (question.required) ? "prepend-asterisk" : "";
+            html = '<div class="col-xs-12 '+required+'"><b>'+question.question_name+'</b></div>\n';
             if(!Empty(question.question_description)){
                 html += '<div class="col-xs-12"><i>'+question.question_description+'</i></div>\n';
             }
