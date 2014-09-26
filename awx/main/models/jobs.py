@@ -444,6 +444,11 @@ class Job(UnifiedJob, JobOptions):
                     dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
 
+    def handle_extra_data(self, extra_data):
+        evars = json.loads(self.extra_vars)
+        evars.update(extra_data)
+        self.update_fields(extra_vars=json.dumps(evars))
+
     def copy(self):
         presets = {}
         for kw in self.job_template._get_unified_job_field_names():

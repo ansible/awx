@@ -567,6 +567,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def get_passwords_needed_to_start(self):
         return []
 
+    def handle_extra_data(self, extra_data):
+        return
+
     @property
     def can_start(self):
         return bool(self.status in ('new', 'waiting'))
@@ -631,6 +634,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
+        extra_data = dict([(field, kwargs[field]) for field in kwargs if field not in needed])
+        self.handle_extra_data(extra_data)
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
         self.socketio_emit_status("pending")
         task_type = get_type_for_model(self)
