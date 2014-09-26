@@ -132,7 +132,18 @@ angular.module('SurveyQuestionFormDefinition', [])
                 type: 'text',
                 addRequired: false,
                 editRequired: false,
-                column: 2
+                column: 2,
+                ngHide: 'type.type === "textarea" '
+            },
+            default_textarea: {
+                realName: 'default_answer',
+                label: 'Default Answer',
+                type: 'textarea',
+                rows: 3,
+                addRequired: false,
+                editRequired: false,
+                column: 2,
+                ngShow: 'type.type === "textarea" '
             },
             required: {
                 realName: 'required_answer',

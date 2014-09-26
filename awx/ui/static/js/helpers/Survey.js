@@ -564,6 +564,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         if(scope[fld]){
                             if(fld === "type"){
                                 data[fld] = scope[fld].type;
+                                if(scope[fld].type==="textarea"){
+                                    data["default"] = scope.default_textarea;
+                                }
                                 if(scope[fld].type==="integer" || scope[fld].type==="float"){
                                     data[min] = $('#answer_min').val();
                                     data[max] = $('#answer_max').val();
