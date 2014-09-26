@@ -290,13 +290,13 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             if(question.type === 'text' ){
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
-                    '<input type="text" placeholder="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" >'+
+                    '<input type="text" placeholder="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" readonly>'+
                     '</div></div>';
             }
             if(question.type === "textarea"){
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
-                    '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3">'+defaultValue+'</textarea>'+
+                    '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3" readonly>'+defaultValue+'</textarea>'+
                     '</div></div>';
             }
             if(question.type === 'multiplechoice' || question.type === "multiselect"){
@@ -306,7 +306,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 for( i = 0; i<choices.length; i++){
                     checked = (!Empty(question.default) && question.default.indexOf(choices[i])!==-1) ? "checked" : "";
                     html+='<label class="'+element+'-inline final">'+
-                    '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+'>' +choices[i]+
+                    '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+' disabled>' +choices[i]+
                     '</label>';
                 }
 
@@ -316,7 +316,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 max = (question.max) ? question.max : "" ;
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
-                    '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
+                    '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly>'+
                     '</div></div>';
 
             }
@@ -331,6 +331,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             element = angular.element(document.getElementById('question_'+question.index));
             // element.html(html);
+            element.css('opacity', 0.7);
             $compile(element)(scope);
             // var questionScope = scope.$new;
 
@@ -362,10 +363,11 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 index = params.index,
                 element, fld, i,
                 form = SurveyQuestionForm;
+
             $('#add_question_btn').hide();
             $('#new_question .aw-form-well').remove();
             element = $('.question_final:eq('+index+')');
-            // element.attr('id', 'question_'+index);
+            element.css('opacity', 1.0);
             element.empty();
             // $('#new_question .aw-form-well').remove();
             GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , scope:scope, breadCrumbs: false});
