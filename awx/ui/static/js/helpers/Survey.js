@@ -321,12 +321,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             }
             html += '<div class="col-xs-12 text-right" id="question_actions">';
-            html += '<a id="edit-question_'+question.index+'" data-placement="top" '+//ng-click="editQuestion('+question.index+')"
-                'aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-pencil"></i> </a>';
-            html += '<a id="delete-question_'+question.index+'" data-placement="top" '+//ng-click="deleteQuestion('+question.index+')"
-                'aw-tool-tip="Delete question" data-original-title="" title=""><i class="fa fa-trash-o"></i> </a>';
-            html += '<a id="edit-action" data-placement="top" ng-click="moveQuestion(this)" aw-tool-tip="Move up" data-original-title="" title=""><i class="fa fa-sort-desc"></i> </a>';
-            html += '<a id="edit-action" data-placement="top" ng-click="editQuestion(question)" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-sort-asc"></i> </a>';
+            html += '<a id="edit-question_'+question.index+'" data-placement="top" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-pencil"></i> </a>';
+            html += '<a id="delete-question_'+question.index+'" data-placement="top" aw-tool-tip="Delete question" data-original-title="" title=""><i class="fa fa-trash-o"></i> </a>';
+            html += '<a id="question-up_'+question.index+'" data-placement="top" aw-tool-tip="Move up" data-original-title="" title=""><i class="fa fa-arrow-up"></i> </a>';
+            html += '<a id="question-down_'+question.index+'" data-placement="top" aw-tool-tip="Move down" data-original-title="" title=""><i class="fa fa-arrow-down"></i> </a>';
             html+='</div></div>';
 
             $('#question_'+question.index).append(html);
@@ -345,6 +343,12 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             });
             $('#edit-question_'+question.index+'').on('click', function($event){
                 scope.editQuestion($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+            });
+            $('#question-up_'+question.index+'').on('click', function($event){
+                scope.questionUp($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+            });
+            $('#question-down_'+question.index+'').on('click', function($event){
+                scope.questionDown($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
             });
         };
     }])
@@ -456,6 +460,66 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     index:index,
                     scope: scope
                 });
+            };
+
+            scope.questionUp = function(index){
+                var animating = false,
+                    clickedDiv = $('#question_'+index),
+                    prevDiv = clickedDiv.prev(),
+                    distance = clickedDiv.outerHeight();
+
+                if (animating) {
+                    return;
+                }
+
+                if (prevDiv.length) {
+                    animating = true;
+                    $.when(clickedDiv.animate({
+                        top: -distance
+                    }, 600),
+                    prevDiv.animate({
+                        top: distance
+                    }, 600)).done(function () {
+                        prevDiv.css('top', '0px');
+                        clickedDiv.css('top', '0px');
+                        clickedDiv.insertBefore(prevDiv);
+                        animating = false;
+                        i = scope.survey_questions[index];
+                        scope.survey_questions[index] = scope.survey_questions[index-1];
+                        scope.survey_questions[index-1] = i;
+                        scope.reorder();
+                    });
+                }
+            };
+
+            scope.questionDown = function(index){
+                var clickedDiv = $('#question_'+index),
+                    nextDiv = clickedDiv.next(),
+                    distance = clickedDiv.outerHeight(),
+                    animating = false;
+
+                if (animating) {
+                    return;
+                }
+
+                if (nextDiv.length) {
+                    animating = true;
+                    $.when(clickedDiv.animate({
+                        top: distance
+                    }, 600),
+                    nextDiv.animate({
+                        top: -distance
+                    }, 600)).done(function () {
+                        nextDiv.css('top', '0px');
+                        clickedDiv.css('top', '0px');
+                        nextDiv.insertBefore(clickedDiv);
+                        animating = false;
+                        i = scope.survey_questions[index];
+                        scope.survey_questions[index] = scope.survey_questions[Number(index)+1];
+                        scope.survey_questions[Number(index)+1] = i;
+                        scope.reorder();
+                    });
+                }
             };
 
             scope.reorder = function(){
