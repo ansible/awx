@@ -1439,6 +1439,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                                 html += "\" ";
                                 html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
 
+                                if(button.ngShow){
+                                    html += this.attr(button, 'ngShow');
+                                }
                                 if (button.ngClick) {
                                     html += this.attr(button, 'ngClick');
                                 }

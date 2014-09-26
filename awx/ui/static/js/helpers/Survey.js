@@ -81,17 +81,17 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 tempSurv = {},
                 generator = GenerateForm,
                 form = SurveyMakerForm,
-                labels={
-                    "type": "Type",
-                    "question_name": "Question Text",
-                    "question_description": "Question Description",
-                    "variable": "Answer Varaible Name",
-                    "choices": "Choices",
-                    "min": "Min",
-                    "max": "Max",
-                    "required": "Required",
-                    "default": "Default Answer"
-                },
+                // labels={
+                //     "type": "Type",
+                //     "question_name": "Question Text",
+                //     "question_description": "Question Description",
+                //     "variable": "Answer Varaible Name",
+                //     "choices": "Choices",
+                //     "min": "Min",
+                //     "max": "Max",
+                //     "required": "Required",
+                //     "default": "Default Answer"
+                // },
                 url = GetBasePath('job_templates') + id + '/survey_spec/', i;
 
             if (scope.removeDialogReady) {
@@ -114,7 +114,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.survey_description = tempSurv.survey_description;
                 // scope.survey_questions = data.spec;
                 for(i=0; i<scope.survey_questions.length; i++){
-                    scope.finalizeQuestion(scope.survey_questions[i], labels);
+                    scope.finalizeQuestion(scope.survey_questions[i], i);
                 }
             }
             else{
@@ -130,7 +130,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                                 scope.survey_description = data.description;
                                 scope.survey_questions = data.spec;
                                 for(i=0; i<scope.survey_questions.length; i++){
-                                    scope.finalizeQuestion(scope.survey_questions[i], labels);
+                                    scope.finalizeQuestion(scope.survey_questions[i], i);
                                 }
                                 // scope.addQuestion();
                                 Wait('stop');
@@ -264,30 +264,39 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             var scope = params.scope,
                 // id = params.id,
                 question = params.question,
-                // callback = params.callback,
+                index = params.index,
                 // url,
                 // key,
                 element, choices, i, checked,
                 max, min, defaultValue,
 
-            html = '<div class="question_final row">';
-            html += '<div class="col-xs-12"><b>'+question.question_name+'</b></div>\n';
+            html = "";
+
+            question.index = index;
+
+            if(!$('#question_'+question.index+':eq(0)').is('div')){
+                html+='<div id="question_'+question.index+'" class="question_final row"></div>';
+                $('#finalized_questions').append(html);
+            }
+
+
+
+            html = '<div class="col-xs-12"><b>'+question.question_name+'</b></div>\n';
             if(!Empty(question.question_description)){
-                html += '<div class="col-xs-12">    '+question.question_description+'</div>\n';
+                html += '<div class="col-xs-12"><i>'+question.question_description+'</i></div>\n';
             }
             defaultValue = (question.default) ? question.default : "";
 
             if(question.type === 'text' ){
-
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
-                    '<input type="text" placeholder="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid" required="" >'+
+                    '<input type="text" placeholder="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" >'+
                     '</div></div>';
             }
             if(question.type === "textarea"){
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
-                    '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid" required="" rows="3">'+defaultValue+'</textarea>'+
+                    '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3">'+defaultValue+'</textarea>'+
                     '</div></div>';
             }
             if(question.type === 'multiplechoice' || question.type === "multiselect"){
@@ -296,7 +305,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
                 for( i = 0; i<choices.length; i++){
                     checked = (!Empty(question.default) && question.default.indexOf(choices[i])!==-1) ? "checked" : "";
-                    html+='<label class="'+element+'-inline">'+
+                    html+='<label class="'+element+'-inline final">'+
                     '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+'>' +choices[i]+
                     '</label>';
                 }
@@ -307,23 +316,20 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 max = (question.max) ? question.max : "" ;
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
-                    '<input type="number" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
+                    '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
                     '</div></div>';
 
             }
-            if(question.type === "json"){
-
-            }
             html += '<div class="col-xs-12 text-right" id="question_actions">';
-            html += '<a id="edit-action" data-placement="top" ng-click="editQuestion(this)" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-pencil"></i> </a>';
+            html += '<a id="edit-action" data-placement="top" ng-click="editQuestion('+question.index+')" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-pencil"></i> </a>';
             html += '<a id="delete-action" data-placement="top" ng-click="deleteQuestion(job_template.id, job_template.name)" aw-tool-tip="Delete template" data-original-title="" title=""><i class="fa fa-trash-o"></i> </a>';
             html += '<a id="edit-action" data-placement="top" ng-click="moveQuestion(this)" aw-tool-tip="Move up" data-original-title="" title=""><i class="fa fa-sort-desc"></i> </a>';
-            html += '<a id="edit-action" data-placement="top" ng-click="editQuestion(this)" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-sort-asc"></i> </a>';
+            html += '<a id="edit-action" data-placement="top" ng-click="editQuestion(question)" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-sort-asc"></i> </a>';
             html+='</div></div>';
 
-            $('#finalized_questions').append(html);
+            $('#question_'+question.index).append(html);
 
-            element = angular.element(document.getElementById('finalized_questions'));
+            element = angular.element(document.getElementById('question_'+question.index));
             // element.html(html);
             $compile(element)(scope);
             // var questionScope = scope.$new;
@@ -335,14 +341,44 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
     }])
 
 
+     .factory('EditQuestion', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', '$compile', 'GenerateForm', 'SurveyQuestionForm',
+    function(GetBasePath, Rest, Wait, ProcessErrors, $compile, GenerateForm, SurveyQuestionForm) {
+        return function(params) {
+
+            var scope = params.scope,
+                index = params.index,
+                element, fld, i,
+                form = SurveyQuestionForm;
+
+
+            element = $('.question_final:eq('+index+')');
+            element.attr('id', 'question_'+index);
+            element.empty();
+            // $('#new_question .aw-form-well').remove();
+            GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , scope:scope, breadCrumbs: false});
+            for(fld in form.fields){
+                if(form.fields[fld].type === 'select'){
+                    for (i = 0; i < scope.answer_types.length; i++) {
+                        if (scope.survey_questions[index][fld] === scope.answer_types[i].type) {
+                            scope[fld] = scope.answer_types[i];
+                        }
+                    }
+                } else {
+                    scope[fld] = scope.survey_questions[index][fld];
+                }
+            }
+        };
+    }])
+
     .factory('SurveyControllerInit', ['$location', 'DeleteSurvey', 'EditSurvey', 'AddSurvey', 'GenerateForm', 'SurveyQuestionForm', 'Wait', 'Alert',
-            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion',
+            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion',
         function($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
-            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion) {
+            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion) {
         return function(params) {
             var scope = params.scope,
                 // parent_scope = params.parent_scope,
                 id = params.id,
+                // element, i,
                 url;
                 // iterator = (params.iterator) ? params.iterator : scope.iterator,
                 // base = $location.path().replace(/^\//, '').split('/')[0];
@@ -353,7 +389,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 {name: 'Textarea', type: 'textarea'},
                 {name: 'Multiple Choice (single select)', type: 'multiplechoice'},
                 {name: 'Multiple Choice (multiple select)', type: 'multiselect'},
-                {name: 'JSON', type: 'json'},
                 {name: 'Integer', type: 'integer'},
                 {name: 'Float', type: 'float'}
             ];
@@ -384,15 +419,19 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 GenerateForm.inject(SurveyQuestionForm, { id:'new_question', mode: 'add' , scope:scope, breadCrumbs: false});
                 scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
             };
-            scope.editQuestion = function(question){
-                alert('success : ' + question);
+            scope.editQuestion = function(index){
+                EditQuestion({
+                    index: index,
+                    scope: scope
+                });
             };
 
-            scope.finalizeQuestion= function(data){
+            scope.finalizeQuestion= function(data, index){
                 FinalizeQuestion({
                     scope: scope,
                     question: data,
                     id: id,
+                    index: index
                     //callback?
                 });
             };
@@ -410,7 +449,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 labels={},
                 min= "min",
                 max = "max",
-                fld;
+                fld, key, elementID;
                 //generator.clearApiErrors();
                 Wait('start');
 
@@ -433,14 +472,23 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         }
                     }
                     Wait('stop');
-                    scope.survey_questions.push(data);
-                    $('#new_question .aw-form-well').remove();
-                    // scope.addQuestion()
-                    $('#add_question_btn').show();
-                    // for(fld in form.fields){
-                    //     $scope[fld] = '';
-                    // }
-                    scope.finalizeQuestion(data , labels);
+
+                    if(GenerateForm.mode === 'add'){
+                        scope.survey_questions.push(data);
+                        $('#new_question .aw-form-well').remove();
+                        // scope.addQuestion()
+                        $('#add_question_btn').show();
+                        scope.finalizeQuestion(data , scope.survey_questions.length-1);
+                    }
+                    if(GenerateForm.mode === 'edit'){
+                        elementID = event.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
+                        key = elementID.split('_')[1];
+                        scope.survey_questions[key] = data;
+                        $('#'+elementID).empty();
+                        scope.finalizeQuestion(data , key);
+                    }
+
+
 
                 } catch (err) {
                     Wait('stop');
