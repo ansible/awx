@@ -321,8 +321,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             }
             html += '<div class="col-xs-12 text-right" id="question_actions">';
-            html += '<a id="edit-action" data-placement="top" ng-click="editQuestion('+question.index+')" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-pencil"></i> </a>';
-            html += '<a id="delete-action" data-placement="top" ng-click="deleteQuestion(job_template.id, job_template.name)" aw-tool-tip="Delete template" data-original-title="" title=""><i class="fa fa-trash-o"></i> </a>';
+            html += '<a id="edit-question_'+question.index+'" data-placement="top" '+//ng-click="editQuestion('+question.index+')"
+                'aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-pencil"></i> </a>';
+            html += '<a id="delete-question_'+question.index+'" data-placement="top" '+//ng-click="deleteQuestion('+question.index+')"
+                'aw-tool-tip="Delete question" data-original-title="" title=""><i class="fa fa-trash-o"></i> </a>';
             html += '<a id="edit-action" data-placement="top" ng-click="moveQuestion(this)" aw-tool-tip="Move up" data-original-title="" title=""><i class="fa fa-sort-desc"></i> </a>';
             html += '<a id="edit-action" data-placement="top" ng-click="editQuestion(question)" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-sort-asc"></i> </a>';
             html+='</div></div>';
@@ -337,6 +339,13 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             $('#add_question_btn').show();
             $('#add_question_btn').removeAttr('disabled');
             $('#survey_maker_save_btn').removeAttr('disabled');
+
+            $('#delete-question_'+question.index+'').on('click', function($event){
+                scope.deleteQuestion($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+            });
+            $('#edit-question_'+question.index+'').on('click', function($event){
+                scope.editQuestion($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+            });
         };
     }])
 
@@ -349,10 +358,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 index = params.index,
                 element, fld, i,
                 form = SurveyQuestionForm;
-
-
+            $('#add_question_btn').hide();
+            $('#new_question .aw-form-well').remove();
             element = $('.question_final:eq('+index+')');
-            element.attr('id', 'question_'+index);
+            // element.attr('id', 'question_'+index);
             element.empty();
             // $('#new_question .aw-form-well').remove();
             GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , scope:scope, breadCrumbs: false});
@@ -370,16 +379,31 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
         };
     }])
 
+     .factory('DeleteQuestion' ,
+    function() {
+        return function(params) {
+
+            var scope = params.scope,
+                index = params.index,
+                element;
+
+            element = $('.question_final:eq('+index+')');
+            // element.attr('id', 'question_'+index);
+            element.remove();
+            scope.survey_questions.splice(index, 1);
+            scope.reorder();
+        };
+    })
+
     .factory('SurveyControllerInit', ['$location', 'DeleteSurvey', 'EditSurvey', 'AddSurvey', 'GenerateForm', 'SurveyQuestionForm', 'Wait', 'Alert',
-            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion',
+            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion', 'DeleteQuestion',
         function($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
-            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion) {
+            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion, DeleteQuestion) {
         return function(params) {
             var scope = params.scope,
                 // parent_scope = params.parent_scope,
                 id = params.id,
-                // element, i,
-                url;
+                i, url;
                 // iterator = (params.iterator) ? params.iterator : scope.iterator,
                 // base = $location.path().replace(/^\//, '').split('/')[0];
 
@@ -419,11 +443,27 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 GenerateForm.inject(SurveyQuestionForm, { id:'new_question', mode: 'add' , scope:scope, breadCrumbs: false});
                 scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
             };
+
             scope.editQuestion = function(index){
                 EditQuestion({
                     index: index,
                     scope: scope
                 });
+            };
+
+            scope.deleteQuestion = function(index){
+                DeleteQuestion({
+                    index:index,
+                    scope: scope
+                });
+            };
+
+            scope.reorder = function(){
+                for(i=0; i<scope.survey_questions.length; i++){
+                    scope.survey_questions[i].index=i;
+                    $('.question_final:eq('+i+')').attr('id', 'question_'+i);
+                    // $('#delete-question_'+question.index+'')
+                }
             };
 
             scope.finalizeQuestion= function(data, index){
