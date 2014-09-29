@@ -16,3 +16,9 @@ class Instance(models.Model):
     class Meta:
         app_label = 'main'
 
+    @property
+    def role(self):
+        """Return the role of this instance, as a string."""
+        if self.primary:
+            return 'primary'
+        return 'secondary'
