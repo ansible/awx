@@ -445,6 +445,8 @@ class Job(UnifiedJob, JobOptions):
         return dependencies
 
     def handle_extra_data(self, extra_data):
+        if extra_data == "":
+            return
         evars = json.loads(self.extra_vars)
         evars.update(extra_data)
         self.update_fields(extra_vars=json.dumps(evars))
