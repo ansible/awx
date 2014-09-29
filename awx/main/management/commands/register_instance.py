@@ -59,13 +59,28 @@ class Command(BaseCommand):
                                '%s instance.' % instance.role)
 
         # If this instance is being set to primary and a *different* primary
-        # machine already exists, then error out if we're supposed to be timid.
-        if timid and instance.primary and primaries:
+        # machine alreadyexists, error out if we're supposed to be timid.
+        if timid and options['primary'] and primaries:
             raise CommandError('Another instance is already registered as '
                                'primary.')
 
         # Lastly, if there are no primary machines at all, then don't allow
         # this to be registered as a secondary machine.
-        if not instance.primary and not primaries:
+        if not options['primary'] and not primaries:
             raise CommandError('Unable to register a secondary machine until '
-                               'a primary machine has been registered')
+                               'another primary machine has been registered.')
+
+        # If this is a primary machine and there is another primary machine,
+        # it must be de-primary-ified.
+        if options['primary'] and primaries:
+            for old_primary in other_instances.filter(primary=True):
+                old_primary.primary = False
+                old_primary.save()
+
+        # Okay, we've checked for appropriate errata; perform the registration.
+        dirty = instance.primary is not options['primary']
+        instance.primary = options['primary']
+        instance.save()
+
+        # Done!
+        print('Instance %s registered (changed: %r).' % (uuid, dirty))
