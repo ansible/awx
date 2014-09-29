@@ -34,6 +34,7 @@ class Command(BaseCommand):
 
     def handle(self, **options):
         uuid = settings.SYSTEM_UUID
+        timid = options['timid']
 
         # Is there an existing record for this machine?
         # If so, retrieve that record and look for issues.
