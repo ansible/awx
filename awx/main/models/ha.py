@@ -2,13 +2,16 @@
 # All Rights Reserved.
 
 from django.db import models
+from awx.main.managers import InstanceManager
 
 
 class Instance(models.Model):
     """A model representing an Ansible Tower instance, primary or secondary,
     running against this database.
     """
-    uuid = models.CharField(max_length=40)
+    objects = InstanceManager()
+
+    uuid = models.CharField(max_length=40, unique=True)
     primary = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
