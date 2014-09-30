@@ -12,16 +12,14 @@ class InstanceManager(models.Manager):
     Provides "table-level" methods including getting the currently active
     instance or role.
     """
-    @cached_property
     def me(self):
         """Return the currently active instance."""
         return self.get(uuid=settings.SYSTEM_UUID)
 
-    @cached_property
     def my_role(self):
         """Return the role of the currently active instance, as a string
         ('primary' or 'secondary').
         """
-        if self.me.primary:
+        if self.me().primary:
             return 'primary'
         return 'secondary'
