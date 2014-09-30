@@ -1119,10 +1119,10 @@ class RunInventoryUpdate(BaseTask):
             f.close()
             os.chmod(path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
             args.append(runpath)
-            try:
-                shutil.rmtree(runpath, True)
-            except OSError:
-                pass
+            # try:
+            #     shutil.rmtree(runpath, True)
+            # except OSError:
+            #     pass
         verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)
         args.append('-v%d' % verbosity)
         if settings.DEBUG:
