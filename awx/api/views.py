@@ -130,7 +130,7 @@ class ApiV1PingView(APIView):
         this requires no auth and is intended for use by the installer process.
         """
         return Response({
-            'role': 'standalone',  # FIXME: Make this dynamic.
+            'role': Instance.objects.my_role(),
             'version': get_awx_version(),
         })
 
