@@ -21,6 +21,8 @@ from awx.main.tests.base import BaseTest, BaseTransactionTest
 
 __all__ = ['InventoryTest', 'InventoryUpdatesTest']
 
+TEST_SIMPLE_INVENTORY_SCRIPT = "#!/usr/bin/env python\nimport json\nprint json.dumps({'hosts': ['ahost-01', 'ahost-02', 'ahost-03', 'ahost-04']})"
+
 class InventoryTest(BaseTest):
 
     def setUp(self):
@@ -266,6 +268,17 @@ class InventoryTest(BaseTest):
         self.get(inventory_detail, expect=200, auth=self.get_other_credentials())
         self.delete(permission_detail, expect=204, auth=self.get_super_credentials())
         self.get(inventory_detail, expect=403, auth=self.get_other_credentials())
+
+    def test_create_inventory_script(self):
+        inventory_scripts = reverse('api:inventory_script_list')
+        new_script = dict(name="Test", description="Test Script", script=TEST_SIMPLE_INVENTORY_SCRIPT)
+        script_data = self.post(inventory_scripts, data=new_script, expect=201, auth=self.get_super_credentials())
+
+        got = self.get(inventory_scripts, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(got['count'], 1)
+
+        new_failed_script = dict(name="Shouldfail", description="This test should fail", script=TEST_SIMPLE_INVENTORY_SCRIPT)
+        self.post(inventory_scripts, data=new_failed_script, expect=403, auth=self.get_normal_credentials())
 
     def test_main_line(self):
        
@@ -1546,3 +1559,26 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # its own child).
         self.assertTrue(self.group in self.inventory.root_groups)
 
+    def test_update_from_custom_script(self):
+        # Create the inventory script
+        inventory_scripts = reverse('api:inventory_script_list')
+        new_script = dict(name="Test", description="Test Script", script=TEST_SIMPLE_INVENTORY_SCRIPT)
+        script_data = self.post(inventory_scripts, data=new_script, expect=201, auth=self.get_super_credentials())
+
+        custom_inv = self.organization.inventories.create(name='Custom Script Inventory')
+        custom_group = custom_inv.groups.create(name="Custom Script Group")
+        custom_inv_src = reverse('api:inventory_source_detail',
+                                 args=(custom_group.inventory_source.pk,))
+        custom_inv_update = reverse('api:inventory_source_update_view',
+                                    args=(custom_group.inventory_source.pk,))
+        inv_src_opts = {'source': 'custom',
+                        'source_script': script_data["id"]}
+        with self.current_user(self.super_django_user):
+            response = self.put(custom_inv_src, inv_src_opts, expect=200)
+
+        with self.current_user(self.super_django_user):
+            response = self.get(custom_inv_update, expect=200)
+            self.assertTrue(response['can_update'])
+        with self.current_user(self.super_django_user):
+            response = self.post(custom_inv_update, {}, expect=202)
+        self.assertTrue(custom_group.hosts.all().count() == 4)

@@ -116,6 +116,11 @@ inventory_update_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/stdout/$',                    'inventory_update_stdout'),
 )
 
+inventory_script_urls = patterns('awx.api.views',
+    url(r'^$',                                          'inventory_script_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'inventory_script_detail'),
+)
+
 credential_urls = patterns('awx.api.views',
     url(r'^$',                                          'credential_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'credential_activity_stream_list'),
@@ -193,6 +198,7 @@ v1_urls = patterns('awx.api.views',
     url(r'^groups/',                include(group_urls)),
     url(r'^inventory_sources/',     include(inventory_source_urls)),
     url(r'^inventory_updates/',     include(inventory_update_urls)),
+    url(r'^inventory_scripts/',     include(inventory_script_urls)),
     url(r'^credentials/',           include(credential_urls)),
     url(r'^permissions/',           include(permission_urls)),
     url(r'^job_templates/',         include(job_template_urls)),

@@ -1110,7 +1110,19 @@ class RunInventoryUpdate(BaseTask):
 
         elif inventory_update.source == 'file':
             args.append(inventory_update.source_path)
-            
+        elif inventory_update.source == 'custom':
+            runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_')
+            handle, path = tempfile.mkstemp(dir=runpath)
+            f = os.fdopen(handle, 'w')
+            # Check that source_script is not none and exists and that .script is not an empty string
+            f.write(inventory_update.source_script.script)
+            f.close()
+            os.chmod(path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
+            args.append(runpath)
+            try:
+                shutil.rmtree(runpath, True)
+            except OSError:
+                pass
         verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)
         args.append('-v%d' % verbosity)
         if settings.DEBUG:

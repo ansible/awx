@@ -39,7 +39,7 @@ from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import *
 from awx.main.utils import encrypt_field, ignore_inventory_computed_fields, _inventory_updates
 
-__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate']
+__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript']
 
 logger = logging.getLogger('awx.main.models.inventory')
 
@@ -744,6 +744,7 @@ class InventorySourceOptions(BaseModel):
         ('gce',    _('Google Compute Engine')),
         ('azure',  _('Microsoft Azure')),
         ('vmware', _('VMware vCenter')),
+        ('custom', _('Custom Script')),
     ]
 
     class Meta:
@@ -760,6 +761,13 @@ class InventorySourceOptions(BaseModel):
         blank=True,
         default='',
         editable=False,
+    )
+    source_script = models.ForeignKey(
+        'CustomInventoryScript',
+        null=True,
+        default=None,
+        blank=True,
+        on_delete=models.SET_NULL,
     )
     source_vars = models.TextField(
         blank=True,
@@ -930,7 +938,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'source', 'source_path', 'source_vars',
+        return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars',
                 'credential', 'source_regions', 'overwrite', 'overwrite_vars']
 
     def save(self, *args, **kwargs):
@@ -1067,3 +1075,19 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     @property
     def task_impact(self):
         return 50
+
+class CustomInventoryScript(CommonModel):
+
+    class Meta:
+        app_label = 'main'
+        ordering = ('name',)
+
+    script = models.TextField(
+        blank=True,
+        default='',
+        help_text=_('Inventory script contents'),
+    )
+
+    def get_absolute_url(self):
+        return reverse('api:inventory_script_detail', args=(self.pk,))
+

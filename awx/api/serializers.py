@@ -929,11 +929,16 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
     class Meta:
         model = Group
 
+class CustomInventoryScriptSerializer(BaseSerializer):
+
+    class Meta:
+        model = CustomInventoryScript
+        fields = ('*', "script")
 
 class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
-        fields = ('*', 'source', 'source_path', 'source_vars', 'credential',
+        fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
                   'source_regions', 'overwrite', 'overwrite_vars')
 
     def get_related(self, obj):

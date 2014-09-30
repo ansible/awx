@@ -1323,6 +1323,32 @@ class ActivityStreamAccess(BaseAccess):
     def can_delete(self, obj):
         return False
 
+class CustomInventoryScriptAccess(BaseAccess):
+
+    model = CustomInventoryScript
+
+    def get_queryset(self):
+        qs = self.model.objects.filter(active=True).distinct()
+        return qs
+
+    def can_read(self, obj):
+        return True
+
+    def can_add(self, data):
+        if self.user.is_superuser:
+            return True
+        return False
+
+    def can_change(self, obj, data):
+        if self.user.is_superuser:
+            return True
+        return False
+
+    def can_delete(self, obj):
+        if self.user.is_superuser:
+            return True
+        return False
+
 register_access(User, UserAccess)
 register_access(Organization, OrganizationAccess)
 register_access(Inventory, InventoryAccess)
@@ -1343,3 +1369,4 @@ register_access(Schedule, ScheduleAccess)
 register_access(UnifiedJobTemplate, UnifiedJobTemplateAccess)
 register_access(UnifiedJob, UnifiedJobAccess)
 register_access(ActivityStream, ActivityStreamAccess)
+register_access(CustomInventoryScript, CustomInventoryScriptAccess)

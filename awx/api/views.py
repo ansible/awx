@@ -102,6 +102,7 @@ class ApiV1RootView(APIView):
         data['teams'] = reverse('api:team_list')
         data['credentials'] = reverse('api:credential_list')
         data['inventory'] = reverse('api:inventory_list')
+        data['inventory_scripts'] = reverse('api:inventory_script_list')
         data['inventory_sources'] = reverse('api:inventory_source_list')
         data['groups'] = reverse('api:group_list')
         data['hosts'] = reverse('api:host_list')
@@ -805,6 +806,16 @@ class PermissionDetail(RetrieveUpdateDestroyAPIView):
 
     model = Permission
     serializer_class = PermissionSerializer
+
+class InventoryScriptList(ListCreateAPIView):
+
+    model = CustomInventoryScript
+    serializer_class = CustomInventoryScriptSerializer
+
+class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
+
+    model = CustomInventoryScript
+    serializer_class = CustomInventoryScriptSerializer
 
 class InventoryList(ListCreateAPIView):
 
