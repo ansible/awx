@@ -1581,4 +1581,5 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.assertTrue(response['can_update'])
         with self.current_user(self.super_django_user):
             response = self.post(custom_inv_update, {}, expect=202)
+        custom_group = Group.objects.get(id=custom_group.id)
         self.assertEqual(custom_group.hosts.all().count(), 4)
