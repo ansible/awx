@@ -1561,6 +1561,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
 
     def test_update_from_custom_script(self):
         # Create the inventory script
+        self.create_test_license_file()
         inventory_scripts = reverse('api:inventory_script_list')
         new_script = dict(name="Test", description="Test Script", script=TEST_SIMPLE_INVENTORY_SCRIPT)
         script_data = self.post(inventory_scripts, data=new_script, expect=201, auth=self.get_super_credentials())
