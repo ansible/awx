@@ -28,6 +28,7 @@ class Command(BaseCommand):
     """
     option_list = BaseCommand.option_list + (
         make_option('--timid', action='store_true', dest='timid'),
+        make_option('--ip-address', dest='ip_address', default=''),
         make_option('--primary', action='store_true', dest='primary'),
         make_option('--secondary', action='store_false', dest='primary'),
     )
@@ -71,6 +72,12 @@ class Command(BaseCommand):
             raise CommandError('Unable to register a secondary machine until '
                                'another primary machine has been registered.')
 
+        # Sanity check: An IP address is required if this is an initial
+        # registration.
+        if not existing and not options['ip_address']:
+            raise CommandError('An explicit IP address is required at initial '
+                               'registration.')
+
         # If this is a primary machine and there is another primary machine,
         # it must be de-primary-ified.
         if options['primary'] and primaries:
@@ -79,8 +86,14 @@ class Command(BaseCommand):
                 old_primary.save()
 
         # Okay, we've checked for appropriate errata; perform the registration.
-        dirty = instance.primary is not options['primary']
+        dirty = any([
+            instance.primary is not options['primary'],
+            options['ip_address'] and
+                instance.ip_address != options['ip_address'],
+        ])
         instance.primary = options['primary']
+        if options['ip_address']:
+            instance.ip_address = options['ip_address']
         instance.save()
 
         # Done!
