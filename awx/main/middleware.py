@@ -61,3 +61,14 @@ class ActivityStreamMiddleware(threading.local):
             else:
                 if instance.id not in self.instance_ids:
                     self.instance_ids.append(instance.id)
+
+
+class HAMiddlware(object):
+    """A middleware class that checks to see whether the request is being
+    served on a secondary instance, and redirects the request back to the
+    primary instance if so.
+    """
+    def process_request(self, request):
+        """Process the request, and redirect if this is a request on a
+        secondary node.
+        """

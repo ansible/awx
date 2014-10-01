@@ -116,6 +116,7 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 )
 
 MIDDLEWARE_CLASSES += (
+    'awx.main.middleware.HAMiddleware',
     'awx.main.middleware.ActivityStreamMiddleware',
     'crum.CurrentRequestUserMiddleware',
 )

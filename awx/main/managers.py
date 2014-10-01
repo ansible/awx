@@ -23,3 +23,7 @@ class InstanceManager(models.Manager):
         if self.me().primary:
             return 'primary'
         return 'secondary'
+
+    def primary(self):
+        """Return the primary instance."""
+        return self.get(primary=True)
