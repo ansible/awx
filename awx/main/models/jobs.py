@@ -449,7 +449,7 @@ class Job(UnifiedJob, JobOptions):
             return
         try:
             evars = json.loads(self.extra_vars)
-        catch Exception, e:
+        except Exception, e:
             return
         evars.update(extra_data)
         self.update_fields(extra_vars=json.dumps(evars))
