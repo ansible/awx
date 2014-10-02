@@ -199,7 +199,6 @@ class CallbackReceiver(object):
         return None
 
     def callback_worker(self, queue_actual):
-        self.consumer_context.destroy()
         messages_processed = 0
         while True:
             message = queue_actual.get()
