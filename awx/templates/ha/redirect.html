@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <title>Ansible Tower: Secondary</title>
+    <meta http-equiv="refresh" content="{{ redirect_seconds }}; url=//{{ primary.ip_address }}/" />
+  </head>
+  <body>
+    <h1>Ansible Tower</h1>
+    <p>This Ansible Tower server (version {{ version }}) is in secondary
+      mode. The current master is {{ primary.ip_address }}.
+    </p>
+    <p>This page will redirect in {{ redirect_seconds }} seconds.</p>
+  </body>
+</html>

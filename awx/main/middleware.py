@@ -1,19 +1,26 @@
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-from django.conf import settings
-from django.contrib.auth.models import User, AnonymousUser
-from django.db.models.signals import pre_save, post_save
-from django.db import IntegrityError
-from django.utils.functional import curry
-from awx.main.models import ActivityStream, AuthToken
 import json
+import logging
 import threading
 import uuid
 import urllib2
 
-import logging
+from django.conf import settings
+from django.contrib.auth.models import User, AnonymousUser
+from django.db.models.signals import pre_save, post_save
+from django.db import IntegrityError
+from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.utils.functional import curry
+
+from awx import __version__ as version
+from awx.main.models import ActivityStream, AuthToken, Instance
+
+
 logger = logging.getLogger('awx.main.middleware')
+
 
 class ActivityStreamMiddleware(threading.local):
 
@@ -63,7 +70,7 @@ class ActivityStreamMiddleware(threading.local):
                     self.instance_ids.append(instance.id)
 
 
-class HAMiddlware(object):
+class HAMiddleware(object):
     """A middleware class that checks to see whether the request is being
     served on a secondary instance, and redirects the request back to the
     primary instance if so.
@@ -72,3 +79,23 @@ class HAMiddlware(object):
         """Process the request, and redirect if this is a request on a
         secondary node.
         """
+        # Is this the primary node? If so, we can just return None and be done;
+        # we just want normal behavior in this case.
+        if Instance.objects.my_role() == 'primary':
+            return None
+
+        # Get the primary instance.
+        primary = Instance.objects.primary()
+
+        # If this is a request to /, then we return a special landing page that
+        # informs the user that they are on the secondary instance and will
+        # be redirected.
+        if request.path == '/':
+            return TemplateResponse(request, 'ha/redirect.html', {
+                'primary': primary,
+                'redirect_seconds': 30,
+                'version': version,
+            })
+
+        # Redirect to the base page of the primary instance.
+        return HttpResponseRedirect('http://%s/' % primary.ip_address)
