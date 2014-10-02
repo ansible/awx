@@ -86,7 +86,7 @@ astroid-1.0.1.tar.gz
 coverage-3.7.1.tar.gz
 pylint-1.1.0.tar.gz
 # Remaining dev-only packages:
-django-debug-toolbar-1.0.1.tar.gz
+django-debug-toolbar-1.1.tar.gz
 django-devserver-0.8.0.tar.gz
 django-jenkins-0.14.1.tar.gz
 ipython-1.2.1.tar.gz
