@@ -27,14 +27,13 @@ CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver_dev.ipc"
 try:
     import django_jenkins
     INSTALLED_APPS += ('django_jenkins',)
-    PROJECT_APPS = ('awx.main', 'awx.api',)
+    PROJECT_APPS = ('awx.main.tests', 'awx.api.tests',)
 except ImportError:
     pass
 
 if 'django_jenkins' in INSTALLED_APPS:
     JENKINS_TASKS = (
         'django_jenkins.tasks.run_pylint',
-        'django_jenkins.tasks.with_coverage',
         'django_jenkins.tasks.run_pep8',
         'django_jenkins.tasks.run_pyflakes',
         'django_jenkins.tasks.run_jshint',

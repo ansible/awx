@@ -37,9 +37,9 @@ endif
 MOCK_BIN ?= mock
 MOCK_CFG ?=
 
-.PHONY: clean rebase push requirements requirements_pypi develop refresh \
-	adduser syncdb migrate dbchange dbshell runserver celeryd receiver test \
-	test_coverage coverage_html test_ui test_jenkins dev_build \
+.PHONY: clean rebase push requirements requirements_pypi requirements_jenkins \
+	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
+	receiver test test_coverage coverage_html test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpm
 
 # Remove temporary build files, compiled Python files.
@@ -88,7 +88,7 @@ requirements_pypi:
 # (using locally downloaded packages).
 requirements_jenkins: requirements
 	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install -r jenkins.txt); \
+	    (cd requirements && pip install -U -r jenkins.txt); \
 	    (cd requirements && pip install -U pycrypto); \
 	    $(PYTHON) fix_virtualenv_setuptools.py; \
 	else \
@@ -190,7 +190,7 @@ test_tox:
 
 # Run unit tests to produce output for Jenkins.
 test_jenkins:
-	$(PYTHON) manage.py jenkins -v2
+	$(PYTHON) manage.py jenkins -v2 --enable-coverage --project-apps-tests
 
 Gruntfile.js:
 	cp packaging/grunt/$@ $@
