@@ -2,7 +2,6 @@
 # Install using "pip --no-index -r jenkins.txt".
 
 django-jenkins
-python-ldap
 ansible
 coverage
 pyzmq
@@ -10,3 +9,4 @@ python-memcached
 pyflakes
 pep8
 pylint
+python-ldap

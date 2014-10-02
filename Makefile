@@ -89,10 +89,12 @@ requirements_pypi:
 requirements_jenkins: requirements
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    (cd requirements && pip install -U -r jenkins.txt); \
-	    (cd requirements && pip install -U pycrypto); \
+	    (cd requirements && pip install -U pyflakes pep8 pylint); \
+	    (cd requirements && pip install -U pycrypto ); \
 	    $(PYTHON) fix_virtualenv_setuptools.py; \
 	else \
 	    (cd requirements && sudo pip install -r jenkins.txt); \
+	    (cd requirements && sudo pip install -U pyflakes pep8 pylint); \
 	    (cd requirements && sudo pip install -U pycrypto); \
 	fi
 	npm install -g csslint jshint
