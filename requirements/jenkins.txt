@@ -1,6 +1,7 @@
 # PIP requirements for running Tower unittests in jenkins.
 # Install using "pip --no-index -r jenkins.txt".
 
+django-jenkins
 python-ldap
 ansible
 coverage
