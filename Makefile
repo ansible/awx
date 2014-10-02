@@ -88,12 +88,12 @@ requirements_pypi:
 # (using locally downloaded packages).
 requirements_jenkins: requirements
 	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install --no-index -r jenkins.txt); \
+	    (cd requirements && pip install -r jenkins.txt); \
 	    (cd requirements && pip install -U pycrypto); \
 	    $(PYTHON) fix_virtualenv_setuptools.py; \
 	else \
-	    (cd requirements && sudo pip install --no-index -r jenkins.txt); \
-	    (cd requirements && sudo pip install --no-index -U pycrypto); \
+	    (cd requirements && sudo pip install -r jenkins.txt); \
+	    (cd requirements && sudo pip install -U pycrypto); \
 	fi
 	npm install -g csslint jshint
 
