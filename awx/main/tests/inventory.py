@@ -1193,10 +1193,13 @@ class InventoryUpdatesTest(BaseTransactionTest):
             inv_src_url2 = reverse('api:inventory_source_detail', args=(inv_src_2.pk,))
             with self.current_user(self.super_django_user):
                 data = self.get(inv_src_url2, expect=200)
-                data.update({
-                    'source': inventory_source.source,
-                    'credential': inventory_source.credential.pk,
-                })
+                if inventory_source.credential is not None:
+                    data.update({
+                        'source': inventory_source.source,
+                        'credential': inventory_source.credential.pk,
+                    })
+                else:
+                    data.update({'source': inventory_source.source})
                 response = self.put(inv_src_url2, data, expect=400)
                 self.assertTrue('source' in response, response)
         # Make sure we can delete the inventory update.
@@ -1576,11 +1579,4 @@ class InventoryUpdatesTest(BaseTransactionTest):
                         'source_script': script_data["id"]}
         with self.current_user(self.super_django_user):
             response = self.put(custom_inv_src, inv_src_opts, expect=200)
-
-        with self.current_user(self.super_django_user):
-            response = self.get(custom_inv_update, expect=200)
-            self.assertTrue(response['can_update'])
-        with self.current_user(self.super_django_user):
-            response = self.post(custom_inv_update, {}, expect=202)
-        custom_group = Group.objects.get(id=custom_group.id)
-        self.assertEqual(custom_group.hosts.all().count(), 4)
+        self.check_inventory_source(custom_group.inventory_source)
