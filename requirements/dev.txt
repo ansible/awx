@@ -29,7 +29,7 @@ Django>=1.6.7,<1.7
 django-debug-toolbar
 django-devserver>0.7
 unittest2
-django-jenkins<0.15
+django-jenkins
 ipython
 
 # You may also need to install the following extra packages using the OS
