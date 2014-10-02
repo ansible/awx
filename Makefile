@@ -86,11 +86,19 @@ requirements_pypi:
 
 # Install third-party requirements needed for running unittests in jenkins
 # (using locally downloaded packages).
-requirements_jenkins: requirements
+requirements_jenkins:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install -U -r jenkins.txt); \
+	    (cd requirements && pip install --no-index distribute-0.7.3.zip || true); \
+	    (cd requirements && pip install --no-index pip-1.5.4.tar.gz || true); \
+	else \
+	    (cd requirements && sudo pip install --no-index distribute-0.7.3.zip || true); \
+	    (cd requirements && sudo pip install --no-index pip-1.5.4.tar.gz || true); \
+	fi
+	$(MAKE) requirements
+	@if [ "$(VIRTUAL_ENV)" ]; then \
+	    (cd requirements && pip install -r jenkins.txt); \
 	    (cd requirements && pip install -U pyflakes pep8 pylint); \
-	    (cd requirements && pip install -U pycrypto ); \
+	    (cd requirements && pip install -U pycrypto); \
 	    $(PYTHON) fix_virtualenv_setuptools.py; \
 	else \
 	    (cd requirements && sudo pip install -r jenkins.txt); \
