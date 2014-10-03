@@ -218,7 +218,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
-        return bool(self.credential and not len(self.passwords_needed_to_start))
+        return bool(self.credential and not len(self.passwords_needed_to_start) and not len(self.variables_needed_to_start))
 
     @property
     def variables_needed_to_start(self):
