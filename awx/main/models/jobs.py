@@ -451,7 +451,10 @@ class Job(UnifiedJob, JobOptions):
             evars = json.loads(self.extra_vars)
         except Exception, e:
             return
-        evars.update(extra_data)
+        if evars is None:
+            evars = extra_data
+        else:
+            evars.update(extra_data)
         self.update_fields(extra_vars=json.dumps(evars))
 
     def copy(self):
