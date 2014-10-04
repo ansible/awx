@@ -16,7 +16,7 @@ angular.module('SurveyQuestionFormDefinition', [])
 
         addTitle: 'Add Question',
         // editTitle: '{{ survey_name }}',
-        name: 'question_unique',
+        name: 'survey_question',
         well: true,
         twoColumns: true,
 
@@ -152,8 +152,9 @@ angular.module('SurveyQuestionFormDefinition', [])
                 // checked: true,
                 addRequired: false,
                 editRequired: false,
-                column: 2
-                // trueValue: true
+                column: 2,
+                // trueValue: true,
+                // falseValue: false
                 // label: 'Answer required or optional',
                 // type: 'custom',
                 // column: 2,
@@ -183,9 +184,9 @@ angular.module('SurveyQuestionFormDefinition', [])
         // },
         },
         buttons: {
-            submit_quesiton: {
+            submit_question: {
                 ngClick: 'submitQuestion()',
-                ngDisabled: true,
+                ngDisabled: '!question_name || !variable || !type',
                 'class': 'btn btn-sm btn-primary',
                 label: 'Add Question'
             }

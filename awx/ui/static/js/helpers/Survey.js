@@ -16,16 +16,18 @@
 angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
     'GeneratorHelpers'])
 
-    .factory('ShowSurveyModal', ['Wait', 'CreateDialog', function(Wait, CreateDialog) {
+    .factory('ShowSurveyModal', ['Wait', 'CreateDialog', 'Empty', '$compile' ,
+        function(Wait, CreateDialog, Empty, $compile) {
         return function(params) {
             // Set modal dimensions based on viewport width
 
-            var buttons,
-                scope = params.scope,
+            var scope = params.scope,
                 callback = params.callback,
-                title = params.title;
-
-            buttons = [{
+                mode = (params.mode) ? params.mode : "survey-maker",
+                title = params.title,
+                element,
+                target = (mode==='survey-taker') ? 'password-modal' : "survey-modal-dialog",
+                buttons = [{
                 "label": "Cancel",
                 "onClick": function() {
                     $(this).dialog('close');
@@ -34,21 +36,25 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 "class": "btn btn-default",
                 "id": "survey-close-button"
             },{
-                "label": "Save",
+                "label": (mode==='survey-taker') ? "Launch" : "Save" ,
                 "onClick": function() {
                     setTimeout(function(){
                         scope.$apply(function(){
-                            scope.saveSurvey();
+                            if(mode==='survey-taker'){
+                                scope.$emit('SurveyTakerCompleted');
+                            } else{
+                                scope.saveSurvey();
+                            }
                         });
                     });
                 },
-                "icon": "fa-check",
+                "icon":  (mode==='survey-taker') ? "fa-rocket" : "fa-check",
                 "class": "btn btn-primary",
                 "id": "survey-save-button"
             }];
 
             CreateDialog({
-                id: 'survey-modal-dialog',
+                id: target,
                 title: title,
                 scope: scope,
                 buttons: buttons,
@@ -56,14 +62,23 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 height: 725,
                 minWidth: 400,
                 onClose: function() {
-                    $('#survey-modal-dialog #form-container').empty();
+                    $('#'+target).empty();
                 },
                 onOpen: function() {
                     Wait('stop');
-                    //  $('#surveyName').focus();
-                    // $('#rrule_nlp_description').dblclick(function() {
-                    //     setTimeout(function() { scope.$apply(function() { scope.showRRule = (scope.showRRule) ? false : true; }); }, 100);
-                    // });
+                    if(mode!=="survey-taker"){
+                        $('#survey-save-button').attr('ng-disabled', "survey_questions.length<1 ");
+                        element = angular.element(document.getElementById('survey-save-button'));
+                        $compile(element)(scope);
+
+                    }
+                    if(mode==="survey-taker"){
+                        $('#survey-save-button').attr('ng-disabled',  "survey_taker_form.$invalid");
+                        element = angular.element(document.getElementById('survey-save-button'));
+                        $compile(element)(scope);
+
+                    }
+
                 },
                 callback: callback
             });
@@ -151,7 +166,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
     .factory('AddSurvey', ['$location', '$routeParams', 'SchedulerInit', 'ShowSurveyModal', 'Wait', 'GetBasePath', 'Empty',
         'SchedulePost', 'GenerateForm', 'SurveyMakerForm',
-    function($location, $routeParams, SchedulerInit, ShowSurveyModal, Wait, GetBasePath, Empty, SchedulePost, GenerateForm, SurveyMakerForm) {
+    function($location, $routeParams, SchedulerInit, ShowSurveyModal, Wait, GetBasePath, Empty,
+        SchedulePost, GenerateForm, SurveyMakerForm) {
         return function(params) {
             var scope = params.scope,
                 // callback= params.callback,
@@ -177,14 +193,14 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             generator.inject(form, { id: 'survey-modal-dialog' , mode: 'add', related: false, scope: scope, breadCrumbs: false });
             ShowSurveyModal({ title: "Add Survey", scope: scope, callback: 'DialogReady' });
 
-            if (scope.removeScheduleSaved) {
-                scope.removeScheduleSaved();
-            }
-            scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
-                Wait('stop');
-                $('#survey-modal-dialog').dialog('close');
-                scope.$emit('surveySaved');
-            });
+            // if (scope.removeScheduleSaved) {
+            //     scope.removeScheduleSaved();
+            // }
+            // scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
+            //     Wait('stop');
+            //     $('#survey-modal-dialog').dialog('close');
+            //     scope.$emit('surveySaved');
+            // });
 
 
         };
@@ -218,6 +234,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.survey_description = "";
                 scope.survey_questions = [];
                 Wait('stop');
+                scope.survey_exists = false;
                 $('#job_templates_delete_survey_btn').hide();
                 $('#job_templates_edit_survey_btn').hide();
                 $('#job_templates_create_survey_btn').show();
@@ -271,6 +288,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             html = "";
 
+            // if(scope.survey_questions.length>0){
+            //     $('#survey-save-button').removeAttr('disabled')
+            // }
+
             question.index = index;
 
             if(!$('#question_'+question.index+':eq(0)').is('div')){
@@ -278,11 +299,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 $('#finalized_questions').append(html);
             }
 
-
-            required = (question.required) ? "prepend-asterisk" : "";
+            required = (question.required===true) ? "prepend-asterisk" : "";
             html = '<div class="col-xs-12 '+required+'"><b>'+question.question_name+'</b></div>\n';
             if(!Empty(question.question_description)){
-                html += '<div class="col-xs-12"><i>'+question.question_description+'</i></div>\n';
+                html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
             }
             defaultValue = (question.default) ? question.default : "";
 
@@ -336,6 +356,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             $('#add_question_btn').show();
             $('#add_question_btn').removeAttr('disabled');
+            $('#add_question_btn').focus();
             $('#survey_maker_save_btn').removeAttr('disabled');
 
             $('#delete-question_'+question.index+'').on('click', function($event){
@@ -353,6 +374,86 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
         };
     }])
 
+ .factory('SurveyTakerQuestion', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', '$compile', 'Empty',
+    function(GetBasePath, Rest, Wait, ProcessErrors, $compile, Empty) {
+        return function(params) {
+
+            var scope = params.scope,
+                // id = params.id,
+                question = params.question,
+                index = params.index,
+                requiredAsterisk,
+                requiredClasses,
+                element, choices, i, checked,
+                max, min, defaultValue,
+
+            html = "";
+
+            // if(scope.survey_questions.length>0){
+            //     $('#survey-save-button').removeAttr('disabled')
+            // }
+
+            question.index = index;
+            question[question.variable] = question.default;
+            scope[question.variable] = question.default;
+
+
+            if(!$('#question_'+question.index+':eq(0)').is('div')){
+                html+='<div id="question_'+question.index+'" class="survey_taker_question_final row"></div>';
+                $('#survey_taker_finalized_questions').append(html);
+            }
+
+            requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
+            requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
+
+            html = '<div class="col-xs-12 '+requiredAsterisk+'"><b>'+question.question_name+'</b></div>\n';
+            if(!Empty(question.question_description)){
+                html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
+            }
+            defaultValue = (question.default) ? question.default : "";
+
+            if(question.type === 'text' ){
+                html+='<div class="row">'+
+                    '<div class="col-xs-8">'+
+                    '<input type="text" ng-model="'+question.variable+'" '+         //placeholder="'+defaultValue+'"
+                            'class="form-control '+requiredClasses+' final" required="" >'+
+                    '</div></div>';
+            }
+            if(question.type === "textarea"){
+                html+='<div class="row">'+
+                    '<div class="col-xs-8">'+
+                    '<textarea ng-model="'+question.variable+'" class="form-control '+requiredClasses+' final" required="" rows="3" >'+//defaultValue+
+                            '</textarea>'+
+                    '</div></div>';
+            }
+            if(question.type === 'multiplechoice' || question.type === "multiselect"){
+                choices = question.choices.split(/\n/);
+                element = (question.type==="multiselect") ? "checkbox" : 'radio';
+
+                for( i = 0; i<choices.length; i++){
+                    checked = (!Empty(question.default) && question.default.indexOf(choices[i].trim())!==-1) ? "checked" : "";
+                    html+='<label class="'+element+'-inline  final">'+
+                    '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+' >' +choices[i]+
+                    '</label>';
+                }
+
+            }
+            if(question.type === 'integer' || question.type === "float"){
+                min = (question.min) ? question.min : "";
+                max = (question.max) ? question.max : "" ;
+                html+='<div class="row">'+
+                    '<div class="col-xs-8">'+
+                    '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
+                    '</div></div>';
+
+            }
+            $('#question_'+question.index).append(html);
+
+            element = angular.element(document.getElementById('question_'+question.index));
+            $compile(element)(scope);
+
+        };
+    }])
 
      .factory('EditQuestion', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', '$compile', 'GenerateForm', 'SurveyQuestionForm',
     function(GetBasePath, Rest, Wait, ProcessErrors, $compile, GenerateForm, SurveyQuestionForm) {
@@ -371,6 +472,11 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             // $('#new_question .aw-form-well').remove();
             GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , scope:scope, breadCrumbs: false});
             for(fld in form.fields){
+                if( fld  === 'answer_options_number'){
+                    $('#answer_min').val(scope.survey_questions[index].min);
+                    $('#answer_max').val(scope.survey_questions[index].max);
+                }
+
                 if(form.fields[fld].type === 'select'){
                     for (i = 0; i < scope.answer_types.length; i++) {
                         if (scope.survey_questions[index][fld] === scope.answer_types[i].type) {
@@ -393,17 +499,19 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 element;
 
             element = $('.question_final:eq('+index+')');
-            // element.attr('id', 'question_'+index);
             element.remove();
             scope.survey_questions.splice(index, 1);
             scope.reorder();
+            if(scope.survey_questions.length<1){
+                $('#survey-save-button').attr('disabled', 'disabled');
+            }
         };
     })
 
     .factory('SurveyControllerInit', ['$location', 'DeleteSurvey', 'EditSurvey', 'AddSurvey', 'GenerateForm', 'SurveyQuestionForm', 'Wait', 'Alert',
-            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion', 'DeleteQuestion',
+            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion', 'DeleteQuestion', 'SurveyTakerQuestion',
         function($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
-            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion, DeleteQuestion) {
+            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion, DeleteQuestion, SurveyTakerQuestion) {
         return function(params) {
             var scope = params.scope,
                 // parent_scope = params.parent_scope,
@@ -447,8 +555,21 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             scope.addQuestion = function(){
                 GenerateForm.inject(SurveyQuestionForm, { id:'new_question', mode: 'add' , scope:scope, breadCrumbs: false});
                 scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
+                // $('#survey_question_submit_question_btn').attr('ng-disabled', "!question_name || !variable || !type && (type===multiplechoice || !choices)");
+                // element = angular.element(document.getElementById('survey_question_submit_question_btn'));
+                // // element.html(html);
+
+                // $compile(element)(scope);
             };
 
+            scope.addNewQuestion = function(){
+                // $('#add_question_btn').on("click" , function(){
+                scope.addQuestion();
+                $('#survey_question_question_name').focus();
+                $('#add_question_btn').attr('disabled', 'disabled');
+                $('#add_question_btn').hide();
+            // });
+            };
             scope.editQuestion = function(index){
                 EditQuestion({
                     index: index,
@@ -531,6 +652,16 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 }
             };
 
+            scope.surveyTakerQuestion= function(data, index){
+                SurveyTakerQuestion({
+                    scope: scope,
+                    question: data,
+                    id: id,
+                    index: index
+                    //callback?
+                });
+            };
+
             scope.finalizeQuestion= function(data, index){
                 FinalizeQuestion({
                     scope: scope,
@@ -541,13 +672,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 });
             };
 
-            scope.addNewQuestion = function(){
-            // $('#add_question_btn').on("click" , function(){
-                scope.addQuestion();
-                $('#add_question_btn').attr('disabled', 'disabled');
-                $('#add_question_btn').hide();
-            // });
-            };
+
             scope.submitQuestion = function(){
                 var form = SurveyQuestionForm,
                 data = {},
@@ -560,6 +685,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
                 try {
                     for (fld in form.fields) {
+                        if(fld==='required'){
+                            data[fld] = (scope[fld]===true) ? true : false;
+                        }
                         if(scope[fld]){
                             if(fld === "type"){
                                 data[fld] = scope[fld].type;
@@ -608,9 +736,13 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 Wait('start');
                 if(scope.mode==="add"){
                     $('#survey-modal-dialog').dialog('close');
+                    scope.survey_name = "";
+                    scope.survey_description = "";
                     scope.$emit('SurveySaved');
                 }
                 else{
+                    scope.survey_name = "";
+                    scope.survey_description = "";
                     url = GetBasePath('job_templates') + id + '/survey_spec/';
                     Rest.setUrl(url);
                     Rest.post({ name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
