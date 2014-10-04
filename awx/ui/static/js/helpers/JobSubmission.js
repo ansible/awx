@@ -14,26 +14,27 @@
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
     'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog', 'FormGenerator', 'JobVarsPromptFormDefinition'])
 
-.factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors', function(Rest, Wait, ProcessErrors) {
-    return function(params) {
-        var scope = params.scope,
-            passwords = params.passwords || {},
-            callback = params.callback || 'JobLaunched',
-            url = params.url;
+.factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors',
+    function(Rest, Wait, ProcessErrors) {
+        return function(params) {
+            var scope = params.scope,
+                passwords = params.passwords || {},
+                callback = params.callback || 'JobLaunched',
+                url = params.url;
 
-        Wait('start');
-        Rest.setUrl(url);
-        Rest.post(passwords)
-            .success(function(data) {
-                scope.new_job_id = data.job;
-                scope.$emit(callback, data);
-            })
-            .error(function (data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Attempt to start job at ' + url + ' failed. POST returned: ' + status });
-            });
-    };
-}])
+            Wait('start');
+            Rest.setUrl(url);
+            Rest.post(passwords)
+                .success(function(data) {
+                    scope.new_job_id = data.job;
+                    scope.$emit(callback, data);
+                })
+                .error(function (data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Attempt to start job at ' + url + ' failed. POST returned: ' + status });
+                });
+        };
+    }])
 
 .factory('PromptForCredential', ['$location', 'Wait', 'GetBasePath', 'LookUpInit', 'JobTemplateForm', 'CredentialList', 'Rest', 'Prompt', 'ProcessErrors',
 function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Rest, Prompt, ProcessErrors) {
@@ -102,29 +103,111 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
     };
 }])
 
-.factory('PromptForPasswords', ['$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateDialog',
-    function($compile, Wait, Alert, CredentialForm, CreateDialog) {
+
+
+.factory('CreateLaunchDialog', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateDialog', 'GenerateForm', 'JobVarsPromptForm', 'Wait',
+    function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm, JobVarsPromptForm, Wait) {
+    return function(params) {
+        var buttons,
+            scope = params.scope,
+            html = params.html,
+            // callback = params.callback,
+            // job = params.job,
+            // url = params.url,
+            e;
+
+        $('#password-modal').empty().html(html);
+        $('#password-modal').find('textarea').before(scope.helpContainer);
+        e = angular.element(document.getElementById('password-modal'));
+        $compile(e)(scope);
+
+        buttons = [{
+            label: "Cancel",
+            onClick: function() {
+                scope.passwordCancel();
+            },
+            icon: "fa-times",
+            "class": "btn btn-default",
+            "id": "password-cancel-button"
+        },{
+            label: "Continue",
+            onClick: function() {
+                scope.passwordAccept();
+            },
+            icon: "fa-check",
+            "class": "btn btn-primary",
+            "id": "password-accept-button"
+        }];
+
+        CreateDialog({
+            id: 'password-modal',
+            scope: scope,
+            buttons: buttons,
+            width: 600,
+            height: 700, //(scope.passwords.length > 1) ? 700 : 500,
+            minWidth: 500,
+            title: 'Launch Configuration',
+            callback: 'DialogReady',
+            onOpen: function(){
+                Wait('stop');
+            }
+        });
+
+        if (scope.removeDialogReady) {
+            scope.removeDialogReady();
+        }
+        scope.removeDialogReady = scope.$on('DialogReady', function() {
+            $('#password-modal').dialog('open');
+            $('#password-accept-button').attr({ "disabled": "disabled" });
+        });
+    };
+
+}])
+
+
+
+
+.factory('PromptForPasswords', ['$compile', 'Wait', 'Alert', 'CredentialForm',
+    function($compile, Wait, Alert, CredentialForm) {
         return function(params) {
-            var parent_scope = params.scope,
-                passwords = params.passwords,
+            var scope = params.scope,
                 callback = params.callback || 'PasswordsAccepted',
                 form = CredentialForm,
                 acceptedPasswords = {},
-                scope = parent_scope.$new(),
-                e, buttons;
+               fld, field, html;
 
-            Wait('stop');
+            scope.passwords = params.passwords;
+            // Wait('stop');
 
-            function buildHtml() {
-                var fld, field, html;
-                html = "";
-                html += "<div class=\"alert alert-info\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
-                html += "<form name=\"password_form\" novalidate>\n";
+            html = "";
+            html += "<div class=\"alert alert-info\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
+            html += "<form name=\"password_form\" novalidate>\n";
 
-                passwords.forEach(function(password) {
-                    // Prompt for password
-                    field = form.fields[password];
-                    fld = password;
+            scope.passwords.forEach(function(password) {
+                // Prompt for password
+                field = form.fields[password];
+                fld = password;
+                scope[fld] = '';
+                html += "<div class=\"form-group\">\n";
+                html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
+                html += "<input type=\"password\" ";
+                html += "ng-model=\"" + fld + '" ';
+                html += "ng-keydown=\"keydown($event)\" ";
+                html += 'name="' + fld + '" ';
+                html += "class=\"password-field form-control input-sm\" ";
+                html += (field.associated) ? "ng-change=\"clearPWConfirm('" + field.associated + "')\" " : "";
+                html += "required ";
+                html += " >";
+                // Add error messages
+                html += "<div class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
+                    "password_form." + fld + ".$error.required\">A value is required!</div>\n";
+                html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+                html += "</div>\n";
+
+                // Add the related confirm field
+                if (field.associated) {
+                    fld = field.associated;
+                    field = form.fields[field.associated];
                     scope[fld] = '';
                     html += "<div class=\"form-group\">\n";
                     html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
@@ -132,85 +215,65 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     html += "ng-model=\"" + fld + '" ';
                     html += "ng-keydown=\"keydown($event)\" ";
                     html += 'name="' + fld + '" ';
-                    html += "class=\"password-field form-control input-sm\" ";
-                    html += (field.associated) ? "ng-change=\"clearPWConfirm('" + field.associated + "')\" " : "";
+                    html += "class=\"form-control input-sm\" ";
+                    html += "ng-change=\"checkStatus()\" ";
                     html += "required ";
-                    html += " >";
+                    html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
+                    html += "/>";
                     // Add error messages
                     html += "<div class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
-                        "password_form." + fld + ".$error.required\">A value is required!</div>\n";
+                        "password_form." + fld + ".$error.required\">A value is required!</span>\n";
+                    html += (field.awPassMatch) ? "<span class=\"error\" ng-show=\"password_form." + fld +
+                        ".$error.awpassmatch\">Must match Password value</div>\n" : "";
                     html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
                     html += "</div>\n";
-
-                    // Add the related confirm field
-                    if (field.associated) {
-                        fld = field.associated;
-                        field = form.fields[field.associated];
-                        scope[fld] = '';
-                        html += "<div class=\"form-group\">\n";
-                        html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
-                        html += "<input type=\"password\" ";
-                        html += "ng-model=\"" + fld + '" ';
-                        html += "ng-keydown=\"keydown($event)\" ";
-                        html += 'name="' + fld + '" ';
-                        html += "class=\"form-control input-sm\" ";
-                        html += "ng-change=\"checkStatus()\" ";
-                        html += "required ";
-                        html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
-                        html += "/>";
-                        // Add error messages
-                        html += "<div class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
-                            "password_form." + fld + ".$error.required\">A value is required!</span>\n";
-                        html += (field.awPassMatch) ? "<span class=\"error\" ng-show=\"password_form." + fld +
-                            ".$error.awpassmatch\">Must match Password value</div>\n" : "";
-                        html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
-                        html += "</div>\n";
-                    }
-                });
-                html += "</form>\n";
-                return html;
-            }
-
-            $('#password-modal').empty().html(buildHtml);
-            e = angular.element(document.getElementById('password-modal'));
-            $compile(e)(scope);
-
-            buttons = [{
-                label: "Cancel",
-                onClick: function() {
-                    scope.passwordCancel();
-                },
-                icon: "fa-times",
-                "class": "btn btn-default",
-                "id": "password-cancel-button"
-            },{
-                label: "Continue",
-                onClick: function() {
-                    scope.passwordAccept();
-                },
-                icon: "fa-check",
-                "class": "btn btn-primary",
-                "id": "password-accept-button"
-            }];
-
-            CreateDialog({
-                id: 'password-modal',
-                scope: scope,
-                buttons: buttons,
-                width: 600,
-                height: (passwords.length > 1) ? 700 : 500,
-                minWidth: 500,
-                title: 'Passwords Required',
-                callback: 'DialogReady'
+                }
             });
+            html += "</form>\n";
 
-            if (scope.removeDialogReady) {
-                scope.removeDialogReady();
-            }
-            scope.removeDialogReady = scope.$on('DialogReady', function() {
-                $('#password-modal').dialog('open');
-                $('#password-accept-button').attr({ "disabled": "disabled" });
-            });
+
+            // $('#password-modal').empty().html(buildHtml);
+            // e = angular.element(document.getElementById('password-modal'));
+            // $compile(e)(scope);
+            scope.$emit(callback, html);
+            // CreateLaunchDialog({scope: scope})
+            // buttons = [{
+            //     label: "Cancel",
+            //     onClick: function() {
+            //         scope.passwordCancel();
+            //     },
+            //     icon: "fa-times",
+            //     "class": "btn btn-default",
+            //     "id": "password-cancel-button"
+            // },{
+            //     label: "Continue",
+            //     onClick: function() {
+            //         scope.passwordAccept();
+            //     },
+            //     icon: "fa-check",
+            //     "class": "btn btn-primary",
+            //     "id": "password-accept-button"
+            // }];
+
+
+            // CreateDialog({
+            //     id: 'password-modal',
+            //     scope: scope,
+            //     buttons: buttons,
+            //     width: 600,
+            //     height: (parent_scope.passwords.length > 1) ? 700 : 500,
+            //     minWidth: 500,
+            //     title: 'parent_scope.passwords Required',
+            //     callback: 'DialogReady'
+            // });
+
+            // if (scope.removeDialogReady) {
+            //     scope.removeDialogReady();
+            // }
+            // scope.removeDialogReady = scope.$on('DialogReady', function() {
+            //     $('#password-modal').dialog('open');
+            //     $('#password-accept-button').attr({ "disabled": "disabled" });
+            // });
             scope.keydown = function(e){
                 if(e.keyCode===13){
                     scope.passwordAccept();
@@ -219,17 +282,17 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
             scope.passwordAccept = function() {
                 if (!scope.password_form.$invalid) {
-                    passwords.forEach(function(password) {
+                    scope.passwords.forEach(function(password) {
                         acceptedPasswords[password] = scope[password];
                     });
                     $('#password-modal').dialog('close');
-                    parent_scope.$emit(callback, acceptedPasswords);
+                    scope.$emit(callback, acceptedPasswords);
                 }
             };
 
             scope.passwordCancel = function() {
                 $('#password-modal').dialog('close');
-                parent_scope.$emit('CancelJob');
+                scope.$emit('CancelJob');
                 scope.$destroy();
             };
 
@@ -252,21 +315,22 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         };
     }])
 
-.factory('PromptForVars', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateDialog', 'GenerateForm', 'JobVarsPromptForm', 'Wait',
+.factory('PromptForVars', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateLaunchDialog', 'GenerateForm', 'JobVarsPromptForm', 'Wait',
     'ParseVariableString', 'ToJSON', 'ProcessErrors',
-    function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm, JobVarsPromptForm, Wait, ParseVariableString, ToJSON,
-        ProcessErrors) {
+    function($compile, Rest, GetBasePath, TextareaResize,CreateLaunchDialog, GenerateForm, JobVarsPromptForm, Wait,
+        ParseVariableString, ToJSON, ProcessErrors) {
     return function(params) {
-        var buttons,
-            parent_scope = params.scope,
-            scope = parent_scope.$new(),
+        var
+            // parent_scope = params.scope,
+            scope = params.scope,
             callback = params.callback,
             job = params.job,
             url = params.url,
-            e, helpContainer, html;
+            // e, helpContainer,
+            html = params.html || "";
 
-        html = GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
-        helpContainer = "<div style=\"display:inline-block; font-size: 12px; margin-top: 6px;\" class=\"help-container pull-right\">\n" +
+        html += GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
+        scope.helpContainer = "<div style=\"display:inline-block; font-size: 12px; margin-top: 6px;\" class=\"help-container pull-right\">\n" +
             "<a href=\"\" id=\"awp-promote\" href=\"\" aw-pop-over=\"{{ helpText }}\" aw-tool-tip=\"Click for help\" aw-pop-over-watch=\"helpText\" " +
             "aw-tip-placement=\"top\" data-placement=\"bottom\" data-container=\"body\" data-title=\"Help\" class=\"help-link\"><i class=\"fa fa-question-circle\">" +
             "</i> click for help</a></div>\n";
@@ -282,80 +346,81 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
         scope.variables = ParseVariableString(params.variables);
         scope.parseType = 'yaml';
-
+        scope.$emit(callback, html);
+        // CreateLaunchDialog({scope: scope, html: html})
         // Reuse password modal
-        $('#password-modal').empty().html(html);
-        $('#password-modal').find('textarea').before(helpContainer);
-        e = angular.element(document.getElementById('password-modal'));
-        $compile(e)(scope);
+        // $('#password-modal').empty().html(html);
+        // $('#password-modal').find('textarea').before(helpContainer);
+        // e = angular.element(document.getElementById('password-modal'));
+        // $compile(e)(scope);
 
-        buttons = [{
-            label: "Cancel",
-            onClick: function() {
-                scope.varsCancel();
-            },
-            icon: "fa-times",
-            "class": "btn btn-default",
-            "id": "vars-cancel-button"
-        },{
-            label: "Continue",
-            onClick: function() {
-                scope.varsAccept();
-            },
-            icon: "fa-check",
-            "class": "btn btn-primary",
-            "id": "vars-accept-button"
-        }];
+        // buttons = [{
+        //     label: "Cancel",
+        //     onClick: function() {
+        //         scope.varsCancel();
+        //     },
+        //     icon: "fa-times",
+        //     "class": "btn btn-default",
+        //     "id": "vars-cancel-button"
+        // },{
+        //     label: "Continue",
+        //     onClick: function() {
+        //         scope.varsAccept();
+        //     },
+        //     icon: "fa-check",
+        //     "class": "btn btn-primary",
+        //     "id": "vars-accept-button"
+        // }];
 
-        if (scope.removeDialogReady) {
-            scope.removeDialogReady();
-        }
-        scope.removeDialogReady = scope.$on('DialogReady', function() {
-            Wait('stop');
-            $('#password-modal').dialog('open');
-            setTimeout(function() {
-                TextareaResize({
-                    scope: scope,
-                    textareaId: 'job_variables',
-                    modalId: 'password-modal',
-                    formId: 'job_form',
-                    parse: true
-                });
-            }, 300);
-        });
+        // if (scope.removeDialogReady) {
+        //     scope.removeDialogReady();
+        // }
+        // scope.removeDialogReady = scope.$on('DialogReady', function() {
+        //     Wait('stop');
+        //     $('#password-modal').dialog('open');
+        //     setTimeout(function() {
+        //         TextareaResize({
+        //             scope: scope,
+        //             textareaId: 'job_variables',
+        //             modalId: 'password-modal',
+        //             formId: 'job_form',
+        //             parse: true
+        //         });
+        //     }, 300);
+        // });
 
-        CreateDialog({
-            id: 'password-modal',
-            scope: scope,
-            buttons: buttons,
-            width: 575,
-            height: 530,
-            minWidth: 450,
-            title: 'Extra Variables',
-            onResizeStop: function() {
-                TextareaResize({
-                    scope: scope,
-                    textareaId: 'job_variables',
-                    modalId: 'password-modal',
-                    formId: 'job_form',
-                    parse: true
-                });
-            },
-            beforeDestroy: function() {
-                if (scope.codeMirror) {
-                    scope.codeMirror.destroy();
-                }
-                $('#password-modal').empty();
-            },
-            onOpen: function() {
-                $('#job_variables').focus();
-            },
-            callback: 'DialogReady'
-        });
+        // CreateDialog({
+        //     id: 'password-modal',
+        //     scope: scope,
+        //     buttons: buttons,
+        //     width: 575,
+        //     height: 530,
+        //     minWidth: 450,
+        //     title: 'Extra Variables',
+        //     onResizeStop: function() {
+        //         TextareaResize({
+        //             scope: scope,
+        //             textareaId: 'job_variables',
+        //             modalId: 'password-modal',
+        //             formId: 'job_form',
+        //             parse: true
+        //         });
+        //     },
+        //     beforeDestroy: function() {
+        //         if (scope.codeMirror) {
+        //             scope.codeMirror.destroy();
+        //         }
+        //         $('#password-modal').empty();
+        //     },
+        //     onOpen: function() {
+        //         $('#job_variables').focus();
+        //     },
+        //     callback: 'DialogReady'
+        // });
 
         scope.varsCancel = function() {
             $('#password-modal').dialog('close');
-            parent_scope.$emit('CancelJob');
+            scope.$emit('CancelJob');
             scope.$destroy();
         };
 
@@ -368,7 +433,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 .success(function() {
                     Wait('stop');
                     $('#password-modal').dialog('close');
-                    parent_scope.$emit(callback);
+                    scope.$emit(callback);
                     scope.$destroy();
                 })
                 .error(function(data, status) {
@@ -379,6 +444,179 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
     };
 }])
+
+.factory('PromptForSurvey', ['$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateLaunchDialog', 'SurveyControllerInit' , 'GetBasePath', 'Rest' , 'Empty',
+        'SurveyTakerForm', 'GenerateForm', 'ShowSurveyModal', 'ProcessErrors', '$routeParams' ,
+    function($compile, Wait, Alert, CredentialForm, CreateLaunchDialog, SurveyControllerInit, GetBasePath, Rest, Empty,
+        SurveyTakerForm, GenerateForm, ShowSurveyModal, ProcessErrors, $routeParams) {
+        return function(params) {
+            var
+            // parent_scope = params.scope,
+                // passwords = params.passwords,
+                // callback = params.callback || 'PasswordsAccepted',
+                html = params.html || "",
+                form = SurveyTakerForm,
+                id= params.id,
+                // acceptedPasswords = {},
+                scope = params.scope,
+                // e, buttons,
+                i,
+                // survey_vars={}, qst,
+                // url = params.url,
+                requiredAsterisk,
+                requiredClasses,
+                defaultValue,
+                choices,
+                element,
+                checked, min, max,
+                // generator = GenerateForm,
+                survey_url = GetBasePath('job_templates') + id + '/survey_spec/' ;
+
+                // // Get the existing record
+                // SurveyControllerInit({
+                //     scope: scope,
+                //     parent_scope: scope,
+                //     id: id
+                // });
+            function buildHtml(question, index){
+
+                question.index = index;
+                question[question.variable] = question.default;
+                scope[question.variable] = question.default;
+
+
+                if(!$('#question_'+question.index+':eq(0)').is('div')){
+                    html+='<div id="question_'+question.index+'" class="survey_taker_question_final row"></div>';
+                    $('#survey_taker_finalized_questions').append(html);
+                }
+
+                requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
+                requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
+
+                html += '<div class="col-xs-12 '+requiredAsterisk+'"><b>'+question.question_name+'</b></div>\n';
+                if(!Empty(question.question_description)){
+                    html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
+                }
+                defaultValue = (question.default) ? question.default : "";
+
+                if(question.type === 'text' ){
+                    html+='<div class="row">'+
+                        '<div class="col-xs-8">'+
+                        '<input type="text" ng-model="'+question.variable+'" '+         //placeholder="'+defaultValue+'"
+                                'class="form-control '+requiredClasses+' final" required="" >'+
+                        '</div></div>';
+                }
+                if(question.type === "textarea"){
+                    html+='<div class="row">'+
+                        '<div class="col-xs-8">'+
+                        '<textarea ng-model="'+question.variable+'" class="form-control '+requiredClasses+' final" required="" rows="3" >'+//defaultValue+
+                                '</textarea>'+
+                        '</div></div>';
+                }
+                if(question.type === 'multiplechoice' || question.type === "multiselect"){
+                    choices = question.choices.split(/\n/);
+                    element = (question.type==="multiselect") ? "checkbox" : 'radio';
+
+                    for( i = 0; i<choices.length; i++){
+                        checked = (!Empty(question.default) && question.default.indexOf(choices[i].trim())!==-1) ? "checked" : "";
+                        html+='<label class="'+element+'-inline  final">'+
+                        '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+' >' +choices[i]+
+                        '</label>';
+                    }
+
+                }
+                if(question.type === 'integer' || question.type === "float"){
+                    min = (question.min) ? question.min : "";
+                    max = (question.max) ? question.max : "" ;
+                    html+='<div class="row">'+
+                        '<div class="col-xs-8">'+
+                        '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
+                        '</div></div>';
+
+                }
+                if(question.index === scope.survey_questions.length-1){
+                    CreateLaunchDialog({scope: scope, html: html});
+                }
+            }
+
+
+                // if (scope.removeDialogReady) {
+                //     scope.removeDialogReady();
+                // }
+                // scope.removeDialogReady = scope.$on('DialogReady', function() {
+                //     $('#password-modal').dialog('open');
+                //     $('#finalized_questions').attr('opacity', 1.0);
+                //     // $('#surveyName').focus();
+                //     // $('#question_unique_required_chbox').prop('checked' , true);
+                // });
+
+                // if (scope.removeSurveyTakerCompleted) {
+                //     scope.removeSurveyTakerCompleted();
+                // }
+                // scope.removeSurveyTakerCompleted = scope.$on('SurveyTakerCompleted', function() {
+
+                //     for(i=0; i<scope.survey_questions.length; i++){
+
+                //         survey_vars[scope.survey_questions[i].variable] = scope[scope.survey_questions[i].variable];
+                //     }
+
+                //     Wait('start');
+                //     Rest.setUrl(url);
+                //     Rest.post(survey_vars)
+                //         .success(function(data) {
+                //             scope.new_job_id = data.job;
+                //             // scope.$emit(callback, data);
+                //             $('#password-modal').dialog('close');
+                //             scope.$emit('StartPlaybookRun', passwords);
+                //         })
+                //         .error(function (data, status) {
+                //             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                //                 msg: 'Attempt to start job at ' + url + ' failed. POST returned: ' + status });
+                //         });
+
+
+
+                // });
+
+            Rest.setUrl(survey_url);
+            Rest.get()
+                .success(function (data) {
+                    if(!Empty(data)){
+                        // generator.inject(form, { id: 'password-modal' , mode: 'edit', related: false, scope: scope, breadCrumbs: false });
+                        // ShowSurveyModal({ title: data.name, scope: scope, callback: 'DialogReady' , mode: 'survey-taker'});
+
+                        scope.survey_name = data.name;
+                        scope.survey_description = data.description;
+                        scope.survey_questions = data.spec;
+
+                        // if(!Empty(scope.survey_description)){
+                        //     $('#survey_taker_description').append(scope.survey_description);
+                        // }
+
+                        for(i=0; i<scope.survey_questions.length; i++){
+                            buildHtml(scope.survey_questions[i], i);
+                        }
+                        // scope.addQuestion();
+                        // Wait('stop');
+                    } else {
+                        // AddSurvey({
+                        //     scope: scope
+                        // });
+                    }
+
+                })
+            .error(function (data, status) {
+                ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                    msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
+            });
+
+        };
+    }])
+
+
+
+
+
 /**
 * @ngdoc method
 * @name helpers.function:JobSubmission#PlaybookRun
@@ -387,8 +625,10 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 *
 */
 // Submit request to run a playbook
-.factory('PlaybookRun', ['$location','$routeParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors', 'Wait', 'Empty', 'PromptForCredential', 'PromptForVars',
-    function ($location, $routeParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty, PromptForCredential, PromptForVars) {
+.factory('PlaybookRun', ['$location','$routeParams', 'LaunchJob', 'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors', 'Wait', 'Empty',
+        'PromptForCredential', 'PromptForVars', 'PromptForSurvey' , 'CreateLaunchDialog',
+    function ($location, $routeParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty,
+        PromptForCredential, PromptForVars, PromptForSurvey, CreateLaunchDialog) {
         return function (params) {
             var scope = params.scope,
                 id = params.id,
@@ -398,6 +638,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 extra_vars,
                 new_job_id,
                 new_job,
+                survey_enabled,
                 launch_url,
                 prompt_for_vars = false,
                 passwords;
@@ -513,22 +754,49 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             if (scope.removePromptForVars) {
                 scope.removePromptForVars();
             }
-            scope.removePromptForVars = scope.$on('PromptForVars', function(e, pwds) {
-                passwords = pwds;
+            scope.removePromptForVars = scope.$on('PromptForVars', function(e, html) {
+                // passwords = pwds;
+
                 if (prompt_for_vars) {
                     // call prompt with callback of StartPlaybookRun, passwords
                     PromptForVars({
                         scope: scope,
                         job: {id:scope.job_template_id},
                         variables: extra_vars,
-                        callback: 'StartPlaybookRun',
-                        url: url
+                        callback: 'PromptForSurvey',
+                        html: html
                     });
                 }
                 else {
-                    scope.$emit('StartPlaybookRun');
+                    scope.$emit('PromptForSurvey', html);
                 }
             });
+
+
+            if (scope.removePromptForSurvey) {
+                scope.removePromptForSurvey();
+            }
+            scope.removePromptForSurvey = scope.$on('PromptForSurvey', function(e, html) {
+
+                if (survey_enabled) {
+                    // call prompt with callback of StartPlaybookRun, passwords
+                    PromptForSurvey({
+                        scope: scope,
+                        id: scope.job_template_id,
+                        variables: extra_vars,
+                        callback: 'StartPlaybookRun',
+                        url: url,
+                        html: html
+                    });
+                }
+                else {
+                    // scope.$emit('StartPlaybookRun');
+                    CreateLaunchDialog({scope: scope, html: html});
+                }
+
+            });
+
+
 
             if (scope.removeCredentialReady) {
                 scope.removeCredentialReady();
@@ -549,12 +817,15 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     launch_url = url;//data.related.start;
                     prompt_for_vars = data.ask_variables_on_launch;
                     extra_vars = data.variables_needed_to_start;
+                    survey_enabled = data.survey_enabled;
                     // new_job = data;
                     if (data.passwords_needed_to_start.length > 0) {
                         scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
                     }
                     else if (data.ask_variables_on_launch) {
                         scope.$emit('PromptForVars');
+                    } else if (data.survey_enabled===true) {
+                        scope.$emit('PromptForSurvey');
                     }
                     else {
                         scope.$emit('StartPlaybookRun');
