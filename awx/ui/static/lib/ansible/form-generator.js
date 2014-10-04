@@ -1253,7 +1253,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                 // string to be injected into the current view.
                 //
                 var btn, button, fld, field, html = '', i, section, group,
-                    tab, sectionShow, offset, width;
+                    tab, sectionShow, offset, width,ngDisabled;
 
                 if (!this.modal && (options.breadCrumbs === undefined || options.breadCrumbs === true)) {
                     if (this.form.navigationLinks) {
@@ -1446,9 +1446,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                                     html += this.attr(button, 'ngClick');
                                 }
                                 if (button.ngDisabled) {
+                                    ngDisabled = (button.ngDisabled===true) ? this.form.name+"_form.$invalid" : button.ngDisabled;
                                     if (btn !== 'reset') {
                                         //html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
-                                        html += "ng-disabled=\"" + this.form.name + "_form.$invalid";
+                                        html += "ng-disabled=\"" + ngDisabled;
                                         //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
                                         html += "\" ";
                                     } else {
