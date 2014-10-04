@@ -174,7 +174,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 callback = params.callback || 'PasswordsAccepted',
                 form = CredentialForm,
                 acceptedPasswords = {},
-               fld, field, html;
+                fld, field, html;
 
             scope.passwords = params.passwords;
             // Wait('stop');
@@ -643,16 +643,12 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 prompt_for_vars = false,
                 passwords;
             scope.job_template_id = id;
-
             if (base === 'job_templates') {
                 url = GetBasePath('job_templates') + id + '/launch/';
             }
             else {
                 url = GetBasePath('jobs') + id + '/relaunch/';
             }
-            //url += id + '/';
-
-            //url = GetBasePath('job_templates')+ id + '/launch/';
 
 
             if (scope.removePostTheJob) {
@@ -813,9 +809,10 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             Rest.setUrl(url);
             Rest.get()
                 .success(function (data) {
-                    // new_job_id = data.id;
+                    new_job_id = data.id;
                     launch_url = url;//data.related.start;
                     prompt_for_vars = data.ask_variables_on_launch;
+
                     extra_vars = data.variables_needed_to_start;
                     survey_enabled = data.survey_enabled;
                     // new_job = data;
@@ -830,14 +827,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     else {
                         scope.$emit('StartPlaybookRun');
                     }
-                    // delete data.id;
-                    // job_template = data;
-                    // if (Empty(data.credential)) {
-                    //     scope.$emit('PromptForCredential');
-                    // } else {
-                    //     // We have what we need, submit the job
-                    //     scope.$emit('PostTheJob');
-                    // }
+
                 })
                 .error(function (data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
