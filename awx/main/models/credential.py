@@ -222,7 +222,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         """
         cert = ''
         data = data.strip()
-        validation_error = ValidationError('Invalid SSH private key')
+        validation_error = ValidationError('Invalid private key')
 
         # Set up the valid private key header and footer.
         begin_re = r'(-{4,})\s*BEGIN\s+([A-Z0-9]+)?\s*PRIVATE\sKEY\s*(-{4,})'
