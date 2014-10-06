@@ -6,6 +6,7 @@ import sys
 import logging
 
 # Django
+from django.conf import settings
 from django.db.models import F, Q
 from django.contrib.auth.models import User
 
@@ -172,7 +173,7 @@ class UserAccess(BaseAccess):
         qs = self.model.objects.filter(is_active=True).distinct()
         if self.user.is_superuser:
             return qs
-        if self.user.admin_of_organizations.filter(active=True).exists():
+        if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and self.user.admin_of_organizations.filter(active=True).exists():
             return qs
         return qs.filter(
             Q(pk=self.user.pk) |

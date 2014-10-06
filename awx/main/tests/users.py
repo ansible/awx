@@ -244,6 +244,11 @@ class UsersTest(BaseTest):
         # Normal user is an org admin, can see all users.
         data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data2['count'], 4)
+        # Unless the setting ORG_ADMINS_CAN_SEE_ALL_USERS is False, in which case
+        # he can only see users in his org
+        settings.ORG_ADMINS_CAN_SEE_ALL_USERS = False
+        data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data2['count'], 2)
         # Other use can only see users in his org.
         data1 = self.get(url, expect=200, auth=self.get_other_credentials())
         self.assertEquals(data1['count'], 2)
