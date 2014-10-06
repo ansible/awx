@@ -2,6 +2,8 @@
 # All Rights Reserved.
 
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from awx.main.managers import InstanceManager
 from awx.main.models import UnifiedJob
@@ -46,3 +48,24 @@ class JobOrigin(models.Model):
 
     class Meta:
         app_label = 'main'
+
+
+
+@receiver(post_save, sender=UnifiedJob)
+def on_create(sender, instance, created=False, raw=False, **kwargs):
+    """When a new job is created, save a record of its origin (the machine
+    that started the job).
+    """
+    # Sanity check: We only want to create a JobOrigin record in cases where
+    # we are making a new record, and in normal situations.
+    #
+    # In other situations, we simply do nothing.
+    if raw or not created:
+        return
+
+    # Create the JobOrigin record, which attaches to the current instance
+    # (which started the job).
+    job_origin, new = JobOrigin.objects.get_or_create(
+        instance=Instance.objects.me(),
+        unified_job=instance,
+    )
