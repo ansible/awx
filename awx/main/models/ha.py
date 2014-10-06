@@ -6,7 +6,12 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from awx.main.managers import InstanceManager
-from awx.main.models import UnifiedJob
+from awx.main.models.inventory import InventoryUpdate
+from awx.main.models.jobs import Job
+from awx.main.models.projects import ProjectUpdate
+from awx.main.models.unified_jobs import UnifiedJob
+
+__all__ = ('Instance', 'JobOrigin')
 
 
 class Instance(models.Model):
@@ -50,8 +55,12 @@ class JobOrigin(models.Model):
         app_label = 'main'
 
 
-
-@receiver(post_save, sender=UnifiedJob)
+# Unfortunately, the signal can't just be connected against UnifiedJob; it
+# turns out that creating a model's subclass doesn't fire the signal for the
+# superclass model.
+@receiver(post_save, sender=InventoryUpdate)
+@receiver(post_save, sender=Job)
+@receiver(post_save, sender=ProjectUpdate)
 def on_create(sender, instance, created=False, raw=False, **kwargs):
     """When a new job is created, save a record of its origin (the machine
     that started the job).
