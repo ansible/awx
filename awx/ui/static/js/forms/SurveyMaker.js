@@ -19,23 +19,7 @@ angular.module('SurveyMakerFormDefinition', [])
         name: 'survey_maker', //entity or model name in singular form
         // // well: true,
         breadCrumbs: false,
-        // twoColumns: true,
-        // // collapse: true,
-        // collapseTitle: "Properties",
-        // collapseMode: 'edit',
-        // collapseOpen: true,
 
-        // actions: {
-        //     stream: {
-        //         'class': "btn-primary btn-xs activity-btn",
-        //         ngClick: "showActivity()",
-        //         awToolTip: "View Activity Stream",
-        //         dataPlacement: "top",
-        //         icon: "icon-comments-alt",
-        //         mode: 'edit',
-        //         iconSize: 'large'
-        //     }
-        // },
 
         fields: {
             survey_name: {
@@ -65,28 +49,7 @@ angular.module('SurveyMakerFormDefinition', [])
                 // capitalize: false,
                 // // column: 1
             },
-            // survey_description: {
-            //     type: 'custom',
-            //     control: '<div class="col-sm-6"><div class="form-group">'+
-            //         '<label for="survey_description"><span class="label-text">Survey Description</span></label><div>'+
-            //         '<input type="text" ng-model="survey_description" name="survey_description" id="survey_maker_survey_description" class="form-control ng-pristine ng-valid">'+
-            //         '<div class="error api-error ng-binding" id="survey_maker-survey_description-api-error" ng-bind="survey_description_api_error"></div>'+
-            //         '</div></div></div></div>'
 
-            //     // label: 'Survey Description',
-            //     // type: 'text',
-            //     // addRequired: false,
-            //     // editRequired: false,
-            //     // column: 2
-            // },
-            // questions: {
-            //     type: 'custom',
-            //     control: '<label for="survey"><span class="label-text prepend-asterisk">Questions</span></label>'+
-            //         '<div id="survey_maker_question_area"></div><div id="finalized_questions"></div>'+
-            //         '<button style="display:none" type="button" class="btn btn-sm btn-primary" id="add_question_btn" ng-click="addNewQuestion()" aw-tool-tip="Create a new question" data-placement="top" data-original-title="" title="" disabled><i class="fa fa-plus fa-lg"></i>  Add Question</button>'+
-            //         '<div id="new_question"></div>'
-
-            // }
         },
 
         buttons: { //for now always generates <button> tags

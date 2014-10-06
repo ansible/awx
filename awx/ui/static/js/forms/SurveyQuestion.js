@@ -133,7 +133,33 @@ angular.module('SurveyQuestionFormDefinition', [])
                 addRequired: false,
                 editRequired: false,
                 column: 2,
-                ngHide: 'type.type === "textarea" '
+                ngHide: 'type.type === "textarea" || type.type === "multiselect" || type.type === "integer" || type.type === "float" '
+            },
+            default_multiselect: {
+                realName: 'default_answer',
+                label: 'Default Answer',
+                type: 'textarea',
+                rows: 3,
+                addRequired: false,
+                editRequired: false,
+                column: 2,
+                ngShow: 'type.type === "multiselect" '
+            },
+            default_int: {
+                realName: 'default_answer',
+                type: 'custom',
+                control: '<div class="row">'+
+                                '<div class="col-xs-6"><label for="default_int"><span class="label-text">Default Answer</span></label><input id="default_int" ng-model="default_int" type="number" class="form-control"></div></div>',
+                column: 2,
+                ngShow: 'type.type === "integer" '
+            },
+            default_float: {
+                realName: 'default_answer',
+                type: 'custom',
+                control: '<div class="row">'+
+                                '<div class="col-xs-6"><label for="default_float"><span class="label-text">Default Answer</span></label><input id="default_float" ng-model="default_float" type="number" class="form-control"></div></div>',
+                column: 2,
+                ngShow: 'type.type=== "float" '
             },
             default_textarea: {
                 realName: 'default_answer',
@@ -186,9 +212,9 @@ angular.module('SurveyQuestionFormDefinition', [])
         buttons: {
             submit_question: {
                 ngClick: 'submitQuestion()',
-                ngDisabled: '!question_name || !variable || !type',
+                ngDisabled: "!question_name || !variable || !type || ((type.type==='multiplechoice' || type.type === 'multiselect' ) && !choices)", //|| type.type===multiselect ',//'!question_name || !variable || !type' ,
                 'class': 'btn btn-sm btn-primary',
-                label: 'Add Question'
+                label: 'Submit Question'
             }
         },
 

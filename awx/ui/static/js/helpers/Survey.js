@@ -476,7 +476,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     $('#answer_min').val(scope.survey_questions[index].min);
                     $('#answer_max').val(scope.survey_questions[index].max);
                 }
-
+                if( fld  === 'default_int' || fld === 'default_float'){
+                    $("#"+fld ).val(scope.survey_questions[index].default);
+                }
                 if(form.fields[fld].type === 'select'){
                     for (i = 0; i < scope.answer_types.length; i++) {
                         if (scope.survey_questions[index][fld] === scope.answer_types[i].type) {
@@ -514,11 +516,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion, DeleteQuestion, SurveyTakerQuestion) {
         return function(params) {
             var scope = params.scope,
-                // parent_scope = params.parent_scope,
                 id = params.id,
                 i, url;
-                // iterator = (params.iterator) ? params.iterator : scope.iterator,
-                // base = $location.path().replace(/^\//, '').split('/')[0];
 
             scope.survey_questions = [];
             scope.answer_types=[
@@ -555,11 +554,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             scope.addQuestion = function(){
                 GenerateForm.inject(SurveyQuestionForm, { id:'new_question', mode: 'add' , scope:scope, breadCrumbs: false});
                 scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
-                // $('#survey_question_submit_question_btn').attr('ng-disabled', "!question_name || !variable || !type && (type===multiplechoice || !choices)");
-                // element = angular.element(document.getElementById('survey_question_submit_question_btn'));
-                // // element.html(html);
 
-                // $compile(element)(scope);
             };
 
             scope.addNewQuestion = function(){
@@ -691,18 +686,38 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         if(scope[fld]){
                             if(fld === "type"){
                                 data[fld] = scope[fld].type;
-                                if(scope[fld].type==="textarea"){
-                                    data["default"] = scope.default_textarea;
-                                }
-                                if(scope[fld].type==="integer" || scope[fld].type==="float"){
+                                // if(scope[fld].type==="textarea"){
+                                //     data["default"] = scope.default_textarea;
+                                // }
+                                // if(scope[fld].type==="multiselect"){
+                                //     data["default"] = scope.default_multiselect;
+                                // }
+                                if(scope[fld].type === 'float'){
                                     data[min] = $('#answer_min').val();
                                     data[max] = $('#answer_max').val();
                                     labels[min]= "Min";
                                     labels[max]= "Max";
+                                    // data["default"] = $('#default_float').val(); //scope.default_float;
+                                }
+                                if(scope[fld].type==="integer" ){
+                                    data[min] = $('#answer_min').val();
+                                    data[max] = $('#answer_max').val();
+                                    labels[min]= "Min";
+                                    labels[max]= "Max";
+                                    // data["default"] = $('#default_int').val(); //scope.default_int;
                                 }
                             }
                             else{
                                 data[fld] = scope[fld];
+                                if( fld === 'default_int' || fld === 'default_float' ){
+                                    data['default'] = $('#'+fld).val();
+                                }
+                                if(fld==="default_textarea" ){
+                                    data['default'] = scope.default_textarea;
+                                }
+                                if(fld==="default_multiselect"){
+                                    data['default'] = scope.default_multiselect;
+                                }
                             }
                             labels[fld] = form.fields[fld].label;
                         }
