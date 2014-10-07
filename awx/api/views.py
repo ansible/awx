@@ -1410,7 +1410,33 @@ class JobTemplateSurveySpec(GenericAPIView):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'change', obj, request.DATA):
             raise PermissionDenied()
-        obj.survey_spec = json.dumps(request.DATA)
+        try:
+            obj.survey_spec = json.dumps(request.DATA)
+        except ValueError, e:
+            return Response(dict(error="Invalid JSON when parsing survey spec"), status=status.HTTP_400_BAD_REQUEST)
+        if "name" not in obj.survey_spec:
+            return Response(dict(error="'name' missing from suvey spec"), status=status.HTTP_400_BAD_REQUEST)
+        if "description" not in obj.survey_spec:
+            return Response(dict(error="'description' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
+        if "spec" not in obj.survey_spec:
+            return Response(dict(error="'spec' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
+        if type(obj.survey_spec["spec"]) != list:
+            return Response(dict(error="'spec' must be a list of items"), status=status.HTTP_400_BAD_REQUEST)
+        if len(obj.survey_spec["spec"]) < 1:
+            return Response(dict(error="'spec' doesn't contain any items"), status=status.HTTP_400_BAD_REQUEST)
+        idx = 0
+        for survey_item in obj.survey_spec["spec"]:
+            if type(survey_item) != dict:
+                return Response(dict(error="survey element %s is not a json object" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+            if "type" not in survey_item:
+                return Response(dict(error="'type' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+            if "question_name" not in survey_item:
+                return Response(dict(error="'question_name' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+            if "question_description" not in survey_item:
+                return Response(dict(error="'question_description' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+            if "variable" not in survey_item:
+                return Response(dict(error="'variable' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+            idx += 1
         obj.save()
         return Response()
 
