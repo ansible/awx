@@ -469,28 +469,47 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                                                     'last_job_failed'])
 
     def save(self, *args, **kwargs):
+        """Save the job, with current status, to the database.
+        Ensure that all data is consistent before doing so.
+        """
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
+
         # Get status before save...
         status_before = self.status or 'new'
+
+        # If this job already exists in the database, retrieve a copy of
+        # the job in its prior state.
         if self.pk:
             self_before = self.__class__.objects.get(pk=self.pk)
             if self_before.status != self.status:
                 status_before = self_before.status
+
+        # Sanity check: Is this a failure? Ensure that the failure value
+        # matches the status.
         failed = bool(self.status in ('failed', 'error', 'canceled'))
         if self.failed != failed:
             self.failed = failed
             if 'failed' not in update_fields:
                 update_fields.append('failed')
+
+        # Sanity check: Has the job just started? If so, mark down its start
+        # time.
         if self.status == 'running' and not self.started:
             self.started = now()
             if 'started' not in update_fields:
                 update_fields.append('started')
+
+        # Sanity check: Has the job just completed? If so, mark down its
+        # completion time, and record its output to the database.
         if self.status in ('successful', 'failed', 'error', 'canceled') and not self.finished:
             self.finished = now()
             if 'finished' not in update_fields:
                 update_fields.append('finished')
+
+        # If we have a start and finished time, and haven't already calculated
+        # out the time that elapsed, do so.
         if self.started and self.finished and not self.elapsed:
             td = self.finished - self.started
             elapsed = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / (10**6 * 1.0)
@@ -500,14 +519,22 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             self.elapsed = str(elapsed)
             if 'elapsed' not in update_fields:
                 update_fields.append('elapsed')
+
+        # Ensure that the job template information is current.
         if self.unified_job_template != self._get_parent_instance():
             self.unified_job_template = self._get_parent_instance()
             if 'unified_job_template' not in update_fields:
                 update_fields.append('unified_job_template')
-        super(UnifiedJob, self).save(*args, **kwargs)
-        # If status changed, update parent instance....
+
+        # Okay; we're done. Perform the actual save.
+        result = super(UnifiedJob, self).save(*args, **kwargs)
+
+        # If status changed, update the parent instance.
         if self.status != status_before:
             self._update_parent_instance()
+
+        # Done.
+        return result
 
     def delete(self):
         if self.result_stdout_file != "":
@@ -518,12 +545,15 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         super(UnifiedJob, self).delete()
 
     def result_stdout_raw_handle(self):
-        if self.result_stdout_file != "":
+        """Return a file-like object containing the standard out of the
+        job's result.
+        """
+        if self.result_stdout_text:
+            return StringIO(self.result_stdout_text)
+        else:
             if not os.path.exists(self.result_stdout_file):
                 return StringIO("stdout capture is missing")
             return codecs.open(self.result_stdout_file, "r", encoding='utf-8')
-        else:
-            return StringIO(self.result_stdout_text)
 
     @property
     def result_stdout_raw(self):
