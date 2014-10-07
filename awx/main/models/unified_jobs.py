@@ -42,6 +42,8 @@ __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 
 logger = logging.getLogger('awx.main.models.unified_jobs')
 
+CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
+
 
 class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     '''
@@ -644,7 +646,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     @property
     def can_cancel(self):
-        return bool(self.status in ('new', 'pending', 'waiting', 'running'))
+        return bool(self.status in CAN_CANCEL)
 
     def _force_cancel(self):
         # Update the status to 'canceled' if we can detect that the job

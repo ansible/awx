@@ -1,6 +1,8 @@
 # Copyright (c) 2014 Ansible, Inc.
 # All Rights Reserved.
 
+import functools
+
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -9,7 +11,7 @@ from awx.main.managers import InstanceManager
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
-from awx.main.models.unified_jobs import UnifiedJob
+from awx.main.models.unified_jobs import UnifiedJob, CAN_CANCEL
 
 __all__ = ('Instance', 'JobOrigin')
 
@@ -36,6 +38,25 @@ class Instance(models.Model):
             return 'primary'
         return 'secondary'
 
+    @functools.wraps(models.Model.save)
+    def save(self, *args, **kwargs):
+        """Save the instance. If this is a secondary instance, then ensure
+        that any currently-running jobs that this instance started are
+        canceled.
+        """
+        # Perform the normal save.
+        result = super(Instance, self).save(*args, **kwargs)
+
+        # If this is not a primary instance, then kill any jobs that this
+        # instance was responsible for starting.
+        if not self.primary:
+            for job in UnifiedJob.objects.filter(job_origin__instance=self,
+                                                 status__in=CAN_CANCEL):
+                job.cancel()
+
+        # Return back the original result.
+        return result
+
 
 class JobOrigin(models.Model):
     """A model representing the relationship between a unified job and
@@ -61,7 +82,7 @@ class JobOrigin(models.Model):
 @receiver(post_save, sender=InventoryUpdate)
 @receiver(post_save, sender=Job)
 @receiver(post_save, sender=ProjectUpdate)
-def on_create(sender, instance, created=False, raw=False, **kwargs):
+def on_job_create(sender, instance, created=False, raw=False, **kwargs):
     """When a new job is created, save a record of its origin (the machine
     that started the job).
     """
