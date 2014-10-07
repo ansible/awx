@@ -1468,6 +1468,8 @@ class JobTemplateSurveySpec(GenericAPIView):
                 return Response(dict(error="'question_description' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "variable" not in survey_item:
                 return Response(dict(error="'variable' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+            if "required" not in survey_item:
+                return Response(dict(error="'required' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             idx += 1
         obj.save()
         return Response()
