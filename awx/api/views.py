@@ -570,6 +570,15 @@ class ProjectDetail(RetrieveUpdateDestroyAPIView):
     model = Project
     serializer_class = ProjectSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        obj = Project.objects.get(pk=kwargs['pk'])
+        can_delete = request.user.can_access(Project, 'delete', obj)
+        if not can_delete:
+            raise PermissionDenied("Cannot delete project")
+        for pu in obj.project_updates.filter(status__in=['pending', 'waiting', 'running']):
+            pu.cancel()
+        return super(ProjectDetail, self).destroy(request, *args, **kwargs)
+
 class ProjectPlaybooks(RetrieveAPIView):
 
     model = Project
@@ -1244,6 +1253,15 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
     serializer_class = InventorySourceSerializer
     new_in_14 = True
 
+    def destroy(self, request, *args, **kwargs):
+        obj = InventorySource.objects.get(pk=kwargs['pk'])
+        can_delete = request.user.can_access(InventorySource, 'delete', obj)
+        if not can_delete:
+            raise PermissionDenied("Cannot delete inventory source")
+        for pu in obj.inventory_updates.filter(status__in=['pending', 'waiting', 'running']):
+            pu.cancel()
+        return super(InventorySourceDetail, self).destroy(request, *args, **kwargs)
+
 class InventorySourceSchedulesList(SubListCreateAPIView):
 
     view_name = "Inventory Source Schedules"
@@ -1348,6 +1366,16 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        obj = JobTemplate.objects.get(pk=kwargs['pk'])
+        can_delete = request.user.can_access(JobTemplate, 'delete', obj)
+        if not can_delete:
+            raise PermissionDenied("Cannot delete job template")
+        for pu in obj.jobs.filter(status__in=['pending', 'waiting', 'running']):
+            pu.cancel()
+        return super(JobTemplateDetail, self).destroy(request, *args, **kwargs)
+
 
 class JobTemplateLaunch(GenericAPIView):
 
