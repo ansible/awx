@@ -621,6 +621,10 @@ class ProjectActivityStreamList(SubListAPIView):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
+        if parent is None:
+            return qs
+        elif parent.credential is None:
+            return qs.filter(project=parent)
         return qs.filter(Q(project=parent) | Q(credential__in=parent.credential))
 
 
