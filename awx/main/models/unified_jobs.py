@@ -517,6 +517,15 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 if 'result_stdout_text' not in update_fields:
                     update_fields.append('result_stdout_text')
 
+                # Attempt to delete the job output from the filesystem if it
+                # was moved to the database.
+                if self.result_stdout_file:
+                    try:
+                        os.remove(self.result_stdout_file)
+                        self.result_stdout_file = ''
+                    except:
+                        pass  # Meh. We don't care that much.
+
         # If we have a start and finished time, and haven't already calculated
         # out the time that elapsed, do so.
         if self.started and self.finished and not self.elapsed:
