@@ -9,7 +9,7 @@ import re
 import shlex
 import os
 import os.path
-from cStringIO import StringIO
+from StringIO import StringIO
 
 # PyYAML
 import yaml
@@ -504,9 +504,18 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         # Sanity check: Has the job just completed? If so, mark down its
         # completion time, and record its output to the database.
         if self.status in ('successful', 'failed', 'error', 'canceled') and not self.finished:
+            # Record the `finished` time.
             self.finished = now()
             if 'finished' not in update_fields:
                 update_fields.append('finished')
+
+            # Take the output from the filesystem and record it in the
+            # database.
+            stdout = self.result_stdout_raw_handle()
+            if not isinstance(stdout, StringIO):
+                self.result_stdout_text = stdout.read()
+                if 'result_stdout_text' not in update_fields:
+                    update_fields.append('result_stdout_text')
 
         # If we have a start and finished time, and haven't already calculated
         # out the time that elapsed, do so.
