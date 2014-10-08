@@ -523,6 +523,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     try:
                         os.remove(self.result_stdout_file)
                         self.result_stdout_file = ''
+                        if 'result_stdout_file' not in update_fields:
+                            update_fields.append('result_stdout_file')
                     except:
                         pass  # Meh. We don't care that much.
 
