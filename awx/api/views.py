@@ -45,6 +45,7 @@ from awx.main.task_engine import TaskSerializer, TASK_FILE
 from awx.main.models import *
 from awx.main.utils import *
 from awx.main.access import get_user_queryset
+from awx.main.ha import is_ha_environment
 from awx.api.authentication import JobTaskAuthentication
 from awx.api.permissions import *
 from awx.api.renderers import *
@@ -130,6 +131,7 @@ class ApiV1PingView(APIView):
         this requires no auth and is intended for use by the installer process.
         """
         return Response({
+            'ha': is_ha_environment(),
             'role': Instance.objects.my_role(),
             'version': get_awx_version(),
         })
