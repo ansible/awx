@@ -89,6 +89,58 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             }
         };
     })
+
+
+    .directive('ngMin', ['Empty', function (Empty) {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, elem, attr, ctrl) {
+                scope.$watch(attr.ngMin, function () {
+                    ctrl.$setViewValue(ctrl.$viewValue);
+                });
+                var minValidator = function (value) {
+                    var min = scope.$eval(attr.ngMin) || -Infinity;
+                    if (!Empty(value) && Number(value) < min) {
+                        ctrl.$setValidity('ngMin', false);
+                        return undefined;
+                    } else {
+                        ctrl.$setValidity('ngMin', true);
+                        return value;
+                    }
+                };
+
+                ctrl.$parsers.push(minValidator);
+                ctrl.$formatters.push(minValidator);
+            }
+        };
+    }])
+
+    .directive('ngMax', ['Empty', function (Empty) {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, elem, attr, ctrl) {
+                scope.$watch(attr.ngMax, function () {
+                    ctrl.$setViewValue(ctrl.$viewValue);
+                });
+                var maxValidator = function (value) {
+                    var max = scope.$eval(attr.ngMax) || Infinity;
+                    if (!Empty(value) && Number(value) > max) {
+                        ctrl.$setValidity('ngMax', false);
+                        return undefined;
+                    } else {
+                        ctrl.$setValidity('ngMax', true);
+                        return value;
+                    }
+                };
+
+                ctrl.$parsers.push(maxValidator);
+                ctrl.$formatters.push(maxValidator);
+            }
+        };
+    }])
+
     // integer  Validate that input is of type integer. Taken from Angular developer
     //          guide, form examples. Add min and max directives, and this will check
     //          entered values is within the range.
