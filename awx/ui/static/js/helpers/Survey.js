@@ -116,7 +116,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 $('#survey-modal-dialog').dialog('open');
             });
 
-
+            scope.resetForm();
             Wait('start');
             if(scope.mode === 'add'){
                 tempSurv.survey_name = scope.survey_name;
@@ -138,7 +138,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 Rest.get()
                     .success(function (data) {
                             if(!Empty(data)){
-                                generator.inject(form, { id: 'survey-modal-dialog' , mode: 'edit', related: false, scope: scope, breadCrumbs: false });
+                                // generator.inject(form, { id: 'survey-modal-dialog' , mode: 'edit', related: false, scope: scope, breadCrumbs: false });
                                 ShowSurveyModal({ title: "Edit Survey", scope: scope, callback: 'DialogReady' });
 
                                 scope.survey_name = data.name;
@@ -164,24 +164,24 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
         };
     }])
 
-    .factory('AddSurvey', ['$location', '$routeParams', 'SchedulerInit', 'ShowSurveyModal', 'Wait', 'GetBasePath', 'Empty',
-        'SchedulePost', 'GenerateForm', 'SurveyMakerForm',
-    function($location, $routeParams, SchedulerInit, ShowSurveyModal, Wait, GetBasePath, Empty,
-        SchedulePost, GenerateForm, SurveyMakerForm) {
+    .factory('AddSurvey', ['$location', '$routeParams', 'SchedulerInit', 'ShowSurveyModal', 'Wait',
+    function($location, $routeParams, SchedulerInit, ShowSurveyModal, Wait) {
         return function(params) {
-            var scope = params.scope,
+            var scope = params.scope;
                 // callback= params.callback,
                 // base = $location.path().replace(/^\//, '').split('/')[0],
                 // url =  GetBasePath(base),
-                generator = GenerateForm,
-                form = SurveyMakerForm;
+                // generator = GenerateForm,
+                // form = SurveyQuestionForm;
 
             if (scope.removeDialogReady) {
                 scope.removeDialogReady();
             }
             scope.removeDialogReady = scope.$on('DialogReady', function() {
-                scope.addQuestion();
+
                 $('#survey-modal-dialog').dialog('open');
+                scope.addQuestion();
+
                 // $('#surveyName').focus();
                 // $('#question_unique_required_chbox').prop('checked' , true);
             });
@@ -189,8 +189,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             Wait('start');
             $('#form-container').empty();
 
-
-            generator.inject(form, { id: 'survey-modal-dialog' , mode: 'add', related: false, scope: scope, breadCrumbs: false });
+            scope.resetForm();
+            // generator.inject(form, { id: 'survey-modal-dialog' , mode: 'add', related: false, scope: scope, breadCrumbs: false });
             ShowSurveyModal({ title: "Add Survey", scope: scope, callback: 'DialogReady' });
 
             // if (scope.removeScheduleSaved) {
@@ -284,7 +284,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 index = params.index,
                 required,
                 element, choices, i, checked,
-                max, min, defaultValue,
+                max, min, defaultValue, numberValidation,
 
             html = "";
 
@@ -333,9 +333,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             if(question.type === 'integer' || question.type === "float"){
                 min = (question.min) ? question.min : "";
                 max = (question.max) ? question.max : "" ;
+                numberValidation = (question.type==="integer") ? "integer" : 'float';
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
-                    '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly>'+
+                    '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly '+numberValidation+'>'+
                     '</div></div>';
 
             }
@@ -385,9 +386,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 requiredAsterisk,
                 requiredClasses,
                 element, choices, i, checked,
-                max, min, defaultValue,
-
-            html = "";
+                max, min, defaultValue, numberValidation,
+                html = "";
 
             // if(scope.survey_questions.length>0){
             //     $('#survey-save-button').removeAttr('disabled')
@@ -441,6 +441,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             if(question.type === 'integer' || question.type === "float"){
                 min = (question.min) ? question.min : "";
                 max = (question.max) ? question.max : "" ;
+                numberValidation = (question.type==="integer") ? "integer" : 'float';
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
                     '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
@@ -470,7 +471,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             element.css('opacity', 1.0);
             element.empty();
             // $('#new_question .aw-form-well').remove();
-            GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , scope:scope, breadCrumbs: false});
+            GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope, breadCrumbs: false});
             for(fld in form.fields){
                 if( fld  === 'answer_options_number'){
                     $('#answer_min').val(scope.survey_questions[index].min);
@@ -517,7 +518,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
         return function(params) {
             var scope = params.scope,
                 id = params.id,
-                i, url;
+                i, url, html, element,
+                form = SurveyQuestionForm;
 
             scope.survey_questions = [];
             scope.answer_types=[
@@ -552,7 +554,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 });
             };
             scope.addQuestion = function(){
-                GenerateForm.inject(SurveyQuestionForm, { id:'new_question', mode: 'add' , scope:scope, breadCrumbs: false});
+                GenerateForm.inject(form, { id:'new_question', mode: 'add' , scope:scope, related: false, breadCrumbs: false});
                 scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
 
             };
@@ -732,7 +734,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         scope.finalizeQuestion(data , scope.survey_questions.length-1);
                     }
                     if(GenerateForm.mode === 'edit'){
-                        elementID = event.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
+                        elementID = event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id;
                         key = elementID.split('_')[1];
                         scope.survey_questions[key] = data;
                         $('#'+elementID).empty();
@@ -745,6 +747,20 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     Wait('stop');
                     Alert("Error", "Error parsing extra variables. Parser returned: " + err);
                 }
+            };
+            scope.resetForm = function(){
+                html = '<div class="row">'+
+                        '<div class="col-sm-12">'+
+                        '<label for="survey"><span class="label-text prepend-asterisk">Questions</span></label>'+
+                        '<div id="survey_maker_question_area"></div>'+
+                        '<div id="finalized_questions"></div>'+
+                        '<button style="display:none" type="button" class="btn btn-sm btn-primary" id="add_question_btn" ng-click="addNewQuestion()" aw-tool-tip="Create a new question" data-placement="top" data-original-title="" title="" disabled><i class="fa fa-plus fa-lg"></i>  Add Question</button>'+
+                        '<div id="new_question"></div>'+
+                    '</div>'+
+                '</div>';
+                $('#survey-modal-dialog').html(html);
+                element = angular.element(document.getElementById('add_question_btn'));
+                $compile(element)(scope);
             };
 
             scope.saveSurvey = function() {
@@ -772,6 +788,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         });
                 }
             };
+
         };
     }]);
 
