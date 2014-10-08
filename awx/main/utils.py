@@ -21,10 +21,13 @@ from Crypto.Cipher import AES
 # ZeroMQ
 import zmq
 
+
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version', 'update_scm_url',
-           'get_type_for_model', 'get_model_for_type', 'ignore_inventory_computed_fields',
-           'ignore_inventory_group_removal', '_inventory_updates']
+           'get_type_for_model', 'get_model_for_type',
+           'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
+           '_inventory_updates']
+
 
 def get_object_or_400(klass, *args, **kwargs):
     '''
@@ -40,6 +43,7 @@ def get_object_or_400(klass, *args, **kwargs):
     except queryset.model.MultipleObjectsReturned, e:
         raise ParseError(*e.args)
 
+
 def get_object_or_403(klass, *args, **kwargs):
     '''
     Return a single object from the given model or queryset based on the query
@@ -54,12 +58,14 @@ def get_object_or_403(klass, *args, **kwargs):
     except queryset.model.MultipleObjectsReturned, e:
         raise PermissionDenied(*e.args)
 
+
 def camelcase_to_underscore(s):
     '''
     Convert CamelCase names to lowercase_with_underscore.
     '''
     s = re.sub(r'(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))', '_\\1', s)
     return s.lower().strip('_')
+
 
 class RequireDebugTrueOrTest(logging.Filter):
     '''
@@ -69,6 +75,7 @@ class RequireDebugTrueOrTest(logging.Filter):
     def filter(self, record):
         from django.conf import settings
         return settings.DEBUG or 'test' in sys.argv
+
 
 def get_ansible_version():
     '''
@@ -83,6 +90,7 @@ def get_ansible_version():
     except:
         return 'unknown'
 
+
 def get_awx_version():
     '''
     Return Ansible Tower version as reported by setuptools.
@@ -94,6 +102,7 @@ def get_awx_version():
     except:
         return __version__
 
+
 def get_encryption_key(instance, field_name):
     '''
     Generate key for encrypted password based on instance pk and field name.
@@ -104,6 +113,7 @@ def get_encryption_key(instance, field_name):
     h.update(str(instance.pk))
     h.update(field_name)
     return h.digest()[:16]
+
 
 def encrypt_field(instance, field_name, ask=False):
     '''
@@ -121,6 +131,7 @@ def encrypt_field(instance, field_name, ask=False):
     b64data = base64.b64encode(encrypted)
     return '$encrypted$%s$%s' % ('AES', b64data)
 
+
 def decrypt_field(instance, field_name):
     '''
     Return content of the given instance and field name decrypted.
@@ -136,6 +147,7 @@ def decrypt_field(instance, field_name):
     cipher = AES.new(key, AES.MODE_ECB)
     value = cipher.decrypt(encrypted)
     return value.rstrip('\x00')
+
 
 def update_scm_url(scm_type, url, username=True, password=True,
                    check_special_cases=True):
@@ -233,6 +245,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
                                    parts.query, parts.fragment])
     return new_url
 
+
 def model_instance_diff(old, new, serializer_mapping=None):
     """
     Calculate the differences between two model instances. One of the instances may be None (i.e., a newly
@@ -283,6 +296,7 @@ def model_instance_diff(old, new, serializer_mapping=None):
 
     return diff
 
+
 def model_to_dict(obj, serializer_mapping=None):
     """
     Serialize a model instance to a dictionary as best as possible
@@ -309,6 +323,7 @@ def model_to_dict(obj, serializer_mapping=None):
             attr_d[field.name] = "hidden"
     return attr_d
 
+
 def get_type_for_model(model):
     '''
     Return type name for a given model class.
@@ -316,6 +331,7 @@ def get_type_for_model(model):
     from rest_framework.compat import get_concrete_model
     opts = get_concrete_model(model)._meta
     return camelcase_to_underscore(opts.object_name)
+
 
 def get_model_for_type(type):
     '''
@@ -331,6 +347,7 @@ def get_model_for_type(type):
         if type == ct_type:
             return ct_model
 
+
 def get_system_task_capacity():
     '''
     Measure system memory and use it as a baseline for determining the system's capacity
@@ -345,6 +362,7 @@ def get_system_task_capacity():
         return 50
     return 50 + ((int(total_mem_value) / 1024) - 2) * 75
 
+
 def emit_websocket_notification(endpoint, event, payload):
     from django.conf import settings
     if getattr(settings, 'SOCKETIO_NOTIFICATION_PORT', None):
@@ -357,6 +375,7 @@ def emit_websocket_notification(endpoint, event, payload):
 
 _inventory_updates = threading.local()
 
+
 @contextlib.contextmanager
 def ignore_inventory_computed_fields():
     '''
@@ -368,6 +387,7 @@ def ignore_inventory_computed_fields():
         yield
     finally:
         _inventory_updates.is_updating = previous_value
+
 
 @contextlib.contextmanager
 def ignore_inventory_group_removal():

@@ -1,4 +1,4 @@
-# Copyright (c) 2014 AnsibleWorks, Inc.
+# Copyright (c) 2014 Ansible, Inc.
 # All Rights Reserved.
 
 import json
