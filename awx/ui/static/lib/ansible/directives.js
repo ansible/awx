@@ -141,6 +141,25 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
+
+    .directive('smartFloat', function() {
+        var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+        return {
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$parsers.unshift(function(viewValue) {
+                    if (FLOAT_REGEXP.test(viewValue)) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue.replace(',', '.'));
+                    } else {
+                        ctrl.$setValidity('float', false);
+                        return undefined;
+                    }
+                });
+            }
+        };
+    })
+
     // integer  Validate that input is of type integer. Taken from Angular developer
     //          guide, form examples. Add min and max directives, and this will check
     //          entered values is within the range.

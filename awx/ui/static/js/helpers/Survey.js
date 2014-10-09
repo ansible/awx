@@ -284,7 +284,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 index = params.index,
                 required,
                 element, choices, i, checked,
-                max, min, defaultValue, numberValidation,
+                max, min, defaultValue,
 
             html = "";
 
@@ -304,15 +304,17 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             if(!Empty(question.question_description)){
                 html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
             }
-            defaultValue = (question.default) ? question.default : "";
+            // defaultValue = (question.default) ? question.default : "";
 
             if(question.type === 'text' ){
+                defaultValue = (question.default) ? question.default : "";
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
                     '<input type="text" placeholder="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" readonly>'+
                     '</div></div>';
             }
             if(question.type === "textarea"){
+                defaultValue = (question.default) ? question.default : (question.default_textarea) ? question.default_textarea:  "" ;
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
                     '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3" readonly>'+defaultValue+'</textarea>'+
@@ -321,7 +323,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             if(question.type === 'multiplechoice' || question.type === "multiselect"){
                 choices = question.choices.split(/\n/);
                 element = (question.type==="multiselect") ? "checkbox" : 'radio';
-
+                question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
                 for( i = 0; i<choices.length; i++){
                     checked = (!Empty(question.default) && question.default.indexOf(choices[i])!==-1) ? "checked" : "";
                     html+='<label class="'+element+'-inline final">'+
@@ -330,13 +332,23 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 }
 
             }
-            if(question.type === 'integer' || question.type === "float"){
-                min = (question.min) ? question.min : "";
-                max = (question.max) ? question.max : "" ;
-                numberValidation = (question.type==="integer") ? "integer" : 'float';
+            if(question.type === 'integer'){
+                min = (!Empty(question.min)) ? question.min : "";
+                max = (!Empty(question.max)) ? question.max : "" ;
+                defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_int)) ? question.default_int : "" ;
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
-                    '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly '+numberValidation+'>'+
+                    '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly>'+
+                    '</div></div>';
+
+            }
+            if(question.type === "float"){
+                min = (!Empty(question.min)) ? question.min : "";
+                max = (!Empty(question.max)) ? question.max : "" ;
+                defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_float)) ? question.default_float : "" ;
+                html+='<div class="row">'+
+                    '<div class="col-xs-8">'+
+                    '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly>'+
                     '</div></div>';
 
             }
@@ -462,7 +474,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             var scope = params.scope,
                 index = params.index,
-                element, fld, i,
+                element, fld, i, pre,
                 form = SurveyQuestionForm;
 
             $('#add_question_btn').hide();
@@ -473,9 +485,12 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             // $('#new_question .aw-form-well').remove();
             GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope, breadCrumbs: false});
             for(fld in form.fields){
-                if( fld  === 'answer_options_number'){
-                    $('#answer_min').val(scope.survey_questions[index].min);
-                    $('#answer_max').val(scope.survey_questions[index].max);
+                if( fld  === 'float_options' || fld === 'int_options'){
+                    pre = fld.substr(0, fld.indexOf('_'));
+                    scope[pre+'_min'] = scope.survey_questions[index].min;
+                    scope[pre+'_max'] = scope.survey_questions[index].max;
+                    // $('#'+pre+'_min').val(scope.survey_questions[index].min);
+                    // $('#'+pre+'_max').val(scope.survey_questions[index].max);
                 }
                 if( fld  === 'default_int' || fld === 'default_float'){
                     $("#"+fld ).val(scope.survey_questions[index].default);
@@ -554,9 +569,13 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 });
             };
             scope.addQuestion = function(){
+
                 GenerateForm.inject(form, { id:'new_question', mode: 'add' , scope:scope, related: false, breadCrumbs: false});
                 scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
-
+                scope.int_min = null;
+                scope.int_max = null;
+                scope.float_min = null;
+                scope.float_max = null;
             };
 
             scope.addNewQuestion = function(){
@@ -673,9 +692,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             scope.submitQuestion = function(){
                 var form = SurveyQuestionForm,
                 data = {},
-                labels={},
-                min= "min",
-                max = "max",
+                // labels={},
+                // min= "min",
+                // max = "max",
                 fld, key, elementID;
                 //generator.clearApiErrors();
                 Wait('start');
@@ -688,40 +707,25 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         if(scope[fld]){
                             if(fld === "type"){
                                 data[fld] = scope[fld].type;
-                                // if(scope[fld].type==="textarea"){
-                                //     data["default"] = scope.default_textarea;
-                                // }
-                                // if(scope[fld].type==="multiselect"){
-                                //     data["default"] = scope.default_multiselect;
-                                // }
+
                                 if(scope[fld].type === 'float'){
-                                    data[min] = $('#answer_min').val();
-                                    data[max] = $('#answer_max').val();
-                                    labels[min]= "Min";
-                                    labels[max]= "Max";
-                                    // data["default"] = $('#default_float').val(); //scope.default_float;
+                                    data.min = scope.float_min;
+                                    data.max = scope.float_max;
+                                    data.default = scope.default_float;
+
                                 }
                                 if(scope[fld].type==="integer" ){
-                                    data[min] = $('#answer_min').val();
-                                    data[max] = $('#answer_max').val();
-                                    labels[min]= "Min";
-                                    labels[max]= "Max";
-                                    // data["default"] = $('#default_int').val(); //scope.default_int;
+                                    data.min = scope.int_min;
+                                    data.max = scope.int_max;
+                                    data.default = scope.default_int;
+
                                 }
                             }
                             else{
                                 data[fld] = scope[fld];
-                                if( fld === 'default_int' || fld === 'default_float' ){
-                                    data['default'] = $('#'+fld).val();
-                                }
-                                if(fld==="default_textarea" ){
-                                    data['default'] = scope.default_textarea;
-                                }
-                                if(fld==="default_multiselect"){
-                                    data['default'] = scope.default_multiselect;
-                                }
+
                             }
-                            labels[fld] = form.fields[fld].label;
+
                         }
                     }
                     Wait('stop');

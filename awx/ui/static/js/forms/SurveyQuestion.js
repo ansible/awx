@@ -98,12 +98,12 @@ angular.module('SurveyQuestionFormDefinition', [])
                 type: 'custom',
                 control: '<div class="row">'+
                                 '<div class="col-xs-6">'+
-                                    '<label for="minimum"><span class="label-text">Minimum</span></label><input id="float_min" type="number" ng-model="float_min" class="form-control" integer >'+
-                                    '<div class="error" ng-show="survey_question_form.default_int.$invalid">This is not valid integer!</div>'+
+                                    '<label for="minimum"><span class="label-text">Minimum</span></label><input id="float_min" type="number" name="float_min" ng-model="float_min" class="form-control" smartFloat >'+
+                                    '<div class="error" ng-show="survey_question_form.float_min.$invalid">This is not valid float!</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6">'+
-                                    '<label for="minimum"><span class="label-text">Maximum</span></label><input id="float_max" type="number" ng-model="float_max" class="form-control" integer >'+
-                                    '<div class="error" ng-show="survey_question_form.float.$invalid">This is not valid integer!</div>'+
+                                    '<label for="minimum"><span class="label-text">Maximum</span></label><input id="float_max" type="number" name="float_max" ng-model="float_max" class="form-control" smartFloat >'+
+                                    '<div class="error" ng-show="survey_question_form.float_max.$invalid">This is not valid float!</div>'+
                                 '</div>'+
                             '</div>',
                 ngShow: 'type.type==="float" ',
@@ -138,45 +138,19 @@ angular.module('SurveyQuestionFormDefinition', [])
                     '<input type="number" ng-model="default_int" name="default_int" ng-min="int_min" ng-max="int_max"  class="form-control" integer />'+
                     '<div class="error" ng-show="survey_question_form.default_int.$error.number || survey_question_form.default_int.$error.integer">This is not valid integer!</div>'+
                     '<div class="error" ng-show="survey_question_form.default_int.$error.ngMin || survey_question_form.default_int.$error.ngMax"> The value must be in range {{int_min}} to {{int_max}}!</div>'+
-                    // 'value = {{default_int}}<br>'+
-                    // 'value.$valid = {{survey_question_form.default_int.$valid}}'+
                     '</div>',
-
-                 // '<div class="row">'+
-                 //                '<div class="col-xs-6"><label for="default_int"><span class="label-text">Default Answer</span></label>'+
-                 //                '<input id="default_int" ng-model="default_int" type="number" class="form-control" survey-integer></div></div>'+
-                 //                '<br><div ng-show="survey_question.default_int.$error.survey-integer">This is not valid integer!</div>',
-
-
-                // '<div class="row">'+
-                //                     '<div class="col-xs-6>'+
-                //                         '<input id="default_int" ng-model="default_int" type="number" class=" col-xs-6 form-control" integer>'+
-
-                //                         '<div class="error" id="survey_question-default_int-required-error" ng-show="survey_question.default_int.$error.integer">This is not valid integer!</div>'+
-                //                         // '<div class="error api-error ng-binding" id="survey_question-default_int-api-error" ng-bind="default_int_api_error"></div>'+
-                //                     '</div>'+
-                //                 '</div>',
-
-
-
-
-
-
-
-                                // <div>
-                                // <input type="text" ng-model="question_name" name="question_name" id="survey_question_question_name" class="form-control ng-pristine ng-invalid ng-invalid-required" required="" aw-survey-question="">
-                                // <div class="error ng-hide" id="survey_question-question_name-required-error" ng-show="survey_question_form.question_name.$dirty &amp;&amp; survey_question_form.question_name.$error.required">A value is required!</div>
-                                // <div class="error api-error ng-binding" id="survey_question-question_name-api-error" ng-bind="question_name_api_error"></div>
-                                // </div>
-
                 column: 2,
                 ngShow: 'type.type === "integer" '
             },
             default_float: {
                 realName: 'default_answer',
                 type: 'custom',
-                control: '<div class="row">'+
-                                '<div class="col-xs-6"><label for="default_float"><span class="label-text">Default Answer</span></label><input id="default_float" ng-model="default_float" type="number" class="form-control"></div></div>',
+                control: '<div>'+
+                    '<label for="default_float"><span class="label-text">Default Answer</span></label>'+
+                    '<input type="number" ng-model="default_float" name="default_float" ng-min="float_min" ng-max="float_max"  class="form-control" integer />'+
+                    '<div class="error" ng-show="survey_question_form.default_float.$error.number || survey_question_form.default_float.$error.integer">This is not valid float!</div>'+
+                    '<div class="error" ng-show="survey_question_form.default_float.$error.ngMin || survey_question_form.default_float.$error.ngMax"> The value must be in range {{float_min}} to {{float_max}}!</div>'+
+                    '</div>',
                 column: 2,
                 ngShow: 'type.type=== "float" '
             },
