@@ -1472,6 +1472,12 @@ class JobTemplateSurveySpec(GenericAPIView):
         obj.save()
         return Response()
 
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.survey_spec = {}
+        obj.save()
+        return Response()
+
 class JobTemplateActivityStreamList(SubListAPIView):
 
     model = ActivityStream
