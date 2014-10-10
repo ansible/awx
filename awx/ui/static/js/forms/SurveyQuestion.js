@@ -179,7 +179,7 @@ angular.module('SurveyQuestionFormDefinition', [])
             question_cancel : {
                 label: 'Cancel',
                 'class' : 'btn btn-default',
-                ngClick: 'cancelQuestion()'
+                ngClick: 'cancelQuestion($event)'
             },
             submit_question: {
                 ngClick: 'submitQuestion()',

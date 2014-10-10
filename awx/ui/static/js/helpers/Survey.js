@@ -529,8 +529,20 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     scope: scope
                 });
             };
-            scope.cancelQuestion = function(){
-                alert('success');
+            scope.cancelQuestion = function(event){
+                var elementID, key;
+                if(event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id==="new_question"){
+                    $('#new_question .aw-form-well').remove();
+                    $('#add_question_btn').show();
+                    $('#add_question_btn').removeAttr('disabled');
+                } else {
+                    elementID = event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id;
+                    key = elementID.split('_')[1];
+                    $('#'+elementID).empty();
+                    scope.finalizeQuestion(scope.survey_questions[key] , key);
+                }
+
+
             };
 
             scope.questionUp = function(index){
