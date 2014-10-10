@@ -450,87 +450,79 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
     function($compile, Wait, Alert, CredentialForm, CreateLaunchDialog, SurveyControllerInit, GetBasePath, Rest, Empty,
         SurveyTakerForm, GenerateForm, ShowSurveyModal, ProcessErrors, $routeParams) {
         return function(params) {
-            var
-            // parent_scope = params.scope,
-                // passwords = params.passwords,
-                // callback = params.callback || 'PasswordsAccepted',
-                html = params.html || "",
+            var html = params.html || "",
                 form = SurveyTakerForm,
                 id= params.id,
-                // acceptedPasswords = {},
                 scope = params.scope,
-                // e, buttons,
-                i,
-                // survey_vars={}, qst,
-                // url = params.url,
+                i, j,
                 requiredAsterisk,
                 requiredClasses,
                 defaultValue,
                 choices,
                 element,
                 checked, min, max,
-                // generator = GenerateForm,
+
                 survey_url = GetBasePath('job_templates') + id + '/survey_spec/' ;
 
-                // // Get the existing record
-                // SurveyControllerInit({
-                //     scope: scope,
-                //     parent_scope: scope,
-                //     id: id
-                // });
+
             function buildHtml(question, index){
-
                 question.index = index;
-                question[question.variable] = question.default;
-                scope[question.variable] = question.default;
-
 
                 if(!$('#question_'+question.index+':eq(0)').is('div')){
-                    html+='<div id="question_'+question.index+'" class="survey_taker_question_final row"></div>';
-                    $('#survey_taker_finalized_questions').append(html);
+                    html+='<div id="question_'+question.index+'" class="question_final row"></div>';
+                    $('#finalized_questions').append(html);
                 }
 
                 requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
                 requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
-
                 html += '<div class="col-xs-12 '+requiredAsterisk+'"><b>'+question.question_name+'</b></div>\n';
                 if(!Empty(question.question_description)){
                     html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
                 }
-                defaultValue = (question.default) ? question.default : "";
 
                 if(question.type === 'text' ){
+                    defaultValue = (question.default) ? question.default : "";
                     html+='<div class="row">'+
                         '<div class="col-xs-8">'+
-                        '<input type="text" ng-model="'+question.variable+'" '+         //placeholder="'+defaultValue+'"
-                                'class="form-control '+requiredClasses+' final" required="" >'+
+                        '<input type="text" placeholder="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" readonly>'+
                         '</div></div>';
                 }
                 if(question.type === "textarea"){
+                    defaultValue = (question.default) ? question.default : (question.default_textarea) ? question.default_textarea:  "" ;
                     html+='<div class="row">'+
                         '<div class="col-xs-8">'+
-                        '<textarea ng-model="'+question.variable+'" class="form-control '+requiredClasses+' final" required="" rows="3" >'+//defaultValue+
-                                '</textarea>'+
+                        '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3" readonly>'+defaultValue+'</textarea>'+
                         '</div></div>';
                 }
                 if(question.type === 'multiplechoice' || question.type === "multiselect"){
                     choices = question.choices.split(/\n/);
                     element = (question.type==="multiselect") ? "checkbox" : 'radio';
-
-                    for( i = 0; i<choices.length; i++){
-                        checked = (!Empty(question.default) && question.default.indexOf(choices[i].trim())!==-1) ? "checked" : "";
-                        html+='<label class="'+element+'-inline  final">'+
-                        '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+' >' +choices[i]+
+                    question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
+                    for( j = 0; j<choices.length; j++){
+                        checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
+                        html+='<label class="'+element+'-inline final">'+
+                        '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+' disabled>' +choices[i]+
                         '</label>';
                     }
 
                 }
-                if(question.type === 'integer' || question.type === "float"){
-                    min = (question.min) ? question.min : "";
-                    max = (question.max) ? question.max : "" ;
+                if(question.type === 'integer'){
+                    min = (!Empty(question.min)) ? question.min : "";
+                    max = (!Empty(question.max)) ? question.max : "" ;
+                    defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_int)) ? question.default_int : "" ;
                     html+='<div class="row">'+
                         '<div class="col-xs-8">'+
-                        '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
+                        '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly>'+
+                        '</div></div>';
+
+                }
+                if(question.type === "float"){
+                    min = (!Empty(question.min)) ? question.min : "";
+                    max = (!Empty(question.max)) ? question.max : "" ;
+                    defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_float)) ? question.default_float : "" ;
+                    html+='<div class="row">'+
+                        '<div class="col-xs-8">'+
+                        '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly>'+
                         '</div></div>';
 
                 }
@@ -538,6 +530,61 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     CreateLaunchDialog({scope: scope, html: html});
                 }
             }
+
+                // question.index = index;
+                // question[question.variable] = question.default;
+                // scope[question.variable] = question.default;
+
+
+                // if(!$('#question_'+question.index+':eq(0)').is('div')){
+                //     html+='<div id="question_'+question.index+'" class="survey_taker_question_final row"></div>';
+                //     $('#survey_taker_finalized_questions').append(html);
+                // }
+
+                // requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
+                // requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
+
+                // html += '<div class="col-xs-12 '+requiredAsterisk+'"><b>'+question.question_name+'</b></div>\n';
+                // if(!Empty(question.question_description)){
+                //     html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
+                // }
+                // defaultValue = (question.default) ? question.default : "";
+
+                // if(question.type === 'text' ){
+                //     html+='<div class="row">'+
+                //         '<div class="col-xs-8">'+
+                //         '<input type="text" ng-model="'+question.variable+'" '+         //placeholder="'+defaultValue+'"
+                //                 'class="form-control '+requiredClasses+' final" required="" >'+
+                //         '</div></div>';
+                // }
+                // if(question.type === "textarea"){
+                //     html+='<div class="row">'+
+                //         '<div class="col-xs-8">'+
+                //         '<textarea ng-model="'+question.variable+'" class="form-control '+requiredClasses+' final" required="" rows="3" >'+//defaultValue+
+                //                 '</textarea>'+
+                //         '</div></div>';
+                // }
+                // if(question.type === 'multiplechoice' || question.type === "multiselect"){
+                //     choices = question.choices.split(/\n/);
+                //     element = (question.type==="multiselect") ? "checkbox" : 'radio';
+
+                //     for( i = 0; i<choices.length; i++){
+                //         checked = (!Empty(question.default) && question.default.indexOf(choices[i].trim())!==-1) ? "checked" : "";
+                //         html+='<label class="'+element+'-inline  final">'+
+                //         '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+' >' +choices[i]+
+                //         '</label>';
+                //     }
+
+                // }
+                // if(question.type === 'integer' || question.type === "float"){
+                //     min = (question.min) ? question.min : "";
+                //     max = (question.max) ? question.max : "" ;
+                //     html+='<div class="row">'+
+                //         '<div class="col-xs-8">'+
+                //         '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
+                //         '</div></div>';
+
+                // }
 
 
                 // if (scope.removeDialogReady) {

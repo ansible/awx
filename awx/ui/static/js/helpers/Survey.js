@@ -250,7 +250,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 url = GetBasePath('job_templates')+ id + '/survey_spec/';
 
                 Rest.setUrl(url);
-                Rest.post({})
+                Rest.destroy()
                     .success(function () {
                         scope.$emit("SurveyDeleted");
 
@@ -387,86 +387,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
         };
     }])
 
- .factory('SurveyTakerQuestion', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', '$compile', 'Empty',
-    function(GetBasePath, Rest, Wait, ProcessErrors, $compile, Empty) {
-        return function(params) {
-
-            var scope = params.scope,
-                // id = params.id,
-                question = params.question,
-                index = params.index,
-                requiredAsterisk,
-                requiredClasses,
-                element, choices, i, checked,
-                max, min, defaultValue, numberValidation,
-                html = "";
-
-            // if(scope.survey_questions.length>0){
-            //     $('#survey-save-button').removeAttr('disabled')
-            // }
-
-            question.index = index;
-            question[question.variable] = question.default;
-            scope[question.variable] = question.default;
-
-
-            if(!$('#question_'+question.index+':eq(0)').is('div')){
-                html+='<div id="question_'+question.index+'" class="survey_taker_question_final row"></div>';
-                $('#survey_taker_finalized_questions').append(html);
-            }
-
-            requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
-            requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
-
-            html = '<div class="col-xs-12 '+requiredAsterisk+'"><b>'+question.question_name+'</b></div>\n';
-            if(!Empty(question.question_description)){
-                html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
-            }
-            defaultValue = (question.default) ? question.default : "";
-
-            if(question.type === 'text' ){
-                html+='<div class="row">'+
-                    '<div class="col-xs-8">'+
-                    '<input type="text" ng-model="'+question.variable+'" '+         //placeholder="'+defaultValue+'"
-                            'class="form-control '+requiredClasses+' final" required="" >'+
-                    '</div></div>';
-            }
-            if(question.type === "textarea"){
-                html+='<div class="row">'+
-                    '<div class="col-xs-8">'+
-                    '<textarea ng-model="'+question.variable+'" class="form-control '+requiredClasses+' final" required="" rows="3" >'+//defaultValue+
-                            '</textarea>'+
-                    '</div></div>';
-            }
-            if(question.type === 'multiplechoice' || question.type === "multiselect"){
-                choices = question.choices.split(/\n/);
-                element = (question.type==="multiselect") ? "checkbox" : 'radio';
-
-                for( i = 0; i<choices.length; i++){
-                    checked = (!Empty(question.default) && question.default.indexOf(choices[i].trim())!==-1) ? "checked" : "";
-                    html+='<label class="'+element+'-inline  final">'+
-                    '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+' >' +choices[i]+
-                    '</label>';
-                }
-
-            }
-            if(question.type === 'integer' || question.type === "float"){
-                min = (question.min) ? question.min : "";
-                max = (question.max) ? question.max : "" ;
-                numberValidation = (question.type==="integer") ? "integer" : 'float';
-                html+='<div class="row">'+
-                    '<div class="col-xs-8">'+
-                    '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
-                    '</div></div>';
-
-            }
-            $('#question_'+question.index).append(html);
-
-            element = angular.element(document.getElementById('question_'+question.index));
-            $compile(element)(scope);
-
-        };
-    }])
 
      .factory('EditQuestion', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', '$compile', 'GenerateForm', 'SurveyQuestionForm',
     function(GetBasePath, Rest, Wait, ProcessErrors, $compile, GenerateForm, SurveyQuestionForm) {
@@ -474,23 +394,32 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             var scope = params.scope,
                 index = params.index,
-                element, fld, i, pre,
+                element, fld, i,
                 form = SurveyQuestionForm;
 
+            $('#survey-save-button').attr('disabled', 'disabled');
             $('#add_question_btn').hide();
             $('#new_question .aw-form-well').remove();
             element = $('.question_final:eq('+index+')');
             element.css('opacity', 1.0);
             element.empty();
-            // $('#new_question .aw-form-well').remove();
+            scope.int_min = null;
+            scope.int_max = null;
+            scope.float_min = null;
+            scope.float_max = null;
             GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope, breadCrumbs: false});
             for(fld in form.fields){
-                if( fld  === 'float_options' || fld === 'int_options'){
-                    pre = fld.substr(0, fld.indexOf('_'));
-                    scope[pre+'_min'] = scope.survey_questions[index].min;
-                    scope[pre+'_max'] = scope.survey_questions[index].max;
-                    // $('#'+pre+'_min').val(scope.survey_questions[index].min);
-                    // $('#'+pre+'_max').val(scope.survey_questions[index].max);
+                if( scope.survey_questions[index].type==='integer' && fld === 'int_options'){
+                    scope.int_min = scope.survey_questions[index].min;
+                    scope.int_max = scope.survey_questions[index].max;
+                    // $("#int_min").val(scope.survey_questions[index].min);
+                    // $("#int_max").val(scope.survey_questions[index].max);
+                }
+                if( scope.survey_questions[index].type==='float' && fld  === 'float_options'  ) {
+                    scope.float_min = scope.survey_questions[index].min;
+                    scope.float_max = scope.survey_questions[index].max;
+                    // $("#float_min").val(scope.survey_questions[index].min);
+                    // $("#float_max").val(scope.survey_questions[index].max);
                 }
                 if( fld  === 'default_int' || fld === 'default_float'){
                     $("#"+fld ).val(scope.survey_questions[index].default);
@@ -527,9 +456,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
     })
 
     .factory('SurveyControllerInit', ['$location', 'DeleteSurvey', 'EditSurvey', 'AddSurvey', 'GenerateForm', 'SurveyQuestionForm', 'Wait', 'Alert',
-            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion', 'DeleteQuestion', 'SurveyTakerQuestion',
+            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion', 'DeleteQuestion',
         function($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
-            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion, DeleteQuestion, SurveyTakerQuestion) {
+            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion, DeleteQuestion) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -584,6 +513,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 $('#survey_question_question_name').focus();
                 $('#add_question_btn').attr('disabled', 'disabled');
                 $('#add_question_btn').hide();
+                $('#survey-save-button').attr('disabled' , 'disabled');
             // });
             };
             scope.editQuestion = function(index){
@@ -598,6 +528,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     index:index,
                     scope: scope
                 });
+            };
+            scope.cancelQuestion = function(){
+                alert('success');
             };
 
             scope.questionUp = function(index){
@@ -668,16 +601,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 }
             };
 
-            scope.surveyTakerQuestion= function(data, index){
-                SurveyTakerQuestion({
-                    scope: scope,
-                    question: data,
-                    id: id,
-                    index: index
-                    //callback?
-                });
-            };
-
             scope.finalizeQuestion= function(data, index){
                 FinalizeQuestion({
                     scope: scope,
@@ -688,6 +611,18 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 });
             };
 
+            scope.typeChange = function() {
+                // alert('typechange');
+                scope.default = null;
+                scope.default_multiselect = null;
+                scope.default_float = null;
+                scope.default_int = null;
+                scope.default_textarea = null;
+                scope.int_min = null;
+                scope.int_max = null;
+                scope.float_min = null;
+                scope.float_max = null;
+            };
 
             scope.submitQuestion = function(){
                 var form = SurveyQuestionForm,
@@ -712,13 +647,11 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                                     data.min = scope.float_min;
                                     data.max = scope.float_max;
                                     data.default = scope.default_float;
-
                                 }
                                 if(scope[fld].type==="integer" ){
                                     data.min = scope.int_min;
                                     data.max = scope.int_max;
                                     data.default = scope.default_int;
-
                                 }
                             }
                             else{
@@ -729,7 +662,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         }
                     }
                     Wait('stop');
-
+                    $('#survey-save-button').removeAttr('disabled');
                     if(GenerateForm.mode === 'add'){
                         scope.survey_questions.push(data);
                         $('#new_question .aw-form-well').remove();
@@ -758,7 +691,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         '<label for="survey"><span class="label-text prepend-asterisk">Questions</span></label>'+
                         '<div id="survey_maker_question_area"></div>'+
                         '<div id="finalized_questions"></div>'+
-                        '<button style="display:none" type="button" class="btn btn-sm btn-primary" id="add_question_btn" ng-click="addNewQuestion()" aw-tool-tip="Create a new question" data-placement="top" data-original-title="" title="" disabled><i class="fa fa-plus fa-lg"></i>  Add Question</button>'+
+                        '<button style="display:none" type="button" class="btn btn-sm btn-primary" id="add_question_btn" ng-click="addNewQuestion()" aw-tool-tip="Create a new question" data-placement="top" data-original-title="" title="" disabled><i class="fa fa-plus fa-lg"></i>  New Question</button>'+
                         '<div id="new_question"></div>'+
                     '</div>'+
                 '</div>';
