@@ -90,7 +90,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     })
 
-
     .directive('ngMin', ['Empty', function (Empty) {
         return {
             restrict: 'A',
