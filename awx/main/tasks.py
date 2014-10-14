@@ -1138,8 +1138,11 @@ class RunInventoryUpdate(BaseTask):
 class RunSystemJob(BaseTask):
 
     name = 'awx.main.tasks.run_system_job'
-    model = 'SystemJob'
+    model = SystemJob
 
     def build_args(self, system_job, **kwargs):
         args = ['awx-manage', system_job.job_type]
         return args
+
+    def build_cwd(self, instance, **kwargs):
+        return settings.BASE_DIR
