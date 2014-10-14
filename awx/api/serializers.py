@@ -1346,9 +1346,9 @@ class SystemJobSerializer(UnifiedJobSerializer):
 
     def get_related(self, obj):
         res = super(SystemJobSerializer, self).get_related(obj)
-        if obj.job_template and obj.job_template.active:
+        if obj.system_job_template and obj.system_job_template.active:
             res['system_job_template'] = reverse('api:system_job_template_detail',
-                                                 args=(obj.job_template.pk,))
+                                                 args=(obj.system_job_template.pk,))
         return res
 
 
