@@ -105,15 +105,17 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
 
 
-.factory('CreateLaunchDialog', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateDialog', 'GenerateForm', 'JobVarsPromptForm', 'Wait',
-    function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm, JobVarsPromptForm, Wait) {
+.factory('CreateLaunchDialog', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateDialog', 'GenerateForm',
+    'JobVarsPromptForm', 'Wait', 'ProcessErrors', 'ToJSON',
+    function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
+        JobVarsPromptForm, Wait, ProcessErrors, ToJSON) {
     return function(params) {
         var buttons,
             scope = params.scope,
             html = params.html,
-            // callback = params.callback,
-            // job = params.job,
-            // url = params.url,
+            job_launch_data = {},
+            callback = params.callback || 'PlaybookLaunchFinished',
+            url = params.url,
             e;
 
         html+='<br>job_launch_form.$valid = {{job_launch_form.$valid}}<br></form>';
@@ -122,10 +124,46 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         e = angular.element(document.getElementById('password-modal'));
         $compile(e)(scope);
 
+        scope.jobLaunchFormAccept = function(){
+            if(scope.passwords_needed_to_start.length>0){
+                scope.passwords.forEach(function(password) {
+                        job_launch_data[password] = scope[password];
+                    });
+            }
+            if(scope.prompt_for_vars===true){
+                job_launch_data.extra_vars = ToJSON(scope.parseType, scope.variables, true);
+            }
+            if(scope.survey_enabled===true){
+                for ( var fld in scope.job_launch_form){
+                    if(scope[fld]){
+                        job_launch_data[fld] = scope[fld];
+                    }
+                }
+            }
+
+            Rest.setUrl(url);
+            Rest.post(job_launch_data)
+                .success(function(data) {
+                    Wait('stop');
+                    $('#password-modal').dialog('close');
+                    scope.$emit(callback, data);
+                    scope.$destroy();
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
+                });
+
+        };
+
+
+
+
+
         buttons = [{
             label: "Cancel",
             onClick: function() {
-                scope.passwordCancel();
+                $('password-modal').close();
             },
             icon: "fa-times",
             "class": "btn btn-default",
@@ -133,7 +171,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         },{
             label: "Continue",
             onClick: function() {
-                scope.passwordAccept();
+                scope.jobLaunchFormAccept();
             },
             icon: "fa-check",
             "class": "btn btn-primary",
@@ -175,6 +213,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         return function(params) {
             var scope = params.scope,
                 callback = params.callback || 'PasswordsAccepted',
+                url = params.url,
                 form = CredentialForm,
                 acceptedPasswords = {},
                 fld, field,
@@ -239,7 +278,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             // $('#password-modal').empty().html(buildHtml);
             // e = angular.element(document.getElementById('password-modal'));
             // $compile(e)(scope);
-            scope.$emit(callback, html);
+            scope.$emit(callback, html, url);
             // CreateLaunchDialog({scope: scope})
             // buttons = [{
             //     label: "Cancel",
@@ -320,9 +359,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
     }])
 
 .factory('PromptForVars', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateLaunchDialog', 'GenerateForm', 'JobVarsPromptForm', 'Wait',
-    'ParseVariableString', 'ToJSON', 'ProcessErrors',
+    'ParseVariableString', 'ToJSON', 'ProcessErrors', '$routeParams' ,
     function($compile, Rest, GetBasePath, TextareaResize,CreateLaunchDialog, GenerateForm, JobVarsPromptForm, Wait,
-        ParseVariableString, ToJSON, ProcessErrors) {
+        ParseVariableString, ToJSON, ProcessErrors, $routeParams) {
     return function(params) {
         var
             // parent_scope = params.scope,
@@ -330,27 +369,61 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             callback = params.callback,
             job = params.job,
             url = params.url,
+            vars_url = GetBasePath('job_templates')+scope.job_template_id + '/',
             // e, helpContainer,
             html = params.html || "";
 
-        html += GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
-        scope.helpContainer = "<div style=\"display:inline-block; font-size: 12px; margin-top: 6px;\" class=\"help-container pull-right\">\n" +
-            "<a href=\"\" id=\"awp-promote\" href=\"\" aw-pop-over=\"{{ helpText }}\" aw-tool-tip=\"Click for help\" aw-pop-over-watch=\"helpText\" " +
-            "aw-tip-placement=\"top\" data-placement=\"bottom\" data-container=\"body\" data-title=\"Help\" class=\"help-link\"><i class=\"fa fa-question-circle\">" +
-            "</i> click for help</a></div>\n";
 
-        scope.helpText = "<p>After defining any extra variables, click Continue to start the job. Otherwise, click cancel to abort.</p>" +
-                    "<p>Extra variables are passed as command line variables to the playbook run. It is equivalent to the -e or --extra-vars " +
-                    "command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
-                    "JSON:<br />\n" +
-                    "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
-                    "YAML:<br />\n" +
-                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                    "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+        function buildHtml(extra_vars){
+            //  html += GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit',  scope: scope });
+            // scope.helpContainer = "<div style=\"display:inline-block; font-size: 12px; margin-top: 6px;\" class=\"help-container pull-right\">\n" +
+            //     "<a href=\"\" id=\"awp-promote\" href=\"\" aw-pop-over=\"{{ helpText }}\" aw-tool-tip=\"Click for help\" aw-pop-over-watch=\"helpText\" " +
+            //     "aw-tip-placement=\"top\" data-placement=\"bottom\" data-container=\"body\" data-title=\"Help\" class=\"help-link\"><i class=\"fa fa-question-circle\">" +
+            //     "</i> click for help</a></div>\n";
 
-        scope.variables = ParseVariableString(params.variables);
-        scope.parseType = 'yaml';
-        scope.$emit(callback, html);
+            // scope.helpText = "<p>After defining any extra variables, click Continue to start the job. Otherwise, click cancel to abort.</p>" +
+            //             "<p>Extra variables are passed as command line variables to the playbook run. It is equivalent to the -e or --extra-vars " +
+            //             "command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
+            //             "JSON:<br />\n" +
+            //             "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+            //             "YAML:<br />\n" +
+            //             "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+            //             "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+
+            // <div class="form-group">
+            html+= '<div>'+
+            '<div class="parse-selection" id="job_variables_parse_type">Parse as: <input type="radio" ng-disabled="disableParseSelection" ng-model="parseType" value="yaml" ng-change="parseTypeChange()" class="ng-pristine ng-valid" name="00L"> <span class="parse-label">YAML</span>'+
+            '<input type="radio" ng-disabled="disableParseSelection" ng-model="parseType" value="json" ng-change="parseTypeChange()" class="ng-pristine ng-valid" name="00M"> <span class="parse-label">JSON</span>'+
+            '</div>'+
+            '<div style="display:inline-block; font-size: 12px; margin-top: 6px;" class="help-container pull-right">'+
+            '<a href="" id="awp-promote" aw-pop-over="<p>After defining any extra variables, click Continue to start the job. Otherwise, click cancel to abort.</p><p>Extra variables are passed as command line variables to the playbook run. It is equivalent to the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>JSON:<br />'+
+            '<blockquote>{<br />&quot;somevar&quot;: &quot;somevalue&quot;,<br />&quot;password&quot;: &quot;magic&quot;<br /> }</blockquote>'+
+            'YAML:<br />'+
+            '<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>'+
+            '<div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>'+
+            '" aw-tool-tip="Click for help" aw-pop-over-watch="helpText" aw-tip-placement="top" data-placement="bottom" data-container="body" data-title="Help" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i> click for help</a></div>'+
+            '<textarea rows="6" ng-model="variables" name="variables" class="form-control ng-pristine ng-valid" id="job_variables" aw-watch=""></textarea>'+
+            '<div class="error api-error ng-binding" id="job-variables-api-error" ng-bind="variables_api_error"></div>'+
+            '</div>';
+            // </div>
+
+            scope.variables = ParseVariableString(extra_vars);
+            scope.parseType = 'yaml';
+            scope.$emit(callback, html, url);
+        }
+
+        Rest.setUrl(vars_url);
+        Rest.get()
+            .success(function (data) {
+                buildHtml(data.extra_vars);
+
+            })
+        .error(function (data, status) {
+            ProcessErrors(scope, data, status, { hdr: 'Error!',
+                msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
+        });
+
+
         // CreateLaunchDialog({scope: scope, html: html})
         // Reuse password modal
         // $('#password-modal').empty().html(html);
@@ -457,6 +530,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             var html = params.html || "",
                 form = SurveyTakerForm,
                 id= params.id,
+                url = params.url,
                 scope = params.scope,
                 i, j,
                 requiredAsterisk,
@@ -471,8 +545,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             function buildHtml(question, index){
                 question.index = index;
 
-                if(!$('#question_'+question.index+':eq(0)').is('div')){
-                    html+='<div id="question_'+question.index+'" class="survey_taker_question row">';
+                if(!$('#taker_'+question.index+':eq(0)').is('div')){
+                    html+='<div id="taker_'+question.index+'" class="survey_taker_question row">';
                     $('#survey_taker_finalized_questions').append(html);
                 }
 
@@ -509,7 +583,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                         '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>'+
                         '</div></div>';
                 }
-                if(question.type === 'multiplechoice' || question.type === "multiselect"){
+                if(question.type === 'multiplechoice'){
                     choices = question.choices.split(/\n/);
                     element = (question.type==="multiselect") ? "checkbox" : 'radio';
                     question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
@@ -522,6 +596,24 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                         // '<input class="survey_taker_input" type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[j]+' " '+checked+' >' +choices[j]+
                         // '</label>';
                         html+= '<input  type="'+element+'" ng-model="'+question.variable+'" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
+                        '<span>'+choices[j] +'</span><br>' ;
+
+                    }
+                    html+=  '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
+                        'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
+                        '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
+                    html+= '</div>';
+                }
+                if(question.type === "multiselect"){
+                    choices = question.choices.split(/\n/);
+                    element = (question.type==="multiselect") ? "checkbox" : 'radio';
+                    question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
+                    // scope[question.variable].choices = choices;
+                    html+='<div class="survey_taker_input" > ';
+
+                    for( j = 0; j<choices.length; j++){
+                        checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
+                        html+= '<input  type="checkbox"  ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
                         '<span>'+choices[j] +'</span><br>' ;
 
                     }
@@ -556,9 +648,15 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 }
                 html+='</div>';
                 if(question.index === scope.survey_questions.length-1){
-                    CreateLaunchDialog({scope: scope, html: html});
+                    CreateLaunchDialog({scope: scope, html: html, url: url});
                 }
             }
+
+            scope.someSelected = function (object) {
+                return Object.keys(object).some(function (key) {
+                    return object[key];
+                });
+            };
 
                 // question.index = index;
                 // question[question.variable] = question.default;
@@ -714,7 +812,6 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 extra_vars,
                 new_job_id,
                 new_job,
-                survey_enabled,
                 launch_url,
                 prompt_for_vars = false,
                 html,
@@ -790,9 +887,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             if (scope.removePlaybookLaunchFinished) {
                 scope.removePlaybookLaunchFinished();
             }
-            scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function() {
+            scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function(e, data) {
                 //var base = $location.path().replace(/^\//, '').split('/')[0];
-                $location.path('/jobs/' + scope.new_job_id);
+                $location.path('/jobs/' + data.job);
             });
 
             if (scope.removeStartPlaybookRun) {
@@ -801,7 +898,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             scope.removeStartPlaybookRun = scope.$on('StartPlaybookRun', function() {
                 LaunchJob({
                     scope: scope,
-                    url: launch_url,
+                    url: url,
                     callback: 'PlaybookLaunchFinished',
                     passwords: passwords
                 });
@@ -810,11 +907,12 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             if (scope.removePromptForPasswords) {
                 scope.removePromptForPasswords();
             }
-            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function(e, passwords_needed_to_start,html) {
+            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function(e, passwords_needed_to_start,html, url) {
                 PromptForPasswords({ scope: scope,
                     passwords: passwords_needed_to_start,
                     callback: 'PromptForVars',
-                    html: html
+                    html: html,
+                    url: url
                 });
             });
 
@@ -828,21 +926,22 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             if (scope.removePromptForVars) {
                 scope.removePromptForVars();
             }
-            scope.removePromptForVars = scope.$on('PromptForVars', function(e, html) {
+            scope.removePromptForVars = scope.$on('PromptForVars', function(e, html, url) {
                 // passwords = pwds;
 
-                if (prompt_for_vars) {
+                if (scope.prompt_for_vars) {
                     // call prompt with callback of StartPlaybookRun, passwords
                     PromptForVars({
                         scope: scope,
                         job: {id:scope.job_template_id},
                         variables: extra_vars,
                         callback: 'PromptForSurvey',
-                        html: html
+                        html: html,
+                        url: url
                     });
                 }
                 else {
-                    scope.$emit('PromptForSurvey', html);
+                    scope.$emit('PromptForSurvey', html, url);
                 }
             });
 
@@ -850,9 +949,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             if (scope.removePromptForSurvey) {
                 scope.removePromptForSurvey();
             }
-            scope.removePromptForSurvey = scope.$on('PromptForSurvey', function(e, html) {
+            scope.removePromptForSurvey = scope.$on('PromptForSurvey', function(e, html, url) {
 
-                if (survey_enabled) {
+                if (scope.survey_enabled) {
                     // call prompt with callback of StartPlaybookRun, passwords
                     PromptForSurvey({
                         scope: scope,
@@ -865,7 +964,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 }
                 else {
                     // scope.$emit('StartPlaybookRun');
-                    CreateLaunchDialog({scope: scope, html: html});
+                    CreateLaunchDialog({scope: scope, html: html, url: url});
                 }
 
             });
@@ -889,21 +988,23 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 .success(function (data) {
                     new_job_id = data.id;
                     launch_url = url;//data.related.start;
-                    prompt_for_vars = data.ask_variables_on_launch;
-                    extra_vars = data.variables_needed_to_start;
-                    survey_enabled = data.survey_enabled;
+                    scope.passwords_needed_to_start = data.passwords_needed_to_start;
+                    scope.prompt_for_vars = data.ask_variables_on_launch;
+                    // scope.extra_vars = data.variables_needed_to_start;
+                    scope.survey_enabled = data.survey_enabled;
+
                     // new_job = data;
                     html = '<form class="    ng-valid ng-valid-required" name="job_launch_form" id="job_launch_form" autocomplete="off" nonvalidate>';
                     if (data.passwords_needed_to_start.length > 0) {
-                        scope.$emit('PromptForPasswords', data.passwords_needed_to_start, html);
+                        scope.$emit('PromptForPasswords', data.passwords_needed_to_start, html, url);
                     }
                     else if (data.ask_variables_on_launch) {
-                        scope.$emit('PromptForVars', html);
+                        scope.$emit('PromptForVars', html, url);
                     } else if (data.survey_enabled===true) {
-                        scope.$emit('PromptForSurvey', html);
+                        scope.$emit('PromptForSurvey', html, url);
                     }
                     else {
-                        scope.$emit('StartPlaybookRun');
+                        scope.$emit('StartPlaybookRun', url);
                     }
 
                 })
