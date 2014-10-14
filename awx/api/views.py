@@ -1642,6 +1642,50 @@ class JobTemplateJobsList(SubListCreateAPIView):
     relationship = 'jobs'
     parent_key = 'job_template'
 
+class SystemJobTemplateList(ListAPIView):
+
+    model = SystemJobTemplate
+    serializer_class = SystemJobTemplateSerializer
+
+class SystemJobTemplateDetail(RetrieveAPIView):
+
+    model = SystemJobTemplate
+    serializer_class = SystemJobTemplateSerializer
+
+class SystemJobTemplateLaunch(GenericAPIView):
+
+    model = SystemJobTemplate
+
+    def get(self, request, *args, **kwargs):
+        return Response({})
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(self.model, 'start', obj):
+            raise PermissionDenied()
+        new_job = obj.create_unified_job()
+        result = new_job.signal_start()
+        data = dict(job=new_job.id)
+        return Response(data, status=status.HTTP_202_ACCEPTED)
+
+class SystemJobTemplateSchedulesList(SubListCreateAPIView):
+
+    view_name = "System Job Template Schedules"
+
+    model = Schedule
+    serializer_class = ScheduleSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'schedules'
+    parent_key = 'unified_job_template'
+
+class SystemJobTemplateJobsList(SubListAPIView):
+
+    model = SystemJob
+    serializer_class = SystemJobListSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'jobs'
+    parent_key = 'system_job_template'
+
 class JobList(ListCreateAPIView):
 
     model = Job
@@ -2052,6 +2096,15 @@ class JobJobTasksList(BaseJobEventsList):
         # Done; return the results and count.
         return (results, count, None)
 
+class SystemJobList(ListCreateAPIView):
+
+    model = SystemJob
+    serializer_class = SystemJobListSerializer
+
+class SystemJobDetail(RetrieveAPIView):
+
+    model = SystemJob
+    serializer_class = SystemJobSerializer
 
 class UnifiedJobTemplateList(ListAPIView):
 

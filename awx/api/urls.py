@@ -168,6 +168,19 @@ job_event_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/hosts/$',                     'job_event_hosts_list'),
 )
 
+system_job_template_urls = patterns('awx.api.views',
+    url(r'^$',                                          'system_job_template_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'system_job_template_detail'),
+    url(r'^(?P<pk>[0-9]+)/launch/$',                    'system_job_template_launch'),
+    url(r'^(?P<pk>[0-9]+)/jobs/$',                      'system_job_template_jobs_list'),
+    url(r'^(?P<pk>[0-9]+)/schedules/$',                 'system_job_template_schedules_list'),
+)
+
+system_job_urls = patterns('awx.api.views',
+    url(r'^$',                                          'system_job_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'system_job_detail'),
+)
+
 schedule_urls = patterns('awx.api.views',
     url(r'^$',                                          'schedule_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'schedule_detail'),
@@ -205,6 +218,8 @@ v1_urls = patterns('awx.api.views',
     url(r'^jobs/',                  include(job_urls)),
     url(r'^job_host_summaries/',    include(job_host_summary_urls)),
     url(r'^job_events/',            include(job_event_urls)),
+    url(r'^system_job_templates/',  include(system_job_template_urls)),
+    url(r'^system_jobs/',           include(system_job_urls)),
     url(r'^unified_job_templates/$', 'unified_job_template_list'),
     url(r'^unified_jobs/$',         'unified_job_list'),
     url(r'^activity_stream/',       include(activity_stream_urls)),

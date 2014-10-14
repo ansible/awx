@@ -47,7 +47,7 @@ from celery import chain
 
 logger = logging.getLogger('awx.main.models.jobs')
 
-__all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent']
+__all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent', 'SystemJobOptions', 'SystemJobTemplate', 'SystemJob']
 
 
 class JobOptions(BaseModel):
@@ -910,3 +910,73 @@ class JobEvent(CreatedModifiedModel):
             job.inventory.update_computed_fields()
             emit_websocket_notification('/socket.io/jobs', 'summary_complete', dict(unified_job_id=job.id))
 
+class SystemJobOptions(BaseModel):
+    '''
+    Common fields for SystemJobTemplate and SystemJob.
+    '''
+
+    SYSTEM_JOB_TYPE = [
+        ('cleanup_jobs', _('Remove jobs older than a certain number of days')),
+        ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
+        ('cleanup_deleted', _('Purge previously deleted items from the database')),
+    ]
+
+    class Meta:
+        abstract = True
+
+    job_type = models.CharField(
+        max_length=32,
+        choices=SYSTEM_JOB_TYPE,
+        blank=True,
+        default='',
+    )
+
+class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
+
+    class Meta:
+        app_label = 'main'
+
+    @classmethod
+    def _get_unified_job_class(cls):
+        return SystemJob
+
+    @classmethod
+    def _get_unified_job_field_names(cls):
+        return ['name', 'description', 'job_type']
+
+class SystemJob(UnifiedJob, SystemJobOptions):
+
+    class Meta:
+        app_label = 'main'
+        ordering = ('id',)
+
+    system_job_template = models.ForeignKey(
+        'SystemJobTemplate',
+        related_name='jobs',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+
+    @classmethod
+    def _get_parent_field_name(cls):
+        return 'system_job_template'
+
+    @classmethod
+    def _get_task_class(cls):
+        from awx.main.tasks import RunSystemJob
+        return RunSystemJob
+
+    def socketio_emit_data(self):
+        return {}
+
+    def get_absolute_url(self):
+        return reverse('api:system_job_detail', args=(self.pk,))
+
+    def is_blocked_by(self, obj):
+        return True
+
+    @property
+    def task_impact(self):
+        return 150

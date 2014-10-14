@@ -136,7 +136,8 @@ def get_tasks():
     graph_jobs = [j for j in Job.objects.filter(status__in=('pending', 'waiting', 'running'))]
     graph_inventory_updates = [iu for iu in InventoryUpdate.objects.filter(status__in=('pending', 'waiting', 'running'))]
     graph_project_updates = [pu for pu in ProjectUpdate.objects.filter(status__in=('pending', 'waiting', 'running'))]
-    all_actions = sorted(graph_jobs + graph_inventory_updates + graph_project_updates, key=lambda task: task.created)
+    graph_system_jobs = [sj for sj in SystemJob.objects.filter(status__in=('pending', 'waiting', 'running'))]
+    all_actions = sorted(graph_jobs + graph_inventory_updates + graph_project_updates + graph_system_jobs, key=lambda task: task.created)
     return all_actions
 
 def rebuild_graph(message):

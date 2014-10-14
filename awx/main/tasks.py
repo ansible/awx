@@ -45,7 +45,7 @@ from awx.main.models import * # Job, JobEvent, ProjectUpdate, InventoryUpdate, S
 from awx.main.utils import (get_ansible_version, decrypt_field, update_scm_url,
             ignore_inventory_computed_fields, emit_websocket_notification)
 
-__all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate',
+__all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'handle_work_error', 'update_inventory_computed_fields']
 
 HIDDEN_PASSWORD = '**********'
@@ -1134,3 +1134,12 @@ class RunInventoryUpdate(BaseTask):
 
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
+
+class RunSystemJob(BaseTask):
+
+    name = 'awx.main.tasks.run_system_job'
+    model = 'SystemJob'
+
+    def build_args(self, system_job, **kwargs):
+        args = ['awx-manage', system_job.job_type]
+        return args

@@ -1323,8 +1323,39 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             ret['job_template'] = None
         return ret
 
-class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
+class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
 
+    class Meta:
+        model = SystemJobTemplate
+        fields = ('*', 'job_type',)
+
+    def get_related(self, obj):
+        res = super(SystemJobTemplateSerializer, self).get_related(obj)
+        res.update(dict(
+            jobs = reverse('api:system_job_template_jobs_list', args=(obj.pk,)),
+            schedules = reverse('api:system_job_template_schedules_list', args=(obj.pk,)),
+            launch = reverse('api:system_job_template_launch', args=(obj.pk,)),
+        ))
+        return res
+
+class SystemJobSerializer(UnifiedJobSerializer):
+
+    class Meta:
+        model = SystemJob
+        fields = ('*', 'system_job_template', 'job_type',)
+
+    def get_related(self, obj):
+        res = super(SystemJobSerializer, self).get_related(obj)
+        if obj.job_template and obj.job_template.active:
+            res['system_job_template'] = reverse('api:system_job_template_detail',
+                                                 args=(obj.job_template.pk,))
+        return res
+
+
+class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
+    pass
+
+class SystemJobListSerializer(SystemJobSerializer, UnifiedJobListSerializer):
     pass
 
 
@@ -1390,7 +1421,6 @@ class JobEventSerializer(BaseSerializer):
         except (KeyError, AttributeError):
             pass
         return d
-
 
 class ScheduleSerializer(BaseSerializer):
 
