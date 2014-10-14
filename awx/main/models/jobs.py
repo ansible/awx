@@ -270,8 +270,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                     if 'max' in survey_element and survey_element['max'] != "" and data[survey_element['variable']] > survey_element['max']:
                         errors.append("'%s' value %s is too large (must be no more than%s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
-                    if type(data[survey_element['variable']]) != float:
-                        errors.append("Value %s for %s expected to be a float" % (data[survey_element['variable']],
+                    if type(data[survey_element['variable']]) not in (float, int):
+                        errors.append("Value %s for %s expected to be a numeric type" % (data[survey_element['variable']],
                                                                                   survey_element['variable']))
             elif survey_element['type'] == 'multiselect':
                 if survey_element['variable'] in data:
