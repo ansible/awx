@@ -99,7 +99,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     ctrl.$setViewValue(ctrl.$viewValue);
                 });
                 var minValidator = function (value) {
-                    var min = scope.$eval(attr.ngMin) || -Infinity;
+                    var min = (!attr.ngMin===false) ? scope.$eval(attr.ngMin)  :  -Infinity;
                     if (!Empty(value) && Number(value) < min) {
                         ctrl.$setValidity('ngMin', false);
                         return undefined;
