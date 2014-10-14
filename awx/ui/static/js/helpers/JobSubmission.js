@@ -116,6 +116,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             // url = params.url,
             e;
 
+        html+='<br>job_launch_form.$valid = {{job_launch_form.$valid}}<br></form>';
         $('#password-modal').empty().html(html);
         $('#password-modal').find('textarea').before(scope.helpContainer);
         e = angular.element(document.getElementById('password-modal'));
@@ -143,7 +144,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             id: 'password-modal',
             scope: scope,
             buttons: buttons,
-            width: 600,
+            width: 620,
             height: 700, //(scope.passwords.length > 1) ? 700 : 500,
             minWidth: 500,
             title: 'Launch Configuration',
@@ -158,7 +159,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         }
         scope.removeDialogReady = scope.$on('DialogReady', function() {
             $('#password-modal').dialog('open');
-            $('#password-accept-button').attr({ "disabled": "disabled" });
+            $('#password-accept-button').attr('ng-disabled', 'job_launch_form.$invalid' );
+            e = angular.element(document.getElementById('password-accept-button'));
+            $compile(e)(scope);
         });
     };
 
@@ -174,22 +177,23 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 callback = params.callback || 'PasswordsAccepted',
                 form = CredentialForm,
                 acceptedPasswords = {},
-                fld, field, html;
+                fld, field,
+                html=params.html || "";
 
             scope.passwords = params.passwords;
             // Wait('stop');
 
-            html = "";
+
             html += "<div class=\"alert alert-info\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
-            html += "<form name=\"password_form\" novalidate>\n";
+            // html += "<form name=\"password_form\" novalidate>\n";
 
             scope.passwords.forEach(function(password) {
                 // Prompt for password
                 field = form.fields[password];
                 fld = password;
                 scope[fld] = '';
-                html += "<div class=\"form-group\">\n";
-                html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
+                html += "<div class=\"form-group prepend-asterisk\">\n";
+                html += "<label for=\"" + fld + "\">" + field.label + "</label>\n";
                 html += "<input type=\"password\" ";
                 html += "ng-model=\"" + fld + '" ';
                 html += "ng-keydown=\"keydown($event)\" ";
@@ -199,8 +203,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 html += "required ";
                 html += " >";
                 // Add error messages
-                html += "<div class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
-                    "password_form." + fld + ".$error.required\">A value is required!</div>\n";
+                html += "<div class=\"error\" ng-show=\"job_launch_form." + fld + ".$dirty && " +
+                    "job_launch_form." + fld + ".$error.required\">A value is required!</div>\n";
                 html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
                 html += "</div>\n";
 
@@ -209,8 +213,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     fld = field.associated;
                     field = form.fields[field.associated];
                     scope[fld] = '';
-                    html += "<div class=\"form-group\">\n";
-                    html += "<label for=\"" + fld + "\">* " + field.label + "</label>\n";
+                    html += "<div class=\"form-group prepend-asterisk\">\n";
+                    html += "<label for=\"" + fld + "\"> " + field.label + "</label>\n";
                     html += "<input type=\"password\" ";
                     html += "ng-model=\"" + fld + '" ';
                     html += "ng-keydown=\"keydown($event)\" ";
@@ -221,15 +225,15 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
                     html += "/>";
                     // Add error messages
-                    html += "<div class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " +
-                        "password_form." + fld + ".$error.required\">A value is required!</span>\n";
-                    html += (field.awPassMatch) ? "<span class=\"error\" ng-show=\"password_form." + fld +
+                    html += "<div class=\"error\" ng-show=\"job_launch_form." + fld + ".$dirty && " +
+                        "job_launch_form." + fld + ".$error.required\">A value is required!</span>\n";
+                    html += (field.awPassMatch) ? "<span class=\"error\" ng-show=\"job_launch_form." + fld +
                         ".$error.awpassmatch\">Must match Password value</div>\n" : "";
                     html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
                     html += "</div>\n";
                 }
             });
-            html += "</form>\n";
+            // html += "</form>\n";
 
 
             // $('#password-modal').empty().html(buildHtml);
@@ -300,12 +304,12 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             scope.clearPWConfirm = function (fld) {
                 // If password value changes, make sure password_confirm must be re-entered
                 scope[fld] = '';
-                scope.password_form[fld].$setValidity('awpassmatch', false);
+                scope.job_launch_form[fld].$setValidity('awpassmatch', false);
                 scope.checkStatus();
             };
 
             scope.checkStatus = function() {
-                if (!scope.password_form.$invalid) {
+                if (!scope.job_launch_form.$invalid) {
                     $('#password-accept-button').removeAttr('disabled');
                 }
                 else {
@@ -461,7 +465,6 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 choices,
                 element,
                 checked, min, max,
-
                 survey_url = GetBasePath('job_templates') + id + '/survey_spec/' ;
 
 
@@ -469,50 +472,73 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 question.index = index;
 
                 if(!$('#question_'+question.index+':eq(0)').is('div')){
-                    html+='<div id="question_'+question.index+'" class="question_final row"></div>';
-                    $('#finalized_questions').append(html);
+                    html+='<div id="question_'+question.index+'" class="survey_taker_question row">';
+                    $('#survey_taker_finalized_questions').append(html);
                 }
 
                 requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
                 requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
                 html += '<div class="col-xs-12 '+requiredAsterisk+'"><b>'+question.question_name+'</b></div>\n';
                 if(!Empty(question.question_description)){
-                    html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
+                    html += '<div class="col-xs-12 survey_taker_description"><i>'+question.question_description+'</i></div>\n';
                 }
-
+                scope[question.variable] = question.default;
                 if(question.type === 'text' ){
-                    defaultValue = (question.default) ? question.default : "";
+                    //defaultValue = (question.default) ? question.default : "";
+
                     html+='<div class="row">'+
                         '<div class="col-xs-8">'+
-                        '<input type="text" placeholder="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" readonly>'+
-                        '</div></div>';
+                        '<input type="text" id="'+question.variable+'" ng-model="'+question.variable+'" '+
+                        'name="'+question.variable+'" '+
+                        'class="form-control survey_taker_input ng-pristine ng-invalid-required ng-invalid" required="" >'+
+                        '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
+                        'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
+                        '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>'+
+                        '</div>'+
+                        '</div>';
+
                 }
                 if(question.type === "textarea"){
-                    defaultValue = (question.default) ? question.default : (question.default_textarea) ? question.default_textarea:  "" ;
+                    scope[question.variable] = question.default || question.default_textarea;
                     html+='<div class="row">'+
                         '<div class="col-xs-8">'+
-                        '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3" readonly>'+defaultValue+'</textarea>'+
+                        '<textarea id="'+question.variable+'" name="'+question.variable+'" ng-model="'+question.variable+'" '+
+                        'class="form-control survey_taker_input ng-pristine ng-invalid-required ng-invalid final"  required="" rows="3"></textarea>'+
+                        '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
+                        'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
+                        '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>'+
                         '</div></div>';
                 }
                 if(question.type === 'multiplechoice' || question.type === "multiselect"){
                     choices = question.choices.split(/\n/);
                     element = (question.type==="multiselect") ? "checkbox" : 'radio';
                     question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
+
+                    html+='<div class="survey_taker_input" > ';
+
                     for( j = 0; j<choices.length; j++){
                         checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
-                        html+='<label class="'+element+'-inline final">'+
-                        '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+' disabled>' +choices[i]+
-                        '</label>';
-                    }
+                        // html+='<label class="'+element+'-inline">'+
+                        // '<input class="survey_taker_input" type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[j]+' " '+checked+' >' +choices[j]+
+                        // '</label>';
+                        html+= '<input  type="'+element+'" ng-model="'+question.variable+'" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
+                        '<span>'+choices[j] +'</span><br>' ;
 
+                    }
+                    html+=  '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
+                        'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
+                        '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
+                    html+= '</div>';
                 }
                 if(question.type === 'integer'){
-                    min = (!Empty(question.min)) ? question.min : "";
-                    max = (!Empty(question.max)) ? question.max : "" ;
-                    defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_int)) ? question.default_int : "" ;
+                    min = (!Empty(question.min)) ? Number(question.min) : "";
+                    max = (!Empty(question.max)) ? Number(question.max) : "" ;
+                    //defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_int)) ? question.default_int : "" ;
                     html+='<div class="row">'+
                         '<div class="col-xs-8">'+
-                        '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly>'+
+                        '<input type="number" id="'+question.variable+'" class="survey_taker_input form-control" name="'+question.variable+'" ng-min="'+min+'" ng-max="'+max+'" ng-model="'+question.variable+' " integer>'+
+                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.number || job_launch_form.'+question.variable+'.$error.integer">This is not valid integer!</div>'+
+                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.ngMin || job_launch_form.'+question.variable+'.$error.ngMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>'+
                         '</div></div>';
 
                 }
@@ -522,10 +548,13 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_float)) ? question.default_float : "" ;
                     html+='<div class="row">'+
                         '<div class="col-xs-8">'+
-                        '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly>'+
+                        '<input type="number" id="'+question.variable+'" class="survey_taker_input form-control" name="'+question.variable+'" ng-min="'+min+'" ng-max="'+max+'" ng-model="'+question.variable+'" smart-float>'+
+                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.number || job_launch_form.'+question.variable+'.$error.float">This is not valid float!</div>'+
+                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.ngMin || job_launch_form.'+question.variable+'.$error.ngMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>'+
                         '</div></div>';
 
                 }
+                html+='</div>';
                 if(question.index === scope.survey_questions.length-1){
                     CreateLaunchDialog({scope: scope, html: html});
                 }
@@ -688,6 +717,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 survey_enabled,
                 launch_url,
                 prompt_for_vars = false,
+                html,
                 passwords;
             scope.job_template_id = id;
             if (base === 'job_templates') {
@@ -780,10 +810,11 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             if (scope.removePromptForPasswords) {
                 scope.removePromptForPasswords();
             }
-            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function(e, passwords_needed_to_start) {
+            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function(e, passwords_needed_to_start,html) {
                 PromptForPasswords({ scope: scope,
                     passwords: passwords_needed_to_start,
-                    callback: 'PromptForVars'
+                    callback: 'PromptForVars',
+                    html: html
                 });
             });
 
@@ -859,17 +890,17 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     new_job_id = data.id;
                     launch_url = url;//data.related.start;
                     prompt_for_vars = data.ask_variables_on_launch;
-
                     extra_vars = data.variables_needed_to_start;
                     survey_enabled = data.survey_enabled;
                     // new_job = data;
+                    html = '<form class="    ng-valid ng-valid-required" name="job_launch_form" id="job_launch_form" autocomplete="off" nonvalidate>';
                     if (data.passwords_needed_to_start.length > 0) {
-                        scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
+                        scope.$emit('PromptForPasswords', data.passwords_needed_to_start, html);
                     }
                     else if (data.ask_variables_on_launch) {
-                        scope.$emit('PromptForVars');
+                        scope.$emit('PromptForVars', html);
                     } else if (data.survey_enabled===true) {
-                        scope.$emit('PromptForSurvey');
+                        scope.$emit('PromptForSurvey', html);
                     }
                     else {
                         scope.$emit('StartPlaybookRun');
