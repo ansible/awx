@@ -944,6 +944,10 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'job_type']
 
+    def get_absolute_url(self):
+        return reverse('api:system_job_template_detail', args=(self.pk,))
+
+
 class SystemJob(UnifiedJob, SystemJobOptions):
 
     class Meta:

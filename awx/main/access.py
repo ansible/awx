@@ -1052,6 +1052,22 @@ class JobAccess(BaseAccess):
     def can_cancel(self, obj):
         return self.can_read(obj) and obj.can_cancel
 
+class SystemJobTemplateAccess(BaseAccess):
+    '''
+    I can only see/manage System Job Templates if I'm a super user
+    '''
+
+    model = SystemJobTemplate
+
+    def can_start(self, obj):
+        return self.can_read(obj)
+
+class SystemJobAccess(BaseAccess):
+    '''
+    I can only see manage System Jobs if I'm a super user
+    '''
+    pass
+
 class JobHostSummaryAccess(BaseAccess):
     '''
     I can see job/host summary records whenever I can read both job and host.
@@ -1366,6 +1382,8 @@ register_access(JobTemplate, JobTemplateAccess)
 register_access(Job, JobAccess)
 register_access(JobHostSummary, JobHostSummaryAccess)
 register_access(JobEvent, JobEventAccess)
+register_access(SystemJobTemplate, SystemJobTemplateAccess)
+register_access(SystemJob, SystemJobAccess)
 register_access(Schedule, ScheduleAccess)
 register_access(UnifiedJobTemplate, UnifiedJobTemplateAccess)
 register_access(UnifiedJob, UnifiedJobAccess)
