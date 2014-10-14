@@ -243,19 +243,19 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                 errors.append("'%s' value missing" % survey_element['variable'])
             elif survey_element['type'] in ["textarea", "text"]:
                 if survey_element['variable'] in data:
-                    if survey_element['min'] != "" and len(data[survey_element['variable']]) < survey_element['min']:
+                    if 'min' in survey_element and survey_element['min'] != "" and len(data[survey_element['variable']]) < survey_element['min']:
                         errors.append("'%s' value %s is too small (must be at least %s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if survey_element['max'] != "" and len(data[survey_element['variable']]) > survey_element['max']:
+                    if 'max' in survey_element and survey_element['max'] != "" and len(data[survey_element['variable']]) > survey_element['max']:
                         errors.append("'%s' value %s is too large (must be no more than%s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
             elif survey_element['type'] == 'integer':
                 if survey_element['variable'] in data:
-                    if survey_element['min'] != "" and survey_element['variable'] in data and \
+                    if 'min' in survey_element and survey_element['min'] != "" and survey_element['variable'] in data and \
                        data[survey_element['variable']] < survey_element['min']:
                         errors.append("'%s' value %s is too small (must be at least %s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if survey_element['max'] != "" and survey_element['variable'] in data and \
+                    if 'max' in survey_element and survey_element['max'] != "" and survey_element['variable'] in data and \
                        data[survey_element['variable']] > survey_element['max']:
                         errors.append("'%s' value %s is too large (must be no more than%s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
@@ -264,10 +264,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                                                                                      survey_element['variable']))
             elif survey_element['type'] == 'float':
                 if survey_element['variable'] in data:
-                    if survey_element['min'] != "" and data[survey_element['variable']] < survey_element['min']:
+                    if 'min' in survey_element and survey_element['min'] != "" and data[survey_element['variable']] < survey_element['min']:
                         errors.append("'%s' value %s is too small (must be at least %s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if survey_element['max'] != "" and data[survey_element['variable']] > survey_element['max']:
+                    if 'max' in survey_element and survey_element['max'] != "" and data[survey_element['variable']] > survey_element['max']:
                         errors.append("'%s' value %s is too large (must be no more than%s)" %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) != float:
