@@ -575,7 +575,7 @@ class ProjectDetail(RetrieveUpdateDestroyAPIView):
         can_delete = request.user.can_access(Project, 'delete', obj)
         if not can_delete:
             raise PermissionDenied("Cannot delete project")
-        for pu in obj.project_updates.filter(status__in=['pending', 'waiting', 'running']):
+        for pu in obj.project_updates.filter(status__in=['new', 'pending', 'waiting', 'running']):
             pu.cancel()
         return super(ProjectDetail, self).destroy(request, *args, **kwargs)
 
@@ -1262,7 +1262,7 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
         can_delete = request.user.can_access(InventorySource, 'delete', obj)
         if not can_delete:
             raise PermissionDenied("Cannot delete inventory source")
-        for pu in obj.inventory_updates.filter(status__in=['pending', 'waiting', 'running']):
+        for pu in obj.inventory_updates.filter(status__in=['new', 'pending', 'waiting', 'running']):
             pu.cancel()
         return super(InventorySourceDetail, self).destroy(request, *args, **kwargs)
 
@@ -1376,7 +1376,7 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
         can_delete = request.user.can_access(JobTemplate, 'delete', obj)
         if not can_delete:
             raise PermissionDenied("Cannot delete job template")
-        for pu in obj.jobs.filter(status__in=['pending', 'waiting', 'running']):
+        for pu in obj.jobs.filter(status__in=['new', 'pending', 'waiting', 'running']):
             pu.cancel()
         return super(JobTemplateDetail, self).destroy(request, *args, **kwargs)
 
