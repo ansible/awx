@@ -6,15 +6,15 @@ Make a GET request to retrieve the list of aggregated task data associated with 
 
 This endpoints supports a limited filtering subset:
 
-    ?id__in=1,2,3
+    ?event_id__in=1,2,3
 
 Will show only the given task ids under the play given by `event_id`.
 
-    ?id__gt=1
+    ?event_id__gt=1
 
 Will show ids greater than the given one.
 
-    ?id__lt=3
+    ?event_id__lt=3
 
 Will show ids less than the given one.
 
@@ -22,7 +22,7 @@ Will show ids less than the given one.
 
 Will show only failed plays.  Alternatively `false` may be used.
 
-    ?task_icontains=test
+    ?task__icontains=test
 
 Will filter tasks matching the substring `test`
 

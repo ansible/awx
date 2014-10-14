@@ -4,15 +4,15 @@ Make a GET request to retrieve the list of aggregated play data associated with 
 
 This endpoints supports a limited filtering subset:
 
-    ?id__in=1,2,3
+    ?event_id__in=1,2,3
 
 Will show only the given ids.
 
-    ?id__gt=1
+    ?event_id__gt=1
 
 Will show ids greater than the given one.
 
-    ?id__lt=3
+    ?event_id__lt=3
 
 Will show ids less than the given one.
 
@@ -20,7 +20,7 @@ Will show ids less than the given one.
 
 Will show only failed plays.  Alternatively `false` may be used.
 
-    ?play_icontains=test
+    ?play__icontains=test
 
 Will filter plays matching the substring `test`
 
