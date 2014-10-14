@@ -1066,7 +1066,7 @@ class SystemJobAccess(BaseAccess):
     '''
     I can only see manage System Jobs if I'm a super user
     '''
-    pass
+    model = SystemJob
 
 class JobHostSummaryAccess(BaseAccess):
     '''
