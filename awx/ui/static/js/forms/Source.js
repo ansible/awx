@@ -42,7 +42,7 @@ angular.module('SourceFormDefinition', [])
             credential: {
                 label: 'Cloud Credential',
                 type: 'lookup',
-                ngShow: "source && source.value !== ''",
+                ngShow: "source && source.value !== '' && source.value !== 'custom'",
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
@@ -65,7 +65,7 @@ angular.module('SourceFormDefinition', [])
             },
             source_vars: {
                 label: 'Source Variables',
-                ngShow: "source && (source.value == 'file' || source.value == 'ec2')",
+                ngShow: "source && (source.value == 'file' || source.value == 'ec2' || source.value == 'custom')",
                 type: 'textarea',
                 addRequired: false,
                 editRequird: false,

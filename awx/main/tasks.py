@@ -1044,6 +1044,10 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
+        elif inventory_update.source == 'custom':
+            for env_k in inventory_update.source_vars_dict:
+                if env_k not in os.environ:
+                    env[env_k] = inventory_update.source_vars_dict[env_k]
         return env
 
     def build_args(self, inventory_update, **kwargs):

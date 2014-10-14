@@ -268,7 +268,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         field: 'credential',
                         input_type: "radio"
                     });
-                    if ($('#group_tabs .active a').text() === 'Source' && scope.source.value === 'ec2') {
+                    if ($('#group_tabs .active a').text() === 'Source' && (scope.source.value === 'ec2' || scope.source.value == 'custom')) {
                         callback = function(){ Wait('stop'); };
                         Wait('start');
                         scope.source_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
@@ -831,7 +831,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     setTimeout(function(){ textareaResize('group_variables'); }, 300);
                 }
                 else if ($(e.target).text() === 'Source') {
-                    if (sources_scope.source && sources_scope.source.value === 'ec2') {
+                    if (sources_scope.source && (sources_scope.source.value === 'ec2' || sources_scope.source.value === 'custom')) {
                         Wait('start');
                         ParseTypeChange({ scope: sources_scope, variable: 'source_vars', parse_variable: SourceForm.fields.source_vars.parseTypeName,
                             field_id: 'source_source_vars', onReady: waitStop });
@@ -1141,7 +1141,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 }
                 data.source_regions = r.join();
 
-                if (sources_scope.source && sources_scope.source.value === 'ec2') {
+                if (sources_scope.source && (sources_scope.source.value === 'ec2' || sources_scope.source.value === 'custom')) {
                     // for ec2, validate variable data
                     data.source_vars = ToJSON(sources_scope.envParseType, sources_scope.source_vars, true);
                 }
