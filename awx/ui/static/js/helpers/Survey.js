@@ -666,9 +666,11 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                                     data.default = scope.default_int;
                                 }
                             }
+                            else if(fld==='default_multiselect'){
+                                data.default = scope.default_multiselect;
+                            }
                             else{
                                 data[fld] = scope[fld];
-
                             }
 
                         }
