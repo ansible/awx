@@ -130,11 +130,32 @@ class ApiV1PingView(APIView):
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
         """
-        return Response({
+        # Most of this response is canned; just build the dictionary.
+        response = {
             'ha': is_ha_environment(),
             'role': Instance.objects.my_role(),
             'version': get_awx_version(),
-        })
+        }
+
+        # If this is an HA environment, we also include the IP address of
+        # all of the instances.
+        #
+        # Set up a default structure.
+        response['instances'] = {
+            'primary': None,
+            'secondaries': [],
+        }
+
+        # Add all of the instances into the structure.
+        for instance in Instance.objects.all():
+            if instance.primary:
+                response['instances']['primary'] = instance.ip_address
+            else:
+                response['instances']['secondaries'].append(instance.ip_address)
+        response['instances']['secondaries'].sort()
+
+        # Done; return the response.
+        return Response(response)
 
 
 class ApiV1ConfigView(APIView):
