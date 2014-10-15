@@ -116,9 +116,8 @@ angular.module('Tower', [
     'LoadConfigHelper',
     'SocketHelper',
     'AboutAnsibleHelpModal',
-    'SurveyMakerFormDefinition',
     'SurveyQuestionFormDefinition',
-    'SurveyTakerFormDefinition'
+
 
 ])
 

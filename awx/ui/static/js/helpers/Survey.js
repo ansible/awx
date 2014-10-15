@@ -85,28 +85,14 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
         };
     }])
 
-    .factory('EditSurvey', ['$routeParams','SchedulerInit', 'ShowSurveyModal', 'Wait', 'Rest', 'ProcessErrors', 'GetBasePath', 'GenerateForm', 'SurveyMakerForm',
+    .factory('EditSurvey', ['$routeParams','SchedulerInit', 'ShowSurveyModal', 'Wait', 'Rest', 'ProcessErrors', 'GetBasePath', 'GenerateForm',
             'Empty', 'AddSurvey',
-    function($routeParams, SchedulerInit, ShowSurveyModal, Wait, Rest, ProcessErrors, GetBasePath, GenerateForm,SurveyMakerForm,
+    function($routeParams, SchedulerInit, ShowSurveyModal, Wait, Rest, ProcessErrors, GetBasePath, GenerateForm,
         Empty, AddSurvey) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
-                // callback = params.callback,
                 tempSurv = {},
-                generator = GenerateForm,
-                form = SurveyMakerForm,
-                // labels={
-                //     "type": "Type",
-                //     "question_name": "Question Text",
-                //     "question_description": "Question Description",
-                //     "variable": "Answer Varaible Name",
-                //     "choices": "Choices",
-                //     "min": "Min",
-                //     "max": "Max",
-                //     "required": "Required",
-                //     "default": "Default Answer"
-                // },
                 url = GetBasePath('job_templates') + id + '/survey_spec/', i;
 
             if (scope.removeDialogReady) {
@@ -121,7 +107,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             if(scope.mode === 'add'){
                 tempSurv.survey_name = scope.survey_name;
                 tempSurv.survey_description = scope.survey_description;
-                generator.inject(form, { id: 'survey-modal-dialog' , mode: 'edit', related: false, scope: scope, breadCrumbs: false });
 
                 ShowSurveyModal({ title: "Edit Survey", scope: scope, callback: 'DialogReady' });
 
@@ -138,7 +123,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 Rest.get()
                     .success(function (data) {
                             if(!Empty(data)){
-                                // generator.inject(form, { id: 'survey-modal-dialog' , mode: 'edit', related: false, scope: scope, breadCrumbs: false });
                                 ShowSurveyModal({ title: "Edit Survey", scope: scope, callback: 'DialogReady' });
 
                                 scope.survey_name = data.name;
@@ -157,7 +141,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
                         })
                     .error(function (data, status) {
-                        ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                        ProcessErrors(scope, data, status, { hdr: 'Error!',
                             msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
                     });
             }

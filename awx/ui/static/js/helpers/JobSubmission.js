@@ -523,12 +523,11 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 }])
 
 .factory('PromptForSurvey', ['$compile', 'Wait', 'Alert', 'CredentialForm', 'CreateLaunchDialog', 'SurveyControllerInit' , 'GetBasePath', 'Rest' , 'Empty',
-        'SurveyTakerForm', 'GenerateForm', 'ShowSurveyModal', 'ProcessErrors', '$routeParams' ,
+         'GenerateForm', 'ShowSurveyModal', 'ProcessErrors', '$routeParams' ,
     function($compile, Wait, Alert, CredentialForm, CreateLaunchDialog, SurveyControllerInit, GetBasePath, Rest, Empty,
-        SurveyTakerForm, GenerateForm, ShowSurveyModal, ProcessErrors, $routeParams) {
+         GenerateForm, ShowSurveyModal, ProcessErrors, $routeParams) {
         return function(params) {
             var html = params.html || "",
-                form = SurveyTakerForm,
                 id= params.id,
                 url = params.url,
                 scope = params.scope,
@@ -780,7 +779,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
                 })
             .error(function (data, status) {
-                ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                ProcessErrors(scope, data, status, { hdr: 'Error!',
                     msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
             });
 
