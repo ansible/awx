@@ -816,7 +816,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 html,
                 passwords;
             scope.job_template_id = id;
-            if (base === 'job_templates') {
+            if (base === 'job_templates' || base === 'portal') {
                 url = GetBasePath('job_templates') + id + '/launch/';
             }
             else {
@@ -888,7 +888,10 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function(e, data) {
                 //var base = $location.path().replace(/^\//, '').split('/')[0];
-                $location.path('/jobs/' + data.job);
+                if(scope.portalMode===false){
+                    $location.path('/jobs/' + data.job);
+                }
+
             });
 
             if (scope.removeStartPlaybookRun) {
