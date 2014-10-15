@@ -86,6 +86,7 @@ angular.module('Tower', [
     'HostPieChartWidget',
     'HostGraphWidget',
     'DashboardJobsWidget',
+    'PortalJobTemplateWidget',
     'StreamWidget',
     'JobsHelper',
     'InventoryGroupsHelpDefinition',
@@ -117,6 +118,7 @@ angular.module('Tower', [
     'SocketHelper',
     'AboutAnsibleHelpModal',
     'SurveyQuestionFormDefinition',
+    'PortalJobsListDefinition'
 
 
 ])
@@ -135,10 +137,11 @@ angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/jobs.html',
                 controller: 'JobsListController'
             }).
-            // when('/portal', {
-            //     templateUrl: urlPrefix + 'partials/portal.html'
-            //     controller: 'Portal'
-            // }).
+
+            when('/portal', {
+                templateUrl: urlPrefix + 'partials/portal.html',
+                controller: 'PortalController'
+            }).
 
             when('/jobs/:id', {
                 templateUrl: urlPrefix + 'partials/job_detail.html',
@@ -164,16 +167,6 @@ angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: 'JobTemplatesEdit'
             }).
-
-            //  when('/job_templates/:template_id/survey/add', {
-            //     templateUrl: urlPrefix + 'partials/survey_maker.html',
-            //     controller: 'SurveyMakerAdd'
-            // }).
-
-            // when('/job_templates/:template_id/survey/edit', {
-            //     templateUrl: urlPrefix + 'partials/survey_maker.html',
-            //     controller: 'SurveyMakerEdit'
-            // }).
 
             when('/job_templates/:id/schedules', {
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
@@ -477,6 +470,11 @@ angular.module('Tower', [
                 } else {
                     //base.replace(/\_/g, ' ');
                     base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
+                }
+
+                $rootScope.portalMode=false;
+                if(base==='portal'){
+                    $rootScope.portalMode= true;
                 }
 
                 $('#ansible-list-title').html('<strong>' + base.replace(/\_/,' ') + '</strong>');

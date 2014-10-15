@@ -77,10 +77,10 @@
   <script src="{{ STATIC_URL }}js/controllers/JobDetail.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/JobTemplates.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/JobStdout.js"></script>
+  <script src="{{ STATIC_URL }}js/controllers/Portal.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Permissions.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Schedules.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Sockets.js"></script>
- <!-- <script src="{{ STATIC_URL }}js/controllers/SurveyMaker.js"></script>-->
   <script src="{{ STATIC_URL }}js/forms/Users.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Inventories.js"></script>
@@ -116,6 +116,7 @@
   <script src="{{ STATIC_URL }}js/lists/JobTemplates.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Projects.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Jobs.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/PortalJobs.js"></script>
   <script src="{{ STATIC_URL }}js/lists/CompletedJobs.js"></script>
   <script src="{{ STATIC_URL }}js/lists/RunningJobs.js"></script>
   <script src="{{ STATIC_URL }}js/lists/QueuedJobs.js"></script>
@@ -167,6 +168,7 @@
   <script src="{{ STATIC_URL }}js/widgets/HostGraph.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/JobStatusGraph.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/DashboardJobs.js"></script>
+  <script src="{{ STATIC_URL }}js/widgets/PortalJobTemplate.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/Stream.js"></script>
   <script src="{{ STATIC_URL }}js/help/InventoryGroups.js"></script>
   <script src="{{ STATIC_URL }}js/help/FirefoxSocketHelp.js"></script>
@@ -180,14 +182,15 @@
     <nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right" id="ansible-mobile-menu">
         <h3>Hello, <span ng-bind="current_user.username"></span></h3>
         <a href="#home" id="mobile_home_link" >Home</a></li>
-        <a href="#organizations" id="mobile_organizations_link">Organizations</a></li>
-        <a href="#users" id="mobile_users_link">Users</a></li>
-        <a href="#teams" id="mobile_teams_link">Teams</a></li>
-        <a href="#credentials" id="mobile_credentials_link">Credentials</a></li>
-        <a href="#projects" id="mobile_projects_link">Projects</a></li>
-        <a href="#inventories" id="mobile_inventories_link">Inventories</a></li>
-        <a href="#job_templates" id="mobile_job_templates_link">Job Templates</a></li>
-        <a href="#jobs" id="mobile_jobs_link">Jobs</a></li>
+        <a href="#organizations" id="mobile_organizations_link" ng-hide="portalMode===true">Organizations</a></li>
+        <a href="#users" id="mobile_users_link"  ng-hide="portalMode===true">Users</a></li>
+        <a href="#teams" id="mobile_teams_link" ng-hide="portalMode===true">Teams</a></li>
+        <a href="#credentials" id="mobile_credentials_link" ng-hide="portalMode===true">Credentials</a></li>
+        <a href="#projects" id="mobile_projects_link" ng-hide="portalMode===true">Projects</a></li>
+        <a href="#inventories" id="mobile_inventories_link" ng-hide="portalMode===true">Inventories</a></li>
+        <a href="#job_templates" id="mobile_job_templates_link"  ng-hide="portalMode===true">Job Templates</a></li>
+        <a href="#jobs" id="mobile_jobs_link" ng-hide="portalMode===true">Jobs</a></li>
+        <a href="#jobs" id="mobile_portal_link" ng-show="portalMode===true">Portal</a></li>
         <a href="" id="mobile_about" ng-click ="viewAboutTower()">About Tower</a> </li>
         <a href="" id="mobile_view_user" ng-click="viewCurrentUser()">Account Settings</a></li>
         <a href="" id="mobile_view_license" ng-click="viewLicense()">View License</a></li>
@@ -213,14 +216,15 @@
                 <div class="navbar-collapse collapse" id="main-navbar-collapse">
                     <ul class="nav navbar-nav" id="ansible-main-menu">
                         <!-- <li id="home" class="active"><a href="#home" id="main_home_link" >Home</a></li> -->
-                        <li id="organizations"><a href="#organizations" id="main_organizations_link">Organizations</a></li>
-                        <li id="users"><a href="#users" id="main_users_link">Users</a></li>
-                        <li id="teams"><a href="#teams" id="main_teams_link">Teams</a></li>
-                        <li id="credentials"><a href="#credentials" id="main_credentials_link">Credentials</a></li>
-                        <li id="projects"><a href="#projects" id="main_projects_link">Projects</a></li>
-                        <li id="inventories"><a href="#inventories" id="main_inventories_link">Inventories</a></li>
-                        <li id="job_templates"><a href="#job_templates" id="main_job_templates_link">Job Templates</a></li>
-                        <li id="jobs"><a href="#jobs" id="main_jobs_link">Jobs</a></li>
+                        <li id="organizations"><a href="#organizations" id="main_organizations_link" ng-hide="portalMode===true">Organizations</a></li>
+                        <li id="users"><a href="#users" id="main_users_link" ng-hide="portalMode===true">Users</a></li>
+                        <li id="teams"><a href="#teams" id="main_teams_link" ng-hide="portalMode===true">Teams</a></li>
+                        <li id="credentials"><a href="#credentials" id="main_credentials_link" ng-hide="portalMode===true">Credentials</a></li>
+                        <li id="projects"><a href="#projects" id="main_projects_link" ng-hide="portalMode===true">Projects</a></li>
+                        <li id="inventories"><a href="#inventories" id="main_inventories_link" ng-hide="portalMode===true">Inventories</a></li>
+                        <li id="job_templates"><a href="#job_templates" id="main_job_templates_link" ng-hide="portalMode===true">Job Templates</a></li>
+                        <li id="jobs"><a href="#jobs" id="main_jobs_link" ng-hide="portalMode===true">Jobs</a></li>
+                        <li id="portal"><a href="#portal" id="main_portal_link" ng-show="portalMode===true">Portal</a></li>
                         <li class="collapsed-option"><a href="#/login" id="main_login_link" ng-show="!current_user.username">Login</a></li>
                         <li ng-show="current_user.username" class="collapsed-option">
                             <a href="" id="account-menu-link">Hello, <span ng-bind="current_user.username"></span> <span class="caret"></span></a>
