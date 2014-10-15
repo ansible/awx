@@ -582,6 +582,9 @@ angular.module('GeneratorHelpers', [])
                 // Add ngShow
                 html += (field.ngShow) ? "<span " + Attr(field, 'ngShow') + ">" : "";
 
+                //Add ngHide
+                //html += (field.ngHide) ? "<span " + Attr(field, 'ngHide') + ">" : "";
+
                 // Badge
                 if (options.mode !== 'lookup' && (field.badges || (field.badgeIcon && field.badgePlacement && field.badgePlacement === 'left'))) {
                     html += Badge(field);
@@ -660,6 +663,9 @@ angular.module('GeneratorHelpers', [])
 
                 // close ngShow
                 html += (field.ngShow) ? "</span>" : "";
+
+                //close ngHide
+                //html += (field.ngHide) ? "</span>" : "";
 
                 // Specific to Job Events page -showing event detail/results
                 html += (field.appendHTML) ? "<div ng-show=\"" + field.appendHTML + " !== null\" " +
