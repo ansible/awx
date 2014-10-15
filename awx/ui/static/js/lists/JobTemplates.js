@@ -38,13 +38,15 @@ angular.module('JobTemplatesListDefinition', [])
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addJobTemplate()',
                 basePaths: ['job_templates'],
-                awToolTip: 'Create a new template'
+                awToolTip: 'Create a new template',
+                ngHide: 'portalMode===true'
             },
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 icon: "icon-comments-alt",
-                mode: 'edit'
+                mode: 'edit',
+                ngHide: 'portalMode===true'
             }
         },
 
@@ -61,21 +63,24 @@ angular.module('JobTemplatesListDefinition', [])
                 mode: 'all',
                 ngHref: '#/job_templates/{{ job_template.id }}/schedules',
                 awToolTip: 'Schedule future job template runs',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngHide: 'portalMode===true'
             },
             edit: {
                 label: 'Edit',
                 ngClick: "editJobTemplate(job_template.id)",
                 awToolTip: 'Edit template',
                 "class": 'btn-default btn-xs',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngHide: 'portalMode===true'
             },
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteJobTemplate(job_template.id, job_template.name)",
                 "class": 'btn-danger btn-xs',
                 awToolTip: 'Delete template',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngHide: 'portalMode===true'
             }
         }
     });
