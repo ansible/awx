@@ -52,6 +52,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 realName: 'answer_type',
                 label: 'Answer Type',
                 type: 'select',
+                defaultText: 'Choose an answer type',
                 ngOptions: 'answer_types.name for answer_types in answer_types track by answer_types.type',
                 addRequired: true,
                 editRequired: true,

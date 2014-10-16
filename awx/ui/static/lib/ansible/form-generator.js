@@ -77,6 +77,7 @@
  * | dataPlacement | Used with awPopOver and awToolTip. String providing the placement parameter (i.e. left, right, top, bottom, etc.). |
  * | dataTitle | Used with awPopOver. String value for the title of the popover. |
  * | default | Default value to place in the field when the form is in 'add' mode. |
+ * | defaultText | Default value to put into a select input. |
  * | editRequird | true or false. If true, set the required attribute when mode is 'edit'. |
  * | falseValue | For radio buttons and checkboxes. Value to set the model to when the checkbox or radio button is not selected. |
  * | genMD5 | true or false. If true, places the field in an input group with a button that when clicked replaces the field contents with an MD5 has key. Used with host_config_key on the job templates detail page. |
@@ -907,15 +908,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                             field.awRequiredWhen.variable + "\" " : "";
                         html += ">\n";
                         html += "<option value=\"\">";
-                        //for survey maker, needed the select drop down to say "select an answer type"
-                        if(form.name === "question_unique"){
-                            html += (field.defaultOption) ? field.defaultOption : "Choose an " + field.label.toLowerCase();
-                        } else{
-                            html += (field.defaultOption) ? field.defaultOption : "Choose a " + field.label.toLowerCase();
-                        }
+                            // Add a custom default select 'value' (default text)
+                        html += (field.defaultText) ? field.defaultText : "Choose a " + field.label.toLowerCase();
                         html += "</option>\n";
                         html += "</select>\n";
-                        // Add error messages
+                            // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
