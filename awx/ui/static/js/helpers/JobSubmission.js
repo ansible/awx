@@ -118,7 +118,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             url = params.url,
             e;
 
-        html+='<br>job_launch_form.$valid = {{job_launch_form.$valid}}<br></form>';
+        // html+='<br>job_launch_form.$valid = {{job_launch_form.$valid}}<br>';
+        html+='</form>';
         $('#password-modal').empty().html(html);
         $('#password-modal').find('textarea').before(scope.helpContainer);
         e = angular.element(document.getElementById('password-modal'));

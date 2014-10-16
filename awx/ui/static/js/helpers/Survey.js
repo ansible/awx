@@ -423,7 +423,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 else if( question.type  === 'float'  ) {
                     scope.float_min = question.min;
                     scope.float_max = question.max;
-                    scope.default_int = question.default;
+                    scope.default_float = question.default;
 
                 }
                 else if ( question.type === 'multiselect'){

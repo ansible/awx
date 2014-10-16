@@ -101,11 +101,11 @@ angular.module('SurveyQuestionFormDefinition', [])
                 type: 'custom',
                 control: '<div class="row">'+
                                 '<div class="col-xs-6">'+
-                                    '<label for="minimum"><span class="label-text">Minimum</span></label><input id="float_min" type="number" name="float_min" ng-model="float_min" class="form-control" smartFloat >'+
+                                    '<label for="minimum"><span class="label-text">Minimum</span></label><input id="float_min" type="number" name="float_min" ng-model="float_min" class="form-control" smart-float >'+
                                     '<div class="error" ng-show="survey_question_form.float_min.$invalid">This is not valid float!</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6">'+
-                                    '<label for="minimum"><span class="label-text">Maximum</span></label><input id="float_max" type="number" name="float_max" ng-model="float_max" class="form-control" smartFloat >'+
+                                    '<label for="minimum"><span class="label-text">Maximum</span></label><input id="float_max" type="number" name="float_max" ng-model="float_max" class="form-control" smart-float >'+
                                     '<div class="error" ng-show="survey_question_form.float_max.$invalid">This is not valid float!</div>'+
                                 '</div>'+
                             '</div>',
@@ -150,7 +150,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 type: 'custom',
                 control: '<div>'+
                     '<label for="default_float"><span class="label-text">Default Answer</span></label>'+
-                    '<input type="number" ng-model="default_float" name="default_float" ng-min="float_min" ng-max="float_max"  class="form-control" integer />'+
+                    '<input type="number" ng-model="default_float" name="default_float" ng-min="float_min" ng-max="float_max"  class="form-control" smart-float />'+
                     '<div class="error" ng-show="survey_question_form.default_float.$error.number || survey_question_form.default_float.$error.float">This is not valid float!</div>'+
                     '<div class="error" ng-show="survey_question_form.default_float.$error.ngMin || survey_question_form.default_float.$error.ngMax"> The value must be in range {{float_min}} to {{float_max}}!</div>'+
                     '</div>',
