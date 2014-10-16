@@ -594,7 +594,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                         // html+='<label class="'+element+'-inline">'+
                         // '<input class="survey_taker_input" type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[j]+' " '+checked+' >' +choices[j]+
                         // '</label>';
-                        html+= '<input  type="'+element+'" ng-model="'+question.variable+'" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
+                        html+= '<input  type="'+element+'" class="mc" ng-model="'+question.variable+'" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
                         '<span>'+choices[j] +'</span><br>' ;
 
                     }
@@ -612,7 +612,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
                     for( j = 0; j<choices.length; j++){
                         checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
-                        html+= '<input  type="checkbox"  ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
+                        html+= '<input  type="checkbox"  class="mc" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
                         '<span>'+choices[j] +'</span><br>' ;
 
                     }

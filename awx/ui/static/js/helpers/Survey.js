@@ -308,14 +308,14 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 choices = question.choices.split(/\n/);
                 element = (question.type==="multiselect") ? "checkbox" : 'radio';
                 question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
+
                 for( i = 0; i<choices.length; i++){
                     checked = (!Empty(question.default) && question.default.indexOf(choices[i])!==-1) ? "checked" : "";
-                    html+='<label class="'+element+'-inline final">'+
-                    '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+' disabled>' +choices[i]+
-                    '</label>';
+                    html+= '<input  type="'+element+'"  class="mc" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[i]+' " '+checked+' >' +
+                        '<span>'+choices[i] +'</span><br>' ;
                 }
-
             }
+
             if(question.type === 'integer'){
                 min = (!Empty(question.min)) ? question.min : "";
                 max = (!Empty(question.max)) ? question.max : "" ;
@@ -378,7 +378,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             var scope = params.scope,
                 index = params.index,
-                element, fld, i,
+                element,
+                //fld,
+                i,
+                question = scope.survey_questions[index],
                 form = SurveyQuestionForm;
 
             $('#survey-save-button').attr('disabled', 'disabled');
@@ -391,33 +394,54 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             scope.int_max = null;
             scope.float_min = null;
             scope.float_max = null;
-            GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope, breadCrumbs: false});
-            for(fld in form.fields){
-                if( scope.survey_questions[index].type==='integer' && fld === 'int_options'){
-                    scope.int_min = scope.survey_questions[index].min;
-                    scope.int_max = scope.survey_questions[index].max;
-                    // $("#int_min").val(scope.survey_questions[index].min);
-                    // $("#int_max").val(scope.survey_questions[index].max);
-                }
-                if( scope.survey_questions[index].type==='float' && fld  === 'float_options'  ) {
-                    scope.float_min = scope.survey_questions[index].min;
-                    scope.float_max = scope.survey_questions[index].max;
-                    // $("#float_min").val(scope.survey_questions[index].min);
-                    // $("#float_max").val(scope.survey_questions[index].max);
-                }
-                if( fld  === 'default_int' || fld === 'default_float'){
-                    $("#"+fld ).val(scope.survey_questions[index].default);
-                }
-                if(form.fields[fld].type === 'select'){
-                    for (i = 0; i < scope.answer_types.length; i++) {
-                        if (scope.survey_questions[index][fld] === scope.answer_types[i].type) {
-                            scope[fld] = scope.answer_types[i];
+
+
+
+
+            //GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope, breadCrumbs: false});
+
+
+            if (scope.removeFillQuestionForm) {
+                scope.removeFillQuestionForm();
+            }
+            scope.removeFillQuestionForm = scope.$on('FillQuestionForm', function() {
+                for( var fld in form.fields){
+                    scope[fld] = question[fld];
+                    if(form.fields[fld].type === 'select'){
+                        for (i = 0; i < scope.answer_types.length; i++) {
+                            if (scope.survey_questions[index][fld] === scope.answer_types[i].type) {
+                                scope[fld] = scope.answer_types[i];
+                            }
                         }
                     }
-                } else {
-                    scope[fld] = scope.survey_questions[index][fld];
                 }
+                if( question.type === 'integer'){
+                    scope.int_min = question.min;
+                    scope.int_max = question.max;
+                    scope.default_int = question.default;
+                }
+                else if( question.type  === 'float'  ) {
+                    scope.float_min = question.min;
+                    scope.float_max = question.max;
+                    scope.default_int = question.default;
+
+                }
+                else if ( question.type === 'multiselect'){
+                    scope.default_multiselect = question.default;
+                }
+            });
+
+            if (scope.removeGenerateForm) {
+                scope.removeGenerateForm();
             }
+            scope.removeGenerateForm = scope.$on('GenerateForm', function() {
+                GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope, breadCrumbs: false});
+                scope.$emit('FillQuestionForm');
+            });
+
+
+            scope.$emit('GenerateForm');
+
         };
     }])
 
