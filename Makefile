@@ -313,7 +313,7 @@ rpm-build/$(RPM_NVR).noarch.rpm: rpm-build/$(RPM_NVR).src.rpm
 	@echo rpm-build/$(RPM_NVR).noarch.rpm
 	@echo "#############################################"
 
-mock-rpm: rpm-build/$(RPM_NVR).noarch.rpm
+mock-rpm: rpmtar rpm-build/$(RPM_NVR).noarch.rpm
 
 deb-build/$(SDIST_TAR_NAME): BYTE_COMPILE = 1
 deb-build/$(SDIST_TAR_NAME):
