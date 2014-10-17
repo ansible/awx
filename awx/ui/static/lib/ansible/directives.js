@@ -63,6 +63,50 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     })
 
+
+// .directive('surveyCheckboxes', function(){
+//     return {
+//         restrict: 'E',
+//         require: 'ngModel',
+//         scope: { 'ngModel': '=accessor' },
+//         template: '<div ng-repeat="option in ngModel().options">'
+//             +'<label>'
+//             +'<input type="checkbox" ng-model="cbModel[option]" '
+//             +'value="{{option}}" ng-change="update()" ng-required="isRequired()"/>'
+//             +'{{option}}'
+//             +'</label>'
+//             +'</div>',
+//         link: function(scope, element, attrs, ctrl){
+//             scope.cbModel= {};
+
+//             ctrl.$parsers.unshift(function(value){
+//                 for (var c in scope.cbModel) {
+//                     if (scope.cbModel[c]) {
+//                         ctrl.$setValidity('checkbox', true);
+//                     }
+//                 }
+//                 ctrl.$setValidity('checkbox', false);
+//             });
+
+//             scope.update = function(){
+//                 var val = [];
+//                 angular.forEach(scope.cbModel, function(v,k){
+//                     if (v)
+//                         val.push(k);
+//                 });
+//                 if (val.length>0)
+//                     scope.ngModel().value = angular.toJson(val);
+//             };
+
+//             scope.isRequired = function(){
+//                 if (!scope.ngModel().required) return false;
+
+//                 return scope.ngModel().required;
+//             };
+//         }
+//     };
+// })
+
     // caplitalize  Add to any input field where the first letter of each
     //              word should be capitalized. Use in place of css test-transform.
     //              For some reason "text-transform: capitalize" in breadcrumbs
