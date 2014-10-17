@@ -513,6 +513,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.int_max = null;
                 scope.float_min = null;
                 scope.float_max = null;
+
             };
 
             scope.addNewQuestion = function(){
