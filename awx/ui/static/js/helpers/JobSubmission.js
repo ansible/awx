@@ -594,10 +594,37 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 }
 
                 if(question.type === "multiselect"){
+                    // question.options = question.choices.split(/\n/);
                     choices = question.choices.split(/\n/);
-                    element = (question.type==="multiselect") ? "checkbox" : 'radio';
+
+                    // element = (question.type==="multiselect") ? "checkbox" : 'radio';
                     question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
                     // scope[question.variable].choices = choices;
+                    // scope[question.variable] = {
+                    //     options: question.options,
+                    //     default: question.default,
+                    //     name: 'multi checkboxes',
+                    //     required: true,
+                    //     value: ''
+                    // }
+                    // function Ctrl($scope) {
+                    //     $scope.field = {
+                    //         name:'multi checkboxes',
+                    //         value:'',
+                    //         required:true,
+                    //         options:[
+                    //             {value:'option 1'},
+                    //             {value:'option 2'},
+                    //             {value:'option 3'}
+                    //         ]
+                    //     };
+                    // }
+
+                    // html+='<survey-checkboxes ng-model=" '+question.variable+' " ></survey-checkboxes>' +
+                    //     '<div ng-show="job_launch_form.$valid">valid</div>'+
+                    //     '<div ng-hide="job_launch_form.$valid">invalid</div>';
+
+
                     html+='<div class="survey_taker_input" > ';
                     for( j = 0; j<choices.length; j++){
                         checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
