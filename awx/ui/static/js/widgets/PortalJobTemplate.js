@@ -88,7 +88,7 @@ angular.module('PortalJobTemplateWidget', ['RestServices', 'Utilities'])
             // });
 
             $(window).resize(_.debounce(function() {
-                resizeDashboardJobsWidget();
+                resizePortalJobsWidget();
             }, 500));
         });
 
@@ -98,7 +98,7 @@ angular.module('PortalJobTemplateWidget', ['RestServices', 'Utilities'])
         scope.removeChoicesReady = scope.$on('choicesReady', function() {
             choicesCount++;
             if (choicesCount === 2) {
-                setDashboardJobsHeight();
+                setPortalJobsHeight();
                 scope.$emit('buildJobsList');
             }
         });
@@ -122,7 +122,7 @@ angular.module('PortalJobTemplateWidget', ['RestServices', 'Utilities'])
 
 
      // Set the height of each container and calc max number of rows containers can hold
-        function setDashboardJobsHeight() {
+        function setPortalJobsHeight() {
             var docw = $(window).width(),
                 box_height, available_height, search_row, page_row, height, header, row_height;
 
@@ -131,7 +131,7 @@ angular.module('PortalJobTemplateWidget', ['RestServices', 'Utilities'])
             search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
             page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
             header = Math.max($('#completed_jobs_table thead').height(), 41);
-            height = Math.floor(available_height) - header - page_row - search_row -30 ;
+            height = Math.floor(available_height) - header - page_row - search_row -250 ;
             if (docw < 765 && docw >= 493) {
                 row_height = 27;
             }
@@ -156,18 +156,18 @@ angular.module('PortalJobTemplateWidget', ['RestServices', 'Utilities'])
                 if (docw < 1140) {
                     box_height += 40;
                 }
-                $('.dashboard-jobs-list-container').height(box_height);
+                $('.portal-job-template-container').height(box_height);
                 max_rows = 5;
             }
         }
 
         // Set container height and return the number of allowed rows
-        function resizeDashboardJobsWidget() {
-            setDashboardJobsHeight();
+        function resizePortalJobsWidget() {
+            setPortalJobsHeight();
             jobs_scope[JobsList.iterator + '_page_size'] = max_rows;
             jobs_scope.changePageSize(JobsList.name, JobsList.iterator, false);
-            scheduled_scope[ScheduledJobsList.iterator + '_page_size'] = max_rows;
-            scheduled_scope.changePageSize(ScheduledJobsList.name, ScheduledJobsList.iterator, false);
+            // scheduled_scope[ScheduledJobsList.iterator + '_page_size'] = max_rows;
+            // scheduled_scope.changePageSize(ScheduledJobsList.name, ScheduledJobsList.iterator, false);
         }
 
 
