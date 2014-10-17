@@ -1163,9 +1163,11 @@ class UnifiedJobAccess(BaseAccess):
         project_update_qs = self.user.get_queryset(ProjectUpdate)
         inventory_update_qs = self.user.get_queryset(InventoryUpdate).filter(source__in=CLOUD_INVENTORY_SOURCES)
         job_qs = self.user.get_queryset(Job)
+        system_job_qs = self.user.get_queryset(SystemJob)
         qs = qs.filter(Q(ProjectUpdate___in=project_update_qs) |
                        Q(InventoryUpdate___in=inventory_update_qs) |
-                       Q(Job___in=job_qs))
+                       Q(Job___in=job_qs) |
+                       Q(SystemJob___in=system_job_qs))
         # FIXME: select/prefetch to optimize!
         return qs
 

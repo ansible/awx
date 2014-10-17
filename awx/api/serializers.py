@@ -386,7 +386,7 @@ class UnifiedJobSerializer(BaseSerializer):
 
     def get_types(self):
         if type(self) is UnifiedJobSerializer:
-            return ['project_update', 'inventory_update', 'job']
+            return ['project_update', 'inventory_update', 'job', 'system_job']
         else:
             return super(UnifiedJobSerializer, self).get_types()
 
@@ -413,6 +413,8 @@ class UnifiedJobSerializer(BaseSerializer):
                 serializer_class = InventoryUpdateSerializer
             elif isinstance(obj, Job):
                 serializer_class = JobSerializer
+            elif isinstance(obj, SystemJob):
+                serializer_class = SystemJobSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj)
             ret = serializer.to_native(obj)
@@ -444,6 +446,8 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
                 serializer_class = InventoryUpdateListSerializer
             elif isinstance(obj, Job):
                 serializer_class = JobListSerializer
+            elif isinstance(obj, SystemJob):
+                serializer_class = SystemJobListSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj)
             ret = serializer.to_native(obj)
