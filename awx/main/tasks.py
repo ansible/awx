@@ -95,7 +95,7 @@ def tower_periodic_scheduler(self):
         template = schedule.unified_job_template
         schedule.save() # To update next_run timestamp.
         new_unified_job = template.create_unified_job(launch_type='scheduled', schedule=schedule)
-        can_start = new_unified_job.signal_start()
+        can_start = new_unified_job.signal_start(**schedule.extra_data)
         if not can_start:
             new_unified_job.status = 'failed'
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
@@ -1146,6 +1146,13 @@ class RunSystemJob(BaseTask):
 
     def build_args(self, system_job, **kwargs):
         args = ['awx-manage', system_job.job_type]
+        try:
+            json_vars = json.loads(system_job.extra_vars)
+            if 'days' in json_vars:
+                args.extend(['--days', str(json_vars['days'])])
+        except Exception, e:
+            pass
+        print args
         return args
 
     def build_cwd(self, instance, **kwargs):

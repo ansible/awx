@@ -963,6 +963,13 @@ class SystemJob(UnifiedJob, SystemJobOptions):
         on_delete=models.SET_NULL,
     )
 
+    extra_vars = models.TextField(
+        blank=True,
+        default='',
+    )
+
+    extra_vars_dict = VarsDictProperty('extra_vars', True)
+
     @classmethod
     def _get_parent_field_name(cls):
         return 'system_job_template'
@@ -971,6 +978,23 @@ class SystemJob(UnifiedJob, SystemJobOptions):
     def _get_task_class(cls):
         from awx.main.tasks import RunSystemJob
         return RunSystemJob
+
+    def handle_extra_data(self, extra_data):
+        if extra_data == "" or extra_data is None:
+            return
+        if type(extra_data) == str:
+            try:
+                evars = json.loads(self.extra_vars)
+            except Exception, e:
+                return
+        else:
+            evars = extra_data
+        if evars is None:
+            evars = extra_data
+        else:
+            evars.update(extra_data)
+        self.update_fields(extra_vars=json.dumps(evars))
+
 
     def socketio_emit_data(self):
         return {}

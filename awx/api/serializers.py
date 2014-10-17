@@ -1342,7 +1342,7 @@ class SystemJobSerializer(UnifiedJobSerializer):
 
     class Meta:
         model = SystemJob
-        fields = ('*', 'system_job_template', 'job_type',)
+        fields = ('*', 'system_job_template', 'job_type', 'extra_vars')
 
     def get_related(self, obj):
         res = super(SystemJobSerializer, self).get_related(obj)
@@ -1426,7 +1426,7 @@ class ScheduleSerializer(BaseSerializer):
 
     class Meta:
         model = Schedule
-        fields = ('*', 'unified_job_template', 'enabled', 'dtstart', 'dtend', 'rrule', 'next_run')
+        fields = ('*', 'unified_job_template', 'enabled', 'dtstart', 'dtend', 'rrule', 'next_run', 'extra_data')
 
     def get_related(self, obj):
         res = super(ScheduleSerializer, self).get_related(obj)

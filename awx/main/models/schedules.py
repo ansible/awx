@@ -11,6 +11,9 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.timezone import now, make_aware, get_default_timezone
 
+# Django-JSONField
+from jsonfield import JSONField
+
 # AWX
 from awx.main.models.base import *
 from awx.main.utils import ignore_inventory_computed_fields, emit_websocket_notification
@@ -81,6 +84,10 @@ class Schedule(CommonModel):
         null=True,
         default=None,
         editable=False,
+    )
+    extra_data = JSONField(
+        blank=True,
+        default={}
     )
 
     def __unicode__(self):
