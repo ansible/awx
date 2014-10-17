@@ -72,7 +72,7 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
         }
         $scope.removeLoadPortal = $scope.$on('LoadPortal', function () {
             winHeight = $(window).height();
-            available_height = Math.floor(winHeight - $('#main-menu-container .navbar').outerHeight() - $('#refresh-row').outerHeight() - 45);
+            available_height = Math.floor(winHeight - $('#main-menu-container .navbar').outerHeight() - $('#refresh-row').outerHeight() - 30);
             $('.portal-container').height(available_height);
 
             view.inject( list, {
