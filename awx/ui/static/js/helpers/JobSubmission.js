@@ -14,25 +14,60 @@
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
     'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog', 'FormGenerator', 'JobVarsPromptFormDefinition'])
 
-.factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors',
-    function(Rest, Wait, ProcessErrors) {
+.factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors', 'ToJSON',
+    function(Rest, Wait, ProcessErrors, ToJSON) {
         return function(params) {
             var scope = params.scope,
-                passwords = params.passwords || {},
+                // passwords = params.passwords || {},
                 callback = params.callback || 'JobLaunched',
-                url = params.url;
+                job_launch_data = {},
+                url = params.url,
+                fld;
 
-            Wait('start');
+
+            if(scope.passwords_needed_to_start.length>0){
+                scope.passwords.forEach(function(password) {
+                        job_launch_data[password] = scope[password];
+                    });
+            }
+            if(scope.prompt_for_vars===true){
+                job_launch_data.extra_vars = ToJSON(scope.parseType, scope.variables, true);
+            }
+            if(scope.survey_enabled===true){
+                for (fld in scope.job_launch_form){
+                    if(scope[fld]){
+                        job_launch_data[fld] = scope[fld];
+                    }
+                }
+            }
+
             Rest.setUrl(url);
-            Rest.post(passwords)
+            Rest.post(job_launch_data)
                 .success(function(data) {
-                    scope.new_job_id = data.job;
+                    Wait('stop');
+                    if(!$('#password-modal').is(':hidden')){
+                        $('#password-modal').dialog('close');
+                    }
                     scope.$emit(callback, data);
+                    scope.$destroy();
                 })
-                .error(function (data, status) {
+                .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Attempt to start job at ' + url + ' failed. POST returned: ' + status });
+                        msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
                 });
+
+
+            // Wait('start');
+            // Rest.setUrl(url);
+            // Rest.post(passwords)
+            //     .success(function(data) {
+            //         scope.new_job_id = data.job;
+            //         scope.$emit(callback, data);
+            //     })
+            //     .error(function (data, status) {
+            //         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+            //             msg: 'Attempt to start job at ' + url + ' failed. POST returned: ' + status });
+            //     });
         };
     }])
 
@@ -106,16 +141,16 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
 
 .factory('CreateLaunchDialog', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateDialog', 'GenerateForm',
-    'JobVarsPromptForm', 'Wait', 'ProcessErrors', 'ToJSON',
+    'JobVarsPromptForm', 'Wait',
     function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
-        JobVarsPromptForm, Wait, ProcessErrors, ToJSON) {
+        JobVarsPromptForm, Wait) {
     return function(params) {
         var buttons,
             scope = params.scope,
             html = params.html,
-            job_launch_data = {},
+            // job_launch_data = {},
             callback = params.callback || 'PlaybookLaunchFinished',
-            url = params.url,
+            // url = params.url,
             e;
 
         // html+='<br>job_launch_form.$valid = {{job_launch_form.$valid}}<br>';
@@ -125,46 +160,12 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         e = angular.element(document.getElementById('password-modal'));
         $compile(e)(scope);
 
-        scope.jobLaunchFormAccept = function(){
-            if(scope.passwords_needed_to_start.length>0){
-                scope.passwords.forEach(function(password) {
-                        job_launch_data[password] = scope[password];
-                    });
-            }
-            if(scope.prompt_for_vars===true){
-                job_launch_data.extra_vars = ToJSON(scope.parseType, scope.variables, true);
-            }
-            if(scope.survey_enabled===true){
-                for ( var fld in scope.job_launch_form){
-                    if(scope[fld]){
-                        job_launch_data[fld] = scope[fld];
-                    }
-                }
-            }
-
-            Rest.setUrl(url);
-            Rest.post(job_launch_data)
-                .success(function(data) {
-                    Wait('stop');
-                    $('#password-modal').dialog('close');
-                    scope.$emit(callback, data);
-                    scope.$destroy();
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
-                });
-
-        };
-
-
-
-
-
         buttons = [{
             label: "Cancel",
             onClick: function() {
-                $('password-modal').close();
+                $('#password-modal').dialog('close');
+                // scope.$emit('CancelJob');
+                // scope.$destroy();
             },
             icon: "fa-times",
             "class": "btn btn-default",
@@ -172,7 +173,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         },{
             label: "Continue",
             onClick: function() {
-                scope.jobLaunchFormAccept();
+                scope.$emit(callback);
             },
             icon: "fa-check",
             "class": "btn btn-primary",
@@ -216,7 +217,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 callback = params.callback || 'PasswordsAccepted',
                 url = params.url,
                 form = CredentialForm,
-                acceptedPasswords = {},
+                // acceptedPasswords = {},
                 fld, field,
                 html=params.html || "";
 
@@ -324,21 +325,21 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 }
             };
 
-            scope.passwordAccept = function() {
-                if (!scope.password_form.$invalid) {
-                    scope.passwords.forEach(function(password) {
-                        acceptedPasswords[password] = scope[password];
-                    });
-                    $('#password-modal').dialog('close');
-                    scope.$emit(callback, acceptedPasswords);
-                }
-            };
+            // scope.passwordAccept = function() {
+            //     if (!scope.password_form.$invalid) {
+            //         scope.passwords.forEach(function(password) {
+            //             acceptedPasswords[password] = scope[password];
+            //         });
+            //         $('#password-modal').dialog('close');
+            //         scope.$emit(callback, acceptedPasswords);
+            //     }
+            // };
 
-            scope.passwordCancel = function() {
-                $('#password-modal').dialog('close');
-                scope.$emit('CancelJob');
-                scope.$destroy();
-            };
+            // scope.passwordCancel = function() {
+            //     $('#password-modal').dialog('close');
+            //     scope.$emit('CancelJob');
+            //     scope.$destroy();
+            // };
 
             // Password change
             scope.clearPWConfirm = function (fld) {
@@ -368,7 +369,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             // parent_scope = params.scope,
             scope = params.scope,
             callback = params.callback,
-            job = params.job,
+            // job = params.job,
             url = params.url,
             vars_url = GetBasePath('job_templates')+scope.job_template_id + '/',
             // e, helpContainer,
@@ -496,29 +497,29 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         //     callback: 'DialogReady'
         // });
 
-        scope.varsCancel = function() {
-            $('#password-modal').dialog('close');
-            scope.$emit('CancelJob');
-            scope.$destroy();
-        };
+        // scope.varsCancel = function() {
+        //     $('#password-modal').dialog('close');
+        //     scope.$emit('CancelJob');
+        //     scope.$destroy();
+        // };
 
-        scope.varsAccept = function() {
-            job.extra_vars = ToJSON(scope.parseType, scope.variables, true);
-            Wait('start');
-            //Rest.setUrl(GetBasePath('jobs') + job.id + '/');
-            Rest.setUrl(url);
-            Rest.put(job)
-                .success(function() {
-                    Wait('stop');
-                    $('#password-modal').dialog('close');
-                    scope.$emit(callback);
-                    scope.$destroy();
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed updating job ' + job.id + ' with variables. PUT returned: ' + status });
-                });
-        };
+        // scope.varsAccept = function() {
+        //     job.extra_vars = ToJSON(scope.parseType, scope.variables, true);
+        //     Wait('start');
+        //     //Rest.setUrl(GetBasePath('jobs') + job.id + '/');
+        //     Rest.setUrl(url);
+        //     Rest.put(job)
+        //         .success(function() {
+        //             Wait('stop');
+        //             $('#password-modal').dialog('close');
+        //             scope.$emit(callback);
+        //             scope.$destroy();
+        //         })
+        //         .error(function(data, status) {
+        //             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+        //                 msg: 'Failed updating job ' + job.id + ' with variables. PUT returned: ' + status });
+        //         });
+        // };
 
     };
 }])
@@ -531,6 +532,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             var html = params.html || "",
                 id= params.id,
                 url = params.url,
+                callback=params.callback,
                 scope = params.scope,
                 i, j,
                 requiredAsterisk,
@@ -545,110 +547,88 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             function buildHtml(question, index){
                 question.index = index;
 
-                if(!$('#taker_'+question.index+':eq(0)').is('div')){
-                    html+='<div id="taker_'+question.index+'" class="survey_taker_question row">';
-                    $('#survey_taker_finalized_questions').append(html);
-                }
-
                 requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
+
+
+                html+='<div id="taker_'+question.index+'" class="form-group '+requiredAsterisk+' ">';
                 requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
-                html += '<div class="col-xs-12 '+requiredAsterisk+'"><b>'+question.question_name+'</b></div>\n';
+                html += '<label for="'+question.variable+'">'+question.question_name+'</label>\n';
+
                 if(!Empty(question.question_description)){
-                    html += '<div class="col-xs-12 survey_taker_description"><i>'+question.question_description+'</i></div>\n';
+                    html += '<div class="survey_taker_description"><i>'+question.question_description+'</i></div>\n';
                 }
                 scope[question.variable] = question.default;
-                if(question.type === 'text' ){
-                    //defaultValue = (question.default) ? question.default : "";
 
-                    html+='<div class="row">'+
-                        '<div class="col-xs-8">'+
-                        '<input type="text" id="'+question.variable+'" ng-model="'+question.variable+'" '+
+                if(question.type === 'text' ){
+                    html+='<input type="text" id="'+question.variable+'" ng-model="'+question.variable+'" '+
                         'name="'+question.variable+'" '+
-                        'class="form-control survey_taker_input ng-pristine ng-invalid-required ng-invalid" required="" >'+
+                        'class="form-control  ng-pristine ng-invalid-required ng-invalid" required="" >'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
                         'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
-                        '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>'+
-                        '</div>'+
-                        '</div>';
-
+                        '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
                 }
+
                 if(question.type === "textarea"){
                     scope[question.variable] = question.default || question.default_textarea;
-                    html+='<div class="row">'+
-                        '<div class="col-xs-8">'+
-                        '<textarea id="'+question.variable+'" name="'+question.variable+'" ng-model="'+question.variable+'" '+
-                        'class="form-control survey_taker_input ng-pristine ng-invalid-required ng-invalid final"  required="" rows="3"></textarea>'+
+                    html+='<textarea id="'+question.variable+'" name="'+question.variable+'" ng-model="'+question.variable+'" '+
+                        'class="form-control  ng-pristine ng-invalid-required ng-invalid final"  required="" rows="3"></textarea>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
                         'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
-                        '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>'+
-                        '</div></div>';
+                        '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
                 }
+
                 if(question.type === 'multiplechoice'){
                     choices = question.choices.split(/\n/);
                     element = (question.type==="multiselect") ? "checkbox" : 'radio';
                     question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
-
                     html+='<div class="survey_taker_input" > ';
-
                     for( j = 0; j<choices.length; j++){
                         checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
-                        // html+='<label class="'+element+'-inline">'+
-                        // '<input class="survey_taker_input" type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[j]+' " '+checked+' >' +choices[j]+
-                        // '</label>';
                         html+= '<input  type="'+element+'" class="mc" ng-model="'+question.variable+'" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
                         '<span>'+choices[j] +'</span><br>' ;
-
                     }
                     html+=  '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
                         'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
                         '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
-                    html+= '</div>';
+                    html+= '</div>'; //end survey_taker_input
                 }
+
                 if(question.type === "multiselect"){
                     choices = question.choices.split(/\n/);
                     element = (question.type==="multiselect") ? "checkbox" : 'radio';
                     question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
                     // scope[question.variable].choices = choices;
                     html+='<div class="survey_taker_input" > ';
-
                     for( j = 0; j<choices.length; j++){
                         checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
                         html+= '<input  type="checkbox"  class="mc" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
                         '<span>'+choices[j] +'</span><br>' ;
-
                     }
                     html+=  '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
                         'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
                         '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
-                    html+= '</div>';
+                    html+= '</div>'; //end survey_taker_input
                 }
+
                 if(question.type === 'integer'){
                     min = (!Empty(question.min)) ? Number(question.min) : "";
                     max = (!Empty(question.max)) ? Number(question.max) : "" ;
-                    //defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_int)) ? question.default_int : "" ;
-                    html+='<div class="row">'+
-                        '<div class="col-xs-8">'+
-                        '<input type="number" id="'+question.variable+'" class="survey_taker_input form-control" name="'+question.variable+'" ng-min="'+min+'" ng-max="'+max+'" ng-model="'+question.variable+' " integer>'+
+                    html+='<input type="number" id="'+question.variable+'" class=" form-control" name="'+question.variable+'" ng-min="'+min+'" ng-max="'+max+'" ng-model="'+question.variable+' " integer>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.number || job_launch_form.'+question.variable+'.$error.integer">This is not valid integer!</div>'+
-                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.ngMin || job_launch_form.'+question.variable+'.$error.ngMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>'+
-                        '</div></div>';
-
+                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.ngMin || job_launch_form.'+question.variable+'.$error.ngMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>';
                 }
+
                 if(question.type === "float"){
                     min = (!Empty(question.min)) ? question.min : "";
                     max = (!Empty(question.max)) ? question.max : "" ;
                     defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_float)) ? question.default_float : "" ;
-                    html+='<div class="row">'+
-                        '<div class="col-xs-8">'+
-                        '<input type="number" id="'+question.variable+'" class="survey_taker_input form-control" name="'+question.variable+'" ng-min="'+min+'" ng-max="'+max+'" ng-model="'+question.variable+'" smart-float>'+
+                    html+='<input type="number" id="'+question.variable+'" class=" form-control" name="'+question.variable+'" ng-min="'+min+'" ng-max="'+max+'" ng-model="'+question.variable+'" smart-float>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.number || job_launch_form.'+question.variable+'.$error.float">This is not valid float!</div>'+
-                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.ngMin || job_launch_form.'+question.variable+'.$error.ngMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>'+
-                        '</div></div>';
-
+                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.ngMin || job_launch_form.'+question.variable+'.$error.ngMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>';
                 }
                 html+='</div>';
                 if(question.index === scope.survey_questions.length-1){
-                    CreateLaunchDialog({scope: scope, html: html, url: url});
+                    scope.$emit(callback, html, url);
                 }
             }
 
@@ -658,126 +638,19 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 });
             };
 
-                // question.index = index;
-                // question[question.variable] = question.default;
-                // scope[question.variable] = question.default;
-
-
-                // if(!$('#question_'+question.index+':eq(0)').is('div')){
-                //     html+='<div id="question_'+question.index+'" class="survey_taker_question_final row"></div>';
-                //     $('#survey_taker_finalized_questions').append(html);
-                // }
-
-                // requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
-                // requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
-
-                // html += '<div class="col-xs-12 '+requiredAsterisk+'"><b>'+question.question_name+'</b></div>\n';
-                // if(!Empty(question.question_description)){
-                //     html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
-                // }
-                // defaultValue = (question.default) ? question.default : "";
-
-                // if(question.type === 'text' ){
-                //     html+='<div class="row">'+
-                //         '<div class="col-xs-8">'+
-                //         '<input type="text" ng-model="'+question.variable+'" '+         //placeholder="'+defaultValue+'"
-                //                 'class="form-control '+requiredClasses+' final" required="" >'+
-                //         '</div></div>';
-                // }
-                // if(question.type === "textarea"){
-                //     html+='<div class="row">'+
-                //         '<div class="col-xs-8">'+
-                //         '<textarea ng-model="'+question.variable+'" class="form-control '+requiredClasses+' final" required="" rows="3" >'+//defaultValue+
-                //                 '</textarea>'+
-                //         '</div></div>';
-                // }
-                // if(question.type === 'multiplechoice' || question.type === "multiselect"){
-                //     choices = question.choices.split(/\n/);
-                //     element = (question.type==="multiselect") ? "checkbox" : 'radio';
-
-                //     for( i = 0; i<choices.length; i++){
-                //         checked = (!Empty(question.default) && question.default.indexOf(choices[i].trim())!==-1) ? "checked" : "";
-                //         html+='<label class="'+element+'-inline  final">'+
-                //         '<input type="'+element+'" name="'+question.variable+ ' " id="" value=" '+choices[i]+' " '+checked+' >' +choices[i]+
-                //         '</label>';
-                //     }
-
-                // }
-                // if(question.type === 'integer' || question.type === "float"){
-                //     min = (question.min) ? question.min : "";
-                //     max = (question.max) ? question.max : "" ;
-                //     html+='<div class="row">'+
-                //         '<div class="col-xs-8">'+
-                //         '<input type="number" class="final" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'">'+
-                //         '</div></div>';
-
-                // }
-
-
-                // if (scope.removeDialogReady) {
-                //     scope.removeDialogReady();
-                // }
-                // scope.removeDialogReady = scope.$on('DialogReady', function() {
-                //     $('#password-modal').dialog('open');
-                //     $('#finalized_questions').attr('opacity', 1.0);
-                //     // $('#surveyName').focus();
-                //     // $('#question_unique_required_chbox').prop('checked' , true);
-                // });
-
-                // if (scope.removeSurveyTakerCompleted) {
-                //     scope.removeSurveyTakerCompleted();
-                // }
-                // scope.removeSurveyTakerCompleted = scope.$on('SurveyTakerCompleted', function() {
-
-                //     for(i=0; i<scope.survey_questions.length; i++){
-
-                //         survey_vars[scope.survey_questions[i].variable] = scope[scope.survey_questions[i].variable];
-                //     }
-
-                //     Wait('start');
-                //     Rest.setUrl(url);
-                //     Rest.post(survey_vars)
-                //         .success(function(data) {
-                //             scope.new_job_id = data.job;
-                //             // scope.$emit(callback, data);
-                //             $('#password-modal').dialog('close');
-                //             scope.$emit('StartPlaybookRun', passwords);
-                //         })
-                //         .error(function (data, status) {
-                //             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                //                 msg: 'Attempt to start job at ' + url + ' failed. POST returned: ' + status });
-                //         });
-
-
-
-                // });
 
             Rest.setUrl(survey_url);
             Rest.get()
                 .success(function (data) {
                     if(!Empty(data)){
-                        // generator.inject(form, { id: 'password-modal' , mode: 'edit', related: false, scope: scope, breadCrumbs: false });
-                        // ShowSurveyModal({ title: data.name, scope: scope, callback: 'DialogReady' , mode: 'survey-taker'});
-
                         scope.survey_name = data.name;
                         scope.survey_description = data.description;
                         scope.survey_questions = data.spec;
 
-                        // if(!Empty(scope.survey_description)){
-                        //     $('#survey_taker_description').append(scope.survey_description);
-                        // }
-
                         for(i=0; i<scope.survey_questions.length; i++){
                             buildHtml(scope.survey_questions[i], i);
                         }
-                        // scope.addQuestion();
-                        // Wait('stop');
-                    } else {
-                        // AddSurvey({
-                        //     scope: scope
-                        // });
                     }
-
                 })
             .error(function (data, status) {
                 ProcessErrors(scope, data, status, { hdr: 'Error!',
@@ -811,11 +684,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 job_template,
                 extra_vars,
                 new_job_id,
-                new_job,
                 launch_url,
-                prompt_for_vars = false,
-                html,
-                passwords;
+                html;
             scope.job_template_id = id;
             if (base === 'job_templates' || base === 'portal') {
                 url = GetBasePath('job_templates') + id + '/launch/';
@@ -825,47 +695,47 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
 
 
-            if (scope.removePostTheJob) {
-                scope.removePostTheJob();
-            }
-            scope.removePostTheJob = scope.$on('PostTheJob', function() {
-                var url = (job_template.related.jobs) ? job_template.related.jobs : job_template.related.job_template + 'jobs/';
-                Wait('start');
-                Rest.setUrl(url);
-                Rest.post(job_template)
-                    .success(function (data) {
-                        new_job_id = data.id;
-                        launch_url = data.related.start;
-                        prompt_for_vars = data.ask_variables_on_launch;
-                        new_job = data;
-                        if (data.passwords_needed_to_start.length > 0) {
-                            scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
-                        }
-                        else if (data.ask_variables_on_launch) {
-                            scope.$emit('PromptForVars');
-                        }
-                        else {
-                            scope.$emit('StartPlaybookRun');
-                        }
-                    })
-                    .error(function (data, status) {
-                        var key, html;
-                        if (status === 400) {
-                            // there's a data problem with the job template
-                            html = "<ul style=\"list-style-type: none; margin: 15px 0;\">\n";
-                            for (key in data) {
-                                html += "<li><strong>" + key + "</strong>: " + data[key][0] + "</li>\n";
-                            }
-                            html += "</ul>\n";
-                            Wait('stop');
-                            Alert('Job Template Error', "<p>Fix the following issues before using the template:</p>" + html, 'alert-danger');
-                        }
-                        else {
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                               msg: 'Failed to create job. POST returned status: ' + status });
-                        }
-                    });
-            });
+            // if (scope.removePostTheJob) {
+            //     scope.removePostTheJob();
+            // }
+            // scope.removePostTheJob = scope.$on('PostTheJob', function() {
+            //     var url = (job_template.related.jobs) ? job_template.related.jobs : job_template.related.job_template + 'jobs/';
+            //     Wait('start');
+            //     Rest.setUrl(url);
+            //     Rest.post(job_template)
+            //         .success(function (data) {
+            //             new_job_id = data.id;
+            //             launch_url = data.related.start;
+            //             prompt_for_vars = data.ask_variables_on_launch;
+            //             new_job = data;
+            //             if (data.passwords_needed_to_start.length > 0) {
+            //                 scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
+            //             }
+            //             else if (data.ask_variables_on_launch) {
+            //                 scope.$emit('PromptForVars');
+            //             }
+            //             else {
+            //                 scope.$emit('StartPlaybookRun');
+            //             }
+            //         })
+            //         .error(function (data, status) {
+            //             var key, html;
+            //             if (status === 400) {
+            //                 // there's a data problem with the job template
+            //                 html = "<ul style=\"list-style-type: none; margin: 15px 0;\">\n";
+            //                 for (key in data) {
+            //                     html += "<li><strong>" + key + "</strong>: " + data[key][0] + "</li>\n";
+            //                 }
+            //                 html += "</ul>\n";
+            //                 Wait('stop');
+            //                 Alert('Job Template Error', "<p>Fix the following issues before using the template:</p>" + html, 'alert-danger');
+            //             }
+            //             else {
+            //                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+            //                    msg: 'Failed to create job. POST returned status: ' + status });
+            //             }
+            //         });
+            // });
 
             if (scope.removeCancelJob) {
                 scope.removeCancelJob();
@@ -902,9 +772,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 LaunchJob({
                     scope: scope,
                     url: url,
-                    callback: 'PlaybookLaunchFinished',
-                    passwords: passwords
+                    callback: 'PlaybookLaunchFinished'
                 });
+
             });
 
             if (scope.removePromptForPasswords) {
@@ -960,18 +830,29 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                         scope: scope,
                         id: scope.job_template_id,
                         variables: extra_vars,
-                        callback: 'StartPlaybookRun',
+                        callback: 'CreateModal',
                         url: url,
                         html: html
                     });
                 }
                 else {
-                    // scope.$emit('StartPlaybookRun');
-                    CreateLaunchDialog({scope: scope, html: html, url: url});
+                    scope.$emit('CreateModal', html, url);
+                    // CreateLaunchDialog({scope: scope, html: html, url: url});
                 }
 
             });
 
+            if (scope.removeCreateModal) {
+                scope.removeCreateModal();
+            }
+            scope.removeCreateModal = scope.$on('CreateModal', function(e, html, url) {
+                CreateLaunchDialog({
+                    scope: scope,
+                    html: html,
+                    url: url,
+                    callback: 'StartPlaybookRun'
+                });
+            });
 
 
             if (scope.removeCredentialReady) {
