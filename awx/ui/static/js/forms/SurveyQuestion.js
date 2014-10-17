@@ -150,7 +150,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 type: 'custom',
                 control: '<div>'+
                     '<label for="default_float"><span class="label-text">Default Answer</span></label>'+
-                    '<input type="number" ng-model="default_float" name="default_float" ng-min="float_min" ng-max="float_max"  class="form-control" smart-float />'+
+                    '<input type="number" ng-model="default_float" name="default_float" ng-min="float_min" ng-max="float_max"  class="form-control"  />'+
                     '<div class="error" ng-show="survey_question_form.default_float.$error.number || survey_question_form.default_float.$error.float">This is not valid float!</div>'+
                     '<div class="error" ng-show="survey_question_form.default_float.$error.ngMin || survey_question_form.default_float.$error.ngMax"> The value must be in range {{float_min}} to {{float_max}}!</div>'+
                     '</div>',
