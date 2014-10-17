@@ -10,7 +10,10 @@ from setuptools.command.sdist import sdist as _sdist
 
 from awx import __version__
 
-build_timestamp = os.getenv("BUILD",datetime.datetime.now().strftime('-%Y%m%d%H%M'))
+if os.getenv('OFFICIAL', 'no') == 'yes':
+    build_timestamp = ''
+else:
+    build_timestamp = '-' + os.getenv("BUILD", datetime.datetime.now().strftime('0.git%Y%m%d%H%M'))
 
 # Paths we'll use later
 etcpath = "/etc/tower"
@@ -73,7 +76,7 @@ def proc_data_files(data_files):
 
 #####################################################################
 
-class sdist_deb(_sdist, object):
+class sdist_pyc_only(_sdist, object):
     '''
     Custom sdist command to distribute some files as .pyc only.
     '''
@@ -83,7 +86,8 @@ class sdist_deb(_sdist, object):
             if f.endswith('.egg-info/SOURCES.txt'):
                 files.remove(f)
                 sources_txt_path = f
-        super(sdist_deb, self).make_release_tree(base_dir, files)
+        super(sdist_pyc_only, self).make_release_tree(base_dir, files)
+
         new_sources_path = os.path.join(base_dir, sources_txt_path)
         if os.path.isfile(new_sources_path):
             log.warn('unlinking previous %s', new_sources_path)
@@ -117,7 +121,7 @@ class sdist_deb(_sdist, object):
                 # Replace .py with .pyc file
                 self.filelist.files[n] = f + 'c'
                 self.pyc_only_files.append(f)
-        super(sdist_deb, self).make_distribution()
+        super(sdist_pyc_only, self).make_distribution()
 
 #####################################################################
 
@@ -225,19 +229,15 @@ setup(
     ),
     options = {
         'egg_info': {
-            'tag_build': '-%s' % build_timestamp,
+            'tag_build': build_timestamp,
         },
         'aliases': {
-            # For RPM builds, don't byte-compile awx ... RPM handles that for us
-            'dev_rpm': 'clean --all egg_info sdist',
-            'release_rpm': 'clean --all egg_info -b "" sdist',
-            # For DEB builds, do byte-compile awx
-            'dev_deb': 'clean --all egg_info sdist_deb',
-            'release_deb': 'clean --all egg_info -b "" sdist_deb',
+            'dev_build': 'clean --all egg_info sdist',
+            'release_build': 'clean --all egg_info -b "" sdist',
         },
     },
     cmdclass = {
-        'sdist_deb': sdist_deb,
+        'sdist': os.getenv('BYTE_COMPILE', False) in (True, 1, 'True', '1') and sdist_pyc_only or _sdist,
         'install_lib': install_lib,
     },
 )

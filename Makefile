@@ -8,45 +8,74 @@ GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 GIT_DATE := $(shell git log -n 1 --format="%ai")
 DATE := $(shell date -u +%Y%m%d%H%M)
 
-NAME=ansible-tower
-VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
-RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[1])")
-GIT_REMOTE_URL=$(shell git config --get remote.origin.url)
+NAME = ansible-tower
+VERSION = $(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
+RELEASE ?= 1
+GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
+BUILD ?= 0.git$(DATE)
 
 # Allow AMI license customization
-AWS_INSTANCE_COUNT ?= 10
+AWS_INSTANCE_COUNT ?= 100
 
+# TAR build parameters
 ifneq ($(OFFICIAL),yes)
-BUILD=0.dev$(DATE)
-SDIST_TAR_FILE=$(NAME)-$(VERSION)-$(BUILD).tar.gz
-SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(BUILD)
-RPM_PKG_RELEASE=$(BUILD)
-DEB_BUILD_DIR=deb-build/$(NAME)-$(VERSION)-$(BUILD)
-DEB_PKG_RELEASE=$(VERSION)-$(BUILD)
-PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-nightly.json
+    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(BUILD)
+    SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(BUILD)
+    PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-nightly.json
 else
-BUILD=
-SDIST_TAR_FILE=$(NAME)-$(VERSION).tar.gz
-SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)
-RPM_PKG_RELEASE=$(RELEASE)
-DEB_BUILD_DIR=deb-build/$(NAME)-$(VERSION)
-DEB_PKG_RELEASE=$(VERSION)-$(RELEASE)
-PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-release.json
+    SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)
+    SDIST_TAR_NAME=$(NAME)-$(VERSION)
+    PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-release.json
 endif
+SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 
+# DEB build parameters
+DEBUILD_BIN ?= debuild
+DEBUILD_OPTS = --source-option="-I"
+DPUT_BIN ?= dput
+DPUT_OPTS ?=
+ifeq ($(OFFICIAL),yes)
+    DEB_DIST ?= stable
+    DEB_RELEASE = $(RELEASE)
+    # Sign OFFICIAL builds using 'DEBSIGN_KEYID'
+    # DEBSIGN_KEYID is required when signing
+    ifneq ($(DEBSIGN_KEYID),)
+        DEBUILD_OPTS += -k$(DEBSIGN_KEYID)
+    endif
+else
+    DEB_DIST ?= unstable
+    DEB_RELEASE = $(BUILD)
+    # Do not sign development builds
+    DEBUILD_OPTS += -uc -us
+    DPUT_OPTS += -u
+endif
+DEBUILD = $(DEBUILD_BIN) $(DEBUILD_OPTS)
+DEB_PPA ?= reprepro
+
+# RPM build parameters
+RPM_SPECDIR= packaging/rpm
+RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
+RPM_DIST = $(shell rpm --eval '%{?dist}')
+ifeq ($(OFFICIAL),yes)
+    RPM_RELEASE = $(RELEASE)
+else
+    RPM_RELEASE = $(BUILD)
+endif
+RPM_NVR = $(NAME)-$(VERSION)-$(RPM_RELEASE)$(RPM_DIST)
 MOCK_BIN ?= mock
 MOCK_CFG ?=
 
 .PHONY: clean rebase push requirements requirements_pypi requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html test_ui test_jenkins dev_build \
-	release_build release_clean sdist rpm
+	release_build release_clean sdist rpmtar mock-rpm mock-srpm \
+	deb deb-src debian reprepro
 
 # Remove temporary build files, compiled Python files.
 clean:
 	rm -rf dist/*
-	rm -rf build rpm-build *.egg-info
-	rm -rf debian deb-build
+	rm -rf build rpm-build $(NAME)-$(VERSION) *.egg-info
+	rm -rf debian deb-build reprepro
 	rm -f awx/ui/static/{js,css}/awx*.{js,css}
 	rm -rf awx/ui/static/docs
 	rm -rf node_modules package.json Gruntfile.js bower.json
@@ -231,81 +260,107 @@ release_build:
 	$(PYTHON) setup.py release_build
 
 # Build AWX setup tarball.
-setup_tarball:
+$(SETUP_TAR_NAME).tar.gz:
 	@cp -a setup $(SETUP_TAR_NAME)
 	@tar czf $(SETUP_TAR_NAME).tar.gz $(SETUP_TAR_NAME)/
 	@rm -rf $(SETUP_TAR_NAME)
+	@echo "#############################################"
+	@echo "Setup artifacts:"
+	@echo $(SETUP_TAR_NAME).tar.gz
+	@echo "#############################################"
+
+setup_tarball: $(SETUP_TAR_NAME).tar.gz
 
 release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
 
-# Traditional 'sdist'
-sdist: clean minjs
-	if [ "$(OFFICIAL)" = "yes" ] ; then \
-	   $(PYTHON) setup.py release_rpm; \
-	else \
-	   BUILD=$(BUILD) $(PYTHON) setup.py dev_rpm; \
-	fi
+dist/$(SDIST_TAR_FILE):
+	BYTE_COMPLE=$(BYTE_COMPILE) BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
-# Differs from 'sdist' because it includes 'byte-compiled' files in the tarball
-sdist_deb: clean minjs
-	if [ "$(OFFICIAL)" = "yes" ] ; then \
-	   $(PYTHON) setup.py release_deb ; \
-	else \
-	   BUILD=$(BUILD) $(PYTHON) setup.py dev_deb; \
-	fi
+sdist: minjs dist/$(SDIST_TAR_FILE)
 
-rpmtar: sdist
+rpm-build/$(SDIST_TAR_FILE): dist/$(SDIST_TAR_FILE)
 	mkdir -p rpm-build
+	cp packaging/rpm/$(NAME).spec rpm-build/
 	cp packaging/rpm/$(NAME).te rpm-build/
-	sed -e 's#^Version:.*#Version: $(VERSION)#' -e 's#^Release:.*#Release: $(RPM_PKG_RELEASE)%{?dist}#' packaging/rpm/$(NAME).spec >rpm-build/$(NAME).spec
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
-	   (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
-	   (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
-	   (cd dist/ && tar czf $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)) ; \
+	  (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
+	  (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
+	  (cd dist/ && tar czf ../rpm-build/$(SDIST_TAR_FILE) $(NAME)-$(VERSION)) ; \
+	  ln -sf $(SDIST_TAR_FILE) rpm-build/$(NAME)-$(VERSION).tar.gz ; \
+	else \
+	  ln -sf ../dist/$(SDIST_TAR_FILE) rpm-build/ ; \
 	fi
-	cp dist/$(NAME)-$(VERSION).tar.gz rpm-build/
 
-mock-srpm: /etc/mock/$(MOCK_CFG).cfg rpmtar
-	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build
+rpmtar: rpm-build/$(SDIST_TAR_FILE)
 
-mock-rpm: /etc/mock/$(MOCK_CFG).cfg mock-srpm
-	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(NAME)-*.src.rpm
+rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
+	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
+	   --define "tower_version $(VERSION)" --define "tower_release $(RPM_RELEASE)"
+	@echo "#############################################"
+	@echo "SRPM artifacts:"
+	@echo rpm-build/$(RPM_NVR).src.rpm
+	@echo "#############################################"
 
-srpm: rpmtar
-	@rpmbuild \
-        --define "_pkgrelease $(RPM_PKG_RELEASE)" \
-        --define "_topdir %(pwd)/rpm-build" \
-        --define "_builddir %{_topdir}" \
-        --define "_rpmdir %{_topdir}" \
-        --define "_srcrpmdir %{_topdir}" \
-        --define "_specdir %{_topdir}" \
-        --define "_sourcedir  %{_topdir}" \
-        --define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
-        -bs rpm-build/$(NAME).spec
+mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 
-rpm: rpmtar
-	@rpmbuild \
-        --define "_pkgrelease $(RPM_PKG_RELEASE)" \
-        --define "_topdir %(pwd)/rpm-build" \
-        --define "_builddir %{_topdir}" \
-        --define "_rpmdir %{_topdir}" \
-        --define "_srcrpmdir %{_topdir}" \
-        --define "_specdir %{_topdir}" \
-        --define "_sourcedir  %{_topdir}" \
-        --define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
-        -ba rpm-build/$(NAME).spec
+rpm-build/$(RPM_NVR).noarch.rpm: rpm-build/$(RPM_NVR).src.rpm
+	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \
+	   --define "tower_version $(VERSION)" --define "tower_release $(RPM_RELEASE)"
+	@echo "#############################################"
+	@echo "RPM artifacts:"
+	@echo rpm-build/$(RPM_NVR).noarch.rpm
+	@echo "#############################################"
 
-deb: sdist_deb
-	@mkdir -p deb-build
-	@cp dist/$(SDIST_TAR_FILE) deb-build/
-	(cd deb-build && tar zxf $(SDIST_TAR_FILE))
-	(cd $(DEB_BUILD_DIR) && dh_make --indep --yes -f ../$(SDIST_TAR_FILE) -p $(NAME)-$(VERSION))
-	@rm -rf $(DEB_BUILD_DIR)/debian
-	@cp -a packaging/debian $(DEB_BUILD_DIR)/
-	@echo "$(NAME)-$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
-	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
+mock-rpm: rpm-build/$(RPM_NVR).noarch.rpm
+
+deb-build/$(SDIST_TAR_NAME): BYTE_COMPILE = 1
+deb-build/$(SDIST_TAR_NAME):
+	mkdir -p deb-build
+	tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE)
+	cp -a packaging/debian deb-build/$(SDIST_TAR_NAME)/
+	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(DEB_RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
+
+debian: sdist deb-build/$(SDIST_TAR_NAME)
+
+deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_all.deb:
+	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -b
+	@echo "#############################################"
+	@echo "DEB artifacts:"
+	@echo deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_all.deb
+	@echo "#############################################"
+
+deb: debian deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_all.deb
+
+deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_source.changes:
+	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -S
+	@echo "#############################################"
+	@echo "DEB artifacts:"
+	@echo deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_source.changes
+	@echo "#############################################"
+
+deb-src: debian deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_source.changes
+
+deb-upload: deb
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_amd64.changes ; \
+
+deb-src-upload: deb-src
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_source.changes ; \
+
+reprepro: deb
+	mkdir -p reprepro/conf
+	cp -a packaging/reprepro/* reprepro/conf/
+	@DEB=deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_all.deb ; \
+	for DIST in trusty precise ; do \
+	    echo "Removing '$(NAME)' from the $${DIST} apt repo" ; \
+	    echo reprepro --export=force -b reprepro remove $${DIST} $(NAME) ; \
+	done; \
+	reprepro --export=force -b reprepro clearvanished; \
+	for DIST in trusty precise ; do \
+	    echo "Adding $${DEB} to the $${DIST} apt repo"; \
+	    reprepro --keepunreferencedfiles --export=force -b reprepro --ignore=brokenold includedeb $${DIST} $${DEB} ; \
+	done; \
 
 ami:
 	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" -var "official=$(OFFICIAL)" $(NAME).json)
