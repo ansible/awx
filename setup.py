@@ -155,7 +155,7 @@ class install_lib(_install_lib, object):
                 log.debug('install_lib skipping: %s', f)
                 continue
             if f.endswith('.py'):
-                log.debug('install_lib removing: %s', f)
+                log.info('install_lib removing: %s', f)
                 os.unlink(f)
 
     def get_outputs(self):

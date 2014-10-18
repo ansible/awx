@@ -55,7 +55,7 @@ DEB_PPA ?= reprepro
 # RPM build parameters
 RPM_SPECDIR= packaging/rpm
 RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
-RPM_DIST = $(shell rpm --eval '%{?dist}')
+RPM_DIST = $(shell rpm --eval '%{?dist}' 2>/dev/null)
 ifeq ($(OFFICIAL),yes)
     RPM_RELEASE = $(RELEASE)
 else
@@ -321,7 +321,7 @@ deb-build/$(SDIST_TAR_NAME):
 	cp -a packaging/debian deb-build/$(SDIST_TAR_NAME)/
 	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(DEB_RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
 
-debian: BYTE_COMPILE = 1
+# debian: BYTE_COMPILE = 1
 debian: sdist deb-build/$(SDIST_TAR_NAME)
 
 deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_all.deb:
