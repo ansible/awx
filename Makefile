@@ -276,7 +276,7 @@ release_clean:
 	-(rm -rf ($RELEASE))
 
 dist/$(SDIST_TAR_FILE):
-	BYTE_COMPILE=$(BYTE_COMPILE) BUILD="$(BUILD)" $(PYTHON) setup.py sdist
+	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
 sdist: minjs dist/$(SDIST_TAR_FILE)
 
@@ -321,7 +321,6 @@ deb-build/$(SDIST_TAR_NAME):
 	cp -a packaging/debian deb-build/$(SDIST_TAR_NAME)/
 	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(DEB_RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
 
-# debian: BYTE_COMPILE = 1
 debian: sdist deb-build/$(SDIST_TAR_NAME)
 
 deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_all.deb:

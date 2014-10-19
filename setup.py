@@ -125,48 +125,52 @@ class sdist_pyc_only(_sdist, object):
 
 #####################################################################
 
-from distutils.command.install_lib import install_lib as _install_lib
+if os.getenv('RPM_PACKAGE_NAME', False) == 'ansible-tower':
 
-class install_lib(_install_lib, object):
-    '''
-    Custom install_lib command to distribute some files as .pyc only.
-    '''
-
-    def run(self):
+    from distutils.command.install_lib import install_lib as _install_lib
+    class install_lib(_install_lib, object):
         '''
-        Overload the run method and remove all .py files after compilation
+        Custom install_lib command to distribute some files as .pyc only.
         '''
 
-        super(install_lib, self).run()
-        for f in self.install():
-            if not f.startswith(self.install_dir + 'awx/'):
-                log.debug('install_lib skipping: %s', f)
-                continue
-            if f.startswith(self.install_dir + 'awx/lib/site-packages'):
-                log.debug('install_lib skipping: %s', f)
-                continue
-            if f.startswith(self.install_dir + 'awx/scripts'):
-                log.debug('install_lib skipping: %s', f)
-                continue
-            if f.startswith(self.install_dir + 'awx/plugins'):
-                log.debug('install_lib skipping: %s', f)
-                continue
-            if f.startswith(self.install_dir + 'awx/main/tests/data'):
-                log.debug('install_lib skipping: %s', f)
-                continue
-            if f.endswith('.py'):
-                log.info('install_lib removing: %s', f)
-                os.unlink(f)
+        def run(self):
+            '''
+            Overload the run method and remove all .py files after compilation
+            '''
 
-    def get_outputs(self):
-        '''
-        Overload the get_outputs method and remove any .py entries in the file
-        list
-        '''
+            super(install_lib, self).run()
+            for f in self.install():
+                if not f.startswith(self.install_dir + 'awx/'):
+                    log.debug('install_lib skipping: %s', f)
+                    continue
+                if f.startswith(self.install_dir + 'awx/lib/site-packages'):
+                    log.debug('install_lib skipping: %s', f)
+                    continue
+                if f.startswith(self.install_dir + 'awx/scripts'):
+                    log.debug('install_lib skipping: %s', f)
+                    continue
+                if f.startswith(self.install_dir + 'awx/plugins'):
+                    log.debug('install_lib skipping: %s', f)
+                    continue
+                if f.startswith(self.install_dir + 'awx/main/tests/data'):
+                    log.debug('install_lib skipping: %s', f)
+                    continue
+                if f.endswith('.py'):
+                    log.info('install_lib removing: %s', f)
+                    os.unlink(f)
 
-        filenames = super(install_lib, self).get_outputs()
-        return [filename for filename in filenames
-            if not filename.endswith('.py')]
+        def get_outputs(self):
+            '''
+            Overload the get_outputs method and remove any .py entries in the file
+            list
+            '''
+
+            filenames = super(install_lib, self).get_outputs()
+            return [filename for filename in filenames
+                if not filename.endswith('.py')]
+else:
+
+    from distutils.command.install_lib import install_lib
 
 #####################################################################
 
@@ -237,7 +241,7 @@ setup(
         },
     },
     cmdclass = {
-        'sdist': os.getenv('BYTE_COMPILE', False) in (True, 1, 'True', '1') and sdist_pyc_only or _sdist,
+        'sdist': _sdist,
         'install_lib': install_lib,
     },
 )
