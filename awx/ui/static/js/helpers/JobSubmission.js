@@ -14,8 +14,8 @@
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
     'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog', 'FormGenerator', 'JobVarsPromptFormDefinition'])
 
-.factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors', 'ToJSON',
-    function(Rest, Wait, ProcessErrors, ToJSON) {
+.factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors', 'ToJSON', 'Empty',
+    function(Rest, Wait, ProcessErrors, ToJSON, Empty) {
         return function(params) {
             var scope = params.scope,
                 // passwords = params.passwords || {},
@@ -25,7 +25,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 fld;
 
 
-            if(scope.passwords_needed_to_start.length>0){
+            if(!Empty(scope.passwords_needed_to_start) && scope.passwords_needed_to_start .length>0){
                 scope.passwords.forEach(function(password) {
                         job_launch_data[password] = scope[password];
                     });
@@ -607,8 +607,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     //     required: true,
                     //     value: ''
                     // }
-                    // function Ctrl($scope) {
-                    //     $scope.field = {
+                    // function Ctrl(scope) {
+                    //     scope.field = {
                     //         name:'multi checkboxes',
                     //         value:'',
                     //         required:true,
@@ -628,7 +628,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     html+='<div class="survey_taker_input" > ';
                     for( j = 0; j<choices.length; j++){
                         checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
-                        html+= '<input  type="checkbox"  class="mc" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
+                        html+= '<input  type="checkbox"  class="mc" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
                         '<span>'+choices[j] +'</span><br>' ;
                     }
                     html+=  '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
