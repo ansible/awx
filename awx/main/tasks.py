@@ -291,7 +291,7 @@ class BaseTask(Task):
                 continue
             elif hidden_re.search(k):
                 env[k] = HIDDEN_PASSWORD
-            elif urlpass_re.match(v):
+            elif type(v) == str and urlpass_re.match(v):
                 env[k] = urlpass_re.sub(HIDDEN_PASSWORD, v)
         return env
 
@@ -1047,7 +1047,7 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source == 'custom':
             for env_k in inventory_update.source_vars_dict:
                 if env_k not in os.environ:
-                    env[env_k] = inventory_update.source_vars_dict[env_k]
+                    env[env_k] = unicode(inventory_update.source_vars_dict[env_k])
         return env
 
     def build_args(self, inventory_update, **kwargs):
@@ -1119,7 +1119,7 @@ class RunInventoryUpdate(BaseTask):
             handle, path = tempfile.mkstemp(dir=runpath)
             f = os.fdopen(handle, 'w')
             # Check that source_script is not none and exists and that .script is not an empty string
-            f.write(inventory_update.source_script.script)
+            f.write(inventory_update.source_script.script.encode('utf-8'))
             f.close()
             os.chmod(path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
             args.append(runpath)
