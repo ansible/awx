@@ -49,6 +49,10 @@ pep8.txt
 tools/vagrant/local.yml
 .vagrant*
 
+# Setup
+setup/tower_setup_conf.yml
+setup/setup.log
+
 # Other
 .tower_cycle
 env/*

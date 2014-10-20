@@ -14,6 +14,7 @@ from awx.main.models.inventory import *
 from awx.main.models.jobs import *
 from awx.main.models.schedules import *
 from awx.main.models.activity_stream import *
+from awx.main.models.ha import *
 
 # Monkeypatch Django serializer to ignore django-taggit fields (which break
 # the dumpdata command; see https://github.com/alex/django-taggit/issues/155).

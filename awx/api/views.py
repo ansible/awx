@@ -45,6 +45,7 @@ from awx.main.task_engine import TaskSerializer, TASK_FILE
 from awx.main.models import *
 from awx.main.utils import *
 from awx.main.access import get_user_queryset
+from awx.main.ha import is_ha_environment
 from awx.api.authentication import JobTaskAuthentication
 from awx.api.permissions import *
 from awx.api.renderers import *
@@ -113,6 +114,49 @@ class ApiV1RootView(APIView):
         data['unified_jobs'] = reverse('api:unified_job_list')
         data['activity_stream'] = reverse('api:activity_stream_list')
         return Response(data)
+
+
+class ApiV1PingView(APIView):
+    """A simple view that reports very basic information about this Tower
+    instance, which is acceptable to be public information.
+    """
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+    view_name = 'Ping'
+
+    def get(self, request, format=None):
+        """Return some basic information about this Tower instance.
+
+        Everything returned here should be considered public / insecure, as
+        this requires no auth and is intended for use by the installer process.
+        """
+        # Most of this response is canned; just build the dictionary.
+        response = {
+            'ha': is_ha_environment(),
+            'role': Instance.objects.my_role(),
+            'version': get_awx_version(),
+        }
+
+        # If this is an HA environment, we also include the IP address of
+        # all of the instances.
+        #
+        # Set up a default structure.
+        response['instances'] = {
+            'primary': None,
+            'secondaries': [],
+        }
+
+        # Add all of the instances into the structure.
+        for instance in Instance.objects.all():
+            if instance.primary:
+                response['instances']['primary'] = instance.ip_address
+            else:
+                response['instances']['secondaries'].append(instance.ip_address)
+        response['instances']['secondaries'].sort()
+
+        # Done; return the response.
+        return Response(response)
+
 
 class ApiV1ConfigView(APIView):
 

@@ -8,28 +8,34 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'SystemJobTemplate'
-        db.create_table(u'main_systemjobtemplate', (
-            (u'unifiedjobtemplate_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['main.UnifiedJobTemplate'], unique=True, primary_key=True)),
-            ('job_type', self.gf('django.db.models.fields.CharField')(default='', max_length=32, blank=True)),
+        # Adding model 'Instance'
+        db.create_table(u'main_instance', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('uuid', self.gf('django.db.models.fields.CharField')(unique=True, max_length=40)),
+            ('ip_address', self.gf('django.db.models.fields.GenericIPAddressField')(max_length=39)),
+            ('primary', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
         ))
-        db.send_create_signal('main', ['SystemJobTemplate'])
+        db.send_create_signal('main', ['Instance'])
 
-        # Adding model 'SystemJob'
-        db.create_table(u'main_systemjob', (
-            (u'unifiedjob_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['main.UnifiedJob'], unique=True, primary_key=True)),
-            ('job_type', self.gf('django.db.models.fields.CharField')(default='', max_length=32, blank=True)),
-            ('system_job_template', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', on_delete=models.SET_NULL, default=None, to=orm['main.SystemJobTemplate'], blank=True, null=True)),
+        # Adding model 'JobOrigin'
+        db.create_table(u'main_joborigin', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('unified_job', self.gf('django.db.models.fields.related.OneToOneField')(related_name='job_origin', unique=True, to=orm['main.UnifiedJob'])),
+            ('instance', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['main.Instance'])),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
         ))
-        db.send_create_signal('main', ['SystemJob'])
+        db.send_create_signal('main', ['JobOrigin'])
 
 
     def backwards(self, orm):
-        # Deleting model 'SystemJobTemplate'
-        db.delete_table(u'main_systemjobtemplate')
+        # Deleting model 'Instance'
+        db.delete_table(u'main_instance')
 
-        # Deleting model 'SystemJob'
-        db.delete_table(u'main_systemjob')
+        # Deleting model 'JobOrigin'
+        db.delete_table(u'main_joborigin')
 
 
     models = {
@@ -186,6 +192,15 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'variables': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'})
         },
+        'main.instance': {
+            'Meta': {'object_name': 'Instance'},
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ip_address': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39'}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'primary': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'uuid': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '40'})
+        },
         'main.inventory': {
             'Meta': {'ordering': "('name',)", 'unique_together': "[('name', 'organization')]", 'object_name': 'Inventory'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
@@ -292,6 +307,14 @@ class Migration(SchemaMigration):
             'processed': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'skipped': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'})
         },
+        'main.joborigin': {
+            'Meta': {'object_name': 'JobOrigin'},
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'instance': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['main.Instance']"}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'unified_job': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'job_origin'", 'unique': 'True', 'to': "orm['main.UnifiedJob']"})
+        },
         'main.jobtemplate': {
             'Meta': {'ordering': "('name',)", 'object_name': 'JobTemplate', '_ormbases': ['main.UnifiedJobTemplate']},
             'ask_variables_on_launch': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -387,6 +410,7 @@ class Migration(SchemaMigration):
             'dtend': ('django.db.models.fields.DateTimeField', [], {'default': 'None', 'null': 'True'}),
             'dtstart': ('django.db.models.fields.DateTimeField', [], {'default': 'None', 'null': 'True'}),
             'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'extra_data': ('jsonfield.fields.JSONField', [], {'default': '{}', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': '"{\'class\': \'schedule\', \'app_label\': \'main\'}(class)s_modified+"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
@@ -397,6 +421,7 @@ class Migration(SchemaMigration):
         },
         'main.systemjob': {
             'Meta': {'ordering': "('id',)", 'object_name': 'SystemJob', '_ormbases': ['main.UnifiedJob']},
+            'extra_vars': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'job_type': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '32', 'blank': 'True'}),
             'system_job_template': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.SystemJobTemplate']", 'blank': 'True', 'null': 'True'}),
             u'unifiedjob_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['main.UnifiedJob']", 'unique': 'True', 'primary_key': 'True'})

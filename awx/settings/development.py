@@ -46,7 +46,10 @@ if 'django_jenkins' in INSTALLED_APPS:
                             os.path.join(BASE_DIR, 'ui/static/lib/ansible'),]
 
 # If there is an `/etc/tower/settings.py`, include it.
+# If there is a `/etc/tower/conf.d/*.py`, include them.
 include(optional('/etc/tower/settings.py'), scope=locals())
+include(optional('/etc/tower/conf.d/*.py'), scope=locals())
+
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using

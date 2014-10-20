@@ -194,6 +194,7 @@ activity_stream_urls = patterns('awx.api.views',
 
 v1_urls = patterns('awx.api.views',
     url(r'^$',                      'api_v1_root_view'),
+    url(r'^ping/$',                 'api_v1_ping_view'),
     url(r'^config/$',               'api_v1_config_view'),
     url(r'^authtoken/$',            'auth_token_view'),
     url(r'^me/$',                   'user_me_list'),
