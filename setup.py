@@ -76,104 +76,6 @@ def proc_data_files(data_files):
 
 #####################################################################
 
-class sdist_pyc_only(_sdist, object):
-    '''
-    Custom sdist command to distribute some files as .pyc only.
-    '''
-
-    def make_release_tree(self, base_dir, files):
-        for f in files[:]:
-            if f.endswith('.egg-info/SOURCES.txt'):
-                files.remove(f)
-                sources_txt_path = f
-        super(sdist_pyc_only, self).make_release_tree(base_dir, files)
-
-        new_sources_path = os.path.join(base_dir, sources_txt_path)
-        if os.path.isfile(new_sources_path):
-            log.warn('unlinking previous %s', new_sources_path)
-            os.unlink(new_sources_path)
-        log.info('writing new %s', new_sources_path)
-        new_sources = file(new_sources_path, 'w')
-        for line in file(sources_txt_path, 'r'):
-            line = line.strip()
-            if line in self.pyc_only_files:
-                line = line + 'c'
-            new_sources.write(line + '\n')
-
-    def make_distribution(self):
-        self.pyc_only_files = []
-        import py_compile
-        for n, f in enumerate(self.filelist.files[:]):
-            if not f.startswith('awx/'):
-                continue
-            if f.startswith('awx/lib/site-packages'):
-                continue
-            if f.startswith('awx/scripts'):
-                continue
-            if f.startswith('awx/plugins'):
-                continue
-            if f.startswith('awx/main/tests/data'):
-                continue
-            if f.endswith('.py'):
-                log.info('using pyc for: %s', f)
-                # Byte compile to create .pyc file
-                py_compile.compile(f, doraise=True)
-                # Replace .py with .pyc file
-                self.filelist.files[n] = f + 'c'
-                self.pyc_only_files.append(f)
-        super(sdist_pyc_only, self).make_distribution()
-
-#####################################################################
-
-if os.getenv('RPM_PACKAGE_NAME', False) == 'ansible-tower':
-
-    from distutils.command.install_lib import install_lib as _install_lib
-    class install_lib(_install_lib, object):
-        '''
-        Custom install_lib command to distribute some files as .pyc only.
-        '''
-
-        def run(self):
-            '''
-            Overload the run method and remove all .py files after compilation
-            '''
-
-            super(install_lib, self).run()
-            for f in self.install():
-                if not f.startswith(self.install_dir + 'awx/'):
-                    log.debug('install_lib skipping: %s', f)
-                    continue
-                if f.startswith(self.install_dir + 'awx/lib/site-packages'):
-                    log.debug('install_lib skipping: %s', f)
-                    continue
-                if f.startswith(self.install_dir + 'awx/scripts'):
-                    log.debug('install_lib skipping: %s', f)
-                    continue
-                if f.startswith(self.install_dir + 'awx/plugins'):
-                    log.debug('install_lib skipping: %s', f)
-                    continue
-                if f.startswith(self.install_dir + 'awx/main/tests/data'):
-                    log.debug('install_lib skipping: %s', f)
-                    continue
-                if f.endswith('.py'):
-                    log.info('install_lib removing: %s', f)
-                    os.unlink(f)
-
-        def get_outputs(self):
-            '''
-            Overload the get_outputs method and remove any .py entries in the file
-            list
-            '''
-
-            filenames = super(install_lib, self).get_outputs()
-            return [filename for filename in filenames
-                if not filename.endswith('.py')]
-else:
-
-    from distutils.command.install_lib import install_lib
-
-#####################################################################
-
 setup(
     name='ansible-tower',
     version=__version__.split("-")[0], # FIXME: Should keep full version here?
@@ -239,9 +141,5 @@ setup(
             'dev_build': 'clean --all egg_info sdist',
             'release_build': 'clean --all egg_info -b "" sdist',
         },
-    },
-    cmdclass = {
-        'sdist': _sdist,
-        'install_lib': install_lib,
     },
 )

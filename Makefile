@@ -286,6 +286,7 @@ rpm-build/$(SDIST_TAR_FILE): dist/$(SDIST_TAR_FILE)
 	mkdir -p rpm-build
 	cp packaging/rpm/$(NAME).spec rpm-build/
 	cp packaging/rpm/$(NAME).te rpm-build/
+	cp packaging/remove_tower_source.py rpm-build/
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	  (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
 	  (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
@@ -321,6 +322,7 @@ deb-build/$(SDIST_TAR_NAME):
 	mkdir -p deb-build
 	tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE)
 	cp -a packaging/debian deb-build/$(SDIST_TAR_NAME)/
+	cp packaging/remove_tower_source.py deb-build/$(SDIST_TAR_NAME)/debian/
 	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(DEB_RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
 
 debian: sdist deb-build/$(SDIST_TAR_NAME)
