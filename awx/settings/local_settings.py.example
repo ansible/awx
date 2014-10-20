@@ -57,6 +57,9 @@ PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
 # This directory should not be web-accessible
 JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_status')
 
+# The UUID of the system, for HA.
+SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
