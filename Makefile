@@ -55,7 +55,7 @@ DEB_PPA ?= reprepro
 # RPM build parameters
 RPM_SPECDIR= packaging/rpm
 RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
-RPM_DIST = $(shell rpm --eval '%{?dist}' 2>/dev/null)
+RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
 ifeq ($(OFFICIAL),yes)
     RPM_RELEASE = $(RELEASE)
 else
