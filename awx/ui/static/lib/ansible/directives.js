@@ -64,48 +64,58 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     })
 
 
-// .directive('surveyCheckboxes', function(){
-//     return {
-//         restrict: 'E',
-//         require: 'ngModel',
-//         scope: { 'ngModel': '=accessor' },
-//         template: '<div ng-repeat="option in ngModel().options">'
-//             +'<label>'
-//             +'<input type="checkbox" ng-model="cbModel[option]" '
-//             +'value="{{option}}" ng-change="update()" ng-required="isRequired()"/>'
-//             +'{{option}}'
-//             +'</label>'
-//             +'</div>',
-//         link: function(scope, element, attrs, ctrl){
-//             scope.cbModel= {};
+.directive('surveyCheckboxes', function(){
+    return {
+        restrict: 'E',
+        require: 'ngModel',
+        scope: { ngModel: '=ngModel' },
+        template: '<div class="survey_taker_input" ng-repeat="option in ngModel.options">' +
+            '<input type="checkbox" ng-model="cbModel[option.value]" ' +
+            'value="{{option.value}}" class="mc" ng-change="update(this.value)" />' +
+            '<span>'+
+            '{{option.value}}'+
+            '</span>'+
+            '</div>',
+        link: function(scope, element, attrs, ctrl){
+            scope.cbModel= {};
+            ctrl.$setValidity('reqCheck', true);
+            angular.forEach(scope.ngModel.value, function(value){
+                scope.cbModel[value] = true;
 
-//             ctrl.$parsers.unshift(function(value){
-//                 for (var c in scope.cbModel) {
-//                     if (scope.cbModel[c]) {
-//                         ctrl.$setValidity('checkbox', true);
-//                     }
-//                 }
-//                 ctrl.$setValidity('checkbox', false);
-//             });
+            });
 
-//             scope.update = function(){
-//                 var val = [];
-//                 angular.forEach(scope.cbModel, function(v,k){
-//                     if (v)
-//                         val.push(k);
-//                 });
-//                 if (val.length>0)
-//                     scope.ngModel().value = angular.toJson(val);
-//             };
+            if(scope.ngModel.required===true && scope.ngModel.value.length===0){
+                ctrl.$setValidity('reqCheck', false);
+            }
 
-//             scope.isRequired = function(){
-//                 if (!scope.ngModel().required) return false;
+            ctrl.$parsers.unshift(function(){
+                for (var c in scope.cbModel) {
+                    if (scope.cbModel[c]) {
+                        ctrl.$setValidity('checkbox', true);
+                    }
+                }
+                ctrl.$setValidity('checkbox', false);
+            });
 
-//                 return scope.ngModel().required;
-//             };
-//         }
-//     };
-// })
+            scope.update = function(){
+                var val = [];
+                angular.forEach(scope.cbModel, function(v,k){
+                    if (v)
+                        val.push(k);
+                });
+                if (val.length>0){
+                    scope.ngModel.value = val;
+                    scope.$parent[scope.ngModel.name] = val;
+                    ctrl.$setValidity('checkbox', true);
+                    ctrl.$setValidity('reqCheck', true);
+                }
+                 else if(scope.ngModel.required===true){
+                    ctrl.$setValidity('checkbox' , false);
+                }
+            };
+        }
+    };
+})
 
     // caplitalize  Add to any input field where the first letter of each
     //              word should be capitalized. Use in place of css test-transform.

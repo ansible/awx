@@ -543,7 +543,6 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 checked, min, max,
                 survey_url = GetBasePath('job_templates') + id + '/survey_spec/' ;
 
-
             function buildHtml(question, index){
                 question.index = index;
 
@@ -594,47 +593,26 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 }
 
                 if(question.type === "multiselect"){
-                    // question.options = question.choices.split(/\n/);
+                    //seperate the choices out into an array
                     choices = question.choices.split(/\n/);
-
-                    // element = (question.type==="multiselect") ? "checkbox" : 'radio';
                     question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
-                    // scope[question.variable].choices = choices;
-                    // scope[question.variable] = {
-                    //     options: question.options,
-                    //     default: question.default,
-                    //     name: 'multi checkboxes',
-                    //     required: true,
-                    //     value: ''
-                    // }
-                    // function Ctrl(scope) {
-                    //     scope.field = {
-                    //         name:'multi checkboxes',
-                    //         value:'',
-                    //         required:true,
-                    //         options:[
-                    //             {value:'option 1'},
-                    //             {value:'option 2'},
-                    //             {value:'option 3'}
-                    //         ]
-                    //     };
-                    // }
-
-                    // html+='<survey-checkboxes ng-model=" '+question.variable+' " ></survey-checkboxes>' +
-                    //     '<div ng-show="job_launch_form.$valid">valid</div>'+
-                    //     '<div ng-hide="job_launch_form.$valid">invalid</div>';
-
-
-                    html+='<div class="survey_taker_input" > ';
-                    for( j = 0; j<choices.length; j++){
-                        checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
-                        html+= '<input  type="checkbox"  class="mc" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
-                        '<span>'+choices[j] +'</span><br>' ;
+                    //ensure that the default answers are in an array
+                    scope[question.variable] = question.default.split(/\n/);
+                    //create a new object to be used by the surveyCheckboxes directive
+                    scope[question.variable + '_object'] = {
+                        name: question.variable,
+                        value: (question.default.split(/\n/)[0]==="") ? [] : question.default.split(/\n/) ,
+                        required: question.required,
+                        options:[]
+                    };
+                    //load the options into the 'options' key of the new object
+                    for(j=0; j<choices.length; j++){
+                        scope[question.variable+'_object'].options.push( {value:choices[j]} );
                     }
-                    html+=  '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
-                        'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
-                        '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
-                    html+= '</div>'; //end survey_taker_input
+                    //surveyCheckboxes takes a list of checkboxes and connects them to one scope variable
+                    html += '<survey-checkboxes name="'+question.variable+'" ng-model=" '+question.variable + '_object " ng-required="'+question.required+'">'+
+                        '</survey-checkboxes>{{job_launch_form.'+question.variable+'_object.$error.checkbox}}'+
+                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.checkbox">A value is required!</div>';
                 }
 
                 if(question.type === 'integer'){
@@ -659,11 +637,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 }
             }
 
-            scope.someSelected = function (object) {
-                return Object.keys(object).some(function (key) {
-                    return object[key];
-                });
-            };
+
 
 
             Rest.setUrl(survey_url);
