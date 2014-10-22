@@ -71,14 +71,28 @@ MOCK_CFG ?=
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm \
 	deb deb-src debian reprepro
 
-# Remove temporary build files, compiled Python files.
-clean:
-	rm -rf dist/*
-	rm -rf build rpm-build $(NAME)-$(VERSION) *.egg-info
-	rm -rf debian deb-build reprepro
+# Remove rpm build files
+clean-rpm:
+	rm -rf rpm-build
+
+# Remove debian build files
+clean-deb:
+	rm -rf deb-build reprepro
+
+# Remove grunt build files
+clean-grunt:
+	rm -f package.json Gruntfile.js bower.json
+	rm -rf node_modules
+
+# Remove UI build files
+clean-ui:
 	rm -f awx/ui/static/{js,css}/awx*.{js,css}
 	rm -rf awx/ui/static/docs
-	rm -rf node_modules package.json Gruntfile.js bower.json
+
+# Remove temporary build files, compiled Python files.
+clean: clean-rpm clean-deb clean-grunt clean-ui
+	rm -rf dist/*
+	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
 
 # Fetch from origin, rebase local commits on top of origin commits.
@@ -296,7 +310,7 @@ rpm-build/$(SDIST_TAR_FILE): dist/$(SDIST_TAR_FILE)
 	  ln -sf ../dist/$(SDIST_TAR_FILE) rpm-build/ ; \
 	fi
 
-rpmtar: rpm-build/$(SDIST_TAR_FILE)
+rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
 
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
