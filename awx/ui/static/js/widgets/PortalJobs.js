@@ -19,7 +19,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             choicesCount = 0,
             listCount = 0,
             jobs_scope = scope.$new(true),
-            scheduled_scope = scope.$new(true),
+            // scheduled_scope = scope.$new(true),
             max_rows,
             html, e;
 
@@ -34,7 +34,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
         // html += "</ul>\n";
         // html += "<div  id=\"portal-job-template-tab-content\" class=\"tab-content \">\n";
         html += "<div class=\"tab-pane active\" id=\"active-jobs-tab\">\n";
-        html += "<div class=\"row search-row\">\n";
+        html += "<div class=\"row search-row\" id='portal-job-template-search'>\n";
         html += "<div class=\"col-lg-6 col-md-6\" id=\"active-jobs-search-container\"></div>\n";
         html += "</div>\n"; //row
         html += "<div class=\"job-list\" id=\"active-jobs-container\">\n";
@@ -56,7 +56,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             listCount++;
             if (listCount === 1) {
                 //api_complete = true;
-                scope.$emit('WidgetLoaded', "dashboard_jobs",  jobs_scope, scheduled_scope);
+                scope.$emit('WidgetLoaded',  jobs_scope);
             }
         });
 
@@ -126,7 +126,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             var docw = $(window).width(),
                 box_height, available_height, search_row, page_row, height, header, row_height;
 
-            available_height = Math.floor($(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#refresh-row').outerHeight() - 30);
+            available_height = Math.floor($(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#refresh-row').outerHeight() - 35);
             $('.portal-job-template-container').height(available_height);
             $('.portal-container').height(available_height);
             search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
