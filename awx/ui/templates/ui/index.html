@@ -182,7 +182,7 @@
 
     <nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right" id="ansible-mobile-menu">
         <h3>Hello, <span ng-bind="current_user.username"></span></h3>
-        <a href="#home" id="mobile_home_link" >Home</a></li>
+        <a href="#home" id="mobile_home_link" ng-hide="portalMode===true">Home</a></li>
         <a href="#organizations" id="mobile_organizations_link" ng-hide="portalMode===true">Organizations</a></li>
         <a href="#users" id="mobile_users_link"  ng-hide="portalMode===true">Users</a></li>
         <a href="#teams" id="mobile_teams_link" ng-hide="portalMode===true">Teams</a></li>
@@ -191,12 +191,14 @@
         <a href="#inventories" id="mobile_inventories_link" ng-hide="portalMode===true">Inventories</a></li>
         <a href="#job_templates" id="mobile_job_templates_link"  ng-hide="portalMode===true">Job Templates</a></li>
         <a href="#jobs" id="mobile_jobs_link" ng-hide="portalMode===true">Jobs</a></li>
-        <a href="#jobs" id="mobile_portal_link" ng-show="portalMode===true">Portal</a></li>
-        <a href="" id="mobile_about" ng-click ="viewAboutTower()">About Tower</a> </li>
-        <a href="" id="mobile_view_user" ng-click="viewCurrentUser()">Account Settings</a></li>
-        <a href="" id="mobile_view_license" ng-click="viewLicense()">View License</a></li>
-        <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" id="mobile_contact_support" target="_blank">Contact Support</a></li>
-        <a id="mobile_munin" target="_blank"  ng-show="user_is_superuser" href="/munin">Monitor Tower</a></li>
+
+        <a href="" id="mobile_about" ng-click ="viewAboutTower()" ng-hide="portalMode===true">About Tower</a> </li>
+        <a href="" id="mobile_view_user" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
+        <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" id="mobile_contact_support" target="_blank" ng-hide="portalMode===true">Contact Support</a></li>
+        <a id="mobile_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
+        <a href="#portal" id="mobile_portal_link" ng-hide="portalMode===true">Portal Mode</a></li>
+        <a href="" id="mobile_view_license" ng-click="viewLicense()" ng-hide="portalMode===true">View License</a></li>
+        <a href="" id="mobile_view_leave_portal" ng-click="leavePortal()" ng-show="portalMode===true">Exit Portal Mode</a></li>
         <a href="#/logout" id="mobile_logout">Logout</a>
     </nav>
 
@@ -230,11 +232,13 @@
                         <li ng-show="current_user.username" class="collapsed-option">
                             <a href="" id="account-menu-link">Hello, <span ng-bind="current_user.username"></span> <span class="caret"></span></a>
                             <ul class="nav navbar-nav" id="account-submenu">
-                               <li><a href="" id="main_about" ng-click ="viewAboutTower()">About Tower</a> </li>
-                               <li><a id="main_view_user" href="" ng-click="viewCurrentUser()">Account Settings</a></li>
-                               <li><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
-                               <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a></li>
-                               <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin">Monitor Tower</a></li>
+                               <li><a href="" id="main_about" ng-click ="viewAboutTower()" ng-hide="portalMode===true">About Tower</a> </li>
+                               <li><a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
+                               <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new" ng-hide="portalMode===true">Contact Support</a></li>
+                                <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
+                               <li><a href="#portal" id="main_view_portal_link" >Portal Mode</a></li>
+                               <li><a id="main_view_license" href="" ng-click="viewLicense()" ng-hide="portalMode===true">View License</a></li>
+                               <li><a id="main_view_leave_portal" href="" ng-click="leavePortal()" ng-show="portalMode===true">Exit Portal</a></li>
                                <li class="divider"></li>
                                <li><a id="main_logout" href="#/logout">Logout</a></li>
                             </ul>
@@ -246,11 +250,15 @@
                         <li class="dropdown" ng-show="current_user.username">
                             <a href="" id="account-menu-link" class="dropdown-toggle" data-toggle="dropdown">Hello, <span ng-bind="current_user.username"></span> <span class="caret"></span></a>
                             <ul class="dropdown-menu" id="account-submenu">
-                               <li><a href="" id="main_about" ng-click ="viewAboutTower()">About Tower</a> </li>
-                               <li><a id="main_view_user" href="" ng-click="viewCurrentUser()">Account Settings</a></li>
-                               <li><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
-                               <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a></li>
-                               <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin">Monitor Tower</a></li>
+                               <li><a href="" id="main_about" ng-click ="viewAboutTower()" ng-hide="portalMode===true">About Tower</a> </li>
+                               <li><a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
+                               <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new" ng-hide="portalMode===true">Contact Support</a></li>
+                               <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
+                               <li><a href="#portal" id="main_view_portal_link" ng-hide="portalMode===true">Portal Mode</a></li>
+                               <li><a id="main_view_license" href="" ng-click="viewLicense()" ng-hide="portalMode===true">View License</a></li>
+                               <li><a id="main_view_leave_portal" href="" ng-click="leavePortal()" ng-show="portalMode===true">Exit Portal</a></li>
+
+
                                <li class="divider"></li>
                                <li><a id="main_logout" href="#/logout">Logout</a></li>
                             </ul>
