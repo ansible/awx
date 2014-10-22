@@ -71,9 +71,6 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
             $scope.removeLoadPortal();
         }
         $scope.removeLoadPortal = $scope.$on('LoadPortal', function () {
-            // winHeight = $(window).height();
-            // available_height = Math.floor(winHeight - $('#main-menu-container .navbar').outerHeight() - $('#refresh-row').outerHeight() - 30);
-            // $('.portal-container').height(available_height);
 
             view.inject( list, {
                 id : 'portal-job-template',
@@ -109,10 +106,18 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
             PortalJobsWidget({
                 scope: $scope,
                 target: 'portal-jobs',
-                // dashboard: data
+                searchSize: 'col-lg-6 col-md-6'
             });
-
         });
+        if ($scope.removeWidgetLoaded) {
+            $scope.removeWidgetLoaded();
+        }
+        $scope.removeWidgetLoaded = $scope.$on('WidgetLoaded', function () {
+            $('.actions-column:eq(0)').text('Launch');
+            $('.actions-column:eq(1)').text('Details');
+            $('.list-well:eq(1)').css('margin-top' , '0px');
+        });
+
         $scope.submitJob = function (id) {
             PlaybookRun({ scope: $scope, id: id });
         };
