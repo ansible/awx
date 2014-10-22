@@ -428,6 +428,33 @@ class DashboardInventoryGraphView(APIView):
 
         return Response(dashboard_data)
 
+
+class UserCreateAPIMixin(object):
+    """A mixin subclass that ensures that only a superuser is able to create
+    another superuser.
+    """
+    def post(self, request, pk=None):
+        self._superuser_sanity_check(request)
+        return super(UserCreateAPIMixin, self).post(request, pk=pk)
+
+    # def put(self, request, pk=None):
+    #     self._superuser_sanity_check(request)
+    #     return super(UserCreateAPIMixin, self).put(request, pk=pk)
+
+    # def patch(self, request, pk=None):
+    #     self._superuser_sanity_check(request)
+    #     return super(UserCreateAPIMixin, self).patch(request, pk=pk)
+
+    def _superuser_sanity_check(self, request):
+        """Ensure that if a non-superuser tries to create a superuser,
+        that the request is rejected.
+        """
+        if not request.user.is_superuser:
+            if request.DATA.get('is_superuser', False):
+                raise PermissionDenied('Only superusers may create '
+                                       'other superusers.')
+
+
 class ScheduleList(ListAPIView):
 
     view_name = "Schedules"
@@ -489,14 +516,14 @@ class OrganizationInventoriesList(SubListAPIView):
     parent_model = Organization
     relationship = 'inventories'
 
-class OrganizationUsersList(SubListCreateAPIView):
+class OrganizationUsersList(UserCreateAPIMixin, SubListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
     relationship = 'users'
 
-class OrganizationAdminsList(SubListCreateAPIView):
+class OrganizationAdminsList(UserCreateAPIMixin, SubListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
@@ -536,7 +563,7 @@ class TeamDetail(RetrieveUpdateDestroyAPIView):
     model = Team
     serializer_class = TeamSerializer
 
-class TeamUsersList(SubListCreateAPIView):
+class TeamUsersList(UserCreateAPIMixin, SubListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
@@ -731,7 +758,7 @@ class ProjectUpdateCancel(GenericAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
-class UserList(ListCreateAPIView):
+class UserList(UserCreateAPIMixin, ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer

@@ -415,7 +415,10 @@ class ProjectsTest(BaseTransactionTest):
         all_users = self.get(reverse('api:user_list'), expect=200, auth=self.get_normal_credentials())
         for x in all_users['results']:
             self.post(team_users, data=x, expect=403, auth=self.get_nobody_credentials())
-            self.post(team_users, data=x, expect=204, auth=self.get_normal_credentials())
+            self.post(team_users, data=dict(x, is_superuser=False),
+                                  expect=204, auth=self.get_normal_credentials())
+            self.post(team_users, data=dict(x, is_superuser=True),
+                                  expect=403, auth=self.get_normal_credentials())
 
         self.assertEqual(Team.objects.get(pk=team.pk).users.count(), 4)
 
