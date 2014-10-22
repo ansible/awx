@@ -25,15 +25,15 @@
  *
 */
 function PortalController($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, ClearScope, Stream, Rest, GetBasePath, ProcessErrors,
-    Button, PortalJobTemplate, GenerateList, JobTemplateList, SearchInit, PaginateInit, PlaybookRun){
+    Button, PortalJobsWidget, GenerateList, PortalJobTemplateList, SearchInit, PaginateInit, PlaybookRun){
 
         ClearScope('portal');
 
         var html,
         e,
-        winHeight,
-        available_height,
-        list = JobTemplateList,
+        // winHeight,
+        // available_height,
+        list = PortalJobTemplateList,
         view= GenerateList,
         defaultUrl = GetBasePath('job_templates'),
         buttons = {
@@ -71,9 +71,9 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
             $scope.removeLoadPortal();
         }
         $scope.removeLoadPortal = $scope.$on('LoadPortal', function () {
-            winHeight = $(window).height();
-            available_height = Math.floor(winHeight - $('#main-menu-container .navbar').outerHeight() - $('#refresh-row').outerHeight() - 30);
-            $('.portal-container').height(available_height);
+            // winHeight = $(window).height();
+            // available_height = Math.floor(winHeight - $('#main-menu-container .navbar').outerHeight() - $('#refresh-row').outerHeight() - 30);
+            // $('.portal-container').height(available_height);
 
             view.inject( list, {
                 id : 'portal-job-template',
@@ -106,7 +106,7 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
 
             $scope.search(list.iterator);
 
-            PortalJobTemplate({
+            PortalJobsWidget({
                 scope: $scope,
                 target: 'portal-jobs',
                 // dashboard: data
@@ -136,5 +136,5 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
     }
 
 PortalController.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors',
-    'Button', 'PortalJobTemplate', 'GenerateList' , 'JobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'
+    'Button', 'PortalJobsWidget', 'GenerateList' , 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'
 ];

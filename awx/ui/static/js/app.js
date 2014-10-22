@@ -60,6 +60,7 @@ angular.module('Tower', [
     'CredentialFormDefinition',
     'LookUpHelper',
     'JobTemplatesListDefinition',
+    'PortalJobTemplatesListDefinition',
     'JobTemplateFormDefinition',
     'JobTemplatesHelper',
     'JobSubmissionHelper',
@@ -86,7 +87,7 @@ angular.module('Tower', [
     'HostPieChartWidget',
     'HostGraphWidget',
     'DashboardJobsWidget',
-    'PortalJobTemplateWidget',
+    'PortalJobsWidget',
     'StreamWidget',
     'JobsHelper',
     'InventoryGroupsHelpDefinition',
@@ -117,7 +118,8 @@ angular.module('Tower', [
     'LoadConfigHelper',
     'SocketHelper',
     'AboutAnsibleHelpModal',
-    'SurveyQuestionFormDefinition'
+    'SurveyQuestionFormDefinition',
+    'PortalJobsListDefinition'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
