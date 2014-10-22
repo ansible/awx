@@ -22,8 +22,8 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
  *  Initialize calling scope with all the bits required to support a jobs list
  *
  */
-.factory('JobsControllerInit', ['$location', 'Find', 'DeleteJob', 'RelaunchJob', 'LogViewer',
-    function($location, Find, DeleteJob, RelaunchJob, LogViewer) {
+.factory('JobsControllerInit', ['$location', 'Find', 'DeleteJob', 'RelaunchJob', 'LogViewer', '$window',
+    function($location, Find, DeleteJob, RelaunchJob, LogViewer, $window) {
         return function(params) {
             var scope = params.scope,
                 iterator = (params.iterator) ? params.iterator : scope.iterator,
@@ -89,7 +89,10 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 }
                 job = Find({ list: list, key: 'id', val: id });
                 if (job.type === 'job') {
-                    $location.url('/jobs/' + job.id);
+                    if(scope.$parent.portalMode===true){
+                        $window.open('/#/jobs/' + job.id, '_blank');
+                    }
+                    else $location.url('/jobs/' + job.id);
                 }
                 else {
                     LogViewer({
