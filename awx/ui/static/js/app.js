@@ -470,10 +470,13 @@ angular.module('Tower', [
                     //base.replace(/\_/g, ' ');
                     base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
                 }
-
+                //make sure that the tower icon works when not in portal mode
+                $('.navbar-brand').attr('href', '/#/home');
                 $rootScope.portalMode=false;
                 if(base==='portal'){
                     $rootScope.portalMode= true;
+                    //in portal mode we don't want the tower icon to lead anywhere
+                    $('.navbar-brand').removeAttr('href');
                 }
 
                 $('#ansible-list-title').html('<strong>' + base.replace(/\_/,' ') + '</strong>');
@@ -577,6 +580,10 @@ angular.module('Tower', [
 
                 $rootScope.socketHelp = function() {
                     ShowSocketHelp();
+                };
+
+                $rootScope.leavePortal = function() {
+                    $location.path('/home/');
                 };
 
                 html = "<a href=\"\" ng-click=\"socketHelp()\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
