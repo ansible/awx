@@ -17,10 +17,10 @@ angular.module('PortalJobsListDefinition', [])
         name: 'jobs',
         iterator: 'job',
         editTitle: 'Jobs',
-        // 'class': 'table-condensed',
+        'class': 'table-condensed',
         index: false,
         hover: true,
-        well: false,
+        well: true,
 
         fields: {
             id: {

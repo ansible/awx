@@ -14,12 +14,13 @@ angular.module('PortalJobTemplatesListDefinition', [])
 
         name: 'job_templates',
         iterator: 'job_template',
-        selectTitle: 'Add Job Template',
+        // selectTitle: 'Add Job Template',
         editTitle: 'Job Templates',
-        selectInstructions: "Click on a row to select it, and click Finished when done. Use the <i class=\"icon-plus\"></i> " +
-            "button to create a new job template.",
+        // selectInstructions: "Click on a row to select it, and click Finished when done. Use the <i class=\"icon-plus\"></i> " +
+        //     "button to create a new job template.",
         index: false,
         hover: true,
+        well: true,
 
         fields: {
             name: {
