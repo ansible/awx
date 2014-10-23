@@ -660,12 +660,6 @@ class RunJob(BaseTask):
         except ValueError:
             pass
 
-        # If private key isn't encrypted, pass the path on the command line.
-        ssh_key_path = kwargs.get('private_data_file', '')
-        use_ssh_agent = bool(creds and creds.has_encrypted_ssh_key_data)
-        if ssh_key_path and not use_ssh_agent:
-            args.append('--private-key=%s' % ssh_key_path)
-
         if job.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % job.forks)
         if job.force_handlers:
@@ -703,8 +697,9 @@ class RunJob(BaseTask):
         # Add path to playbook (relative to project.local_path).
         args.append(job.playbook)
 
-        # If ssh unlock password is needed, run using ssh-agent.
-        if ssh_key_path and use_ssh_agent:
+        # If using an SSH key, run using ssh-agent.
+        ssh_key_path = kwargs.get('private_data_file', '')
+        if ssh_key_path:
             args = self.wrap_args_with_ssh_agent(args, ssh_key_path)
 
         return args

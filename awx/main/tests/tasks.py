@@ -459,7 +459,7 @@ class RunJobTest(BaseCeleryTest):
         if expect_stdout:
             self.assertTrue(job.result_stdout)
         else:
-            self.assertFalse(job.result_stdout,
+            self.assertTrue(job.result_stdout in ('', 'stdout capture is missing'),
                              u'expected no stdout, got:\n%s' %
                              job.result_stdout)
         if expect_traceback:
@@ -925,8 +925,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('"--private-key=' in job.job_args)
-        self.assertFalse('ssh-agent' in job.job_args)
+        self.assertFalse('"--private-key=' in job.job_args)
+        self.assertTrue('ssh-agent' in job.job_args)
 
     def test_tag_and_task_options(self):
         self.create_test_project(TEST_PLAYBOOK_WITH_TAGS)
@@ -1062,8 +1062,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('"--private-key=' in job.job_args)
-        self.assertFalse('ssh-agent' in job.job_args)
+        self.assertFalse('"--private-key=' in job.job_args)
+        self.assertTrue('ssh-agent' in job.job_args)
 
     def test_locked_ssh_key_with_password(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
