@@ -105,14 +105,14 @@ class AutoScaleConnection(AWSQueryConnection):
         self.region = region
         self.use_block_device_types = use_block_device_types
         super(AutoScaleConnection, self).__init__(aws_access_key_id,
-                                    aws_secret_access_key,
-                                    is_secure, port, proxy, proxy_port,
-                                    proxy_user, proxy_pass,
-                                    self.region.endpoint, debug,
-                                    https_connection_factory, path=path,
-                                    security_token=security_token,
-                                    validate_certs=validate_certs,
-                                    profile_name=profile_name)
+                                                  aws_secret_access_key,
+                                                  is_secure, port, proxy, proxy_port,
+                                                  proxy_user, proxy_pass,
+                                                  self.region.endpoint, debug,
+                                                  https_connection_factory, path=path,
+                                                  security_token=security_token,
+                                                  validate_certs=validate_certs,
+                                                  profile_name=profile_name)
 
     def _required_auth_capability(self):
         return ['hmac-v4']
@@ -222,7 +222,10 @@ class AutoScaleConnection(AWSQueryConnection):
         if launch_config.key_name:
             params['KeyName'] = launch_config.key_name
         if launch_config.user_data:
-            params['UserData'] = base64.b64encode(launch_config.user_data).decode('utf-8')
+            user_data = launch_config.user_data
+            if isinstance(user_data, six.text_type):
+                user_data = user_data.encode('utf-8')
+            params['UserData'] = base64.b64encode(user_data).decode('utf-8')
         if launch_config.kernel_id:
             params['KernelId'] = launch_config.kernel_id
         if launch_config.ramdisk_id:

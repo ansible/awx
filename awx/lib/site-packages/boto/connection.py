@@ -90,7 +90,7 @@ ON_APP_ENGINE = all(key in os.environ for key in (
 PORTS_BY_SECURITY = {True: 443,
                      False: 80}
 
-DEFAULT_CA_CERTS_FILE = os.path.join(os.path.dirname(os.path.abspath(boto.cacerts.__file__ )), "cacerts.txt")
+DEFAULT_CA_CERTS_FILE = os.path.join(os.path.dirname(os.path.abspath(boto.cacerts.__file__)), "cacerts.txt")
 
 
 class HostConnectionPool(object):
@@ -372,9 +372,10 @@ class HTTPRequest(object):
                     self.headers[key] = quote(val.encode('utf-8'), safe)
             setattr(self, '_headers_quoted', True)
 
+        self.headers['User-Agent'] = UserAgent
+
         connection._auth_handler.add_auth(self, **kwargs)
 
-        self.headers['User-Agent'] = UserAgent
         # I'm not sure if this is still needed, now that add_auth is
         # setting the content-length for POST requests.
         if 'Content-Length' not in self.headers:
@@ -485,13 +486,13 @@ class AWSAuthConnection(object):
             validate_certs)
         if self.https_validate_certificates and not HAVE_HTTPS_CONNECTION:
             raise BotoClientError(
-                    "SSL server certificate validation is enabled in boto "
-                    "configuration, but Python dependencies required to "
-                    "support this feature are not available. Certificate "
-                    "validation is only supported when running under Python "
-                    "2.6 or later.")
+                "SSL server certificate validation is enabled in boto "
+                "configuration, but Python dependencies required to "
+                "support this feature are not available. Certificate "
+                "validation is only supported when running under Python "
+                "2.6 or later.")
         certs_file = config.get_value(
-                'Boto', 'ca_certificates_file', DEFAULT_CA_CERTS_FILE)
+            'Boto', 'ca_certificates_file', DEFAULT_CA_CERTS_FILE)
         if certs_file == 'system':
             certs_file = None
         self.ca_certificates_file = certs_file
@@ -508,7 +509,7 @@ class AWSAuthConnection(object):
         self.http_unretryable_exceptions = []
         if HAVE_HTTPS_CONNECTION:
             self.http_unretryable_exceptions.append(
-                    https_connection.InvalidCertificateException)
+                https_connection.InvalidCertificateException)
 
         # define values in socket exceptions we don't want to catch
         self.socket_exception_values = (errno.EINTR,)
@@ -565,7 +566,7 @@ class AWSAuthConnection(object):
         self._connection = (self.host, self.port, self.is_secure)
         self._last_rs = None
         self._auth_handler = auth.get_auth_handler(
-              host, config, self.provider, self._required_auth_capability())
+            host, config, self.provider, self._required_auth_capability())
         if getattr(self, 'AuthServiceName', None) is not None:
             self.auth_service_name = self.AuthServiceName
         self.request_hook = None
@@ -667,9 +668,9 @@ class AWSAuthConnection(object):
         self.proxy_pass = proxy_pass
         if 'http_proxy' in os.environ and not self.proxy:
             pattern = re.compile(
-                '(?:http://)?' \
-                '(?:(?P<user>[\w\-\.]+):(?P<pass>.*)@)?' \
-                '(?P<host>[\w\-\.]+)' \
+                '(?:http://)?'
+                '(?:(?P<user>[\w\-\.]+):(?P<pass>.*)@)?'
+                '(?P<host>[\w\-\.]+)'
                 '(?::(?P<port>\d+))?'
             )
             match = pattern.match(os.environ['http_proxy'])
@@ -689,8 +690,8 @@ class AWSAuthConnection(object):
                 self.proxy_pass = config.get_value('Boto', 'proxy_pass', None)
 
         if not self.proxy_port and self.proxy:
-            print("http_proxy environment variable does not specify " \
-                "a port, using default")
+            print("http_proxy environment variable does not specify "
+                  "a port, using default")
             self.proxy_port = self.port
 
         self.no_proxy = os.environ.get('no_proxy', '') or os.environ.get('NO_PROXY', '')
@@ -740,30 +741,30 @@ class AWSAuthConnection(object):
 
         if is_secure:
             boto.log.debug(
-                    'establishing HTTPS connection: host=%s, kwargs=%s',
-                    host, http_connection_kwargs)
+                'establishing HTTPS connection: host=%s, kwargs=%s',
+                host, http_connection_kwargs)
             if self.use_proxy and not self.skip_proxy(host):
                 connection = self.proxy_ssl(host, is_secure and 443 or 80)
             elif self.https_connection_factory:
                 connection = self.https_connection_factory(host)
             elif self.https_validate_certificates and HAVE_HTTPS_CONNECTION:
                 connection = https_connection.CertValidatingHTTPSConnection(
-                        host, ca_certs=self.ca_certificates_file,
-                        **http_connection_kwargs)
+                    host, ca_certs=self.ca_certificates_file,
+                    **http_connection_kwargs)
             else:
-                connection = http_client.HTTPSConnection(host,
-                        **http_connection_kwargs)
+                connection = http_client.HTTPSConnection(
+                    host, **http_connection_kwargs)
         else:
             boto.log.debug('establishing HTTP connection: kwargs=%s' %
-                    http_connection_kwargs)
+                           http_connection_kwargs)
             if self.https_connection_factory:
                 # even though the factory says https, this is too handy
                 # to not be able to allow overriding for http also.
-                connection = self.https_connection_factory(host,
-                    **http_connection_kwargs)
+                connection = self.https_connection_factory(
+                    host, **http_connection_kwargs)
             else:
-                connection = http_client.HTTPConnection(host,
-                    **http_connection_kwargs)
+                connection = http_client.HTTPConnection(
+                    host, **http_connection_kwargs)
         if self.debug > 1:
             connection.set_debuglevel(self.debug)
         # self.connection must be maintained for backwards-compatibility
@@ -822,7 +823,7 @@ class AWSAuthConnection(object):
         if self.https_validate_certificates and HAVE_HTTPS_CONNECTION:
             msg = "wrapping ssl socket for proxied connection; "
             if self.ca_certificates_file:
-                msg += "CA certificate file=%s" %self.ca_certificates_file
+                msg += "CA certificate file=%s" % self.ca_certificates_file
             else:
                 msg += "using system provided SSL certs"
             boto.log.debug(msg)
@@ -836,7 +837,7 @@ class AWSAuthConnection(object):
             hostname = self.host.split(':', 0)[0]
             if not https_connection.ValidateCertificateHostname(cert, hostname):
                 raise https_connection.InvalidCertificateException(
-                        hostname, cert, 'hostname mismatch')
+                    hostname, cert, 'hostname mismatch')
         else:
             # Fallback for old Python without ssl.wrap_socket
             if hasattr(http_client, 'ssl'):
@@ -856,6 +857,21 @@ class AWSAuthConnection(object):
     def get_proxy_auth_header(self):
         auth = encodebytes(self.proxy_user + ':' + self.proxy_pass)
         return {'Proxy-Authorization': 'Basic %s' % auth}
+
+    # For passing proxy information to other connection libraries, e.g. cloudsearch2
+    def get_proxy_url_with_auth(self):
+        if not self.use_proxy:
+            return None
+
+        if self.proxy_user or self.proxy_pass:
+            if self.proxy_pass:
+                login_info = '%s:%s@' % (self.proxy_user, self.proxy_pass)
+            else:
+                login_info = '%s@' % self.proxy_user
+        else:
+            login_info = ''
+
+        return 'http://%s%s:%s' % (login_info, self.proxy, str(self.proxy_port or self.port))
 
     def set_host_header(self, request):
         try:
@@ -993,8 +1009,8 @@ class AWSAuthConnection(object):
                             'encountered unretryable %s exception, re-raising' %
                             e.__class__.__name__)
                         raise
-                boto.log.debug('encountered %s exception, reconnecting' % \
-                                  e.__class__.__name__)
+                boto.log.debug('encountered %s exception, reconnecting' %
+                               e.__class__.__name__)
                 connection = self.new_http_connection(request.host, request.port,
                                                       self.is_secure)
             time.sleep(next_sleep)
@@ -1026,8 +1042,7 @@ class AWSAuthConnection(object):
             headers = {}
         else:
             headers = headers.copy()
-        if (self.host_header and
-            not boto.utils.find_matching_headers('host', headers)):
+        if self.host_header and not boto.utils.find_matching_headers('host', headers):
             headers['host'] = self.host_header
         host = host or self.host
         if self.use_proxy:
@@ -1070,14 +1085,15 @@ class AWSQueryConnection(AWSAuthConnection):
                  proxy_user=None, proxy_pass=None, host=None, debug=0,
                  https_connection_factory=None, path='/', security_token=None,
                  validate_certs=True, profile_name=None):
-        super(AWSQueryConnection, self).__init__(host, aws_access_key_id,
-                                   aws_secret_access_key,
-                                   is_secure, port, proxy,
-                                   proxy_port, proxy_user, proxy_pass,
-                                   debug, https_connection_factory, path,
-                                   security_token=security_token,
-                                   validate_certs=validate_certs,
-                                   profile_name=profile_name)
+        super(AWSQueryConnection, self).__init__(
+            host, aws_access_key_id,
+            aws_secret_access_key,
+            is_secure, port, proxy,
+            proxy_port, proxy_user, proxy_pass,
+            debug, https_connection_factory, path,
+            security_token=security_token,
+            validate_certs=validate_certs,
+            profile_name=profile_name)
 
     def _required_auth_capability(self):
         return []

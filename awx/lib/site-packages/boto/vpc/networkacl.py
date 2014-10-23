@@ -135,7 +135,7 @@ class NetworkAclAssociation(object):
         if name == 'networkAclAssociationId':
             self.id = value
         elif name == 'networkAclId':
-            self.route_table_id = value
+            self.network_acl_id = value
         elif name == 'subnetId':
             self.subnet_id = value
 

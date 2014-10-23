@@ -467,6 +467,8 @@ class Table(object):
         should be fetched)
 
         Returns an ``Item`` instance containing all the data for that record.
+        
+        Raises an ``ItemNotFound`` exception if the item is not found.
 
         Example::
 

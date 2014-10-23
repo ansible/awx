@@ -39,8 +39,6 @@
 Some handy utility functions used by several classes.
 """
 
-import socket
-import imp
 import subprocess
 import time
 import logging.handlers
@@ -170,9 +168,7 @@ def merge_meta(headers, metadata, provider=None):
     metadata_prefix = provider.metadata_prefix
     final_headers = headers.copy()
     for k in metadata.keys():
-        if k.lower() in ['cache-control', 'content-md5', 'content-type',
-                         'content-encoding', 'content-disposition',
-                         'expires']:
+        if k.lower() in boto.s3.key.Key.base_user_settable_fields:
             final_headers[k] = metadata[k]
         else:
             final_headers[metadata_prefix + k] = metadata[k]
@@ -199,7 +195,7 @@ def get_aws_metadata(headers, provider=None):
     return metadata
 
 
-def retry_url(url, retry_on_404=True, num_retries=10):
+def retry_url(url, retry_on_404=True, num_retries=10, timeout=None):
     """
     Retry a url.  This is specifically used for accessing the metadata
     service on an instance.  Since this address should never be proxied
@@ -211,7 +207,7 @@ def retry_url(url, retry_on_404=True, num_retries=10):
             proxy_handler = urllib.request.ProxyHandler({})
             opener = urllib.request.build_opener(proxy_handler)
             req = urllib.request.Request(url)
-            r = opener.open(req)
+            r = opener.open(req, timeout=timeout)
             result = r.read()
 
             if(not isinstance(result, six.string_types) and
@@ -234,17 +230,18 @@ def retry_url(url, retry_on_404=True, num_retries=10):
     return ''
 
 
-def _get_instance_metadata(url, num_retries):
-    return LazyLoadMetadata(url, num_retries)
+def _get_instance_metadata(url, num_retries, timeout=None):
+    return LazyLoadMetadata(url, num_retries, timeout)
 
 
 class LazyLoadMetadata(dict):
-    def __init__(self, url, num_retries):
+    def __init__(self, url, num_retries, timeout=None):
         self._url = url
         self._num_retries = num_retries
         self._leaves = {}
         self._dicts = []
-        data = boto.utils.retry_url(self._url, num_retries=self._num_retries)
+        self._timeout = timeout
+        data = boto.utils.retry_url(self._url, num_retries=self._num_retries, timeout=self._timeout)
         if data:
             fields = data.split('\n')
             for field in fields:
@@ -284,7 +281,8 @@ class LazyLoadMetadata(dict):
                     val = boto.utils.retry_url(
                         self._url + urllib.parse.quote(resource,
                                                        safe="/:"),
-                        num_retries=self._num_retries)
+                        num_retries=self._num_retries,
+                        timeout=self._timeout)
                     if val and val[0] == '{':
                         val = json.loads(val)
                         break
@@ -391,17 +389,11 @@ def get_instance_metadata(version='latest', url='http://169.254.169.254',
     will time out after the specified number of seconds.
 
     """
-    if timeout is not None:
-        original = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(timeout)
     try:
         metadata_url = _build_instance_metadata_url(url, version, data)
-        return _get_instance_metadata(metadata_url, num_retries=num_retries)
-    except urllib.error.URLError as e:
+        return _get_instance_metadata(metadata_url, num_retries=num_retries, timeout=timeout)
+    except urllib.error.URLError:
         return None
-    finally:
-        if timeout is not None:
-            socket.setdefaulttimeout(original)
 
 
 def get_instance_identity(version='latest', url='http://169.254.169.254',
@@ -412,30 +404,24 @@ def get_instance_identity(version='latest', url='http://169.254.169.254',
     iid = {}
     base_url = _build_instance_metadata_url(url, version,
                                             'dynamic/instance-identity/')
-    if timeout is not None:
-        original = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(timeout)
     try:
-        data = retry_url(base_url, num_retries=num_retries)
+        data = retry_url(base_url, num_retries=num_retries, timeout=timeout)
         fields = data.split('\n')
         for field in fields:
-            val = retry_url(base_url + '/' + field + '/')
+            val = retry_url(base_url + '/' + field + '/', num_retries=num_retries, timeout=timeout)
             if val[0] == '{':
                 val = json.loads(val)
             if field:
                 iid[field] = val
         return iid
-    except urllib.error.URLError as e:
+    except urllib.error.URLError:
         return None
-    finally:
-        if timeout is not None:
-            socket.setdefaulttimeout(original)
 
 
 def get_instance_userdata(version='latest', sep=None,
-                          url='http://169.254.169.254'):
+                          url='http://169.254.169.254', timeout=None, num_retries=5):
     ud_url = _build_instance_metadata_url(url, version, 'user-data')
-    user_data = retry_url(ud_url, retry_on_404=False)
+    user_data = retry_url(ud_url, retry_on_404=False, num_retries=num_retries, timeout=timeout)
     if user_data:
         if sep:
             l = user_data.split(sep)
@@ -450,6 +436,7 @@ ISO8601_MS = '%Y-%m-%dT%H:%M:%S.%fZ'
 RFC1123 = '%a, %d %b %Y %H:%M:%S %Z'
 LOCALE_LOCK = threading.Lock()
 
+
 @contextmanager
 def setlocale(name):
     """
@@ -462,6 +449,7 @@ def setlocale(name):
             yield locale.setlocale(locale.LC_ALL, name)
         finally:
             locale.setlocale(locale.LC_ALL, saved)
+
 
 def get_ts(ts=None):
     if not ts:
@@ -1051,6 +1039,7 @@ def merge_headers_by_name(name, headers):
     matching_headers = find_matching_headers(name, headers)
     return ','.join(str(headers[h]) for h in matching_headers
                     if headers[h] is not None)
+
 
 class RequestHook(object):
     """

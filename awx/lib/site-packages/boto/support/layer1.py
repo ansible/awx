@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Amazon.com, Inc. or its affiliates.  All Rights Reserved
+# Copyright (c) 2014 Amazon.com, Inc. or its affiliates.  All Rights Reserved
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -21,19 +21,19 @@
 #
 
 import boto
+from boto.compat import json
 from boto.connection import AWSQueryConnection
 from boto.regioninfo import RegionInfo
 from boto.exception import JSONResponseError
 from boto.support import exceptions
-from boto.compat import json
 
 
 class SupportConnection(AWSQueryConnection):
     """
     AWS Support
     The AWS Support API reference is intended for programmers who need
-    detailed information about the AWS Support actions and data types.
-    This service enables you to manage your AWS Support cases
+    detailed information about the AWS Support operations and data
+    types. This service enables you to manage your AWS Support cases
     programmatically. It uses HTTP methods that return results in JSON
     format.
 
@@ -43,29 +43,31 @@ class SupportConnection(AWSQueryConnection):
     get the refresh status of checks.
 
     The following list describes the AWS Support case management
-    actions:
+    operations:
 
 
     + **Service names, issue categories, and available severity
-      levels. **The actions DescribeServices and DescribeSeverityLevels
-      enable you to obtain AWS service names, service codes, service
+      levels. **The DescribeServices and DescribeSeverityLevels
+      operations return AWS service names, service codes, service
       categories, and problem severity levels. You use these values when
-      you call the CreateCase action.
+      you call the CreateCase operation.
     + **Case creation, case details, and case resolution.** The
-      actions CreateCase, DescribeCases, and ResolveCase enable you to
-      create AWS Support cases, retrieve them, and resolve them.
-    + **Case communication.** The actions DescribeCommunications and
-      AddCommunicationToCase enable you to retrieve and add
-      communication to AWS Support cases.
+      CreateCase, DescribeCases, DescribeAttachment, and ResolveCase
+      operations create AWS Support cases, retrieve information about
+      cases, and resolve cases.
+    + **Case communication.** The DescribeCommunications,
+      AddCommunicationToCase, and AddAttachmentsToSet operations
+      retrieve and add communications and attachments to AWS Support
+      cases.
 
 
-    The following list describes the actions available from the AWS
+    The following list describes the operations available from the AWS
     Support service for Trusted Advisor:
 
 
     + DescribeTrustedAdvisorChecks returns the list of checks that run
       against your AWS resources.
-    + Using the CheckId for a specific check returned by
+    + Using the `CheckId` for a specific check returned by
       DescribeTrustedAdvisorChecks, you can call
       DescribeTrustedAdvisorCheckResult to obtain the results for the
       check you specified.
@@ -80,9 +82,10 @@ class SupportConnection(AWSQueryConnection):
     For authentication of requests, AWS Support uses `Signature
     Version 4 Signing Process`_.
 
-    See the AWS Support `User Guide`_ for information about how to use
-    this service to create and manage your support cases, and how to
-    call Trusted Advisor for results of checks on your resources.
+    See `About the AWS Support API`_ in the AWS Support User Guide for
+    information about how to use this service to create and manage
+    your support cases, and how to call Trusted Advisor for results of
+    checks on your resources.
     """
     APIVersion = "2013-04-15"
     DefaultRegionName = "us-east-1"
@@ -92,9 +95,15 @@ class SupportConnection(AWSQueryConnection):
     ResponseError = JSONResponseError
 
     _faults = {
-        "CaseIdNotFound": exceptions.CaseIdNotFound,
         "CaseCreationLimitExceeded": exceptions.CaseCreationLimitExceeded,
+        "AttachmentLimitExceeded": exceptions.AttachmentLimitExceeded,
+        "CaseIdNotFound": exceptions.CaseIdNotFound,
+        "DescribeAttachmentLimitExceeded": exceptions.DescribeAttachmentLimitExceeded,
+        "AttachmentSetIdNotFound": exceptions.AttachmentSetIdNotFound,
         "InternalServerError": exceptions.InternalServerError,
+        "AttachmentSetExpired": exceptions.AttachmentSetExpired,
+        "AttachmentIdNotFound": exceptions.AttachmentIdNotFound,
+        "AttachmentSetSizeLimitExceeded": exceptions.AttachmentSetSizeLimitExceeded,
     }
 
 
@@ -103,15 +112,53 @@ class SupportConnection(AWSQueryConnection):
         if not region:
             region = RegionInfo(self, self.DefaultRegionName,
                                 self.DefaultRegionEndpoint)
-        kwargs['host'] = region.endpoint
+
+        if 'host' not in kwargs or kwargs['host'] is None:
+            kwargs['host'] = region.endpoint
+
         super(SupportConnection, self).__init__(**kwargs)
         self.region = region
 
     def _required_auth_capability(self):
         return ['hmac-v4']
 
+    def add_attachments_to_set(self, attachments, attachment_set_id=None):
+        """
+        Adds one or more attachments to an attachment set. If an
+        `AttachmentSetId` is not specified, a new attachment set is
+        created, and the ID of the set is returned in the response. If
+        an `AttachmentSetId` is specified, the attachments are added
+        to the specified set, if it exists.
+
+        An attachment set is a temporary container for attachments
+        that are to be added to a case or case communication. The set
+        is available for one hour after it is created; the
+        `ExpiryTime` returned in the response indicates when the set
+        expires. The maximum number of attachments in a set is 3, and
+        the maximum size of any attachment in the set is 5 MB.
+
+        :type attachment_set_id: string
+        :param attachment_set_id: The ID of the attachment set. If an
+            `AttachmentSetId` is not specified, a new attachment set is
+            created, and the ID of the set is returned in the response. If an
+            `AttachmentSetId` is specified, the attachments are added to the
+            specified set, if it exists.
+
+        :type attachments: list
+        :param attachments: One or more attachments to add to the set. The
+            limit is 3 attachments per set, and the size limit is 5 MB per
+            attachment.
+
+        """
+        params = {'attachments': attachments, }
+        if attachment_set_id is not None:
+            params['attachmentSetId'] = attachment_set_id
+        return self.make_request(action='AddAttachmentsToSet',
+                                 body=json.dumps(params))
+
     def add_communication_to_case(self, communication_body, case_id=None,
-                                  cc_email_addresses=None):
+                                  cc_email_addresses=None,
+                                  attachment_set_id=None):
         """
         Adds additional customer communication to an AWS Support case.
         You use the `CaseId` value to identify the case to add
@@ -138,18 +185,26 @@ class SupportConnection(AWSQueryConnection):
         :param cc_email_addresses: The email addresses in the CC line of an
             email to be added to the support case.
 
+        :type attachment_set_id: string
+        :param attachment_set_id: The ID of a set of one or more attachments
+            for the communication to add to the case. Create the set by calling
+            AddAttachmentsToSet
+
         """
         params = {'communicationBody': communication_body, }
         if case_id is not None:
             params['caseId'] = case_id
         if cc_email_addresses is not None:
             params['ccEmailAddresses'] = cc_email_addresses
+        if attachment_set_id is not None:
+            params['attachmentSetId'] = attachment_set_id
         return self.make_request(action='AddCommunicationToCase',
                                  body=json.dumps(params))
 
     def create_case(self, subject, communication_body, service_code=None,
                     severity_code=None, category_code=None,
-                    cc_email_addresses=None, language=None, issue_type=None):
+                    cc_email_addresses=None, language=None, issue_type=None,
+                    attachment_set_id=None):
         """
         Creates a new case in the AWS Support Center. This operation
         is modeled on the behavior of the AWS Support Center `Open a
@@ -157,6 +212,9 @@ class SupportConnection(AWSQueryConnection):
         following information:
 
 
+        #. **IssueType.** The type of issue for the case. You can
+           specify either "customer-service" or "technical." If you do
+           not indicate a value, the default is "technical."
         #. **ServiceCode.** The code for an AWS service. You obtain
            the `ServiceCode` by calling DescribeServices.
         #. **CategoryCode.** The category for the service defined for
@@ -171,6 +229,8 @@ class SupportConnection(AWSQueryConnection):
            Center `Open a new case`_ page.
         #. **CommunicationBody.** The **Description** field on the AWS
            Support Center `Open a new case`_ page.
+        #. **AttachmentSetId.** The ID of a set of attachments that
+           has been created by using AddAttachmentsToSet.
         #. **Language.** The human language in which AWS Support
            handles the case. English and Japanese are currently
            supported.
@@ -181,20 +241,11 @@ class SupportConnection(AWSQueryConnection):
            Credentials in the HTTP POST method or in a method or function
            call from one of the programming languages supported by an
            `AWS SDK`_.
-        #. **IssueType.** The type of issue for the case. You can
-           specify either "customer-service" or "technical." If you do
-           not indicate a value, the default is "technical."
-
-
-
-        The AWS Support API does not currently support the ability to
-        add attachments to cases. You can, however, call
-        AddCommunicationToCase to add information to an open case.
 
 
         A successful CreateCase request returns an AWS Support case
-        number. Case numbers are used by the DescribeCases action to
-        retrieve existing AWS Support cases.
+        number. Case numbers are used by the DescribeCases operation
+        to retrieve existing AWS Support cases.
 
         :type subject: string
         :param subject: The title of the AWS Support case.
@@ -204,14 +255,8 @@ class SupportConnection(AWSQueryConnection):
             to DescribeServices.
 
         :type severity_code: string
-        :param severity_code:
-        The code for the severity level returned by the call to
-            DescribeSeverityLevels.
-
-
-        The availability of severity levels depends on each customer's support
-            subscription. In other words, your subscription may not necessarily
-            require the urgent level of response time.
+        :param severity_code: The code for the severity level returned by the
+            call to DescribeSeverityLevels.
 
         :type category_code: string
         :param category_code: The category of problem for the AWS Support case.
@@ -235,6 +280,10 @@ class SupportConnection(AWSQueryConnection):
             either "customer-service" or "technical." If you do not indicate a
             value, the default is "technical."
 
+        :type attachment_set_id: string
+        :param attachment_set_id: The ID of a set of one or more attachments
+            for the case. Create the set by using AddAttachmentsToSet.
+
         """
         params = {
             'subject': subject,
@@ -252,18 +301,42 @@ class SupportConnection(AWSQueryConnection):
             params['language'] = language
         if issue_type is not None:
             params['issueType'] = issue_type
+        if attachment_set_id is not None:
+            params['attachmentSetId'] = attachment_set_id
         return self.make_request(action='CreateCase',
+                                 body=json.dumps(params))
+
+    def describe_attachment(self, attachment_id):
+        """
+        Returns the attachment that has the specified ID. Attachment
+        IDs are generated by the case management system when you add
+        an attachment to a case or case communication. Attachment IDs
+        are returned in the AttachmentDetails objects that are
+        returned by the DescribeCommunications operation.
+
+        :type attachment_id: string
+        :param attachment_id: The ID of the attachment to return. Attachment
+            IDs are returned by the DescribeCommunications operation.
+
+        """
+        params = {'attachmentId': attachment_id, }
+        return self.make_request(action='DescribeAttachment',
                                  body=json.dumps(params))
 
     def describe_cases(self, case_id_list=None, display_id=None,
                        after_time=None, before_time=None,
                        include_resolved_cases=None, next_token=None,
-                       max_results=None, language=None):
+                       max_results=None, language=None,
+                       include_communications=None):
         """
         Returns a list of cases that you specify by passing one or
         more case IDs. In addition, you can filter the cases by date
         by setting values for the `AfterTime` and `BeforeTime` request
         parameters.
+
+        Case data is available for 12 months after creation. If a case
+        was created more than 12 months ago, a request for data might
+        cause an error.
 
         The response returns the following in JSON format:
 
@@ -283,15 +356,18 @@ class SupportConnection(AWSQueryConnection):
 
         :type after_time: string
         :param after_time: The start date for a filtered date search on support
-            case communications.
+            case communications. Case communications are available for 12
+            months after creation.
 
         :type before_time: string
         :param before_time: The end date for a filtered date search on support
-            case communications.
+            case communications. Case communications are available for 12
+            months after creation.
 
         :type include_resolved_cases: boolean
         :param include_resolved_cases: Specifies whether resolved support cases
-            should be included in the DescribeCases results.
+            should be included in the DescribeCases results. The default is
+            false .
 
         :type next_token: string
         :param next_token: A resumption point for pagination.
@@ -305,6 +381,10 @@ class SupportConnection(AWSQueryConnection):
             provides support. AWS Support currently supports English ("en") and
             Japanese ("ja"). Language parameters must be passed explicitly for
             operations that take them.
+
+        :type include_communications: boolean
+        :param include_communications: Specifies whether communications should
+            be included in the DescribeCases results. The default is true .
 
         """
         params = {}
@@ -324,6 +404,8 @@ class SupportConnection(AWSQueryConnection):
             params['maxResults'] = max_results
         if language is not None:
             params['language'] = language
+        if include_communications is not None:
+            params['includeCommunications'] = include_communications
         return self.make_request(action='DescribeCases',
                                  body=json.dumps(params))
 
@@ -331,12 +413,16 @@ class SupportConnection(AWSQueryConnection):
                                 after_time=None, next_token=None,
                                 max_results=None):
         """
-        Returns communications regarding the support case. You can use
-        the `AfterTime` and `BeforeTime` parameters to filter by date.
-        The `CaseId` parameter enables you to identify a specific case
-        by its `CaseId` value.
+        Returns communications (and attachments) for one or more
+        support cases. You can use the `AfterTime` and `BeforeTime`
+        parameters to filter by date. You can use the `CaseId`
+        parameter to restrict the results to a particular case.
 
-        The `MaxResults` and `NextToken` parameters enable you to
+        Case data is available for 12 months after creation. If a case
+        was created more than 12 months ago, a request for data might
+        cause an error.
+
+        You can use the `MaxResults` and `NextToken` parameters to
         control the pagination of the result set. Set `MaxResults` to
         the number of cases you want displayed on each page, and use
         `NextToken` to specify the resumption of pagination.
@@ -348,11 +434,13 @@ class SupportConnection(AWSQueryConnection):
 
         :type before_time: string
         :param before_time: The end date for a filtered date search on support
-            case communications.
+            case communications. Case communications are available for 12
+            months after creation.
 
         :type after_time: string
         :param after_time: The start date for a filtered date search on support
-            case communications.
+            case communications. Case communications are available for 12
+            months after creation.
 
         :type next_token: string
         :param next_token: A resumption point for pagination.

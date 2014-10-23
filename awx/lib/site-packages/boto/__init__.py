@@ -38,7 +38,7 @@ import logging.config
 from boto.compat import urlparse
 from boto.exception import InvalidUriError
 
-__version__ = '2.32.1'
+__version__ = '2.34.0'
 Version = __version__  # for backware compatibility
 
 # http://bugs.python.org/issue7980
@@ -857,6 +857,76 @@ def connect_logs(aws_access_key_id=None,
         aws_secret_access_key=aws_secret_access_key,
         **kwargs
     )
+
+
+def connect_route53domains(aws_access_key_id=None,
+                           aws_secret_access_key=None,
+                           **kwargs):
+    """
+    Connect to Amazon Route 53 Domains
+
+    :type aws_access_key_id: string
+    :param aws_access_key_id: Your AWS Access Key ID
+
+    :type aws_secret_access_key: string
+    :param aws_secret_access_key: Your AWS Secret Access Key
+
+    rtype: :class:`boto.route53.domains.layer1.Route53DomainsConnection`
+    :return: A connection to the Amazon Route 53 Domains service
+    """
+    from boto.route53.domains.layer1 import Route53DomainsConnection
+    return Route53DomainsConnection(
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        **kwargs
+    )
+
+
+def connect_cognito_identity(aws_access_key_id=None,
+                             aws_secret_access_key=None,
+                             **kwargs):
+    """
+    Connect to Amazon Cognito Identity
+
+    :type aws_access_key_id: string
+    :param aws_access_key_id: Your AWS Access Key ID
+
+    :type aws_secret_access_key: string
+    :param aws_secret_access_key: Your AWS Secret Access Key
+
+    rtype: :class:`boto.cognito.identity.layer1.CognitoIdentityConnection`
+    :return: A connection to the Amazon Cognito Identity service
+    """
+    from boto.cognito.identity.layer1 import CognitoIdentityConnection
+    return CognitoIdentityConnection(
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        **kwargs
+    )
+
+
+def connect_cognito_sync(aws_access_key_id=None,
+                         aws_secret_access_key=None,
+                         **kwargs):
+    """
+    Connect to Amazon Cognito Sync
+
+    :type aws_access_key_id: string
+    :param aws_access_key_id: Your AWS Access Key ID
+
+    :type aws_secret_access_key: string
+    :param aws_secret_access_key: Your AWS Secret Access Key
+
+    rtype: :class:`boto.cognito.sync.layer1.CognitoSyncConnection`
+    :return: A connection to the Amazon Cognito Sync service
+    """
+    from boto.cognito.sync.layer1 import CognitoSyncConnection
+    return CognitoSyncConnection(
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        **kwargs
+    )
+
 
 def storage_uri(uri_str, default_scheme='file', debug=0, validate=True,
                 bucket_storage_uri_class=BucketStorageUri,

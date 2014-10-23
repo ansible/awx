@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-from datetime import datetime
 from boto.ec2.elb.listelement import ListElement
 # Namespacing issue with deprecated local class
 from boto.ec2.blockdevicemapping import BlockDeviceMapping as BDM
@@ -129,8 +128,8 @@ class LaunchConfiguration(object):
         :type instance_type: str
         :param instance_type: The instance type
 
-        :type kern_id: str
-        :param kern_id: Kernel id for instance
+        :type kernel_id: str
+        :param kernel_id: Kernel id for instance
 
         :type ramdisk_id: str
         :param ramdisk_id: RAM disk id for instance

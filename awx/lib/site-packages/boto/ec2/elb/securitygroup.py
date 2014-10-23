@@ -19,6 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+
 class SecurityGroup(object):
     def __init__(self, connection=None):
         self.name = None
@@ -35,4 +36,3 @@ class SecurityGroup(object):
             self.name = value
         elif name == 'OwnerAlias':
             self.owner_alias = value
-

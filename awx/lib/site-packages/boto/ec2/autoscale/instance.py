@@ -57,4 +57,3 @@ class Instance(object):
             self.group_name = value
         else:
             setattr(self, name, value)
-

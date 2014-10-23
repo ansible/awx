@@ -440,6 +440,21 @@ class MTurkConnection(AWSQueryConnection):
             params['RequesterFeedback'] = feedback
         return self._process_request('ApproveRejectedAssignment', params)
 
+    def get_file_upload_url(self, assignment_id, question_identifier):
+        """
+        Generates and returns a temporary URL to an uploaded file. The
+        temporary URL is used to retrieve the file as an answer to a
+        FileUploadAnswer question, it is valid for 60 seconds.
+
+        Will have a FileUploadURL attribute as per the API Reference.
+        """
+
+        params = {'AssignmentId': assignment_id,
+                  'QuestionIdentifier': question_identifier}
+
+        return self._process_request('GetFileUploadURL', params,
+                                     [('FileUploadURL', FileUploadURL)])
+
     def get_hit(self, hit_id, response_groups=None):
         """
         """
@@ -913,6 +928,14 @@ class HIT(BaseAutoResultElement):
 
     # are we there yet?
     expired = property(_has_expired)
+
+
+class FileUploadURL(BaseAutoResultElement):
+    """
+    Class to extract an FileUploadURL structure from a response
+    """
+
+    pass
 
 
 class HITTypeId(BaseAutoResultElement):

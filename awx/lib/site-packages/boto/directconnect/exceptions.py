@@ -20,6 +20,7 @@
 # IN THE SOFTWARE.
 #
 
+
 class DirectConnectClientException(Exception):
     pass
 

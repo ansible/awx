@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Amazon.com, Inc. or its affiliates.  All Rights Reserved
+# Copyright (c) 2014 Amazon.com, Inc. or its affiliates.  All Rights Reserved
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -20,8 +20,8 @@
 # IN THE SOFTWARE.
 #
 
-import json
 import boto
+from boto.compat import json
 from boto.connection import AWSQueryConnection
 from boto.regioninfo import RegionInfo
 from boto.exception import JSONResponseError
@@ -113,6 +113,7 @@ class RedshiftConnection(AWSQueryConnection):
         "InvalidS3KeyPrefix": exceptions.InvalidS3KeyPrefix,
         "SubscriptionAlreadyExist": exceptions.SubscriptionAlreadyExist,
         "HsmConfigurationNotFound": exceptions.HsmConfigurationNotFound,
+        "InvalidSubscriptionState": exceptions.InvalidSubscriptionState,
         "AuthorizationNotFound": exceptions.AuthorizationNotFound,
         "ClusterSecurityGroupQuotaExceeded": exceptions.ClusterSecurityGroupQuotaExceeded,
         "SubnetAlreadyInUse": exceptions.SubnetAlreadyInUse,
@@ -140,8 +141,10 @@ class RedshiftConnection(AWSQueryConnection):
         if not region:
             region = RegionInfo(self, self.DefaultRegionName,
                                 self.DefaultRegionEndpoint)
-        if 'host' not in kwargs:
+
+        if 'host' not in kwargs or kwargs['host'] is None:
             kwargs['host'] = region.endpoint
+
         super(RedshiftConnection, self).__init__(**kwargs)
         self.region = region
 
@@ -161,8 +164,7 @@ class RedshiftConnection(AWSQueryConnection):
         Routing (CIDR) IP address range or an EC2 security group. You
         can add as many as 20 ingress rules to an Amazon Redshift
         security group.
-        The EC2 security group must be defined in the AWS region where
-        the cluster resides.
+
         For an overview of CIDR blocks, see the Wikipedia article on
         `Classless Inter-Domain Routing`_.
 
@@ -269,7 +271,7 @@ class RedshiftConnection(AWSQueryConnection):
 
 
         + Must be the identifier for a valid automated snapshot whose state is
-              "available".
+              `available`.
 
         :type source_snapshot_cluster_identifier: string
         :param source_snapshot_cluster_identifier:
@@ -386,7 +388,8 @@ class RedshiftConnection(AWSQueryConnection):
         :param node_type: The node type to be provisioned for the cluster. For
             information about node types, go to ` Working with Clusters`_ in
             the Amazon Redshift Management Guide .
-        Valid Values: `dw.hs1.xlarge` | `dw.hs1.8xlarge`.
+        Valid Values: `dw1.xlarge` | `dw1.8xlarge` | `dw2.large` |
+            `dw2.8xlarge`.
 
         :type master_username: string
         :param master_username:
@@ -459,6 +462,10 @@ class RedshiftConnection(AWSQueryConnection):
 
         + **US-East (Northern Virginia) Region:** 03:00-11:00 UTC
         + **US-West (Oregon) Region** 06:00-14:00 UTC
+        + **EU (Ireland) Region** 22:00-06:00 UTC
+        + **Asia Pacific (Singapore) Region** 14:00-22:00 UTC
+        + **Asia Pacific (Sydney) Region** 12:00-20:00 UTC
+        + **Asia Pacific (Tokyo) Region** 17:00-03:00 UTC
 
 
         Valid Days: Mon | Tue | Wed | Thu | Fri | Sat | Sun
@@ -541,7 +548,8 @@ class RedshiftConnection(AWSQueryConnection):
             a public network.
 
         :type encrypted: boolean
-        :param encrypted: If `True`, the data in cluster is encrypted at rest.
+        :param encrypted: If `True`, the data in the cluster is encrypted at
+            rest.
         Default: false
 
         :type hsm_client_certificate_identifier: string
@@ -643,8 +651,7 @@ class RedshiftConnection(AWSQueryConnection):
         + Must be 1 to 255 alphanumeric characters or hyphens
         + First character must be a letter.
         + Cannot end with a hyphen or contain two consecutive hyphens.
-        + Must be unique withing your AWS account.
-
+        + Must be unique within your AWS account.
 
         This value is stored as a lower-case string.
 
@@ -680,7 +687,7 @@ class RedshiftConnection(AWSQueryConnection):
         Creates a new Amazon Redshift security group. You use security
         groups to control access to non-VPC clusters.
 
-        For information about managing security groups, go to`Amazon
+        For information about managing security groups, go to `Amazon
         Redshift Cluster Security Groups`_ in the Amazon Redshift
         Management Guide .
 
@@ -715,7 +722,7 @@ class RedshiftConnection(AWSQueryConnection):
                                 cluster_identifier):
         """
         Creates a manual snapshot of the specified cluster. The
-        cluster must be in the "available" state.
+        cluster must be in the `available` state.
 
         For more information about working with snapshots, go to
         `Amazon Redshift Snapshots`_ in the Amazon Redshift Management
@@ -758,7 +765,7 @@ class RedshiftConnection(AWSQueryConnection):
         Private Cloud (Amazon VPC) when creating Amazon Redshift
         subnet group.
 
-        For information about subnet groups, go to`Amazon Redshift
+        For information about subnet groups, go to `Amazon Redshift
         Cluster Subnet Groups`_ in the Amazon Redshift Management
         Guide .
 
@@ -815,13 +822,13 @@ class RedshiftConnection(AWSQueryConnection):
         those criteria. For example, you can specify source type =
         cluster, source ID = my-cluster-1 and mycluster2, event
         categories = Availability, Backup, and severity = ERROR. The
-        subsription will only send notifications for those ERROR
-        events in the Availability and Backup categores for the
+        subscription will only send notifications for those ERROR
+        events in the Availability and Backup categories for the
         specified clusters.
 
         If you specify both the source type and source IDs, such as
         source type = cluster and source identifier = my-cluster-1,
-        notifiactions will be sent for all the cluster events for my-
+        notifications will be sent for all the cluster events for my-
         cluster-1. If you specify a source type but do not specify a
         source identifier, you will receive notice of the events for
         the objects of that type in your AWS account. If you do not
@@ -917,16 +924,16 @@ class RedshiftConnection(AWSQueryConnection):
         databases.
 
         The command returns a public key, which you must store in the
-        HSM. After creating the HSM certificate, you must create an
-        Amazon Redshift HSM configuration that provides a cluster the
-        information needed to store and retrieve database encryption
-        keys in the HSM. For more information, go to aLinkToHSMTopic
-        in the Amazon Redshift Management Guide.
+        HSM. In addition to creating the HSM certificate, you must
+        create an Amazon Redshift HSM configuration that provides a
+        cluster the information needed to store and use encryption
+        keys in the HSM. For more information, go to `Hardware
+        Security Modules`_ in the Amazon Redshift Management Guide.
 
         :type hsm_client_certificate_identifier: string
         :param hsm_client_certificate_identifier: The identifier to be assigned
             to the new HSM client certificate that the cluster will use to
-            connect to the HSM to retrieve the database encryption keys.
+            connect to the HSM to use the database encryption keys.
 
         """
         params = {
@@ -943,15 +950,16 @@ class RedshiftConnection(AWSQueryConnection):
                                  hsm_server_public_certificate):
         """
         Creates an HSM configuration that contains the information
-        required by an Amazon Redshift cluster to store and retrieve
-        database encryption keys in a Hardware Storeage Module (HSM).
+        required by an Amazon Redshift cluster to store and use
+        database encryption keys in a Hardware Security Module (HSM).
         After creating the HSM configuration, you can specify it as a
         parameter when creating a cluster. The cluster will then store
         its encryption keys in the HSM.
 
-        Before creating an HSM configuration, you must have first
-        created an HSM client certificate. For more information, go to
-        aLinkToHSMTopic in the Amazon Redshift Management Guide.
+        In addition to creating an HSM configuration, you must also
+        create an HSM client certificate. For more information, go to
+        `Hardware Security Modules`_ in the Amazon Redshift Management
+        Guide.
 
         :type hsm_configuration_identifier: string
         :param hsm_configuration_identifier: The identifier to be assigned to
@@ -975,9 +983,8 @@ class RedshiftConnection(AWSQueryConnection):
             partition.
 
         :type hsm_server_public_certificate: string
-        :param hsm_server_public_certificate: The public key used to access the
-            HSM client certificate, which was created by calling the Amazon
-            Redshift create HSM certificate command.
+        :param hsm_server_public_certificate: The HSMs public certificate file.
+            When using Cloud HSM, the file name is server.pem.
 
         """
         params = {
@@ -1026,9 +1033,6 @@ class RedshiftConnection(AWSQueryConnection):
             cluster. If `True`, a final cluster snapshot is not created. If
             `False`, a final cluster snapshot is created before the cluster is
             deleted.
-        The FinalClusterSnapshotIdentifier parameter must be specified if
-            SkipFinalClusterSnapshot is `False`.
-
         Default: `False`
 
         :type final_cluster_snapshot_identifier: string
@@ -1058,9 +1062,7 @@ class RedshiftConnection(AWSQueryConnection):
 
     def delete_cluster_parameter_group(self, parameter_group_name):
         """
-        Deletes a specified Amazon Redshift parameter group. You
-        cannot delete a parameter group if it is associated with a
-        cluster.
+        Deletes a specified Amazon Redshift parameter group.
 
         :type parameter_group_name: string
         :param parameter_group_name:
@@ -1082,9 +1084,8 @@ class RedshiftConnection(AWSQueryConnection):
     def delete_cluster_security_group(self, cluster_security_group_name):
         """
         Deletes an Amazon Redshift security group.
-        You cannot delete a security group that is associated with any
-        clusters. You cannot delete the default security group.
-        For information about managing security groups, go to`Amazon
+
+        For information about managing security groups, go to `Amazon
         Redshift Cluster Security Groups`_ in the Amazon Redshift
         Management Guide .
 
@@ -1105,7 +1106,7 @@ class RedshiftConnection(AWSQueryConnection):
                                 snapshot_cluster_identifier=None):
         """
         Deletes the specified manual snapshot. The snapshot must be in
-        the "available" state, with no other users authorized to
+        the `available` state, with no other users authorized to
         access the snapshot.
 
         Unlike automated snapshots, manual snapshots are retained even
@@ -1224,19 +1225,23 @@ class RedshiftConnection(AWSQueryConnection):
             groups and the default parameter group are returned.
 
         :type max_records: integer
-        :param max_records: The maximum number of parameter group records to
-            include in the response. If more records exist than the specified
-            `MaxRecords` value, the response includes a marker that you can use
-            in a subsequent DescribeClusterParameterGroups request to retrieve
-            the next set of records.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
-        Constraints: Value must be at least 20 and no more than 100.
+        Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned by a previous
-            DescribeClusterParameterGroups request to indicate the first
-            parameter group that the current request will return.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeClusterParameterGroups request exceed the value specified
+            in `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {}
@@ -1284,19 +1289,23 @@ class RedshiftConnection(AWSQueryConnection):
         Valid Values: `user` | `engine-default`
 
         :type max_records: integer
-        :param max_records: The maximum number of records to include in the
-            response. If more records exist than the specified `MaxRecords`
-            value, response includes a marker that you can specify in your
-            subsequent request to retrieve remaining result.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
-        Constraints: Value must be at least 20 and no more than 100.
+        Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned from a previous
-            **DescribeClusterParameters** request. If this parameter is
-            specified, the response includes only records beyond the specified
-            marker, up to the value specified by `MaxRecords`.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeClusterParameters request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {'ParameterGroupName': parameter_group_name, }
@@ -1319,7 +1328,7 @@ class RedshiftConnection(AWSQueryConnection):
         the name of a security group is specified, the response will
         contain only information about only that security group.
 
-        For information about managing security groups, go to`Amazon
+        For information about managing security groups, go to `Amazon
         Redshift Cluster Security Groups`_ in the Amazon Redshift
         Management Guide .
 
@@ -1331,20 +1340,25 @@ class RedshiftConnection(AWSQueryConnection):
         Example: `securitygroup1`
 
         :type max_records: integer
-        :param max_records: The maximum number of records to be included in the
-            response. If more records exist than the specified `MaxRecords`
-            value, a marker is included in the response, which you can use in a
-            subsequent DescribeClusterSecurityGroups request.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
-        Constraints: Value must be at least 20 and no more than 100.
+        Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned by a previous
-            DescribeClusterSecurityGroups request to indicate the first
-            security group that the current request will return. You can
-            specify either the **Marker** parameter or a
-            **ClusterSecurityGroupName** parameter, but not both.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeClusterSecurityGroups request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
+        Constraints: You can specify either the **ClusterSecurityGroupName**
+            parameter or the **Marker** parameter, but not both.
 
         """
         params = {}
@@ -1401,19 +1415,23 @@ class RedshiftConnection(AWSQueryConnection):
         Example: `2012-07-16T18:00:00Z`
 
         :type max_records: integer
-        :param max_records: The maximum number of snapshot records to include
-            in the response. If more records exist than the specified
-            `MaxRecords` value, the response returns a marker that you can use
-            in a subsequent DescribeClusterSnapshots request in order to
-            retrieve the next set of snapshot records.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
-        Constraints: Must be at least 20 and no more than 100.
+        Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned by a previous
-            DescribeClusterSnapshots request to indicate the first snapshot
-            that the request will return.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeClusterSnapshots request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         :type owner_account: string
         :param owner_account: The AWS customer account used to create or copy
@@ -1458,19 +1476,23 @@ class RedshiftConnection(AWSQueryConnection):
             for which information is requested.
 
         :type max_records: integer
-        :param max_records: The maximum number of cluster subnet group records
-            to include in the response. If more records exist than the
-            specified `MaxRecords` value, the response returns a marker that
-            you can use in a subsequent DescribeClusterSubnetGroups request in
-            order to retrieve the next set of cluster subnet group records.
-        Default: 100
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
+        Default: `100`
 
-        Constraints: Must be at least 20 and no more than 100.
+        Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned by a previous
-            DescribeClusterSubnetGroups request to indicate the first cluster
-            subnet group that the current request will return.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeClusterSubnetGroups request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {}
@@ -1512,18 +1534,23 @@ class RedshiftConnection(AWSQueryConnection):
         + Cannot end with a hyphen or contain two consecutive hyphens
 
         :type max_records: integer
-        :param max_records: The maximum number of records to include in the
-            response. If more than the `MaxRecords` value is available, a
-            marker is included in the response so that the following results
-            can be retrieved.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
-        Constraints: Value must be at least 20 and no more than 100.
+        Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: The marker returned from a previous request. If this
-            parameter is specified, the response includes records beyond the
-            marker only, up to `MaxRecords`.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeClusterVersions request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {}
@@ -1552,25 +1579,29 @@ class RedshiftConnection(AWSQueryConnection):
 
         :type cluster_identifier: string
         :param cluster_identifier: The unique identifier of a cluster whose
-            properties you are requesting. This parameter isn't case sensitive.
+            properties you are requesting. This parameter is case sensitive.
         The default is that all clusters defined for an account are returned.
 
         :type max_records: integer
-        :param max_records: The maximum number of records that the response can
-            include. If more records exist than the specified `MaxRecords`
-            value, a `marker` is included in the response that can be used in a
-            new **DescribeClusters** request to continue listing results.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
-        Constraints: Value must be at least 20 and no more than 100.
+        Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned by a previous
-            **DescribeClusters** request to indicate the first cluster that the
-            current **DescribeClusters** request will return.
-        You can specify either a **Marker** parameter or a
-            **ClusterIdentifier** parameter in a **DescribeClusters** request,
-            but not both.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeClusters request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
+        Constraints: You can specify either the **ClusterIdentifier** parameter
+            or the **Marker** parameter, but not both.
 
         """
         params = {}
@@ -1600,19 +1631,23 @@ class RedshiftConnection(AWSQueryConnection):
             family.
 
         :type max_records: integer
-        :param max_records: The maximum number of records to include in the
-            response. If more records exist than the specified `MaxRecords`
-            value, a marker is included in the response so that the remaining
-            results may be retrieved.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
-        Constraints: Value must be at least 20 and no more than 100.
+        Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned from a previous
-            **DescribeDefaultClusterParameters** request. If this parameter is
-            specified, the response includes only records beyond the marker, up
-            to the value specified by `MaxRecords`.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeDefaultClusterParameters request exceed the value specified
+            in `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {'ParameterGroupFamily': parameter_group_family, }
@@ -1659,19 +1694,23 @@ class RedshiftConnection(AWSQueryConnection):
             notification subscription to be described.
 
         :type max_records: integer
-        :param max_records: The maximum number of records to include in the
-            response. If more records exist than the specified MaxRecords
-            value, a pagination token called a marker is included in the
-            response so that the remaining results can be retrieved.
-        Default: 100
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
+        Default: `100`
 
-        Constraints: minimum 20, maximum 100
+        Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional pagination token provided by a previous
-            DescribeOrderableClusterOptions request. If this parameter is
-            specified, the response includes only records beyond the marker, up
-            to the value specified by MaxRecords.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeEventSubscriptions request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {}
@@ -1753,19 +1792,22 @@ class RedshiftConnection(AWSQueryConnection):
         Default: `60`
 
         :type max_records: integer
-        :param max_records: The maximum number of records to include in the
-            response. If more records exist than the specified `MaxRecords`
-            value, a marker is included in the response so that the remaining
-            results may be retrieved.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
-        Constraints: Value must be at least 20 and no more than 100.
+        Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned from a previous
-            **DescribeEvents** request. If this parameter is specified, the
-            response includes only records beyond the marker, up to the value
-            specified by `MaxRecords`.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeEvents request exceed the value specified in `MaxRecords`,
+            AWS returns a value in the `Marker` field of the response. You can
+            retrieve the next set of response records by providing the returned
+            marker value in the `Marker` parameter and retrying the request.
 
         """
         params = {}
@@ -1801,23 +1843,26 @@ class RedshiftConnection(AWSQueryConnection):
         :param hsm_client_certificate_identifier: The identifier of a specific
             HSM client certificate for which you want information. If no
             identifier is specified, information is returned for all HSM client
-            certificates associated with Amazon Redshift clusters owned by your
-            AWS customer account.
+            certificates owned by your AWS customer account.
 
         :type max_records: integer
-        :param max_records: The maximum number of records to include in the
-            response. If more records exist than the specified `MaxRecords`
-            value, a marker is included in the response so that the remaining
-            results may be retrieved.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
         Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned from a previous
-            **DescribeOrderableClusterOptions** request. If this parameter is
-            specified, the response includes only records beyond the marker, up
-            to the value specified by `MaxRecords`.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeHsmClientCertificates request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {}
@@ -1847,19 +1892,23 @@ class RedshiftConnection(AWSQueryConnection):
             owned by your AWS customer account.
 
         :type max_records: integer
-        :param max_records: The maximum number of records to include in the
-            response. If more records exist than the specified `MaxRecords`
-            value, a marker is included in the response so that the remaining
-            results may be retrieved.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
         Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned from a previous
-            **DescribeOrderableClusterOptions** request. If this parameter is
-            specified, the response includes only records beyond the marker, up
-            to the value specified by `MaxRecords`.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeHsmConfigurations request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {}
@@ -1921,19 +1970,23 @@ class RedshiftConnection(AWSQueryConnection):
             show only the available offerings matching the specified node type.
 
         :type max_records: integer
-        :param max_records: The maximum number of records to include in the
-            response. If more records exist than the specified `MaxRecords`
-            value, a marker is included in the response so that the remaining
-            results may be retrieved.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
         Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned from a previous
-            **DescribeOrderableClusterOptions** request. If this parameter is
-            specified, the response includes only records beyond the marker, up
-            to the value specified by `MaxRecords`.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeOrderableClusterOptions request exceed the value specified
+            in `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {}
@@ -1972,21 +2025,23 @@ class RedshiftConnection(AWSQueryConnection):
             offering.
 
         :type max_records: integer
-        :param max_records: The maximum number of records to include in the
-            response. If more records exist than the specified `MaxRecords`
-            value, a marker is included in the response so that the remaining
-            results may be retrieved.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
         Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned by a previous
-            DescribeReservedNodeOfferings request to indicate the first
-            offering that the request will return.
-        You can specify either a **Marker** parameter or a
-            **ClusterIdentifier** parameter in a DescribeClusters request, but
-            not both.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeReservedNodeOfferings request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {}
@@ -2010,18 +2065,23 @@ class RedshiftConnection(AWSQueryConnection):
         :param reserved_node_id: Identifier for the node reservation.
 
         :type max_records: integer
-        :param max_records: The maximum number of records to include in the
-            response. If more records exist than the specified `MaxRecords`
-            value, a marker is included in the response so that the remaining
-            results may be retrieved.
+        :param max_records: The maximum number of response records to return in
+            each call. If the number of remaining response records exceeds the
+            specified `MaxRecords` value, a value is returned in a `marker`
+            field of the response. You can retrieve the next set of records by
+            retrying the command with the returned marker value.
         Default: `100`
 
         Constraints: minimum 20, maximum 100.
 
         :type marker: string
-        :param marker: An optional marker returned by a previous
-            DescribeReservedNodes request to indicate the first parameter group
-            that the current request will return.
+        :param marker: An optional parameter that specifies the starting point
+            to return a set of response records. When the results of a
+            DescribeReservedNodes request exceed the value specified in
+            `MaxRecords`, AWS returns a value in the `Marker` field of the
+            response. You can retrieve the next set of response records by
+            providing the returned marker value in the `Marker` parameter and
+            retrying the request.
 
         """
         params = {}
@@ -2199,16 +2259,17 @@ class RedshiftConnection(AWSQueryConnection):
                        preferred_maintenance_window=None,
                        cluster_version=None, allow_version_upgrade=None,
                        hsm_client_certificate_identifier=None,
-                       hsm_configuration_identifier=None):
+                       hsm_configuration_identifier=None,
+                       new_cluster_identifier=None):
         """
         Modifies the settings for a cluster. For example, you can add
         another security or parameter group, update the preferred
         maintenance window, or change the master user password.
         Resetting a cluster password or modifying the security groups
         associated with a cluster do not need a reboot. However,
-        modifying parameter group requires a reboot for parameters to
-        take effect. For more information about managing clusters, go
-        to `Amazon Redshift Clusters`_ in the Amazon Redshift
+        modifying a parameter group requires a reboot for parameters
+        to take effect. For more information about managing clusters,
+        go to `Amazon Redshift Clusters`_ in the Amazon Redshift
         Management Guide
 
         You can also change node type and the number of nodes to scale
@@ -2247,7 +2308,8 @@ class RedshiftConnection(AWSQueryConnection):
             permissions for the cluster are restored. You can use the
             DescribeResize to track the progress of the resize request.
 
-        Valid Values: ` dw.hs1.xlarge` | `dw.hs1.8xlarge`
+        Valid Values: ` dw1.xlarge` | `dw1.8xlarge` | `dw2.large` |
+            `dw2.8xlarge`.
 
         :type number_of_nodes: integer
         :param number_of_nodes: The new number of nodes of the cluster. If you
@@ -2269,7 +2331,7 @@ class RedshiftConnection(AWSQueryConnection):
         A list of cluster security groups to be authorized on this cluster.
             This change is asynchronously applied as soon as possible.
 
-        Security groups currently associated with the cluster and not in the
+        Security groups currently associated with the cluster, and not in the
             list of groups to apply, will be revoked from the cluster.
 
         Constraints:
@@ -2280,7 +2342,7 @@ class RedshiftConnection(AWSQueryConnection):
         + Cannot end with a hyphen or contain two consecutive hyphens
 
         :type vpc_security_group_ids: list
-        :param vpc_security_group_ids: A list of Virtual Private Cloud (VPC)
+        :param vpc_security_group_ids: A list of virtual private cloud (VPC)
             security groups to be associated with the cluster.
 
         :type master_user_password: string
@@ -2290,10 +2352,6 @@ class RedshiftConnection(AWSQueryConnection):
             request and the completion of the request, the `MasterUserPassword`
             element exists in the `PendingModifiedValues` element of the
             operation response.
-        Operations never return the password, so this operation provides a way
-            to regain access to the master user account for a cluster if the
-            password is lost.
-
 
         Default: Uses existing setting.
 
@@ -2323,7 +2381,7 @@ class RedshiftConnection(AWSQueryConnection):
             you can still create manual snapshots when you want with
             CreateClusterSnapshot.
         If you decrease the automated snapshot retention period from its
-            current value, existing automated snapshots which fall outside of
+            current value, existing automated snapshots that fall outside of
             the new retention period will be immediately deleted.
 
         Default: Uses existing setting.
@@ -2376,6 +2434,20 @@ class RedshiftConnection(AWSQueryConnection):
             configuration that contains the information the Amazon Redshift
             cluster can use to retrieve and store keys in an HSM.
 
+        :type new_cluster_identifier: string
+        :param new_cluster_identifier: The new identifier for the cluster.
+        Constraints:
+
+
+        + Must contain from 1 to 63 alphanumeric characters or hyphens.
+        + Alphabetic characters must be lowercase.
+        + First character must be a letter.
+        + Cannot end with a hyphen or contain two consecutive hyphens.
+        + Must be unique for all clusters within an AWS account.
+
+
+        Example: `examplecluster`
+
         """
         params = {'ClusterIdentifier': cluster_identifier, }
         if cluster_type is not None:
@@ -2409,6 +2481,8 @@ class RedshiftConnection(AWSQueryConnection):
             params['HsmClientCertificateIdentifier'] = hsm_client_certificate_identifier
         if hsm_configuration_identifier is not None:
             params['HsmConfigurationIdentifier'] = hsm_configuration_identifier
+        if new_cluster_identifier is not None:
+            params['NewClusterIdentifier'] = new_cluster_identifier
         return self._make_request(
             action='ModifyCluster',
             verb='POST',
@@ -2433,6 +2507,9 @@ class RedshiftConnection(AWSQueryConnection):
         For each parameter to be modified, you must supply at least the
             parameter name and parameter value; other name-value pairs of the
             parameter are optional.
+
+        For the workload management (WLM) configuration, you must supply all
+            the name-value pairs in the wlm_json_configuration parameter.
 
         """
         params = {'ParameterGroupName': parameter_group_name, }
@@ -2694,7 +2771,12 @@ class RedshiftConnection(AWSQueryConnection):
                                       owner_account=None,
                                       hsm_client_certificate_identifier=None,
                                       hsm_configuration_identifier=None,
-                                      elastic_ip=None):
+                                      elastic_ip=None,
+                                      cluster_parameter_group_name=None,
+                                      cluster_security_groups=None,
+                                      vpc_security_group_ids=None,
+                                      preferred_maintenance_window=None,
+                                      automated_snapshot_retention_period=None):
         """
         Creates a new cluster from a snapshot. Amazon Redshift creates
         the resulting cluster with the same configuration as the
@@ -2705,11 +2787,8 @@ class RedshiftConnection(AWSQueryConnection):
         different security group and different parameter group with
         the restored cluster.
 
-        If a snapshot is taken of a cluster in VPC, you can restore it
-        only in VPC. In this case, you must provide a cluster subnet
-        group where you want the cluster restored. If snapshot is
-        taken of a cluster outside VPC, then you can restore it only
-        outside VPC.
+        If you restore a cluster into a VPC, you must provide a
+        cluster subnet group where you want the cluster restored.
 
         For more information about working with snapshots, go to
         `Amazon Redshift Snapshots`_ in the Amazon Redshift Management
@@ -2787,6 +2866,68 @@ class RedshiftConnection(AWSQueryConnection):
         :type elastic_ip: string
         :param elastic_ip: The elastic IP (EIP) address for the cluster.
 
+        :type cluster_parameter_group_name: string
+        :param cluster_parameter_group_name:
+        The name of the parameter group to be associated with this cluster.
+
+        Default: The default Amazon Redshift cluster parameter group. For
+            information about the default parameter group, go to `Working with
+            Amazon Redshift Parameter Groups`_.
+
+        Constraints:
+
+
+        + Must be 1 to 255 alphanumeric characters or hyphens.
+        + First character must be a letter.
+        + Cannot end with a hyphen or contain two consecutive hyphens.
+
+        :type cluster_security_groups: list
+        :param cluster_security_groups: A list of security groups to be
+            associated with this cluster.
+        Default: The default cluster security group for Amazon Redshift.
+
+        Cluster security groups only apply to clusters outside of VPCs.
+
+        :type vpc_security_group_ids: list
+        :param vpc_security_group_ids: A list of Virtual Private Cloud (VPC)
+            security groups to be associated with the cluster.
+        Default: The default VPC security group is associated with the cluster.
+
+        VPC security groups only apply to clusters in VPCs.
+
+        :type preferred_maintenance_window: string
+        :param preferred_maintenance_window: The weekly time range (in UTC)
+            during which automated cluster maintenance can occur.
+        Format: `ddd:hh24:mi-ddd:hh24:mi`
+
+        Default: The value selected for the cluster from which the snapshot was
+            taken. The following list shows the time blocks for each region
+            from which the default maintenance windows are assigned.
+
+
+        + **US-East (Northern Virginia) Region:** 03:00-11:00 UTC
+        + **US-West (Oregon) Region** 06:00-14:00 UTC
+        + **EU (Ireland) Region** 22:00-06:00 UTC
+        + **Asia Pacific (Singapore) Region** 14:00-22:00 UTC
+        + **Asia Pacific (Sydney) Region** 12:00-20:00 UTC
+        + **Asia Pacific (Tokyo) Region** 17:00-03:00 UTC
+
+
+        Valid Days: Mon | Tue | Wed | Thu | Fri | Sat | Sun
+
+        Constraints: Minimum 30-minute window.
+
+        :type automated_snapshot_retention_period: integer
+        :param automated_snapshot_retention_period: The number of days that
+            automated snapshots are retained. If the value is 0, automated
+            snapshots are disabled. Even if automated snapshots are disabled,
+            you can still create manual snapshots when you want with
+            CreateClusterSnapshot.
+        Default: The value selected for the cluster from which the snapshot was
+            taken.
+
+        Constraints: Must be a value from 0 to 35.
+
         """
         params = {
             'ClusterIdentifier': cluster_identifier,
@@ -2814,6 +2955,20 @@ class RedshiftConnection(AWSQueryConnection):
             params['HsmConfigurationIdentifier'] = hsm_configuration_identifier
         if elastic_ip is not None:
             params['ElasticIp'] = elastic_ip
+        if cluster_parameter_group_name is not None:
+            params['ClusterParameterGroupName'] = cluster_parameter_group_name
+        if cluster_security_groups is not None:
+            self.build_list_params(params,
+                                   cluster_security_groups,
+                                   'ClusterSecurityGroups.member')
+        if vpc_security_group_ids is not None:
+            self.build_list_params(params,
+                                   vpc_security_group_ids,
+                                   'VpcSecurityGroupIds.member')
+        if preferred_maintenance_window is not None:
+            params['PreferredMaintenanceWindow'] = preferred_maintenance_window
+        if automated_snapshot_retention_period is not None:
+            params['AutomatedSnapshotRetentionPeriod'] = automated_snapshot_retention_period
         return self._make_request(
             action='RestoreFromClusterSnapshot',
             verb='POST',
@@ -2829,7 +2984,7 @@ class RedshiftConnection(AWSQueryConnection):
         for a previously authorized IP range or Amazon EC2 security
         group. To add an ingress rule, see
         AuthorizeClusterSecurityGroupIngress. For information about
-        managing security groups, go to`Amazon Redshift Cluster
+        managing security groups, go to `Amazon Redshift Cluster
         Security Groups`_ in the Amazon Redshift Management Guide .
 
         :type cluster_security_group_name: string

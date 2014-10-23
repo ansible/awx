@@ -60,7 +60,7 @@ class Zone(object):
         return response['ChangeResourceRecordSetsResponse']['ChangeInfo']
 
     def _new_record(self, changes, resource_type, name, value, ttl, identifier,
-                   comment=""):
+                    comment=""):
         """
         Add a CREATE change record to an existing ResourceRecordSets
 
@@ -233,7 +233,14 @@ class Zone(object):
 
         # name/type for get_all_rrsets sets the starting record; they
         # are not a filter
-        results = [r for r in returned if r.name == name and r.type == type]
+        results = []
+        for r in returned:
+            if r.name == name and r.type == type:
+                results.append(r)
+            # Is at the end of the list of matched records. No need to continue
+            # since the records are sorted by name and type.
+            else:
+                break
 
         weight = None
         region = None

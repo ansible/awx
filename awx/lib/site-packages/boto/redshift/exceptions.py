@@ -34,10 +34,6 @@ class ClusterSnapshotNotFoundFault(JSONResponseError):
     pass
 
 
-class ClusterNotFoundFault(JSONResponseError):
-    pass
-
-
 class ClusterSecurityGroupQuotaExceededFault(JSONResponseError):
     pass
 
@@ -456,4 +452,8 @@ class SnapshotCopyAlreadyEnabled(JSONResponseError):
 
 
 class IncompatibleOrderableOptions(JSONResponseError):
+    pass
+
+
+class InvalidSubscriptionState(JSONResponseError):
     pass

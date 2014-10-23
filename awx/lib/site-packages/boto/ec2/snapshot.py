@@ -185,6 +185,3 @@ class SnapshotAttribute(object):
             self.snapshot_id = value
         else:
             setattr(self, name, value)
-
-
-

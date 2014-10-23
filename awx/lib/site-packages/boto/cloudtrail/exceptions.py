@@ -24,6 +24,7 @@ class TrailAlreadyExistsException(BotoServerError):
     """
     pass
 
+
 class InsufficientSnsTopicPolicyException(BotoServerError):
     """
     Raised when the SNS topic does not allow Cloudtrail to post
@@ -31,17 +32,20 @@ class InsufficientSnsTopicPolicyException(BotoServerError):
     """
     pass
 
+
 class InvalidTrailNameException(BotoServerError):
     """
     Raised when the trail name is invalid.
     """
     pass
 
+
 class InternalErrorException(BotoServerError):
     """
     Raised when there was an internal Cloudtrail error.
     """
     pass
+
 
 class TrailNotFoundException(BotoServerError):
     """

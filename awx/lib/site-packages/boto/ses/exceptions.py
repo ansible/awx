@@ -3,6 +3,7 @@ Various exceptions that are specific to the SES module.
 """
 from boto.exception import BotoServerError
 
+
 class SESError(BotoServerError):
     """
     Sub-class all SES-related errors from here. Don't raise this error
@@ -13,12 +14,12 @@ class SESError(BotoServerError):
     pass
 
 
-
 class SESAddressNotVerifiedError(SESError):
     """
     Raised when a "Reply-To" address has not been validated in SES yet.
     """
     pass
+
 
 class SESIdentityNotVerifiedError(SESError):
     """
@@ -26,10 +27,12 @@ class SESIdentityNotVerifiedError(SESError):
     """
     pass
 
+
 class SESDomainNotConfirmedError(SESError):
     """
     """
     pass
+
 
 class SESAddressBlacklistedError(SESError):
     """

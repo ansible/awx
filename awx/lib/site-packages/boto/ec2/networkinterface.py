@@ -119,8 +119,7 @@ class NetworkInterface(TaggedEC2Object):
         return 'NetworkInterface:%s' % self.id
 
     def startElement(self, name, attrs, connection):
-        retval = super(NetworkInterface, self).startElement(name, attrs,
-            connection)
+        retval = super(NetworkInterface, self).startElement(name, attrs, connection)
         if retval is not None:
             return retval
         if name == 'groupSet':
@@ -313,10 +312,10 @@ class NetworkInterfaceCollection(list):
             if spec.associate_public_ip_address is not None:
                 if not params[full_prefix + 'DeviceIndex'] in (0, '0'):
                     raise BotoClientError(
-                            "Only the interface with device index of 0 can " + \
-                            "be provided when using " + \
-                            "'associate_public_ip_address'."
-                        )
+                        "Only the interface with device index of 0 can " + \
+                        "be provided when using " + \
+                        "'associate_public_ip_address'."
+                    )
 
                 if len(self) > 1:
                     raise BotoClientError(

@@ -37,8 +37,6 @@ import datetime
 from email.utils import formatdate
 import hmac
 import os
-import sys
-import time
 import posixpath
 
 from boto.compat import urllib, encodebytes
@@ -317,6 +315,8 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
         for name, value in http_request.headers.items():
             lname = name.lower()
             if lname.startswith('x-amz'):
+                if isinstance(value, bytes):
+                    value = value.decode('utf-8')
                 headers_to_sign[name] = value
         return headers_to_sign
 
@@ -345,7 +345,7 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
         for param in sorted(http_request.params):
             value = boto.utils.get_utf8_value(http_request.params[param])
             l.append('%s=%s' % (urllib.parse.quote(param, safe='-_.~'),
-                                urllib.parse.quote(value.decode('utf-8'), safe='-_.~')))
+                                urllib.parse.quote(value, safe='-_.~')))
         return '&'.join(l)
 
     def canonical_headers(self, headers_to_sign):
@@ -376,7 +376,7 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
         path = http_request.auth_path
         # Normalize the path
         # in windows normpath('/') will be '\\' so we chane it back to '/'
-        normalized = posixpath.normpath(path).replace('\\','/')
+        normalized = posixpath.normpath(path).replace('\\', '/')
         # Then urlencode whatever's left.
         encoded = urllib.parse.quote(normalized)
         if len(path) > 1 and path.endswith('/'):
@@ -472,7 +472,7 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
     def signature(self, http_request, string_to_sign):
         key = self._provider.secret_key
         k_date = self._sign(('AWS4' + key).encode('utf-8'),
-                              http_request.timestamp)
+                            http_request.timestamp)
         k_region = self._sign(k_date, http_request.region_name)
         k_service = self._sign(k_region, http_request.service_name)
         k_signing = self._sign(k_service, 'aws4_request')
@@ -494,10 +494,25 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
         if self._provider.security_token:
             req.headers['X-Amz-Security-Token'] = self._provider.security_token
         qs = self.query_string(req)
-        if qs and req.method == 'POST':
+
+        qs_to_post = qs
+
+        # We do not want to include any params that were mangled into
+        # the params if performing s3-sigv4 since it does not
+        # belong in the body of a post for some requests.  Mangled
+        # refers to items in the query string URL being added to the
+        # http response params. However, these params get added to
+        # the body of the request, but the query string URL does not
+        # belong in the body of the request. ``unmangled_resp`` is the
+        # response that happened prior to the mangling.  This ``unmangled_req``
+        # kwarg will only appear for s3-sigv4.
+        if 'unmangled_req' in kwargs:
+            qs_to_post = self.query_string(kwargs['unmangled_req'])
+
+        if qs_to_post and req.method == 'POST':
             # Stash request parameters into post body
             # before we generate the signature.
-            req.body = qs
+            req.body = qs_to_post
             req.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
             req.headers['Content-Length'] = str(len(req.body))
         else:
@@ -549,6 +564,17 @@ class S3HmacAuthV4Handler(HmacAuthV4Handler, AuthHandler):
         encoded = urllib.parse.quote(unquoted)
         return encoded
 
+    def canonical_query_string(self, http_request):
+        # Note that we just do not return an empty string for
+        # POST request. Query strings in url are included in canonical
+        # query string.
+        l = []
+        for param in sorted(http_request.params):
+            value = boto.utils.get_utf8_value(http_request.params[param])
+            l.append('%s=%s' % (urllib.parse.quote(param, safe='-_.~'),
+                                urllib.parse.quote(value, safe='-_.~')))
+        return '&'.join(l)
+
     def host_header(self, host, http_request):
         port = http_request.port
         secure = http_request.protocol == 'https'
@@ -568,7 +594,7 @@ class S3HmacAuthV4Handler(HmacAuthV4Handler, AuthHandler):
             # Hooray for the only difference! The main SigV4 signer only does
             # ``Host`` + ``x-amz-*``. But S3 wants pretty much everything
             # signed, except for authorization itself.
-            if not lname in ['authorization']:
+            if lname not in ['authorization']:
                 headers_to_sign[name] = value
         return headers_to_sign
 
@@ -581,8 +607,8 @@ class S3HmacAuthV4Handler(HmacAuthV4Handler, AuthHandler):
         # - s3-us-west-2.amazonaws.com (Specific region)
         # - bukkit.s3.amazonaws.com (Vhosted Classic)
         # - bukkit.s3-ap-northeast-1.amazonaws.com (Vhosted specific region)
-        # - s3.cn-north-1.amazonaws.com.cn - (Bejing region)
-        # - bukkit.s3.cn-north-1.amazonaws.com.cn - (Vhosted Bejing region)
+        # - s3.cn-north-1.amazonaws.com.cn - (Beijing region)
+        # - bukkit.s3.cn-north-1.amazonaws.com.cn - (Vhosted Beijing region)
         parts = self.split_host_parts(host)
 
         if self.region_name is not None:
@@ -641,6 +667,13 @@ class S3HmacAuthV4Handler(HmacAuthV4Handler, AuthHandler):
 
         if modified_req.params is None:
             modified_req.params = {}
+        else:
+            # To keep the original request object untouched. We must make
+            # a copy of the params dictionary. Because the copy of the
+            # original request directly refers to the params dictionary
+            # of the original request.
+            copy_params = req.params.copy()
+            modified_req.params = copy_params
 
         raw_qs = parsed_path.query
         existing_qs = urllib.parse.parse_qs(
@@ -665,14 +698,15 @@ class S3HmacAuthV4Handler(HmacAuthV4Handler, AuthHandler):
         return super(S3HmacAuthV4Handler, self).payload(http_request)
 
     def add_auth(self, req, **kwargs):
-        if not 'x-amz-content-sha256' in req.headers:
+        if 'x-amz-content-sha256' not in req.headers:
             if '_sha256' in req.headers:
                 req.headers['x-amz-content-sha256'] = req.headers.pop('_sha256')
             else:
                 req.headers['x-amz-content-sha256'] = self.payload(req)
-
-        req = self.mangle_path_and_params(req)
-        return super(S3HmacAuthV4Handler, self).add_auth(req, **kwargs)
+        updated_req = self.mangle_path_and_params(req)
+        return super(S3HmacAuthV4Handler, self).add_auth(updated_req,
+                                                         unmangled_req=req,
+                                                         **kwargs)
 
     def presign(self, req, expires, iso_date=None):
         """
@@ -703,6 +737,10 @@ class S3HmacAuthV4Handler(HmacAuthV4Handler, AuthHandler):
         if self._provider.security_token:
             params['X-Amz-Security-Token'] = self._provider.security_token
 
+        headers_to_sign = self.headers_to_sign(req)
+        l = sorted(['%s' % n.lower().strip() for n in headers_to_sign])
+        params['X-Amz-SignedHeaders'] = ';'.join(l)
+ 
         req.params.update(params)
 
         cr = self.canonical_request(req)
@@ -749,7 +787,6 @@ class QueryAuthHandler(AuthHandler):
 
     def add_auth(self, http_request, **kwargs):
         headers = http_request.headers
-        params = http_request.params
         qs = self._build_query_string(
             http_request.params
         )
@@ -897,7 +934,7 @@ class POSTPathQSV2AuthHandler(QuerySignatureV2AuthHandler, AuthHandler):
         # already be there, we need to get rid of that and rebuild it
         req.path = req.path.split('?')[0]
         req.path = (req.path + '?' + qs +
-                             '&Signature=' + urllib.parse.quote_plus(signature))
+                    '&Signature=' + urllib.parse.quote_plus(signature))
 
 
 def get_auth_handler(host, config, provider, requested_capability=None):
@@ -923,7 +960,6 @@ def get_auth_handler(host, config, provider, requested_capability=None):
     """
     ready_handlers = []
     auth_handlers = boto.plugin.get_plugin(AuthHandler, requested_capability)
-    total_handlers = len(auth_handlers)
     for handler in auth_handlers:
         try:
             ready_handlers.append(handler(host, config, provider))
@@ -934,9 +970,9 @@ def get_auth_handler(host, config, provider, requested_capability=None):
         checked_handlers = auth_handlers
         names = [handler.__name__ for handler in checked_handlers]
         raise boto.exception.NoAuthHandlerFound(
-              'No handler was ready to authenticate. %d handlers were checked.'
-              ' %s '
-              'Check your credentials' % (len(names), str(names)))
+            'No handler was ready to authenticate. %d handlers were checked.'
+            ' %s '
+            'Check your credentials' % (len(names), str(names)))
 
     # We select the last ready auth handler that was loaded, to allow users to
     # customize how auth works in environments where there are shared boto
@@ -964,7 +1000,8 @@ def detect_potential_sigv4(func):
             # ``boto/iam/connection.py``, as several things there are also
             # endpoint-related.
             if getattr(self.region, 'endpoint', ''):
-                if '.cn-' in self.region.endpoint:
+                if '.cn-' in self.region.endpoint or \
+                        '.eu-central' in self.region.endpoint:
                     return ['hmac-v4']
 
         return func(self)
@@ -983,7 +1020,7 @@ def detect_potential_s3sigv4(func):
             # If you're making changes here, you should also check
             # ``boto/iam/connection.py``, as several things there are also
             # endpoint-related.
-            if '.cn-' in self.host:
+            if '.cn-' in self.host or '.eu-central' in self.host:
                 return ['hmac-v4-s3']
 
         return func(self)

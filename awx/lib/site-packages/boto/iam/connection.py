@@ -64,13 +64,13 @@ class IAMConnection(AWSQueryConnection):
                  debug=0, https_connection_factory=None, path='/',
                  security_token=None, validate_certs=True, profile_name=None):
         super(IAMConnection, self).__init__(aws_access_key_id,
-                                    aws_secret_access_key,
-                                    is_secure, port, proxy,
-                                    proxy_port, proxy_user, proxy_pass,
-                                    host, debug, https_connection_factory,
-                                    path, security_token,
-                                    validate_certs=validate_certs,
-                                    profile_name=profile_name)
+                                            aws_secret_access_key,
+                                            is_secure, port, proxy,
+                                            proxy_port, proxy_user, proxy_pass,
+                                            host, debug, https_connection_factory,
+                                            path, security_token,
+                                            validate_certs=validate_certs,
+                                            profile_name=profile_name)
 
     def _required_auth_capability(self):
         return ['hmac-v4']
@@ -700,7 +700,7 @@ class IAMConnection(AWSQueryConnection):
     #
 
     def list_server_certs(self, path_prefix='/',
-                             marker=None, max_items=None):
+                          marker=None, max_items=None):
         """
         Lists the server certificates that have the specified path prefix.
         If none exist, the action returns an empty list.
@@ -1199,8 +1199,8 @@ class IAMConnection(AWSQueryConnection):
         :param instance_profile_name: Name of the instance profile to get
             information about.
         """
-        return self.get_response('GetInstanceProfile', {'InstanceProfileName':
-                                                       instance_profile_name})
+        return self.get_response('GetInstanceProfile',
+                                 {'InstanceProfileName': instance_profile_name})
 
     def get_role(self, role_name):
         """
@@ -1453,7 +1453,7 @@ class IAMConnection(AWSQueryConnection):
             provider to get information about.
 
         """
-        params = {'SAMLProviderArn': saml_provider_arn }
+        params = {'SAMLProviderArn': saml_provider_arn}
         return self.get_response('GetSAMLProvider', params)
 
     def update_saml_provider(self, saml_provider_arn, saml_metadata_document):
@@ -1496,5 +1496,51 @@ class IAMConnection(AWSQueryConnection):
             provider to delete.
 
         """
-        params = {'SAMLProviderArn': saml_provider_arn }
+        params = {'SAMLProviderArn': saml_provider_arn}
         return self.get_response('DeleteSAMLProvider', params)
+
+    #
+    # IAM Reports
+    #
+
+    def generate_credential_report(self):
+        """
+        Generates a credential report for an account
+
+        A new credential report can only be generated every 4 hours. If one
+        hasn't been generated in the last 4 hours then get_credential_report
+        will error when called
+        """
+        params = {}
+        return self.get_response('GenerateCredentialReport', params)
+
+    def get_credential_report(self):
+        """
+        Retrieves a credential report for an account
+
+        A report must have been generated in the last 4 hours to succeed.
+        The report is returned as a base64 encoded blob within the response.
+        """
+        params = {}
+        return self.get_response('GetCredentialReport', params)
+
+    def create_virtual_mfa_device(self, path, device_name):
+        """
+        Creates a new virtual MFA device for the AWS account.
+
+        After creating the virtual MFA, use enable-mfa-device to
+        attach the MFA device to an IAM user.
+
+        :type path: string
+        :param path: The path for the virtual MFA device.
+
+        :type device_name: string
+        :param device_name: The name of the virtual MFA device.
+            Used with path to uniquely identify a virtual MFA device.
+
+        """
+        params = {
+            'Path': path,
+            'VirtualMFADeviceName': device_name
+        }
+        return self.get_response('CreateVirtualMFADevice', params)

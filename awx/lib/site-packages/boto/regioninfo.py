@@ -124,7 +124,7 @@ def get_regions(service_name, region_cls=None, connection_cls=None):
     """
     endpoints = load_regions()
 
-    if not service_name in endpoints:
+    if service_name not in endpoints:
         raise BotoClientError(
             "Service '%s' not found in endpoints." % service_name
         )

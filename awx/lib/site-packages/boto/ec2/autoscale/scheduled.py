@@ -75,4 +75,3 @@ class ScheduledUpdateGroupAction(object):
                 self.end_time = datetime.strptime(value, '%Y-%m-%dT%H:%M:%SZ')
         else:
             setattr(self, name, value)
-

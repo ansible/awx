@@ -71,4 +71,3 @@ class Activity(object):
             self.status_code = value
         else:
             setattr(self, name, value)
-

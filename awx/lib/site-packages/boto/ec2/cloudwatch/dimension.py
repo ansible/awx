@@ -20,6 +20,7 @@
 # IN THE SOFTWARE.
 #
 
+
 class Dimension(dict):
 
     def startElement(self, name, attrs, connection):

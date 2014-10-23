@@ -65,7 +65,6 @@ class DirectConnectConnection(AWSQueryConnection):
         "DirectConnectServerException": exceptions.DirectConnectServerException,
     }
 
-
     def __init__(self, **kwargs):
         region = kwargs.pop('region', None)
         if not region:
@@ -626,4 +625,3 @@ class DirectConnectConnection(AWSQueryConnection):
             exception_class = self._faults.get(fault_name, self.ResponseError)
             raise exception_class(response.status, response.reason,
                                   body=json_body)
-

@@ -75,7 +75,6 @@ class CloudTrailConnection(AWSQueryConnection):
         "InsufficientS3BucketPolicyException": exceptions.InsufficientS3BucketPolicyException,
     }
 
-
     def __init__(self, **kwargs):
         region = kwargs.pop('region', None)
         if not region:
@@ -351,4 +350,3 @@ class CloudTrailConnection(AWSQueryConnection):
             exception_class = self._faults.get(fault_name, self.ResponseError)
             raise exception_class(response.status, response.reason,
                                   body=json_body)
-

@@ -19,6 +19,24 @@
 #
 # Created by Chris Huegle for TellApart, Inc.
 
+class ConnectionSettingAttribute(object):
+    """
+    Represents the ConnectionSetting segment of ELB Attributes.
+    """
+    def __init__(self, connection=None):
+        self.idle_timeout = None
+
+    def __repr__(self):
+        return 'ConnectionSettingAttribute(%s)' % (
+            self.idle_timeout)
+
+    def startElement(self, name, attrs, connection):
+        pass
+
+    def endElement(self, name, value, connection):
+        if name == 'IdleTimeout':
+            self.idle_timeout = int(value)
+
 class CrossZoneLoadBalancingAttribute(object):
     """
     Represents the CrossZoneLoadBalancing segement of ELB Attributes.
@@ -39,6 +57,7 @@ class CrossZoneLoadBalancingAttribute(object):
                 self.enabled = True
             else:
                 self.enabled = False
+
 
 class AccessLogAttribute(object):
     """
@@ -74,6 +93,7 @@ class AccessLogAttribute(object):
         elif name == 'EmitInterval':
             self.emit_interval = int(value)
 
+
 class ConnectionDrainingAttribute(object):
     """
     Represents the ConnectionDraining segment of ELB attributes.
@@ -100,6 +120,7 @@ class ConnectionDrainingAttribute(object):
         elif name == 'Timeout':
             self.timeout = int(value)
 
+
 class LbAttributes(object):
     """
     Represents the Attributes of an Elastic Load Balancer.
@@ -107,15 +128,17 @@ class LbAttributes(object):
     def __init__(self, connection=None):
         self.connection = connection
         self.cross_zone_load_balancing = CrossZoneLoadBalancingAttribute(
-          self.connection)
+            self.connection)
         self.access_log = AccessLogAttribute(self.connection)
         self.connection_draining = ConnectionDrainingAttribute(self.connection)
+        self.connecting_settings = ConnectionSettingAttribute(self.connection)
 
     def __repr__(self):
-        return 'LbAttributes(%s, %s, %s)' % (
+        return 'LbAttributes(%s, %s, %s, %s)' % (
             repr(self.cross_zone_load_balancing),
             repr(self.access_log),
-            repr(self.connection_draining))
+            repr(self.connection_draining),
+            repr(self.connecting_settings))
 
     def startElement(self, name, attrs, connection):
         if name == 'CrossZoneLoadBalancing':
@@ -124,6 +147,8 @@ class LbAttributes(object):
             return self.access_log
         if name == 'ConnectionDraining':
             return self.connection_draining
+        if name == 'ConnectionSettings':
+            return self.connecting_settings
 
     def endElement(self, name, value, connection):
         pass

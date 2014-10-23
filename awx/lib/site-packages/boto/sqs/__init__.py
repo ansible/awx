@@ -31,9 +31,11 @@ def regions():
     :rtype: list
     :return: A list of :class:`boto.sqs.regioninfo.RegionInfo`
     """
+    from boto.sqs.connection import SQSConnection
     return get_regions(
         'sqs',
-        region_cls=SQSRegionInfo
+        region_cls=SQSRegionInfo,
+        connection_cls=SQSConnection
     )
 
 

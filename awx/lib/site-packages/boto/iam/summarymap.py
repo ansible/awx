@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+
 class SummaryMap(dict):
 
     def __init__(self, parent=None):
@@ -39,4 +40,3 @@ class SummaryMap(dict):
                 self[self._name] = value
         else:
             setattr(self, name, value)
-
