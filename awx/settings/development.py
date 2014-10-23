@@ -45,6 +45,9 @@ if 'django_jenkins' in INSTALLED_APPS:
     JSHINT_CHECKED_FILES = [os.path.join(BASE_DIR, 'ui/static/js'),
                             os.path.join(BASE_DIR, 'ui/static/lib/ansible'),]
 
+# Configure a default UUID for development only.
+SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
+
 # If there is an `/etc/tower/settings.py`, include it.
 # If there is a `/etc/tower/conf.d/*.py`, include them.
 include(optional('/etc/tower/settings.py'), scope=locals())
