@@ -118,11 +118,11 @@
                 <pre class="prettyprint"><b>{{ request.method }}</b> {{ request.get_full_path }}</pre>
             </div>
             <div class="response-info">
-                <pre class="prettyprint"><div class="meta nocode"><b>HTTP {{ response.status_code }} {{ response.status_text }}</b>{% autoescape off %}
+                <pre class="prettyprint"><div class="meta nocode"><b>HTTP {{ response.status_code }} {{ response.status_text }}</b>
 {% for key, val in response_headers.items %}<b>{{ key }}:</b> <span class="lit">{{ val|break_long_headers|urlize_quoted_links }}</span>
 {% endfor %}
 {# Original line below had content|urlize_quoted_links; for Ansible Tower disable automatic URL creation here. #}
-</div>{{ content }}</pre>{% endautoescape %}
+</div>{{ content }}</pre>
             </div>
         </div>
 
