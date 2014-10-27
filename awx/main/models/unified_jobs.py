@@ -674,24 +674,41 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return True
 
     def signal_start(self, **kwargs):
-        '''
-        Notify the task runner system to begin work on this task.
-        '''
-        from awx.main.tasks import notify_task_runner
+        """Notify the task runner system to begin work on this task."""
+
+        # Sanity check: If we are running unit tests, then run synchronously.
         if getattr(settings, 'CELERY_UNIT_TEST', False):
             return self.start(None, **kwargs)
+
+        # Sanity check: Are we able to start the job? If not, do not attempt
+        # to do so.
         if not self.can_start:
             return False
+
+        # Get any passwords or other data that are prerequisites to running
+        # the job.
         needed = self.get_passwords_needed_to_start()
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
-        extra_data = dict([(field, kwargs[field]) for field in kwargs if field not in needed])
+        extra_data = dict([(field, kwargs[field]) for field in kwargs
+                           if field not in needed])
         self.handle_extra_data(extra_data)
+
+        # Save the pending status, and inform the SocketIO listener.
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
         self.socketio_emit_status("pending")
+
+        # Each type of unified job has a different Task class; get the
+        # appropirate one.
         task_type = get_type_for_model(self)
-        # notify_task_runner.delay(dict(task_type=task_type, id=self.id, metadata=kwargs))
+
+        # Actually tell the task runner to run this task.
+        from awx.main.tasks import notify_task_runner
+        notify_task_runner.delay({'id': self.id, 'metadata': kwargs,
+                                  'task_type': task_type})
+
+        # Done!
         return True
 
     @property

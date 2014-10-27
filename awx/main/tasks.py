@@ -112,7 +112,8 @@ def notify_task_runner(metadata_dict):
 
 @task(bind=True)
 def handle_work_error(self, task_id, subtasks=None):
-    print('Executing error task id %s, subtasks: %s' % (str(self.request.id), str(subtasks)))
+    print('Executing error task id %s, subtasks: %s' %
+          (str(self.request.id), str(subtasks)))
     first_task = None
     first_task_type = ''
     first_task_name = ''

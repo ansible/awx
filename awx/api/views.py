@@ -727,7 +727,9 @@ class ProjectUpdateView(GenericAPIView):
                 return Response({}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 headers = {'Location': project_update.get_absolute_url()}
-                return Response(dict(project_update=project_update.id), status=status.HTTP_202_ACCEPTED, headers=headers)
+                return Response({'project_update': project_update.id},
+                                headers=headers,
+                                status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
