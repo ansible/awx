@@ -18,9 +18,9 @@
 
 if [ -e /etc/debian_version ]
 then 
-    SERVICES=(postgresql rabbitmq-server apache2 supervisor)
+    SERVICES=(postgresql redis apache2 supervisor)
 else
-    SERVICES=(postgresql rabbitmq-server httpd supervisord)
+    SERVICES=(postgresql redis httpd supervisord)
 fi
 
 service_action() {
