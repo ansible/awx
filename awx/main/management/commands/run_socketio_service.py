@@ -84,7 +84,7 @@ class JobEventNamespace(TowerBaseNamespace):
 
     def get_initial_acl(self):
         valid_user = self.valid_user()
-        if valid_user is None:
+        if valid_user is None or valid_user is False:
             return set()
         else:
             user_jobs = get_user_queryset(valid_user, Job).filter(finished__isnull=True)
