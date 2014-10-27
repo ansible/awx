@@ -18,8 +18,8 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # PyCrypto
 from Crypto.Cipher import AES
 
-# ZeroMQ
-import zmq
+# Tower
+from awx.main.queue import PubSub
 
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
@@ -364,14 +364,10 @@ def get_system_task_capacity():
 
 
 def emit_websocket_notification(endpoint, event, payload):
-    from django.conf import settings
-    if getattr(settings, 'SOCKETIO_NOTIFICATION_PORT', None):
-        emit_context = zmq.Context()
-        emit_socket = emit_context.socket(zmq.PUSH)
-        emit_socket.connect(settings.SOCKETIO_NOTIFICATION_PORT)
-        payload['event'] = event
-        payload['endpoint'] = endpoint
-        emit_socket.send_json(payload);
+    pubsub = PubSub('websocket')
+    payload['event'] = event
+    payload['endpoint'] = endpoint
+    pubsub.publish(payload)
 
 _inventory_updates = threading.local()
 

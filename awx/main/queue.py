@@ -5,7 +5,38 @@ import json
 
 from redis import StrictRedis
 
-redis = StrictRedis('127.0.0.1')  # FIXME: Don't hard-code.
+from django.conf import settings
+
+__all__ = ['FifoQueue', 'PubSub']
+
+
+# Determine, based on settings.BROKER_URL (for celery), what the correct Redis
+# connection settings are.
+redis_kwargs = {}
+broker_url = settings.BROKER_URL
+if not broker_url.lower().startswith('redis://'):
+    raise RuntimeError('Error importing awx.main.queue: Cannot use queue with '
+                       'a non-Redis broker configured for celery.')
+broker_url = broker_url[8:]
+
+# There may or may not be a password; address both situations by checking
+# for an "@" in the broker URL.
+if '@' in broker_url:
+    broker_auth, broker_host = broker_url.split('@')
+    redis_kwargs['password'] = broker_auth.split(':')[1]
+else:
+    broker_host = broker_url
+
+# Ignore anything after a / in the broker host.
+broker_host = broker_host.split('/')[0]
+
+# If a custom port is present, parse it out.
+if ':' in broker_host:
+    broker_host, broker_port = broker_host.split(':')
+    redis_kwargs['port'] = int(broker_port)
+
+# Now create a StrictRedis object that knows how to connect appropriately.
+redis = StrictRedis(broker_host, **redis_kwargs)
 
 
 class FifoQueue(object):
@@ -62,7 +93,7 @@ class PubSub(object):
         """
         return self._ps.get_message()
 
-    def listen(self, wait=0.001):
+    def subscribe(self, wait=0.001):
         """Listen to content from the subscription channel indefinitely,
         and yield messages as they are retrieved.
         """

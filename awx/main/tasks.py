@@ -26,9 +26,6 @@ import dateutil.parser
 # Pexpect
 import pexpect
 
-# ZMQ
-import zmq
-
 # Celery
 from celery import Task, task
 from djcelery.models import PeriodicTask
@@ -41,7 +38,9 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
-from awx.main.models import * # Job, JobEvent, ProjectUpdate, InventoryUpdate, Schedule, UnifiedJobTemplate
+from awx.main.models import * # Job, JobEvent, ProjectUpdate, InventoryUpdate,
+                              # Schedule, UnifiedJobTemplate
+from awx.main.queue import FifoQueue
 from awx.main.utils import (get_ansible_version, decrypt_field, update_scm_url,
             ignore_inventory_computed_fields, emit_websocket_notification)
 
@@ -105,10 +104,11 @@ def tower_periodic_scheduler(self):
 
 @task()
 def notify_task_runner(metadata_dict):
-    signal_context = zmq.Context()
-    signal_socket = signal_context.socket(zmq.PUSH)
-    signal_socket.connect(settings.TASK_COMMAND_PORT)
-    signal_socket.send_json(metadata_dict)
+    """Add the given task into the Tower task manager's queue, to be consumed
+    by the task system.
+    """
+    queue = FifoQueue('tower_task_manager')
+    queue.push(metadata_dict)
 
 @task(bind=True)
 def handle_work_error(self, task_id, subtasks=None):

@@ -23,9 +23,7 @@ from django.utils.tzinfo import FixedOffset
 # AWX
 import awx
 from awx.main.models import *
-
-# ZeroMQ
-import zmq
+from awx.main.queue import PubSub
 
 # gevent & socketio
 import gevent
@@ -68,14 +66,15 @@ class TowerSocket(object):
             start_response('404 Not Found', [])
             return ['Tower version %s' % awx.__version__]
 
-def notification_handler(bind_port, server):
-    handler_context = zmq.Context()
-    handler_socket = handler_context.socket(zmq.PULL)
-    handler_socket.bind(bind_port)
-
-    while True:
-        message = handler_socket.recv_json()
-        packet = dict(type='event', name=message['event'], endpoint=message['endpoint'], args=message)
+def notification_handler(server):
+    pubsub = PubSub('websocket')
+    for message in pubsub.subscribe():
+        packet = {
+            'args': message,
+            'endpoint': message['endpoint'],
+            'name': message['event'],
+            'type': 'event',
+        }
         for session_id, socket in list(server.sockets.iteritems()):
             socket.send_packet(packet)
 
@@ -119,7 +118,7 @@ class Command(NoArgsCommand):
                 server = SocketIOServer(('0.0.0.0', socketio_listen_port), TowerSocket(), resource='socket.io')
 
             #gevent.spawn(notification_handler, socketio_notification_port, server)
-            handler_thread = Thread(target=notification_handler, args = (socketio_notification_port, server,))
+            handler_thread = Thread(target=notification_handler, args=(server,))
             handler_thread.daemon = True
             handler_thread.start()
 

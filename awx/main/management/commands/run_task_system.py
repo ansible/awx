@@ -22,14 +22,15 @@ from django.utils.tzinfo import FixedOffset
 
 # AWX
 from awx.main.models import *
+from awx.main.queue import FifoQueue
 from awx.main.tasks import handle_work_error
 from awx.main.utils import get_system_task_capacity, decrypt_field
 
-# ZeroMQ
-import zmq
-
 # Celery
 from celery.task.control import inspect
+
+
+queue = FifoQueue('tower_task_manager')
 
 class SimpleDAG(object):
     ''' A simple implementation of a directed acyclic graph '''
@@ -280,7 +281,7 @@ def process_graph(graph, task_capacity):
             print('Started Node: %s (capacity hit: %s) Remaining Capacity: %s' %
                   (str(node_obj), str(impact), str(remaining_volume)))
 
-def run_taskmanager(command_port):
+def run_taskmanager():
     """Receive task start and finish signals to rebuild a dependency graph
     and manage the actual running of tasks.
     """
@@ -293,18 +294,23 @@ def run_taskmanager(command_port):
     signal.signal(signal.SIGTERM, shutdown_handler())
     paused = False
     task_capacity = get_system_task_capacity()
-    command_context = zmq.Context()
-    command_socket = command_context.socket(zmq.PULL)
-    command_socket.bind(command_port)
-    print("Listening on %s" % command_port)
     last_rebuild = datetime.datetime.fromtimestamp(0)
+
+    # Attempt to pull messages off of the task system queue into perpetuity.
     while True:
-        try:
-            message = command_socket.recv_json(flags=zmq.NOBLOCK)
-        except zmq.ZMQError,e:
-            message = None
-        if message is not None or (datetime.datetime.now() - last_rebuild).seconds > 10:
-            if message is not None and 'pause' in message:
+        # Pop a message off the queue.
+        # (If the queue is empty, None will be returned.)
+        message = queue.pop()
+
+        # Sanity check: If we got no message back, sleep and continue.
+        if message is None:
+            time.sleep(0.1)
+            continue
+
+        # Parse out the message appropriately, rebuilding our graph if
+        # appropriate.
+        if (datetime.datetime.now() - last_rebuild).seconds > 10:
+            if 'pause' in message:
                 print("Pause command received: %s" % str(message))
                 paused = message['pause']
             graph = rebuild_graph(message)
@@ -339,8 +345,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
-        command_port = settings.TASK_COMMAND_PORT
         try:
-            run_taskmanager(command_port)
+            run_taskmanager()
         except KeyboardInterrupt:
             pass
