@@ -339,18 +339,21 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
                     .success(function(data) {
                         $scope.$emit('templateSaveSuccess', data);
 
-                        //once the job template information is saved we submit the survey info to the correct endpoint
-                        var url = data.url+ 'survey_spec/';
-                        Rest.setUrl(url);
-                        Rest.post({ name: $scope.survey_name, description: $scope.survey_description, spec: $scope.survey_questions })
-                            .success(function () {
-                                Wait('stop');
+                        if(data.survey_enabled===true){
+                            //once the job template information is saved we submit the survey info to the correct endpoint
+                            var url = data.url+ 'survey_spec/';
+                            Rest.setUrl(url);
+                            Rest.post({ name: $scope.survey_name, description: $scope.survey_description, spec: $scope.survey_questions })
+                                .success(function () {
+                                    Wait('stop');
 
-                            })
-                            .error(function (data, status) {
-                                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                                    msg: 'Failed to add new survey. Post returned status: ' + status });
-                            });
+                                })
+                                .error(function (data, status) {
+                                    ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                                        msg: 'Failed to add new survey. Post returned status: ' + status });
+                                });
+                        }
+
 
                     })
                     .error(function (data, status) {
