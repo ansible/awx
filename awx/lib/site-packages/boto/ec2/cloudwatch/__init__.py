@@ -92,14 +92,14 @@ class CloudWatchConnection(AWSQueryConnection):
             validate_certs = False
 
         super(CloudWatchConnection, self).__init__(aws_access_key_id,
-                                    aws_secret_access_key,
-                                    is_secure, port, proxy, proxy_port,
-                                    proxy_user, proxy_pass,
-                                    self.region.endpoint, debug,
-                                    https_connection_factory, path,
-                                    security_token,
-                                    validate_certs=validate_certs,
-                                    profile_name=profile_name)
+                                                   aws_secret_access_key,
+                                                   is_secure, port, proxy, proxy_port,
+                                                   proxy_user, proxy_pass,
+                                                   self.region.endpoint, debug,
+                                                   https_connection_factory, path,
+                                                   security_token,
+                                                   validate_certs=validate_certs,
+                                                   profile_name=profile_name)
 
     def _required_auth_capability(self):
         return ['hmac-v4']
@@ -113,11 +113,11 @@ class CloudWatchConnection(AWSQueryConnection):
                 if isinstance(dim_value, six.string_types):
                     dim_value = [dim_value]
                 for value in dim_value:
-                    params['%s.%d.Name' % (prefix, i+1)] = dim_name
-                    params['%s.%d.Value' % (prefix, i+1)] = value
+                    params['%s.%d.Name' % (prefix, i + 1)] = dim_name
+                    params['%s.%d.Value' % (prefix, i + 1)] = value
                     i += 1
             else:
-                params['%s.%d.Name' % (prefix, i+1)] = dim_name
+                params['%s.%d.Name' % (prefix, i + 1)] = dim_name
                 i += 1
 
     def build_list_params(self, params, items, label):
@@ -134,7 +134,7 @@ class CloudWatchConnection(AWSQueryConnection):
                 params[label % i] = item
 
     def build_put_params(self, params, name, value=None, timestamp=None,
-                        unit=None, dimensions=None, statistics=None):
+                         unit=None, dimensions=None, statistics=None):
         args = (name, value, unit, dimensions, statistics, timestamp)
         length = max(map(lambda a: len(a) if isinstance(a, list) else 1, args))
 
@@ -329,7 +329,7 @@ class CloudWatchConnection(AWSQueryConnection):
         """
         params = {'Namespace': namespace}
         self.build_put_params(params, name, value=value, timestamp=timestamp,
-            unit=unit, dimensions=dimensions, statistics=statistics)
+                              unit=unit, dimensions=dimensions, statistics=statistics)
 
         return self.get_status('PutMetricData', params, verb="POST")
 
@@ -498,15 +498,15 @@ class CloudWatchConnection(AWSQueryConnection):
         :param alarm: MetricAlarm object.
         """
         params = {
-                    'AlarmName': alarm.name,
-                    'MetricName': alarm.metric,
-                    'Namespace': alarm.namespace,
-                    'Statistic': alarm.statistic,
-                    'ComparisonOperator': alarm.comparison,
-                    'Threshold': alarm.threshold,
-                    'EvaluationPeriods': alarm.evaluation_periods,
-                    'Period': alarm.period,
-                 }
+            'AlarmName': alarm.name,
+            'MetricName': alarm.metric,
+            'Namespace': alarm.namespace,
+            'Statistic': alarm.statistic,
+            'ComparisonOperator': alarm.comparison,
+            'Threshold': alarm.threshold,
+            'EvaluationPeriods': alarm.evaluation_periods,
+            'Period': alarm.period,
+        }
         if alarm.actions_enabled is not None:
             params['ActionsEnabled'] = alarm.actions_enabled
         if alarm.alarm_actions:

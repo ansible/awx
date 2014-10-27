@@ -93,6 +93,12 @@ class DocumentServiceConnection(object):
         self.documents_batch = []
         self._sdf = None
 
+        # Copy proxy settings from connection
+        if self.domain and self.domain.layer1 and self.domain.layer1.use_proxy:
+            self.proxy = {'http': self.domain.layer1.get_proxy_url_with_auth()}
+        else:
+            self.proxy = {}
+
     def add(self, _id, fields):
         """
         Add a document to be processed by the DocumentService
@@ -184,6 +190,7 @@ class DocumentServiceConnection(object):
 
         # Keep-alive is automatic in a post-1.0 requests world.
         session = requests.Session()
+        session.proxies = self.proxy
         adapter = requests.adapters.HTTPAdapter(
             pool_connections=20,
             pool_maxsize=50,

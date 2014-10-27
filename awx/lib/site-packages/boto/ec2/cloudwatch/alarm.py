@@ -52,11 +52,11 @@ class MetricAlarm(object):
     INSUFFICIENT_DATA = 'INSUFFICIENT_DATA'
 
     _cmp_map = {
-                    '>=': 'GreaterThanOrEqualToThreshold',
-                    '>':  'GreaterThanThreshold',
-                    '<':  'LessThanThreshold',
-                    '<=': 'LessThanOrEqualToThreshold',
-               }
+        '>=': 'GreaterThanOrEqualToThreshold',
+        '>':  'GreaterThanThreshold',
+        '<':  'LessThanThreshold',
+        '<=': 'LessThanOrEqualToThreshold',
+    }
     _rev_cmp_map = dict((v, k) for (k, v) in six.iteritems(_cmp_map))
 
     def __init__(self, connection=None, name=None, metric=None,
@@ -122,15 +122,15 @@ class MetricAlarm(object):
                                'InstanceId': ['i-0123456', 'i-0123457'],
                                'LoadBalancerName': 'test-lb'
                            }
-        
+
         :type alarm_actions: list of strs
         :param alarm_actions: A list of the ARNs of the actions to take in
                               ALARM state
-        
+
         :type insufficient_data_actions: list of strs
         :param insufficient_data_actions: A list of the ARNs of the actions to
                                           take in INSUFFICIENT_DATA state
-        
+
         :type ok_actions: list of strs
         :param ok_actions: A list of the ARNs of the actions to take in OK state
         """
@@ -294,6 +294,7 @@ class MetricAlarm(object):
 
     def delete(self):
         self.connection.delete_alarms([self.name])
+
 
 class AlarmHistoryItem(object):
     def __init__(self, connection=None):

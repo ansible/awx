@@ -128,9 +128,9 @@ class ReservedInstance(ReservedInstancesOffering):
                  usage_price=None, description=None,
                  instance_count=None, state=None):
         super(ReservedInstance, self).__init__(connection, id, instance_type,
-                                           availability_zone, duration,
-                                           fixed_price, usage_price,
-                                           description)
+                                               availability_zone, duration,
+                                               fixed_price, usage_price,
+                                               description)
         self.instance_count = instance_count
         self.state = state
         self.start = None

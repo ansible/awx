@@ -25,6 +25,7 @@ Represents an EC2 Spot Instance Request
 
 from boto.ec2.ec2object import EC2Object
 
+
 class SpotPriceHistory(EC2Object):
 
     def __init__(self, connection=None):
@@ -51,5 +52,3 @@ class SpotPriceHistory(EC2Object):
             self.availability_zone = value
         else:
             setattr(self, name, value)
-
-

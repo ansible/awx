@@ -25,6 +25,7 @@ Represents an EC2 Bundle Task
 
 from boto.ec2.ec2object import EC2Object
 
+
 class BundleInstanceTask(EC2Object):
 
     def __init__(self, connection=None):
@@ -75,4 +76,3 @@ class BundleInstanceTask(EC2Object):
             self.message = value
         else:
             setattr(self, name, value)
-

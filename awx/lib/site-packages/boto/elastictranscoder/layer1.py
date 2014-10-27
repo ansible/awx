@@ -922,7 +922,7 @@ class ElasticTranscoderConnection(AWSAuthConnection):
         if headers is None:
             headers = {}
         response = super(ElasticTranscoderConnection, self).make_request(
-            verb, resource, headers=headers, data=data)
+            verb, resource, headers=headers, data=data, params=params)
         body = json.loads(response.read().decode('utf-8'))
         if response.status == expected_status:
             return body

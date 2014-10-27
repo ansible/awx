@@ -131,7 +131,7 @@ class Query(object):
                 params['highlight.%s' % k] = v
 
         if self.options:
-            params['options'] = self.options
+            params['q.options'] = self.options
 
         if self.return_fields:
             params['return'] = ','.join(self.return_fields)
@@ -151,6 +151,10 @@ class SearchConnection(object):
         self.domain = domain
         self.endpoint = endpoint
         self.session = requests.Session()
+
+        # Copy proxy settings from connection
+        if self.domain and self.domain.layer1 and self.domain.layer1.use_proxy:
+            self.session.proxies['http'] = self.domain.layer1.get_proxy_url_with_auth()
 
         if not endpoint:
             self.endpoint = domain.search_service_endpoint

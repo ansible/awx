@@ -27,6 +27,7 @@ import os
 from boto.ec2.ec2object import EC2Object
 from boto.exception import BotoClientError
 
+
 class KeyPair(EC2Object):
 
     def __init__(self, connection=None):
@@ -108,6 +109,3 @@ class KeyPair(EC2Object):
         rconn = region.connect(**conn_params)
         kp = rconn.create_key_pair(self.name, dry_run=dry_run)
         return kp
-
-
-

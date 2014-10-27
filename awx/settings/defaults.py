@@ -171,8 +171,6 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser',
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
@@ -364,12 +362,14 @@ EC2_REGION_NAMES = {
     'us-east-1': 'US East (Northern Virginia)',
     'us-west-2': 'US West (Oregon)',
     'us-west-1': 'US West (Northern California)',
+    'eu-central-1': 'EU (Frankfurt)',
     'eu-west-1': 'EU (Ireland)',
     'ap-southeast-1': 'Asia Pacific (Singapore)',
     'ap-southeast-2': 'Asia Pacific (Sydney)',
     'ap-northeast-1': 'Asia Pacific (Tokyo)',
     'sa-east-1': 'South America (Sao Paulo)',
     'us-gov-west-1': 'US West (GovCloud)',
+    'cn-north-1': 'China (Beijing)',
 }
 
 EC2_REGIONS_BLACKLIST = [

@@ -44,7 +44,7 @@ class InstanceType(EC2Object):
 
     def __repr__(self):
         return 'InstanceType:%s-%s,%s,%s' % (self.name, self.cores,
-                                       self.memory, self.disk)
+                                             self.memory, self.disk)
 
     def endElement(self, name, value, connection):
         if name == 'name':

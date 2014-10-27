@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -25,8 +25,10 @@ Defines an interface which all Auth handlers need to implement.
 
 from boto.plugin import Plugin
 
+
 class NotReadyToAuthenticate(Exception):
-  pass
+    pass
+
 
 class AuthHandler(Plugin):
 
@@ -37,10 +39,10 @@ class AuthHandler(Plugin):
         :type host: string
         :param host: The host to which the request is being sent.
 
-        :type config: boto.pyami.Config 
+        :type config: boto.pyami.Config
         :param config: Boto configuration.
 
-        :type provider: boto.provider.Provider  
+        :type provider: boto.provider.Provider
         :param provider: Provider details.
 
         Raises:

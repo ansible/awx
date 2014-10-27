@@ -141,6 +141,6 @@ class HealthCheck(object):
             params['ip_addr_part'] = self.XMLIpAddrPart % {'ip_addr': self.ip_addr}
 
         if self.string_match is not None:
-            params['string_match_part'] = self.XMLStringMatchPart % {'string_match' : self.string_match}
+            params['string_match_part'] = self.XMLStringMatchPart % {'string_match': self.string_match}
 
         return self.POSTXMLBody % params

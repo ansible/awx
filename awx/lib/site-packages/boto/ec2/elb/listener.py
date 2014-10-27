@@ -80,6 +80,8 @@ class Listener(object):
             return self.instance_port
         if key == 2:
             return self.protocol
-        if key == 4:
+        if key == 3:
             return self.instance_protocol
+        if key == 4:
+            return self.ssl_certificate_id
         raise KeyError

@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -26,19 +26,20 @@ Implements plugin related api.
 To define a new plugin just subclass Plugin, like this.
 
 class AuthPlugin(Plugin):
-  pass
+    pass
 
 Then start creating subclasses of your new plugin.
 
 class MyFancyAuth(AuthPlugin):
-  capability = ['sign', 'vmac'] 
+    capability = ['sign', 'vmac']
 
 The actual interface is duck typed.
- 
 """
 
 import glob
-import imp, os.path
+import imp
+import os.path
+
 
 class Plugin(object):
     """Base class for all plugins."""
@@ -50,9 +51,10 @@ class Plugin(object):
         """Returns true if the requested capability is supported by this plugin
         """
         for c in requested_capability:
-            if not c in cls.capability:
+            if c not in cls.capability:
                 return False
         return True
+
 
 def get_plugin(cls, requested_capability=None):
     if not requested_capability:
@@ -63,18 +65,20 @@ def get_plugin(cls, requested_capability=None):
             result.append(handler)
     return result
 
+
 def _import_module(filename):
     (path, name) = os.path.split(filename)
     (name, ext) = os.path.splitext(name)
 
     (file, filename, data) = imp.find_module(name, [path])
     try:
-      return imp.load_module(name, file, filename, data)
+        return imp.load_module(name, file, filename, data)
     finally:
-      if file:
-        file.close()
+        if file:
+            file.close()
 
-_plugin_loaded = False 
+_plugin_loaded = False
+
 
 def load_plugins(config):
     global _plugin_loaded
@@ -87,4 +91,3 @@ def load_plugins(config):
     directory = config.get('Plugin', 'plugin_directory')
     for file in glob.glob(os.path.join(directory, '*.py')):
         _import_module(file)
-

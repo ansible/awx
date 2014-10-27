@@ -22,6 +22,7 @@
 # IN THE SOFTWARE.
 #
 
+
 class HostedZone(object):
 
     def __init__(self, id=None, name=None, owner=None, version=None,
@@ -53,4 +54,3 @@ class HostedZone(object):
             self.caller_reference = value
         else:
             setattr(self, name, value)
-        

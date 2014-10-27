@@ -32,3 +32,27 @@ class CaseCreationLimitExceeded(JSONResponseError):
 
 class InternalServerError(JSONResponseError):
     pass
+
+
+class AttachmentLimitExceeded(JSONResponseError):
+    pass
+
+
+class DescribeAttachmentLimitExceeded(JSONResponseError):
+    pass
+
+
+class AttachmentSetIdNotFound(JSONResponseError):
+    pass
+
+
+class AttachmentSetExpired(JSONResponseError):
+    pass
+
+
+class AttachmentIdNotFound(JSONResponseError):
+    pass
+
+
+class AttachmentSetSizeLimitExceeded(JSONResponseError):
+    pass

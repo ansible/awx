@@ -19,6 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+
 class Request(object):
     def __init__(self, connection=None):
         self.connection = connection
@@ -35,4 +36,3 @@ class Request(object):
             self.request_id = value
         else:
             setattr(self, name, value)
-

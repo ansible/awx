@@ -390,6 +390,7 @@ class VPCConnection(EC2Connection):
 
     def create_route(self, route_table_id, destination_cidr_block,
                      gateway_id=None, instance_id=None, interface_id=None,
+                     vpc_peering_connection_id=None,
                      dry_run=False):
         """
         Creates a new route in the route table within a VPC. The route's target
@@ -412,6 +413,10 @@ class VPCConnection(EC2Connection):
         :type interface_id: str
         :param interface_id: Allows routing to network interface attachments.
 
+        :type vpc_peering_connection_id: str
+        :param vpc_peering_connection_id: Allows routing to VPC peering
+                                          connection.
+
         :type dry_run: bool
         :param dry_run: Set to True if the operation should not actually run.
 
@@ -429,6 +434,8 @@ class VPCConnection(EC2Connection):
             params['InstanceId'] = instance_id
         elif interface_id is not None:
             params['NetworkInterfaceId'] = interface_id
+        elif vpc_peering_connection_id is not None:
+            params['VpcPeeringConnectionId'] = vpc_peering_connection_id
         if dry_run:
             params['DryRun'] = 'true'
 
@@ -436,6 +443,7 @@ class VPCConnection(EC2Connection):
 
     def replace_route(self, route_table_id, destination_cidr_block,
                       gateway_id=None, instance_id=None, interface_id=None,
+                      vpc_peering_connection_id=None,
                       dry_run=False):
         """
         Replaces an existing route within a route table in a VPC.
@@ -456,6 +464,10 @@ class VPCConnection(EC2Connection):
         :type interface_id: str
         :param interface_id: Allows routing to network interface attachments.
 
+        :type vpc_peering_connection_id: str
+        :param vpc_peering_connection_id: Allows routing to VPC peering
+                                          connection.
+
         :type dry_run: bool
         :param dry_run: Set to True if the operation should not actually run.
 
@@ -473,6 +485,8 @@ class VPCConnection(EC2Connection):
             params['InstanceId'] = instance_id
         elif interface_id is not None:
             params['NetworkInterfaceId'] = interface_id
+        elif vpc_peering_connection_id is not None:
+            params['VpcPeeringConnectionId'] = vpc_peering_connection_id
         if dry_run:
             params['DryRun'] = 'true'
 

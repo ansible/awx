@@ -87,8 +87,8 @@ class StorageUri(object):
         for arg in args:
             if args[arg]:
                 sys.stderr.write(
-                        'Warning: %s ignores argument: %s=%s\n' %
-                        (function_name, arg, str(args[arg])))
+                    'Warning: %s ignores argument: %s=%s\n' %
+                    (function_name, arg, str(args[arg])))
 
     def connect(self, access_key_id=None, secret_access_key=None, **kwargs):
         """
@@ -103,7 +103,7 @@ class StorageUri(object):
         connection_args = dict(self.connection_args or ())
 
         if (hasattr(self, 'suppress_consec_slashes') and
-            'suppress_consec_slashes' not in connection_args):
+                'suppress_consec_slashes' not in connection_args):
             connection_args['suppress_consec_slashes'] = (
                 self.suppress_consec_slashes)
         connection_args.update(kwargs)
@@ -167,7 +167,7 @@ class StorageUri(object):
         if all_versions:
             return (v for v in bucket.list_versions(
                 prefix=prefix, delimiter=delimiter, headers=headers)
-                    if not isinstance(v, DeleteMarker))
+                if not isinstance(v, DeleteMarker))
         else:
             return bucket.list(prefix=prefix, delimiter=delimiter,
                                headers=headers)
@@ -247,7 +247,7 @@ class BucketStorageUri(StorageUri):
     """
 
     delim = '/'
-    capabilities = set([]) # A set of additional capabilities.
+    capabilities = set([])  # A set of additional capabilities.
 
     def __init__(self, scheme, bucket_name=None, object_name=None,
                  debug=0, connection_args=None, suppress_consec_slashes=True,
@@ -299,37 +299,37 @@ class BucketStorageUri(StorageUri):
         self._build_uri_strings()
 
     def _build_uri_strings(self):
-      if self.bucket_name and self.object_name:
-          self.versionless_uri = '%s://%s/%s' % (self.scheme, self.bucket_name,
-                                                 self.object_name)
-          if self.generation:
-              self.version_specific_uri = '%s#%s' % (self.versionless_uri,
-                                                     self.generation)
-          elif self.version_id:
-              self.version_specific_uri = '%s#%s' % (
-                  self.versionless_uri, self.version_id)
-          if self.is_version_specific:
-              self.uri = self.version_specific_uri
-          else:
-              self.uri = self.versionless_uri
-      elif self.bucket_name:
-          self.uri = ('%s://%s/' % (self.scheme, self.bucket_name))
-      else:
-          self.uri = ('%s://' % self.scheme)
+        if self.bucket_name and self.object_name:
+            self.versionless_uri = '%s://%s/%s' % (self.scheme, self.bucket_name,
+                                                   self.object_name)
+            if self.generation:
+                self.version_specific_uri = '%s#%s' % (self.versionless_uri,
+                                                       self.generation)
+            elif self.version_id:
+                self.version_specific_uri = '%s#%s' % (
+                    self.versionless_uri, self.version_id)
+            if self.is_version_specific:
+                self.uri = self.version_specific_uri
+            else:
+                self.uri = self.versionless_uri
+        elif self.bucket_name:
+            self.uri = ('%s://%s/' % (self.scheme, self.bucket_name))
+        else:
+            self.uri = ('%s://' % self.scheme)
 
     def _update_from_key(self, key):
-      self._update_from_values(
-          getattr(key, 'version_id', None),
-          getattr(key, 'generation', None),
-          getattr(key, 'is_latest', None),
-          getattr(key, 'md5', None))
+        self._update_from_values(
+            getattr(key, 'version_id', None),
+            getattr(key, 'generation', None),
+            getattr(key, 'is_latest', None),
+            getattr(key, 'md5', None))
 
     def _update_from_values(self, version_id, generation, is_latest, md5):
-      self.version_id = version_id
-      self.generation = generation
-      self.is_latest = is_latest
-      self._build_uri_strings()
-      self.md5 = md5
+        self.version_id = version_id
+        self.generation = generation
+        self.is_latest = is_latest
+        self._build_uri_strings()
+        self.md5 = md5
 
     def get_key(self, validate=False, headers=None, version_id=None):
         self._check_object_uri('get_key')
@@ -388,14 +388,14 @@ class BucketStorageUri(StorageUri):
             is_latest = key.is_latest
 
         return BucketStorageUri(
-                key.provider.get_provider_name(),
-                bucket_name=key.bucket.name,
-                object_name=key.name,
-                debug=self.debug,
-                suppress_consec_slashes=self.suppress_consec_slashes,
-                version_id=version_id,
-                generation=generation,
-                is_latest=is_latest)
+            key.provider.get_provider_name(),
+            bucket_name=key.bucket.name,
+            object_name=key.name,
+            debug=self.debug,
+            suppress_consec_slashes=self.suppress_consec_slashes,
+            version_id=version_id,
+            generation=generation,
+            is_latest=is_latest)
 
     def get_acl(self, validate=False, headers=None, version_id=None):
         """returns a bucket's acl"""
@@ -464,8 +464,8 @@ class BucketStorageUri(StorageUri):
                              'URIs.' % self.scheme)
         if self.object_name:
             if recursive:
-              raise ValueError('add_group_email_grant() on key-ful URI cannot '
-                               'specify recursive=True')
+                raise ValueError('add_group_email_grant() on key-ful URI cannot '
+                                 'specify recursive=True')
             key = self.get_key(validate, headers)
             self.check_response(key, 'key', self.uri)
             key.add_group_email_grant(permission, email_address, headers)
@@ -556,10 +556,10 @@ class BucketStorageUri(StorageUri):
         # Pass storage_class param only if this is a GCS bucket. (In S3 the
         # storage class is specified on the key object.)
         if self.scheme == 'gs':
-          return conn.create_bucket(self.bucket_name, headers, location, policy,
-                                    storage_class)
+            return conn.create_bucket(self.bucket_name, headers, location, policy,
+                                      storage_class)
         else:
-          return conn.create_bucket(self.bucket_name, headers, location, policy)
+            return conn.create_bucket(self.bucket_name, headers, location, policy)
 
     def delete_bucket(self, headers=None):
         self._check_bucket_uri('delete_bucket')
@@ -583,27 +583,27 @@ class BucketStorageUri(StorageUri):
         key_name = key_name or self.object_name or ''
         bucket = self.get_bucket(validate, headers)
         if self.generation:
-          bucket.set_acl(
-              acl_or_str, key_name, headers, generation=self.generation,
-              if_generation=if_generation, if_metageneration=if_metageneration)
+            bucket.set_acl(
+                acl_or_str, key_name, headers, generation=self.generation,
+                if_generation=if_generation, if_metageneration=if_metageneration)
         else:
-          version_id = version_id or self.version_id
-          bucket.set_acl(acl_or_str, key_name, headers, version_id)
+            version_id = version_id or self.version_id
+            bucket.set_acl(acl_or_str, key_name, headers, version_id)
 
     def set_xml_acl(self, xmlstring, key_name='', validate=False, headers=None,
-            version_id=None, if_generation=None, if_metageneration=None):
+                    version_id=None, if_generation=None, if_metageneration=None):
         """Sets or updates a bucket's ACL with an XML string."""
         self._check_bucket_uri('set_xml_acl')
         key_name = key_name or self.object_name or ''
         bucket = self.get_bucket(validate, headers)
         if self.generation:
-          bucket.set_xml_acl(
-              xmlstring, key_name, headers, generation=self.generation,
-              if_generation=if_generation, if_metageneration=if_metageneration)
+            bucket.set_xml_acl(
+                xmlstring, key_name, headers, generation=self.generation,
+                if_generation=if_generation, if_metageneration=if_metageneration)
         else:
-          version_id = version_id or self.version_id
-          bucket.set_xml_acl(xmlstring, key_name, headers,
-                             version_id=version_id)
+            version_id = version_id or self.version_id
+            bucket.set_xml_acl(xmlstring, key_name, headers,
+                               version_id=version_id)
 
     def set_def_xml_acl(self, xmlstring, validate=False, headers=None):
         """Sets or updates a bucket's default object ACL with an XML string."""
@@ -699,14 +699,16 @@ class BucketStorageUri(StorageUri):
         self._check_object_uri('copy_key')
         dst_bucket = self.get_bucket(validate=False, headers=headers)
         if src_generation:
-            return dst_bucket.copy_key(new_key_name=self.object_name,
+            return dst_bucket.copy_key(
+                new_key_name=self.object_name,
                 src_bucket_name=src_bucket_name,
                 src_key_name=src_key_name, metadata=metadata,
                 storage_class=storage_class, preserve_acl=preserve_acl,
                 encrypt_key=encrypt_key, headers=headers, query_args=query_args,
                 src_generation=src_generation)
         else:
-            return dst_bucket.copy_key(new_key_name=self.object_name,
+            return dst_bucket.copy_key(
+                new_key_name=self.object_name,
                 src_bucket_name=src_bucket_name, src_key_name=src_key_name,
                 metadata=metadata, src_version_id=src_version_id,
                 storage_class=storage_class, preserve_acl=preserve_acl,
@@ -766,7 +768,7 @@ class BucketStorageUri(StorageUri):
             component_keys.append(suri.new_key())
             component_keys[-1].generation = suri.generation
         self.generation = self.new_key().compose(
-                component_keys, content_type=content_type, headers=headers)
+            component_keys, content_type=content_type, headers=headers)
         self._build_uri_strings()
         return self
 
@@ -786,12 +788,13 @@ class BucketStorageUri(StorageUri):
         bucket.configure_lifecycle(lifecycle_config, headers)
 
     def exists(self, headers=None):
-      """Returns True if the object exists or False if it doesn't"""
-      if not self.object_name:
-        raise InvalidUriError('exists on object-less URI (%s)' % self.uri)
-      bucket = self.get_bucket()
-      key = bucket.get_key(self.object_name, headers=headers)
-      return bool(key)
+        """Returns True if the object exists or False if it doesn't"""
+        if not self.object_name:
+            raise InvalidUriError('exists on object-less URI (%s)' % self.uri)
+        bucket = self.get_bucket()
+        key = bucket.get_key(self.object_name, headers=headers)
+        return bool(key)
+
 
 class FileStorageUri(StorageUri):
     """
@@ -881,8 +884,8 @@ class FileStorageUri(StorageUri):
         self.get_key().close()
 
     def exists(self, _headers_not_used=None):
-      """Returns True if the file exists or False if it doesn't"""
-      # The _headers_not_used parameter is ignored. It is only there to ensure
-      # that this method's signature is identical to the exists method on the
-      # BucketStorageUri class.
-      return os.path.exists(self.object_name)
+        """Returns True if the file exists or False if it doesn't"""
+        # The _headers_not_used parameter is ignored. It is only there to ensure
+        # that this method's signature is identical to the exists method on the
+        # BucketStorageUri class.
+        return os.path.exists(self.object_name)

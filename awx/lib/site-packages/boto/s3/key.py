@@ -89,10 +89,16 @@ class Key(object):
     # x-amz-meta).
     base_user_settable_fields = set(["cache-control", "content-disposition",
                                     "content-encoding", "content-language",
-                                    "content-md5", "content-type"])
+                                    "content-md5", "content-type",
+                                     "x-robots-tag", "expires"])
     _underscore_base_user_settable_fields = set()
     for f in base_user_settable_fields:
       _underscore_base_user_settable_fields.add(f.replace('-', '_'))
+    # Metadata fields, whether user-settable or not, other than custom
+    # metadata fields (i.e., those beginning with a provider specific prefix
+    # like x-amz-meta).
+    base_fields = (base_user_settable_fields |
+                   set(["last-modified", "content-length", "date", "etag"]))
 
 
 
@@ -130,9 +136,15 @@ class Key(object):
 
     def __repr__(self):
         if self.bucket:
-            return '<Key: %s,%s>' % (self.bucket.name, self.name)
+            name = u'<Key: %s,%s>' % (self.bucket.name, self.name)
         else:
-            return '<Key: None,%s>' % self.name
+            name = u'<Key: None,%s>' % self.name
+
+        # Encode to bytes for Python 2 to prevent display decoding issues
+        if not isinstance(name, str):
+            name = name.encode('utf-8')
+
+        return name
 
     def __iter__(self):
         return self
@@ -302,20 +314,8 @@ class Key(object):
                 elif name.lower() == 'content-range':
                     end_range = re.sub('.*/(.*)', '\\1', value)
                     self.size = int(end_range)
-                elif name.lower() == 'etag':
-                    self.etag = value
-                elif name.lower() == 'content-type':
-                    self.content_type = value
-                elif name.lower() == 'content-encoding':
-                    self.content_encoding = value
-                elif name.lower() == 'content-language':
-                    self.content_language = value
-                elif name.lower() == 'last-modified':
-                    self.last_modified = value
-                elif name.lower() == 'cache-control':
-                    self.cache_control = value
-                elif name.lower() == 'content-disposition':
-                    self.content_disposition = value
+                elif name.lower() in Key.base_fields:
+                    self.__dict__[name.lower().replace('-', '_')] = value
             self.handle_version_headers(self.resp)
             self.handle_encryption_headers(self.resp)
             self.handle_restore_headers(self.resp)
@@ -555,6 +555,8 @@ class Key(object):
             self.metadata['Content-MD5'] = value
         else:
             self.metadata[name] = value
+        if name.lower() in Key.base_user_settable_fields:
+            self.__dict__[name.lower().replace('-', '_')] = value
 
     def update_metadata(self, d):
         self.metadata.update(d)
@@ -932,7 +934,10 @@ class Key(object):
         # the auth mechanism (because closures). Detect if it's SigV4 & embelish
         # while we can before the auth calculations occur.
         if 'hmac-v4-s3' in self.bucket.connection._required_auth_capability():
-            headers['_sha256'] = compute_hash(fp, hash_algorithm=hashlib.sha256)[0]
+            kwargs = {'fp': fp, 'hash_algorithm': hashlib.sha256}
+            if size is not None:
+                kwargs['size'] = size
+            headers['_sha256'] = compute_hash(**kwargs)[0]
         headers['Expect'] = '100-Continue'
         headers = boto.utils.merge_meta(headers, self.metadata, provider)
         resp = self.bucket.connection.make_request(

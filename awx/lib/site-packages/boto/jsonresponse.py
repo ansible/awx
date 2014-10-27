@@ -23,6 +23,7 @@
 import xml.sax
 from boto import utils
 
+
 class XmlHandler(xml.sax.ContentHandler):
 
     def __init__(self, root_node, connection):
@@ -52,7 +53,8 @@ class XmlHandler(xml.sax.ContentHandler):
         if not isinstance(s, bytes):
             s = s.encode('utf-8')
         xml.sax.parseString(s, self)
-        
+
+
 class Element(dict):
 
     def __init__(self, connection=None, element_name=None,
@@ -115,6 +117,7 @@ class Element(dict):
                 self.parent[self.get_name(name)] = value
             elif isinstance(self.parent, ListElement):
                 self.parent.append(value)
+
 
 class ListElement(list):
 

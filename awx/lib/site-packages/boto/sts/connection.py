@@ -92,7 +92,7 @@ class STSConnection(AWSQueryConnection):
         if self.anon:
             return ['pure-query']
         else:
-            return ['sign-v2']
+            return ['hmac-v4']
 
     def _check_token_cache(self, token_key, duration=None, window_seconds=60):
         token = _session_token_cache.get(token_key, None)

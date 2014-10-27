@@ -58,7 +58,6 @@ class ElastiCacheConnection(AWSQueryConnection):
         super(ElastiCacheConnection, self).__init__(**kwargs)
         self.region = region
 
-
     def _required_auth_capability(self):
         return ['hmac-v4']
 

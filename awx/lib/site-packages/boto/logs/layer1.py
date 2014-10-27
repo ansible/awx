@@ -95,7 +95,6 @@ class CloudWatchLogsConnection(AWSQueryConnection):
         "InvalidSequenceTokenException": exceptions.InvalidSequenceTokenException,
     }
 
-
     def __init__(self, **kwargs):
         region = kwargs.pop('region', None)
         if not region:

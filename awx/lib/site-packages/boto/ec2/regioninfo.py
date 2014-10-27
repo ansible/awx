@@ -23,6 +23,7 @@
 
 from boto.regioninfo import RegionInfo
 
+
 class EC2RegionInfo(RegionInfo):
     """
     Represents an EC2 Region

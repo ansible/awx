@@ -21,6 +21,7 @@
 #
 from datetime import datetime
 
+
 class Datapoint(dict):
 
     def __init__(self, connection=None):

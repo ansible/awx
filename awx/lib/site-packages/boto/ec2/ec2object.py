@@ -25,6 +25,7 @@ Represents an EC2 Object
 """
 from boto.ec2.tag import TagSet
 
+
 class EC2Object(object):
 
     def __init__(self, connection=None):
@@ -64,7 +65,7 @@ class TaggedEC2Object(EC2Object):
 
     def add_tag(self, key, value='', dry_run=False):
         """
-        Add a tag to this object.  Tag's are stored by AWS and can be used
+        Add a tag to this object.  Tags are stored by AWS and can be used
         to organize and filter resources.  Adding a tag involves a round-trip
         to the EC2 service.
 
@@ -76,14 +77,7 @@ class TaggedEC2Object(EC2Object):
                       If you want only the tag name and no value, the
                       value should be the empty string.
         """
-        status = self.connection.create_tags(
-            [self.id],
-            {key : value},
-            dry_run=dry_run
-        )
-        if self.tags is None:
-            self.tags = TagSet()
-        self.tags[key] = value
+        self.add_tags({key: value}, dry_run)
 
     def add_tags(self, tags, dry_run=False):
         """
@@ -116,21 +110,35 @@ class TaggedEC2Object(EC2Object):
 
         :type value: str
         :param value: An optional value that can be stored with the tag.
-                      If a value is provided, it must match the value
-                      currently stored in EC2.  If not, the tag will not
-                      be removed.  If a value of None is provided, all
-                      tags with the specified name will be deleted.
-                      NOTE: There is an important distinction between
-                      a value of '' and a value of None.
+                      If a value is provided, it must match the value currently
+                      stored in EC2.  If not, the tag will not be removed.  If
+                      a value of None is provided, the tag will be
+                      unconditionally deleted.
+                      NOTE: There is an important distinction between a value
+                      of '' and a value of None.
         """
-        if value is not None:
-            tags = {key : value}
-        else:
-            tags = [key]
+        self.remove_tags({key: value}, dry_run)
+
+    def remove_tags(self, tags, dry_run=False):
+        """
+        Removes tags from this object.  Removing tags involves a round-trip
+        to the EC2 service.
+
+        :type tags: dict
+        :param tags: A dictionary of key-value pairs for the tags being removed.
+                     For each key, the provided value must match the value
+                     currently stored in EC2.  If not, that particular tag will
+                     not be removed.  However, if a value of None is provided,
+                     the tag will be unconditionally deleted.
+                     NOTE: There is an important distinction between a value of
+                     '' and a value of None.
+        """
         status = self.connection.delete_tags(
             [self.id],
             tags,
             dry_run=dry_run
         )
-        if key in self.tags:
-            del self.tags[key]
+        for key, value in tags.items():
+            if key in self.tags:
+                if value is None or value == self.tags[key]:
+                    del self.tags[key]

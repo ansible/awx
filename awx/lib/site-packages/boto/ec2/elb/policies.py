@@ -106,4 +106,3 @@ class Policies(object):
 
     def endElement(self, name, value, connection):
         return
-
