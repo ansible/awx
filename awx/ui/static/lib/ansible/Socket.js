@@ -71,11 +71,11 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                         $log.debug('Socket connecting to: ' + url);
                         self.scope.socket_url = url;
                         handshakeData = {
-                           headers:  {
+                            headers: {
                                 'Authorization': 'Token ' + token,
                                 'X-Auth-Token': 'Token ' + token
                             }
-                         }
+                        };
 
                         self.socket = io.connect(url, {
                             // headers:
@@ -182,7 +182,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 },
                 disconnect: function(){
                     var self = this;
-                    $rootScope.disconnect_timer = setInterval(function(){disconnectSocket()}, 1000);
+                    $rootScope.disconnect_timer = setInterval(function(){disconnectSocket();}, 1000);
 
                     function disconnectSocket() {
                         self.socket.socket.disconnect();
