@@ -1145,6 +1145,13 @@ class RunSystemJob(BaseTask):
             json_vars = json.loads(system_job.extra_vars)
             if 'days' in json_vars:
                 args.extend(['--days', str(json_vars['days'])])
+            if system_job.job_type == 'cleanup_jobs':
+                if 'jobs' in json_vars and json_vars['jobs']:
+                    args.extend(['--jobs'])
+                if 'project_updates' in json_vars and json_vars['project_updates']:
+                    args.extend(['--project-updates'])
+                if 'inventory_updates' in json_vars and json_vars['inventory_updates']:
+                    args.extend(['--inventory-updates'])
         except Exception, e:
             pass
         print args
