@@ -21,6 +21,7 @@ __pycache__
 build
 deb-build
 rpm-build
+tar-build
 /dist
 *.egg-info
 *.py[c,o]

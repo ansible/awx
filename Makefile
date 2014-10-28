@@ -10,9 +10,13 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 
 NAME = ansible-tower
 VERSION = $(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
-RELEASE ?= 1
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
-BUILD ?= 0.git$(DATE)
+BUILD = 0.git$(DATE)
+ifeq ($(OFFICIAL),yes)
+    RELEASE ?= 1
+else
+    RELEASE ?= $(BUILD)
+endif
 
 # Allow AMI license customization
 AWS_INSTANCE_COUNT ?= 100
@@ -28,6 +32,7 @@ else
     PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-release.json
 endif
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
+SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
 
 # DEB build parameters
 DEBUILD_BIN ?= debuild
@@ -36,7 +41,6 @@ DPUT_BIN ?= dput
 DPUT_OPTS ?=
 ifeq ($(OFFICIAL),yes)
     DEB_DIST ?= stable
-    DEB_RELEASE = $(RELEASE)
     # Sign OFFICIAL builds using 'DEBSIGN_KEYID'
     # DEBSIGN_KEYID is required when signing
     ifneq ($(DEBSIGN_KEYID),)
@@ -44,7 +48,6 @@ ifeq ($(OFFICIAL),yes)
     endif
 else
     DEB_DIST ?= unstable
-    DEB_RELEASE = $(BUILD)
     # Do not sign development builds
     DEBUILD_OPTS += -uc -us
     DPUT_OPTS += -u
@@ -56,12 +59,7 @@ DEB_PPA ?= reprepro
 RPM_SPECDIR= packaging/rpm
 RPM_SPEC = $(RPM_SPECDIR)/$(NAME).spec
 RPM_DIST ?= $(shell rpm --eval '%{?dist}' 2>/dev/null)
-ifeq ($(OFFICIAL),yes)
-    RPM_RELEASE = $(RELEASE)
-else
-    RPM_RELEASE = $(BUILD)
-endif
-RPM_NVR = $(NAME)-$(VERSION)-$(RPM_RELEASE)$(RPM_DIST)
+RPM_NVR = $(NAME)-$(VERSION)-$(RELEASE)$(RPM_DIST)
 MOCK_BIN ?= mock
 MOCK_CFG ?=
 
@@ -69,7 +67,11 @@ MOCK_CFG ?=
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm \
-	deb deb-src debian reprepro
+	deb deb-src debian reprepro setup_tarball
+
+# Remove setup build files
+clean-tar:
+	rm -rf tar-build
 
 # Remove rpm build files
 clean-rpm:
@@ -90,7 +92,7 @@ clean-ui:
 	rm -rf awx/ui/static/docs
 
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui
+clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar
 	rm -rf dist/*
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -281,17 +283,18 @@ dev_build:
 release_build:
 	$(PYTHON) setup.py release_build
 
-# Build AWX setup tarball.
-$(SETUP_TAR_NAME).tar.gz:
-	@cp -a setup $(SETUP_TAR_NAME)
-	@tar czf $(SETUP_TAR_NAME).tar.gz $(SETUP_TAR_NAME)/
-	@rm -rf $(SETUP_TAR_NAME)
+# Build setup tarball
+tar-build/$(SETUP_TAR_FILE):
+	@mkdir -p tar-build
+	@cp -a setup tar-build/$(SETUP_TAR_NAME)
+	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
+	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
 	@echo "#############################################"
 	@echo "Setup artifacts:"
-	@echo $(SETUP_TAR_NAME).tar.gz
+	@echo tar-build/$(SETUP_TAR_FILE)
 	@echo "#############################################"
 
-setup_tarball: $(SETUP_TAR_NAME).tar.gz
+setup_tarball: tar-build/$(SETUP_TAR_FILE)
 
 release_clean:
 	-(rm *.tar)
@@ -320,7 +323,7 @@ rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
 
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
-	   --define "tower_version $(VERSION)" --define "tower_release $(RPM_RELEASE)"
+	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
 	@echo "#############################################"
 	@echo "SRPM artifacts:"
 	@echo rpm-build/$(RPM_NVR).src.rpm
@@ -330,7 +333,7 @@ mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 
 rpm-build/$(RPM_NVR).noarch.rpm: rpm-build/$(RPM_NVR).src.rpm
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \
-	   --define "tower_version $(VERSION)" --define "tower_release $(RPM_RELEASE)"
+	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)"
 	@echo "#############################################"
 	@echo "RPM artifacts:"
 	@echo rpm-build/$(RPM_NVR).noarch.rpm
@@ -343,38 +346,38 @@ deb-build/$(SDIST_TAR_NAME):
 	tar -C deb-build/ -xvf dist/$(SDIST_TAR_FILE)
 	cp -a packaging/debian deb-build/$(SDIST_TAR_NAME)/
 	cp packaging/remove_tower_source.py deb-build/$(SDIST_TAR_NAME)/debian/
-	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(DEB_RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
+	sed -ie "s#^$(NAME) (\([^)]*\)) \([^;]*\);#$(NAME) ($(VERSION)-$(RELEASE)) $(DEB_DIST);#" deb-build/$(SDIST_TAR_NAME)/debian/changelog
 
 debian: sdist deb-build/$(SDIST_TAR_NAME)
 
-deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_all.deb:
+deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb:
 	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -b
 	@echo "#############################################"
 	@echo "DEB artifacts:"
-	@echo deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_all.deb
+	@echo deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
 	@echo "#############################################"
 
-deb: debian deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_all.deb
+deb: debian deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb
 
-deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_source.changes:
+deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes:
 	cd deb-build/$(SDIST_TAR_NAME) && $(DEBUILD) -S
 	@echo "#############################################"
 	@echo "DEB artifacts:"
-	@echo deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_source.changes
+	@echo deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes
 	@echo "#############################################"
 
-deb-src: debian deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_source.changes
+deb-src: debian deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes
 
 deb-upload: deb
-	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_amd64.changes ; \
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_amd64.changes ; \
 
 deb-src-upload: deb-src
-	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_source.changes ; \
+	$(DPUT_BIN) $(DPUT_OPTS) $(DEB_PPA) deb-build/$(NAME)_$(VERSION)-$(RELEASE)_source.changes ; \
 
 reprepro: deb
 	mkdir -p reprepro/conf
 	cp -a packaging/reprepro/* reprepro/conf/
-	@DEB=deb-build/$(NAME)_$(VERSION)-$(DEB_RELEASE)_all.deb ; \
+	@DEB=deb-build/$(NAME)_$(VERSION)-$(RELEASE)_all.deb ; \
 	for DIST in trusty precise ; do \
 	    echo "Removing '$(NAME)' from the $${DIST} apt repo" ; \
 	    echo reprepro --export=force -b reprepro remove $${DIST} $(NAME) ; \
