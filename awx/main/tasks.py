@@ -1041,8 +1041,8 @@ class RunInventoryUpdate(BaseTask):
             pass
         elif inventory_update.source == 'custom':
             for env_k in inventory_update.source_vars_dict:
-                if env_k not in os.environ:
-                    env[env_k] = unicode(inventory_update.source_vars_dict[env_k])
+                if str(env_k) not in os.environ:
+                    env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
         return env
 
     def build_args(self, inventory_update, **kwargs):
