@@ -980,6 +980,8 @@ class JobAccess(BaseAccess):
     def can_add(self, data):
         if not data or '_method' in data:  # So the browseable API will work?
             return True
+        if not self.user.is_superuser:
+            return False
 
         reader = TaskSerializer()
         validation_info = reader.from_file()
@@ -995,8 +997,6 @@ class JobAccess(BaseAccess):
         if validation_info.get('free_instances', 0) < 0:
             raise PermissionDenied("Host Count exceeds available instances")
 
-        if self.user.is_superuser:
-            return True
         add_data = dict(data.items())
 
         # If a job template is provided, the user should have read access to it.
@@ -1012,9 +1012,6 @@ class JobAccess(BaseAccess):
                 add_data.setdefault('credential', job_template.credential.pk)
         else:
             job_template = None
-            # Only admins can create jobs without job templates
-            if not self.user.is_superuser:
-                return False
 
         # Check that the user would be able to add a job template with the
         # same data.
