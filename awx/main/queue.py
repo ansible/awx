@@ -76,7 +76,7 @@ class PubSub(object):
             from contextmanager import closing
 
             with closing(PubSub('foobar')) as foobar:
-                for message in foobar.listen(wait=0.1):
+                for message in foobar.subscribe(wait=0.1):
                     <deal with message>
         """
         self._queue_name = queue_name

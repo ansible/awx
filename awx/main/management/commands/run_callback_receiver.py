@@ -24,19 +24,17 @@ from django.db import connection
 
 # AWX
 from awx.main.models import *
-
-# ZeroMQ
-import zmq
+from awx.main.queue import PubSub
 
 MAX_REQUESTS = 10000
 WORKERS = 4
 
-class CallbackReceiver(object):
 
+class CallbackReceiver(object):
     def __init__(self):
         self.parent_mappings = {}
 
-    def run_subscriber(self, consumer_port, queue_port, use_workers=True):
+    def run_subscriber(self, use_workers=True):
         def shutdown_handler(active_workers):
             def _handler(signum, frame):
                 for active_worker in active_workers:
@@ -67,7 +65,10 @@ class CallbackReceiver(object):
         elif settings.DEBUG:
             print 'Started callback receiver (no workers)'
 
-        main_process = Process(target=self.callback_handler, args=(use_workers, consumer_port, worker_queues,))
+        main_process = Process(
+            target=self.callback_handler,
+            args=(use_workers, worker_queues,),
+        )
         main_process.daemon = True
         main_process.start()
 
@@ -88,16 +89,12 @@ class CallbackReceiver(object):
                 sys.exit(1)
             time.sleep(0.1)
 
-    def callback_handler(self, use_workers, consumer_port, worker_queues):
+    def callback_handler(self, use_workers, worker_queues):
         message_number = 0
         total_messages = 0
         last_parent_events = {}
-        self.consumer_context = zmq.Context()
-        self.consumer_subscriber = self.consumer_context.socket(zmq.REP)
-        self.consumer_subscriber.bind(consumer_port)
 
-        while True: # Handle signal
-            message = self.consumer_subscriber.recv_json()
+        for message in pubsub.subscribe('callbacks'):
             total_messages += 1
             if not use_workers:
                 self.process_job_event(message)
@@ -232,13 +229,8 @@ class Command(NoArgsCommand):
     Save Job Callback receiver (see awx.plugins.callbacks.job_event_callback)
     Runs as a management command and receives job save events.  It then hands
     them off to worker processors (see Worker) which writes them to the database
-    '''
-    
+    '''    
     help = 'Launch the job callback receiver'
-
-    option_list = NoArgsCommand.option_list + (
-        make_option('--port', dest='port', type='int', default=5556,
-                    help='Port to listen for requests on'),)
 
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO,
@@ -253,11 +245,9 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
-        consumer_port = settings.CALLBACK_CONSUMER_PORT
-        queue_port = settings.CALLBACK_QUEUE_PORT
         cr = CallbackReceiver()
         try:
-            cr.run_subscriber(consumer_port, queue_port)
+            cr.run_subscriber()
         except KeyboardInterrupt:
             pass
 

@@ -42,9 +42,8 @@ import time
 # Requests
 import requests
 
-# ZeroMQ
-import zmq
-
+# Tower
+from awx.main.queue import PubSub
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -80,9 +79,6 @@ class CallbackModule(object):
         self.job_id = int(os.getenv('JOB_ID'))
         self.base_url = os.getenv('REST_API_URL', '')
         self.auth_token = os.getenv('REST_API_TOKEN', '')
-        self.callback_consumer_port = os.getenv('CALLBACK_CONSUMER_PORT', '')
-        self.context = None
-        self.socket = None
         self._init_logging()
         self._init_connection()
         self.counter = 0
@@ -109,11 +105,6 @@ class CallbackModule(object):
         self.context = None
         self.socket = None
 
-    def _start_connection(self):
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect(self.callback_consumer_port)
-
     def _post_job_event_queue_msg(self, event, event_data):
         self.counter += 1
         msg = {
@@ -132,13 +123,10 @@ class CallbackModule(object):
             try:
                 if not hasattr(self, 'connection_pid'):
                     self.connection_pid = active_pid
-                if self.connection_pid != active_pid:
-                    self._init_connection()
-                if self.context is None:
-                    self._start_connection()
 
-                self.socket.send_json(msg)
-                self.socket.recv()
+                # Publish the callback through Redis.
+                pubsub = PubSub('callbacks')
+                pubsub.publish(msg)
                 return
             except Exception, e:
                 self.logger.info('Publish Exception: %r, retry=%d', e,
