@@ -1562,6 +1562,62 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # its own child).
         self.assertTrue(self.group in self.inventory.root_groups)
 
+    def test_update_from_vmware(self):
+        source_host = getattr(settings, 'TEST_VMWARE_HOST', '')
+        source_username = getattr(settings, 'TEST_VMWARE_USER', '')
+        source_password = getattr(settings, 'TEST_VMWARE_PASSWORD', '')
+        if not all([source_host, source_username, source_password]):
+            self.skipTest('no test vmware credentials defined!')
+        self.create_test_license_file()
+        credential = Credential.objects.create(kind='vmware',
+                                               user=self.super_django_user,
+                                               username=source_username,
+                                               password=source_password,
+                                               host=source_host)
+        inventory_source = self.update_inventory_source(self.group,
+            source='vmware', credential=credential)
+        # Check first without instance_id set (to import by name only).
+        with self.settings(VMWARE_INSTANCE_ID_VAR=''):
+            self.check_inventory_source(inventory_source)
+        # Rename hosts and verify the import picks up the instance_id present
+        # in host variables.
+        for host in self.inventory.hosts.all():
+            self.assertFalse(host.instance_id, host.instance_id)
+            if host.enabled:
+                self.assertTrue(host.variables_dict.get('ansible_ssh_host', ''))
+            # Test a field that should be present for host systems, not VMs.
+            self.assertFalse(host.variables_dict.get('vmware_product_name', ''))
+            host.name = 'updated-%s' % host.name
+            host.save()
+        old_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.check_inventory_source(inventory_source, initial=False)
+        new_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.assertEqual(old_host_pks, new_host_pks)
+        # Manually disable all hosts, verify a new update re-enables them.
+        # Also change the host name, and verify it is not deleted, but instead
+        # updated because the instance ID matches.
+        enabled_host_pks = set(self.inventory.hosts.filter(enabled=True).values_list('pk', flat=True))
+        for host in self.inventory.hosts.all():
+            host.enabled = False
+            host.name = 'changed-%s' % host.name
+            host.save()
+        old_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.check_inventory_source(inventory_source, initial=False, enabled_host_pks=enabled_host_pks)
+        new_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.assertEqual(old_host_pks, new_host_pks)
+        # Update again and include host systems in addition to guests.
+        inventory_source.source_vars = '---\n\nguests_only: false\n'
+        inventory_source.save()
+        old_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.check_inventory_source(inventory_source, initial=False)
+        new_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
+        self.assertTrue(new_host_pks > old_host_pks)
+        for host in self.inventory.hosts.filter(pk__in=(new_host_pks - old_host_pks)):
+            if host.enabled:
+                self.assertTrue(host.variables_dict.get('ansible_ssh_host', ''))
+            # Test a field only present for host systems.
+            self.assertTrue(host.variables_dict.get('vmware_product_name', ''))
+
     def test_update_from_custom_script(self):
         # Create the inventory script
         self.create_test_license_file()
