@@ -159,7 +159,7 @@ angular.module('GeneratorHelpers', [])
                 icon = 'fa-list-ul';
                 break;
             case 'copy':
-                icon = "fa-cut";
+                icon = "fa-copy";
                 break;
             }
             icon += (size) ? " " + size : "";

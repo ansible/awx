@@ -64,7 +64,6 @@ angular.module('JobTemplatesListDefinition', [])
                 ngHref: '#/job_templates/{{ job_template.id }}/schedules',
                 awToolTip: 'Schedule future job template runs',
                 dataPlacement: 'top',
-                ngHide: 'portalMode===true'
             },
             edit: {
                 label: 'Edit',
@@ -72,7 +71,6 @@ angular.module('JobTemplatesListDefinition', [])
                 awToolTip: 'Edit template',
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',
-                ngHide: 'portalMode===true'
             },
             "delete": {
                 label: 'Delete',
@@ -80,7 +78,14 @@ angular.module('JobTemplatesListDefinition', [])
                 "class": 'btn-danger btn-xs',
                 awToolTip: 'Delete template',
                 dataPlacement: 'top',
-                ngHide: 'portalMode===true'
+            },
+            copy: {
+                label: 'Copy',
+                ngClick: "copyJobTemplate(job_template.id, job_template.name)",
+                "class": 'btn-danger btn-xs',
+                awToolTip: 'Copy template',
+                dataPlacement: 'top',
+
             }
         }
     });

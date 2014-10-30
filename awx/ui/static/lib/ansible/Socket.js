@@ -28,7 +28,8 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 endpoint = params.endpoint,
                 protocol = $location.protocol(),
                 config, socketPort,
-                handshakeData, url;
+                // handshakeData,
+                url;
 
             // Since some pages are opened in a new tab, we might get here before AnsibleConfig is available.
             // In that case, load from local storage.
@@ -70,19 +71,20 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                         // We have a valid session token, so attempt socket connection
                         $log.debug('Socket connecting to: ' + url);
                         self.scope.socket_url = url;
-                        handshakeData = {
-                            headers: {
-                                'Authorization': 'Token ' + token,
-                                'X-Auth-Token': 'Token ' + token
-                            }
-                        };
+                        // handshakeData = {
+                        //    headers:  {
+                        //         'Authorization': 'Token ' + token,
+                        //         'X-Auth-Token': 'Token ' + token
+                        //     }
+                        //  }
+
 
                         self.socket = io.connect(url, {
-                            // headers:
-                            // {
-                            //     'Authorization': 'Token ' + token,
-                            //     'X-Auth-Token': 'Token ' + token
-                            // },
+                            headers:
+                            {
+                                'Authorization': 'Token ' + token,
+                                'X-Auth-Token': 'Token ' + token
+                            },
                             'connect timeout': 3000,
                             'try multiple transports': false,
                             'max reconneciton attemps': 3,
@@ -179,19 +181,6 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             callback.apply(self.socket, args);
                         });
                     });
-                },
-                disconnect: function(){
-                    var self = this;
-                    $rootScope.disconnect_timer = setInterval(function(){disconnectSocket();}, 1000);
-
-                    function disconnectSocket() {
-                        self.socket.socket.disconnect();
-                        window.clearInterval($rootScope.disconnect_timer);
-                    }
-                    // self.scope.$apply(function () {
-
-                    // });
-
                 },
                 emit: function (eventName, data, callback) {
                     var self = this;

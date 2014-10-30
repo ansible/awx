@@ -32,6 +32,7 @@ angular.module('VariablesHelper', ['Utilities'])
                         json_obj = JSON.parse(variables);
                         json_obj = SortVariables(json_obj);
                         result = jsyaml.safeDump(json_obj);
+
                     }
                     catch (e) {
                         $log.info('Attempt to parse extra_vars as JSON failed. Attempting to parse as YAML');
@@ -56,6 +57,7 @@ angular.module('VariablesHelper', ['Utilities'])
                     try {
                         json_obj = SortVariables(variables);
                         result = jsyaml.safeDump(json_obj);
+                        // result = variables;
                     }
                     catch(e3) {
                         ProcessErrors(null, variables, e3.message, null, { hdr: 'Error!',
@@ -78,7 +80,11 @@ angular.module('VariablesHelper', ['Utilities'])
      **/
     .factory('ToJSON', ['$log', 'ProcessErrors', function($log, ProcessErrors) {
         return function(parseType, variables, stringify, reviver) {
-            var json_data, result;
+            var json_data,
+            result;
+            // bracketVar,
+            // key,
+            // lines, i, newVars = [];
             if (parseType === 'json') {
                 try {
                     //parse a JSON string
@@ -97,7 +103,30 @@ angular.module('VariablesHelper', ['Utilities'])
                 }
             } else {
                 try {
+                    // if(variables.indexOf('{{')>-1){
+                    //     lines = variables.split(/\n/);
+                    //     for(i=0; i<lines.length; i++){
+                    //         if(lines[i].indexOf('{{')>-1){
+                    //             lines[i] = lines[i].replace('{{', '"{{');
+                    //             // lines[i] = lines[i].replace(lines[i].lastIndexOf('}}'), '}}"');
+                    //             lines[i] = lines[i]+'"';
+                    //             // newVars = newVars+ lines[i];
+                    //             newVars.push(lines[i])
+
+                    //         }
+                    //     }
+                    //     json_data = jsyaml.load(newVars.toString());
+
+                    //     bracketVar = variables.substr(variables.indexOf('{{'), variables.indexOf('}}'));
+                    //     bracketVar = bracketVar.trimRight();
+                    //     key = variables.substr(0, variables.indexOf(':'));
+                    //     json_data = jsyaml.load(variables);
+                    //     json_data[key] = bracketVar;
+                    // }
+                    // else
                     json_data = jsyaml.load(variables);
+
+
                 }
                 catch(e) {
                     json_data = {};

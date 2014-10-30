@@ -79,6 +79,8 @@ function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, C
                 queued_scope.search('queued_job');
                 break;
             case 'successful':
+                completed_scope.search('completed_job');
+                break;
             case 'failed':
             case 'error':
             case 'canceled':
