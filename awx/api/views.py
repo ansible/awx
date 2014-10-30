@@ -1743,7 +1743,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
             raise PermissionDenied()
         new_job = obj.create_unified_job()
         result = new_job.signal_start()
-        data = dict(job=new_job.id)
+        data = dict(system_job=new_job.id)
         return Response(data, status=status.HTTP_202_ACCEPTED)
 
 class SystemJobTemplateSchedulesList(SubListCreateAPIView):
