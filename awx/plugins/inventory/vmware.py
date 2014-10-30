@@ -4,18 +4,28 @@
 VMware Inventory Script
 =======================
 
-shamelessly copied from existing inventory scripts.
+Retrieve information about virtual machines from a vCenter server or
+standalone ESX host.  When `group_by=false` (in the INI file), host systems
+are also returned in addition to VMs.
 
-This script and it's ini can be used more than once,
+This script will attempt to read configuration from an INI file with the same
+base filename if present, or `vmware.ini` if not.  It is possible to create
+symlinks to the inventory script to support multiple configurations, e.g.:
 
-i.e vmware.py/vmware_colo.ini vmware_idf.py/vmware_idf.ini
-(script can be link)
+* `vmware.py` (this script)
+* `vmware.ini` (default configuration, will be read by `vmware.py`)
+* `vmware_test.py` (symlink to `vmware.py`)
+* `vmware_test.ini` (test configuration, will be read by `vmware_test.py`)
+* `vmware_other.py` (symlink to `vmware.py`, will read `vmware.ini` since no
+  `vmware_other.ini` exists)
 
-so if you don't have clustered vcenter  but multiple esx machines or
-just diff clusters you can have a inventory  per each and automatically
-group hosts based on file name or specify a group in the ini.
-FIXME
+The path to an INI file may also be specified via the `VMWARE_INI` environment
+variable, in which case the filename matching rules above will not apply.
 
+Host and authentication parameters may be specified via the `VMWARE_HOST`,
+`VMWARE_USER` and `VMWARE_PASSWORD` environment variables; these options will
+take precedence over options present in the INI file.  An INI file is not
+required if these options are specified using environment variables.
 '''
 
 import collections
