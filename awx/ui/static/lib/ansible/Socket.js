@@ -78,7 +78,6 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                         //     }
                         //  }
 
-
                         self.socket = io.connect(url, {
                             headers:
                             {
