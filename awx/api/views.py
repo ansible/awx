@@ -1720,6 +1720,11 @@ class SystemJobTemplateList(ListAPIView):
     model = SystemJobTemplate
     serializer_class = SystemJobTemplateSerializer
 
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return super(SystemJobTemplateList, self).get(request, *args, **kwargs)
+
 class SystemJobTemplateDetail(RetrieveAPIView):
 
     model = SystemJobTemplate
@@ -2173,6 +2178,12 @@ class SystemJobList(ListCreateAPIView):
 
     model = SystemJob
     serializer_class = SystemJobListSerializer
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return super(SystemJobList, self).get(request, *args, **kwargs)
+
 
 class SystemJobDetail(RetrieveAPIView):
 
