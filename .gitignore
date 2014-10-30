@@ -52,6 +52,7 @@ tools/vagrant/local.yml
 # Setup
 setup/tower_setup_conf.yml
 setup/setup.log
+setup/inventory
 
 # Other
 .tower_cycle
