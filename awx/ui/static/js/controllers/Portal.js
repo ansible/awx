@@ -31,8 +31,7 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
 
         var html,
         e,
-        // winHeight,
-        // available_height,
+        jobs_scope,
         list = PortalJobTemplateList,
         view= GenerateList,
         defaultUrl = GetBasePath('job_templates'),
@@ -112,10 +111,58 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
         if ($scope.removeWidgetLoaded) {
             $scope.removeWidgetLoaded();
         }
-        $scope.removeWidgetLoaded = $scope.$on('WidgetLoaded', function () {
+        $scope.removeWidgetLoaded = $scope.$on('WidgetLoaded', function (e, label, jobscope) {
+            if(label==="portal_jobs"){
+                jobs_scope = jobscope;
+            }
             $('.actions-column:eq(0)').text('Launch');
             $('.actions-column:eq(1)').text('Details');
             $('.list-well:eq(1)').css('margin-top' , '0px');
+        });
+
+        //  function processEvent(event) {
+        //     switch(event.status) {
+        //         case 'running':
+        //             jobs_scope.search('running_job');
+        //             jobs_scope.search('queued_job');
+
+        //             break;
+        //         case 'new':
+        //         case 'pending':
+        //         case 'waiting':
+        //             jobs_scope.search('queued_job');
+
+        //             break;
+        //         case 'successful':
+        //              jobs_scope.search('completed_job');
+        //         case 'failed':
+        //         case 'error':
+        //         case 'canceled':
+        //             jobs_scope.search('completed_job');
+        //             jobs_scope.search('running_job');
+        //             jobs_scope.search('queued_job');
+        //     }
+        // }
+
+        if ($rootScope.removeJobStatusChange) {
+            $rootScope.removeJobStatusChange();
+        }
+        $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function() {
+            jobs_scope.refreshJobs();
+            // if(data.status==='pending'){
+            //     // $scope.refresh();
+            //     $('#portal-jobs').empty();
+            //     // $rootScope.flashMessage = null;
+            //     PortalJobsWidget({
+            //         scope: $scope,
+            //         target: 'portal-jobs',
+            //         searchSize: 'col-lg-6 col-md-6'
+            //     });
+            // }
+
+
+                //x`processEvent(data);
+
         });
 
         $scope.submitJob = function (id) {

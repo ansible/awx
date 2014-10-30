@@ -957,7 +957,7 @@ class RunInventoryUpdate(BaseTask):
                 ec2_opts['cache_path'] = cache_path
             ec2_opts.setdefault('cache_max_age', '300')
             for k,v in ec2_opts.items():
-                cp.set(section, k, str(v))
+                cp.set(section, k, unicode(v))
         # Build pyrax creds INI for rax inventory script.
         elif inventory_update.source == 'rax':
             section = 'rackspace_cloud'
@@ -967,6 +967,15 @@ class RunInventoryUpdate(BaseTask):
                 cp.set(section, 'username', credential.username)
                 cp.set(section, 'api_key', decrypt_field(credential,
                                                          'password'))
+        # Allow custom options to vmware inventory script.
+        elif inventory_update.source == 'vmware':
+            section = 'defaults'
+            cp.add_section(section)
+            vmware_opts = dict(inventory_update.source_vars_dict.items())
+            vmware_opts.setdefault('guests_only', 'True')
+            for k,v in vmware_opts.items():
+                cp.set(section, k, unicode(v))
+
         # Return INI content.
         if cp.sections():
             f = cStringIO.StringIO()
@@ -1027,6 +1036,7 @@ class RunInventoryUpdate(BaseTask):
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
         elif inventory_update.source == 'vmware':
+            env['VMWARE_INI'] = kwargs.get('private_data_file', '')
             env['VMWARE_HOST'] = passwords.get('source_host', '')
             env['VMWARE_USER'] = passwords.get('source_username', '')
             env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
@@ -1042,8 +1052,8 @@ class RunInventoryUpdate(BaseTask):
             pass
         elif inventory_update.source == 'custom':
             for env_k in inventory_update.source_vars_dict:
-                if env_k not in os.environ:
-                    env[env_k] = unicode(inventory_update.source_vars_dict[env_k])
+                if str(env_k) not in os.environ:
+                    env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
         return env
 
     def build_args(self, inventory_update, **kwargs):
@@ -1146,6 +1156,13 @@ class RunSystemJob(BaseTask):
             json_vars = json.loads(system_job.extra_vars)
             if 'days' in json_vars:
                 args.extend(['--days', str(json_vars['days'])])
+            if system_job.job_type == 'cleanup_jobs':
+                if 'jobs' in json_vars and json_vars['jobs']:
+                    args.extend(['--jobs'])
+                if 'project_updates' in json_vars and json_vars['project_updates']:
+                    args.extend(['--project-updates'])
+                if 'inventory_updates' in json_vars and json_vars['inventory_updates']:
+                    args.extend(['--inventory-updates'])
         except Exception, e:
             pass
         print args

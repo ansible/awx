@@ -8,6 +8,7 @@ import logging
 import json
 import signal
 import time
+import urllib
 from optparse import make_option
 from threading import Thread
 
@@ -31,23 +32,71 @@ from socketio import socketio_manage
 from socketio.server import SocketIOServer
 from socketio.namespace import BaseNamespace
 
-class TestNamespace(BaseNamespace):
+class TowerBaseNamespace(BaseNamespace):
+
+    def get_allowed_methods(self):
+        return []
+    
+    def get_initial_acl(self):
+        print self
+        if self.valid_user() is not None:
+            return set(['recv_connect'] + self.get_allowed_methods())
+        return set()
+
+    def valid_user(self):
+        if 'HTTP_COOKIE' not in self.environ:
+            return False
+        else:
+            try:
+                all_keys = [e.strip() for e in self.environ['HTTP_COOKIE'].split(";")]
+                for each_key in all_keys:
+                    k, v = each_key.split("=")
+                    if k == "token":
+                        token_actual = urllib.unquote_plus(v).decode().replace("\"","")
+                        auth_token = AuthToken.objects.filter(key=token_actual)
+                        if not auth_token.exists():
+                            return False
+                        auth_token = auth_token[0]
+                        if not auth_token.expired:
+                            return auth_token.user
+                        else:
+                            return False
+            except Exception, e:
+                return False
+
+class TestNamespace(TowerBaseNamespace):
 
     def recv_connect(self):
         print("Received client connect for test namespace from %s" % str(self.environ['REMOTE_ADDR']))
         self.emit('test', "If you see this then you are connected to the test socket endpoint")
 
-class JobNamespace(BaseNamespace):
+class JobNamespace(TowerBaseNamespace):
+
+    def get_allowed_methods(self):
+        return ['summary_complete', 'status_changed']
 
     def recv_connect(self):
         print("Received client connect for job namespace from %s" % str(self.environ['REMOTE_ADDR']))
 
-class JobEventNamespace(BaseNamespace):
+class JobEventNamespace(TowerBaseNamespace):
 
+    def get_initial_acl(self):
+        valid_user = self.valid_user()
+        if valid_user is None or valid_user is False:
+            return set()
+        else:
+            user_jobs = get_user_queryset(valid_user, Job).filter(finished__isnull=True)
+            visible_jobs = set(['recv_connect'] + ["job_events-%s" % str(j.id) for j in user_jobs])
+            print("Visible jobs: " + str(visible_jobs))
+            return visible_jobs
+    
     def recv_connect(self):
         print("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
 
-class ScheduleNamespace(BaseNamespace):
+class ScheduleNamespace(TowerBaseNamespace):
+
+    def get_allowed_methods(self):
+        return ["schedule_changed"]
 
     def recv_connect(self):
         print("Received client connect for schedule namespace from %s" % str(self.environ['REMOTE_ADDR']))

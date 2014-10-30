@@ -27,7 +27,9 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 host = $location.host(),
                 endpoint = params.endpoint,
                 protocol = $location.protocol(),
-                config, socketPort, url;
+                config, socketPort,
+                // handshakeData,
+                url;
 
             // Since some pages are opened in a new tab, we might get here before AnsibleConfig is available.
             // In that case, load from local storage.
@@ -61,14 +63,23 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 scope: scope,
                 url:  url,
                 socket: null,
+
                 init: function() {
                     var self = this,
                         token = Authorization.getToken();
                     if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
-                        // We have a valid session token, so attmempt socket connection
+                        // We have a valid session token, so attempt socket connection
                         $log.debug('Socket connecting to: ' + url);
                         self.scope.socket_url = url;
-                        self.socket = io.connect(url, { headers:
+                        // handshakeData = {
+                        //    headers:  {
+                        //         'Authorization': 'Token ' + token,
+                        //         'X-Auth-Token': 'Token ' + token
+                        //     }
+                        //  }
+
+                        self.socket = io.connect(url, {
+                            headers:
                             {
                                 'Authorization': 'Token ' + token,
                                 'X-Auth-Token': 'Token ' + token
@@ -77,7 +88,9 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             'try multiple transports': false,
                             'max reconneciton attemps': 3,
                             'reconnection limit': 3000,
+                            'force new connection': true,
                         });
+
                         self.socket.on('connection', function() {
                             $log.debug('Socket connecting...');
                             self.scope.$apply(function () {

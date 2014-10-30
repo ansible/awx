@@ -760,7 +760,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function(e, data) {
                 //var base = $location.path().replace(/^\//, '').split('/')[0];
-                if(scope.portalMode===false){
+                if(scope.portalMode===false || scope.$parent.portalMode===false){
                     $location.path('/jobs/' + data.job);
                 }
 

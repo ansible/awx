@@ -109,6 +109,8 @@ class ApiV1RootView(APIView):
         data['hosts'] = reverse('api:host_list')
         data['job_templates'] = reverse('api:job_template_list')
         data['jobs'] = reverse('api:job_list')
+        data['system_job_templates'] = reverse('api:system_job_template_list')
+        data['system_jobs'] = reverse('api:system_job_list')
         data['schedules'] = reverse('api:schedule_list')
         data['unified_job_templates'] = reverse('api:unified_job_template_list')
         data['unified_jobs'] = reverse('api:unified_job_list')
@@ -1720,6 +1722,11 @@ class SystemJobTemplateList(ListAPIView):
     model = SystemJobTemplate
     serializer_class = SystemJobTemplateSerializer
 
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return super(SystemJobTemplateList, self).get(request, *args, **kwargs)
+
 class SystemJobTemplateDetail(RetrieveAPIView):
 
     model = SystemJobTemplate
@@ -1738,7 +1745,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
             raise PermissionDenied()
         new_job = obj.create_unified_job()
         result = new_job.signal_start()
-        data = dict(job=new_job.id)
+        data = dict(system_job=new_job.id)
         return Response(data, status=status.HTTP_202_ACCEPTED)
 
 class SystemJobTemplateSchedulesList(SubListCreateAPIView):
@@ -2173,6 +2180,12 @@ class SystemJobList(ListCreateAPIView):
 
     model = SystemJob
     serializer_class = SystemJobListSerializer
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return super(SystemJobList, self).get(request, *args, **kwargs)
+
 
 class SystemJobDetail(RetrieveAPIView):
 

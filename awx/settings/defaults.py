@@ -399,11 +399,11 @@ VMWARE_REGIONS_BLACKLIST = []
 
 # Inventory variable name/values for determining whether a host is
 # active in vSphere.
-VMWARE_ENABLED_VAR = 'status' 
-VMWARE_ENABLED_VALUE = 'POWERED ON'
+VMWARE_ENABLED_VAR = 'vmware_powerState' 
+VMWARE_ENABLED_VALUE = 'poweredOn'
 
 # Inventory variable name containing the unique instance ID.
-VMWARE_INSTANCE_ID_VAR = 'guest_id'
+VMWARE_INSTANCE_ID_VAR = 'vmware_uuid'
 
 # Filter for allowed group and host names when importing inventory
 # from EC2.
