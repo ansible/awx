@@ -16,7 +16,7 @@
 
 function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobTemplateList,
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
-    GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun, Wait, Stream) {
+    GetBasePath, JobTemplateForm, CredentialList, LookUpInit, PlaybookRun, Wait, Stream, CreateDialog, $compile) {
 
     ClearScope();
 
@@ -97,6 +97,138 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
         });
     };
 
+    $scope.copyJobTemplate = function(id, name){
+        var  element,
+              buttons = [{
+                "label": "Cancel",
+                "onClick": function() {
+                    $(this).dialog('close');
+                },
+                "icon": "fa-times",
+                "class": "btn btn-default",
+                "id": "copy-close-button"
+            },{
+                "label": "Copy",
+                "onClick": function() {
+                    copyAction();
+                    // setTimeout(function(){
+                    //     scope.$apply(function(){
+                    //         if(mode==='survey-taker'){
+                    //             scope.$emit('SurveyTakerCompleted');
+                    //         } else{
+                    //             scope.saveSurvey();
+                    //         }
+                    //     });
+                    // });
+                },
+                "icon":  "fa-copy",
+                "class": "btn btn-primary",
+                "id": "job-copy-button"
+            }],
+            copyAction = function () {
+                // retrieve the copy of the job template object from the api, then overwrite the name and throw away the id
+                Wait('start');
+                var url = defaultUrl + id + '/';
+                Rest.setUrl(url);
+                Rest.get()
+                    .success(function (data) {
+                        data.name = $scope.new_copy_name;
+                        delete data.id;
+                        $scope.$emit('GoToCopy', data);
+                    })
+                    .error(function (data) {
+                        Wait('stop');
+                        ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                    });
+            };
+
+
+        CreateDialog({
+            id: 'copy-job-modal'    ,
+            title: "Copy",
+            scope: $scope,
+            buttons: buttons,
+            width: 500,
+            height: 300,
+            minWidth: 200,
+            callback: 'CopyDialogReady'
+        });
+
+        $('#job_name').text(name);
+        $('#copy-job-modal').show();
+
+
+        if ($scope.removeCopyDialogReady) {
+            $scope.removeCopyDialogReady();
+        }
+        $scope.removeCopyDialogReady = $scope.$on('CopyDialogReady', function() {
+            $('#copy-job-modal').dialog('open');
+            $('#job-copy-button').attr('ng-disabled', "!copy_form.$valid");
+            element = angular.element(document.getElementById('job-copy-button'));
+            $compile(element)($scope);
+        });
+
+        if ($scope.removeGoToCopy) {
+            $scope.removeGoToCopy();
+        }
+        $scope.removeGoToCopy = $scope.$on('GoToCopy', function(e, data) {
+            var url = defaultUrl,
+            old_survey_url = (data.related.survey_spec) ? data.related.survey_spec : "" ;
+            Rest.setUrl(url);
+            Rest.post(data)
+                .success(function (data) {
+                    if(data.survey_enabled===true){
+                        $scope.$emit("CopySurvey", data, old_survey_url);
+                    }
+                    else {
+                        $('#copy-job-modal').dialog('close');
+                        Wait('stop');
+                        $location.path($location.path() + '/' + data.id);
+                    }
+
+                })
+                .error(function (data) {
+                    Wait('stop');
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                });
+        });
+
+        if ($scope.removeCopySurvey) {
+            $scope.removeCopySurvey();
+        }
+        $scope.removeCopySurvey = $scope.$on('CopySurvey', function(e, new_data, old_url) {
+            // var url = data.related.survey_spec;
+            Rest.setUrl(old_url);
+            Rest.get()
+                .success(function (survey_data) {
+
+                    Rest.setUrl(new_data.related.survey_spec);
+                    Rest.post(survey_data)
+                    .success(function () {
+                        $('#copy-job-modal').dialog('close');
+                        Wait('stop');
+                        $location.path($location.path() + '/' + new_data.id);
+                    })
+                    .error(function (data) {
+                        Wait('stop');
+                        ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + new_data.related.survey_spec + ' failed. DELETE returned status: ' + status });
+                    });
+
+
+                })
+                .error(function (data) {
+                    Wait('stop');
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + old_url + ' failed. DELETE returned status: ' + status });
+                });
+
+        });
+
+    };
+
     $scope.submitJob = function (id) {
         PlaybookRun({ scope: $scope, id: id });
     };
@@ -105,7 +237,7 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
 JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobTemplateList',
     'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList', 'LookUpInit',
-    'PlaybookRun', 'Wait', 'Stream'
+    'PlaybookRun', 'Wait', 'Stream', 'CreateDialog' , '$compile'
 ];
 
 function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm,
@@ -416,8 +548,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
-    GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit)
-{
+    GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit){
 
     ClearScope();
 
@@ -431,6 +562,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         relatedSets = {},
         checkSCMStatus, getPlaybooks, callback,
         choicesCount = 0;
+
 
     CallbackHelpInit({ scope: $scope });
 
@@ -706,122 +838,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         $scope.rmoveLoadJobs();
     }
     $scope.removeLoadJobs = $scope.$on('LoadJobs', function() {
-        // Retrieve detail record and prepopulate the form
-        Rest.setUrl(defaultUrl + id);
-        Rest.get()
-            .success(function (data) {
-                var fld, i;
-                LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
-                for (fld in form.fields) {
-                    if (fld !== 'variables' && data[fld] !== null && data[fld] !== undefined) {
-                        if (form.fields[fld].type === 'select') {
-                            if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
-                                for (i = 0; i < $scope[fld + '_options'].length; i++) {
-                                    if (data[fld] === $scope[fld + '_options'][i].value) {
-                                        $scope[fld] = $scope[fld + '_options'][i];
-                                    }
-                                }
-                            } else {
-                                $scope[fld] = data[fld];
-                            }
-                        } else {
-                            $scope[fld] = data[fld];
-                            if(fld ==='survey_enabled'){
-                                // $scope.$emit('EnableSurvey', fld);
-                                $('#job_templates_survey_enabled_chbox').attr('checked', $scope[fld]);
-                                if(Empty(data.summary_fields.survey)) {
-                                    $('#job_templates_delete_survey_btn').hide();
-                                    $('#job_templates_edit_survey_btn').hide();
-                                    $('#job_templates_create_survey_btn').show();
-                                }
-                                else{
-                                    $('#job_templates_delete_survey_btn').show();
-                                    $('#job_templates_edit_survey_btn').show();
-                                    $('#job_templates_create_survey_btn').hide();
-                                    $scope.survey_exists = true;
-                                }
-                            }
-                        }
-                        master[fld] = $scope[fld];
-                    }
-                    if (fld === 'variables') {
-                        // Parse extra_vars, converting to YAML.
-                        $scope.variables = ParseVariableString(data.extra_vars);
-                        master.variables = $scope.variables;
-                    }
-                    if (form.fields[fld].type === 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
-                        $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                            data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                        master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                            $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
-                    }
-                }
-
-                $scope.url = data.url;
-
-                $scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? 'true' : 'false';
-                master.ask_variables_on_launch = $scope.ask_variables_on_launch;
-
-                relatedSets = form.relatedSets(data.related);
-
-                if (data.host_config_key) {
-                    $scope.example_config_key = data.host_config_key;
-                }
-                $scope.example_template_id = id;
-                $scope.setCallbackHelp();
-
-                $scope.callback_url = $scope.callback_server_path + ((data.related.callback) ? data.related.callback :
-                    GetBasePath('job_templates') + id + '/callback/');
-                master.callback_url = $scope.callback_url;
-
-                LookUpInit({
-                    scope: $scope,
-                    form: form,
-                    current_item: data.inventory,
-                    list: InventoryList,
-                    field: 'inventory',
-                    input_type: "radio"
-                });
-
-                LookUpInit({
-                    url: GetBasePath('credentials') + '?kind=ssh',
-                    scope: $scope,
-                    form: form,
-                    current_item: data.credential,
-                    list: CredentialList,
-                    field: 'credential',
-                    hdr: 'Select Machine Credential',
-                    input_type: "radio"
-                });
-
-                LookUpInit({
-                    scope: $scope,
-                    form: form,
-                    current_item: data.project,
-                    list: ProjectList,
-                    field: 'project',
-                    input_type: "radio"
-                });
-
-                RelatedSearchInit({
-                    scope: $scope,
-                    form: form,
-                    relatedSets: relatedSets
-                });
-
-                RelatedPaginateInit({
-                    scope: $scope,
-                    relatedSets: relatedSets
-                });
-
-                $scope.$emit('jobTemplateLoaded', data.related.cloud_credential);
-            })
-            .error(function (data, status) {
-                ProcessErrors($scope, data, status, form, {
-                    hdr: 'Error!',
-                    msg: 'Failed to retrieve job template: ' + $routeParams.template_id + '. GET status: ' + status
-                });
-            });
+        $scope.fillJobTemplate();
     });
 
     if ($scope.removeChoicesReady) {
