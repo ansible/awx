@@ -126,6 +126,15 @@ angular.module('VariablesHelper', ['Utilities'])
                     // else
                     json_data = jsyaml.load(variables);
 
+                    $.each( json_data, function( key, value ) {
+                        console.log( key + ": " + value );
+                        if(value.toString() === "[object Object]"){
+                            //$log.error('Failed to parse YAML string. Parser returned ' + key + ' : ' + value + '.');
+
+                           throw 'Failed to parse YAML string. Parser returned ' + key + ' : ' + value + '.';
+                        }
+                    });
+
 
                 }
                 catch(e) {
@@ -146,7 +155,7 @@ angular.module('VariablesHelper', ['Utilities'])
             result = json_data;
             if (stringify) {
                 if ($.isEmptyObject(json_data)) {
-                    result = "";
+                    result = undefined;
                 } else {
                     result = JSON.stringify(json_data, undefined, '\t');
                 }

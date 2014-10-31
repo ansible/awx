@@ -71,17 +71,10 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                         // We have a valid session token, so attempt socket connection
                         $log.debug('Socket connecting to: ' + url);
                         self.scope.socket_url = url;
-                        // handshakeData = {
-                        //    headers:  {
-                        //         'Authorization': 'Token ' + token,
-                        //         'X-Auth-Token': 'Token ' + token
-                        //     }
-                        //  }
-
                         self.socket = io.connect(url, {
                             headers:
                             {
-                                'Authorization': 'Token ' + token,
+                                'Authorization': 'Token ' + token,      // i don't think these are actually inserted into the header--jt
                                 'X-Auth-Token': 'Token ' + token
                             },
                             'connect timeout': 3000,
