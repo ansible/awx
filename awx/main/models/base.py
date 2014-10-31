@@ -39,7 +39,7 @@ __all__ = ['VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
            'CommonModelNameNotUnique',
            'PERM_INVENTORY_ADMIN', 'PERM_INVENTORY_READ',
            'PERM_INVENTORY_WRITE', 'PERM_INVENTORY_DEPLOY',
-           'PERM_INVENTORY_CHECK', 'JOB_TYPE_CHOICES',
+           'PERM_INVENTORY_CHECK', 'PERM_JOBTEMPLATE_CREATE', 'JOB_TYPE_CHOICES',
            'PERMISSION_TYPE_CHOICES', 'CLOUD_INVENTORY_SOURCES']
 
 PERM_INVENTORY_ADMIN  = 'admin'
@@ -47,6 +47,7 @@ PERM_INVENTORY_READ   = 'read'
 PERM_INVENTORY_WRITE  = 'write'
 PERM_INVENTORY_DEPLOY = 'run'
 PERM_INVENTORY_CHECK  = 'check'
+PERM_JOBTEMPLATE_CREATE = 'create'
 
 JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_DEPLOY, _('Run')),
@@ -59,6 +60,7 @@ PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_ADMIN, _('Administrate Inventory')),
     (PERM_INVENTORY_DEPLOY, _('Deploy To Inventory')),
     (PERM_INVENTORY_CHECK, _('Deploy To Inventory (Dry Run)')),
+    (PERM_JOBTEMPLATE_CREATE, _('Create a Job Template used in Deployment')),
 ]
 
 CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'custom']

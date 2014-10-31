@@ -50,6 +50,7 @@ tools/vagrant/local.yml
 .vagrant*
 
 # Setup
+setup.log
 setup/tower_setup_conf.yml
 setup/setup.log
 setup/inventory

@@ -907,6 +907,9 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             try {
                 // Make sure we have valid variable data
                 data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
+                if(data.extra_vars === undefined ){
+                    throw 'undefined variables';
+                }
                 for (fld in form.fields) {
                     if (form.fields[fld].type === 'select' && fld !== 'playbook') {
                         data[fld] = $scope[fld].value;

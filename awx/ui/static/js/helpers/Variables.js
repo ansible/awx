@@ -103,49 +103,39 @@ angular.module('VariablesHelper', ['Utilities'])
                 }
             } else {
                 try {
-                    // if(variables.indexOf('{{')>-1){
-                    //     lines = variables.split(/\n/);
-                    //     for(i=0; i<lines.length; i++){
-                    //         if(lines[i].indexOf('{{')>-1){
-                    //             lines[i] = lines[i].replace('{{', '"{{');
-                    //             // lines[i] = lines[i].replace(lines[i].lastIndexOf('}}'), '}}"');
-                    //             lines[i] = lines[i]+'"';
-                    //             // newVars = newVars+ lines[i];
-                    //             newVars.push(lines[i])
 
-                    //         }
-                    //     }
-                    //     json_data = jsyaml.load(newVars.toString());
-
-                    //     bracketVar = variables.substr(variables.indexOf('{{'), variables.indexOf('}}'));
-                    //     bracketVar = bracketVar.trimRight();
-                    //     key = variables.substr(0, variables.indexOf(':'));
-                    //     json_data = jsyaml.load(variables);
-                    //     json_data[key] = bracketVar;
-                    // }
-                    // else
                     json_data = jsyaml.load(variables);
-
-
+                    if(json_data!==null){
+                        $.each( json_data, function( key, value ) {
+                            // console.log( key + ": " + value );
+                            if(value.toString() === "[object Object]"){
+                                json_data = undefined;
+                                throw 'Failed to parse YAML string. Parser returned ' + key + ' : ' + value + '.';
+                            }
+                        });
+                    }
                 }
                 catch(e) {
-                    json_data = {};
-                    $log.error('Failed to parse YAML string. Parser returned: ' + e.message);
+                    json_data = undefined; // {};
+                    // $log.error('Failed to parse YAML string. Parser returned undefined');
                     ProcessErrors(null, variables, e.message, null, { hdr: 'Error!',
-                        msg: 'Failed to parse YAML string. Parser returned: ' + e.message });
+                        msg: 'Failed to parse YAML string. Parser returned undefined'});
                 }
             }
             // Make sure our JSON is actually an object
             if (typeof json_data !== 'object') {
                 ProcessErrors(null, variables, null, null, { hdr: 'Error!',
                     msg: 'Failed to parse variables. Attempted to parse ' + parseType + ' Parser did not return an object.' });
-                setTimeout( function() {
-                    throw { name: 'Parse error', message: 'Failed to parse variables. Attempted to parse ' + parseType + ' Parser did not return an object.' };
-                }, 1000);
+                // setTimeout( function() {
+                throw  'Parse error. Failed to parse variables.';
+                // }, 1000);
             }
             result = json_data;
             if (stringify) {
-                if ($.isEmptyObject(json_data)) {
+                if(json_data === undefined){
+                    result = undefined;
+                }
+                else if ($.isEmptyObject(json_data)) {
                     result = "";
                 } else {
                     result = JSON.stringify(json_data, undefined, '\t');
