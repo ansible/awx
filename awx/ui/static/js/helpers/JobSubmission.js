@@ -171,7 +171,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             "class": "btn btn-default",
             "id": "password-cancel-button"
         },{
-            label: "Continue",
+            label: "Launch",
             onClick: function() {
                 scope.$emit(callback);
             },
