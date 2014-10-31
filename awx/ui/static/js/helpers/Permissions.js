@@ -34,6 +34,8 @@ angular.module('PermissionsHelper', [])
             } else {
                 scope.projectrequired = true;
                 html = "<dl>\n" +
+		    "<dt>Create</dt>\n" +
+		    "<dd>Allow the user or team to create deployments. This implies that they can run and check deployments</dd>\n" +
                     "<dt>Run</dt>\n" +
                     "<dd>Allow the user or team to perform a live deployment of the project against the inventory. In Run mode modules will " +
                     "be executed, and changes to the inventory will occur.</dd>\n" +
