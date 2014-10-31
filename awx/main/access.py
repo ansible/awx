@@ -826,7 +826,7 @@ class JobTemplateAccess(BaseAccess):
         org_admin_qs = base_qs.filter(
             project__organizations__admins__in=[self.user]
         )
-        allowed = [PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY]
+        allowed = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY]
         perm_qs = base_qs.filter(
             Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
             Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
@@ -884,7 +884,9 @@ class JobTemplateAccess(BaseAccess):
 
         # Check that the given inventory ID is valid.
         inventory_pk = get_pk_from_dict(data, 'inventory')
-        inventory = get_object_or_400(Inventory, pk=inventory_pk)
+        inventory = Inventory.objects.filter(id=inventory_pk)
+        if not inventory.exists():
+            return False # Does this make sense?  Maybe should check read access
         
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
@@ -893,33 +895,37 @@ class JobTemplateAccess(BaseAccess):
         if self.user.can_access(Project, 'admin', project, None):
             return True
 
-        # Otherwise, check for explicitly granted permissions for the project
-        # and inventory.
-        has_perm = False
+        # Otherwise, check for explicitly granted permissions to create job templates
+        # for the project and inventory.
         permission_qs = Permission.objects.filter(
             Q(user=self.user) | Q(team__users__in=[self.user]),
             inventory=inventory,
             project=project,
-            permission_type__in=[PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY],
+            #permission_type__in=[PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY],
+            permission_type=PERM_JOBTEMPLATE_CREATE,
         )
-        job_type = data.get('job_type', None)
-        for perm in permission_qs:
-            # if you have run permissions, you can also create check jobs
-            if job_type == PERM_INVENTORY_CHECK:
-                has_perm = True
-            # you need explicit run permissions to make run jobs
-            elif job_type == PERM_INVENTORY_DEPLOY and perm.permission_type == PERM_INVENTORY_DEPLOY:
-                has_perm = True
-        if not has_perm:
-            return False
+        if permission_qs.exists():
+            return True
+        return False
+            
+        # job_type = data.get('job_type', None)
+        
+        # for perm in permission_qs:
+        #     # if you have run permissions, you can also create check jobs
+        #     if job_type == PERM_INVENTORY_CHECK:
+        #         has_perm = True
+        #     # you need explicit run permissions to make run jobs
+        #     elif job_type == PERM_INVENTORY_DEPLOY and perm.permission_type == PERM_INVENTORY_DEPLOY:
+        #         has_perm = True
+        # if not has_perm:
+        #     return False
+        # return True
 
         # shouldn't really matter with permissions given, but make sure the user
         # is also currently on the team in case they were added a per-user permission and then removed
         # from the project.
         #if not project.teams.filter(users__in=[self.user]).count():
         #    return False
-
-        return True
 
     def can_start(self, obj):
         reader = TaskSerializer()
@@ -937,9 +943,36 @@ class JobTemplateAccess(BaseAccess):
         if validation_info.get('free_instances', 0) < 0:
             raise PermissionDenied("Host Count exceeds available instances")
 
+        # Super users can start any job
+        if self.user.is_superuser:
+            return True
+        # Check to make sure both the inventory and project exist
+        if obj.inventory is None or obj.project is None:
+            return False
+        # If the user has admin access to the project they can start a job
+        if self.user.can_access(Project, 'admin', obj.project):
+            return True
+
+        # Otherwise check for explicitly granted permissions
+        permission_qs = Permission.objects.filter(
+            Q(user=self.user) | Q(team__users__in=[self.user]),
+            inventory=inventory,
+            project=project,
+            permission_type__in=[PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY],
+        )
+        has_perm = False
+        for perm in permission_qs:
+            # If you have job template create permission that implies both CHECK and DEPLOY
+            # If you have DEPLOY permissions you can run both CHECK and DEPLOY
+            if perm.permission_type in [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]:
+                has_perm = True
+            # If you only have CHECK permission then you can only run CHECK
+            if perm.permission_type == PERM_INVENTORY_CHECK and perm.permission_type == PERM_INVENTORY_CHECK:
+                has_perm = True
+                
         dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and \
                      self.user.can_access(Project, 'read', obj.project)
-        return self.can_read(obj) and dep_access
+        return self.can_read(obj) and dep_access and has_perm
 
     def can_change(self, obj, data):
         return self.can_read(obj) and self.can_add(data)
@@ -1003,8 +1036,6 @@ class JobAccess(BaseAccess):
         job_template_pk = get_pk_from_dict(data, 'job_template')
         if job_template_pk:
             job_template = get_object_or_400(JobTemplate, pk=job_template_pk)
-            if not self.user.can_access(JobTemplate, 'read', job_template):
-                return False
             add_data.setdefault('inventory', job_template.inventory.pk)
             add_data.setdefault('project', job_template.project.pk)
             add_data.setdefault('job_type', job_template.job_type)
@@ -1012,11 +1043,6 @@ class JobAccess(BaseAccess):
                 add_data.setdefault('credential', job_template.credential.pk)
         else:
             job_template = None
-
-        # Check that the user would be able to add a job template with the
-        # same data.
-        if not self.user.can_access(JobTemplate, 'add', add_data):
-            return False
 
         return True
 
@@ -1042,9 +1068,16 @@ class JobAccess(BaseAccess):
         if validation_info.get('free_instances', 0) < 0:
             raise PermissionDenied("Host Count exceeds available instances")
 
-        dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and \
-                     self.user.can_access(Project, 'read', obj.project)
-        return self.can_read(obj) and dep_access
+        # A super user can relaunch a job
+        if self.user.is_superuser:
+            return True
+        # If a user can launch the job template then they can relaunch a job from that
+        # job template
+        has_perm = False
+        if obj.job_template is not None and self.user.can_access(JobTemplate, 'start', obj.job_template):
+            has_perm = True
+
+        return self.can_read(obj) and dep_access and has_perm
 
     def can_cancel(self, obj):
         return self.can_read(obj) and obj.can_cancel

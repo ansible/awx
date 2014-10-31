@@ -1257,8 +1257,13 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         d = super(JobTemplateSerializer, self).get_summary_fields(obj)
         if obj.survey_enabled and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
+        request = self.context.get('request', None)
+        if request is not None and request.user is not None:
+            d['can_copy'] = request.user.can_access(JobTemplate, 'add', {'inventory': obj.inventory,
+                                                                     'project': obj.project})
+        else:
+            d['can_copy'] = False
         return d
-
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 

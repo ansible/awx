@@ -107,6 +107,10 @@ angular.module('PermissionFormDefinition', [])
                     value: 'admin',
                     ngShow: "category == 'Inventory'"
                 }, {
+		    label: 'Create',
+		    value: 'create',
+		    ngShow: "category == 'Deploy'"
+		}, {
                     label: 'Run',
                     value: 'run',
                     ngShow: "category == 'Deploy'"

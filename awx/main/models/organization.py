@@ -119,6 +119,7 @@ class Permission(CommonModelNameNotUnique):
     #
     # for example, user A on inventory X has write permissions                 (PERM_INVENTORY_WRITE)
     #              team C on inventory X has read permissions                  (PERM_INVENTORY_READ)
+    #              user A can create job templates                             (PERM_JOBTEMPLATE_CREATE)
     #              team C on inventory X and project Y has launch permissions  (PERM_INVENTORY_DEPLOY)
     #              team C on inventory X and project Z has dry run permissions (PERM_INVENTORY_CHECK)
     #

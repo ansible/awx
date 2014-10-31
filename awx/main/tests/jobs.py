@@ -266,6 +266,16 @@ class BaseJobTestMixin(BaseTestMixin):
         self.user_doug = self.make_user('doug')
         self.org_eng.users.add(self.user_doug)
 
+        # Juan is another engineer working under Chuck.  He has a little more freedom
+        # to run playbooks but can't create job templates
+        self.user_juan = self.make_user('juan')
+        self.org_eng.users.add(self.user_juan)
+
+        # Hannibal is Chuck's right-hand man.  Chuck usually has him create the job
+        # templates that the rest of the team will use
+        self.user_hannibal = self.make_user('hannibal')
+        self.org_eng.users.add(self.user_hannibal)
+
         # Eve is the head of support.  She can also see what goes on in
         # operations to help them troubleshoot problems.
         self.user_eve = self.make_user('eve')
@@ -287,8 +297,17 @@ class BaseJobTestMixin(BaseTestMixin):
         # Iris is another operations engineer.
         self.user_iris = self.make_user('iris')
         self.org_ops.users.add(self.user_iris)
+
+        # Randall and Billybob are new ops interns that ops uses to test
+        # their playbooks and inventory
+        self.user_randall = self.make_user('randall')
+        self.org_ops.users.add(self.user_randall)
+
+        # He works with Randall
+        self.user_billybob = self.make_user('billybob')
+        self.org_ops.users.add(self.user_billybob)
         
-        # Jim is the intern. He can login, but can't do anything quite yet
+        # Jim is the newest intern. He can login, but can't do anything quite yet
         # except make everyone else fresh coffee.
         self.user_jim = self.make_user('jim')
 
@@ -406,6 +425,16 @@ class BaseJobTestMixin(BaseTestMixin):
         self.team_ops_north.projects.add(self.proj_prod)
         self.team_ops_north.users.add(self.user_greg)
 
+        # The testers team are interns that can only check playbooks but can't
+        # run them
+        self.team_ops_testers = self.org_ops.teams.create(
+            name='testers',
+            created_by=self.user_sue,
+        )
+        self.team_ops_testers.projects.add(self.proj_prod)
+        self.team_ops_testers.users.add(self.user_randall)
+        self.team_ops_testers.users.add(self.user_billybob)
+
         # Each user has his/her own set of credentials.
         from awx.main.tests.tasks import (TEST_SSH_KEY_DATA,
                                           TEST_SSH_KEY_DATA_LOCKED,
@@ -477,6 +506,44 @@ class BaseJobTestMixin(BaseTestMixin):
             username='north',
             password='Heading0',
             created_by = self.user_sue,
+        )
+
+        self.cred_ops_test = self.team_ops_testers.credentials.create(
+            username='testers',
+            password='HeadingNone',
+            created_by = self.user_sue,
+        )
+
+        self.ops_testers_permission = Permission.objects.create(
+            inventory       = self.inv_ops_west,
+            project         = self.proj_prod,
+            team            = self.team_ops_testers,
+            permission_type = PERM_INVENTORY_CHECK,
+            created_by      = self.user_sue
+        )
+
+        self.doug_check_permission = Permission.objects.create(
+            inventory       = self.inv_eng,
+            project         = self.proj_dev,
+            user            = self.user_doug,
+            permission_type = PERM_INVENTORY_CHECK,
+            created_by      = self.user_sue
+        )
+
+        self.juan_deploy_permission = Permission.objects.create(
+            inventory       = self.inv_eng,
+            project         = self.proj_dev,
+            user            = self.user_juan,
+            permission_type = PERM_INVENTORY_DEPLOY,
+            created_by      = self.user_sue
+        )
+
+        self.hannibal_create_permission = Permission.objects.create(
+            inventory       = self.inv_eng,
+            project         = self.proj_dev,
+            user            = self.user_hannibal,
+            permission_type = PERM_JOBTEMPLATE_CREATE,
+            created_by      = self.user_sue
         )
 
         # FIXME: Define explicit permissions for tests.
@@ -747,6 +814,44 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             self.assertTrue('Job template with this Name already exists.' in response['name'])
             self.assertTrue('__all__' not in response)
 
+        data = dict(
+            name      = 'ops job template',
+            job_type  = PERM_INVENTORY_DEPLOY,
+            inventory = self.inv_ops_west.pk,
+            project   = self.proj_prod.pk,
+            playbook  = self.proj_prod.playbooks[0],
+        )
+
+        # randall can't create a job template since his job is to check templates
+        # as per the ops testers team permission
+        with self.current_user(self.user_randall):
+            response = self.post(url, data, expect=403)
+
+        # greg can because he is the head of operations
+        with self.current_user(self.user_greg):
+            response = self.post(url, data, expect=201)
+
+        data = dict(
+            name      = 'eng job template',
+            job_type  = PERM_INVENTORY_DEPLOY,
+            inventory = self.inv_eng.pk,
+            project   = self.proj_dev.pk,
+            playbook  = self.proj_dev.playbooks[0],
+        )
+
+        # Neither Juan or Doug can create job templates as they have Permissions
+        # that only allow them to DEPLOY and CHECK respectively
+        with self.current_user(self.user_juan):
+            response = self.post(url, data, expect=403)
+
+        with self.current_user(self.user_doug):
+            response = self.post(url, data, expect=403)
+
+        # Hannibal, despite his questionable social habits has a user Permission
+        # that allows him to create playbooks
+        with self.current_user(self.user_hannibal):
+            response = self.post(url, data, expect=201)
+
         # FIXME: Check other credentials and optional fields.
 
     def test_get_job_template_detail(self):
@@ -954,6 +1059,10 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         # sue can create a new job without a template.
         with self.current_user(self.user_sue):
             response = self.post(url, data, expect=201)
+
+        # alex can't create a job without a template, only super users can do that
+        with self.current_user(self.user_alex):
+            response = self.post(url, data, expect=403)
 
         # sue can also create a job here from a template.
         jt = self.jt_ops_east_run
