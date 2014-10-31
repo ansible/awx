@@ -131,7 +131,7 @@ angular.module('VariablesHelper', ['Utilities'])
                         if(value.toString() === "[object Object]"){
                             //$log.error('Failed to parse YAML string. Parser returned ' + key + ' : ' + value + '.');
 
-                           throw 'Failed to parse YAML string. Parser returned ' + key + ' : ' + value + '.';
+                            throw 'Failed to parse YAML string. Parser returned ' + key + ' : ' + value + '.';
                         }
                     });
 
