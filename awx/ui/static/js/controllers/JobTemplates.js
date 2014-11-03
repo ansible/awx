@@ -61,6 +61,8 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
 
     LoadBreadCrumbs();
 
+
+
     $scope.showActivity = function () {
         Stream({ scope: $scope });
     };

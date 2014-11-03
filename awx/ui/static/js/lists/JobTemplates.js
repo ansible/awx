@@ -85,6 +85,7 @@ angular.module('JobTemplatesListDefinition', [])
                 "class": 'btn-danger btn-xs',
                 awToolTip: 'Copy template',
                 dataPlacement: 'top',
+                ngHide: 'job_template.summary_fields.can_copy===false'
 
             }
         }
