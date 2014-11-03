@@ -70,6 +70,7 @@ Django-1.5.5.tar.gz
   #Markdown-2.4.tar.gz
   #pexpect-3.1.tar.gz
   #pyrax-1.7.2.tar.gz
+  #redis-2.10.3.tar.gz
   #South-0.8.4.tar.gz
 
 # You may also need to install the following extra packages using the OS
