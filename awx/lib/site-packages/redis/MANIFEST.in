@@ -1,7 +1,0 @@
-include CHANGES
-include INSTALL
-include LICENSE
-include README.rst
-exclude __pycache__
-recursive-include tests *
-recursive-exclude tests *.pyc
