@@ -22,7 +22,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 callback = params.callback || 'JobLaunched',
                 job_launch_data = {},
                 url = params.url,
-                fld;
+                fld,
+                extra_vars;
 
 
             if(!Empty(scope.passwords_needed_to_start) && scope.passwords_needed_to_start .length>0){
@@ -31,7 +32,10 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                     });
             }
             if(scope.prompt_for_vars===true){
-                job_launch_data.extra_vars = ToJSON(scope.parseType, scope.variables, true);
+                extra_vars = ToJSON(scope.parseType, scope.variables, false);
+                $.each(extra_vars, function(key,value){
+                    job_launch_data[key] = value;
+                });
             }
             if(scope.survey_enabled===true){
                 for (fld in scope.job_launch_form){
