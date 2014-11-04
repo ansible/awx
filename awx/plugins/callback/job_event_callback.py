@@ -38,6 +38,7 @@ import sys
 import urllib
 import urlparse
 import time
+from contextlib import closing
 
 # Requests
 import requests
@@ -125,8 +126,8 @@ class CallbackModule(object):
                     self.connection_pid = active_pid
 
                 # Publish the callback through Redis.
-                pubsub = PubSub('callbacks')
-                pubsub.publish(msg)
+                with closing(PubSub('callbacks')) as callbacks:
+                    callbacks.publish(msg)
                 return
             except Exception, e:
                 self.logger.info('Publish Exception: %r, retry=%d', e,

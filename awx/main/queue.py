@@ -74,7 +74,7 @@ class PubSub(object):
         Ideally this should be used with `contextmanager.closing` to ensure
         well-behavedness:
 
-            from contextmanager import closing
+            from contextlib import closing
 
             with closing(PubSub('foobar')) as foobar:
                 for message in foobar.subscribe(wait=0.1):
