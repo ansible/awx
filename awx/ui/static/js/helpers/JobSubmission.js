@@ -241,7 +241,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 html += "<label for=\"" + fld + "\">" + field.label + "</label>\n";
                 html += "<input type=\"password\" ";
                 html += "ng-model=\"" + fld + '" ';
-                html += "ng-keydown=\"keydown($event)\" ";
+                // html += "ng-keydown=\"keydown($event)\" ";
                 html += 'name="' + fld + '" ';
                 html += "class=\"password-field form-control input-sm\" ";
                 html += (field.associated) ? "ng-change=\"clearPWConfirm('" + field.associated + "')\" " : "";
@@ -262,7 +262,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     html += "<label for=\"" + fld + "\"> " + field.label + "</label>\n";
                     html += "<input type=\"password\" ";
                     html += "ng-model=\"" + fld + '" ';
-                    html += "ng-keydown=\"keydown($event)\" ";
+                    // html += "ng-keydown=\"keydown($event)\" ";
                     html += 'name="' + fld + '" ';
                     html += "class=\"form-control input-sm\" ";
                     html += "ng-change=\"checkStatus()\" ";
@@ -323,11 +323,11 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             //     $('#password-modal').dialog('open');
             //     $('#password-accept-button').attr({ "disabled": "disabled" });
             // });
-            scope.keydown = function(e){
-                if(e.keyCode===13){
-                    scope.passwordAccept();
-                }
-            };
+            // scope.keydown = function(e){
+            //     if(e.keyCode===13){
+            //         scope.passwordAccept();
+            //     }
+            // };
 
             // scope.passwordAccept = function() {
             //     if (!scope.password_form.$invalid) {
@@ -764,7 +764,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function(e, data) {
                 //var base = $location.path().replace(/^\//, '').split('/')[0];
-                if(scope.portalMode===false || scope.$parent.portalMode===false){
+                if(scope.portalMode===false ){
                     $location.path('/jobs/' + data.job);
                 }
 
