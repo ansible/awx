@@ -103,7 +103,7 @@ class PubSub(object):
             if message is None:
                 time.sleep(max(wait, 0.001))
             else:
-                yield json.loads(message)
+                yield json.loads(message['data'])
 
     def close(self):
         """Close the pubsub connection."""
