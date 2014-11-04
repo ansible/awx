@@ -52,13 +52,19 @@ class FifoQueue(object):
         """
         self._queue_name = queue_name
 
+    def __len__(self):
+        """Return the length of the Redis list."""
+        return redis.llen(self._queue_name)
+        
     def push(self, value):
         """Push a value onto the right side of the queue."""
         redis.rpush(self._queue_name, json.dumps(value))
 
     def pop(self):
         """Retrieve a value from the left side of the queue."""
-        return json.loads(redis.lpop(self._queue_name))
+        answer = redis.lpop(self._queue_name)
+        if answer:
+            return json.loads(answer)
 
 
 class PubSub(object):
