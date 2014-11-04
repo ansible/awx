@@ -90,11 +90,12 @@ class CallbackReceiver(object):
             time.sleep(0.1)
 
     def callback_handler(self, use_workers, worker_queues):
+        pubsub = PubSub('callbacks')
         message_number = 0
         total_messages = 0
         last_parent_events = {}
 
-        for message in pubsub.subscribe('callbacks'):
+        for message in pubsub.subscribe():
             total_messages += 1
             if not use_workers:
                 self.process_job_event(message)
