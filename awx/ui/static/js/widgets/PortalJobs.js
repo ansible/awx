@@ -76,39 +76,11 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
                 scope: jobs_scope,
                 list: PortalJobsList,
                 id: 'active-jobs',
-                url: GetBasePath('unified_jobs') + '?status__in=running,completed,failed,successful,error,canceled',
+                url: GetBasePath('jobs'), //+ '?type__in=job' , //&status__in=running,completed,failed,successful,error,canceled',
                 pageSize: max_rows,
                 spinner: true
             });
 
-            // completed_scope.showJobType = true;
-            // LoadJobsScope({
-            //     parent_scope: scope,
-            //     scope: completed_scope,
-            //     list: PortalJobsList,
-            //     id: 'active-jobs',
-            //     url: GetBasePath('unified_jobs') + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled',
-            //     // searchParams: search_params,
-            //     pageSize: max_rows
-            // });
-
-            // LoadJobsScope({
-            //     parent_scope: scope,
-            //     scope: running_scope,
-            //     list: PortalJobsList,
-            //     id: 'active-jobs',
-            //     url: GetBasePath('unified_jobs') + '?status=running',
-            //     pageSize: max_rows
-            // });
-
-            // LoadJobsScope({
-            //     parent_scope: scope,
-            //     scope: queued_scope,
-            //     list: PortalJobsList,
-            //     id: 'active-jobs',
-            //     url: GetBasePath('unified_jobs') + '?or__status=pending&or__status=waiting&or__status=new',
-            //     pageSize: max_rows
-            // });
 
             $(window).resize(_.debounce(function() {
                 resizePortalJobsWidget();

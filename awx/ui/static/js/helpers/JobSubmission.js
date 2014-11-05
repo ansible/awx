@@ -53,7 +53,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                         $('#password-modal').dialog('close');
                     }
                     scope.$emit(callback, data);
-                    scope.$destroy();
+                    // scope.$destroy();
                 })
                 .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -764,7 +764,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             }
             scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function(e, data) {
                 //var base = $location.path().replace(/^\//, '').split('/')[0];
-                if(scope.portalMode===false ){
+                if(scope.portalMode===false || scope.$parent.portalMode===false ){
                     $location.path('/jobs/' + data.job);
                 }
 

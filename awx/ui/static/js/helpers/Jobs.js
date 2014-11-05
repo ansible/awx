@@ -405,6 +405,9 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             JobsControllerInit({ scope: scope, parent_scope: parent_scope });
             JobsListUpdate({ scope: scope, parent_scope: parent_scope, list: list });
             parent_scope.$emit('listLoaded');
+            // setTimeout(function(){
+            //     scope.$apply();
+            // }, 300);
         });
 
         if (base === 'jobs' && list.name === 'completed_jobs') {
