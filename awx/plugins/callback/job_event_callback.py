@@ -170,10 +170,14 @@ class CallbackModule(object):
             event_data['task'] = task_name
         if role_name and event not in self.EVENTS_WITHOUT_TASK:
             event_data['role'] = role_name
-        if self.callback_consumer_port:
-            self._post_job_event_queue_msg(event, event_data)
-        else:
-            self._post_rest_api_event(event, event_data)
+
+        # FIXME:
+        # This seems to check if anything is listening for the callback.
+        # We probably need to duplicate this in the new Redis system.
+        # if self.callback_consumer_port:
+        self._post_job_event_queue_msg(event, event_data)
+        # else:
+        #    self._post_rest_api_event(event, event_data)
 
     def on_any(self, *args, **kwargs):
         pass

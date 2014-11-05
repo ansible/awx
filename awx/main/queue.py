@@ -17,7 +17,8 @@ redis_kwargs = {}
 broker_url = settings.BROKER_URL
 if not broker_url.lower().startswith('redis://'):
     raise RuntimeError('Error importing awx.main.queue: Cannot use queue with '
-                       'a non-Redis broker configured for celery.')
+                       'a non-Redis broker configured for celery.\n'
+                       'Broker is set to: %s' % broker_url)
 broker_url = broker_url[8:]
 
 # There may or may not be a password; address both situations by checking

@@ -18,9 +18,6 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # PyCrypto
 from Crypto.Cipher import AES
 
-# Tower
-from awx.main.queue import PubSub
-
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version', 'update_scm_url',
@@ -364,6 +361,7 @@ def get_system_task_capacity():
 
 
 def emit_websocket_notification(endpoint, event, payload):
+    from awx.main.queue import PubSub
     pubsub = PubSub('websocket')
     payload['event'] = event
     payload['endpoint'] = endpoint
