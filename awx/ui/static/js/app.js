@@ -649,6 +649,10 @@ angular.module('Tower', [
                 $AnsibleConfig = Store('AnsibleConfig');
             }
 
+            //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override
+            // this, set the last path to /portal for instances where portal is visited for the first time.
+            $rootScope.lastPath = ($location.path() === "/portal") ? 'portal' : undefined;
+
             LoadConfig();
         }
     ]);
