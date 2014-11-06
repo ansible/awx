@@ -1052,7 +1052,7 @@ class RunInventoryUpdate(BaseTask):
             pass
         elif inventory_update.source == 'custom':
             for env_k in inventory_update.source_vars_dict:
-                if str(env_k) not in os.environ:
+                if str(env_k) not in os.environ and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
                     env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
         return env
 
