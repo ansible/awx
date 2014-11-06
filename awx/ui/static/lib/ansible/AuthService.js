@@ -84,7 +84,6 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 $rootScope.sessionExpired = false;
                 $rootScope.token = null;
                 $rootScope.token_expires = null;
-
                 $rootScope.login_username = null;
                 $rootScope.login_password = null;
             },

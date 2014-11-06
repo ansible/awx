@@ -119,41 +119,11 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
             $('.list-well:eq(1)').css('margin-top' , '0px');
         });
 
-        function processEvent(event) {
-            switch(event.status) {
-                case 'running':
-                    jobs_scope.search('portal_job');
-                    // queued_scope.search('queued_job');
-                    break;
-                case 'new':
-                case 'pending':
-                    jobs_scope.search('portal_job');
-                    break;
-                case 'waiting':
-                    jobs_scope.search('portal_job');
-                    // completed_scope.search('completed_job');
-                    break;
-                case 'successful':
-                    // // console.log('successful');
-                    // running_scope.search('running_job');
-                    // completed_scope.search('completed_job');
-                    // break;
-                case 'failed':
-                case 'error':
-                case 'canceled':
-                    jobs_scope.search('portal_job');
-                        // running_scope.search('running_job');
-                        // queued_scope.search('queued_job');
-            }
-        }
-
         if ($rootScope.removeJobStatusChange) {
             $rootScope.removeJobStatusChange();
         }
-        $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function(e, event) {
-            // jobs_scope.search('portal_job');
-            processEvent(event);
-
+        $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function() {
+            jobs_scope.search('portal_job'); //processEvent(event);
         });
 
         $scope.submitJob = function (id) {

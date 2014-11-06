@@ -19,23 +19,11 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             choicesCount = 0,
             listCount = 0,
             jobs_scope = scope.$new(true),
-            // completed_scope = scope.$new(true),
-            // running_scope = scope.$new(true),
-            // queued_scope = scope.$new(true),
-            // scheduled_scope = scope.$new(true),
             max_rows,
             html, e;
 
         html = '';
         html += "<div class=\"portal-job-template-container\">\n";
-        // html+= "<span id='portal-job-template-header'>Job Templates </span>";
-        // html += "<ul id=\"job_status_tabs\" class=\"nav nav-tabs\">\n";
-        // html += "<li class=\"active\"><a id=\"active_jobs_link\" ng-click=\"toggleTab($event, 'active_jobs_link', 'job_status_tabs')\"\n";
-        // html += " href=\"#active-jobs-tab\" data-toggle=\"tab\">Jobs</a></li>\n";
-        // html += "<li><a id=\"scheduled_jobs_link\" ng-click=\"toggleTab($event, 'scheduled_jobs_link', 'job_status_tabs')\"\n";
-        // html += "href=\"#scheduled-jobs-tab\" data-toggle=\"tab\">Schedule</a></li>\n";
-        // html += "</ul>\n";
-        // html += "<div  id=\"portal-job-template-tab-content\" class=\"tab-content \">\n";
         html += "<div class=\"tab-pane active\" id=\"active-jobs-tab\">\n";
         html += "<div class=\"row search-row\" id='portal-job-template-search'>\n";
         html += "<div class=\"col-lg-6 col-md-6\" id=\"active-jobs-search-container\"></div>\n";
@@ -44,8 +32,6 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
         html += "<div id=\"active-jobs\" class=\"job-list-target\"></div>\n";
         html += "</div>\n"; //list
         html += "</div>\n"; //active-jobs-tab
-        // html += "<div class=\"tab-pane\" id=\"scheduled-jobs-tab\"></div>\n";
-        // html += "</div>\n"; // jobs-list-container
         html += "</div>\n";
 
         e = angular.element(document.getElementById(target));

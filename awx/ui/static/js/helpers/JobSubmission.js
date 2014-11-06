@@ -53,7 +53,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                         $('#password-modal').dialog('close');
                     }
                     scope.$emit(callback, data);
-                    // scope.$destroy();
                 })
                 .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
