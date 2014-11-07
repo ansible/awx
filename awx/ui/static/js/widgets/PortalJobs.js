@@ -20,6 +20,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             listCount = 0,
             jobs_scope = scope.$new(true),
             max_rows,
+            user,
             html, e;
 
         html = '';
@@ -57,12 +58,13 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             if (PortalJobsList.fields.type) {
                 PortalJobsList.fields.type.searchOptions = scope.type_choices;
             }
+            user = scope.$parent.current_user.id;
             LoadJobsScope({
                 parent_scope: scope,
                 scope: jobs_scope,
                 list: PortalJobsList,
                 id: 'active-jobs',
-                url: GetBasePath('jobs'), //+ '?type__in=job' , //&status__in=running,completed,failed,successful,error,canceled',
+                url: GetBasePath('jobs')+'?created_by='+user,
                 pageSize: max_rows,
                 spinner: true
             });
