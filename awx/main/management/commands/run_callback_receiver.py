@@ -68,7 +68,7 @@ class CallbackReceiver(object):
 
         main_process = Process(
             target=self.callback_handler,
-            args=(use_workers, worker_queues,),
+            args=(use_workers, worker_queues,)
         )
         main_process.daemon = True
         main_process.start()
@@ -146,7 +146,6 @@ class CallbackReceiver(object):
 
                             # queue_actual_worker[2] = w
                     last_parent_events[message['job_id']] = job_parent_events
-                self.consumer_subscriber.send("1")
 
     def process_job_event(self, data):
         # Sanity check: Do we need to do anything at all?

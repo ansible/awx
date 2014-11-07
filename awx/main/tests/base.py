@@ -452,10 +452,10 @@ class BaseTestMixin(object):
         if hasattr(self, 'taskmanager_process'):
             self.taskmanager_process.terminate()
 
-    def start_queue(self, consumer_port, queue_port):
+    def start_queue(self):
         receiver = CallbackReceiver()
         self.queue_process = Process(target=receiver.run_subscriber,
-                                args=(consumer_port, queue_port, False,))
+                                     args=(False,))
         self.queue_process.start()
 
     def terminate_queue(self):

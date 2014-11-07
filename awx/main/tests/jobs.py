@@ -680,8 +680,7 @@ class BaseJobTestMixin(BaseTestMixin):
     def setUp(self):
         super(BaseJobTestMixin, self).setUp()
         self.populate()
-        if settings.CALLBACK_CONSUMER_PORT:
-            self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
+        self.start_queue()
 
     def tearDown(self):
         super(BaseJobTestMixin, self).tearDown()

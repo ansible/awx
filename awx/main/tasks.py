@@ -191,7 +191,7 @@ class BaseTask(Task):
             # Log out the error to the debug logger.
             logger.debug('Database error updating %s, retrying in 5 '
                          'seconds (retry #%d): %s',
-                         self.model._meta.object_name, retry_count + 1, e)
+                         self.model._meta.object_name, _attempt + 1, e)
 
             # Attempt to retry the update, assuming we haven't already
             # tried too many times.

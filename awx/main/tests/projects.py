@@ -734,7 +734,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
 
     def setUp(self):
         super(ProjectUpdatesTest, self).setUp()
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
+        self.start_queue()
         self.setup_users()
 
     def tearDown(self):

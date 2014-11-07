@@ -360,8 +360,7 @@ class RunJobTest(BaseCeleryTest):
         self.credential = None
         self.cloud_credential = None
         settings.INTERNAL_API_URL = self.live_server_url
-        if settings.CALLBACK_CONSUMER_PORT:
-            self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
+        self.start_queue()
 
     def tearDown(self):
         super(RunJobTest, self).tearDown()
