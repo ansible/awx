@@ -87,6 +87,9 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 else if (scope.jobs) {
                     list = scope.jobs;
                 }
+                else if(scope.portal_jobs){
+                    list=scope.portal_jobs;
+                }
                 job = Find({ list: list, key: 'id', val: id });
                 if (job.type === 'job') {
                     if(scope.$parent.portalMode===true){
