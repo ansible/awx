@@ -839,6 +839,7 @@ class UserActivityStreamList(SubListAPIView):
         return qs.filter(Q(actor=parent) | Q(user__in=[parent]))
 
 
+
 class UserDetail(RetrieveUpdateDestroyAPIView):
 
     model = User
