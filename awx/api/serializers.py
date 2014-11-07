@@ -41,7 +41,7 @@ from awx.main.utils import update_scm_url, get_type_for_model, get_model_for_typ
 logger = logging.getLogger('awx.api.serializers')
 
 # Fields that should be summarized regardless of object type.
-DEFAULT_SUMMARY_FIELDS = ('name', 'description')#, 'type')
+DEFAULT_SUMMARY_FIELDS = ('name', 'description')#, 'created_by', 'modified_by')#, 'type')
 
 # Keys are fields (foreign keys) where, if found on an instance, summary info
 # should be added to the serialized data.  Values are a tuple of field names on
@@ -49,7 +49,7 @@ DEFAULT_SUMMARY_FIELDS = ('name', 'description')#, 'type')
 # the related object).
 SUMMARIZABLE_FK_FIELDS = {
     'organization': DEFAULT_SUMMARY_FIELDS,
-    'user': ('username', 'first_name', 'last_name'),
+    'user': ('id', 'username', 'first_name', 'last_name'),
     'team': DEFAULT_SUMMARY_FIELDS,
     'inventory': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
                                            'total_hosts',
@@ -289,6 +289,15 @@ class BaseSerializer(serializers.ModelSerializer):
             # Can be raised by the reverse accessor for a OneToOneField.
             except ObjectDoesNotExist:
                 pass
+        if getattr(obj, 'created_by', None) and obj.created_by.is_active:
+            summary_fields['created_by'] = SortedDict()
+            for field in SUMMARIZABLE_FK_FIELDS['user']:
+                summary_fields['created_by'][field] = getattr(obj.created_by, field)
+        if getattr(obj, 'modified_by', None) and obj.modified_by.is_active:
+            summary_fields['modified_by'] = SortedDict()
+            for field in SUMMARIZABLE_FK_FIELDS['user']:
+                summary_fields['modified_by'][field] = getattr(obj.modified_by, field)
+        print summary_fields
         return summary_fields
 
     def get_created(self, obj):
