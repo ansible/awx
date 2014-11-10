@@ -123,6 +123,7 @@ from boto import ec2
 from boto import rds
 from boto import route53
 import ConfigParser
+from collections import defaultdict
 
 try:
     import json
@@ -257,6 +258,8 @@ class Ec2Inventory(object):
             pattern_include = config.get('ec2', 'pattern_include')
             if pattern_include and len(pattern_include) > 0:
                 self.pattern_include = re.compile(pattern_include)
+            else:
+                self.pattern_include = None
         except ConfigParser.NoOptionError, e:
             self.pattern_include = None
 
@@ -265,8 +268,17 @@ class Ec2Inventory(object):
             pattern_exclude = config.get('ec2', 'pattern_exclude');
             if pattern_exclude and len(pattern_exclude) > 0:
                 self.pattern_exclude = re.compile(pattern_exclude)
+            else:
+                self.pattern_exclude = None
         except ConfigParser.NoOptionError, e:
-            self.pattern_exclude = ''
+            self.pattern_exclude = None
+
+        # Instance filters (see boto and EC2 API docs)
+        self.ec2_instance_filters = defaultdict(list)
+        if config.has_option('ec2', 'instance_filters'):
+            for x in config.get('ec2', 'instance_filters', '').split(','):
+                filter_key, filter_value = x.split('=')
+                self.ec2_instance_filters[filter_key].append(filter_value)
 
     def parse_cli_args(self):
         ''' Command line argument processing '''
@@ -312,7 +324,13 @@ class Ec2Inventory(object):
                 print("region name: %s likely not supported, or AWS is down.  connection to region failed." % region)
                 sys.exit(1)
 
-            reservations = conn.get_all_instances()
+            reservations = []
+            if self.ec2_instance_filters:
+                for filter_key, filter_values in self.ec2_instance_filters.iteritems():
+                    reservations.extend(conn.get_all_instances(filters = { filter_key : filter_values }))
+            else:
+                reservations = conn.get_all_instances()
+
             for reservation in reservations:
                 for instance in reservation.instances:
                     self.add_instance(instance, region)
