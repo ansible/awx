@@ -867,7 +867,7 @@ class JobTemplateAccess(BaseAccess):
 
     def can_read(self, obj):
         # you can only see the job templates that you have permission to launch.
-        return self.can_start(obj)
+        return self.can_start(obj, validate_license=False)
 
     def can_add(self, data):
         '''
@@ -916,6 +916,7 @@ class JobTemplateAccess(BaseAccess):
             Q(user=self.user) | Q(team__users__in=[self.user]),
             inventory=inventory,
             project=project,
+            active=True,
             #permission_type__in=[PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY],
             permission_type=PERM_JOBTEMPLATE_CREATE,
         )
@@ -942,21 +943,22 @@ class JobTemplateAccess(BaseAccess):
         #if not project.teams.filter(users__in=[self.user]).count():
         #    return False
 
-    def can_start(self, obj):
+    def can_start(self, obj, validate_license=True):
         reader = TaskSerializer()
         validation_info = reader.from_file()
 
-        if 'test' in sys.argv or 'jenkins' in sys.argv:
-            validation_info['free_instances'] = 99999999
-            validation_info['time_remaining'] = 99999999
-            validation_info['grace_period_remaining'] = 99999999
+        if validate_license:
+            if 'test' in sys.argv or 'jenkins' in sys.argv:
+                validation_info['free_instances'] = 99999999
+                validation_info['time_remaining'] = 99999999
+                validation_info['grace_period_remaining'] = 99999999
 
-        if validation_info.get('time_remaining', None) is None:
-            raise PermissionDenied("license is missing")
-        if validation_info.get("grace_period_remaining") <= 0:
-            raise PermissionDenied("license has expired")
-        if validation_info.get('free_instances', 0) < 0:
-            raise PermissionDenied("Host Count exceeds available instances")
+            if validation_info.get('time_remaining', None) is None:
+                raise PermissionDenied("license is missing")
+            if validation_info.get("grace_period_remaining") <= 0:
+                raise PermissionDenied("license has expired")
+            if validation_info.get('free_instances', 0) < 0:
+                raise PermissionDenied("Host Count exceeds available instances")
 
         # Super users can start any job
         if self.user.is_superuser:
@@ -996,7 +998,11 @@ class JobTemplateAccess(BaseAccess):
         return self.can_read(obj) and self.can_add(data)
 
     def can_delete(self, obj):
-        return self.can_read(obj)
+        add_obj = dict(credential=obj.credential.id if obj.credential is not None else None,
+                       cloud_credential=obj.cloud_credential.id if obj.cloud_credential is not None else None,
+                       inventory=obj.inventory.id if obj.inventory is not None else None,
+                       project=obj.project.id if obj.project is not None else None)
+        return self.can_add(add_obj)
 
 class JobAccess(BaseAccess):
 
