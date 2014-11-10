@@ -9,18 +9,18 @@ from awx.main.models import *
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        SystemJobTemplate(name='Delete Old Jobs',
-                          description="Run a job to delete jobs that are older than a given number of days",
+        SystemJobTemplate(name='Cleanup Job Details',
+                          description="Remove job history older than X days",
                           job_type="cleanup_jobs",
                           created=now(),
                           modified=now()).save()
         SystemJobTemplate(name='Cleanup Deleted Data',
-                          description="Run a job to cleanup any deleted objects that are older than a given number of days",
+                          description="Remove deleted object history older than X days",
                           job_type="cleanup_deleted",
                           created=now(),
                           modified=now()).save()
         SystemJobTemplate(name='Cleanup Activity Stream',
-                          description="Run a job to purge activity stream data that's older than a given number of days",
+                          description="Remove activity stream history older than X days",
                           job_type="cleanup_activitystream",
                           created=now(),
                           modified=now()).save()
