@@ -79,7 +79,6 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
                 searchSize: 'col-lg-6 col-md-6'
             });
 
-            $rootScope.flashMessage = null;
 
             SearchInit({
                 scope: $scope,
@@ -120,49 +119,11 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
             $('.list-well:eq(1)').css('margin-top' , '0px');
         });
 
-        //  function processEvent(event) {
-        //     switch(event.status) {
-        //         case 'running':
-        //             jobs_scope.search('running_job');
-        //             jobs_scope.search('queued_job');
-
-        //             break;
-        //         case 'new':
-        //         case 'pending':
-        //         case 'waiting':
-        //             jobs_scope.search('queued_job');
-
-        //             break;
-        //         case 'successful':
-        //              jobs_scope.search('completed_job');
-        //         case 'failed':
-        //         case 'error':
-        //         case 'canceled':
-        //             jobs_scope.search('completed_job');
-        //             jobs_scope.search('running_job');
-        //             jobs_scope.search('queued_job');
-        //     }
-        // }
-
         if ($rootScope.removeJobStatusChange) {
             $rootScope.removeJobStatusChange();
         }
         $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function() {
-            jobs_scope.refreshJobs();
-            // if(data.status==='pending'){
-            //     // $scope.refresh();
-            //     $('#portal-jobs').empty();
-            //     // $rootScope.flashMessage = null;
-            //     PortalJobsWidget({
-            //         scope: $scope,
-            //         target: 'portal-jobs',
-            //         searchSize: 'col-lg-6 col-md-6'
-            //     });
-            // }
-
-
-                //x`processEvent(data);
-
+            jobs_scope.search('portal_job'); //processEvent(event);
         });
 
         $scope.submitJob = function (id) {

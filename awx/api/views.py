@@ -5,6 +5,7 @@
 # Python
 import datetime
 import dateutil
+import functools
 import time
 import re
 import socket
@@ -431,30 +432,32 @@ class DashboardInventoryGraphView(APIView):
         return Response(dashboard_data)
 
 
-class UserCreateAPIMixin(object):
-    """A mixin subclass that ensures that only a superuser is able to create
-    another superuser.
+def disallow_superuser_escalation(cls):
+    """Decorator that ensures that the post, put, and patch methods on the
+    class, if they exist, perform a sanity check and disallow superuser
+    escalation by non-superusers.
     """
-    def post(self, request, pk=None):
-        self._superuser_sanity_check(request)
-        return super(UserCreateAPIMixin, self).post(request, pk=pk)
+    # Create a method decorator that ensures superuser escalation by
+    # non-superusers is disallowed.
+    def superuser_lockdown(method):
+        @functools.wraps(method)
+        def fx(self, request, *a, **kw):
+            if not request.user.is_superuser:
+                if request.DATA.get('is_superuser', False):
+                    raise PermissionDenied('Only superusers may create '
+                                           'other superusers.')
+            return method(self, request, *a, **kw)
+        return fx
 
-    # def put(self, request, pk=None):
-    #     self._superuser_sanity_check(request)
-    #     return super(UserCreateAPIMixin, self).put(request, pk=pk)
+    # Ensure that if post, put, or patch methods exist, that they are decorated
+    # with the sanity check decorator.
+    for vuln_method in ('post', 'put', 'patch'):
+        original_method = getattr(cls, vuln_method, None)
+        if original_method is not None:
+            setattr(cls, vuln_method, superuser_lockdown(original_method))
 
-    # def patch(self, request, pk=None):
-    #     self._superuser_sanity_check(request)
-    #     return super(UserCreateAPIMixin, self).patch(request, pk=pk)
-
-    def _superuser_sanity_check(self, request):
-        """Ensure that if a non-superuser tries to create a superuser,
-        that the request is rejected.
-        """
-        if not request.user.is_superuser:
-            if request.DATA.get('is_superuser', False):
-                raise PermissionDenied('Only superusers may create '
-                                       'other superusers.')
+    # Return the class object.
+    return cls
 
 
 class ScheduleList(ListAPIView):
@@ -518,14 +521,16 @@ class OrganizationInventoriesList(SubListAPIView):
     parent_model = Organization
     relationship = 'inventories'
 
-class OrganizationUsersList(UserCreateAPIMixin, SubListCreateAPIView):
+@disallow_superuser_escalation
+class OrganizationUsersList(SubListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
     relationship = 'users'
 
-class OrganizationAdminsList(UserCreateAPIMixin, SubListCreateAPIView):
+@disallow_superuser_escalation
+class OrganizationAdminsList(SubListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
@@ -565,7 +570,8 @@ class TeamDetail(RetrieveUpdateDestroyAPIView):
     model = Team
     serializer_class = TeamSerializer
 
-class TeamUsersList(UserCreateAPIMixin, SubListCreateAPIView):
+@disallow_superuser_escalation
+class TeamUsersList(SubListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
@@ -762,7 +768,9 @@ class ProjectUpdateCancel(GenericAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
-class UserList(UserCreateAPIMixin, ListCreateAPIView):
+
+@disallow_superuser_escalation
+class UserList(ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
@@ -839,6 +847,7 @@ class UserActivityStreamList(SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(actor=parent) | Q(user__in=[parent]))
+
 
 
 class UserDetail(RetrieveUpdateDestroyAPIView):
@@ -1467,6 +1476,7 @@ class JobTemplateLaunch(GenericAPIView):
         data['passwords_needed_to_start'] = obj.passwords_needed_to_start
         data['ask_variables_on_launch'] = obj.ask_variables_on_launch
         data['variables_needed_to_start'] = obj.variables_needed_to_start
+        data['credential_needed_to_start'] = obj.credential is None
         data['survey_enabled'] = obj.survey_enabled
         return Response(data)
 

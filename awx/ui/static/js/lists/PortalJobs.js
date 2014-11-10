@@ -14,8 +14,8 @@
 angular.module('PortalJobsListDefinition', [])
     .value( 'PortalJobsList', {
 
-        name: 'jobs',
-        iterator: 'job',
+        name: 'portal_jobs',
+        iterator: 'portal_job',
         editTitle: 'Jobs',
         'class': 'table-condensed',
         index: false,
@@ -39,8 +39,8 @@ angular.module('PortalJobsListDefinition', [])
                 columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2',
                 // awToolTip: "{{ job.status_tip }}",
                 // awTipPlacement: "top",
-                dataTitle: "{{ job.status_popover_title }}",
-                icon: 'icon-job-{{ job.status }}',
+                dataTitle: "{{ portal_job.status_popover_title }}",
+                icon: 'icon-job-{{ portal_job.status }}',
                 iconOnly: true,
                 // ngClick:"viewJobLog(job.id)",
                 searchable: true,
@@ -73,7 +73,7 @@ angular.module('PortalJobsListDefinition', [])
         fieldActions: {
             job_details: {
                 mode: 'all',
-                ngClick: "viewJobLog(job.id)",
+                ngClick: "viewJobLog(portal_job.id)",
                 awToolTip: 'View job details',
                 dataPlacement: 'top'
             }

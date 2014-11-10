@@ -87,6 +87,9 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 else if (scope.jobs) {
                     list = scope.jobs;
                 }
+                else if(scope.portal_jobs){
+                    list=scope.portal_jobs;
+                }
                 job = Find({ list: list, key: 'id', val: id });
                 if (job.type === 'job') {
                     if(scope.$parent.portalMode===true){
@@ -405,6 +408,9 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             JobsControllerInit({ scope: scope, parent_scope: parent_scope });
             JobsListUpdate({ scope: scope, parent_scope: parent_scope, list: list });
             parent_scope.$emit('listLoaded');
+            // setTimeout(function(){
+            //     scope.$apply();
+            // }, 300);
         });
 
         if (base === 'jobs' && list.name === 'completed_jobs') {

@@ -193,10 +193,13 @@ class VMwareInventory(object):
         host_info = {
             'name': host.name,
             'tag': host.tag,
-            'datastores': self._get_obj_info(host.datastore, depth=0),
-            'networks': self._get_obj_info(host.network, depth=0),
-            'vms': self._get_obj_info(host.vm, depth=0),
         }
+        for attr in ('datastore', 'network', 'vm'):
+            try:
+                value = getattr(host, attr)
+                host_info['%ss' % attr] = self._get_obj_info(value, depth=0)
+            except AttributeError:
+                host_info['%ss' % attr] = []
         for k, v in self._get_obj_info(host.summary, depth=0).items():
             if isinstance(v, collections.MutableMapping):
                 for k2, v2 in v.items():
@@ -219,11 +222,21 @@ class VMwareInventory(object):
         vm_info = {
             'name': vm.name,
             'tag': vm.tag,
-            'datastores': self._get_obj_info(vm.datastore, depth=0),
-            'networks': self._get_obj_info(vm.network, depth=0),
-            'resourcePool': self._get_obj_info(vm.resourcePool, depth=0),
-            'guestState': vm.guest.guestState,
         }
+        for attr in ('datastore', 'network'):
+            try:
+                value = getattr(vm, attr)
+                vm_info['%ss' % attr] = self._get_obj_info(value, depth=0)
+            except AttributeError:
+                vm_info['%ss' % attr] = []
+        try:
+            vm_info['resourcePool'] = self._get_obj_info(vm.resourcePool, depth=0)
+        except AttributeError:
+            vm_info['resourcePool'] = ''
+        try:
+            vm_info['guestState'] = vm.guest.guestState
+        except AttributeError:
+            vm_info['guestState'] = ''
         for k, v in self._get_obj_info(vm.summary, depth=0).items():
             if isinstance(v, collections.MutableMapping):
                 for k2, v2 in v.items():

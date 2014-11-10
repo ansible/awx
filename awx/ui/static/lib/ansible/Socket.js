@@ -28,7 +28,6 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 endpoint = params.endpoint,
                 protocol = $location.protocol(),
                 config, socketPort,
-                // handshakeData,
                 url;
 
             // Since some pages are opened in a new tab, we might get here before AnsibleConfig is available.

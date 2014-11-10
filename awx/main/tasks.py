@@ -339,12 +339,13 @@ class BaseTask(Task):
          - /etc/tower (to prevent obtaining db info or secret key)
          - /var/lib/awx (except for current project)
          - /var/log/tower
+         - /var/log/supervisor
          - /tmp (except for own tmp files)
         '''
         new_args = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '-r', '/']
         hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log/tower',
-                      tempfile.gettempdir(), settings.PROJECTS_ROOT,
-                      settings.JOBOUTPUT_ROOT]
+                      '/var/log/supervisor', tempfile.gettempdir(),
+                      settings.PROJECTS_ROOT, settings.JOBOUTPUT_ROOT]
         hide_paths.extend(getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
         for path in sorted(set(hide_paths)):
             if not os.path.exists(path):
@@ -1052,7 +1053,7 @@ class RunInventoryUpdate(BaseTask):
             pass
         elif inventory_update.source == 'custom':
             for env_k in inventory_update.source_vars_dict:
-                if str(env_k) not in os.environ:
+                if str(env_k) not in os.environ and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
                     env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
         return env
 

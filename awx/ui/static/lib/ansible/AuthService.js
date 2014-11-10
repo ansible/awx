@@ -64,7 +64,16 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 //$rootScope.$destroy();
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');
-                $cookieStore.remove('lastPath');
+
+                if($cookieStore.get('lastPath')==='/portal'){
+                    $cookieStore.put( 'lastPath', '/portal');
+                    $rootScope.lastPath = '/portal';
+                }
+                else {
+                    $cookieStore.remove('lastPath');
+                    $rootScope.lastPath = '/home';
+                }
+
                 $cookieStore.remove('token');
                 $cookieStore.put('userLoggedIn', false);
                 $cookieStore.put('sessionExpired', false);
@@ -75,7 +84,6 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 $rootScope.sessionExpired = false;
                 $rootScope.token = null;
                 $rootScope.token_expires = null;
-                $rootScope.lastPath = '/home';
                 $rootScope.login_username = null;
                 $rootScope.login_password = null;
             },

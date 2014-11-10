@@ -3,6 +3,7 @@
 
 # Python
 from distutils.version import StrictVersion as Version
+import glob
 import json
 import os
 import shutil
@@ -176,6 +177,15 @@ TEST_PROOT_PLAYBOOK = '''
     assert:
       that:
       - "not temp_stat.stat.exists"
+  - name: check for supervisor log path
+    stat: path={{ supervisor_log_path }}
+    register: supervisor_log_stat
+    when: supervisor_log_path is defined
+  - name: check that supervisor log path was not found
+    assert:
+      that:
+      - "not supervisor_log_stat.stat.exists"
+    when: supervisor_log_path is defined
   - name: try to run a tower-manage command
     command: tower-manage validate
     ignore_errors: true
@@ -1353,6 +1363,11 @@ class RunJobTest(BaseCeleryTest):
         # Create a temp directory that should not be visible to the playbook.
         temp_path = tempfile.mkdtemp()
         self._temp_paths.append(temp_path)
+        # Find a file in supervisor logs that should not be visible.
+        try:
+            supervisor_log_path = glob.glob('/var/log/supervisor/*')[0]
+        except IndexError:
+            supervisor_log_path = None
         # Create our test project and job template.
         self.create_test_project(TEST_PROOT_PLAYBOOK)
         project_path = self.project.local_path
@@ -1364,6 +1379,8 @@ class RunJobTest(BaseCeleryTest):
             'other_project_path': other_project_path,
             'temp_path': temp_path,
         }
+        if supervisor_log_path:
+            extra_vars['supervisor_log_path'] = supervisor_log_path
         job = self.create_test_job(job_template=job_template, verbosity=3,
                                    extra_vars=json.dumps(extra_vars))
         self.assertEqual(job.status, 'new')

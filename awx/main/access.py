@@ -826,41 +826,56 @@ class JobTemplateAccess(BaseAccess):
         org_admin_qs = base_qs.filter(
             project__organizations__admins__in=[self.user]
         )
-        allowed = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY]
-        perm_qs = base_qs.filter(
+        allowed = [PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY]
+        allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
+        allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
+
+        # perm_qs = base_qs.filter(
+        #     Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
+        #     Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
+        #     inventory__permissions__permission_type__in=allowed,
+        #     project__permissions__permission_type__in=allowed,
+        #     inventory__permissions__active=True,
+        #     project__permissions__active=True,
+        #     inventory__permissions__pk=F('project__permissions__pk'),
+        # )
+
+        perm_deploy_qs = base_qs.filter(
             Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
             Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
-            inventory__permissions__permission_type__in=allowed,
-            project__permissions__permission_type__in=allowed,
+            job_type=PERM_INVENTORY_DEPLOY,
+            inventory__permissions__permission_type__in=allowed_deploy,
+            project__permissions__permission_type__in=allowed_deploy,
             inventory__permissions__active=True,
             project__permissions__active=True,
             inventory__permissions__pk=F('project__permissions__pk'),
         )
+
+        perm_check_qs = base_qs.filter(
+            Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
+            Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
+            job_type=PERM_INVENTORY_CHECK,
+            inventory__permissions__permission_type__in=allowed_check,
+            project__permissions__permission_type__in=allowed_check,
+            inventory__permissions__active=True,
+            project__permissions__active=True,
+            inventory__permissions__pk=F('project__permissions__pk'),
+        )
+
         # FIXME: I *think* this should work... needs more testing.
-        return org_admin_qs | perm_qs
+        return org_admin_qs | perm_deploy_qs | perm_check_qs
 
     def can_read(self, obj):
         # you can only see the job templates that you have permission to launch.
-        data = {
-            'job_type': obj.job_type,
-        }
-        if obj.inventory and obj.inventory.pk:
-            data['inventory'] = obj.inventory.pk
-        if obj.project and obj.project.pk:
-            data['project'] = obj.project.pk
-        if obj.credential:
-            data['credential'] = obj.credential.pk
-        if obj.cloud_credential:
-            data['cloud_credential'] = obj.cloud_credential.pk
-        return self.can_add(data)
+        return self.can_start(obj)
 
     def can_add(self, data):
         '''
         a user can create a job template if they are a superuser, an org admin
         of any org that the project is a member, or if they have user or team
         based permissions tying the project to the inventory source for the
-        given action.  users who are able to create deploy jobs can also make
-        check (dry run) jobs.
+        given action as well as the 'create' deploy permission. 
+        Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
         if not data or '_method' in data:  # So the browseable API will work?
             return True
@@ -950,29 +965,32 @@ class JobTemplateAccess(BaseAccess):
         if obj.inventory is None or obj.project is None:
             return False
         # If the user has admin access to the project they can start a job
-        if self.user.can_access(Project, 'admin', obj.project):
+        if self.user.can_access(Project, 'admin', obj.project, None):
             return True
 
         # Otherwise check for explicitly granted permissions
         permission_qs = Permission.objects.filter(
             Q(user=self.user) | Q(team__users__in=[self.user]),
-            inventory=inventory,
-            project=project,
+            inventory=obj.inventory,
+            project=obj.project,
             permission_type__in=[PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY],
         )
+
         has_perm = False
         for perm in permission_qs:
             # If you have job template create permission that implies both CHECK and DEPLOY
             # If you have DEPLOY permissions you can run both CHECK and DEPLOY
-            if perm.permission_type in [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]:
+            if perm.permission_type in [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY] and \
+               obj.job_type == PERM_INVENTORY_DEPLOY:
                 has_perm = True
             # If you only have CHECK permission then you can only run CHECK
-            if perm.permission_type == PERM_INVENTORY_CHECK and perm.permission_type == PERM_INVENTORY_CHECK:
+            if perm.permission_type in [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK] and \
+               obj.job_type == PERM_INVENTORY_CHECK:
                 has_perm = True
                 
         dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and \
                      self.user.can_access(Project, 'read', obj.project)
-        return self.can_read(obj) and dep_access and has_perm
+        return dep_access and has_perm
 
     def can_change(self, obj, data):
         return self.can_read(obj) and self.can_add(data)
@@ -998,17 +1016,44 @@ class JobAccess(BaseAccess):
             project__organizations__admins__in=[self.user]
         )
         allowed = [PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY]
-        perm_qs = base_qs.filter(
+
+        allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
+        allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
+
+        # perm_qs = base_qs.filter(
+        #     Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
+        #     Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
+        #     inventory__permissions__permission_type__in=allowed,
+        #     project__permissions__permission_type__in=allowed,
+        #     inventory__permissions__active=True,
+        #     project__permissions__active=True,
+        #     inventory__permissions__pk=F('project__permissions__pk'),
+        # )
+
+        perm_deploy_qs = base_qs.filter(
             Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
             Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
-            inventory__permissions__permission_type__in=allowed,
-            project__permissions__permission_type__in=allowed,
+            job_type=PERM_INVENTORY_DEPLOY,
+            inventory__permissions__permission_type__in=allowed_deploy,
+            project__permissions__permission_type__in=allowed_deploy,
             inventory__permissions__active=True,
             project__permissions__active=True,
             inventory__permissions__pk=F('project__permissions__pk'),
         )
+
+        perm_check_qs = base_qs.filter(
+            Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
+            Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
+            job_type=PERM_INVENTORY_CHECK,
+            inventory__permissions__permission_type__in=allowed_check,
+            project__permissions__permission_type__in=allowed_check,
+            inventory__permissions__active=True,
+            project__permissions__active=True,
+            inventory__permissions__pk=F('project__permissions__pk'),
+        )
+        
         # FIXME: I *think* this should work... needs more testing.
-        return org_admin_qs | perm_qs
+        return org_admin_qs | perm_deploy_qs | perm_check_qs
 
     def can_add(self, data):
         if not data or '_method' in data:  # So the browseable API will work?
