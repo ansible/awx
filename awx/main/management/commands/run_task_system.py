@@ -32,6 +32,11 @@ from celery.task.control import inspect
 
 queue = FifoQueue('tower_task_manager')
 
+
+def print_log(message):
+    print("[%s] %s" % (now().isoformat(), message))
+
+
 class SimpleDAG(object):
     ''' A simple implementation of a directed acyclic graph '''
 
@@ -163,7 +168,7 @@ def rebuild_graph(message):
     if not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
         active_task_queues = inspector.active()
     else:
-        print("Ignoring celery task inspector")
+        print_log("Ignoring celery task inspector")
         active_task_queues = None
 
     all_sorted_tasks = get_tasks()
@@ -176,9 +181,9 @@ def rebuild_graph(message):
             active_tasks += [at['id'] for at in active_task_queues[queue]]
     else:
         if settings.DEBUG:
-            print("Could not communicate with celery!")
-        # TODO: Something needs to be done here to signal to the system
-        #       as a whole that celery appears to be down.
+            print_log("Could not communicate with celery!")
+            # TODO: Something needs to be done here to signal to the system
+            #       as a whole that celery appears to be down.
         if not hasattr(settings, 'CELERY_UNIT_TEST'):
             return None
     running_tasks = filter(lambda t: t.status == 'running', all_sorted_tasks)
@@ -186,7 +191,7 @@ def rebuild_graph(message):
     new_tasks = filter(lambda t: t.status == 'pending', all_sorted_tasks)
 
     # Check running tasks and make sure they are active in celery
-    print("Active celery tasks: " + str(active_tasks))
+    print_log("Active celery tasks: " + str(active_tasks))
     for task in list(running_tasks):
         if (task.celery_task_id not in active_tasks and
                     not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
@@ -200,15 +205,13 @@ def rebuild_graph(message):
             task.save()
             task.socketio_emit_status("failed")
             running_tasks.pop(running_tasks.index(task))
-            print("Task %s appears orphaned... marking as failed" % task)
+            print_log("Task %s appears orphaned... marking as failed" % task)
 
     # Create and process dependencies for new tasks
     for task in new_tasks:
-        print("Checking dependencies for: %s" % str(task))
-        #TODO: other 'new' tasks? Need to investigate this scenario
-        task_dependencies = task.generate_dependencies(running_tasks +
-                                                       waiting_tasks)
-        print("New dependencies: %s" % str(task_dependencies))
+        print_log("Checking dependencies for: %s" % str(task))
+        task_dependencies = task.generate_dependencies(running_tasks + waiting_tasks) #TODO: other 'new' tasks? Need to investigate this scenario
+        print_log("New dependencies: %s" % str(task_dependencies))
         for dep in task_dependencies:
             # We recalculate the created time for the moment to ensure the
             # dependencies are always sorted in the right order relative to
@@ -247,11 +250,11 @@ def process_graph(graph, task_capacity):
     running_impact = sum([t['node_object'].task_impact for t in running_nodes])
     ready_nodes = filter(lambda x: x['node_object'].status != 'running', leaf_nodes)
     remaining_volume = task_capacity - running_impact
-    print('Running Nodes: %s; Capacity: %s; Running Impact: %s; '
-          'Remaining Capacity: %s' %
-          (str(running_nodes), str(task_capacity),
-           str(running_impact), str(remaining_volume)))
-    print("Ready Nodes: %s" % str(ready_nodes))
+    print_log('Running Nodes: %s; Capacity: %s; Running Impact: %s; '
+             'Remaining Capacity: %s' %
+             (str(running_nodes), str(task_capacity),
+              str(running_impact), str(remaining_volume)))
+    print_log("Ready Nodes: %s" % str(ready_nodes))
     for task_node in ready_nodes:
         node_obj = task_node['node_object']
         node_args = task_node['metadata']
@@ -278,8 +281,9 @@ def process_graph(graph, task_capacity):
                 continue
             remaining_volume -= impact
             running_impact += impact
-            print('Started Node: %s (capacity hit: %s) Remaining Capacity: %s' %
-                  (str(node_obj), str(impact), str(remaining_volume)))
+            print_log('Started Node: %s (capacity hit: %s) '
+                      'Remaining Capacity: %s' %
+                      (str(node_obj), str(impact), str(remaining_volume)))
 
 def run_taskmanager():
     """Receive task start and finish signals to rebuild a dependency graph
@@ -311,7 +315,7 @@ def run_taskmanager():
         # appropriate.
         if (datetime.datetime.now() - last_rebuild).seconds > 10:
             if 'pause' in message:
-                print("Pause command received: %s" % str(message))
+                print_log("Pause command received: %s" % str(message))
                 paused = message['pause']
             graph = rebuild_graph(message)
             if not paused and graph is not None:
