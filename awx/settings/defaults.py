@@ -274,7 +274,7 @@ SOUTH_TESTS_MIGRATE = False
 import djcelery
 djcelery.setup_loader()
 
-BROKER_URL = 'django://'
+BROKER_URL = 'redis://localhost/'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']

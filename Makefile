@@ -152,10 +152,17 @@ develop:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    pip uninstall -y awx; \
 	    $(PYTHON) setup.py develop; \
-	    awx-manage register_instance --primary --ip-address=127.0.0.1; \
 	else \
 	    sudo pip uninstall -y awx; \
 	    sudo $(PYTHON) setup.py develop; \
+	    sudo awx-manage register_instance --primary --ip-address=127.0.0.1; \
+	fi
+
+# Do any one-time init tasks.
+init:
+	@if [ "$(VIRTUAL_ENV)" ]; then \
+	    awx-manage register_instance --primary --ip-address=127.0.0.1; \
+	else \
 	    sudo awx-manage register_instance --primary --ip-address=127.0.0.1; \
 	fi
 

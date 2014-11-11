@@ -9,6 +9,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import unittest
 
 # Django
 from django.conf import settings
@@ -1340,6 +1341,8 @@ class RunJobTest(BaseCeleryTest):
         self.check_job_result(job, 'successful')
         self.check_job_events(job, 'ok', 1, 3, has_roles=True)
 
+    @unittest.skipUnless(settings.BROKER_URL == 'redis://localhost/',
+                         'Non-default Redis setup.')
     def test_run_job_with_proot(self):
         # Only run test if proot is installed
         cmd = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '--version']

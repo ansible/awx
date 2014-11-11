@@ -44,7 +44,7 @@ if len(sys.argv) >= 2 and sys.argv[1] == 'test':
     }
 
 # Celery AMQP configuration.
-BROKER_URL = 'amqp://awx-dev:AWXsome1@localhost:5672/awx-dev'
+BROKER_URL = 'redis://localhost/'
 
 # Set True to enable additional logging from the job_event_callback plugin
 JOB_CALLBACK_DEBUG = False
