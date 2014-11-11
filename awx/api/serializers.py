@@ -298,7 +298,6 @@ class BaseSerializer(serializers.ModelSerializer):
             summary_fields['modified_by'] = SortedDict()
             for field in SUMMARIZABLE_FK_FIELDS['user']:
                 summary_fields['modified_by'][field] = getattr(obj.modified_by, field)
-        print summary_fields
         return summary_fields
 
     def get_created(self, obj):

@@ -1166,7 +1166,6 @@ class RunSystemJob(BaseTask):
                     args.extend(['--inventory-updates'])
         except Exception, e:
             pass
-        print args
         return args
 
     def build_cwd(self, instance, **kwargs):
