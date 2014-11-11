@@ -72,7 +72,7 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
         $scope.removeLoadPortal = $scope.$on('LoadPortal', function () {
 
             view.inject( list, {
-                id : 'portal-job-template',
+                id : 'portal-job-templates',
                 mode: 'edit',
                 scope: $scope,
                 breadCrumbs: false,
