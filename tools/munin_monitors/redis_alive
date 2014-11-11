@@ -3,14 +3,14 @@
 case $1 in
    config)
         cat <<'EOM'
-graph_title Rabbit Processes
+graph_title Redis Processes
 graph_vlabel num processes
 graph_category tower
-rabbit.label Rabbit Processes
+redis.label Redis Processes
 EOM
         exit 0;;
 esac
 
-printf "rabbit.value "
-ps ax | grep rabbitmq | grep -v grep | wc -l
+printf "redis.value "
+ps ax | grep redis | grep -v grep | wc -l
 printf "\n"
