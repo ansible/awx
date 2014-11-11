@@ -773,6 +773,7 @@ class UserList(ListCreateAPIView):
     model = User
     serializer_class = UserSerializer
 
+@disallow_superuser_escalation
 class UserMeList(ListAPIView):
 
     model = User
@@ -847,7 +848,7 @@ class UserActivityStreamList(SubListAPIView):
         return qs.filter(Q(actor=parent) | Q(user__in=[parent]))
 
 
-
+@disallow_superuser_escalation
 class UserDetail(RetrieveUpdateDestroyAPIView):
 
     model = User
