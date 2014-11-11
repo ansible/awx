@@ -343,9 +343,9 @@ class BaseTask(Task):
          - /tmp (except for own tmp files)
         '''
         new_args = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '-r', '/']
-        hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log/tower',
-                      '/var/log/supervisor', tempfile.gettempdir(),
-                      settings.PROJECTS_ROOT, settings.JOBOUTPUT_ROOT]
+        hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log',
+                      tempfile.gettempdir(), settings.PROJECTS_ROOT,
+                      settings.JOBOUTPUT_ROOT]
         hide_paths.extend(getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
         for path in sorted(set(hide_paths)):
             if not os.path.exists(path):
