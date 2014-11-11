@@ -36,6 +36,9 @@ class CallbackReceiver(object):
     def __init__(self):
         self.parent_mappings = {}
 
+    def print_log(self, message):
+        print("[%s] %s" % (now().isoformat(), message))
+
     def run_subscriber(self, consumer_port, queue_port, use_workers=True):
         def shutdown_handler(active_workers):
             def _handler(signum, frame):
@@ -62,10 +65,10 @@ class CallbackReceiver(object):
                 signal.signal(signal.SIGINT, shutdown_handler([w]))
                 signal.signal(signal.SIGTERM, shutdown_handler([w]))
                 if settings.DEBUG:
-                    print 'Started worker %s' % str(idx)
+                    self.print_log('Started worker %s' % str(idx))
                 worker_queues.append([0, queue_actual, w])
         elif settings.DEBUG:
-            print 'Started callback receiver (no workers)'
+            self.print_log('Started callback receiver (no workers)')
 
         main_process = Process(target=self.callback_handler, args=(use_workers, consumer_port, worker_queues,))
         main_process.daemon = True
@@ -209,12 +212,12 @@ class CallbackReceiver(object):
                     return job_event
             except DatabaseError as e:
                 # Log the error and try again.
-                print('Database error saving job event, retrying in '
-                      '1 second (retry #%d): %s', retry_count + 1, e)
+                self.print_log('Database error saving job event, retrying in '
+                               '1 second (retry #%d): %s', retry_count + 1, e)
                 time.sleep(1)
 
         # We failed too many times, and are giving up.
-        print('Failed to save job event after %d retries.', retry_count)
+        self.print_log('Failed to save job event after %d retries.', retry_count)
         return None
 
     def callback_worker(self, queue_actual):
@@ -224,7 +227,7 @@ class CallbackReceiver(object):
             self.process_job_event(message)
             messages_processed += 1
             if messages_processed >= MAX_REQUESTS:
-                print("Shutting down message receiver")
+                self.print_log("Shutting down message receiver")
                 break
 
 class Command(NoArgsCommand):

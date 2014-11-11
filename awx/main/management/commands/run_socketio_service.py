@@ -34,6 +34,9 @@ from socketio import socketio_manage
 from socketio.server import SocketIOServer
 from socketio.namespace import BaseNamespace
 
+def print_log(message):
+    print("[%s] %s" % (now().isoformat(), message))
+
 class TowerBaseNamespace(BaseNamespace):
 
     def get_allowed_methods(self):
@@ -69,7 +72,7 @@ class TowerBaseNamespace(BaseNamespace):
 class TestNamespace(TowerBaseNamespace):
 
     def recv_connect(self):
-        print("Received client connect for test namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        print_log("Received client connect for test namespace from %s" % str(self.environ['REMOTE_ADDR']))
         self.emit('test', "If you see this then you are connected to the test socket endpoint")
 
 class JobNamespace(TowerBaseNamespace):
@@ -78,7 +81,7 @@ class JobNamespace(TowerBaseNamespace):
         return ['summary_complete', 'status_changed']
 
     def recv_connect(self):
-        print("Received client connect for job namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        print_log("Received client connect for job namespace from %s" % str(self.environ['REMOTE_ADDR']))
 
 class JobEventNamespace(TowerBaseNamespace):
 
@@ -89,11 +92,11 @@ class JobEventNamespace(TowerBaseNamespace):
         else:
             user_jobs = get_user_queryset(valid_user, Job).filter(finished__isnull=True)
             visible_jobs = set(['recv_connect'] + ["job_events-%s" % str(j.id) for j in user_jobs])
-            print("Visible jobs: " + str(visible_jobs))
+            print_log("Visible jobs: " + str(visible_jobs))
             return visible_jobs
     
     def recv_connect(self):
-        print("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        print_log("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
 
 class ScheduleNamespace(TowerBaseNamespace):
 
@@ -101,7 +104,7 @@ class ScheduleNamespace(TowerBaseNamespace):
         return ["schedule_changed"]
 
     def recv_connect(self):
-        print("Received client connect for schedule namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        print_log("Received client connect for schedule namespace from %s" % str(self.environ['REMOTE_ADDR']))
 
 class TowerSocket(object):
 
