@@ -2,7 +2,7 @@
 # Install using "pip --no-index -r jenkins.txt".
 
 ansible
-pyzmq
+redis
 python-memcached
 python-ldap
 pycrypto
