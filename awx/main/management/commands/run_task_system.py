@@ -301,20 +301,28 @@ def run_taskmanager():
     last_rebuild = datetime.datetime.fromtimestamp(0)
 
     # Attempt to pull messages off of the task system queue into perpetuity.
+    #
+    # A quick explanation of what is happening here:
+    # The popping messages off the queue bit is something of a sham. We remove
+    # the messages from the queue and then immediately throw them away. The
+    # `rebuild_graph` function, while it takes the message as an argument,
+    # ignores it.
+    #
+    # What actually happens is that we just check the database every 10 seconds
+    # to see what the task dependency graph looks like, and go do that. This
+    # is the job of the `rebuild_graph` function.
+    #
+    # There is some placeholder here: we may choose to actually use the message
+    # in the future.
     while True:
         # Pop a message off the queue.
         # (If the queue is empty, None will be returned.)
         message = queue.pop()
 
-        # Sanity check: If we got no message back, sleep and continue.
-        if message is None:
-            time.sleep(0.1)
-            continue
-
         # Parse out the message appropriately, rebuilding our graph if
         # appropriate.
         if (datetime.datetime.now() - last_rebuild).seconds > 10:
-            if 'pause' in message:
+            if message is not None and 'pause' in message:
                 print_log("Pause command received: %s" % str(message))
                 paused = message['pause']
             graph = rebuild_graph(message)
