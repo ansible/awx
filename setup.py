@@ -125,7 +125,7 @@ setup(
                                         "tools/munin_monitors/callbackr_alive",
                                         "tools/munin_monitors/celery_alive",
                                         "tools/munin_monitors/postgres_alive",
-                                        "tools/munin_monitors/rabbit_alive",
+                                        "tools/munin_monitors/redis_alive",
                                         "tools/munin_monitors/socketio_alive",
                                         "tools/munin_monitors/taskmanager_alive"]),
             ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
