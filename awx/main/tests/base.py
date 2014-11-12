@@ -22,6 +22,7 @@ from django.conf import settings, UserSettingsHolder
 from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
+from django.test.utils import override_settings
 
 # AWX
 from awx.main.models import *
