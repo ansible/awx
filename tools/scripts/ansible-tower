@@ -9,16 +9,16 @@
 # Required-Start: $local_fs $remote_fs $network $named
 # Required-Stop: $local_fs $remote_fs $network
 # Should-Start: distcache
-# Should-Stop: 
-# Default-Start: 
-# Default-Stop: 
+# Should-Stop:
+# Default-Start:
+# Default-Stop:
 # Short-Description: support init to manage tower and its related services
 # Description: Ansible Tower provides an easy-to-use UI and dashboard, role-based access control and more for your Ansible initiative
 ### END INIT INFO
 
 if [ -e /etc/debian_version ]
-then 
-    SERVICES=(postgresql redis apache2 supervisor)
+then
+    SERVICES=(postgresql redis-server apache2 supervisor)
 else
     SERVICES=(postgresql redis httpd supervisord)
 fi
