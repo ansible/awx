@@ -93,6 +93,9 @@ def tower_periodic_scheduler(self):
     for schedule in schedules:
         template = schedule.unified_job_template
         schedule.save() # To update next_run timestamp.
+        if template.cache_timeout_blocked:
+            logger.warn("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
+            continue
         new_unified_job = template.create_unified_job(launch_type='scheduled', schedule=schedule)
         can_start = new_unified_job.signal_start(**schedule.extra_data)
         if not can_start:

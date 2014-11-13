@@ -299,6 +299,14 @@ class Project(UnifiedJobTemplate, ProjectOptions):
         return self.create_unified_job(**kwargs)
 
     @property
+    def cache_timeout_blocked(self):
+        if not self.last_job_run:
+            return False
+        if (self.last_job_run + datetime.timedelta(seconds=self.update_cache_timeout)) > now():
+            return True
+        return False
+    
+    @property
     def needs_update_on_launch(self):
         if self.active and self.scm_type and self.scm_update_on_launch:
             if not self.last_job_run:

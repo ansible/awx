@@ -371,6 +371,10 @@ class Job(UnifiedJob, JobOptions):
         return False
 
     @property
+    def cache_timeout_blocked(self):
+        return False
+    
+    @property
     def task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
