@@ -17,13 +17,14 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
     'GeneratorHelpers'])
 
     .factory('ConfigureTower', ['Wait', 'CreateDialog', 'ConfigureTowerJobsList', 'GenerateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'LoadSchedulesScope',
-        'SchedulesList', 'SchedulesControllerInit' , 'ConfigureTowerSchedule', 'Rest' , 'ProcessErrors',
+        'SchedulesList', 'SchedulesControllerInit' , 'ConfigureTowerSchedule', 'Rest' , 'ProcessErrors', 'Empty', 'Prompt',
         function(Wait, CreateDialog, ConfigureTowerJobsList, GenerateList, GetBasePath, SearchInit, PaginateInit, PlaybookRun, LoadSchedulesScope,
-            SchedulesList, SchedulesControllerInit, ConfigureTowerSchedule, Rest, ProcessErrors) {
+            SchedulesList, SchedulesControllerInit, ConfigureTowerSchedule, Rest, ProcessErrors, Empty, Prompt) {
         return function(params) {
             // Set modal dimensions based on viewport width
 
             var scope = params.scope.$new(),
+                parent_scope = params.scope,
                 callback = 'OpenConfig',
                 defaultUrl = GetBasePath('system_job_templates'),
                 list = ConfigureTowerJobsList,
@@ -77,7 +78,7 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
 
             SchedulesControllerInit({
                 scope: scope,
-                // parent_scope: parent_scope,
+                parent_scope: parent_scope,
                 // list: list
             });
 
@@ -194,14 +195,6 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
             };
 
             scope.configureSchedule = function(id) {
-                // scope.addSchedule();
-                // schedule_scope.editSchedule = function(id) {
-                //     GroupsScheduleEdit({ scope: schedule_scope, mode: 'edit', url: GetBasePath('schedules') + id + '/' });
-                // };
-
-                // schedule_scope.addSchedule = function() {
-                //     GroupsScheduleEdit({ scope: schedule_scope, mode: 'add', url: url });
-                // };
                 Rest.setUrl(scheduleUrl+id+'/schedules/');
                 Rest.get()
                     .success(function(data) {
@@ -228,32 +221,70 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
 
             };
 
-            // scope.deleteSystemSchedule = function(id){
-            //     Rest.setUrl(scheduleUrl+id+'/schedules/');
-            //     Rest.get()
-            //         .success(function(data) {
+            scope.deleteSystemSchedule = function(id){
+                var url, hdr,action;
+                Rest.setUrl(scheduleUrl+id+'/schedules/');
+                Rest.get()
+                    .success(function(data) {
+                        //delete the schedule if one exists
+                        if(data.count>0){
+                            if(!Empty(data.results[0].url)){
+                                url = data.results[0].url;
+                                hdr = 'Delete Schedule';
+                                action = function () {
+                                    Wait('start');
+                                    Rest.setUrl(url);
+                                    Rest.destroy()
+                                        .success(function () {
+                                            $('#prompt-modal').modal('hide');
+                                            Wait('stop');
+                                            scope.$emit(callback, id);
+                                        })
+                                        .error(function (data, status) {
+                                            try {
+                                                $('#prompt-modal').modal('hide');
+                                            }
+                                            catch(e) {
+                                                // ignore
+                                            }
+                                            ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
+                                                ' failed. DELETE returned: ' + status });
+                                        });
+                                };
 
+                                Prompt({
+                                    hdr: hdr,
+                                    body: "<div class=\"alert alert-info\">Are you sure you want to delete the <em>" + data.results[0].name  + "</em> schedule?</div>",
+                                    action: action,
+                                    backdrop: false
+                                });
+                            }
+                        } else {
+                            //a schedule doesn't exist
+                            $("#prompt_action_btn").text('OK');
+                            $('#prompt_cancel_btn').hide();
+                            var action2 = function(){
+                                $('#prompt-modal').modal('hide');
+                                $("#prompt_action_btn").text('Yes');
+                                $('#prompt_cancel_btn').show();
+                            };
+                            Prompt({
+                                    hdr: "Delete",
+                                    body: "<div class=\"alert alert-info\">No schedule exists for that job. </div>",
+                                    action: action2,
+                                    backdrop: false
+                                });
+                        }
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
+                    });
+            };
 
-            //         })
-            //         .error(function(data, status) {
-            //             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-            //                 msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
-            //         });
-
-
-
-
-
-            //     Rest.setUrl(GetBasePath('schedules')+id+'/');
-            //     Rest.destroy()
-            //         .success(function() {
-            //             Alert("successfully deleted");
-            //         })
-            //         .error(function(data, status) {
-            //             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-            //                 msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
-            //         });
-            // };
+            parent_scope.refreshJobs = function(){
+                scope.search(SchedulesList.iterator);
+            };
 
         };
     }])

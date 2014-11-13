@@ -590,7 +590,8 @@ angular.module('Tower', [
 
                 $rootScope.configureTower = function(){
                     ConfigureTower({
-                        scope: $rootScope
+                        scope: $rootScope,
+                        parent_scope: $rootScope
                     });
                 };
 
