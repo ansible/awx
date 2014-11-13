@@ -18,7 +18,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
     function(Rest, Wait, ProcessErrors, ToJSON, Empty) {
         return function(params) {
             var scope = params.scope,
-                // passwords = params.passwords || {},
                 callback = params.callback || 'JobLaunched',
                 job_launch_data = {},
                 url = params.url,
@@ -45,6 +44,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 }
             }
 
+
             Rest.setUrl(url);
             Rest.post(job_launch_data)
                 .success(function(data) {
@@ -59,18 +59,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                         msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
                 });
 
-
-            // Wait('start');
-            // Rest.setUrl(url);
-            // Rest.post(passwords)
-            //     .success(function(data) {
-            //         scope.new_job_id = data.job;
-            //         scope.$emit(callback, data);
-            //     })
-            //     .error(function (data, status) {
-            //         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-            //             msg: 'Attempt to start job at ' + url + ' failed. POST returned: ' + status });
-            //     });
         };
     }])
 
@@ -698,48 +686,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 url = GetBasePath('jobs') + id + '/relaunch/';
             }
 
-
-            // if (scope.removePostTheJob) {
-            //     scope.removePostTheJob();
-            // }
-            // scope.removePostTheJob = scope.$on('PostTheJob', function() {
-            //     var url = (job_template.related.jobs) ? job_template.related.jobs : job_template.related.job_template + 'jobs/';
-            //     Wait('start');
-            //     Rest.setUrl(url);
-            //     Rest.post(job_template)
-            //         .success(function (data) {
-            //             new_job_id = data.id;
-            //             launch_url = data.related.start;
-            //             prompt_for_vars = data.ask_variables_on_launch;
-            //             new_job = data;
-            //             if (data.passwords_needed_to_start.length > 0) {
-            //                 scope.$emit('PromptForPasswords', data.passwords_needed_to_start);
-            //             }
-            //             else if (data.ask_variables_on_launch) {
-            //                 scope.$emit('PromptForVars');
-            //             }
-            //             else {
-            //                 scope.$emit('StartPlaybookRun');
-            //             }
-            //         })
-            //         .error(function (data, status) {
-            //             var key, html;
-            //             if (status === 400) {
-            //                 // there's a data problem with the job template
-            //                 html = "<ul style=\"list-style-type: none; margin: 15px 0;\">\n";
-            //                 for (key in data) {
-            //                     html += "<li><strong>" + key + "</strong>: " + data[key][0] + "</li>\n";
-            //                 }
-            //                 html += "</ul>\n";
-            //                 Wait('stop');
-            //                 Alert('Job Template Error', "<p>Fix the following issues before using the template:</p>" + html, 'alert-danger');
-            //             }
-            //             else {
-            //                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-            //                    msg: 'Failed to create job. POST returned status: ' + status });
-            //             }
-            //         });
-            // });
+            if(!Empty(system_job) &&  system_job === 'launch'){
+                url = GetBasePath('system_job_templates') + id + '/launch/';
+            }
 
             if (scope.removeCancelJob) {
                 scope.removeCancelJob();
@@ -762,9 +711,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 scope.removePlaybookLaunchFinished();
             }
             scope.removePlaybookLaunchFinished = scope.$on('PlaybookLaunchFinished', function(e, data) {
-                //var base = $location.path().replace(/^\//, '').split('/')[0];
-                if(scope.portalMode===false || scope.$parent.portalMode===false ){
-                    $location.path('/jobs/' + data.job);
+                var job = data.job || data.system_job;
+                if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job)){
+                    $location.path('/jobs/' + job);
                 }
 
             });
@@ -883,12 +832,12 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
                     // new_job = data;
                     html = '<form class="    ng-valid ng-valid-required" name="job_launch_form" id="job_launch_form" autocomplete="off" nonvalidate>';
-                    if (data.passwords_needed_to_start.length > 0) {
+                    if (!Empty(data.passwords_needed_to_start) && data.passwords_needed_to_start.length > 0) {
                         scope.$emit('PromptForPasswords', data.passwords_needed_to_start, html, url);
                     }
                     else if (data.ask_variables_on_launch) {
                         scope.$emit('PromptForVars', html, url);
-                    } else if (data.survey_enabled===true) {
+                    } else if (!Empty(data.survey_enabled) &&  data.survey_enabled===true) {
                         scope.$emit('PromptForSurvey', html, url);
                     }
                     else {
