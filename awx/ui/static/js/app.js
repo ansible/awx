@@ -119,7 +119,9 @@ angular.module('Tower', [
     'SocketHelper',
     'AboutAnsibleHelpModal',
     'SurveyQuestionFormDefinition',
-    'PortalJobsListDefinition'
+    'PortalJobsListDefinition',
+    'ConfigureTowerHelper',
+    'ConfigureTowerJobsListDefinition'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -432,9 +434,9 @@ angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'LicenseViewer', 'AboutAnsibleHelp',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'LicenseViewer', 'AboutAnsibleHelp', 'ConfigureTower',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
-        LoadConfig, Store, ShowSocketHelp, LicenseViewer, AboutAnsibleHelp) {
+        LoadConfig, Store, ShowSocketHelp, LicenseViewer, AboutAnsibleHelp, ConfigureTower) {
 
 
             var e, html, sock, checkCount = 0;
@@ -584,6 +586,12 @@ angular.module('Tower', [
 
                 $rootScope.leavePortal = function() {
                     $location.path('/home/');
+                };
+
+                $rootScope.configureTower = function(){
+                    ConfigureTower({
+                        scope: $rootScope
+                    });
                 };
 
                 html = "<a href=\"\" ng-click=\"socketHelp()\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +

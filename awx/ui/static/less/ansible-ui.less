@@ -186,6 +186,126 @@ a:focus {
   }
 }
 
+#configure-schedules-tab {
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+#configure-schedules-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    background-color: @black;
+    opacity: 0;
+  }
+
+#configure-schedules-buttons{
+    height: 46px;
+    padding-top: 10px;
+    text-align: right;
+    border-top: 1px solid #A6C9E2;
+    margin-top: 5px;
+    a {
+        margin-right: 8px;
+        font-size: 12px;
+    }
+}
+
+#configure-schedules-form-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    box-shadow: 3px 3px 6px 0 #666;
+    padding: 0 10px 15px 8px;
+    background-color: @white;
+    z-index: 200;
+}
+
+#configure-schedules-title {
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    margin-top: 0;
+    h4 {
+        display: inline-block;
+        margin: 0;
+    }
+    button {
+        display: inline-block;
+    }
+}
+
+#configure-schedules-list {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#configure-schedules-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    background-color: @black;
+    opacity: 0;
+}
+
+#configure-tower-dialog, #configure-schedules-form-container {
+    display: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-top: 25px;
+
+    form {
+        width: 100%;
+    }
+
+    .sublabel {
+        font-weight: normal;
+    }
+
+    #occurrence-label {
+        display: inline-block;
+    }
+
+    .occurrence-list {
+        border: 1px solid @well-border;
+        padding: 8px 10px;
+        border-radius: 4px;
+        background-color: @well;
+        list-style: none;
+        margin-bottom: 5px;
+    }
+
+    #date-choice {
+        display: inline-block;
+        margin-left: 15px;
+        font-size: 12px;
+
+        .label-inline {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        input {
+            margin-bottom: 2px;
+            height: 11px;
+            width: 10px;
+        }
+        .label-inline:first-child {
+            padding-bottom: 2px;
+            margin-right: 10px;
+        }
+        .label-inline:nth-child(3) {
+            margin-right: 10px;
+        }
+    }
+}
 #home_groups_table .actions .cancel { padding-right: 3px; }
 
 .success-badge {

@@ -671,6 +671,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         return function (params) {
             var scope = params.scope,
                 id = params.id,
+                system_job = params.system_job || false,
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 url,
                 job_template,

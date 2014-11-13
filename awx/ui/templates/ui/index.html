@@ -106,6 +106,7 @@
   <script src="{{ STATIC_URL }}js/forms/LogViewerStatus.js"></script>
   <script src="{{ STATIC_URL }}js/forms/LogViewerOptions.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Users.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/ConfigureTowerJobs.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Admins.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Inventories.js"></script>
@@ -131,6 +132,7 @@
   <script src="{{ STATIC_URL }}js/lists/ScheduledJobs.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/SocketHelper.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/LoadConfig.js"></script>
+  <script src="{{ STATIC_URL }}js/helpers/ConfigureTower.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh-related.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-search.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh.js"></script>
@@ -194,6 +196,7 @@
 
         <a href="" id="mobile_about" ng-click ="viewAboutTower()" ng-hide="portalMode===true">About Tower</a> </li>
         <a href="" id="mobile_view_user" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
+        <a id="main_configure_tower"  ng-click="configureTower()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Configure Tower</a></li>
         <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" id="mobile_contact_support" target="_blank" ng-hide="portalMode===true">Contact Support</a></li>
         <a id="mobile_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
         <a href="#portal" id="mobile_portal_link" ng-hide="portalMode===true">Portal Mode</a></li>
@@ -234,8 +237,9 @@
                             <ul class="nav navbar-nav" id="account-submenu">
                                <li><a href="" id="main_about" ng-click ="viewAboutTower()" ng-hide="portalMode===true">About Tower</a> </li>
                                <li><a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
+                               <li><a id="main_configure_tower"  ng-click="configureTower()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Configure Tower</a></li>
                                <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new" ng-hide="portalMode===true">Contact Support</a></li>
-                                <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
+                               <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
                                <li><a href="#portal" id="main_view_portal_link" >Portal Mode</a></li>
                                <li><a id="main_view_license" href="" ng-click="viewLicense()" ng-hide="portalMode===true">View License</a></li>
                                <li><a id="main_view_leave_portal" href="" ng-click="leavePortal()" ng-show="portalMode===true">Exit Portal</a></li>
@@ -252,6 +256,7 @@
                             <ul class="dropdown-menu" id="account-submenu">
                                <li><a href="" id="main_about" ng-click ="viewAboutTower()" ng-hide="portalMode===true">About Tower</a> </li>
                                <li><a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
+                               <li><a id="configure_tower"  ng-click="configureTower()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Configure Tower</a></li>
                                <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new" ng-hide="portalMode===true">Contact Support</a></li>
                                <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
                                <li><a href="#portal" id="main_view_portal_link" ng-hide="portalMode===true">Portal Mode</a></li>
@@ -386,6 +391,36 @@
     <div id="help-modal-dialog" style="display: none;"></div>
     <div id="license-modal-dialog" style="display: none;"></div>
     <div id="about-modal-dialog" style="display: none;" ng-include="'static/partials/cowsay-about.html '"></div>
+    <div id='configure-tower-dialog' style="display:none">
+              <div id="configure-jobs" > </div>
+              <div class="tab-pane" id="configure-schedules-tab">
+                    <div id="configure-schedules-overlay"></div>
+                    <div id="configure-schedules-list"></div>
+                    <div id="configure-schedules-form-container">
+                        <div id="configure-schedules-title">
+                            <h4 ng-bind="schedulesTitle"></h4>
+                            <button type="button"  class="close pull-right" ng-click="cancelScheduleForm()">x</button>
+                        </div>
+                        <div id="configure-schedules-form-container-body">
+                            <div id="configure-schedules-form"></div>
+                            <div id="configure-schedules-detail"></div>
+                        </div>
+                        <div id="configure-schedules-buttons" >
+                            <a id="configure-schedules-flip-link" ng-show="formShowing" ng-click="showScheduleDetail()" href=""><i class="fa fa-search-plus"></i> View Details</a>
+                            <a id="configure-schedules-flip-link" ng-show="!formShowing" ng-click="showScheduleDetail()" href=""><i class="fa fa-arrow-circle-left"></i> Back to options</a>
+                            <button type="button" class="btn btn-default btn-sm" id="configure-reset-button" ng-click="cancelScheduleForm()"><i class="fa fa-times"></i> Cancel</button>
+                            <button type="button" class="btn btn-primary btn-sm" id="configure-save-button" ng-click="saveScheduleForm()"><i class="fa fa-check"></i> Save</button>
+                        </div>
+                    </div>
+                </div>
+    </div>
+    <div id="prompt-for-days" style="display:none">
+      <form name="prompt_for_days_form" id="prompt_for_days_form">
+            How many days of data would you like to <b>keep</b>? <br>
+            <input type="number" min="1" id="days_to_keep" name="days_to_keep" value="30" ng-required="true" class="form-control  ng-pristine ng-invalid-required ng-invalid" style="margin-top:10px;">
+            <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && copy_form.new_copy_name.$error.required">A value is required!</div></input>
+            </form>
+    </div>
 
 
   </div><!-- container -->
