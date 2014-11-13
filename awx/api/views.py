@@ -1771,7 +1771,7 @@ class SystemJobTemplateSchedulesList(SubListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         system_job = self.get_parent_object()
-        if system_job.schedules.count() > 0:
+        if system_job.schedules.filter(active=True).count() > 0:
             return Response({"error": "Multiple schedules for Systems Jobs is not allowed"}, status=status.HTTP_400_BAD_REQUEST)
         return super(SystemJobTemplateSchedulesList, self).post(request, *args, **kwargs)
 
