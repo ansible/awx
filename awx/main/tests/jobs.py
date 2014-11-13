@@ -160,6 +160,16 @@ TEST_SURVEY_REQUIREMENTS = '''
         "default": ""
         },
         {
+        "type": "integer",
+        "question_name": "integerchoicewithoutmax",
+        "question_description": "I need an int here without max",
+        "variable": "int_answer_no_max",
+        "choices": "",
+        "min": 1,
+        "required": false,
+        "default": ""
+        },
+        {
         "type": "float",
         "question_name": "float",
         "question_description": "I need a float here",
@@ -972,6 +982,8 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             self.post(launch_url, dict(int_answer=10, reqd_answer="foo"), expect=400)
             # Integer that's just riiiiight
             self.post(launch_url, dict(int_answer=3, reqd_answer="foo"), expect=202)
+            # Integer bigger than min with no max defined
+            self.post(launch_url, dict(int_answer_no_max=3, reqd_answer="foo"), expect=202)
             # Integer answer that's the wrong type
             self.post(launch_url, dict(int_answer="test", reqd_answer="foo"), expect=400)
             # Float that's too big
