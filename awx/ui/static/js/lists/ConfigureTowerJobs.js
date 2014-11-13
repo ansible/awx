@@ -50,7 +50,7 @@ angular.module('ConfigureTowerJobsListDefinition', [])
                 mode: 'all',
                 ngClick: 'deleteSystemSchedule(configure_job.id)', // '#/job_templates/{{ configure_job.id }}/schedules',
                 awToolTip: 'Delete the schedule ',
-                dataPlacement: 'top',
+                dataPlacement: 'top'
             }
         }
     });
