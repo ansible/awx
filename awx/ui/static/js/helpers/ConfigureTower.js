@@ -221,66 +221,7 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
 
             };
 
-            scope.deleteSystemSchedule = function(id){
-                var url, hdr,action;
-                Rest.setUrl(scheduleUrl+id+'/schedules/');
-                Rest.get()
-                    .success(function(data) {
-                        //delete the schedule if one exists
-                        if(data.count>0){
-                            if(!Empty(data.results[0].url)){
-                                url = data.results[0].url;
-                                hdr = 'Delete Schedule';
-                                action = function () {
-                                    Wait('start');
-                                    Rest.setUrl(url);
-                                    Rest.destroy()
-                                        .success(function () {
-                                            $('#prompt-modal').modal('hide');
-                                            Wait('stop');
-                                            scope.$emit(callback, id);
-                                        })
-                                        .error(function (data, status) {
-                                            try {
-                                                $('#prompt-modal').modal('hide');
-                                            }
-                                            catch(e) {
-                                                // ignore
-                                            }
-                                            ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
-                                                ' failed. DELETE returned: ' + status });
-                                        });
-                                };
 
-                                Prompt({
-                                    hdr: hdr,
-                                    body: "<div class=\"alert alert-info\">Are you sure you want to delete the <em>" + data.results[0].name  + "</em> schedule?</div>",
-                                    action: action,
-                                    backdrop: false
-                                });
-                            }
-                        } else {
-                            //a schedule doesn't exist
-                            $("#prompt_action_btn").text('OK');
-                            $('#prompt_cancel_btn').hide();
-                            var action2 = function(){
-                                $('#prompt-modal').modal('hide');
-                                $("#prompt_action_btn").text('Yes');
-                                $('#prompt_cancel_btn').show();
-                            };
-                            Prompt({
-                                    hdr: "Delete",
-                                    body: "<div class=\"alert alert-info\">No schedule exists for that job. </div>",
-                                    action: action2,
-                                    backdrop: false
-                                });
-                        }
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
-                    });
-            };
 
             parent_scope.refreshJobs = function(){
                 scope.search(SchedulesList.iterator);
@@ -328,7 +269,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
         container = $('#configure-schedules-form-container');
         $("#configure-jobs").show();
         $("#configure-schedules-form-container").hide();
-
+        scope.mode = mode;
         // Clean up any lingering stuff
         container.hide();
         target.empty();
@@ -379,7 +320,6 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                         scheduler.setRRule(schedule.rrule);
                         scheduler.setName(schedule.name);
                         scope.schedulerPurgeDays = (!Empty(scope.days)) ? Number(scope.days) : 30;
-                        scope.id = id;
                     });
                 }
             };
@@ -445,6 +385,60 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             else {
                 scope.schedulerIsValid = false;
             }
+        };
+
+        scope.deleteSystemSchedule = function(){
+            var hdr = 'Delete Schedule',
+            action = function () {
+                Wait('start');
+                Rest.setUrl(schedule.url);
+                Rest.destroy()
+                    .success(function () {
+                        $('#prompt-modal').modal('hide');
+                        Wait('stop');
+                        // scope.$emit(callback, id);
+                        scope.cancelScheduleForm();
+                    })
+                    .error(function (data, status) {
+                        try {
+                            $('#prompt-modal').modal('hide');
+                        }
+                        catch(e) {
+                            // ignore
+                        }
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
+                            ' failed. DELETE returned: ' + status });
+                    });
+            };
+
+            Prompt({
+                hdr: hdr,
+                body: "<div class=\"alert alert-info\">Are you sure you want to delete the <em>" + scope.schedulerName  + "</em> schedule?</div>",
+                action: action,
+                backdrop: false
+            });
+                //         }
+                //     } else {
+                //         //a schedule doesn't exist
+                //         $("#prompt_action_btn").text('OK');
+                //         $('#prompt_cancel_btn').hide();
+                //         var action2 = function(){
+                //             $('#prompt-modal').modal('hide');
+                //             $("#prompt_action_btn").text('Yes');
+                //             $('#prompt_cancel_btn').show();
+                //         };
+                //         Prompt({
+                //                 hdr: "Delete",
+                //                 body: "<div class=\"alert alert-info\">No schedule exists for that job. </div>",
+                //                 action: action2,
+                //                 backdrop: false
+                //             });
+                //     }
+                // })
+                // .error(function(data, status) {
+                //     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                //         msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
+                // });
         };
 
         scope.cancelScheduleForm = function() {

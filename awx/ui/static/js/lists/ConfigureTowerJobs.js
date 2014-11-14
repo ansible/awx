@@ -41,16 +41,16 @@ angular.module('ConfigureTowerJobsListDefinition', [])
             schedule: {
                 label: 'Schedule',
                 mode: 'all',
-                ngClick: 'configureSchedule(configure_job.id)', // '#/job_templates/{{ configure_job.id }}/schedules',
+                ngClick: 'configureSchedule(configure_job.id, configure_job.name)', // '#/job_templates/{{ configure_job.id }}/schedules',
                 awToolTip: 'Schedule future job template runs',
                 dataPlacement: 'top',
-            },
-            delete: {
-                label: 'Delete Schedule',
-                mode: 'all',
-                ngClick: 'deleteSystemSchedule(configure_job.id)', // '#/job_templates/{{ configure_job.id }}/schedules',
-                awToolTip: 'Delete the schedule ',
-                dataPlacement: 'top'
             }
+            // delete: {
+            //     label: 'Delete Schedule',
+            //     mode: 'all',
+            //     ngClick: 'deleteSystemSchedule(configure_job.id)', // '#/job_templates/{{ configure_job.id }}/schedules',
+            //     awToolTip: 'Delete the schedule ',
+            //     dataPlacement: 'top'
+            // }
         }
     });
