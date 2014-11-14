@@ -90,7 +90,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 field: 'credential',
                 hdr: 'Credential Required',
                 instructions: "Launching this job requires a machine credential. Please select your machine credential now or Cancel to quit.",
-                postAction: selectionMade
+                postAction: selectionMade,
+                input_type: 'radio'
             });
             scope.lookUpCredential();
         });
@@ -674,7 +675,6 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 system_job = params.system_job || false,
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 url,
-                job_template,
                 extra_vars,
                 new_job_id,
                 launch_url,
@@ -813,10 +813,34 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 scope.removeCredentialReady();
             }
             scope.removeCredentialReady = scope.$on('CredentialReady', function(e, credential) {
+                var passwords = [];
                 if (!Empty(credential)) {
-                    job_template.credential = credential;
-                    scope.$emit('PostTheJob');
+                    Rest.setUrl(GetBasePath('credentials')+credential);
+                    Rest.get()
+                        .success(function (data) {
+                            if(data.ssh_key_unlock === "ASK"){
+                                passwords.push("ssh_password");
+                            }
+                            if(data.sudo_password === "ASK"){
+                                passwords.push("sudo_password");
+                            }
+                            if(data.su_password === "ASK"){
+                                passwords.push("su_password");
+                            }
+                            if(data.vault_password === "ASK"){
+                                passwords.push("vault_password");
+                            }
+                            if(passwords.length>0){
+                                scope.$emit('PromptForPasswords', passwords, html, url);
+                            }
+                            else scope.$emit('StartPlaybookRun', url);
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Failed to get job template details. GET returned status: ' + status });
+                        });
                 }
+
             });
 
             // Get the job or job_template record
@@ -831,14 +855,18 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     // scope.extra_vars = data.variables_needed_to_start;
                     scope.survey_enabled = data.survey_enabled;
 
-                    // new_job = data;
-                    html = '<form class="    ng-valid ng-valid-required" name="job_launch_form" id="job_launch_form" autocomplete="off" nonvalidate>';
-                    if (!Empty(data.passwords_needed_to_start) && data.passwords_needed_to_start.length > 0) {
+                    html = '<form class="ng-valid ng-valid-required" name="job_launch_form" id="job_launch_form" autocomplete="off" nonvalidate>';
+
+                    if(data.credential_needed_to_start === true){
+                        scope.$emit('PromptForCredential');
+                    }
+                    else if (!Empty(data.passwords_needed_to_start) && data.passwords_needed_to_start.length > 0) {
                         scope.$emit('PromptForPasswords', data.passwords_needed_to_start, html, url);
                     }
                     else if (data.ask_variables_on_launch) {
                         scope.$emit('PromptForVars', html, url);
-                    } else if (!Empty(data.survey_enabled) &&  data.survey_enabled===true) {
+                    }
+                    else if (!Empty(data.survey_enabled) &&  data.survey_enabled===true) {
                         scope.$emit('PromptForSurvey', html, url);
                     }
                     else {
