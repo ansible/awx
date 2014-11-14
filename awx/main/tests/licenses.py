@@ -16,6 +16,7 @@ from awx.main.task_engine import *
 class LicenseTests(BaseTest):
 
     def setUp(self):
+        self.start_redis()
         super(LicenseTests, self).setUp()
         self.setup_users()
         u = self.super_django_user
@@ -33,6 +34,10 @@ class LicenseTests(BaseTest):
         host = Host.objects.create(name='a10', inventory=inventory, created_by=u)
         host = Host.objects.create(name='a11', inventory=inventory, created_by=u)
         host = Host.objects.create(name='a12', inventory=inventory, created_by=u)
+
+    def tearDown(self):
+        super(LicenseTests, self).tearDown()
+        self.stop_redis()
 
     def test_license_writer(self):
 

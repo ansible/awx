@@ -194,8 +194,13 @@ class CleanupDeletedTest(BaseCommandMixin, BaseTest):
     '''
 
     def setUp(self):
+        self.start_redis()
         super(CleanupDeletedTest, self).setUp()
         self.create_test_inventories()
+
+    def tearDown(self):
+        super(CleanupDeletedTest, self).tearDown()
+        self.stop_redis()
 
     def get_model_counts(self):
         def get_models(m):
@@ -415,9 +420,14 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
 
     def setUp(self):
         super(InventoryImportTest, self).setUp()
+        self.start_redis()
         self.create_test_inventories()
         self.create_test_ini()
         self.create_test_license_file()
+
+    def tearDown(self):
+        super(InventoryImportTest, self).tearDown()
+        self.stop_redis()
 
     def create_test_ini(self, inv_dir=None, ini_content=None):
         ini_content = ini_content or TEST_INVENTORY_INI

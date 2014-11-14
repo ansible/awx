@@ -26,7 +26,7 @@ TEST_SIMPLE_INVENTORY_SCRIPT = "#!/usr/bin/env python\nimport json\nprint json.d
 class InventoryTest(BaseTest):
 
     def setUp(self):
-
+        self.start_redis()
         super(InventoryTest, self).setUp()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 3)
@@ -46,6 +46,10 @@ class InventoryTest(BaseTest):
              user            = self.other_django_user,
              permission_type = 'read'
         )
+
+    def tearDown(self):
+        super(InventoryTest, self).tearDown()
+        self.stop_redis()
 
     def test_get_inventory_list(self):
         url = reverse('api:inventory_list')

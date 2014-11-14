@@ -13,6 +13,7 @@ import sys
 import tempfile
 import time
 from multiprocessing import Process
+from subprocess import Popen
 
 # PyYAML
 import yaml
@@ -445,6 +446,7 @@ class BaseTestMixin(object):
                 self.assertTrue(set(obj.keys()) <= set(fields), msg)
 
     def start_taskmanager(self, command_port):
+        self.start_redis()
         self.taskmanager_process = Process(target=run_taskmanager,
                                            args=(command_port,))
         self.taskmanager_process.start()
@@ -452,8 +454,10 @@ class BaseTestMixin(object):
     def terminate_taskmanager(self):
         if hasattr(self, 'taskmanager_process'):
             self.taskmanager_process.terminate()
+        self.stop_redis()
 
     def start_queue(self):
+        self.start_redis()
         receiver = CallbackReceiver()
         self.queue_process = Process(target=receiver.run_subscriber,
                                      args=(False,))
@@ -462,9 +466,21 @@ class BaseTestMixin(object):
     def terminate_queue(self):
         if hasattr(self, 'queue_process'):
             self.queue_process.terminate()
+        self.stop_redis()
+
+    def start_redis(self):
+        if not getattr(self, 'redis_process', None):
+            self.redis_process = Popen('redis-server --port 16379 > /dev/null',
+                                       shell=True, executable='/bin/bash')
+
+    def stop_redis(self):
+        if getattr(self, 'redis_process', None):
+            self.redis_process.kill()
+            self.redis_process = None
 
 
-@override_settings(SYSTEM_UUID='00000000-0000-0000-0000-000000000000')
+@override_settings(SYSTEM_UUID='00000000-0000-0000-0000-000000000000',
+                   BROKER_URL='redis://localhost:16379/')
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''
     Base class for unit tests.

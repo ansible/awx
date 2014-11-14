@@ -57,6 +57,7 @@ class ScheduleTest(BaseTest):
 
     def setUp(self):
         super(ScheduleTest, self).setUp()
+        self.start_redis()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)
         self.organizations[0].admins.add(self.normal_django_user)
@@ -98,6 +99,10 @@ class ScheduleTest(BaseTest):
         self.without_valid_source_inventory.hosts.create(name='host_3')
         self.without_valid_source_inventory_group = self.without_valid_source_inventory.groups.create(name='not valid source')
         self.without_valid_source_inventory_source = self.without_valid_source_inventory_group.inventory_source
+
+    def tearDown(self):
+        super(ScheduleTest, self).tearDown()
+        self.stop_redis()
 
     def test_schedules_list(self):
         url = reverse('api:schedule_list')

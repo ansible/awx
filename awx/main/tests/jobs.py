@@ -198,6 +198,14 @@ TEST_SURVEY_REQUIREMENTS = '''
 class BaseJobTestMixin(BaseTestMixin):
     ''''''
 
+    def setUp(self):
+        self.start_redis()
+        super(BaseJobTestMixin, self).setUp()
+
+    def tearDown(self):
+        self.stop_redis()
+        super(BaseJobTestMixin, self).tearDown()
+
     def _create_inventory(self, name, organization, created_by,
                           groups_hosts_dict):
         '''Helper method for creating inventory with groups and hosts.'''
