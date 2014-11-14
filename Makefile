@@ -313,7 +313,7 @@ rpm-build/$(SDIST_TAR_FILE): dist/$(SDIST_TAR_FILE)
 	  (cd dist/ && tar czf ../rpm-build/$(SDIST_TAR_FILE) $(NAME)-$(VERSION)) ; \
 	  ln -sf $(SDIST_TAR_FILE) rpm-build/$(NAME)-$(VERSION).tar.gz ; \
 	else \
-	  ln -sf ../dist/$(SDIST_TAR_FILE) rpm-build/ ; \
+	  cp -a dist/$(SDIST_TAR_FILE) rpm-build/ ; \
 	fi
 
 rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
