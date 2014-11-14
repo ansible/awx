@@ -17,9 +17,9 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
     'GeneratorHelpers'])
 
     .factory('ConfigureTower', ['Wait', 'CreateDialog', 'ConfigureTowerJobsList', 'GenerateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'LoadSchedulesScope',
-        'SchedulesList', 'SchedulesControllerInit' , 'ConfigureTowerSchedule', 'Rest' , 'ProcessErrors', 'Empty', 'Prompt',
+        'SchedulesList', 'SchedulesControllerInit' , 'ConfigureTowerSchedule', 'Rest' , 'ProcessErrors',
         function(Wait, CreateDialog, ConfigureTowerJobsList, GenerateList, GetBasePath, SearchInit, PaginateInit, PlaybookRun, LoadSchedulesScope,
-            SchedulesList, SchedulesControllerInit, ConfigureTowerSchedule, Rest, ProcessErrors, Empty, Prompt) {
+            SchedulesList, SchedulesControllerInit, ConfigureTowerSchedule, Rest, ProcessErrors) {
         return function(params) {
             // Set modal dimensions based on viewport width
 
@@ -194,7 +194,7 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
 
             };
 
-            scope.configureSchedule = function(id) {
+            scope.configureSchedule = function(id, name) {
                 Rest.setUrl(scheduleUrl+id+'/schedules/');
                 Rest.get()
                     .success(function(data) {
@@ -203,14 +203,14 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                             ConfigureTowerSchedule({
                                 scope: scope,
                                 mode: 'edit',
-                                url: scheduleUrl+id+'/schedules/',
-                                // id: id
+                                url: scheduleUrl+id+'/schedules/'
                             });
                         } else {
                             ConfigureTowerSchedule({
                                 scope: scope,
                                 mode: 'add',
-                                url: scheduleUrl+id+'/schedules/'
+                                url: scheduleUrl+id+'/schedules/',
+                                name: name
                             });
                         }
                     })
@@ -290,14 +290,15 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
     }])
 
 
-.factory('ConfigureTowerSchedule', ['$compile','SchedulerInit', 'Rest', 'Wait', 'SetSchedulesInnerDialogSize', 'SchedulePost', 'ProcessErrors', 'GetBasePath', 'Empty',
-function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, ProcessErrors, GetBasePath, Empty) {
+.factory('ConfigureTowerSchedule', ['$compile','SchedulerInit', 'Rest', 'Wait', 'SetSchedulesInnerDialogSize', 'SchedulePost', 'ProcessErrors', 'GetBasePath', 'Empty', 'Prompt',
+function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, ProcessErrors, GetBasePath, Empty, Prompt) {
     return function(params) {
         var parent_scope = params.scope,
             mode = params.mode,  // 'add' or 'edit'
             url = params.url,
             scope = parent_scope.$new(),
             id = params.id || undefined,
+            name = params.name || undefined,
             schedule = {},
             scheduler,
             target,
@@ -365,13 +366,20 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 container.width($('#configure-schedules-tab').width() - 18);
                 SetSchedulesInnerDialogSize();
                 container.show('slide', { direction: 'right' }, 300);
-                // $('#configure-save-button').prop('disabled', true);
+                // scope.schedulerPurgeDays = (!Empty(scope.days)) ? Number(scope.days) : 30;
                 target.show();
+                if(mode==="add"){
+                    scope.$apply(function(){
+                        scope.schedulerPurgeDays = 30;
+                        scope.schedulerName = name+' Schedule';
+                    });
+                }
                 if (mode === 'edit') {
                     scope.$apply(function() {
                         scheduler.setRRule(schedule.rrule);
                         scheduler.setName(schedule.name);
                         scope.schedulerPurgeDays = (!Empty(scope.days)) ? Number(scope.days) : 30;
+                        scope.id = id;
                     });
                 }
             };
