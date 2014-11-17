@@ -735,6 +735,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
 
     def setUp(self):
         super(ProjectUpdatesTest, self).setUp()
+        self.setup_instances()
         self.start_queue()
         self.setup_users()
 

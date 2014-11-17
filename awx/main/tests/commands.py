@@ -422,6 +422,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
     def setUp(self):
         super(InventoryImportTest, self).setUp()
         self.start_redis()
+        self.setup_instances()
         self.create_test_inventories()
         self.create_test_ini()
         self.create_test_license_file()
