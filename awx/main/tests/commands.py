@@ -104,7 +104,6 @@ class BaseCommandMixin(object):
     '''
 
     def create_test_inventories(self):
-        self.setup_instances()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)
         self.projects = self.make_projects(self.normal_django_user, 2)
@@ -297,6 +296,7 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
     def setUp(self):
         super(CleanupJobsTest, self).setUp()
         self.test_project_path = None
+        self.setup_instances()
         self.setup_users()
         self.organization = self.make_organizations(self.super_django_user, 1)[0]
         self.inventory = Inventory.objects.create(name='test-inventory',

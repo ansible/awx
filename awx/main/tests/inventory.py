@@ -1083,6 +1083,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
 
     def setUp(self):
         super(InventoryUpdatesTest, self).setUp()
+        self.setup_instances()
         self.setup_users()
         self.organization = self.make_organizations(self.super_django_user, 1)[0]
         self.organization.admins.add(self.normal_django_user)

@@ -42,8 +42,8 @@ class ProjectsTest(BaseTransactionTest):
         return reverse('api:project_list')
 
     def setUp(self):
-        self.setup_instances()
         super(ProjectsTest, self).setUp()
+        self.setup_instances()
         self.setup_users()
 
         self.organizations = self.make_organizations(self.super_django_user, 10)

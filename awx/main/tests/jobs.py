@@ -196,16 +196,7 @@ TEST_SURVEY_REQUIREMENTS = '''
 '''
 
 class BaseJobTestMixin(BaseTestMixin):
-    ''''''
 
-    def setUp(self):
-        self.start_redis()
-        self.setup_instances()
-        super(BaseJobTestMixin, self).setUp()
-
-    def tearDown(self):
-        self.stop_redis()
-        super(BaseJobTestMixin, self).tearDown()
 
     def _create_inventory(self, name, organization, created_by,
                           groups_hosts_dict):
@@ -698,11 +689,14 @@ class BaseJobTestMixin(BaseTestMixin):
 
     def setUp(self):
         super(BaseJobTestMixin, self).setUp()
+        self.start_redis()
+        self.setup_instances()
         self.populate()
         self.start_queue()
 
     def tearDown(self):
         super(BaseJobTestMixin, self).tearDown()
+        self.stop_redis()
         self.terminate_queue()
 
 class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
