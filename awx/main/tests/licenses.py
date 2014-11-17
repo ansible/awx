@@ -17,6 +17,7 @@ class LicenseTests(BaseTest):
 
     def setUp(self):
         self.start_redis()
+        self.setup_instances()
         super(LicenseTests, self).setUp()
         self.setup_users()
         u = self.super_django_user

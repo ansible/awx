@@ -358,6 +358,7 @@ class RunJobTest(BaseCeleryTest):
     def setUp(self):
         super(RunJobTest, self).setUp()
         self.test_project_path = None
+        self.setup_instances()
         self.setup_users()
         self.organization = self.make_organizations(self.super_django_user, 1)[0]
         self.inventory = self.organization.inventories.create(name='test-inventory',

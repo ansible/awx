@@ -69,6 +69,9 @@ class BaseTestMixin(object):
             os.environ['AWX_TEST_DATABASE_%s' % opt] = settings.DATABASES['default'][opt]
         # Set flag so that task chain works with unit tests.
         settings.CELERY_UNIT_TEST = True
+        settings.SYSTEM_UUID='00000000-0000-0000-0000-000000000000'
+        settings.BROKER_URL='redis://localhost:16379/'
+        
         # Create unique random consumer and queue ports for zeromq callback.
         if settings.CALLBACK_CONSUMER_PORT:
             callback_port = random.randint(55700, 55799)
@@ -213,6 +216,10 @@ class BaseTestMixin(object):
                 role_playbooks=role_playbooks,
             ))
         return results
+
+    def setup_instances(self):
+        instance = Instance(uuid=settings.SYSTEM_UUID, primary=True, ip_address='127.0.0.1')
+        instance.save()
 
     def setup_users(self, just_super_user=False):
         # Create a user.
@@ -479,8 +486,6 @@ class BaseTestMixin(object):
             self.redis_process = None
 
 
-@override_settings(SYSTEM_UUID='00000000-0000-0000-0000-000000000000',
-                   BROKER_URL='redis://localhost:16379/')
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''
     Base class for unit tests.

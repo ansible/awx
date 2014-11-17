@@ -26,6 +26,7 @@ class UsersTest(BaseTest):
         return reverse('api:user_list')
 
     def setUp(self):
+        self.setup_instances()
         super(UsersTest, self).setUp()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)

@@ -58,6 +58,7 @@ class ScheduleTest(BaseTest):
     def setUp(self):
         super(ScheduleTest, self).setUp()
         self.start_redis()
+        self.setup_instances()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)
         self.organizations[0].admins.add(self.normal_django_user)

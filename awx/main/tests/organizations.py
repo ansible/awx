@@ -18,6 +18,7 @@ class OrganizationsTest(BaseTest):
 
     def setUp(self):
         super(OrganizationsTest, self).setUp()
+        self.setup_instances()
         self.setup_users()
  
         self.organizations = self.make_organizations(self.super_django_user, 10)

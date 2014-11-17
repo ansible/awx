@@ -104,6 +104,7 @@ class BaseCommandMixin(object):
     '''
 
     def create_test_inventories(self):
+        self.setup_instances()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)
         self.projects = self.make_projects(self.normal_django_user, 2)

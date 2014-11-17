@@ -200,6 +200,7 @@ class BaseJobTestMixin(BaseTestMixin):
 
     def setUp(self):
         self.start_redis()
+        self.setup_instances()
         super(BaseJobTestMixin, self).setUp()
 
     def tearDown(self):

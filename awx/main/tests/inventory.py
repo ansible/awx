@@ -28,6 +28,7 @@ class InventoryTest(BaseTest):
     def setUp(self):
         self.start_redis()
         super(InventoryTest, self).setUp()
+        self.setup_instances()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 3)
         self.organizations[0].admins.add(self.normal_django_user)
