@@ -25,11 +25,16 @@ fi
 
 service_action() {
     for svc in ${SERVICES[@]}; do
-	service ${svc} $1
-	this_return=$?
-	if [ $this_return -gt $worst_return ]; then
-	    worst_return=$this_return
-	fi
+        service ${svc} $1
+        this_return=$?
+        if [ $this_return -gt $worst_return ]; then
+            worst_return=$this_return
+        fi
+        # Allow supervisor time to cleanup child pids (ubuntu only)
+        if [[ ${svc} == supervisor* && ${1} == stop && -e /etc/debian_version ]]; then
+            echo "Waiting to allow supervisor time to cleanup ..."
+            sleep 5
+        fi
     done
 }
 
