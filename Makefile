@@ -33,6 +33,7 @@ else
 endif
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
+SETUP_TAR_LINK=$(NAME)-setup-latest.tar.gz
 
 # DEB build parameters
 DEBUILD_BIN ?= debuild
@@ -289,9 +290,11 @@ tar-build/$(SETUP_TAR_FILE):
 	@cp -a setup tar-build/$(SETUP_TAR_NAME)
 	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
 	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
+	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
 	@echo "#############################################"
 	@echo "Setup artifacts:"
 	@echo tar-build/$(SETUP_TAR_FILE)
+	@echo tar-build/$(SETUP_TAR_LINK)
 	@echo "#############################################"
 
 setup_tarball: tar-build/$(SETUP_TAR_FILE)
