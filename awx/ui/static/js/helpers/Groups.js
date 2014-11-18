@@ -508,7 +508,6 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
         list = $('#schedules-list');
         target = $('#schedules-form');
         container = $('#schedules-form-container');
-
         // Clean up any lingering stuff
         container.hide();
         target.empty();

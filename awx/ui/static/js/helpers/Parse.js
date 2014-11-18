@@ -28,6 +28,17 @@ angular.module('ParseHelper', ['Utilities', 'AngularCodeMirrorModule'])
             function removeField() {
                 //set our model to the last change in CodeMirror and then destroy CodeMirror
                 scope[fld] = scope.codeMirror.getValue();
+
+                // codeMirror.destroy looks for anything with a CodeMirror class and destroys it, so if there are multiple codeMirror editor instances, it will delete them all,
+                // // which was the case if launching a job from the job template form. I had to add a check to see if there were multiple instances and only remove the second one found on the modal.
+                // if( $(".CodeMirror").length >1) {
+                //     var self = scope.codeMirror;
+                //     $('.CodeMirror:eq(1)').empty().remove();
+                //     if (self.element) {
+                //         self.element.show();
+                //     }
+                // }
+                // else
                 scope.codeMirror.destroy();
             }
 

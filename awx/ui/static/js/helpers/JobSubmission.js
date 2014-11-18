@@ -31,7 +31,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                     });
             }
             if(scope.prompt_for_vars===true){
-                extra_vars = ToJSON(scope.parseType, scope.variables, false);
+                extra_vars = ToJSON(scope.parseType, scope.extra_vars, false);
                 $.each(extra_vars, function(key,value){
                     job_launch_data[key] = value;
                 });
@@ -133,9 +133,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
 
 .factory('CreateLaunchDialog', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateDialog', 'GenerateForm',
-    'JobVarsPromptForm', 'Wait',
+    'JobVarsPromptForm', 'Wait', 'ParseTypeChange',
     function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
-        JobVarsPromptForm, Wait) {
+        JobVarsPromptForm, Wait, ParseTypeChange) {
     return function(params) {
         var buttons,
             scope = params.scope,
@@ -151,6 +151,10 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         $('#password-modal').find('textarea').before(scope.helpContainer);
         e = angular.element(document.getElementById('password-modal'));
         $compile(e)(scope);
+
+        if(scope.prompt_for_vars===true){
+            ParseTypeChange({ scope: scope, field_id: 'job_extra_vars' , variable: "extra_vars"});
+        }
 
         buttons = [{
             label: "Cancel",
@@ -194,6 +198,18 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             $('#password-accept-button').attr('ng-disabled', 'job_launch_form.$invalid' );
             e = angular.element(document.getElementById('password-accept-button'));
             $compile(e)(scope);
+            // if(scope.prompt_for_vars===true){
+            //     setTimeout(function() {
+            //         TextareaResize({
+            //             scope: scope,
+            //             textareaId: 'job_variables',
+            //             modalId: 'password-modal',
+            //             formId: 'job_launch_form',
+            //             parse: true
+            //         });
+            //     }, 300);
+            // }
+
         });
     };
 
@@ -364,44 +380,27 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             // job = params.job,
             url = params.url,
             vars_url = GetBasePath('job_templates')+scope.job_template_id + '/',
-            // e, helpContainer,
             html = params.html || "";
 
 
         function buildHtml(extra_vars){
-            //  html += GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit',  scope: scope });
-            // scope.helpContainer = "<div style=\"display:inline-block; font-size: 12px; margin-top: 6px;\" class=\"help-container pull-right\">\n" +
-            //     "<a href=\"\" id=\"awp-promote\" href=\"\" aw-pop-over=\"{{ helpText }}\" aw-tool-tip=\"Click for help\" aw-pop-over-watch=\"helpText\" " +
-            //     "aw-tip-placement=\"top\" data-placement=\"bottom\" data-container=\"body\" data-title=\"Help\" class=\"help-link\"><i class=\"fa fa-question-circle\">" +
-            //     "</i> click for help</a></div>\n";
 
-            // scope.helpText = "<p>After defining any extra variables, click Continue to start the job. Otherwise, click cancel to abort.</p>" +
-            //             "<p>Extra variables are passed as command line variables to the playbook run. It is equivalent to the -e or --extra-vars " +
-            //             "command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
-            //             "JSON:<br />\n" +
-            //             "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
-            //             "YAML:<br />\n" +
-            //             "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-            //             "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+            html += GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
+            scope.helpContainer = "<div style=\"display:inline-block; font-size: 12px; margin-top: 6px;\" class=\"help-container pull-right\">\n" +
+                "<a href=\"\" id=\"awp-promote\" href=\"\" aw-pop-over=\"{{ helpText }}\" aw-tool-tip=\"Click for help\" aw-pop-over-watch=\"helpText\" " +
+                "aw-tip-placement=\"top\" data-placement=\"bottom\" data-container=\"body\" data-title=\"Help\" class=\"help-link\"><i class=\"fa fa-question-circle\">" +
+                "</i> click for help</a></div>\n";
 
-            // <div class="form-group">
-            html+= '<div>'+
-            '<div class="parse-selection" id="job_variables_parse_type">Parse as: <input type="radio" ng-disabled="disableParseSelection" ng-model="parseType" value="yaml" ng-change="parseTypeChange()" class="ng-pristine ng-valid" name="00L"> <span class="parse-label">YAML</span>'+
-            '<input type="radio" ng-disabled="disableParseSelection" ng-model="parseType" value="json" ng-change="parseTypeChange()" class="ng-pristine ng-valid" name="00M"> <span class="parse-label">JSON</span>'+
-            '</div>'+
-            '<div style="display:inline-block; font-size: 12px; margin-top: 6px;" class="help-container pull-right">'+
-            '<a href="" id="awp-promote" aw-pop-over="<p>After defining any extra variables, click Continue to start the job. Otherwise, click cancel to abort.</p><p>Extra variables are passed as command line variables to the playbook run. It is equivalent to the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>JSON:<br />'+
-            '<blockquote>{<br />&quot;somevar&quot;: &quot;somevalue&quot;,<br />&quot;password&quot;: &quot;magic&quot;<br /> }</blockquote>'+
-            'YAML:<br />'+
-            '<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>'+
-            '<div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>'+
-            '" aw-tool-tip="Click for help" aw-pop-over-watch="helpText" aw-tip-placement="top" data-placement="bottom" data-container="body" data-title="Help" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i> click for help</a></div>'+
-            '<textarea rows="6" ng-model="variables" name="variables" class="form-control ng-pristine ng-valid" id="job_variables" aw-watch=""></textarea>'+
-            '<div class="error api-error ng-binding" id="job-variables-api-error" ng-bind="variables_api_error"></div>'+
-            '</div>';
-            // </div>
+            scope.helpText = "<p>After defining any extra variables, click Continue to start the job. Otherwise, click cancel to abort.</p>" +
+                "<p>Extra variables are passed as command line variables to the playbook run. It is equivalent to the -e or --extra-vars " +
+                "command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
+                "JSON:<br />\n" +
+                "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+                "YAML:<br />\n" +
+                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
 
-            scope.variables = ParseVariableString(extra_vars);
+            scope.extra_vars = ParseVariableString(extra_vars);
             scope.parseType = 'yaml';
             scope.$emit(callback, html, url);
         }
@@ -418,100 +417,6 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         });
 
 
-        // CreateLaunchDialog({scope: scope, html: html})
-        // Reuse password modal
-        // $('#password-modal').empty().html(html);
-        // $('#password-modal').find('textarea').before(helpContainer);
-        // e = angular.element(document.getElementById('password-modal'));
-        // $compile(e)(scope);
-
-        // buttons = [{
-        //     label: "Cancel",
-        //     onClick: function() {
-        //         scope.varsCancel();
-        //     },
-        //     icon: "fa-times",
-        //     "class": "btn btn-default",
-        //     "id": "vars-cancel-button"
-        // },{
-        //     label: "Continue",
-        //     onClick: function() {
-        //         scope.varsAccept();
-        //     },
-        //     icon: "fa-check",
-        //     "class": "btn btn-primary",
-        //     "id": "vars-accept-button"
-        // }];
-
-        // if (scope.removeDialogReady) {
-        //     scope.removeDialogReady();
-        // }
-        // scope.removeDialogReady = scope.$on('DialogReady', function() {
-        //     Wait('stop');
-        //     $('#password-modal').dialog('open');
-        //     setTimeout(function() {
-        //         TextareaResize({
-        //             scope: scope,
-        //             textareaId: 'job_variables',
-        //             modalId: 'password-modal',
-        //             formId: 'job_form',
-        //             parse: true
-        //         });
-        //     }, 300);
-        // });
-
-        // CreateDialog({
-        //     id: 'password-modal',
-        //     scope: scope,
-        //     buttons: buttons,
-        //     width: 575,
-        //     height: 530,
-        //     minWidth: 450,
-        //     title: 'Extra Variables',
-        //     onResizeStop: function() {
-        //         TextareaResize({
-        //             scope: scope,
-        //             textareaId: 'job_variables',
-        //             modalId: 'password-modal',
-        //             formId: 'job_form',
-        //             parse: true
-        //         });
-        //     },
-        //     beforeDestroy: function() {
-        //         if (scope.codeMirror) {
-        //             scope.codeMirror.destroy();
-        //         }
-        //         $('#password-modal').empty();
-        //     },
-        //     onOpen: function() {
-        //         $('#job_variables').focus();
-        //     },
-        //     callback: 'DialogReady'
-        // });
-
-        // scope.varsCancel = function() {
-        //     $('#password-modal').dialog('close');
-        //     scope.$emit('CancelJob');
-        //     scope.$destroy();
-        // };
-
-        // scope.varsAccept = function() {
-        //     job.extra_vars = ToJSON(scope.parseType, scope.variables, true);
-        //     Wait('start');
-        //     //Rest.setUrl(GetBasePath('jobs') + job.id + '/');
-        //     Rest.setUrl(url);
-        //     Rest.put(job)
-        //         .success(function() {
-        //             Wait('stop');
-        //             $('#password-modal').dialog('close');
-        //             scope.$emit(callback);
-        //             scope.$destroy();
-        //         })
-        //         .error(function(data, status) {
-        //             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-        //                 msg: 'Failed updating job ' + job.id + ' with variables. PUT returned: ' + status });
-        //         });
-        // };
 
     };
 }])
@@ -670,7 +575,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
     function ($location, $routeParams, LaunchJob, PromptForPasswords, Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty,
         PromptForCredential, PromptForVars, PromptForSurvey, CreateLaunchDialog) {
         return function (params) {
-            var scope = params.scope,
+            var //parent_scope = params.scope,
+                scope = params.scope.$new(),
                 id = params.id,
                 system_job = params.system_job || false,
                 base = $location.path().replace(/^\//, '').split('/')[0],

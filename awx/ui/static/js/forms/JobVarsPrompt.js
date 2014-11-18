@@ -25,7 +25,7 @@ angular.module('JobVarsPromptFormDefinition', [])
         actions: { },
 
         fields: {
-            variables: {
+            extra_vars: {
                 label: null,
                 type: 'textarea',
                 rows: 6,
