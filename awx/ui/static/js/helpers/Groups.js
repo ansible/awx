@@ -239,6 +239,22 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         id: 'all',
                         text: 'All'
                     }]);
+                    // FIXME: Should come from API.
+                    scope.group_by_choices = [
+                        {label: 'All', name: 'All', value: 'all'},
+                        {label: 'Instance ID', name: 'Instance ID', value: 'instance_id'},
+                        {label: 'Region', name: 'Region', value: 'region'},
+                        {label: 'Availability Zone', name: 'Availability Zone', value: 'availability_zone'},
+                        {label: 'AMI ID', name: 'AMI ID', value: 'ami_id'},
+                        {label: 'Instance Type', name: 'Instance Type', value: 'instance_type'},
+                        {label: 'Key Pair', name: 'Key Pair', value: 'key_pair'},
+                        {label: 'Security Group', name: 'Security Group', value: 'security_group'},
+                        {label: 'Tag Keys', name: 'Tag Keys', value: 'tag_keys'},
+                    ];
+                    $('#s2id_source_group_by').select2('data', [{
+                        id: 'all',
+                        text: 'All'
+                    }]);
                     $('#source_form').addClass('squeeze');
                 } else if (scope.source.value === 'gce') {
                     scope.source_region_choices = scope.gce_regions;
