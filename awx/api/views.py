@@ -1755,7 +1755,14 @@ class SystemJobTemplateLaunch(GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
         new_job = obj.create_unified_job()
-        result = new_job.signal_start()
+        if 'extra_vars' in request.DATA:
+            try:
+                extra_vars = json.loads(request.DATA['extra_vars'])
+            except Exception:
+                extra_vars = {}
+        else:
+            extra_vars = {}
+        result = new_job.signal_start(**extra_vars)
         data = dict(system_job=new_job.id)
         return Response(data, status=status.HTTP_202_ACCEPTED)
 

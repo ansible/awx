@@ -1168,7 +1168,7 @@ class RunSystemJob(BaseTask):
                 if 'inventory_updates' in json_vars and json_vars['inventory_updates']:
                     args.extend(['--inventory-updates'])
         except Exception, e:
-            pass
+            logger.error("Failed to parse system job: " + str(e))
         return args
 
     def build_cwd(self, instance, **kwargs):
