@@ -362,7 +362,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
     def get_types(self):
         if type(self) is UnifiedJobTemplateSerializer:
-            return ['project', 'inventory_source', 'job_template']
+            return ['project', 'inventory_source', 'job_template', 'system_job_template']
         else:
             return super(UnifiedJobTemplateSerializer, self).get_types()
 
@@ -442,7 +442,7 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
 
     def get_types(self):
        if type(self) is UnifiedJobListSerializer:
-           return ['project_update', 'inventory_update', 'job']
+           return ['project_update', 'inventory_update', 'job', 'system_job']
        else:
            return super(UnifiedJobListSerializer, self).get_types()
 
@@ -474,7 +474,7 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
     def get_types(self):
         if type(self) is UnifiedJobStdoutSerializer:
-            return ['project_update', 'inventory_update', 'job']
+            return ['project_update', 'inventory_update', 'job', 'system_job']
         else:
             return super(UnifiedJobStdoutSerializer, self).get_types()
 
