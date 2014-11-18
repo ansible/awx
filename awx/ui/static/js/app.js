@@ -40,6 +40,7 @@ angular.module('Tower', [
     'PaginationHelpers',
     'RefreshHelper',
     'AdminListDefinition',
+    'CustomInventoryListDefinition',
     'AWDirectives',
     'InventoriesListDefinition',
     'InventoryFormDefinition',
@@ -121,7 +122,9 @@ angular.module('Tower', [
     'SurveyQuestionFormDefinition',
     'PortalJobsListDefinition',
     'ConfigureTowerHelper',
-    'ConfigureTowerJobsListDefinition'
+    'ConfigureTowerJobsListDefinition',
+    'CreateCustomInventoryHelper',
+    'CustomInventoryListDefinition'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -434,9 +437,9 @@ angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'LicenseViewer', 'AboutAnsibleHelp', 'ConfigureTower',
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'LicenseViewer', 'AboutAnsibleHelp', 'ConfigureTower', 'CreateCustomInventory' ,
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
-        LoadConfig, Store, ShowSocketHelp, LicenseViewer, AboutAnsibleHelp, ConfigureTower) {
+        LoadConfig, Store, ShowSocketHelp, LicenseViewer, AboutAnsibleHelp, ConfigureTower, CreateCustomInventory) {
 
 
             var e, html, sock, checkCount = 0;
@@ -591,6 +594,12 @@ angular.module('Tower', [
                 $rootScope.configureTower = function(){
                     ConfigureTower({
                         scope: $rootScope,
+                        parent_scope: $rootScope
+                    });
+                };
+
+                $rootScope.createCustomInv = function(){
+                    CreateCustomInventory({
                         parent_scope: $rootScope
                     });
                 };

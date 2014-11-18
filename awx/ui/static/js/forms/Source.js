@@ -63,6 +63,50 @@ angular.module('SourceFormDefinition', [])
                     "</p>",
                 dataContainer: 'body'
             },
+            instance_filters: {
+                label: 'Instance Filters',
+                type: 'text',
+                ngShow: "source && source.value == 'ec2'",
+                addRequired: false,
+                editRequired: false,
+                dataTitle: 'Instance Filters',
+                dataPlacement: 'right',
+                awPopOver: "<p>Open the <a href=http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html target='_blank'>documentation</a> for a complete list of filter options.</p>",
+                dataContainer: 'body'
+            },
+            group_by: {
+                label: 'Group By',
+                type: 'text',
+                ngShow: "source && source.value == 'ec2'",
+                addRequired: false,
+                editRequired: false,
+                awMultiselect: 'group_by_choices',
+                dataTitle: 'Group By',
+                dataPlacement: 'right',
+                awPopOver: "<p>FIXME: Create these automatic groups by default.</p>",
+                dataContainer: 'body'
+            },
+            group_tag_filters: {
+                label: 'Tag Filters',
+                type: 'text',
+                ngShow: "source && source.value == 'ec2' && group_by.value.indexOf('tag_keys') >= 0", // FIXME: Not sure what's needed to make the last expression work.
+                addRequired: false,
+                editRequired: false,
+                dataTitle: 'Tag Filters',
+                dataPlacement: 'right',
+                awPopOver: "<p>FIXME: When grouping by tags, specify which tag keys become groups.</p>",
+                dataContainer: 'body'
+            },
+            custom_script: {
+                label :  "Custom Inventory Scripts",
+                type: 'lookup',
+                ngShow: "source && source.value !== '' && source.value === 'custom'",
+                sourceModel: 'custom_script',
+                sourceField: 'name',
+                ngClick: 'lookUpCustomScript()',
+                addRequired: false,
+                editRequired: false
+            },
             source_vars: {
                 label: 'Source Variables',
                 ngShow: "source && (source.value == 'file' || source.value == 'ec2' || source.value == 'custom')",
