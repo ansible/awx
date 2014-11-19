@@ -456,6 +456,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                             type = 'project';
                             url = '/projects/' + activity.summary_fields[type].id + '/schedules/?id__int=';
                         }
+                        else if (activity.summary_fields.system_job_template) {
+                            type = 'system_job_template';
+                            url = '/system_job_templates/' + activity.summary_fields[type].id + '/schedules/?id__int=';
+                        }
                         else if (activity.summary_fields.job_template) {
                             type = 'job_template';
                             url = '/job_templates/' + activity.summary_fields[type].id + '/schedules/?id__int=';
