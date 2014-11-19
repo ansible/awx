@@ -287,6 +287,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                                                                                     survey_element['choices']))
         return errors
 
+    @property
+    def cache_timeout_blocked(self):
+        return False
 
     def _can_update(self):
         return self.can_start_without_user_input()
@@ -370,10 +373,6 @@ class Job(UnifiedJob, JobOptions):
             return False
         return False
 
-    @property
-    def cache_timeout_blocked(self):
-        return False
-    
     @property
     def task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
