@@ -34,14 +34,6 @@ angular.module('CustomInventoryListDefinition', [])
                 excludeModal: true,
                 columnClass: 'col-md-5 hidden-sm hidden-xs'
             },
-            // kind: {
-            //     label: 'Type',
-            //     searchType: 'select',
-            //     searchOptions: [], // will be set by Options call to credentials resource
-            //     excludeModal: true,
-            //     nosort: true,
-            //     columnClass: 'col-md-3 hidden-sm hidden-xs'
-            // }
         },
 
         actions: {
@@ -50,16 +42,11 @@ angular.module('CustomInventoryListDefinition', [])
                 ngClick: 'addCustomInv()',
                 awToolTip: 'Create a new credential'
             },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'edit'
-            }
         },
 
         fieldActions: {
             edit: {
-                ngClick: "editCredential(credential.id)",
+                ngClick: "editCustomInv(custom_inventory.id)",
                 icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
@@ -68,7 +55,7 @@ angular.module('CustomInventoryListDefinition', [])
             },
 
             "delete": {
-                ngClick: "deleteCredential(credential.id, credential.name)",
+                ngClick: "deleteCustomInv(custom_inventory.id, custom_inventory.name)",
                 icon: 'fa-trash',
                 label: 'Delete',
                 "class": 'btn-sm',

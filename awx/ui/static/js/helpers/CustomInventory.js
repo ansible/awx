@@ -16,22 +16,18 @@
 angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
     'GeneratorHelpers', 'CustomInventoryFormDefinition'])
 
-    .factory('CreateCustomInventory', ['Wait', 'CreateDialog', 'CustomInventoryList', 'GenerateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'LoadSchedulesScope',
-        'SchedulesList', 'SchedulesControllerInit' , 'ConfigureTowerSchedule', 'Rest' , 'ProcessErrors', 'CustomInventoryForm', 'GenerateForm',
-        function(Wait, CreateDialog, CustomInventoryList, GenerateList, GetBasePath, SearchInit, PaginateInit, PlaybookRun, LoadSchedulesScope,
-            SchedulesList, SchedulesControllerInit, ConfigureTowerSchedule, Rest, ProcessErrors, CustomInventoryForm, GenerateForm) {
+    .factory('CreateCustomInventory', ['Wait', 'CreateDialog', 'CustomInventoryList', 'GenerateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'CustomInventoryAdd',
+        'SchedulesList', 'CustomInventoryEdit', 'Rest' , 'ProcessErrors', 'CustomInventoryForm', 'GenerateForm', 'Prompt',
+        function(Wait, CreateDialog, CustomInventoryList, GenerateList, GetBasePath, SearchInit, PaginateInit, PlaybookRun, CustomInventoryAdd,
+            SchedulesList, CustomInventoryEdit, Rest, ProcessErrors, CustomInventoryForm, GenerateForm, Prompt) {
         return function(params) {
             // Set modal dimensions based on viewport width
 
             var scope = params.parent_scope.$new(),
-                parent_scope = params.parent_scope,
                 callback = 'OpenConfig',
-                defaultUrl = GetBasePath('system_job_templates'),
+                defaultUrl = GetBasePath('inventory_scripts'),
                 list = CustomInventoryList,
                 view = GenerateList,
-                scheduleUrl = GetBasePath('system_job_templates'),
-                form = CustomInventoryForm,
-                generator = GenerateForm,
                 buttons = [
                 {
                     "label": "Close",
@@ -41,7 +37,7 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
                     },
                     "icon": "fa-times",
                     "class": "btn btn-default",
-                    "id": "configure-close-button"
+                    "id": "script-close-button"
                 }
             ];
 
@@ -51,13 +47,13 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
                 scope.removeOpenConfig();
             }
             scope.removeOpenConfig = scope.$on('OpenConfig', function() {
-                $('#configure-tower-dialog').dialog('open');
-                $('#configure-close-button').focus();
-                $('#configure-close-button').blur();
+                $('#custom-script-dialog').dialog('open');
+                $('#script-close-button').focus();
+                $('#script-close-button').blur();
             });
 
             view.inject( list, {
-                id : 'configure-jobs',
+                id : 'custom-script-dialog',
                 mode: 'edit',
                 scope: scope,
                 breadCrumbs: false,
@@ -67,7 +63,7 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
 
             SearchInit({
                 scope: scope,
-                set: 'configure_jobs',
+                set: 'custum_inventories',
                 list: list,
                 url: defaultUrl
             });
@@ -79,20 +75,20 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
 
             scope.search(list.iterator);
 
-            SchedulesControllerInit({
-                scope: scope,
-                parent_scope: parent_scope,
-                // list: list
-            });
+            // SchedulesControllerInit({
+            //     scope: scope,
+            //     parent_scope: parent_scope,
+            //     // list: list
+            // });
 
 
             CreateDialog({
-                id: 'configure-tower-dialog',
+                id: 'custom-script-dialog',
                 title: 'Inventory Script',
-                target: 'configure-tower-dialog',
+                target: 'custom-script-dialog',
                 scope: scope,
                 buttons: buttons,
-                width: 670,
+                width: 700,
                 height: 800,
                 minWidth: 400,
                 callback: callback,
@@ -106,12 +102,12 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
                         // remove lingering popover <div> elements
                         $(this).remove();
                     });
-                    $("#configure-jobs").show();
-                    $("#configure-schedules-form-container").hide();
-                    $('#configure-schedules-list').empty();
-                    $('#configure-schedules-form').empty();
-                    $('#configure-schedules-detail').empty();
-                    $('#configure-tower-dialog').hide();
+                    // $("#configure-jobs").show();
+                    // $("#configure-schedules-form-container").hide();
+                    // $('#configure-schedules-list').empty();
+                    // $('#configure-schedules-form').empty();
+                    // $('#configure-schedules-detail').empty();
+                    // $('#configure-tower-dialog').hide();
                     $(this).dialog('destroy');
                     scope.cancelConfigure();
                 },
@@ -122,7 +118,7 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
              // Cancel
             scope.cancelConfigure = function () {
                 try {
-                    $('#configure-tower-dialog').dialog('close');
+                    $('#custom-script-dialog').dialog('close');
                 }
                 catch(e) {
                     //ignore
@@ -138,342 +134,194 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
                 }
             };
 
-            scope.submitJob = function (id) {
-                Wait('start');
-                scheduleUrl += id+'/launch/';
-                CreateDialog({
-                    id: 'prompt-for-days'    ,
-                    title: "Cleanup Job",
+            scope.editCustomInv = function(id){
+                CustomInventoryEdit({
                     scope: scope,
-                    width: 500,
-                    height: 300,
-                    minWidth: 200,
-                    callback: 'PromptForDays',
-                    buttons: [{
-                        "label": "Cancel",
-                        "onClick": function() {
-                            $(this).dialog('close');
-
-                        },
-                        "icon": "fa-times",
-                        "class": "btn btn-default",
-                        "id": "prompt-for-days-button"
-                    },{
-                        "label": "Launch",
-                        "onClick": function() {
-                            var extra_vars = {"days": $("#days_to_keep").val() },
-                            data = {};
-                            data.extra_vars = JSON.stringify(extra_vars);
-
-                            Rest.setUrl(scheduleUrl);
-                            Rest.post(data)
-                                .success(function() {
-                                    Wait('stop');
-                                    $("#prompt-for-days").dialog("close");
-                                    $("#configure-tower-dialog").dialog('close');
-                                })
-                                .error(function(data, status) {
-                                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                        msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
-                                });
-                        },
-                        "icon":  "fa-rocket",
-                        "class": "btn btn-primary",
-                        "id": "prompt-for-days-button"
-                    }]
+                    id: id
                 });
-
-                if (scope.removePromptForDays) {
-                    scope.removePromptForDays();
-                }
-                scope.removePromptForDays = scope.$on('PromptForDays', function() {
-                    // $('#configure-tower-dialog').dialog('close');
-                    $('#prompt-for-days').show();
-                    $('#prompt-for-days').dialog('open');
-                    Wait('stop');
-                });
-
-
-
             };
+            scope.deleteCustomInv =  function(id, name){
 
-            scope.configureSchedule = function(id, name) {
-                Rest.setUrl(scheduleUrl+id+'/schedules/');
-                Rest.get()
-                    .success(function(data) {
-                        if(data.count>0){
-                            scope.days=data.results[0].extra_data.days;
-                            ConfigureTowerSchedule({
-                                scope: scope,
-                                mode: 'edit',
-                                url: scheduleUrl+id+'/schedules/'
-                            });
-                        } else {
-                            ConfigureTowerSchedule({
-                                scope: scope,
-                                mode: 'add',
-                                url: scheduleUrl+id+'/schedules/',
-                                name: name
-                            });
-                        }
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
-                    });
+                var action = function () {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+                    var url = defaultUrl + id + '/';
+                    Rest.setUrl(url);
+                    Rest.destroy()
+                        .success(function () {
+                            scope.search(list.iterator);
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                        });
+                };
 
+                Prompt({
+                    hdr: 'Delete',
+                    body: "<div class\"alert alert-info\">Are you sure you want to delete  " + name + "?</div>",
+                    action: action
+                });
             };
 
             scope.addCustomInv = function(){
-                // generator.inject(form, { mode: 'add', related: false, scope: $scope, });
-                generator.inject(form, { id:'configure-jobs', mode: 'add' , scope:scope, related: false, breadCrumbs: false});
-                generator.reset();
+                CustomInventoryAdd({
+                    scope: scope
+                });
             };
 
-            parent_scope.refreshJobs = function(){
-                scope.search(SchedulesList.iterator);
-            };
+
 
         };
     }])
 
 
-.factory('ConfigureTowerSchedule', ['$compile','SchedulerInit', 'Rest', 'Wait', 'SetSchedulesInnerDialogSize', 'SchedulePost', 'ProcessErrors', 'GetBasePath', 'Empty', 'Prompt',
-function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, ProcessErrors, GetBasePath, Empty, Prompt) {
+.factory('CustomInventoryAdd', ['$compile','SchedulerInit', 'Rest', 'Wait', 'CustomInventoryList', 'CustomInventoryForm', 'ProcessErrors', 'GetBasePath', 'Empty', 'GenerateForm',
+    'SearchInit' , 'PaginateInit', 'GenerateList',
+function($compile, SchedulerInit, Rest, Wait, CustomInventoryList, CustomInventoryForm, ProcessErrors, GetBasePath, Empty, GenerateForm,
+    SearchInit, PaginateInit, GenerateList) {
     return function(params) {
-        var parent_scope = params.scope,
-            mode = params.mode,  // 'add' or 'edit'
-            url = params.url,
-            scope = parent_scope.$new(),
-            id = params.id || undefined,
-            name = params.name || undefined,
-            schedule = {},
-            scheduler,
-            target,
-            showForm,
-            list,
-            detail,
-            restoreList,
-            container,
-            elem;
+        var scope = params.scope,
+            generator = GenerateForm,
+            form = CustomInventoryForm,
+            view = GenerateList,
+            list = CustomInventoryList,
+            url = GetBasePath('inventory_scripts');
+            // base = $location.path().replace(/^\//, '').split('/')[0];
 
-// <div id='configure-tower-dialog' style="display:none">
-//       <div id="configure-jobs-list"></div>
-//       <div id="configure-schedule-form"></div>
-//     </div>
-
-        // Wait('start');
-        // detail = $('#schedules-detail').hide();
-        // list = $('#schedules-list');
-        // target = $('#schedules-form');
-        // container = $('#schedules-form-container');
-
-        Wait('start');
-        // $('#configure-jobs').hide();
-        detail = $('#configure-schedules-detail').hide();
-        list = $('#configure-schedules-list');
-        target = $('#configure-schedules-form');
-        container = $('#configure-schedules-form-container');
-        $("#configure-jobs").show();
-        $("#configure-schedules-form-container").hide();
-        scope.mode = mode;
-        // Clean up any lingering stuff
-        container.hide();
-        target.empty();
-        $('.tooltip').each(function () {
-            $(this).remove();
-        });
-        $('.popover').each(function () {
-            $(this).remove();
-        });
-
-        elem = angular.element(document.getElementById('configure-schedules-form-container'));
-        $compile(elem)(scope);
-
-        if (scope.removeScheduleReady) {
-            scope.removeScheduleReady();
-        }
-        scope.removeScheduleReady = scope.$on('ScheduleReady', function() {
-            // Insert the scheduler widget into the hidden div
-            scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
-            scheduler.inject('configure-schedules-form', false);
-            scheduler.injectDetail('configure-schedules-detail', false);
-            scheduler.clear();
-            scope.formShowing = true;
-            scope.showRRuleDetail = false;
-            scope.schedulesTitle = (mode === 'edit') ? 'Edit Schedule' : 'Create Schedule';
+        generator.inject(form, { id:'custom-script-dialog', mode: 'add' , scope:scope, related: false, breadCrumbs: false});
+        generator.reset();
 
 
-            // display the scheduler widget
-            showForm = function() {
-                $('#configure-jobs').show('slide', { direction: 'left' }, 500);
-                $('#configure-jobs').hide();
-                Wait('stop');
-                $('#configure-schedules-overlay').width($('#configure-schedules-tab')
-                    .width()).height($('#configure-schedules-tab').height()).show();
-                container.width($('#configure-schedules-tab').width() - 18);
-                SetSchedulesInnerDialogSize();
-                container.show('slide', { direction: 'right' }, 300);
-                // scope.schedulerPurgeDays = (!Empty(scope.days)) ? Number(scope.days) : 30;
-                target.show();
-                if(mode==="add"){
-                    scope.$apply(function(){
-                        scope.schedulerPurgeDays = 30;
-                        scope.schedulerName = name+' Schedule';
+        // Save
+        scope.formSave = function () {
+            generator.clearApiErrors();
+            Wait('start');
+            Rest.setUrl(url);
+            Rest.post({ name: scope.name, description: scope.description, script: scope.script })
+                .success(function () {
+                    view.inject( list, {
+                        id : 'custom-script-dialog',
+                        mode: 'edit',
+                        scope: scope,
+                        breadCrumbs: false,
+                        activityStream: false,
+                        showSearch: true
                     });
-                }
-                if (mode === 'edit') {
-                    scope.$apply(function() {
-                        scheduler.setRRule(schedule.rrule);
-                        scheduler.setName(schedule.name);
-                        scope.schedulerPurgeDays = (!Empty(scope.days)) ? Number(scope.days) : 30;
+
+                    SearchInit({
+                        scope: scope,
+                        set: 'custum_inventories',
+                        list: list,
+                        url: url
                     });
-                }
-            };
-            setTimeout(function() { showForm(); }, 1000);
-        });
-
-        restoreList = function() {
-            // $('#group-save-button').prop('disabled', false);
-            $('#configure-jobs').show('slide', { direction: 'right' }, 500);
-            // $('#configure-jobs').width($('#configure-jobs').width()).height($('#configure-jobs').height()).hide();
-            // parent_scope.refreshSchedules();
-            list.show('slide', { direction: 'right' }, 500);
-            $('#configure-schedules-overlay').width($('#configure-schedules-tab').width()).height($('#configure-schedules-tab').height()).hide();
-            parent_scope.refreshSchedules();
-
-        };
-
-        scope.showScheduleDetail = function() {
-            if (scope.formShowing) {
-                if (scheduler.isValid()) {
-                    detail.width($('#configure-schedules-form').width()).height($('#configure-schedules-form').height());
-                    target.hide();
-                    detail.show();
-                    scope.formShowing = false;
-                }
-            }
-            else {
-                detail.hide();
-                target.show();
-                scope.formShowing = true;
-            }
-        };
-
-        if (scope.removeScheduleSaved) {
-            scope.removeScheduleSaved();
-        }
-        scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
-            Wait('stop');
-            container.hide('slide', { direction: 'left' }, 500, restoreList);
-            scope.$destroy();
-        });
-
-        scope.saveScheduleForm = function() {
-            var extra_vars;
-            if (scheduler.isValid()) {
-                scope.schedulerIsValid = true;
-                url = (mode==="edit") ? GetBasePath('schedules')+id+'/' : url;
-
-                extra_vars = {
-                    "days" : scope.scheduler_form.schedulerPurgeDays.$viewValue
-                };
-                schedule.extra_data = JSON.stringify(extra_vars);
-
-                SchedulePost({
-                    scope: scope,
-                    url: url,
-                    scheduler: scheduler,
-                    callback: 'ScheduleSaved',
-                    mode: mode,
-                    schedule: schedule
-                });
-            }
-            else {
-                scope.schedulerIsValid = false;
-            }
-        };
-
-        scope.deleteSystemSchedule = function(){
-            var hdr = 'Delete Schedule',
-            action = function () {
-                Wait('start');
-                Rest.setUrl(schedule.url);
-                Rest.destroy()
-                    .success(function () {
-                        $('#prompt-modal').modal('hide');
-                        Wait('stop');
-                        // scope.$emit(callback, id);
-                        scope.cancelScheduleForm();
-                    })
-                    .error(function (data, status) {
-                        try {
-                            $('#prompt-modal').modal('hide');
-                        }
-                        catch(e) {
-                            // ignore
-                        }
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
-                            ' failed. DELETE returned: ' + status });
+                    PaginateInit({
+                        scope: scope,
+                        list: list,
+                        url: url
                     });
-            };
 
-            Prompt({
-                hdr: hdr,
-                body: "<div class=\"alert alert-info\">Are you sure you want to delete the <em>" + scope.schedulerName  + "</em> schedule?</div>",
-                action: action,
-                backdrop: false
-            });
-                //         }
-                //     } else {
-                //         //a schedule doesn't exist
-                //         $("#prompt_action_btn").text('OK');
-                //         $('#prompt_cancel_btn').hide();
-                //         var action2 = function(){
-                //             $('#prompt-modal').modal('hide');
-                //             $("#prompt_action_btn").text('Yes');
-                //             $('#prompt_cancel_btn').show();
-                //         };
-                //         Prompt({
-                //                 hdr: "Delete",
-                //                 body: "<div class=\"alert alert-info\">No schedule exists for that job. </div>",
-                //                 action: action2,
-                //                 backdrop: false
-                //             });
-                //     }
-                // })
-                // .error(function(data, status) {
-                //     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                //         msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
-                // });
-        };
+                    scope.search(list.iterator);
+                    Wait('stop');
+                    Wait('stop');
 
-        scope.cancelScheduleForm = function() {
-            container.hide('slide', { direction: 'right' }, 500, restoreList);
-            scope.$destroy();
-        };
-
-        if (mode === 'edit') {
-            // Get the existing record
-            Rest.setUrl(url); //GetBasePath('schedules')+id+'/');
-            Rest.get()
-                .success(function(data) {
-                    schedule = data.results[0];
-                    id = schedule.id;
-                    if (!/DTSTART/.test(schedule.rrule)) {
-                        schedule.rrule += ";DTSTART=" + schedule.dtstart.replace(/\.\d+Z$/,'Z');
-                    }
-                    schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
-                    schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
-                    scope.$emit('ScheduleReady');
                 })
-                .error(function(data,status){
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to get: ' + url + ' GET returned: ' + status });
+                .error(function (data, status) {
+                    ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                        msg: 'Failed to add new inventory script. Post returned status: ' + status });
                 });
-        }
-        else {
-            scope.$emit('ScheduleReady');
-        }
+        };
+
+        // Cancel
+        scope.formReset = function () {
+            generator.reset();
+        };
+    };
+}])
+
+.factory('CustomInventoryEdit', ['$compile','CustomInventoryList', 'Rest', 'Wait', 'GenerateList', 'CustomInventoryForm', 'ProcessErrors', 'GetBasePath', 'Empty', 'GenerateForm',
+    'SearchInit', 'PaginateInit', '$routeParams',
+function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventoryForm, ProcessErrors, GetBasePath, Empty, GenerateForm,
+    SearchInit, PaginateInit, $routeParams) {
+    return function(params) {
+        var scope = params.scope,
+            id = params.id,
+            generator = GenerateForm,
+            form = CustomInventoryForm,
+            view = GenerateList,
+            list = CustomInventoryList,
+            master = {},
+            url = GetBasePath('inventory_scripts');
+            // base = $location.path().replace(/^\//, '').split('/')[0];
+
+        generator.inject(form, {
+                id:'custom-script-dialog',
+                mode: 'edit' ,
+                scope:scope,
+                related: false,
+                breadCrumbs: false,
+                activityStream: false
+            });
+        generator.reset();
+
+        // Retrieve detail record and prepopulate the form
+        Wait('start');
+        Rest.setUrl(url + id+'/');
+        Rest.get()
+            .success(function (data) {
+                var fld;
+                for (fld in form.fields) {
+                    if (data[fld]) {
+                        scope[fld] = data[fld];
+                        master[fld] = data[fld];
+                    }
+                }
+                Wait('stop');
+            })
+            .error(function (data, status) {
+                ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                    msg: 'Failed to retrieve inventory script: ' + $routeParams.id + '. GET status: ' + status });
+            });
+
+        scope.formSave = function () {
+            generator.clearApiErrors();
+            Wait('start');
+            Rest.setUrl(url+ id+'/');
+            Rest.put({ name: scope.name, description: scope.description, script: scope.script })
+                .success(function () {
+                    view.inject( list, {
+                        id : 'custom-script-dialog',
+                        mode: 'edit',
+                        scope: scope,
+                        breadCrumbs: false,
+                        activityStream: false,
+                        showSearch: true
+                    });
+
+                    SearchInit({
+                        scope: scope,
+                        set: 'custum_inventories',
+                        list: list,
+                        url: url
+                    });
+                    PaginateInit({
+                        scope: scope,
+                        list: list,
+                        url: url
+                    });
+
+                    scope.search(list.iterator);
+                    Wait('stop');
+
+                })
+                .error(function (data, status) {
+                    ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                        msg: 'Failed to add new inventory script. Post returned status: ' + status });
+                });
+        };
+
+        scope.formReset = function () {
+            generator.reset();
+        };
     };
 }]);
