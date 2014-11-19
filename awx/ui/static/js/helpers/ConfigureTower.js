@@ -85,7 +85,7 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
 
             CreateDialog({
                 id: 'configure-tower-dialog',
-                title: 'Configure Tower',
+                title: 'Management Jobs',
                 target: 'configure-tower-dialog',
                 scope: scope,
                 buttons: buttons,
@@ -137,7 +137,7 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
 
             scope.submitJob = function (id) {
                 Wait('start');
-                scheduleUrl += id+'/launch/';
+                defaultUrl = GetBasePath('system_job_templates')+id+'/launch/';
                 CreateDialog({
                     id: 'prompt-for-days'    ,
                     title: "Cleanup Job",
@@ -146,6 +146,9 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                     height: 300,
                     minWidth: 200,
                     callback: 'PromptForDays',
+                    onOpen: function(){
+                        $("#days_to_keep").val(30);
+                    },
                     buttons: [{
                         "label": "Cancel",
                         "onClick": function() {
@@ -162,7 +165,7 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                             data = {};
                             data.extra_vars = JSON.stringify(extra_vars);
 
-                            Rest.setUrl(scheduleUrl);
+                            Rest.setUrl(defaultUrl);
                             Rest.post(data)
                                 .success(function() {
                                     Wait('stop');
