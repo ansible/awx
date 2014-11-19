@@ -947,6 +947,11 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
     def get_absolute_url(self):
         return reverse('api:system_job_template_detail', args=(self.pk,))
 
+    @property
+    def cache_timeout_blocked(self):
+        return False
+
+
 
 class SystemJob(UnifiedJob, SystemJobOptions):
 
