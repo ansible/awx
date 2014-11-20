@@ -444,7 +444,8 @@ def disallow_superuser_escalation(cls):
         @functools.wraps(method)
         def fx(self, request, *a, **kw):
             if not request.user.is_superuser:
-                if request.DATA.get('is_superuser', False):
+                is_su = request.DATA.get('is_superuser', False)
+                if su and su != 'false':
                     raise PermissionDenied('Only superusers may create '
                                            'other superusers.')
             return method(self, request, *a, **kw)
