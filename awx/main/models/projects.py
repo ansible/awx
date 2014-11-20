@@ -302,7 +302,7 @@ class Project(UnifiedJobTemplate, ProjectOptions):
     def cache_timeout_blocked(self):
         if not self.last_job_run:
             return False
-        if (self.last_job_run + datetime.timedelta(seconds=self.update_cache_timeout)) > now():
+        if (self.last_job_run + datetime.timedelta(seconds=self.scm_update_cache_timeout)) > now():
             return True
         return False
     
