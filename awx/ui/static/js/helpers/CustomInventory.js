@@ -63,7 +63,7 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
 
             SearchInit({
                 scope: scope,
-                set: 'custum_inventories',
+                set: 'custom_inventories',
                 list: list,
                 url: defaultUrl
             });
@@ -187,11 +187,9 @@ function($compile, SchedulerInit, Rest, Wait, CustomInventoryList, CustomInvento
             view = GenerateList,
             list = CustomInventoryList,
             url = GetBasePath('inventory_scripts');
-            // base = $location.path().replace(/^\//, '').split('/')[0];
 
         generator.inject(form, { id:'custom-script-dialog', mode: 'add' , scope:scope, related: false, breadCrumbs: false});
         generator.reset();
-
 
         // Save
         scope.formSave = function () {
@@ -211,7 +209,7 @@ function($compile, SchedulerInit, Rest, Wait, CustomInventoryList, CustomInvento
 
                     SearchInit({
                         scope: scope,
-                        set: 'custum_inventories',
+                        set: 'custom_inventories',
                         list: list,
                         url: url
                     });
@@ -252,7 +250,6 @@ function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventor
             list = CustomInventoryList,
             master = {},
             url = GetBasePath('inventory_scripts');
-            // base = $location.path().replace(/^\//, '').split('/')[0];
 
         generator.inject(form, {
                 id:'custom-script-dialog',

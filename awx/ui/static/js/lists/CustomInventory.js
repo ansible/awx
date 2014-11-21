@@ -12,7 +12,7 @@
 angular.module('CustomInventoryListDefinition', [])
     .value('CustomInventoryList', {
 
-        name: 'custum_inventories',
+        name: 'custom_inventories',
         iterator: 'custom_inventory',
         selectTitle: 'Add custom inventory',
         editTitle: 'Custom Inventories',
