@@ -5,18 +5,15 @@ import os
 
 import zmq
 
+from django.conf import settings
+
+
 class Socket(object):
     """An abstraction class implemented for a dumb OS socket.
 
     Intended to allow alteration of backend details in a single, consistent
     way throughout the Tower application.
     """
-    ports = {
-        'callbacks': 5556,
-        'task_commands': 6559,
-        'websocket': 6557,
-    }
-
     def __init__(self, bucket, rw, debug=0, logger=None):
         """Instantiate a Socket object, which uses ZeroMQ to actually perform
         passing a message back and forth.
@@ -61,7 +58,11 @@ class Socket(object):
 
     @property
     def port(self):
-        return self.ports[self._bucket]
+        return {
+            'callbacks': settings.CALLBACK_CONSUMER_PORT,
+            'task_commands': settings.TASK_COMMAND_PORT,
+            'websocket': settings.SOCKETIO_NOTIFICATION_PORT,
+        }[self._bucket]
 
     def connect(self):
         """Connect to ZeroMQ."""
@@ -76,23 +77,38 @@ class Socket(object):
             self._socket = None
             self._connection_pid = active_pid
 
+        # If the port is an integer, convert it into tcp://
+        port = self.port
+        if isinstance(port, int):
+            port = 'tcp://127.0.0.1:%d' % port
+
+        # If the port is None, then this is an intentional dummy;
+        # honor this. (For testing.)
+        if port is None:
+            return
+
         # Okay, create the connection.
         if self._context is None:
             self._context = zmq.Context()
             self._socket = self._context.socket(self._rw) 
             if self._rw == zmq.REQ:
-                self._socket.connect('tcp://127.0.0.1:%d' % self.port)
+                self._socket.connect(port)
             else:
-                self._socket.bind('tcp://127.0.0.1:%d' % self.port)
+                self._socket.bind(port)
 
     def close(self):
         """Disconnect and tear down."""
-        self._socket.close()
+        if self._socket:
+            self._socket.close()
         self._socket = None
         self._context = None
                 
     def publish(self, message):
         """Publish a message over the socket."""
+
+        # If the port is None, no-op.
+        if self.port is None:
+            return
 
         # If we are not connected, whine.
         if not self.is_connected:
@@ -124,6 +140,10 @@ class Socket(object):
         """Retrieve a single message from the subcription channel
         and return it.
         """
+        # If the port is None, no-op.
+        if self.port is None:
+            raise StopIteration
+
         # If we are not connected, whine.
         if not self.is_connected:
             raise RuntimeError('Cannot publish a message when not connected '
@@ -135,6 +155,8 @@ class Socket(object):
 
         # Actually listen to the socket.
         while True:
-            message = self._socket.recv_json()
-            yield message
-            self._socket.send('1')
+            try:
+                message = self._socket.recv_json()
+                yield message
+            finally:
+                self._socket.send('1')
