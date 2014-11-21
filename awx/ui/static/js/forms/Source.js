@@ -118,7 +118,11 @@ angular.module('SourceFormDefinition', [])
                 parseTypeName: 'envParseType',
                 dataTitle: "Environment Variables",   //'<p ng-show=source.value=="ec2">Source Variables<p>',
                 dataPlacement: 'right',
-                awPopOver: "<p>These are environment variables</p>",
+                awPopOver:  "<p>Provide key/value pairs using either YAML or JSON.</p>" +
+                    "JSON:<br />\n" +
+                    "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    "YAML:<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
                 dataContainer: 'body'
             },
             source_vars: {
