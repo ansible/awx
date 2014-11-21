@@ -277,12 +277,6 @@ class OrderByBackend(BaseFilterBackend):
                         if field not in ('type', '-type'):
                             new_order_by.append(field)
                 queryset = queryset.order_by(*new_order_by)
-                # Fetch the first result to run the query, otherwise we don't
-                # always catch the FieldError for invalid field names.
-                try:
-                    queryset[0]
-                except IndexError:
-                    pass
             return queryset
         except FieldError, e:
             # Return a 400 for invalid field names.
