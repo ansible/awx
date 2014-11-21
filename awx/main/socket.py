@@ -80,7 +80,7 @@ class Socket(object):
         if self._context is None:
             self._context = zmq.Context()
             self._socket = self._context.socket(self._rw) 
-            if purpose == zmq.REQ:
+            if self._rw == zmq.REQ:
                 self._socket.connect('tcp://127.0.0.1:%d' % self.port)
             else:
                 self._socket.bind('tcp://127.0.0.1:%d' % self.port)
