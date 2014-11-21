@@ -12,13 +12,26 @@ class Socket(object):
     way throughout the Tower application.
     """
     ports = {
-        'callbacks': ,
-        'websocket': ,
+        'callbacks': 5556,
+        'task_commands': 6559,
+        'websocket': 6557,
     }
 
     def __init__(self, bucket, rw, debug=0, logger=None):
         """Instantiate a Socket object, which uses ZeroMQ to actually perform
         passing a message back and forth.
+
+        Designed to be used as a context manager:
+
+            with Socket('callbacks', 'w') as socket:
+                socket.publish({'message': 'foo bar baz'})
+
+        If listening for messages through a socket, the `listen` method
+        is a simple generator:
+
+            with Socket('callbacks', 'r') as socket:
+                for message in socket.listen():
+                    [...]
         """
         self._bucket = bucket
         self._rw = {
@@ -37,11 +50,20 @@ class Socket(object):
         self.connect()
         return self
 
+    def __exit__(self, *args, **kwargs):
+        self.close()
+
+    @property
+    def is_connected(self):
+        if self._socket:
+            return True
+        return False
+
     @property
     def port(self):
         return self.ports[self._bucket]
 
-    def connect(self, purpose):
+    def connect(self):
         """Connect to ZeroMQ."""
 
         # Make sure that we are clearing everything out if there is
@@ -57,14 +79,29 @@ class Socket(object):
         # Okay, create the connection.
         if self._context is None:
             self._context = zmq.Context()
-            self._socket = self._context.socket(purpose) 
-            if purpose == self.WRITE:
-                self._socket.connect(self.port)
+            self._socket = self._context.socket(self._rw) 
+            if purpose == zmq.REQ:
+                self._socket.connect('tcp://127.0.0.1:%d' % self.port)
             else:
-                self._socket.bind(self.port)
+                self._socket.bind('tcp://127.0.0.1:%d' % self.port)
+
+    def close(self):
+        """Disconnect and tear down."""
+        self._socket.close()
+        self._socket = None
+        self._context = None
                 
     def publish(self, message):
         """Publish a message over the socket."""
+
+        # If we are not connected, whine.
+        if not self.is_connected:
+            raise RuntimeError('Cannot publish a message when not connected '
+                               'to the socket.')
+
+        # If we are in the wrong mode, whine.
+        if self._rw != zmq.REQ:
+            raise RuntimeError('This socket is not opened for writing.')
 
         # If we are in debug mode; provide the PID.
         if self._debug:
@@ -74,7 +111,6 @@ class Socket(object):
         # Send the message.
         for retry in xrange(4):
             try:
-                self.connect()
                 self._socket.send_json(message)
                 self._socket.recv()
             except Exception as ex:
@@ -88,6 +124,16 @@ class Socket(object):
         """Retrieve a single message from the subcription channel
         and return it.
         """
+        # If we are not connected, whine.
+        if not self.is_connected:
+            raise RuntimeError('Cannot publish a message when not connected '
+                               'to the socket.')
+
+        # If we are in the wrong mode, whine.
+        if self._rw != zmq.REP:
+            raise RuntimeError('This socket is not opened for reading.')
+
+        # Actually listen to the socket.
         while True:
             message = self._socket.recv_json()
             yield message

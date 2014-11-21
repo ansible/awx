@@ -25,7 +25,7 @@ from django.db import connection
 
 # AWX
 from awx.main.models import *
-from awx.main.queue import PubSub
+from awx.main.socket import Socket
 
 MAX_REQUESTS = 10000
 WORKERS = 4
@@ -102,8 +102,8 @@ class CallbackReceiver(object):
         total_messages = 0
         last_parent_events = {}
 
-        with closing(PubSub('callbacks')) as callbacks:
-            for message in callbacks.subscribe(wait=0.1):
+        with Socket('callbacks', 'r') as callbacks:
+            for message in callbacks.listen():
                 total_messages += 1
                 if not use_workers:
                     self.process_job_event(message)

@@ -24,7 +24,7 @@ from django.utils.tzinfo import FixedOffset
 # AWX
 import awx
 from awx.main.models import *
-from awx.main.queue import PubSub
+from awx.main.socket import Socket
 
 # gevent & socketio
 import gevent
@@ -119,16 +119,16 @@ class TowerSocket(object):
             return ['Tower version %s' % awx.__version__]
 
 def notification_handler(server):
-    pubsub = PubSub('websocket')
-    for message in pubsub.subscribe():
-        packet = {
-            'args': message,
-            'endpoint': message['endpoint'],
-            'name': message['event'],
-            'type': 'event',
-        }
-        for session_id, socket in list(server.sockets.iteritems()):
-            socket.send_packet(packet)
+    with Socket('websocket', 'r') as websocket:
+        for message in websocket.listen():
+            packet = {
+                'args': message,
+                'endpoint': message['endpoint'],
+                'name': message['event'],
+                'type': 'event',
+            }
+            for session_id, socket in list(server.sockets.iteritems()):
+                socket.send_packet(packet)
 
 class Command(NoArgsCommand):
     '''
