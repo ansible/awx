@@ -43,8 +43,10 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                     }
                 }
             }
-
-
+            delete(job_launch_data.extra_vars);
+            if(!Empty(scope.credential)){
+                job_launch_data.credential = scope.credential;
+            }
             Rest.setUrl(url);
             Rest.post(job_launch_data)
                 .success(function(data) {
@@ -386,6 +388,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         function buildHtml(extra_vars){
 
             html += GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
+            html = html.replace("</form>", "");
             scope.helpContainer = "<div style=\"display:inline-block; font-size: 12px; margin-top: 6px;\" class=\"help-container pull-right\">\n" +
                 "<a href=\"\" id=\"awp-promote\" href=\"\" aw-pop-over=\"{{ helpText }}\" aw-tool-tip=\"Click for help\" aw-pop-over-watch=\"helpText\" " +
                 "aw-tip-placement=\"top\" data-placement=\"bottom\" data-container=\"body\" data-title=\"Help\" class=\"help-link\"><i class=\"fa fa-question-circle\">" +
@@ -739,6 +742,12 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                             if(passwords.length>0){
                                 scope.$emit('PromptForPasswords', passwords, html, url);
                             }
+                            else if (scope.ask_variables_on_launch){
+                                scope.$emit('PromptForVars', html, url);
+                            }
+                            else if (!Empty(scope.survey_enabled) &&  scope.survey_enabled===true) {
+                                scope.$emit('PromptForSurvey', html, url);
+                            }
                             else scope.$emit('StartPlaybookRun', url);
                         })
                         .error(function (data, status) {
@@ -758,8 +767,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     launch_url = url;//data.related.start;
                     scope.passwords_needed_to_start = data.passwords_needed_to_start;
                     scope.prompt_for_vars = data.ask_variables_on_launch;
-                    // scope.extra_vars = data.variables_needed_to_start;
                     scope.survey_enabled = data.survey_enabled;
+                    scope.ask_variables_on_launch = data.ask_variables_on_launch;
 
                     html = '<form class="ng-valid ng-valid-required" name="job_launch_form" id="job_launch_form" autocomplete="off" nonvalidate>';
 
