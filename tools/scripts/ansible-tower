@@ -16,15 +16,20 @@
 # Description: Ansible Tower provides an easy-to-use UI and dashboard, role-based access control and more for your Ansible initiative
 ### END INIT INFO
 
-if [ -e /etc/debian_version ]
-then
-    SERVICES=(postgresql redis-server apache2 supervisor)
+# Default configured services
+if [ -e /etc/debian_version ]; then
+    SERVICES="postgresql redis-server apache2 supervisor"
+    TOWER_CONFIG="/etc/default/tower"
 else
-    SERVICES=(postgresql redis httpd supervisord)
+    SERVICES="postgresql redis httpd supervisord"
+    TOWER_CONFIG="/etc/sysconfig/tower"
 fi
 
+# Load any configuration
+[ -e "${TOWER_CONFIG}" ] && . "${TOWER_CONFIG}"
+
 service_action() {
-    for svc in ${SERVICES[@]}; do
+    for svc in ${SERVICES}; do
         service ${svc} $1
         this_return=$?
         if [ $this_return -gt $worst_return ]; then
