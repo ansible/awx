@@ -9,6 +9,7 @@ import logging
 from django.conf import settings
 from django.db.models import F, Q
 from django.contrib.auth.models import User
+from django.utils.functional import cached_property
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -531,18 +532,30 @@ class CredentialAccess(BaseAccess):
     model = Credential
 
     def get_queryset(self):
+        """Return the queryset for credentials, based on what the user is
+        permitted to see.
+        """
+        # Create a base queryset.
+        # If the user is a superuser, and therefore can see everything, this
+        # is also sufficient, and we are done.
         qs = self.model.objects.filter(active=True).distinct()
         qs = qs.select_related('created_by', 'user', 'team')
         if self.user.is_superuser:
             return qs
-        orgs_as_admin = self.user.admin_of_organizations.filter(active=True)
+
+        # Get the list of organizations for which the user is an admin
         return qs.filter(
             Q(user=self.user) |
-            Q(user__organizations__in=orgs_as_admin) |
-            Q(user__admin_of_organizations__in=orgs_as_admin) |
-            Q(team__organization__in=orgs_as_admin, team__active=True) |
+            Q(user__organizations__id__in=self._orgs_as_admin) |
+            Q(user__admin_of_organizations__id__in=self._orgs_as_admin) |
+            Q(team__organization__id__in=self._orgs_as_admin, team__active=True) |
             Q(team__users__in=[self.user], team__active=True)
         )
+
+    @cached_property
+    def _orgs_as_admin(self):
+        orgs = self.user.admin_of_organizations.filter(active=True).values('id')
+        return [i['id'] for i in orgs]
 
     def can_add(self, data):
         if self.user.is_superuser:
@@ -817,10 +830,11 @@ class JobTemplateAccess(BaseAccess):
                                'credential')
         if self.user.is_superuser:
             return qs
-        credential_qs = self.user.get_queryset(Credential)
+
+        credential_ids = [x.id for x in self.user.get_queryset(Credential)]
         base_qs = qs.filter(
-            Q(credential__in=credential_qs) | Q(credential__isnull=True),
-            Q(cloud_credential__in=credential_qs) | Q(cloud_credential__isnull=True),
+            Q(credential__in=credential_ids) | Q(credential__isnull=True),
+            Q(cloud_credential__in=credential_ids) | Q(cloud_credential__isnull=True),
         )
         # FIXME: Check active status on related objects!
         org_admin_qs = base_qs.filter(
@@ -830,35 +844,30 @@ class JobTemplateAccess(BaseAccess):
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
 
-        # perm_qs = base_qs.filter(
-        #     Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
-        #     Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
-        #     inventory__permissions__permission_type__in=allowed,
-        #     project__permissions__permission_type__in=allowed,
-        #     inventory__permissions__active=True,
-        #     project__permissions__active=True,
-        #     inventory__permissions__pk=F('project__permissions__pk'),
-        # )
+        team_ids = [i.id for i in Team.objects.filter(users__in=[self.user])]
+
+        deploy_permissions_ids = [i.id for i in Permission.objects.filter(
+            Q(user=self.user) | Q(team__in=team_ids),
+            active=True,
+            permission_type__in=allowed_deploy,
+        )]
+        check_permissions_ids = [i.id for i in Permission.objects.filter(
+            Q(user=self.user) | Q(team__in=team_ids),
+            active=True,
+            permission_type__in=allowed_check,
+        )]
 
         perm_deploy_qs = base_qs.filter(
-            Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
-            Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
             job_type=PERM_INVENTORY_DEPLOY,
-            inventory__permissions__permission_type__in=allowed_deploy,
-            project__permissions__permission_type__in=allowed_deploy,
-            inventory__permissions__active=True,
-            project__permissions__active=True,
+            inventory__permissions__in=deploy_permissions_ids,
+            project__permissions__in=deploy_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
         )
 
         perm_check_qs = base_qs.filter(
-            Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
-            Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
             job_type=PERM_INVENTORY_CHECK,
-            inventory__permissions__permission_type__in=allowed_check,
-            project__permissions__permission_type__in=allowed_check,
-            inventory__permissions__active=True,
-            project__permissions__active=True,
+            inventory__permissions__in=check_permissions_ids,
+            project__permissions__in=check_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
         )
 
@@ -1014,9 +1023,9 @@ class JobAccess(BaseAccess):
                                'project', 'credential')
         if self.user.is_superuser:
             return qs
-        credential_qs = self.user.get_queryset(Credential)
+        credential_ids = [x.id for x in self.user.get_queryset(Credential)]
         base_qs = qs.filter(
-            credential__in=credential_qs,
+            credential__in=credential_ids,
         )
         org_admin_qs = base_qs.filter(
             project__organizations__admins__in=[self.user]
@@ -1036,28 +1045,33 @@ class JobAccess(BaseAccess):
         #     inventory__permissions__pk=F('project__permissions__pk'),
         # )
 
+        team_ids = [i.id for i in Team.objects.filter(users__in=[self.user])]
+
+        deploy_permissions_ids = [i.id for i in Permission.objects.filter(
+            Q(user=self.user) | Q(team__in=team_ids),
+            active=True,
+            permission_type__in=allowed_deploy,
+        )]
+        check_permissions_ids = [i.id for i in Permission.objects.filter(
+            Q(user=self.user) | Q(team__in=team_ids),
+            active=True,
+            permission_type__in=allowed_check,
+        )]
+
         perm_deploy_qs = base_qs.filter(
-            Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
-            Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
             job_type=PERM_INVENTORY_DEPLOY,
-            inventory__permissions__permission_type__in=allowed_deploy,
-            project__permissions__permission_type__in=allowed_deploy,
-            inventory__permissions__active=True,
-            project__permissions__active=True,
+            inventory__permissions__in=deploy_permissions_ids,
+            project__permissions__in=deploy_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
         )
 
         perm_check_qs = base_qs.filter(
-            Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
-            Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
             job_type=PERM_INVENTORY_CHECK,
-            inventory__permissions__permission_type__in=allowed_check,
-            project__permissions__permission_type__in=allowed_check,
-            inventory__permissions__active=True,
-            project__permissions__active=True,
+            inventory__permissions__in=check_permissions_ids,
+            project__permissions__in=check_permissions_ids,
             inventory__permissions__pk=F('project__permissions__pk'),
         )
-        
+
         # FIXME: I *think* this should work... needs more testing.
         return org_admin_qs | perm_deploy_qs | perm_check_qs
 
