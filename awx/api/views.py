@@ -1882,7 +1882,7 @@ class JobRelaunch(GenericAPIView):
         obj = self.get_object()
         data = {}
         data['passwords_needed_to_start'] = obj.passwords_needed_to_start
-        data['ask_variables_on_launch'] = obj.ask_variables_on_launch
+        #data['ask_variables_on_launch'] = obj.ask_variables_on_launch
         return Response(data)
 
     def post(self, request, *args, **kwargs):
