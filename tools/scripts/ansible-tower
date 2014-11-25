@@ -18,18 +18,16 @@
 
 # Default configured services
 if [ -e /etc/debian_version ]; then
-    SERVICES="postgresql redis-server apache2 supervisor"
-    TOWER_CONFIG="/etc/default/tower"
+    TOWER_CONFIG="/etc/default/ansible-tower"
 else
-    SERVICES="postgresql redis httpd supervisord"
-    TOWER_CONFIG="/etc/sysconfig/tower"
+    TOWER_CONFIG="/etc/sysconfig/ansible-tower"
 fi
 
-# Load any configuration
+# Load default configuration
 [ -e "${TOWER_CONFIG}" ] && . "${TOWER_CONFIG}"
 
 service_action() {
-    for svc in ${SERVICES}; do
+    for svc in ${TOWER_SERVICES}; do
         service ${svc} $1
         this_return=$?
         if [ $this_return -gt $worst_return ]; then

@@ -312,6 +312,7 @@ rpm-build/$(SDIST_TAR_FILE): dist/$(SDIST_TAR_FILE)
 	mkdir -p rpm-build
 	cp packaging/rpm/$(NAME).spec rpm-build/
 	cp packaging/rpm/$(NAME).te rpm-build/
+	cp packaging/rpm/$(NAME).sysconfig rpm-build/
 	cp packaging/remove_tower_source.py rpm-build/
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	  (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
