@@ -81,6 +81,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'current_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('source', 'last_updated', 'status'),
+    'source_script': ('name', 'description'),
 }
 
 class ChoiceField(fields.ChoiceField):
@@ -1037,6 +1038,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         if obj.group and obj.group.active:
             res['group'] = reverse('api:group_detail', args=(obj.group.pk,))
+        if obj.source_script:
+            res['source_script'] = reverse('api:inventory_script_detail', args=(obj.source_script.pk,))
         # Backwards compatibility.
         if obj.current_update:
             res['current_update'] = reverse('api:inventory_update_detail',
