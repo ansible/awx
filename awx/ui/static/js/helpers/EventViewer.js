@@ -273,7 +273,8 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
         };
     }])
 
-    .factory('GetEvent', ['Wait', 'Rest', 'ProcessErrors', function(Wait, Rest, ProcessErrors) {
+    .factory('GetEvent', ['Wait', 'Rest', 'ProcessErrors',
+        function(Wait, Rest, ProcessErrors) {
         return function(params) {
             var url = params.url,
                 scope = params.scope,
@@ -295,70 +296,79 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
             Rest.setUrl(url);
             Rest.get()
                 .success( function(data) {
-                    scope.next_event_set = data.next;
-                    scope.prev_event_set = data.previous;
-                    data.results.forEach(function(event) {
-                        var msg, key, event_data = {};
-                        if (event.event_data.res) {
-                            if (typeof event.event_data.res !== 'object') {
-                                // turn event_data.res into an object
-                                msg = event.event_data.res;
-                                event.event_data.res = {};
-                                event.event_data.res.msg = msg;
-                            }
-                            for (key in event.event_data) {
-                                if (key !== "res") {
-                                    event.event_data.res[key] = event.event_data[key];
-                                }
-                            }
-                            if (event.event_data.res.ansible_facts) {
-                                // don't show fact gathering results
-                                event.event_data.res.task = "Gathering Facts";
-                                delete event.event_data.res.ansible_facts;
-                            }
-                            event.event_data.res.status = getStatus(event);
-                            event_data = event.event_data.res;
-                        }
-                        else {
-                            event.event_data.status = getStatus(event);
-                            event_data = event.event_data;
-                        }
-                        // convert results to stdout
-                        if (event_data.results && typeof event_data.results === "object" && Array.isArray(event_data.results)) {
-                            event_data.stdout = "";
-                            event_data.results.forEach(function(row) {
-                                event_data.stdout += row + "\n";
-                            });
-                            delete event_data.results;
-                        }
-                        if (event_data.invocation) {
-                            for (key in event_data.invocation) {
-                                event_data[key] = event_data.invocation[key];
-                            }
-                            delete event_data.invocation;
-                        }
-                        event_data.play = event.play;
-                        if (event.task) {
-                            event_data.task = event.task;
-                        }
-                        event_data.created = event.created;
-                        event_data.role = event.role;
-                        event_data.host_id = event.host;
-                        event_data.host_name = event.host_name;
-                        if (event_data.host) {
-                            delete event_data.host;
-                        }
-                        event_data.id = event.id;
-                        event_data.parent = event.parent;
-                        event_data.event = (event.event_display) ? event.event_display : event.event;
-                        results.push(event_data);
-                    });
-                    if (show_event) {
-                        scope.$emit('ShowNextEvent', results, show_event);
+
+                    if(jQuery.isEmptyObject(data)) {
+                        Wait('stop');
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to get event ' + url + '. ' });
+
                     }
                     else {
-                        scope.$emit('EventReady', results);
-                    }
+                        scope.next_event_set = data.next;
+                        scope.prev_event_set = data.previous;
+                        data.results.forEach(function(event) {
+                            var msg, key, event_data = {};
+                            if (event.event_data.res) {
+                                if (typeof event.event_data.res !== 'object') {
+                                    // turn event_data.res into an object
+                                    msg = event.event_data.res;
+                                    event.event_data.res = {};
+                                    event.event_data.res.msg = msg;
+                                }
+                                for (key in event.event_data) {
+                                    if (key !== "res") {
+                                        event.event_data.res[key] = event.event_data[key];
+                                    }
+                                }
+                                if (event.event_data.res.ansible_facts) {
+                                    // don't show fact gathering results
+                                    event.event_data.res.task = "Gathering Facts";
+                                    delete event.event_data.res.ansible_facts;
+                                }
+                                event.event_data.res.status = getStatus(event);
+                                event_data = event.event_data.res;
+                            }
+                            else {
+                                event.event_data.status = getStatus(event);
+                                event_data = event.event_data;
+                            }
+                            // convert results to stdout
+                            if (event_data.results && typeof event_data.results === "object" && Array.isArray(event_data.results)) {
+                                event_data.stdout = "";
+                                event_data.results.forEach(function(row) {
+                                    event_data.stdout += row + "\n";
+                                });
+                                delete event_data.results;
+                            }
+                            if (event_data.invocation) {
+                                for (key in event_data.invocation) {
+                                    event_data[key] = event_data.invocation[key];
+                                }
+                                delete event_data.invocation;
+                            }
+                            event_data.play = event.play;
+                            if (event.task) {
+                                event_data.task = event.task;
+                            }
+                            event_data.created = event.created;
+                            event_data.role = event.role;
+                            event_data.host_id = event.host;
+                            event_data.host_name = event.host_name;
+                            if (event_data.host) {
+                                delete event_data.host;
+                            }
+                            event_data.id = event.id;
+                            event_data.parent = event.parent;
+                            event_data.event = (event.event_display) ? event.event_display : event.event;
+                            results.push(event_data);
+                        });
+                        if (show_event) {
+                            scope.$emit('ShowNextEvent', results, show_event);
+                        }
+                        else {
+                            scope.$emit('EventReady', results);
+                        }
+                    } //else statement
                 })
                 .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
