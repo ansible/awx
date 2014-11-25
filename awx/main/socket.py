@@ -85,7 +85,7 @@ class Socket(object):
 
         # If the port is None, then this is an intentional dummy;
         # honor this. (For testing.)
-        if port is None:
+        if not port:
             return
 
         # Okay, create the connection.
