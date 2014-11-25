@@ -9,7 +9,6 @@ import logging
 from django.conf import settings
 from django.db.models import F, Q
 from django.contrib.auth.models import User
-from django.utils.functional import cached_property
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -224,7 +223,7 @@ class OrganizationAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by')
+        qs = qs.select_related('created_by', 'modified_by')
         if self.user.is_superuser:
             return qs
         return qs.filter(Q(admins__in=[self.user]) | Q(users__in=[self.user]))
@@ -257,7 +256,7 @@ class InventoryAccess(BaseAccess):
     def get_queryset(self, allowed=None):
         allowed = allowed or PERMISSION_TYPES_ALLOWING_INVENTORY_READ
         qs = Inventory.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'organization')
+        qs = qs.select_related('created_by', 'modified_by', 'organization')
         if self.user.is_superuser:
             return qs
         qs = qs.filter(organization__active=True)
@@ -332,12 +331,12 @@ class HostAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'inventory',
+        qs = qs.select_related('created_by', 'modified_by', 'inventory',
                                'last_job__job_template',
-                               'last_job_host_summary')
+                               'last_job_host_summary__job')
         qs = qs.prefetch_related('groups')
-        inventories_qs = self.user.get_queryset(Inventory)
-        return qs.filter(inventory__in=inventories_qs)
+        inventory_ids = set(self.user.get_queryset(Inventory).values_list('id', flat=True))
+        return qs.filter(inventory_id__in=inventory_ids)
 
     def can_read(self, obj):
         return obj and self.user.can_access(Inventory, 'read', obj.inventory)
@@ -405,10 +404,10 @@ class GroupAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'inventory')
+        qs = qs.select_related('created_by', 'modified_by', 'inventory')
         qs = qs.prefetch_related('parents', 'children', 'inventory_source')
-        inventories_qs = self.user.get_queryset(Inventory)
-        return qs.filter(inventory__in=inventories_qs)
+        inventory_ids = set(self.user.get_queryset(Inventory).values_list('id', flat=True))
+        return qs.filter(inventory_id__in=inventory_ids)
 
     def can_read(self, obj):
         return obj and self.user.can_access(Inventory, 'read', obj.inventory)
@@ -465,10 +464,10 @@ class InventorySourceAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'group', 'inventory')
-        inventories_qs = self.user.get_queryset(Inventory)
-        return qs.filter(Q(inventory__in=inventories_qs) |
-                         Q(group__inventory__in=inventories_qs))
+        qs = qs.select_related('created_by', 'modified_by', 'group', 'inventory')
+        inventory_ids = set(self.user.get_queryset(Inventory).values_list('id', flat=True))
+        return qs.filter(Q(inventory_id__in=inventory_ids) |
+                         Q(group__inventory_id__in=inventory_ids))
 
     def can_read(self, obj):
         if obj and obj.group:
@@ -505,7 +504,7 @@ class InventoryUpdateAccess(BaseAccess):
 
     def get_queryset(self):
         qs = InventoryUpdate.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'inventory_source__group',
+        qs = qs.select_related('created_by', 'modified_by', 'inventory_source__group',
                                'inventory_source__inventory')
         inventory_sources_qs = self.user.get_queryset(InventorySource)
         return qs.filter(inventory_source__in=inventory_sources_qs)
@@ -539,23 +538,19 @@ class CredentialAccess(BaseAccess):
         # If the user is a superuser, and therefore can see everything, this
         # is also sufficient, and we are done.
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'user', 'team')
+        qs = qs.select_related('created_by', 'modified_by', 'user', 'team')
         if self.user.is_superuser:
             return qs
 
         # Get the list of organizations for which the user is an admin
+        orgs_as_admin_ids = set(self.user.admin_of_organizations.filter(active=True).values_list('id', flat=True))
         return qs.filter(
             Q(user=self.user) |
-            Q(user__organizations__id__in=self._orgs_as_admin) |
-            Q(user__admin_of_organizations__id__in=self._orgs_as_admin) |
-            Q(team__organization__id__in=self._orgs_as_admin, team__active=True) |
+            Q(user__organizations__id__in=orgs_as_admin_ids) |
+            Q(user__admin_of_organizations__id__in=orgs_as_admin_ids) |
+            Q(team__organization__id__in=orgs_as_admin_ids, team__active=True) |
             Q(team__users__in=[self.user], team__active=True)
         )
-
-    @cached_property
-    def _orgs_as_admin(self):
-        orgs = self.user.admin_of_organizations.filter(active=True).values('id')
-        return [i['id'] for i in orgs]
 
     def can_add(self, data):
         if self.user.is_superuser:
@@ -611,7 +606,7 @@ class TeamAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'organization')
+        qs = qs.select_related('created_by', 'modified_by', 'organization')
         if self.user.is_superuser:
             return qs
         return qs.filter(
@@ -663,7 +658,7 @@ class ProjectAccess(BaseAccess):
 
     def get_queryset(self):
         qs = Project.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'current_update', 'last_update')
+        qs = qs.select_related('created_by', 'modified_by', 'credential', 'current_update', 'last_update')
         if self.user.is_superuser:
             return qs
         allowed = [PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
@@ -709,9 +704,9 @@ class ProjectUpdateAccess(BaseAccess):
 
     def get_queryset(self):
         qs = ProjectUpdate.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'project')
-        projects_qs = self.user.get_queryset(Project)
-        return qs.filter(project__in=projects_qs)
+        qs = qs.select_related('created_by', 'modified_by', 'project')
+        project_ids = set(self.user.get_queryset(Project).values_list('id', flat=True))
+        return qs.filter(project_id__in=project_ids)
 
     def can_cancel(self, obj):
         return self.can_change(obj, {}) and obj.can_cancel
@@ -734,15 +729,15 @@ class PermissionAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'user', 'team', 'inventory',
+        qs = qs.select_related('created_by', 'modified_by', 'user', 'team', 'inventory',
                                'project')
         if self.user.is_superuser:
             return qs
-        orgs_as_admin = self.user.admin_of_organizations.filter(active=True)
+        orgs_as_admin_ids = set(self.user.admin_of_organizations.filter(active=True).values_list('id', flat=True))
         return qs.filter(
-            Q(user__organizations__in=orgs_as_admin) |
-            Q(user__admin_of_organizations__in=orgs_as_admin) |
-            Q(team__organization__in=orgs_as_admin, team__active=True) |
+            Q(user__organizations__in=orgs_as_admin_ids) |
+            Q(user__admin_of_organizations__in=orgs_as_admin_ids) |
+            Q(team__organization__in=orgs_as_admin_ids, team__active=True) |
             Q(user=self.user) |
             Q(team__users__in=[self.user], team__active=True)
         )
@@ -826,15 +821,14 @@ class JobTemplateAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'inventory', 'project',
-                               'credential')
+        qs = qs.select_related('created_by', 'modified_by', 'inventory', 'project',
+                               'credential', 'cloud_credential', 'next_schedule')
         if self.user.is_superuser:
             return qs
-
-        credential_ids = [x.id for x in self.user.get_queryset(Credential)]
+        credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
         base_qs = qs.filter(
-            Q(credential__in=credential_ids) | Q(credential__isnull=True),
-            Q(cloud_credential__in=credential_ids) | Q(cloud_credential__isnull=True),
+            Q(credential_id__in=credential_ids) | Q(credential__isnull=True),
+            Q(cloud_credential_id__in=credential_ids) | Q(cloud_credential__isnull=True),
         )
         # FIXME: Check active status on related objects!
         org_admin_qs = base_qs.filter(
@@ -844,18 +838,18 @@ class JobTemplateAccess(BaseAccess):
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
 
-        team_ids = [i.id for i in Team.objects.filter(users__in=[self.user])]
+        team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
 
-        deploy_permissions_ids = [i.id for i in Permission.objects.filter(
-            Q(user=self.user) | Q(team__in=team_ids),
+        deploy_permissions_ids = set(Permission.objects.filter(
+            Q(user=self.user) | Q(team_id__in=team_ids),
             active=True,
             permission_type__in=allowed_deploy,
-        )]
-        check_permissions_ids = [i.id for i in Permission.objects.filter(
-            Q(user=self.user) | Q(team__in=team_ids),
+        ).values_list('id', flat=True))
+        check_permissions_ids = set(Permission.objects.filter(
+            Q(user=self.user) | Q(team_id__in=team_ids),
             active=True,
             permission_type__in=allowed_check,
-        )]
+        ).values_list('id', flat=True))
 
         perm_deploy_qs = base_qs.filter(
             job_type=PERM_INVENTORY_DEPLOY,
@@ -1019,13 +1013,14 @@ class JobAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'job_template', 'inventory',
-                               'project', 'credential')
+        qs = qs.select_related('created_by', 'modified_by', 'job_template', 'inventory',
+                               'project', 'credential', 'cloud_credential', 'job_template')
+        qs = qs.prefetch_related('unified_job_template')
         if self.user.is_superuser:
             return qs
-        credential_ids = [x.id for x in self.user.get_queryset(Credential)]
+        credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
         base_qs = qs.filter(
-            credential__in=credential_ids,
+            credential_id__in=credential_ids,
         )
         org_admin_qs = base_qs.filter(
             project__organizations__admins__in=[self.user]
@@ -1045,18 +1040,18 @@ class JobAccess(BaseAccess):
         #     inventory__permissions__pk=F('project__permissions__pk'),
         # )
 
-        team_ids = [i.id for i in Team.objects.filter(users__in=[self.user])]
+        team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
 
-        deploy_permissions_ids = [i.id for i in Permission.objects.filter(
+        deploy_permissions_ids = set(Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
             active=True,
             permission_type__in=allowed_deploy,
-        )]
-        check_permissions_ids = [i.id for i in Permission.objects.filter(
+        ).values_list('id', flat=True))
+        check_permissions_ids = set(Permission.objects.filter(
             Q(user=self.user) | Q(team__in=team_ids),
             active=True,
             permission_type__in=allowed_check,
-        )]
+        ).values_list('id', flat=True))
 
         perm_deploy_qs = base_qs.filter(
             job_type=PERM_INVENTORY_DEPLOY,
@@ -1172,7 +1167,7 @@ class JobHostSummaryAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.distinct()
-        qs = qs.select_related('created_by', 'job', 'job__job_template',
+        qs = qs.select_related('created_by', 'modified_by', 'job', 'job__job_template',
                                'host')
         if self.user.is_superuser:
             return qs
@@ -1198,7 +1193,7 @@ class JobEventAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.distinct()
-        qs = qs.select_related('created_by', 'job', 'job__job_template',
+        qs = qs.select_related('created_by', 'modified_by', 'job', 'job__job_template',
                                'host', 'parent')
         qs = qs.prefetch_related('hosts', 'children')
 
@@ -1242,7 +1237,17 @@ class UnifiedJobTemplateAccess(BaseAccess):
         qs = qs.filter(Q(Project___in=project_qs) |
                        Q(InventorySource___in=inventory_source_qs) |
                        Q(JobTemplate___in=job_template_qs))
-        # FIXME: select/prefetch to optimize!
+        qs = qs.select_related(
+            'created_by',
+            'modified_by',
+            'project',
+            'inventory',
+            'credential',
+            'cloud_credential',
+            'next_schedule',
+            'last_job',
+            'current_job',
+        )
         return qs
 
 class UnifiedJobAccess(BaseAccess):
@@ -1263,7 +1268,21 @@ class UnifiedJobAccess(BaseAccess):
                        Q(InventoryUpdate___in=inventory_update_qs) |
                        Q(Job___in=job_qs) |
                        Q(SystemJob___in=system_job_qs))
-        # FIXME: select/prefetch to optimize!
+        qs = qs.select_related(
+            'created_by',
+            'modified_by',
+            'project',
+            'inventory',
+            'credential',
+            'project___credential',
+            'inventory_source___credential',
+            'inventory_source___inventory',
+            'job_template___inventory',
+            'job_template___project',
+            'job_template___credential',
+            'job_template___cloud_credential',
+        )
+        qs = qs.prefetch_related('unified_job_template')
         return qs
 
 class ScheduleAccess(BaseAccess):
@@ -1275,7 +1294,8 @@ class ScheduleAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('unified_job_template')
+        qs = qs.select_related('created_by', 'modified_by')
+        qs = qs.prefetch_related('unified_job_template')
         if self.user.is_superuser:
             return qs
         job_template_qs = self.user.get_queryset(JobTemplate)
