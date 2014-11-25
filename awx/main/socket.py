@@ -59,7 +59,8 @@ class Socket(object):
     @property
     def port(self):
         return {
-            'callbacks': settings.CALLBACK_CONSUMER_PORT,
+            'callbacks': os.environ.get('CALLBACK_CONSUMER_PORT',
+                                        settings.CALLBACK_CONSUMER_PORT),
             'task_commands': settings.TASK_COMMAND_PORT,
             'websocket': settings.SOCKETIO_NOTIFICATION_PORT,
         }[self._bucket]
