@@ -447,10 +447,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 question.index = index;
 
                 requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
-
+                requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
 
                 html+='<div id="taker_'+question.index+'" class="form-group '+requiredAsterisk+' ">';
-                requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
                 html += '<label for="'+question.variable+'">'+question.question_name+'</label>\n';
 
                 if(!Empty(question.question_description)){
@@ -461,7 +460,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 if(question.type === 'text' ){
                     html+='<input type="text" id="'+question.variable+'" ng-model="'+question.variable+'" '+
                         'name="'+question.variable+'" '+
-                        'class="form-control  ng-pristine ng-invalid-required ng-invalid" required="" >'+
+                        'class="form-control" ng-required='+question.required+'>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
                         'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
                         '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
@@ -470,7 +469,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 if(question.type === "textarea"){
                     scope[question.variable] = question.default || question.default_textarea;
                     html+='<textarea id="'+question.variable+'" name="'+question.variable+'" ng-model="'+question.variable+'" '+
-                        'class="form-control  ng-pristine ng-invalid-required ng-invalid final"  required="" rows="3"></textarea>'+
+                        'class="form-control final"  ng-required="'+question.required+'" rows="3"></textarea>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
                         'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
                         '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
@@ -483,7 +482,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     html+='<div class="survey_taker_input" > ';
                     for( j = 0; j<choices.length; j++){
                         checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
-                        html+= '<input  type="'+element+'" class="mc" ng-model="'+question.variable+'" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
+                        html+= '<input  type="'+element+'" class="mc" ng-model="'+question.variable+'" ng-required="'+question.required+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
                         '<span>'+choices[j] +'</span><br>' ;
                     }
                     html+=  '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
@@ -518,18 +517,23 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 if(question.type === 'integer'){
                     min = (!Empty(question.min)) ? Number(question.min) : "";
                     max = (!Empty(question.max)) ? Number(question.max) : "" ;
-                    html+='<input type="number" id="'+question.variable+'" class=" form-control" name="'+question.variable+'" ng-min="'+min+'" ng-max="'+max+'" ng-model="'+question.variable+' " integer>'+
+                    html+='<input type="number" id="'+question.variable+'" ng-model="'+question.variable+'" class="form-control" name="'+question.variable+'" ng-min="'+min+'" ng-max="'+max+'" integer>'+
+                         '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
+                        'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
+                        '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.number || job_launch_form.'+question.variable+'.$error.integer">This is not valid integer!</div>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.ngMin || job_launch_form.'+question.variable+'.$error.ngMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>';
+
                 }
 
                 if(question.type === "float"){
                     min = (!Empty(question.min)) ? question.min : "";
                     max = (!Empty(question.max)) ? question.max : "" ;
                     defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_float)) ? question.default_float : "" ;
-                    html+='<input type="number" id="'+question.variable+'" class=" form-control" name="'+question.variable+'" ng-min="'+min+'" ng-max="'+max+'" ng-model="'+question.variable+'" smart-float>'+
+                    html+='<input type="number" id="'+question.variable+'" ng-model="'+question.variable+'"  class=" form-control" name="'+question.variable+'" ng-min="'+min+'" ng-max="'+max+'" smart-float>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.number || job_launch_form.'+question.variable+'.$error.float">This is not valid float!</div>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.ngMin || job_launch_form.'+question.variable+'.$error.ngMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>';
+                        // '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$dirty || job_launch_form.'+question.variable+'.$error.required"> A value is required!</div>';
                 }
                 html+='</div>';
                 if(question.index === scope.survey_questions.length-1){
