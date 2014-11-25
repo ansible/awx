@@ -75,7 +75,7 @@ angular.module('SourceFormDefinition', [])
                 dataContainer: 'body'
             },
             group_by: {
-                label: 'Group By',
+                label: 'Only Group By',
                 type: 'text',
                 ngShow: "source && source.value == 'ec2'",
                 addRequired: false,
@@ -83,40 +83,58 @@ angular.module('SourceFormDefinition', [])
                 awMultiselect: 'group_by_choices',
                 dataTitle: 'Group By',
                 dataPlacement: 'right',
-                awPopOver: "<p>FIXME: Create these automatic groups by default.</p>",
+                awPopOver: "<p>FIXME: Create these automatic groups by default. give examples</p>",
                 dataContainer: 'body'
             },
-            group_tag_filters: {
-                label: 'Tag Filters',
-                type: 'text',
-                ngShow: "source && source.value == 'ec2' && group_by.value.indexOf('tag_keys') >= 0", // FIXME: Not sure what's needed to make the last expression work.
-                addRequired: false,
-                editRequired: false,
-                dataTitle: 'Tag Filters',
-                dataPlacement: 'right',
-                awPopOver: "<p>FIXME: When grouping by tags, specify which tag keys become groups.</p>",
-                dataContainer: 'body'
-            },
-            custom_script: {
+            // group_tag_filters: {
+            //     label: 'Tag Filters',
+            //     type: 'text',
+            //     ngShow: "source && source.value == 'ec2' && group_by.value.indexOf('tag_keys') >= 0", // FIXME: Not sure what's needed to make the last expression work.
+            //     addRequired: false,
+            //     editRequired: false,
+            //     dataTitle: 'Tag Filters',
+            //     dataPlacement: 'right',
+            //     awPopOver: "<p>FIXME: When grouping by tags, specify which tag keys become groups.</p>",
+            //     dataContainer: 'body'
+            // },
+            source_script: {
                 label :  "Custom Inventory Scripts",
                 type: 'lookup',
                 ngShow: "source && source.value !== '' && source.value === 'custom'",
-                sourceModel: 'custom_script',
+                sourceModel: 'source_script',
                 sourceField: 'name',
-                ngClick: 'lookUpCustomScript()',
+                ngClick: 'lookUpCustom_inventory()',
                 addRequired: false,
                 editRequired: false
             },
-            source_vars: {
-                label: 'Source Variables',
-                ngShow: "source && (source.value == 'file' || source.value == 'ec2' || source.value == 'custom')",
+            extra_vars: {
+                label: 'Environment Variables', //"{{vars_label}}" ,
+                ngShow: "source && (source.value=='custom')",
                 type: 'textarea',
                 addRequired: false,
                 editRequird: false,
                 rows: 6,
                 'default': '---',
                 parseTypeName: 'envParseType',
-                dataTitle: 'Source Variables',
+                dataTitle: "Environment Variables",   //'<p ng-show=source.value=="ec2">Source Variables<p>',
+                dataPlacement: 'right',
+                awPopOver:  "<p>Provide key/value pairs using either YAML or JSON.</p>" +
+                    "JSON:<br />\n" +
+                    "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    "YAML:<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
+                dataContainer: 'body'
+            },
+            source_vars: {
+                label: 'Source Variables', //"{{vars_label}}" ,
+                ngShow: "source && (source.value == 'file' || source.value == 'ec2')",
+                type: 'textarea',
+                addRequired: false,
+                editRequird: false,
+                rows: 6,
+                'default': '---',
+                parseTypeName: 'envParseType',
+                dataTitle: "Source Variables",
                 dataPlacement: 'right',
                 awPopOver: "<p>Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables " +
                     "<a href=\"https://github.com/ansible/ansible/blob/devel/plugins/inventory/ec2.ini\" target=\"_blank\">" +

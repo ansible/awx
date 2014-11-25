@@ -266,6 +266,13 @@ class BaseSerializer(serializers.ModelSerializer):
         summary_fields = SortedDict()
         for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items():
             try:
+                # A few special cases where we don't want to access the field
+                # because it results in additional queries.
+                if fk == 'job' and isinstance(obj, UnifiedJob):
+                    continue
+                if fk == 'project' and isinstance(obj, InventorySource):
+                    continue
+
                 fkval = getattr(obj, fk, None)
                 if fkval is None:
                     continue
@@ -777,7 +784,7 @@ class HostSerializer(BaseSerializerWithVariables):
                                             else "",
             'status': j.job.status,
             'finished': j.job.finished,
-        } for j in obj.job_host_summaries.filter(job__active=True).order_by('-created')[:5]]})
+        } for j in obj.job_host_summaries.filter(job__active=True).select_related('job__job_template').order_by('-created')[:5]]})
         return d
 
     def _get_host_port_from_name(self, name):
@@ -1452,9 +1459,7 @@ class ScheduleSerializer(BaseSerializer):
             unified_jobs = reverse('api:schedule_unified_jobs_list', args=(obj.pk,)),
         ))
         if obj.unified_job_template and obj.unified_job_template.active:
-            #TODO: Figure out why we have to do this
-            ujt = UnifiedJobTemplate.objects.get(id=obj.unified_job_template.id)
-            res['unified_job_template'] = ujt.get_absolute_url() #obj.unified_job_template.get_absolute_url()
+            res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
         return res
 
     def validate_unified_job_template(self, attrs, source):

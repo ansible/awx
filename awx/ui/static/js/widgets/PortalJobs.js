@@ -11,8 +11,8 @@
 'use strict';
 
 angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
-.factory('PortalJobsWidget', ['$rootScope', '$compile', 'LoadSchedulesScope', 'LoadJobsScope', 'PortalJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath',
-    function ($rootScope, $compile, LoadSchedulesScope, LoadJobsScope, PortalJobsList, ScheduledJobsList, GetChoices, GetBasePath) {
+.factory('PortalJobsWidget', ['$rootScope', '$compile', 'LoadSchedulesScope', 'LoadJobsScope', 'PortalJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'PortalJobTemplateList',
+    function ($rootScope, $compile, LoadSchedulesScope, LoadJobsScope, PortalJobsList, ScheduledJobsList, GetChoices, GetBasePath, PortalJobTemplateList) {
     return function (params) {
         var scope = params.scope,
             target = params.target,
@@ -68,6 +68,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
                 pageSize: max_rows,
                 spinner: true
             });
+
 
 
             $(window).resize(_.debounce(function() {
@@ -150,8 +151,9 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             setPortalJobsHeight();
             jobs_scope[PortalJobsList.iterator + '_page_size'] = max_rows;
             jobs_scope.changePageSize(PortalJobsList.name, PortalJobsList.iterator, false);
-            // scheduled_scope[ScheduledJobsList.iterator + '_page_size'] = max_rows;
-            // scheduled_scope.changePageSize(ScheduledJobsList.name, ScheduledJobsList.iterator, false);
+            scope[PortalJobTemplateList.iterator + '_page_size'] = max_rows;
+            scope[PortalJobTemplateList.iterator + 'PageSize'] = max_rows;
+            scope.changePageSize(PortalJobTemplateList.name, PortalJobTemplateList.iterator, false);
         }
 
 

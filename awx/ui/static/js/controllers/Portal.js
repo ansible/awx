@@ -35,6 +35,7 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
         list = PortalJobTemplateList,
         view= GenerateList,
         defaultUrl = GetBasePath('job_templates'),
+        max_rows,
         buttons = {
             refresh: {
                 mode: 'all',
@@ -79,6 +80,7 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
                 searchSize: 'col-lg-6 col-md-6'
             });
 
+            $scope.job_templatePageSize = $scope.getMaxRows();
 
             SearchInit({
                 scope: $scope,
@@ -89,15 +91,9 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
             PaginateInit({
                 scope: $scope,
                 list: list,
-                url: defaultUrl
+                url: defaultUrl,
+                pageSize: $scope.job_templatePageSize
             });
-
-            // Called from Inventories tab, host failed events link:
-            if ($routeParams.name) {
-                $scope[list.iterator + 'SearchField'] = 'name';
-                $scope[list.iterator + 'SearchValue'] = $routeParams.name;
-                $scope[list.iterator + 'SearchFieldLabel'] = list.fields.name.label;
-            }
 
             $scope.search(list.iterator);
 
@@ -126,22 +122,53 @@ function PortalController($scope, $compile, $routeParams, $rootScope, $location,
             jobs_scope.search('portal_job'); //processEvent(event);
         });
 
+        $scope.getMaxRows = function(){
+            var docw = $(window).width(),
+                box_height, available_height, search_row, page_row, height, header, row_height;
+
+            available_height = Math.floor($(window).height() - $('#main-menu-container .navbar').outerHeight() - $('#refresh-row').outerHeight() - 35);
+            $('.portal-job-template-container').height(available_height);
+            $('.portal-container').height(available_height);
+            search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
+            page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
+            header = 0; //Math.max($('#completed_jobs_table thead').height(), 41);
+            height = Math.floor(available_height) - header - page_row - search_row ;
+            if (docw < 765 && docw >= 493) {
+                row_height = 27;
+            }
+            else if (docw < 493) {
+                row_height = 47;
+            }
+            else if (docw < 865) {
+                row_height = 87;
+            }
+            else if (docw < 925) {
+                row_height = 67;
+            }
+            else if (docw < 1415) {
+                row_height = 47;
+            }
+            else {
+                row_height = 35;
+            }
+            max_rows = Math.floor(height / row_height);
+            if (max_rows < 5){
+                box_height = header+page_row + search_row + 40 + (5 * row_height);
+                if (docw < 1140) {
+                    box_height += 40;
+                }
+                // $('.portal-job-template-container').height(box_height);
+                max_rows = 5;
+            }
+            return max_rows;
+        };
+
         $scope.submitJob = function (id) {
             PlaybookRun({ scope: $scope, id: id });
         };
 
         $scope.refresh = function () {
             $scope.$emit('LoadPortal');
-            // Wait('start');
-            // loadedCount = 0;
-            // Rest.setUrl(GetBasePath('dashboard'));
-            // Rest.get()
-            //     .success(function (data) {
-            //         $scope.$emit('dashboardReady', data);
-            //     })
-            //     .error(function (data, status) {
-            //         ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
-            //     });
         };
 
         $scope.refresh();

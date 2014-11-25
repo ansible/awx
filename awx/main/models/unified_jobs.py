@@ -137,6 +137,13 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         editable=False,
     )
 
+    def get_absolute_url(self):
+        real_instance = self.get_real_instance()
+        if real_instance != self:
+            return real_instance.get_absolute_url()
+        else:
+            return ''
+
     def unique_error_message(self, model_class, unique_check):
         # If polymorphic_ctype is part of a unique check, return a list of the
         # remaining fields instead of the error message.
@@ -437,6 +444,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default='',
         editable=False,
     )
+
+    def get_absolute_url(self):
+        real_instance = self.get_real_instance()
+        if real_instance != self:
+            return real_instance.get_absolute_url()
+        else:
+            return ''
 
     @classmethod
     def _get_task_class(cls):

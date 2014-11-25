@@ -207,13 +207,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     }
 ])
 
-.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange',
-    function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange) {
+.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange', 'CustomInventoryList' ,
+    function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange, CustomInventoryList) {
         return function (params) {
 
             var scope = params.scope,
                 form = params.form,
-                kind, url, callback;
+                kind, url, callback, invUrl;
 
             if (!Empty(scope.source)) {
                 if (scope.source.value === 'file') {
@@ -234,7 +234,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     $('#source_form').removeClass('squeeze');
                 } else if (scope.source.value === 'ec2') {
                     scope.source_region_choices = scope.ec2_regions;
-                    //$('#s2id_group_source_regions').select2('data', []);
                     $('#s2id_source_source_regions').select2('data', [{
                         id: 'all',
                         text: 'All'
@@ -272,6 +271,21 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         text: 'All'
                     }]);
                     $('#source_form').addClass('squeeze');
+                }
+                if(scope.source.value==="custom"){
+                    invUrl = GetBasePath('inventory_scripts');
+                    LookUpInit({
+                        url: invUrl,
+                        scope: scope,
+                        form: form,
+                        // current_item: null,
+                        list: CustomInventoryList,
+                        field: 'source_script',
+                        input_type: 'radio'
+                    });
+                    scope.extra_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
+                    ParseTypeChange({ scope: scope, variable: 'extra_vars', parse_variable: form.fields.extra_vars.parseTypeName,
+                        field_id: 'source_extra_vars', onReady: callback });
                 }
                 if (scope.source.value === 'rax' || scope.source.value === 'ec2'|| scope.source.value==='gce' || scope.source.value === 'azure' || scope.source.value === 'vmware') {
                     kind = (scope.source.value === 'rax') ? 'rax' : (scope.source.value==='gce') ? 'gce' : (scope.source.value==='azure') ? 'azure' : (scope.source.value === 'vmware') ? 'vmware' : 'aws' ;
@@ -850,6 +864,8 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                         Wait('start');
                         ParseTypeChange({ scope: sources_scope, variable: 'source_vars', parse_variable: SourceForm.fields.source_vars.parseTypeName,
                             field_id: 'source_source_vars', onReady: waitStop });
+                        ParseTypeChange({ scope: sources_scope, variable: 'extra_vars', parse_variable: SourceForm.fields.extra_vars.parseTypeName,
+                            field_id: 'source_extra_vars', onReady: waitStop });
                     }
                 }
                 else if ($(e.target).text() === 'Schedule') {
@@ -946,7 +962,12 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                                     // Parse source_vars, converting to YAML.
                                     sources_scope.source_vars = ParseVariableString(data.source_vars);
                                     master.source_vars = sources_scope.variables;
-                                } else if (data[fld] !== undefined) {
+                                }
+                                // else if(fld === "source_script"){
+                                //     sources_scope[fld] = data
+                                // }
+
+                                else if (data[fld] !== undefined) {
                                     sources_scope[fld] = data[fld];
                                     master[fld] = sources_scope[fld];
                                 }
@@ -1144,6 +1165,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                         credential: sources_scope.credential,
                         overwrite: sources_scope.overwrite,
                         overwrite_vars: sources_scope.overwrite_vars,
+                        source_script: sources_scope.source_script,
                         update_on_launch: sources_scope.update_on_launch,
                         update_cache_timeout: (sources_scope.update_cache_timeout || 0)
                     };
@@ -1156,9 +1178,17 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 }
                 data.source_regions = r.join();
 
-                if (sources_scope.source && (sources_scope.source.value === 'ec2' || sources_scope.source.value === 'custom')) {
+                if (sources_scope.source && (sources_scope.source.value === 'ec2')) {
                     // for ec2, validate variable data
                     data.source_vars = ToJSON(sources_scope.envParseType, sources_scope.source_vars, true);
+                }
+
+                if (sources_scope.source && (sources_scope.source.value === 'custom')) {
+                    data.source_vars = ToJSON(sources_scope.envParseType, sources_scope.extra_vars, true);
+                }
+
+                if(sources_scope.source.value === 'custom'){
+                    delete(data.credential);
                 }
 
                 if (!parseError) {

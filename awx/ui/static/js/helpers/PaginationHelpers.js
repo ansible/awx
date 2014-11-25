@@ -138,7 +138,7 @@ angular.module('PaginationHelpers', ['Utilities', 'RefreshHelper', 'RefreshRelat
                     connect = (/\/$/.test(new_url)) ? '?' : '&';
                 new_url += connect + 'page=' + page;
                 new_url += (scope[iterator + 'SearchParams']) ? '&' + scope[iterator + 'SearchParams'] +
-                    '&page_size=' + scope[iterator + '_page_size'] : 'page_size=' + scope[iterator + 'PageSize'];
+                    '&page_size=' + scope[iterator + '_page_size'] : '&page_size=' + scope[iterator + 'PageSize'];
                 Wait('start');
                 Refresh({ scope: scope, set: set, iterator: iterator, url: new_url });
             };

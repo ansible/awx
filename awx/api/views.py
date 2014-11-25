@@ -15,6 +15,7 @@ import sys
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.core.exceptions import FieldError
 from django.db.models import Q, Count, Sum
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
@@ -61,6 +62,8 @@ def api_exception_handler(exc):
     Override default API exception handler to catch IntegrityError exceptions.
     '''
     if isinstance(exc, IntegrityError):
+        exc = ParseError(exc.args[0])
+    if isinstance(exc, FieldError):
         exc = ParseError(exc.args[0])
     return exception_handler(exc)
 
@@ -1879,7 +1882,7 @@ class JobRelaunch(GenericAPIView):
         obj = self.get_object()
         data = {}
         data['passwords_needed_to_start'] = obj.passwords_needed_to_start
-        data['ask_variables_on_launch'] = obj.ask_variables_on_launch
+        #data['ask_variables_on_launch'] = obj.ask_variables_on_launch
         return Response(data)
 
     def post(self, request, *args, **kwargs):
