@@ -16,9 +16,9 @@
 angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
     'GeneratorHelpers'])
 
-    .factory('ConfigureTower', ['Wait', 'CreateDialog', 'ConfigureTowerJobsList', 'GenerateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'LoadSchedulesScope',
+    .factory('ConfigureTower', ['Wait', '$location' , 'CreateDialog', 'ConfigureTowerJobsList', 'GenerateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'LoadSchedulesScope',
         'SchedulesList', 'SchedulesControllerInit' , 'ConfigureTowerSchedule', 'Rest' , 'ProcessErrors',
-        function(Wait, CreateDialog, ConfigureTowerJobsList, GenerateList, GetBasePath, SearchInit, PaginateInit, PlaybookRun, LoadSchedulesScope,
+        function(Wait, $location, CreateDialog, ConfigureTowerJobsList, GenerateList, GetBasePath, SearchInit, PaginateInit, PlaybookRun, LoadSchedulesScope,
             SchedulesList, SchedulesControllerInit, ConfigureTowerSchedule, Rest, ProcessErrors) {
         return function(params) {
             // Set modal dimensions based on viewport width
@@ -171,6 +171,7 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                                     Wait('stop');
                                     $("#prompt-for-days").dialog("close");
                                     $("#configure-tower-dialog").dialog('close');
+                                    $location.path('/jobs/');
                                 })
                                 .error(function(data, status) {
                                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
