@@ -79,7 +79,7 @@ angular.module('SourceFormDefinition', [])
                     "<blockquote>key-name=staging, key-name=production</blockquote>\n" +
                     "Limit to hosts where the Name tag begins with <em>test</em>:<br />\n" +
                     "<blockquote>tag:Name=test*</blockquote>\n" +
-                    "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">DescribeInstances documentation</a> " +
+                    "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">Describe Instances documentation</a> " +
                     "for a complete list of supported filters.</p>",
                 dataContainer: 'body'
             },
@@ -106,7 +106,7 @@ angular.module('SourceFormDefinition', [])
                     "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
                 dataContainer: 'body'
             },
-            custom_script: {
+            source_script: {
                 label :  "Custom Inventory Scripts",
                 type: 'lookup',
                 ngShow: "source && source.value !== '' && source.value === 'custom'",
