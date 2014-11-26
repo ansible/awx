@@ -295,10 +295,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         kwargs.pop('%s_id' % parent_field_name, None)
         kwargs[parent_field_name] = self
         for field_name in self._get_unified_job_field_names():
-            if hasattr(self, '%s_id' % field_name) and field_name in kwargs:
-                kwargs['%s_id' % field_name] = kwargs[field_name]
-                kwargs.pop(field_name)
-                continue
             if field_name in kwargs:
                 continue
             # Foreign keys can be specified as field_name or field_name_id.
