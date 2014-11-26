@@ -293,16 +293,19 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         unified_job_class = self._get_unified_job_class()
         parent_field_name = unified_job_class._get_parent_field_name()
         kwargs.pop('%s_id' % parent_field_name, None)
-        kwargs[parent_field_name] = self
+        create_kwargs = {}
+        create_kwargs[parent_field_name] = self
         for field_name in self._get_unified_job_field_names():
             if field_name in kwargs:
+                create_kwargs[field_name] = kwargs[field_name]
                 continue
             # Foreign keys can be specified as field_name or field_name_id.
             if hasattr(self, '%s_id' % field_name) and ('%s_id' % field_name) in kwargs:
+                create_kwargs['%s_id' % field_name] = kwargs['%s_id' % field_name] = kwargs[field_name]
                 continue
-            kwargs[field_name] = getattr(self, field_name)
-        kwargs = self._update_unified_job_kwargs(**kwargs)
-        unified_job = unified_job_class(**kwargs)
+            create_kwargs[field_name] = getattr(self, field_name)
+        kwargs = self._update_unified_job_kwargs(**create_kwargs)
+        unified_job = unified_job_class(**create_kwargs)
         if save_unified_job:
             unified_job.save()
         return unified_job
