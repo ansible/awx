@@ -927,11 +927,12 @@ class InventorySourceOptions(BaseModel):
     source_vars_dict = VarsDictProperty('source_vars')
 
     def clean_instance_filters(self):
+        instance_filters = unicode(self.instance_filters or '')
         if self.source != 'ec2':
             return ''
         invalid_filters = []
         instance_filter_re = re.compile(r'^(?:tag:.+)|(?:[a-z][a-z\.-]*[a-z])=.*$')
-        for instance_filter in self.instance_filters.split(','):
+        for instance_filter in instance_filters.split(','):
             instance_filter = instance_filter.strip()
             if not instance_filter:
                 continue
@@ -941,16 +942,17 @@ class InventorySourceOptions(BaseModel):
             raise ValidationError('Invalid filter expression%s: %s' %
                                   ('' if len(invalid_filters) == 1 else 's',
                                   ', '.join(invalid_filters)))
-        return self.instance_filters
+        return instance_filters
 
     def clean_group_by(self):
+        group_by = unicode(self.group_by or '')
         if self.source != 'ec2':
             return ''
         get_choices = getattr(self, 'get_%s_group_by_choices' % self.source)
         valid_choices = [x[0] for x in get_choices()]
         choice_transform = lambda x: x.strip().lower()
         valid_choices = [choice_transform(x) for x in valid_choices]
-        choices = [choice_transform(x) for x in self.group_by.split(',') if x.strip()]
+        choices = [choice_transform(x) for x in group_by.split(',') if x.strip()]
         invalid_choices = []
         for c in choices:
             if c not in valid_choices and c not in invalid_choices:

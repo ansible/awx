@@ -1256,10 +1256,36 @@ class InventoryUpdatesTest(BaseTransactionTest):
             'source': 'ec2',
             'credential': aws_cred_id,
             'source_regions': '',
+            'instance_filters': '',
+            'group_by': '',
         }
         with self.current_user(self.super_django_user):
             response = self.put(inv_src_url1, inv_src_data, expect=200)
             self.assertEqual(response['source_regions'], '')
+        # Null for instance filters and group_by should be converted to empty
+        # string.
+        inv_src_data['instance_filters'] = None
+        inv_src_data['group_by'] = None
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+            self.assertEqual(response['instance_filters'], '')
+            self.assertEqual(response['group_by'], '')
+        # Invalid string for instance filters.
+        inv_src_data['instance_filters'] = 'tag-key_123=Name,'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=400)
+        # Valid string for instance filters.
+        inv_src_data['instance_filters'] = 'tag-key=Name'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+        # Invalid string for group_by.
+        inv_src_data['group_by'] = 'ec2_region,'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=400)
+        # Valid string for group_by.
+        inv_src_data['group_by'] = 'region,key_pair,instance_type'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
         # All region.
         inv_src_data['source_regions'] = 'ALL'
         with self.current_user(self.super_django_user):
@@ -1293,6 +1319,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
             'source': 'rax',
             'credential': rax_cred_id,
             'source_regions': '',
+            'instance_filters': None,
+            'group_by': None,
         }
         with self.current_user(self.super_django_user):
             response = self.put(inv_src_url2, inv_src_data, expect=200)
