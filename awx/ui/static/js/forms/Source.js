@@ -71,7 +71,16 @@ angular.module('SourceFormDefinition', [])
                 editRequired: false,
                 dataTitle: 'Instance Filters',
                 dataPlacement: 'right',
-                awPopOver: "<p>Open the <a href=http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html target='_blank'>documentation</a> for a complete list of filter options.</p>",
+                awPopOver: "<p>Provide a comma-separated list of filter expressions. " +
+                    "Hosts are imported to Tower when <em>ANY</em> of the filters match.</p>" +
+                    "Limit to hosts having a tag:<br />\n" +
+                    "<blockquote>tag-key=TowerManaged</blockquote>\n" +
+                    "Limit to hosts using either key pair:<br />\n" +
+                    "<blockquote>key-name=staging, key-name=production</blockquote>\n" +
+                    "Limit to hosts where the Name tag begins with <em>test</em>:<br />\n" +
+                    "<blockquote>tag:Name=test*</blockquote>\n" +
+                    "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">Describe Instances documentation</a> " +
+                    "for a complete list of supported filters.</p>",
                 dataContainer: 'body'
             },
             group_by: {
@@ -81,22 +90,22 @@ angular.module('SourceFormDefinition', [])
                 addRequired: false,
                 editRequired: false,
                 awMultiselect: 'group_by_choices',
-                dataTitle: 'Group By',
+                dataTitle: 'Only Group By',
                 dataPlacement: 'right',
-                awPopOver: "<p>FIXME: Create these automatic groups by default. give examples</p>",
+                awPopOver: "<p>Select which groups to create automatically. " +
+                    "Tower will create group names similar to the following examples based on the options selected:</p><ul>" +
+                    "<li>Availability Zone: <strong>zones &raquo; us-east-1b</strong></li>" +
+                    "<li>Image ID: <strong>images &raquo; ami-b007ab1e</strong></li>" +
+                    "<li>Instance ID: <strong>instances &raquo; i-ca11ab1e</strong></li>" +
+                    "<li>Instance Type: <strong>types &raquo; type_m1_medium</strong></li>" +
+                    "<li>Key Name: <strong>keys &raquo; key_testing</strong></li>" +
+                    "<li>Region: <strong>regions &raquo; us-east-1</strong></li>" +
+                    "<li>Security Group: <strong>security_groups &raquo; security_group_default</strong></li>" +
+                    "<li>Tags: <strong>tags &raquo; tag_Name &raquo; tag_Name_host1</strong></li>" +
+                    "<li>VPC ID: <strong>vpcs &raquo; vpc-5ca1ab1e</strong></li>" +
+                    "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
                 dataContainer: 'body'
             },
-            // group_tag_filters: {
-            //     label: 'Tag Filters',
-            //     type: 'text',
-            //     ngShow: "source && source.value == 'ec2' && group_by.value.indexOf('tag_keys') >= 0", // FIXME: Not sure what's needed to make the last expression work.
-            //     addRequired: false,
-            //     editRequired: false,
-            //     dataTitle: 'Tag Filters',
-            //     dataPlacement: 'right',
-            //     awPopOver: "<p>FIXME: When grouping by tags, specify which tag keys become groups.</p>",
-            //     dataContainer: 'body'
-            // },
             source_script: {
                 label :  "Custom Inventory Scripts",
                 type: 'lookup',

@@ -14,6 +14,9 @@ The response will include the following fields:
   job_template (array, read-only)
 * `survey_enabled`: Flag indicating if whether the job_template has an enabled
   survey (boolean, read-only)
+* `credential_needed_to_start`: Flag indicating the presence of a credential
+  associated with the job template.  If not then one should be supplied when
+  launching the job (boolean, read-only)
 
 Make a POST request to this resource to launch the job_template.  If any
 passwords or variables are required, they must be passed via POST data.

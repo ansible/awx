@@ -148,6 +148,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         return {
             restrict: 'A',
             require: 'ngModel',
+            // scope: true,
             link: function (scope, elem, attr, ctrl) {
                 scope.$watch(attr.ngMin, function () {
                     ctrl.$setViewValue(ctrl.$viewValue);
@@ -162,7 +163,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         return value;
                     }
                 };
-
                 ctrl.$parsers.push(minValidator);
                 ctrl.$formatters.push(minValidator);
             }
@@ -173,6 +173,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         return {
             restrict: 'A',
             require: 'ngModel',
+            // scope: true,
             link: function (scope, elem, attr, ctrl) {
                 scope.$watch(attr.ngMax, function () {
                     ctrl.$setViewValue(ctrl.$viewValue);
@@ -187,7 +188,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         return value;
                     }
                 };
-
                 ctrl.$parsers.push(maxValidator);
                 ctrl.$formatters.push(maxValidator);
             }
@@ -196,14 +196,19 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
 
 
     .directive('smartFloat', function() {
-        var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+        var FLOAT_REGEXP_1 = /^\$?\d+(.\d{3})*(\,\d*)?$/,  //Numbers like: 1.123,56
+        FLOAT_REGEXP_2 = /^\$?\d+(,\d{3})*(\.\d*)?$/; //Numbers like: 1,123.56
         return {
+            restrict: 'A',
             require: 'ngModel',
-            link: function(scope, elm, attrs, ctrl) {
-                ctrl.$parsers.unshift(function(viewValue) {
-                    if (FLOAT_REGEXP.test(viewValue)) {
+            link: function (scope, elm, attrs, ctrl) {
+                ctrl.$parsers.unshift(function (viewValue) {
+                    if (FLOAT_REGEXP_1.test(Number(viewValue))) {
                         ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue.replace(',', '.'));
+                        return parseFloat(viewValue.replace('.', '').replace(',', '.'));
+                    } else if (FLOAT_REGEXP_2.test(Number(viewValue))) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue.replace(',', ''));
                     } else {
                         ctrl.$setValidity('float', false);
                         return undefined;
@@ -211,6 +216,21 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 });
             }
         };
+        // var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+        // return {
+        //     require: 'ngModel',
+        //     link: function(scope, elm, attrs, ctrl) {
+        //         ctrl.$parsers.unshift(function(viewValue) {
+        //             if (FLOAT_REGEXP.test(viewValue)) {
+        //                 ctrl.$setValidity('float', true);
+        //                 return parseFloat(viewValue.replace(',', '.'));
+        //             } else {
+        //                 ctrl.$setValidity('float', false);
+        //                 return undefined;
+        //             }
+        //         });
+        //     }
+        // };
     })
 
     // integer  Validate that input is of type integer. Taken from Angular developer
@@ -221,6 +241,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //          override/interfere with this directive.
     .directive('integer', function() {
         return {
+            restrict: 'A',
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
                 ctrl.$parsers.unshift(function(viewValue) {

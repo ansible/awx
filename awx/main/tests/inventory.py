@@ -1135,7 +1135,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
             pass # If should_fail is None, we don't care.
         return inventory_update
 
-    def check_inventory_source(self, inventory_source, initial=True, enabled_host_pks=None):
+    def check_inventory_source(self, inventory_source, initial=True, enabled_host_pks=None, instance_id_group_ok=False):
         enabled_host_pks = enabled_host_pks or set()
         inventory_source = InventorySource.objects.get(pk=inventory_source.pk)
         inventory = inventory_source.group.inventory
@@ -1158,7 +1158,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
             url = reverse('api:inventory_source_hosts_list', args=(inventory_source.pk,))
             response = self.get(url, expect=200)
             self.assertNotEqual(response['count'], 0)
-        for host in inventory.hosts.all():
+        for host in inventory.hosts.filter(active=True):
             source_pks = host.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(host.has_inventory_sources)
@@ -1172,20 +1172,21 @@ class InventoryUpdatesTest(BaseTransactionTest):
                 url = reverse('api:host_inventory_sources_list', args=(host.pk,))
                 response = self.get(url, expect=200)
                 self.assertNotEqual(response['count'], 0)
-        for group in inventory.groups.all():
+        for group in inventory.groups.filter(active=True):
             source_pks = group.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(group.has_inventory_sources)
             self.assertTrue(group.children.filter(active=True).exists() or
                             group.hosts.filter(active=True).exists())
             # Make sure EC2 instance ID groups and RDS groups are excluded.
-            if inventory_source.source == 'ec2':
+            if inventory_source.source == 'ec2' and not instance_id_group_ok:
                 self.assertFalse(re.match(r'^i-[0-9a-f]{8}$', group.name, re.I),
                                  group.name)
+            if inventory_source.source == 'ec2':
                 self.assertFalse(re.match(r'^rds|rds_.+|type_db_.+$', group.name, re.I),
                                  group.name)
             # Make sure Rackspace instance ID groups are excluded.
-            if inventory_source.source == 'rax':
+            if inventory_source.source == 'rax' and not instance_id_group_ok:
                 self.assertFalse(re.match(r'^instance-.+$', group.name, re.I),
                                  group.name)
             with self.current_user(self.super_django_user):
@@ -1194,7 +1195,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                 self.assertNotEqual(response['count'], 0)
         # Try to set a source on a child group that was imported.  Should not
         # be allowed.
-        for group in inventory_source.group.children.all():
+        for group in inventory_source.group.children.filter(active=True):
             inv_src_2 = group.inventory_source
             inv_src_url2 = reverse('api:inventory_source_detail', args=(inv_src_2.pk,))
             with self.current_user(self.super_django_user):
@@ -1255,10 +1256,36 @@ class InventoryUpdatesTest(BaseTransactionTest):
             'source': 'ec2',
             'credential': aws_cred_id,
             'source_regions': '',
+            'instance_filters': '',
+            'group_by': '',
         }
         with self.current_user(self.super_django_user):
             response = self.put(inv_src_url1, inv_src_data, expect=200)
             self.assertEqual(response['source_regions'], '')
+        # Null for instance filters and group_by should be converted to empty
+        # string.
+        inv_src_data['instance_filters'] = None
+        inv_src_data['group_by'] = None
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+            self.assertEqual(response['instance_filters'], '')
+            self.assertEqual(response['group_by'], '')
+        # Invalid string for instance filters.
+        inv_src_data['instance_filters'] = 'tag-key_123=Name,'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=400)
+        # Valid string for instance filters.
+        inv_src_data['instance_filters'] = 'tag-key=Name'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+        # Invalid string for group_by.
+        inv_src_data['group_by'] = 'ec2_region,'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=400)
+        # Valid string for group_by.
+        inv_src_data['group_by'] = 'region,key_pair,instance_type'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
         # All region.
         inv_src_data['source_regions'] = 'ALL'
         with self.current_user(self.super_django_user):
@@ -1292,6 +1319,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
             'source': 'rax',
             'credential': rax_cred_id,
             'source_regions': '',
+            'instance_filters': None,
+            'group_by': None,
         }
         with self.current_user(self.super_django_user):
             response = self.put(inv_src_url2, inv_src_data, expect=200)
@@ -1450,10 +1479,15 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # Also change the host name, and verify it is not deleted, but instead
         # updated because the instance ID matches.
         enabled_host_pks = set(self.inventory.hosts.filter(enabled=True).values_list('pk', flat=True))
+        instance_types = {}
         for host in self.inventory.hosts.all():
             host.enabled = False
             host.name = 'changed-%s' % host.name
             host.save()
+            # Get instance types for later use with instance_filters.
+            instance_type = host.variables_dict.get('ec2_instance_type', '')
+            if instance_type:
+                instance_types.setdefault(instance_type, []).append(host.pk)
         old_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
         self.check_inventory_source(inventory_source, initial=False, enabled_host_pks=enabled_host_pks)
         new_host_pks = set(self.inventory.hosts.values_list('pk', flat=True))
@@ -1461,6 +1495,18 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # Verify that main group is in top level groups (hasn't been added as
         # its own child).
         self.assertTrue(self.group in self.inventory.root_groups)
+        # Now add instance filters and verify that only the matching hosts are
+        # synced, specify new cache path to force refresh.
+        cache_path2 = tempfile.mkdtemp(prefix='awx_ec2_')
+        self._temp_paths.append(cache_path2)
+        instance_type = max(instance_types.items(), key=lambda x: len(x[1]))[0]
+        inventory_source.instance_filters = 'instance-type=%s' % instance_type
+        inventory_source.source_vars = '---\n\nnested_groups: false\ncache_path: %s\n' % cache_path2
+        inventory_source.overwrite = True
+        inventory_source.save()
+        self.check_inventory_source(inventory_source, initial=False)
+        new_host_pks = set(self.inventory.hosts.filter(active=True).values_list('pk', flat=True))
+        self.assertEqual(new_host_pks, set(instance_types[instance_type]))
 
     def test_update_from_ec2_with_nested_groups(self):
         source_username = getattr(settings, 'TEST_AWS_ACCESS_KEY_ID', '')
@@ -1494,16 +1540,67 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.assertFalse(name.startswith('key_'))
             self.assertFalse(name.startswith('security_group_'))
             self.assertFalse(name.startswith('tag_'))
+            self.assertFalse(name.startswith('ami-'))
+            self.assertFalse(name.startswith('vpc-'))
         self.assertTrue('ec2' in child_names)
         self.assertTrue('regions' in child_names)
         self.assertTrue('types' in child_names)
         self.assertTrue('keys' in child_names)
         self.assertTrue('security_groups' in child_names)
         self.assertTrue('tags' in child_names)
+        self.assertTrue('images' in child_names)
+        self.assertFalse('instances' in child_names)
         # Make sure we clean up the cache path when finished (when one is not
         # provided explicitly via source_vars).
         new_cache_paths = set(glob.glob(cache_path_pattern))
         self.assertEqual(old_cache_paths, new_cache_paths)
+        # Sync again with group_by set to a non-empty value.
+        cache_path = tempfile.mkdtemp(prefix='awx_ec2_')
+        self._temp_paths.append(cache_path)
+        inventory_source.group_by = 'region,instance_type'
+        inventory_source.source_vars = '---\n\ncache_path: %s\n' % cache_path
+        inventory_source.overwrite = True
+        inventory_source.save()
+        self.check_inventory_source(inventory_source, initial=False)
+        # Verify that only the desired groups are returned.
+        child_names = self.group.children.filter(active=True).values_list('name', flat=True)
+        self.assertTrue('ec2' in child_names)
+        self.assertTrue('regions' in child_names)
+        self.assertTrue(self.group.children.get(name='regions').children.filter(active=True).count())
+        self.assertTrue('types' in child_names)
+        self.assertTrue(self.group.children.get(name='types').children.filter(active=True).count())
+        self.assertFalse('keys' in child_names)
+        self.assertFalse('security_groups' in child_names)
+        self.assertFalse('tags' in child_names)
+        self.assertFalse('images' in child_names)
+        self.assertFalse('vpcs' in child_names)
+        self.assertFalse('instances' in child_names)
+        # Sync again with group_by set to include all possible groups.
+        cache_path2 = tempfile.mkdtemp(prefix='awx_ec2_')
+        self._temp_paths.append(cache_path2)
+        inventory_source.group_by = 'instance_id, region, availability_zone, ami_id, instance_type, key_pair, vpc_id, security_group, tag_keys'
+        inventory_source.source_vars = '---\n\ncache_path: %s\n' % cache_path2
+        inventory_source.overwrite = True
+        inventory_source.save()
+        self.check_inventory_source(inventory_source, initial=False, instance_id_group_ok=True)
+        # Verify that only the desired groups are returned.
+        # Skip vpcs as selected inventory may or may not have any.
+        child_names = self.group.children.filter(active=True).values_list('name', flat=True)
+        self.assertTrue('ec2' in child_names)
+        self.assertTrue('regions' in child_names)
+        self.assertTrue(self.group.children.get(name='regions').children.filter(active=True).count())
+        self.assertTrue('types' in child_names)
+        self.assertTrue(self.group.children.get(name='types').children.filter(active=True).count())
+        self.assertTrue('keys' in child_names)
+        self.assertTrue(self.group.children.get(name='keys').children.filter(active=True).count())
+        self.assertTrue('security_groups' in child_names)
+        self.assertTrue(self.group.children.get(name='security_groups').children.filter(active=True).count())
+        self.assertTrue('tags' in child_names)
+        self.assertTrue(self.group.children.get(name='tags').children.filter(active=True).count())
+        self.assertTrue('images' in child_names)
+        self.assertTrue(self.group.children.get(name='images').children.filter(active=True).count())
+        self.assertTrue('instances' in child_names)
+        self.assertTrue(self.group.children.get(name='instances').children.filter(active=True).count())
         return
         # Print out group/host tree for debugging.
         print
@@ -1515,7 +1612,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                 draw_tree(c, d+1)
         for g in self.inventory.root_groups.order_by('name'):
             draw_tree(g)
-        
+
     def test_update_from_rax(self):
         source_username = getattr(settings, 'TEST_RACKSPACE_USERNAME', '')
         source_password = getattr(settings, 'TEST_RACKSPACE_API_KEY', '')

@@ -238,22 +238,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         id: 'all',
                         text: 'All'
                     }]);
-                    // FIXME: Should come from API.
-                    scope.group_by_choices = [
-                        {label: 'All', name: 'All', value: 'all'},
-                        {label: 'Instance ID', name: 'Instance ID', value: 'instance_id'},
-                        {label: 'Region', name: 'Region', value: 'region'},
-                        {label: 'Availability Zone', name: 'Availability Zone', value: 'availability_zone'},
-                        {label: 'AMI ID', name: 'AMI ID', value: 'ami_id'},
-                        {label: 'Instance Type', name: 'Instance Type', value: 'instance_type'},
-                        {label: 'Key Pair', name: 'Key Pair', value: 'key_pair'},
-                        {label: 'Security Group', name: 'Security Group', value: 'security_group'},
-                        {label: 'Tag Keys', name: 'Tag Keys', value: 'tag_keys'},
-                    ];
-                    $('#s2id_source_group_by').select2('data', [{
-                        id: 'all',
-                        text: 'All'
-                    }]);
+                    scope.group_by_choices = scope.ec2_group_by;
+                    $('#s2id_group_by').select2('data', []);
                     $('#source_form').addClass('squeeze');
                 } else if (scope.source.value === 'gce') {
                     scope.source_region_choices = scope.gce_regions;
@@ -860,10 +846,13 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     setTimeout(function(){ textareaResize('group_variables'); }, 300);
                 }
                 else if ($(e.target).text() === 'Source') {
-                    if (sources_scope.source && (sources_scope.source.value === 'ec2' || sources_scope.source.value === 'custom')) {
+                    if (sources_scope.source && (sources_scope.source.value === 'ec2')) {
                         Wait('start');
                         ParseTypeChange({ scope: sources_scope, variable: 'source_vars', parse_variable: SourceForm.fields.source_vars.parseTypeName,
                             field_id: 'source_source_vars', onReady: waitStop });
+                    }
+                    else if (sources_scope.source && (sources_scope.source.value === 'custom')) {
+                        Wait('start');
                         ParseTypeChange({ scope: sources_scope, variable: 'extra_vars', parse_variable: SourceForm.fields.extra_vars.parseTypeName,
                             field_id: 'source_extra_vars', onReady: waitStop });
                     }
@@ -1009,6 +998,23 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                                 }];
                                 $('#s2id_source_source_regions').select2('data', master.source_regions);
                             }
+                            if (data.group_by && data.source === 'ec2') {
+                                set = sources_scope.ec2_group_by;
+                                opts = [];
+                                list = data.group_by.split(',');
+                                for (i = 0; i < list.length; i++) {
+                                    for (j = 0; j < set.length; j++) {
+                                        if (list[i] === set[j].value) {
+                                            opts.push({
+                                                id: set[j].value,
+                                                text: set[j].label
+                                            });
+                                        }
+                                    }
+                                }
+                                master.group_by = opts;
+                                $('#s2id_source_group_by').select2('data', opts);
+                            }
                             sources_scope.group_update_url = data.related.update;
                             modal_scope.$emit('groupVariablesLoaded');  // JT-- "groupVariablesLoaded" is where the schedule info is loaded, so I make a call after the sources_scope.source has been loaded
                             //Wait('stop');
@@ -1119,6 +1125,16 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 callback: 'choicesReadyGroup'
             });
 
+            // Load options for group_by
+            GetChoices({
+                scope: sources_scope,
+                url: GetBasePath('inventory_sources'),
+                field: 'group_by',
+                variable: 'ec2_group_by',
+                choice_name: 'ec2_group_by_choices',
+                callback: 'choicesReadyGroup'
+            });
+
             Wait('start');
 
             if (parent_scope.removeAddTreeRefreshed) {
@@ -1179,6 +1195,17 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 data.source_regions = r.join();
 
                 if (sources_scope.source && (sources_scope.source.value === 'ec2')) {
+                    data.instance_filters = sources_scope.instance_filters;
+                    // Create a string out of selected list of regions
+                    var group_by = $('#s2id_source_group_by').select2("data");
+                    r = [];
+                    for (i = 0; i < group_by.length; i++) {
+                        r.push(group_by[i].id);
+                    }
+                    data.group_by = r.join();
+                }
+
+                if (sources_scope.source && (sources_scope.source.value === 'ec2' || sources_scope.source.value === 'custom')) {
                     // for ec2, validate variable data
                     data.source_vars = ToJSON(sources_scope.envParseType, sources_scope.source_vars, true);
                 }

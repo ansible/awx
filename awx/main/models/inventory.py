@@ -784,6 +784,18 @@ class InventorySourceOptions(BaseModel):
         blank=True,
         default='',
     )
+    instance_filters = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Comma-separated list of filter expressions (EC2 only). Hosts are imported when ANY of the filters match.'),
+    )
+    group_by = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Limit groups automatically created from inventory source (EC2 only).'),
+    )
     overwrite = models.BooleanField(
         default=False,
         help_text=_('Overwrite local groups and hosts from remote inventory source.'),
@@ -814,6 +826,20 @@ class InventorySourceOptions(BaseModel):
                 label = ' '.join(label_parts)
             regions.append((region.name, label))
         return regions
+
+    @classmethod
+    def get_ec2_group_by_choices(cls):
+        return [
+            ('availability_zone', 'Availability Zone'),
+            ('ami_id', 'Image ID'),
+            ('instance_id', 'Instance ID'),
+            ('instance_type', 'Instance Type'),
+            ('key_pair', 'Key Name'),
+            ('region', 'Region'),
+            ('security_group', 'Security Group'),
+            ('tag_keys', 'Tags'),
+            ('vpc_id', 'VPC ID'),
+        ]
 
     @classmethod
     def get_rax_region_choices(cls):
@@ -900,6 +926,43 @@ class InventorySourceOptions(BaseModel):
 
     source_vars_dict = VarsDictProperty('source_vars')
 
+    def clean_instance_filters(self):
+        instance_filters = unicode(self.instance_filters or '')
+        if self.source != 'ec2':
+            return ''
+        invalid_filters = []
+        instance_filter_re = re.compile(r'^(?:tag:.+)|(?:[a-z][a-z\.-]*[a-z])=.*$')
+        for instance_filter in instance_filters.split(','):
+            instance_filter = instance_filter.strip()
+            if not instance_filter:
+                continue
+            if not instance_filter_re.match(instance_filter):
+                invalid_filters.append(instance_filter)
+        if invalid_filters:
+            raise ValidationError('Invalid filter expression%s: %s' %
+                                  ('' if len(invalid_filters) == 1 else 's',
+                                  ', '.join(invalid_filters)))
+        return instance_filters
+
+    def clean_group_by(self):
+        group_by = unicode(self.group_by or '')
+        if self.source != 'ec2':
+            return ''
+        get_choices = getattr(self, 'get_%s_group_by_choices' % self.source)
+        valid_choices = [x[0] for x in get_choices()]
+        choice_transform = lambda x: x.strip().lower()
+        valid_choices = [choice_transform(x) for x in valid_choices]
+        choices = [choice_transform(x) for x in group_by.split(',') if x.strip()]
+        invalid_choices = []
+        for c in choices:
+            if c not in valid_choices and c not in invalid_choices:
+                invalid_choices.append(c)
+        if invalid_choices:
+            raise ValidationError('Invalid group by choice%s: %s' %
+                                  ('' if len(invalid_choices) == 1 else 's',
+                                  ', '.join(invalid_choices)))
+        return ','.join(choices)
+
 
 class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
@@ -936,7 +999,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars',
-                'credential', 'source_regions', 'overwrite', 'overwrite_vars']
+                'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars']
 
     def save(self, *args, **kwargs):
         new_instance = bool(self.pk)

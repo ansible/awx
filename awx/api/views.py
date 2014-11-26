@@ -1499,7 +1499,7 @@ class JobTemplateLaunch(GenericAPIView):
             if validation_errors:
                 return Response(dict(errors=validation_errors),
                                 status=status.HTTP_400_BAD_REQUEST)
-        new_job = obj.create_unified_job()
+        new_job = obj.create_unified_job(**request.DATA)
         result = new_job.signal_start(**request.DATA)
         if not result:
             data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
