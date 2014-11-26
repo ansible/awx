@@ -387,15 +387,13 @@ EC2_ENABLED_VALUE = 'running'
 EC2_INSTANCE_ID_VAR = 'ec2_id'
 
 # Filter for allowed group/host names when importing inventory from EC2.
-# By default, filter group of one created for each instance, filter all RDS
-# hosts, and exclude all groups without children, hosts and variables.
-EC2_GROUP_FILTER = r'^(?!i-[a-f0-9]{8,}).+$'
+EC2_GROUP_FILTER = r'^.+$'
 EC2_HOST_FILTER = r'^.+$'
 EC2_EXCLUDE_EMPTY_GROUPS = True
 
 
 # ------------
-# -- VMWare --
+# -- VMware --
 # ------------
 VMWARE_REGIONS_BLACKLIST = []
 
@@ -408,7 +406,7 @@ VMWARE_ENABLED_VALUE = 'poweredOn'
 VMWARE_INSTANCE_ID_VAR = 'vmware_uuid'
 
 # Filter for allowed group and host names when importing inventory
-# from EC2.
+# from VMware.
 VMWARE_GROUP_FILTER = r'^.+$'
 VMWARE_HOST_FILTER = r'^.+$'
 VMWARE_EXCLUDE_EMPTY_GROUPS = True

@@ -960,7 +960,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
-                  'source_regions', 'overwrite', 'overwrite_vars')
+                  'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars')
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
@@ -1000,6 +1000,10 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         for cp in ('azure', 'ec2', 'gce', 'rax'):
             get_regions = getattr(self.opts.model, 'get_%s_region_choices' % cp)
             field_opts['%s_region_choices' % cp] = get_regions()
+        field_opts = metadata.get('group_by', {})
+        for cp in ('ec2',):
+            get_group_by_choices = getattr(self.opts.model, 'get_%s_group_by_choices' % cp)
+            field_opts['%s_group_by_choices' % cp] = get_group_by_choices()
         return metadata
 
     def to_native(self, obj):

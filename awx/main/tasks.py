@@ -956,6 +956,12 @@ class RunInventoryUpdate(BaseTask):
             ec2_opts.setdefault('all_rds_instances', 'False')
             ec2_opts.setdefault('rds', 'False')
             ec2_opts.setdefault('nested_groups', 'True')
+            if inventory_update.instance_filters:
+                ec2_opts.setdefault('instance_filters', inventory_update.instance_filters)
+            group_by = [x.strip().lower() for x in inventory_update.group_by.split(',') if x.strip()]
+            for choice in inventory_update.get_ec2_group_by_choices():
+                value = bool((group_by and choice[0] in group_by) or (not group_by and choice[0] != 'instance_id'))
+                ec2_opts.setdefault('group_by_%s' % choice[0], str(value))
             if 'cache_path' not in ec2_opts:
                 cache_path = tempfile.mkdtemp(prefix='ec2_cache', dir=kwargs.get('private_data_dir', None))
                 ec2_opts['cache_path'] = cache_path
