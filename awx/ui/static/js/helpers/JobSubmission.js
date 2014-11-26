@@ -150,7 +150,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
         // html+='<br>job_launch_form.$valid = {{job_launch_form.$valid}}<br>';
         html+='</form>';
         $('#password-modal').empty().html(html);
-        $('#password-modal').find('textarea').before(scope.helpContainer);
+        $('#password-modal').find('#job_extra_vars').before(scope.helpContainer);
         e = angular.element(document.getElementById('password-modal'));
         $compile(e)(scope);
 

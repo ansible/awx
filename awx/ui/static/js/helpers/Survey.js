@@ -633,16 +633,17 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             };
 
             scope.typeChange = function() {
-                // alert('typechange');
-                scope.default = null;
-                scope.default_multiselect = null;
-                scope.default_float = null;
-                scope.default_int = null;
-                scope.default_textarea = null;
-                scope.int_min = null;
-                scope.int_max = null;
-                scope.float_min = null;
-                scope.float_max = null;
+                scope.default = "";
+                scope.default_multiselect = "";
+                scope.default_float = "";
+                scope.default_int = "";
+                scope.default_textarea = "";
+                scope.survey_question_form.choices.$setPristine();
+                scope.choices = "";
+                scope.int_min = "";
+                scope.int_max = "";
+                scope.float_min = "";
+                scope.float_max = "";
             };
 
             scope.submitQuestion = function(){
