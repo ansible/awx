@@ -103,7 +103,7 @@ class Socket(object):
             self._socket.close()
         self._socket = None
         self._context = None
-                
+
     def publish(self, message):
         """Publish a message over the socket."""
 
@@ -130,6 +130,7 @@ class Socket(object):
             try:
                 self._socket.send_json(message)
                 self._socket.recv()
+                break
             except Exception as ex:
                 if self._logger:
                     self._logger.info('Publish Exception: %r; retry=%d',

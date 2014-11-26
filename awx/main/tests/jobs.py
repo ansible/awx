@@ -1193,7 +1193,6 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                   CALLBACK_CONSUMER_PORT='',
                    ANSIBLE_TRANSPORT='local')
 class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
     '''Job API tests that need to use the celery task backend.'''
