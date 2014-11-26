@@ -301,7 +301,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
                 continue
             # Foreign keys can be specified as field_name or field_name_id.
             if hasattr(self, '%s_id' % field_name) and ('%s_id' % field_name) in kwargs:
-                create_kwargs['%s_id' % field_name] = kwargs['%s_id' % field_name] = kwargs[field_name]
+                create_kwargs['%s_id' % field_name] = kwargs['%s_id' % field_name] = kwargs["%s_id" % field_name]
                 continue
             create_kwargs[field_name] = getattr(self, field_name)
         kwargs = self._update_unified_job_kwargs(**create_kwargs)
