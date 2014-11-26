@@ -45,7 +45,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             }
             delete(job_launch_data.extra_vars);
             if(!Empty(scope.credential)){
-                job_launch_data.credential = scope.credential;
+                job_launch_data.credential_id = scope.credential;
             }
             Rest.setUrl(url);
             Rest.post(job_launch_data)
