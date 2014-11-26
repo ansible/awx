@@ -967,6 +967,8 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
+        if obj.source_script and obj.source_script.active:
+            res['source_script'] = reverse('api:inventory_script_detail', args=(obj.source_script.pk,))
         return res
 
     def validate_source(self, attrs, source):
@@ -1042,8 +1044,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         if obj.group and obj.group.active:
             res['group'] = reverse('api:group_detail', args=(obj.group.pk,))
-        if obj.source_script:
-            res['source_script'] = reverse('api:inventory_script_detail', args=(obj.source_script.pk,))
         # Backwards compatibility.
         if obj.current_update:
             res['current_update'] = reverse('api:inventory_update_detail',
