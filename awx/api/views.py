@@ -1474,6 +1474,7 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 class JobTemplateLaunch(GenericAPIView):
 
     model = JobTemplate
+    is_job_start = True
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()

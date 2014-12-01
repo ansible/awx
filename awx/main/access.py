@@ -978,6 +978,7 @@ class JobTemplateAccess(BaseAccess):
             Q(user=self.user) | Q(team__users__in=[self.user]),
             inventory=obj.inventory,
             project=obj.project,
+            active=True,
             permission_type__in=[PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY],
         )
 
