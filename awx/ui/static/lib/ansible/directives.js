@@ -148,23 +148,17 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         return {
             restrict: 'A',
             require: 'ngModel',
-            // scope: true,
             link: function (scope, elem, attr, ctrl) {
-                scope.$watch(attr.ngMin, function () {
-                    ctrl.$setViewValue(ctrl.$viewValue);
-                });
-                var minValidator = function (value) {
+                ctrl.$parsers.unshift( function(viewValue) {
                     var min = (attr.ngMin) ? scope.$eval(attr.ngMin)  :  -Infinity;
-                    if (!Empty(value) && Number(value) < min) {
+                    if (!Empty(viewValue) && Number(viewValue) < min) {
                         ctrl.$setValidity('ngMin', false);
                         return undefined;
                     } else {
                         ctrl.$setValidity('ngMin', true);
-                        return value;
+                        return viewValue;
                     }
-                };
-                ctrl.$parsers.push(minValidator);
-                ctrl.$formatters.push(minValidator);
+                });
             }
         };
     }])
@@ -173,27 +167,20 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         return {
             restrict: 'A',
             require: 'ngModel',
-            // scope: true,
             link: function (scope, elem, attr, ctrl) {
-                scope.$watch(attr.ngMax, function () {
-                    ctrl.$setViewValue(ctrl.$viewValue);
-                });
-                var maxValidator = function (value) {
-                    var max = scope.$eval(attr.ngMax) || Infinity;
-                    if (!Empty(value) && Number(value) > max) {
+                ctrl.$parsers.unshift( function(viewValue) {
+                    var max = (attr.ngMax) ? scope.$eval(attr.ngMax)  :  Infinity;
+                    if (!Empty(viewValue) && Number(viewValue) >  max) {
                         ctrl.$setValidity('ngMax', false);
                         return undefined;
                     } else {
                         ctrl.$setValidity('ngMax', true);
-                        return value;
+                        return viewValue;
                     }
-                };
-                ctrl.$parsers.push(maxValidator);
-                ctrl.$formatters.push(maxValidator);
+                });
             }
         };
     }])
-
 
     .directive('smartFloat', function() {
         var FLOAT_REGEXP_1 = /^\$?\d+(.\d{3})*(\,\d*)?$/,  //Numbers like: 1.123,56
