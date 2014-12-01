@@ -151,7 +151,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             link: function (scope, elem, attr, ctrl) {
                 ctrl.$parsers.unshift( function(viewValue) {
                     var min = (attr.ngMin) ? scope.$eval(attr.ngMin)  :  -Infinity;
-                    if (!Empty(viewValue) && Number(viewValue) < min) {
+                    if (!Empty(min) && !Empty(viewValue) && Number(viewValue) < min) {
                         ctrl.$setValidity('ngMin', false);
                         return undefined;
                     } else {
@@ -170,7 +170,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             link: function (scope, elem, attr, ctrl) {
                 ctrl.$parsers.unshift( function(viewValue) {
                     var max = (attr.ngMax) ? scope.$eval(attr.ngMax)  :  Infinity;
-                    if (!Empty(viewValue) && Number(viewValue) >  max) {
+                    if (!Empty(max) && !Empty(viewValue) && Number(viewValue) >  max) {
                         ctrl.$setValidity('ngMax', false);
                         return undefined;
                     } else {
