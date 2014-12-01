@@ -303,6 +303,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
             if hasattr(self, '%s_id' % field_name) and ('%s_id' % field_name) in kwargs:
                 create_kwargs['%s_id' % field_name] = kwargs['%s_id' % field_name] = kwargs["%s_id" % field_name]
                 continue
+            if not hasattr(self, field_name):
+                continue
             create_kwargs[field_name] = getattr(self, field_name)
         kwargs = self._update_unified_job_kwargs(**create_kwargs)
         unified_job = unified_job_class(**create_kwargs)
