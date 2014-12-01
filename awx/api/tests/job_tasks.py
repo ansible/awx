@@ -20,7 +20,6 @@ from awx.main.tests.jobs import BaseJobTestMixin
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                   CALLBACK_CONSUMER_PORT='',
                    ANSIBLE_TRANSPORT='local')
 class JobTasksTests(BaseJobTestMixin, LiveServerTestCase):
     """A set of tests to ensure that the job_tasks endpoint, available at
