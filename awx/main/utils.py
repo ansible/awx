@@ -361,11 +361,12 @@ def get_system_task_capacity():
 
 
 def emit_websocket_notification(endpoint, event, payload):
-    from awx.main.queue import PubSub
-    pubsub = PubSub('websocket')
-    payload['event'] = event
-    payload['endpoint'] = endpoint
-    pubsub.publish(payload)
+    from awx.main.socket import Socket
+
+    with Socket('websocket', 'w') as websocket:
+        payload['event'] = event
+        payload['endpoint'] = endpoint
+        websocket.publish(payload)
 
 _inventory_updates = threading.local()
 

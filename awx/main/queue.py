@@ -8,7 +8,7 @@ from redis import StrictRedis
 
 from django.conf import settings
 
-__all__ = ['FifoQueue', 'PubSub']
+__all__ = ['FifoQueue']
 
 
 # Determine, based on settings.BROKER_URL (for celery), what the correct Redis
@@ -66,52 +66,3 @@ class FifoQueue(object):
         answer = redis.lpop(self._queue_name)
         if answer:
             return json.loads(answer)
-
-
-class PubSub(object):
-    """An abstraction class implemented for pubsub.
-
-    Intended to allow alteration of backend details in a single, consistent
-    way throughout the Tower application.
-    """
-    def __init__(self, queue_name):
-        """Instantiate a pubsub object, which is able to interact with a
-        Redis key as a pubsub.
-
-        Ideally this should be used with `contextmanager.closing` to ensure
-        well-behavedness:
-
-            from contextlib import closing
-
-            with closing(PubSub('foobar')) as foobar:
-                for message in foobar.subscribe(wait=0.1):
-                    <deal with message>
-        """
-        self._queue_name = queue_name
-        self._ps = redis.pubsub(ignore_subscribe_messages=True)
-        self._ps.subscribe(queue_name)
-
-    def publish(self, message):
-        """Publish a message to the given queue."""
-        redis.publish(self._queue_name, json.dumps(message))
-
-    def retrieve(self):
-        """Retrieve a single message from the subcription channel
-        and return it.
-        """
-        return self._ps.get_message()
-
-    def subscribe(self, wait=0.001):
-        """Listen to content from the subscription channel indefinitely,
-        and yield messages as they are retrieved.
-        """
-        while True:
-            message = self.retrieve()
-            if message is None:
-                time.sleep(max(wait, 0.001))
-            else:
-                yield json.loads(message['data'])
-
-    def close(self):
-        """Close the pubsub connection."""
-        self._ps.close()

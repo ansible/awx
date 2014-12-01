@@ -44,7 +44,7 @@ from contextlib import closing
 import requests
 
 # Tower
-from awx.main.queue import PubSub
+from awx.main.socket import Socket
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -115,26 +115,11 @@ class CallbackModule(object):
             'counter': self.counter,
             'created': datetime.datetime.utcnow().isoformat(),
         }
-        active_pid = os.getpid()
-        if self.job_callback_debug:
-            msg.update({
-                'pid': active_pid,
-            })
-        for retry_count in xrange(4):
-            try:
-                if not hasattr(self, 'connection_pid'):
-                    self.connection_pid = active_pid
 
-                # Publish the callback through Redis.
-                with closing(PubSub('callbacks')) as callbacks:
-                    callbacks.publish(msg)
-                return
-            except Exception, e:
-                self.logger.info('Publish Exception: %r, retry=%d', e,
-                                 retry_count, exc_info=True)
-                # TODO: Maybe recycle connection here?
-                if retry_count >= 3:
-                    raise
+        # Publish the callback.
+        with Socket('callbacks', 'w', debug=self.job_callback_debug,
+                                      logger=self.logger) as callbacks:
+            callbacks.publish(msg)
 
     def _post_rest_api_event(self, event, event_data):
         data = json.dumps({
