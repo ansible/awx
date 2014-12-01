@@ -200,7 +200,7 @@
         <a href="" id="mobile_about" ng-click ="viewAboutTower()" ng-hide="portalMode===true">About Tower</a> </li>
         <a href="" id="mobile_view_user" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
         <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" id="mobile_contact_support" target="_blank" ng-hide="portalMode===true">Contact Support</a></li>
-        <a id="mobile_custom_inv"  ng-click="createCustomInv()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Inventory Script</a></li>
+        <a id="mobile_custom_inv"  ng-click="createCustomInv()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Inventory Scripts</a></li>
         <a id="mobile_configure_tower"  ng-click="configureTower()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Management Jobs</a></li>
         <a id="mobile_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
         <a href="#portal" id="mobile_portal_link" ng-hide="portalMode===true">Portal Mode</a></li>
@@ -242,7 +242,7 @@
                                <li><a href="" id="main_about" ng-click ="viewAboutTower()" ng-hide="portalMode===true">About Tower</a> </li>
                                <li><a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
                                <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new" ng-hide="portalMode===true">Contact Support</a></li>
-                               <li> <a id="main_custom_inv"  ng-click="createCustomInv()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Inventory Script</a></li>
+                               <li> <a id="main_custom_inv"  ng-click="createCustomInv()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Inventory Scripts</a></li>
                                 <li><a id="main_configure_tower"  ng-click="configureTower()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Management Jobs</a></li>
                                <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
                                <li><a href="#portal" id="main_view_portal_link" >Portal Mode</a></li>
@@ -262,7 +262,7 @@
                                <li><a href="" id="main_about" ng-click ="viewAboutTower()" ng-hide="portalMode===true">About Tower</a> </li>
                                <li><a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-hide="portalMode===true">Account Settings</a></li>
                                <li><a id="main_contact_support" target="_blank" href="https://ansibleworks.zendesk.com/anonymous_requests/new" ng-hide="portalMode===true">Contact Support</a></li>
-                               <li> <a id="main_custom_inv"  ng-click="createCustomInv()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Inventory Script</a></li>
+                               <li> <a id="main_custom_inv"  ng-click="createCustomInv()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Inventory Scripts</a></li>
                                <li><a id="configure_tower"  ng-click="configureTower()" ng-show="user_is_superuser" href="" ng-hide="portalMode===true">Management Jobs</a></li>
                                <li><a id="main_munin" target="_blank"  ng-show="user_is_superuser" href="/munin" ng-hide="portalMode===true">Monitor Tower</a></li>
                                <li><a href="#portal" id="main_view_portal_link" ng-hide="portalMode===true">Portal Mode</a></li>
@@ -425,8 +425,10 @@
     <div id="prompt-for-days" style="display:none">
       <form name="prompt_for_days_form" id="prompt_for_days_form">
             How many days of data would you like to <b>keep</b>? <br>
-            <input type="number" min="1" id="days_to_keep" name="days_to_keep" value="30" ng-required="true" class="form-control  ng-pristine ng-invalid-required ng-invalid" style="margin-top:10px;">
-            <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && copy_form.new_copy_name.$error.required">A value is required!</div></input>
+            <input type="number" min="1"value=30 id="days_to_keep" name="days_to_keep" ng-model="days_to_keep" ng-required="true" class="form-control" ng-min=1 style="margin-top:10px;"></input>
+            <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && prompt_for_days_form.days_to_keep.$error.required">A value is required!</div>
+            <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.ngMin"> The value must be more than 1!</div>
+
             </form>
     </div>
 

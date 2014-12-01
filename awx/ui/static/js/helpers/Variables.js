@@ -103,7 +103,9 @@ angular.module('VariablesHelper', ['Utilities'])
                 }
             } else {
                 try {
-
+                    if(variables=== ""){
+                        variables = '---';
+                    }
                     json_data = jsyaml.load(variables);
                     if(json_data!==null){
                         $.each( json_data, function( key, value ) {

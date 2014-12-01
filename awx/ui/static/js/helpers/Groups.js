@@ -1174,6 +1174,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
                 var parseError = false,
                     regions, r, i,
+                    group_by,
                     data = {
                         group: group_id,
                         source: ((sources_scope.source && sources_scope.source.value) ? sources_scope.source.value : ''),
@@ -1197,7 +1198,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 if (sources_scope.source && (sources_scope.source.value === 'ec2')) {
                     data.instance_filters = sources_scope.instance_filters;
                     // Create a string out of selected list of regions
-                    var group_by = $('#s2id_source_group_by').select2("data");
+                    group_by = $('#s2id_source_group_by').select2("data");
                     r = [];
                     for (i = 0; i < group_by.length; i++) {
                         r.push(group_by[i].id);

@@ -84,7 +84,7 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
 
             CreateDialog({
                 id: 'custom-script-dialog',
-                title: 'Inventory Script',
+                title: 'Inventory Scripts',
                 target: 'custom-script-dialog',
                 scope: scope,
                 buttons: buttons,
@@ -297,7 +297,7 @@ function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventor
 
                     SearchInit({
                         scope: scope,
-                        set: 'custum_inventories',
+                        set: 'custom_inventories',
                         list: list,
                         url: url
                     });
@@ -308,6 +308,7 @@ function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventor
                     });
 
                     scope.search(list.iterator);
+
                     Wait('stop');
 
                 })
