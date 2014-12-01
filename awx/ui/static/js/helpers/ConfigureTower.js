@@ -16,9 +16,9 @@
 angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
     'GeneratorHelpers'])
 
-    .factory('ConfigureTower', ['Wait', '$location' , 'CreateDialog', 'ConfigureTowerJobsList', 'GenerateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'LoadSchedulesScope',
+    .factory('ConfigureTower', ['Wait', '$location' , '$compile',  'CreateDialog', 'ConfigureTowerJobsList', 'GenerateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'LoadSchedulesScope',
         'SchedulesList', 'SchedulesControllerInit' , 'ConfigureTowerSchedule', 'Rest' , 'ProcessErrors',
-        function(Wait, $location, CreateDialog, ConfigureTowerJobsList, GenerateList, GetBasePath, SearchInit, PaginateInit, PlaybookRun, LoadSchedulesScope,
+        function(Wait, $location, $compile, CreateDialog, ConfigureTowerJobsList, GenerateList, GetBasePath, SearchInit, PaginateInit, PlaybookRun, LoadSchedulesScope,
             SchedulesList, SchedulesControllerInit, ConfigureTowerSchedule, Rest, ProcessErrors) {
         return function(params) {
             // Set modal dimensions based on viewport width
@@ -28,7 +28,7 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                 callback = 'OpenConfig',
                 defaultUrl = GetBasePath('system_job_templates'),
                 list = ConfigureTowerJobsList,
-                view = GenerateList,
+                view = GenerateList, e,
                 scheduleUrl = GetBasePath('system_job_templates'),
                 buttons = [
                 {
@@ -147,7 +147,12 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                     minWidth: 200,
                     callback: 'PromptForDays',
                     onOpen: function(){
-                        $("#days_to_keep").val(30);
+                        e = angular.element(document.getElementById('prompt_for_days_form'));
+                        scope.prompt_for_days_form.days_to_keep.$setViewValue(30);
+                        $compile(e)(scope);
+                        $('#prompt-for-days-launch').attr("ng-disabled", 'prompt_for_days_form.$invalid');
+                        e = angular.element(document.getElementById('prompt-for-days-launch'));
+                        $compile(e)(scope);
                     },
                     buttons: [{
                         "label": "Cancel",
@@ -157,11 +162,11 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                         },
                         "icon": "fa-times",
                         "class": "btn btn-default",
-                        "id": "prompt-for-days-button"
+                        "id": "prompt-for-days-cancel"
                     },{
                         "label": "Launch",
                         "onClick": function() {
-                            var extra_vars = {"days": $("#days_to_keep").val() },
+                            var extra_vars = {"days": scope.days_to_keep },
                             data = {};
                             data.extra_vars = JSON.stringify(extra_vars);
 
@@ -180,7 +185,7 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                         },
                         "icon":  "fa-rocket",
                         "class": "btn btn-primary",
-                        "id": "prompt-for-days-button"
+                        "id": "prompt-for-days-launch"
                     }]
                 });
 
