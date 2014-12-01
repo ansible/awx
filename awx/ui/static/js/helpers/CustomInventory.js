@@ -84,7 +84,7 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
 
             CreateDialog({
                 id: 'custom-script-dialog',
-                title: 'Inventory Script',
+                title: 'Inventory Scripts',
                 target: 'custom-script-dialog',
                 scope: scope,
                 buttons: buttons,
