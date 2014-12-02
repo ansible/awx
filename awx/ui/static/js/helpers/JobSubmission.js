@@ -517,10 +517,10 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 if(question.type === 'integer'){
                     min = (!Empty(question.min)) ? Number(question.min) : "";
                     max = (!Empty(question.max)) ? Number(question.max) : "" ;
-                    html+='<input type="number" id="'+question.variable+'" ng-model="'+question.variable+'" class="form-control" name="'+question.variable+'" ng-required="'+question.required+'"  integer ng-min="'+min+'"  ng-max="'+max+'" />'+
+                    html+='<input type="number" id="'+question.variable+'" ng-model="'+question.variable+'" class="form-control" name="'+question.variable+'" ng-required="'+question.required+'"  integer aw-min="'+min+'"  aw-max="'+max+'" />'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && job_launch_form.'+question.variable+'.$error.required">A value is required!</div>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.number || job_launch_form.'+question.variable+'.$error.integer" >This is not valid integer!</div>'+
-                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.ngMin || job_launch_form.'+question.variable+'.$error.ngMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>';
+                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.awMin || job_launch_form.'+question.variable+'.$error.awMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>';
 
                 }
 
@@ -528,9 +528,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     min = (!Empty(question.min)) ? question.min : "";
                     max = (!Empty(question.max)) ? question.max : "" ;
                     defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_float)) ? question.default_float : "" ;
-                    html+='<input type="number" id="'+question.variable+'" ng-model="'+question.variable+'"  class=" form-control" name="'+question.variable+'" ng-required="'+question.variable+'" smart-float ng-min="'+min+'"  ng-max="'+max+'"/>'+
+                    html+='<input type="number" id="'+question.variable+'" ng-model="'+question.variable+'"  class=" form-control" name="'+question.variable+'" ng-required="'+question.variable+'" smart-float aw-min="'+min+'"  aw-max="'+max+'"/>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.number || job_launch_form.'+question.variable+'.$error.float">This is not valid float!</div>'+
-                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.ngMin || job_launch_form.'+question.variable+'.$error.ngMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>';
+                        '<div class="error survey_error" ng-show="job_launch_form.'+question.variable+'.$error.awMin || job_launch_form.'+question.variable+'.$error.awMax"> The value must be in range {{'+min+'}} to {{'+max+'}}!</div>';
                 }
                 html+='</div>';
                 if(question.index === scope.survey_questions.length-1){

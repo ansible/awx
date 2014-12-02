@@ -144,18 +144,18 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     })
 
-    .directive('ngMin', ['Empty', function (Empty) {
+    .directive('awMin', ['Empty', function (Empty) {
         return {
             restrict: 'A',
             require: 'ngModel',
             link: function (scope, elem, attr, ctrl) {
                 ctrl.$parsers.unshift( function(viewValue) {
-                    var min = (attr.ngMin) ? scope.$eval(attr.ngMin)  :  -Infinity;
+                    var min = (attr.awMin) ? scope.$eval(attr.awMin)  :  -Infinity;
                     if (!Empty(min) && !Empty(viewValue) && Number(viewValue) < min) {
-                        ctrl.$setValidity('ngMin', false);
+                        ctrl.$setValidity('awMin', false);
                         return undefined;
                     } else {
-                        ctrl.$setValidity('ngMin', true);
+                        ctrl.$setValidity('awMin', true);
                         return viewValue;
                     }
                 });
@@ -163,18 +163,18 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
-    .directive('ngMax', ['Empty', function (Empty) {
+    .directive('awMax', ['Empty', function (Empty) {
         return {
             restrict: 'A',
             require: 'ngModel',
             link: function (scope, elem, attr, ctrl) {
                 ctrl.$parsers.unshift( function(viewValue) {
-                    var max = (attr.ngMax) ? scope.$eval(attr.ngMax)  :  Infinity;
+                    var max = (attr.awMax) ? scope.$eval(attr.awMax)  :  Infinity;
                     if (!Empty(max) && !Empty(viewValue) && Number(viewValue) >  max) {
-                        ctrl.$setValidity('ngMax', false);
+                        ctrl.$setValidity('awMax', false);
                         return undefined;
                     } else {
-                        ctrl.$setValidity('ngMax', true);
+                        ctrl.$setValidity('awMax', true);
                         return viewValue;
                     }
                 });
