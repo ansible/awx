@@ -41,9 +41,30 @@ angular.module('SurveyQuestionFormDefinition', [])
                 editRequired: false,
                 column: 1
             },
+            // variable: {
+            //     label: 'Answer Variable Name',
+            //     type: 'text',
+            //     addRequired: true,
+            //     editRequired: true,
+            //     column: 1,
+            //     awPopOver: '<p>The suggested format for variable names are lowercase, underscore-seperated descriptive nouns.</p>'+
+            //                 '<p>For example: <br>foo_bar<br>\n user_id<br>\n host_name<br>' ,
+            //     dataTitle: 'Answer Variable Name',
+            //     dataPlacement: 'right',
+            //     dataContainer: "body"
+            // },
             variable: {
-                label: 'Answer Variable Name',
-                type: 'text',
+                ealName: 'variable',
+                type: 'custom',
+                control:'<label for="variable"><span class="label-text prepend-asterisk">Answer Variable Name</span>'+
+                    '<a id="awp-variable" href="" aw-pop-over="<p>The suggested format for variable names is lowercase and underscore-seperated. Also note that this field cannot accept variable names with spaces.</p><p>For example: <br>foo_bar<br>'+
+                    'user_id<br>host_name<br><div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>" '+
+                    'data-placement="right" data-container="body" data-title="Answer Variable Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a> </label>'+
+                    '<div><input type="text" ng-model="variable" name="variable" id="survey_question_variable" class="form-control ng-pristine ng-invalid ng-invalid-required" required="" aw-survey-variable-name>'+
+                    '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty &amp;&amp; survey_question_form.variable.$error.required">A value is required!</div>'+
+                    '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty &amp;&amp; survey_question_form.variable.$error.variable">Please remove spaces</div>'+
+                    '<div class="error api-error ng-binding" id="survey_question-variable-api-error" ng-bind="variable_api_error"></div>'+
+                    '</div>',
                 addRequired: true,
                 editRequired: true,
                 column: 1
