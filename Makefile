@@ -25,11 +25,11 @@ AWS_INSTANCE_COUNT ?= 100
 ifneq ($(OFFICIAL),yes)
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(BUILD)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)-$(BUILD)
-    PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-nightly.json
+    PACKER_BUILD_OPTS=-var-file=vars-nightly.json
 else
     SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)
     SDIST_TAR_NAME=$(NAME)-$(VERSION)
-    PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-release.json
+    PACKER_BUILD_OPTS=-var-file=vars-release.json
 endif
 SDIST_TAR_FILE=$(SDIST_TAR_NAME).tar.gz
 SETUP_TAR_FILE=$(SETUP_TAR_NAME).tar.gz
