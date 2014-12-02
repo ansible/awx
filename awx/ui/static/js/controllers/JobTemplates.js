@@ -993,10 +993,33 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
     // Launch a job using the selected template
     $scope.launch = function() {
-        PlaybookRun({
-            scope: $scope,
-            id: id
+
+        if ($scope.removePromptForSurvey) {
+            $scope.removePromptForSurvey();
+        }
+        $scope.removePromptForSurvey = $scope.$on('PromptForSurvey', function() {
+            var action = function () {
+                    // $scope.$emit("GatherFormFields");
+                    Wait('start');
+                    $('#prompt-modal').modal('hide');
+                    $scope.addSurvey();
+
+                };
+            Prompt({
+                hdr: 'Incomplete Survey',
+                body: 'Do you want to create a survey before proceeding?',
+                action: action
+            });
         });
+
+        if($scope.survey_enabled === true && $scope.survey_exists!==true){
+            $scope.$emit("PromptForSurvey");
+        }
+        else
+            PlaybookRun({
+                scope: $scope,
+                id: id
+            });
     };
 
     // handler for 'Enable Survey' button
