@@ -163,9 +163,9 @@ develop:
 # Do any one-time init tasks.
 init:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    awx-manage register_instance --primary --ip-address=127.0.0.1; \
+	    awx-manage register_instance --primary --hostname=127.0.0.1; \
 	else \
-	    sudo awx-manage register_instance --primary --ip-address=127.0.0.1; \
+	    sudo awx-manage register_instance --primary --hostname=127.0.0.1; \
 	fi
 
 # Refresh development environment after pulling new code.
