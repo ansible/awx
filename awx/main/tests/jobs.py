@@ -1036,6 +1036,12 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             j = Job.objects.get(pk=response['job'])
             self.assertTrue(j.status == 'new')
 
+        with self.current_user(self.user_sue):
+            response = self.post(launch_url, {'credential': self.cred_doug.pk}, expect=202)
+            j = Job.objects.get(pk=response['job'])
+            self.assertTrue(j.status == 'new')
+
+
 class JobTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_get_job_list(self):
