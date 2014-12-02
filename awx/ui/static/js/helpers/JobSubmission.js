@@ -440,6 +440,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 defaultValue,
                 choices,
                 element,
+                minlength, maxlength,
                 checked, min, max,
                 survey_url = GetBasePath('job_templates') + id + '/survey_spec/' ;
 
@@ -458,20 +459,30 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 scope[question.variable] = question.default;
 
                 if(question.type === 'text' ){
+                    minlength = (!Empty(question.min)) ? Number(question.min) : "";
+                    maxlength =(!Empty(question.max)) ? Number(question.max) : "" ;
                     html+='<input type="text" id="'+question.variable+'" ng-model="'+question.variable+'" '+
-                        'name="'+question.variable+'" '+
+                        'name=" '+question.variable+' " ' +
+                        'ng-minlength="'+minlength+'" ng-maxlength="'+maxlength+'" '+
                         'class="form-control" ng-required='+question.required+'>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
                         'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
+                         '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$error.minlength || ' +
+                        'job_launch_form.'+question.variable+'.$error.maxlength\">The answer must be between {{'+minlength+'}} to {{'+maxlength+'}} characters long.</div>'+
                         '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
                 }
 
                 if(question.type === "textarea"){
                     scope[question.variable] = question.default || question.default_textarea;
+                    minlength = (!Empty(question.min)) ? Number(question.min) : "";
+                    maxlength =(!Empty(question.max)) ? Number(question.max) : "" ;
                     html+='<textarea id="'+question.variable+'" name="'+question.variable+'" ng-model="'+question.variable+'" '+
+                        'ng-minlength="'+minlength+'" ng-maxlength="'+maxlength+'" '+
                         'class="form-control final"  ng-required="'+question.required+'" rows="3"></textarea>'+
                         '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
                         'job_launch_form.'+question.variable+'.$error.required\">A value is required!</div>'+
+                        '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$error.minlength || ' +
+                        'job_launch_form.'+question.variable+'.$error.maxlength\">The answer must be between {{'+minlength+'}} to {{'+maxlength+'}} characters long.</div>'+
                         '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
                 }
 

@@ -390,6 +390,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             element = $('.question_final:eq('+index+')');
             element.css('opacity', 1.0);
             element.empty();
+            scope.text_min = null;
+            scope.text_max = null;
             scope.int_min = null;
             scope.int_max = null;
             scope.float_min = null;
@@ -414,6 +416,16 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                             }
                         }
                     }
+                }
+                if( question.type === 'text'){
+                    scope.text_min = question.min;
+                    scope.text_max = question.max;
+                    // scope.default_text = question.default;
+                }
+                if( question.type === 'textarea'){
+                    scope.textarea_min = question.min;
+                    scope.textarea_max = question.max;
+                    // scope.default_text = question.default;
                 }
                 if( question.type === 'integer'){
                     scope.int_min = question.min;
@@ -509,6 +521,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
                 GenerateForm.inject(form, { id:'new_question', mode: 'add' , scope:scope, related: false, breadCrumbs: false});
                 scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
+                scope.text_min = null;
+                scope.text_max = null;
                 scope.int_min = null;
                 scope.int_max = null;
                 scope.float_min = null;
@@ -640,6 +654,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.default_textarea = "";
                 scope.survey_question_form.choices.$setPristine();
                 scope.choices = "";
+                scope.text_min = "";
+                scope.text_max = "" ;
+                scope.textarea_min = "";
+                scope.textarea_max = "" ;
                 scope.int_min = "";
                 scope.int_max = "";
                 scope.float_min = "";
@@ -665,6 +683,16 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                             if(fld === "type"){
                                 data[fld] = scope[fld].type;
 
+                                if(scope[fld].type === 'text'){
+                                    data.min = scope.text_min;
+                                    data.max = scope.text_max;
+                                    // data.default = scope.default_text;
+                                }
+                                if(scope[fld].type === 'textarea'){
+                                    data.min = scope.textarea_min;
+                                    data.max = scope.textarea_max;
+                                    // data.default = scope.default_text;
+                                }
                                 if(scope[fld].type === 'float'){
                                     data.min = scope.float_min;
                                     data.max = scope.float_max;

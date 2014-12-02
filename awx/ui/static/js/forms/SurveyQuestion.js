@@ -97,26 +97,46 @@ angular.module('SurveyQuestionFormDefinition', [])
                 dataContainer: "body",
                 column: 2
             },
-            //  text_options: {
-            //     realName: 'answer_options',
-            //     type: 'custom',
-            //     control:'<div class="row">'+
-            //                     '<div class="col-xs-6">'+
-            //                         '<label for="text_min"><span class="label-text">Minimum</span></label><input id="text_min" type="number" name="text_min" ng-model="text_min" aw-max="text_max" class="form-control" integer />'+
-            //                         '<div class="error" ng-show="survey_question_form.text_min.$error.number || survey_question_form.text_min.$error.integer">This is not valid integer!</div>'+
-            //                         '<div class="error" ng-show="survey_question_form.text_min.$error.ngMax">Too high!</div>'+
-            //                     '</div>'+
-            //                     // '<div class="col-xs-6">'+
-            //                     //     '<label for="minimum"><span class="label-text">Maximum</span></label><input id="text_max" type="number" name="text_max" ng-model="text_max" aw-min="text_min" class="form-control" integer >'+
-            //                     //     '<div class="error" ng-show="survey_question_form.text_max.$error.number || survey_question_form.text_max.$error.integer">This is not valid integer!</div>'+
-            //                     //     '<div class="error" ng-show="survey_question_form.text_max.$error.ngMin">Too low!</div>'+
-            //                     // '</div>'+
-            //                 '</div>',
-            //     ngShow: 'type.type==="text" ',
-            //     addRequired: true,
-            //     editRequired: true,
-            //     column: 2
-            // },
+            text_options: {
+                realName: 'answer_options',
+                type: 'custom',
+                control:'<div class="row">'+
+                                '<div class="col-xs-6">'+
+                                    '<label for="text_min"><span class="label-text">Minimum</span></label><input id="text_min" type="number" name="text_min" ng-model="text_min" min=0 aw-max="text_max" class="form-control" integer />'+
+                                    '<div class="error" ng-show="survey_question_form.text_min.$error.number || survey_question_form.text_min.$error.integer">This is not valid integer!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.text_min.$error.awMax">Too high!</div>'+
+                                '</div>'+
+                                '<div class="col-xs-6">'+
+                                    '<label for="minimum"><span class="label-text">Maximum</span></label><input id="text_max" type="number" name="text_max" ng-model="text_max" aw-min="text_min" class="form-control" integer >'+
+                                    '<div class="error" ng-show="survey_question_form.text_max.$error.number || survey_question_form.text_max.$error.integer">This is not valid integer!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.text_max.$error.awMin">Too low!</div>'+
+                                '</div>'+
+                            '</div>',
+                ngShow: 'type.type==="text" ',
+                addRequired: true,
+                editRequired: true,
+                column: 2
+            },
+            textarea_options: {
+                realName: 'answer_options',
+                type: 'custom',
+                control:'<div class="row">'+
+                                '<div class="col-xs-6">'+
+                                    '<label for="textarea_min"><span class="label-text">Minimum</span></label><input id="textarea_min" type="number" name="textarea_min" ng-model="textarea_min"  min=0 aw-max="textarea_max" class="form-control" integer />'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_min.$error.number || survey_question_form.textarea_min.$error.integer">This is not valid integer!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_min.$error.awMax">Too high!</div>'+
+                                '</div>'+
+                                '<div class="col-xs-6">'+
+                                    '<label for="textarea_max"><span class="label-text">Maximum</span></label><input id="textarea_max" type="number" name="textarea_max" ng-model="textarea_max" aw-min="textarea_min" class="form-control" integer >'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_max.$error.number || survey_question_form.textarea_max.$error.integer">This is not valid integer!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_max.$error.awMin">Too low!</div>'+
+                                '</div>'+
+                            '</div>',
+                ngShow: 'type.type==="textarea" ',
+                addRequired: true,
+                editRequired: true,
+                column: 2
+            },
             int_options: {
                 realName: 'answer_options',
                 type: 'custom',
@@ -165,14 +185,14 @@ angular.module('SurveyQuestionFormDefinition', [])
                 addRequired: false,
                 editRequired: false,
                 column: 2,
-                ngHide: 'type.type === "textarea" || type.type === "multiselect" || type.type === "integer" || type.type === "float" ' // type.type === "text" ||
+                ngHide: 'type.type === "textarea" || type.type === "multiselect" || type.type === "integer" || type.type === "float" '
             },
             // default_text: {
             //     realName: 'default_answer',
             //     type: 'custom',
             //     control:  '<div>'+
             //         '<label for="default_text"><span class="label-text">Default Answer</span></label>'+
-            //         '<input type="text" ng-model="default_text" name="default_text" ng-minlength="text_min" ng-maxlength="text_max || 0" class="form-control" />{{text_min}} survey_question_form.default_text.$error.minlength = {{survey_question_form.default_text.$error.minlength}}'+
+            //         '<input type="text" ng-model="default_text" name="default_text"  class="form-control" />'+
             //         '<div class="error" ng-show="survey_question_form.default_text.$error.minlength || survey_question_form.default_text.$error.maxlength"> The answer must be between {{text_min}} to {{text_max}} characters long!</div>'+
             //         '</div>',
             //     column: 2,
