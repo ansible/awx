@@ -721,17 +721,11 @@ class ProjectUpdatesList(SubListAPIView):
     relationship = 'project_updates'
     new_in_13 = True
 
-class ProjectUpdateView(GenericAPIView):
+class ProjectUpdateView(RetrieveAPIView):
 
     model = Project
+    serializer_class = ProjectUpdateViewSerializer
     new_in_13 = True
-
-    def get(self, request, *args, **kwargs):
-        obj = self.get_object()
-        data = dict(
-            can_update=obj.can_update,
-        )
-        return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -753,18 +747,12 @@ class ProjectUpdateDetail(RetrieveDestroyAPIView):
     serializer_class = ProjectUpdateSerializer
     new_in_13 = True
 
-class ProjectUpdateCancel(GenericAPIView):
+class ProjectUpdateCancel(RetrieveAPIView):
 
     model = ProjectUpdate
+    serializer_class = ProjectUpdateCancelSerializer
     is_job_cancel = True
     new_in_13 = True
-
-    def get(self, request, *args, **kwargs):
-        obj = self.get_object()
-        data = dict(
-            can_cancel=obj.can_cancel,
-        )
-        return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1198,6 +1186,7 @@ class GroupVariableData(BaseVariableData):
 class InventoryScriptView(RetrieveAPIView):
 
     model = Inventory
+    serializer_class = InventoryScriptSerializer
     authentication_classes = [JobTaskAuthentication] + \
                              api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
@@ -1285,6 +1274,7 @@ class InventoryScriptView(RetrieveAPIView):
 class InventoryTreeView(RetrieveAPIView):
 
     model = Inventory
+    serializer_class = GroupTreeSerializer
     filter_backends = ()
     new_in_13 = True
 
@@ -1400,18 +1390,12 @@ class InventorySourceUpdatesList(SubListAPIView):
     relationship = 'inventory_updates'
     new_in_14 = True
 
-class InventorySourceUpdateView(GenericAPIView):
+class InventorySourceUpdateView(RetrieveAPIView):
 
     model = InventorySource
+    serializer_class = InventorySourceUpdateSerializer
     is_job_start = True
     new_in_14 = True
-
-    def get(self, request, *args, **kwargs):
-        obj = self.get_object()
-        data = dict(
-            can_update=obj.can_update,
-        )
-        return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1431,18 +1415,12 @@ class InventoryUpdateDetail(RetrieveDestroyAPIView):
     serializer_class = InventoryUpdateSerializer
     new_in_14 = True
 
-class InventoryUpdateCancel(GenericAPIView):
+class InventoryUpdateCancel(RetrieveAPIView):
 
     model = InventoryUpdate
+    serializer_class = InventoryUpdateCancelSerializer
     is_job_cancel = True
     new_in_14 = True
-
-    def get(self, request, *args, **kwargs):
-        obj = self.get_object()
-        data = dict(
-            can_cancel=obj.can_cancel,
-        )
-        return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1475,6 +1453,7 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 class JobTemplateLaunch(GenericAPIView):
 
     model = JobTemplate
+    # FIXME: Add serializer class to define fields in OPTIONS request!
     is_job_start = True
 
     def get(self, request, *args, **kwargs):
@@ -1524,6 +1503,7 @@ class JobTemplateSchedulesList(SubListCreateAPIView):
 class JobTemplateSurveySpec(GenericAPIView):
 
     model = JobTemplate
+    # FIXME: Add serializer class to define fields in OPTIONS request!
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1582,6 +1562,7 @@ class JobTemplateActivityStreamList(SubListAPIView):
 class JobTemplateCallback(GenericAPIView):
 
     model = JobTemplate
+    # FIXME: Add serializer class to define fields in OPTIONS request!
     permission_classes = (JobTemplateCallbackPermission,)
 
     @csrf_exempt
@@ -1753,6 +1734,7 @@ class SystemJobTemplateDetail(RetrieveAPIView):
 class SystemJobTemplateLaunch(GenericAPIView):
 
     model = SystemJobTemplate
+    # FIXME: Add serializer class to define fields in OPTIONS request!
 
     def get(self, request, *args, **kwargs):
         return Response({})
@@ -1825,6 +1807,7 @@ class JobActivityStreamList(SubListAPIView):
 class JobStart(GenericAPIView):
 
     model = Job
+    # FIXME: Add serializer class to define fields in OPTIONS request!
     is_job_start = True
 
     def get(self, request, *args, **kwargs):
@@ -1851,17 +1834,11 @@ class JobStart(GenericAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
-class JobCancel(GenericAPIView):
+class JobCancel(RetrieveAPIView):
 
     model = Job
+    serializer_class = JobCancelSerializer
     is_job_cancel = True
-
-    def get(self, request, *args, **kwargs):
-        obj = self.get_object()
-        data = dict(
-            can_cancel=obj.can_cancel,
-        )
-        return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1874,6 +1851,7 @@ class JobCancel(GenericAPIView):
 class JobRelaunch(GenericAPIView):
 
     model = Job
+    # FIXME: Add serializer class to define fields in OPTIONS request!
 
     @csrf_exempt
     @transaction.non_atomic_requests

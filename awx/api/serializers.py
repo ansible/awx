@@ -131,7 +131,7 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
     '''
 
     @classmethod
-    def _update_meta(self, base, meta, other=None):
+    def _update_meta(cls, base, meta, other=None):
         for attr in dir(other):
             if attr.startswith('_'):
                 continue
@@ -679,6 +679,14 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
         return ret.get('playbooks', [])
 
 
+class ProjectUpdateViewSerializer(ProjectSerializer):
+
+    can_update = serializers.BooleanField(source='can_update', read_only=True)
+
+    class Meta:
+        fields = ('can_update',)
+
+
 class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
     class Meta:
@@ -697,6 +705,14 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 class ProjectUpdateListSerializer(ProjectUpdateSerializer, UnifiedJobListSerializer):
 
     pass
+
+
+class ProjectUpdateCancelSerializer(ProjectUpdateSerializer):
+
+    can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
+
+    class Meta:
+        fields = ('can_cancel',)
 
 
 class BaseSerializerWithVariables(BaseSerializer):
@@ -742,6 +758,13 @@ class InventorySerializer(BaseSerializerWithVariables):
         if obj is not None and 'organization' in ret and (not obj.organization or not obj.organization.active):
             ret['organization'] = None
         return ret
+
+
+class InventoryScriptSerializer(InventorySerializer):
+
+    class Meta:
+        fields = ('id',)
+        exclude = ('id',)
 
 
 class HostSerializer(BaseSerializerWithVariables):
@@ -1064,6 +1087,14 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         return ret
 
 
+class InventorySourceUpdateSerializer(InventorySourceSerializer):
+
+    can_update = serializers.BooleanField(source='can_update', read_only=True)
+
+    class Meta:
+        fields = ('can_update',)
+
+
 class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSerializer):
 
     class Meta:
@@ -1082,6 +1113,14 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 class InventoryUpdateListSerializer(InventoryUpdateSerializer, UnifiedJobListSerializer):
 
     pass
+
+
+class InventoryUpdateCancelSerializer(InventoryUpdateSerializer):
+
+    can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
+
+    class Meta:
+        fields = ('can_cancel',)
 
 
 class TeamSerializer(BaseSerializer):
@@ -1354,6 +1393,15 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         if 'job_template' in ret and (not obj.job_template or not obj.job_template.active):
             ret['job_template'] = None
         return ret
+
+
+class JobCancelSerializer(JobSerializer):
+
+    can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
+
+    class Meta:
+        fields = ('can_cancel',)
+
 
 class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
 
