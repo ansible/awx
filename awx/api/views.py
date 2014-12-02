@@ -130,6 +130,7 @@ class ApiV1PingView(APIView):
     permission_classes = (AllowAny,)
     authentication_classes = ()
     view_name = 'Ping'
+    new_in_210 = True
 
     def get(self, request, format=None):
         """Return some basic information about this Tower instance.

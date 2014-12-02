@@ -151,7 +151,7 @@ class APIView(views.APIView):
         '''
         ret = super(APIView, self).metadata(request)
         added_in_version = '1.2'
-        for version in ('2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
+        for version in ('2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
             if getattr(self, 'new_in_%s' % version.replace('.', ''), False):
                 added_in_version = version
                 break
