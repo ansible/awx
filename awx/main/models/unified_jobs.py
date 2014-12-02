@@ -729,9 +729,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         task_type = get_type_for_model(self)
 
         # Actually tell the task runner to run this task.
-        from awx.main.tasks import notify_task_runner
-        notify_task_runner.delay({'id': self.id, 'metadata': kwargs,
-                                  'task_type': task_type})
+        # NOTE: This will deadlock the task runner
+        #from awx.main.tasks import notify_task_runner
+        #notify_task_runner.delay({'id': self.id, 'metadata': kwargs,
+        #                          'task_type': task_type})
 
         # Done!
         return True
