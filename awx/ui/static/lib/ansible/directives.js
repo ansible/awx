@@ -183,19 +183,14 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     }])
 
     .directive('smartFloat', function() {
-        var FLOAT_REGEXP_1 = /^\$?\d+(.\d{3})*(\,\d*)?$/,  //Numbers like: 1.123,56
-        FLOAT_REGEXP_2 = /^\$?\d+(,\d{3})*(\.\d*)?$/; //Numbers like: 1,123.56
+        var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
         return {
-            restrict: 'A',
             require: 'ngModel',
-            link: function (scope, elm, attrs, ctrl) {
-                ctrl.$parsers.unshift(function (viewValue) {
-                    if (FLOAT_REGEXP_1.test(Number(viewValue))) {
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$parsers.unshift(function(viewValue) {
+                    if (FLOAT_REGEXP.test(viewValue)) {
                         ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue.replace('.', '').replace(',', '.'));
-                    } else if (FLOAT_REGEXP_2.test(Number(viewValue))) {
-                        ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue.replace(',', ''));
+                        return parseFloat(viewValue.replace(',', '.'));
                     } else {
                         ctrl.$setValidity('float', false);
                         return undefined;
@@ -203,21 +198,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 });
             }
         };
-        // var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
-        // return {
-        //     require: 'ngModel',
-        //     link: function(scope, elm, attrs, ctrl) {
-        //         ctrl.$parsers.unshift(function(viewValue) {
-        //             if (FLOAT_REGEXP.test(viewValue)) {
-        //                 ctrl.$setValidity('float', true);
-        //                 return parseFloat(viewValue.replace(',', '.'));
-        //             } else {
-        //                 ctrl.$setValidity('float', false);
-        //                 return undefined;
-        //             }
-        //         });
-        //     }
-        // };
     })
 
     // integer  Validate that input is of type integer. Taken from Angular developer
