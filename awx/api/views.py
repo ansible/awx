@@ -156,9 +156,9 @@ class ApiV1PingView(APIView):
         # Add all of the instances into the structure.
         for instance in Instance.objects.all():
             if instance.primary:
-                response['instances']['primary'] = instance.ip_address
+                response['instances']['primary'] = instance.hostname
             else:
-                response['instances']['secondaries'].append(instance.ip_address)
+                response['instances']['secondaries'].append(instance.hostname)
         response['instances']['secondaries'].sort()
 
         # Done; return the response.

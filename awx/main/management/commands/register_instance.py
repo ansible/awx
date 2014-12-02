@@ -28,7 +28,7 @@ class Command(BaseCommand):
     """
     option_list = BaseCommand.option_list + (
         make_option('--timid', action='store_true', dest='timid'),
-        make_option('--ip-address', dest='ip_address', default=''),
+        make_option('--hostname', dest='hostname', default=''),
         make_option('--primary', action='store_true', dest='primary'),
         make_option('--secondary', action='store_false', dest='primary'),
     )
@@ -74,8 +74,8 @@ class Command(BaseCommand):
 
         # Sanity check: An IP address is required if this is an initial
         # registration.
-        if not existing and not options['ip_address']:
-            raise CommandError('An explicit IP address is required at initial '
+        if not existing and not options['hostname']:
+            raise CommandError('An explicit hostname is required at initial '
                                'registration.')
 
         # If this is a primary machine and there is another primary machine,
@@ -88,12 +88,12 @@ class Command(BaseCommand):
         # Okay, we've checked for appropriate errata; perform the registration.
         dirty = any([
             instance.primary is not options['primary'],
-            options['ip_address'] and
-                instance.ip_address != options['ip_address'],
+            options['hostname'] and
+                instance.hostname != options['hostname'],
         ])
         instance.primary = options['primary']
-        if options['ip_address']:
-            instance.ip_address = options['ip_address']
+        if options['hostname']:
+            instance.hostname = options['hostname']
         instance.save()
 
         # Done!

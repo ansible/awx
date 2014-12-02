@@ -23,7 +23,7 @@ class Instance(models.Model):
     objects = InstanceManager()
 
     uuid = models.CharField(max_length=40, unique=True)
-    ip_address = models.GenericIPAddressField(protocol='both', unpack_ipv4=True)
+    hostname = models.CharField(max_length=250, unique=True)
     primary = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
