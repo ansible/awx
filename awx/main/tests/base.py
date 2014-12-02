@@ -218,7 +218,7 @@ class BaseTestMixin(object):
         return results
 
     def setup_instances(self):
-        instance = Instance(uuid=settings.SYSTEM_UUID, primary=True, ip_address='127.0.0.1')
+        instance = Instance(uuid=settings.SYSTEM_UUID, primary=True, hostname='127.0.0.1')
         instance.save()
 
     def setup_users(self, just_super_user=False):

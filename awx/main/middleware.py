@@ -98,4 +98,4 @@ class HAMiddleware(object):
             })
 
         # Redirect to the base page of the primary instance.
-        return HttpResponseRedirect('http://%s/' % primary.ip_address)
+        return HttpResponseRedirect('http://%s/' % primary.hostname)
