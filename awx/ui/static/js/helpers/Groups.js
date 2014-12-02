@@ -264,7 +264,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         url: invUrl,
                         scope: scope,
                         form: form,
-                        // current_item: null,
+                        hdr: "Select Custom Inventory",
                         list: CustomInventoryList,
                         field: 'source_script',
                         input_type: 'radio'

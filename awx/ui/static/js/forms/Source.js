@@ -107,7 +107,7 @@ angular.module('SourceFormDefinition', [])
                 dataContainer: 'body'
             },
             source_script: {
-                label :  "Custom Inventory Scripts",
+                label :  "Custom Inventory Script",
                 type: 'lookup',
                 ngShow: "source && source.value !== '' && source.value === 'custom'",
                 sourceModel: 'source_script',
