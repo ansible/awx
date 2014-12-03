@@ -24,6 +24,7 @@ angular.module('PortalJobTemplatesListDefinition', [])
 
         fields: {
             name: {
+                key: true,
                 label: 'Name',
                 columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8'
             },
