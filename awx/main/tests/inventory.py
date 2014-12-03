@@ -276,13 +276,13 @@ class InventoryTest(BaseTest):
 
     def test_create_inventory_script(self):
         inventory_scripts = reverse('api:inventory_script_list')
-        new_script = dict(name="Test", description="Test Script", script=TEST_SIMPLE_INVENTORY_SCRIPT)
+        new_script = dict(name="Test", description="Test Script", script=TEST_SIMPLE_INVENTORY_SCRIPT, organization=self.organizations[0].id)
         script_data = self.post(inventory_scripts, data=new_script, expect=201, auth=self.get_super_credentials())
 
         got = self.get(inventory_scripts, expect=200, auth=self.get_super_credentials())
         self.assertEquals(got['count'], 1)
 
-        new_failed_script = dict(name="Shouldfail", description="This test should fail", script=TEST_SIMPLE_INVENTORY_SCRIPT)
+        new_failed_script = dict(name="Shouldfail", description="This test should fail", script=TEST_SIMPLE_INVENTORY_SCRIPT, organization=self.organizations[0].id)
         self.post(inventory_scripts, data=new_failed_script, expect=403, auth=self.get_normal_credentials())
 
     def test_main_line(self):
