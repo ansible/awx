@@ -977,7 +977,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
 
     class Meta:
         model = CustomInventoryScript
-        fields = ('*', "script")
+        fields = ('*', "script", "organization")
 
 class InventorySourceOptionsSerializer(BaseSerializer):
 

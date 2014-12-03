@@ -19,6 +19,7 @@ class Migration(SchemaMigration):
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
             ('script', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
+            ('organization', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['main.Organization'])),
         ))
         db.send_create_signal('main', ['CustomInventoryScript'])
 

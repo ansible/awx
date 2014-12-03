@@ -1235,12 +1235,19 @@ class CustomInventoryScript(CommonModel):
 
     class Meta:
         app_label = 'main'
+        unique_together = [('name', 'organization')]
         ordering = ('name',)
 
     script = models.TextField(
         blank=True,
         default='',
         help_text=_('Inventory script contents'),
+    )
+    organization = models.ForeignKey(
+        'Organization',
+        related_name='custom_inventory_scripts',
+        help_text=_('Organization owning this inventory script'),
+        on_delete=models.CASCADE,
     )
 
     def get_absolute_url(self):

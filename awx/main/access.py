@@ -1464,10 +1464,14 @@ class CustomInventoryScriptAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
+        if not self.user.is_superuser:
+            qs = qs.filter(Q(organization__admins__in=[self.user]) | Q(organization__users__in=[self.user]))
         return qs
 
     def can_read(self, obj):
-        return True
+        if self.user.is_superuser:
+            return True
+        return bool(obj.organization in self.user.organizations.all() or obj.organization in self.user.admin_of_organizations.all())
 
     def can_add(self, data):
         if self.user.is_superuser:
