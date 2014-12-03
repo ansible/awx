@@ -264,7 +264,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
     callback = function() {
         // Make sure the form controller knows there was a change
-        $scope[form.name + '_form'].setDirty();
+        $scope[form.name + '_form'].$setDirty();
     };
     $scope.mode = "add";
     $scope.parseType = 'yaml';
