@@ -294,11 +294,16 @@ class Ec2Inventory(object):
         except ConfigParser.NoOptionError, e:
             self.pattern_exclude = None
 
-        # Instance filters (see boto and EC2 API docs)
+        # Instance filters (see boto and EC2 API docs). Ignore invalid filters.
         self.ec2_instance_filters = defaultdict(list)
         if config.has_option('ec2', 'instance_filters'):
-            for x in config.get('ec2', 'instance_filters', '').split(','):
-                filter_key, filter_value = x.split('=')
+            for instance_filter in config.get('ec2', 'instance_filters', '').split(','):
+                instance_filter = instance_filter.strip()
+                if not instance_filter or '=' not in instance_filter:
+                    continue
+                filter_key, filter_value = [x.strip() for x in instance_filter.split('=', 1)]
+                if not filter_key:
+                    continue
                 self.ec2_instance_filters[filter_key].append(filter_value)
 
     def parse_cli_args(self):
