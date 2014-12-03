@@ -1756,7 +1756,9 @@ class InventoryUpdatesTest(BaseTransactionTest):
         custom_inv_update = reverse('api:inventory_source_update_view',
                                     args=(custom_group.inventory_source.pk,))
         inv_src_opts = {'source': 'custom',
-                        'source_script': script_data["id"]}
+                        'source_script': script_data["id"],
+                        'source_vars': json.dumps({'HOME': 'no-place-like', 'USER': 'notme', '_': 'nope', 'INVENTORY_SOURCE_ID': -1})
+                        }
         with self.current_user(self.super_django_user):
             response = self.put(custom_inv_src, inv_src_opts, expect=200)
         self.check_inventory_source(custom_group.inventory_source)
