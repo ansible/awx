@@ -1471,6 +1471,8 @@ class CustomInventoryScriptAccess(BaseAccess):
     def can_read(self, obj):
         if self.user.is_superuser:
             return True
+        if not self.active:
+            return Flase
         return bool(obj.organization in self.user.organizations.all() or obj.organization in self.user.admin_of_organizations.all())
 
     def can_add(self, data):

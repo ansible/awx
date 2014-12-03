@@ -1134,7 +1134,8 @@ class RunInventoryUpdate(BaseTask):
             runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_')
             handle, path = tempfile.mkstemp(dir=runpath)
             f = os.fdopen(handle, 'w')
-            # Check that source_script is not none and exists and that .script is not an empty string
+            if inventory_update.source_script is None or not inventory_update.source_script.active:
+                raise RuntimeError('Inventory Script does not exist')
             f.write(inventory_update.source_script.script.encode('utf-8'))
             f.close()
             os.chmod(path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
