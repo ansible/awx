@@ -43,8 +43,7 @@ from contextlib import closing
 # Requests
 import requests
 
-# Tower
-from awx.main.socket import Socket
+import zmq
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -80,6 +79,9 @@ class CallbackModule(object):
         self.job_id = int(os.getenv('JOB_ID'))
         self.base_url = os.getenv('REST_API_URL', '')
         self.auth_token = os.getenv('REST_API_TOKEN', '')
+        self.callback_consumer_port = os.getenv('CALLBACK_CONSUMER_PORT', 5556)
+        self.context = None
+        self.socket = None
         self._init_logging()
         self._init_connection()
         self.counter = 0
@@ -106,6 +108,11 @@ class CallbackModule(object):
         self.context = None
         self.socket = None
 
+    def _start_connection(self):
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.REQ)
+        self.socket.connect("tcp://127.0.0.1:%s" % str(self.callback_consumer_port))
+
     def _post_job_event_queue_msg(self, event, event_data):
         self.counter += 1
         msg = {
@@ -116,10 +123,29 @@ class CallbackModule(object):
             'created': datetime.datetime.utcnow().isoformat(),
         }
 
-        # Publish the callback.
-        with Socket('callbacks', 'w', debug=self.job_callback_debug,
-                                      logger=self.logger) as callbacks:
-            callbacks.publish(msg)
+        active_pid = os.getpid()
+        if self.job_callback_debug:
+            msg.update({
+                'pid': active_pid,
+            })
+        for retry_count in xrange(4):
+            try:
+                if not hasattr(self, 'connection_pid'):
+                    self.connection_pid = active_pid
+                if self.connection_pid != active_pid:
+                    self._init_connection()
+                if self.context is None:
+                    self._start_connection()
+
+                self.socket.send_json(msg)
+                self.socket.recv()
+                return
+            except Exception, e:
+                self.logger.info('Publish Exception: %r, retry=%d', e,
+                                 retry_count, exc_info=True)
+                # TODO: Maybe recycle connection here?
+                if retry_count >= 3:
+                    raise
 
     def _post_rest_api_event(self, event, event_data):
         data = json.dumps({
