@@ -1,10 +1,10 @@
 Build and Release Process
 =========================
 
-This document describes the AWX Software build and release process.
-This process includes the automation of the packaging for Debian/Ubuntu
-and Fedora/EL (Enterprise Linux), as well as the creation of various
-software repositories which are used by the default playbook setup. 
+This document describes the Ansible Tower Software build and release process.
+This process includes the automation of the packaging for Debian/Ubuntu and
+Fedora/EL (Enterprise Linux), as well as the creation of various software
+repositories which are used by the default playbook setup. 
 
 Packaging Details
 -----------------------------
@@ -46,10 +46,6 @@ production servers via the automated Jenkins build process (described below).
 The sdist build is the first step in the packaging process. This step is 
 responsible for assembling the files to be packaged into a .tar.gz, which
 can then be installed itself via pip or used later for the RPM/DEB builds.
-
-We are currently overriding the default python sdist function, as we are 
-pre-compiling all .py files into .pyc's and removing the plain source. This 
-is handled by the function `sdist_awx()` in `setup.py`.
 
 The resulting tar.gz file will be named:
 
@@ -198,8 +194,8 @@ In order to create apt repositories, the reprepro package was also installed.
 
 There are currently three classes of jobs configured in Jenkins:
 
-    - RPM/DEB builds for Ansible Core
-    - RPM/DEB builds for AWX (and tar packaging of the setup playbook/scripts)
+    - `Build_Ansible_{RPM,DEB,TAR,Docs}` builds for Ansible
+    - `Build_Tower_{RPM,DEB,TAR,Docs}` builds for Ansible Tower
     - Automated Scans which kick-off the prior two jobs
 
 The automated scans work by checking for new tags in the git repository for
@@ -243,29 +239,28 @@ Repositories
 The nightly repositories are hosted on the AnsibleWorks Jenkins server, and can
 be found at the following location:
 
-    http://50.116.42.103/awx_nightlies_RTYUIOPOIUYTYU/
+    http://50.116.42.103/ansible-tower_nightlies_RTYUIOPOIUYTYU/
 
-There are two sub-folders: `deb/` and `rpm/`.
+There are several sub-folders, including `deb/`, `rpm/`, `docs/` and `setup/`
 
 The `rpm/` folder itself contains sub-folders for each distribution/architecture
 that we support, for example:
 
     - epel-6-{i386,x86_64}
-    - fedora-17-{i386,x86_64}
-    - fedora-18-{i386,x86_64}
-    - fedora-19-{i386,x86_64}
+    - epel-7-{i386,x86_64}
 
-The `deb/` folder contains several subfolders, which correspond to the normal 
+The `deb/` folder contains several subfolders, which correspond to the normal
 apt repository structure. All .deb files are located under `pool/`, while the `dists/`
 directory contains the distribution-specific information.
 
-These nightly repositories can be used by the AWX setup playbook by running the
-`setup.sh` shell script with the following option:
+The `docs/` folder contains the PDF documentation.
 
-    ./setup.sh -e "aw_repo_url=http://50.116.42.103/awx_nightlies_RTYUIOPOIUYTYU"
+The `setup/` folder contains the Ansible Tower setup playbook tar.gz file.
 
-> Note that if this is not a fresh installation, you should run the following:
-> "yum clean all --enablerepo=ansibleworks-awx" in order to clean out the yum cache.
+These nightly repositories can be used by the Ansible Tower setup playbook by
+running the `setup.sh` shell script with the following option:
+
+    ./setup.sh -e "aw_repo_url=http://50.116.42.103/ansible-tower_nightlies_RTYUIOPOIUYTYU"
 
 ### Official Releases ###
 
@@ -274,7 +269,5 @@ found at the following location:
 
     http://releases.ansible.com/ansible-tower/
 
-The AWX setup playbook will use this repo location by default.
-
-
+The Ansible Tower setup playbook will use this repo location by default.
 
