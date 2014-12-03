@@ -1,7 +1,7 @@
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-from django.views.generic.base import TemplateView
+from django.views.generic.base import TemplateView, RedirectView
 
 class IndexView(TemplateView):
 
@@ -13,3 +13,9 @@ class IndexView(TemplateView):
         return context
 
 index = IndexView.as_view()
+
+class PortalRedirectView(RedirectView):
+
+    url = '/#/portal'
+
+portal_redirect = PortalRedirectView.as_view()

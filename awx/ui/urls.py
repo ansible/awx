@@ -6,4 +6,5 @@ from django.conf.urls import *
 
 urlpatterns = patterns('awx.ui.views',
     url(r'^$', 'index', name='index'),
+    url(r'^portal/$', 'portal_redirect', name='portal_redirect'),
 )
