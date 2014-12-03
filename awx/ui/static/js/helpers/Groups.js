@@ -273,6 +273,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     ParseTypeChange({ scope: scope, variable: 'extra_vars', parse_variable: form.fields.extra_vars.parseTypeName,
                         field_id: 'source_extra_vars', onReady: callback });
                 }
+
                 if (scope.source.value === 'rax' || scope.source.value === 'ec2'|| scope.source.value==='gce' || scope.source.value === 'azure' || scope.source.value === 'vmware') {
                     kind = (scope.source.value === 'rax') ? 'rax' : (scope.source.value==='gce') ? 'gce' : (scope.source.value==='azure') ? 'azure' : (scope.source.value === 'vmware') ? 'vmware' : 'aws' ;
                     url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;
@@ -284,12 +285,19 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         field: 'credential',
                         input_type: "radio"
                     });
-                    if ($('#group_tabs .active a').text() === 'Source' && (scope.source.value === 'ec2' || scope.source.value === 'custom')) {
+                    if ($('#group_tabs .active a').text() === 'Source' && (scope.source.value === 'ec2' )) {
                         callback = function(){ Wait('stop'); };
                         Wait('start');
                         scope.source_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
                         ParseTypeChange({ scope: scope, variable: 'source_vars', parse_variable: form.fields.source_vars.parseTypeName,
                             field_id: 'source_source_vars', onReady: callback });
+                    }
+                    if ($('#group_tabs .active a').text() === 'Source' && (scope.source.value === 'vmware' )) {
+                        callback = function(){ Wait('stop'); };
+                        Wait('start');
+                        scope.inventory_variables = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
+                        ParseTypeChange({ scope: scope, variable: 'inventory_variables', parse_variable: form.fields.inventory_variables.parseTypeName,
+                            field_id: 'source_inventory_variables', onReady: callback });
                     }
                 }
             }
@@ -850,6 +858,10 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                         Wait('start');
                         ParseTypeChange({ scope: sources_scope, variable: 'source_vars', parse_variable: SourceForm.fields.source_vars.parseTypeName,
                             field_id: 'source_source_vars', onReady: waitStop });
+                    } else if (sources_scope.source && (sources_scope.source.value === 'vmware')) {
+                        Wait('start');
+                        ParseTypeChange({ scope: sources_scope, variable: 'inventory_variables', parse_variable: SourceForm.fields.inventory_variables.parseTypeName,
+                            field_id: 'source_inventory_variables', onReady: waitStop });
                     }
                     else if (sources_scope.source && (sources_scope.source.value === 'custom')) {
                         Wait('start');
@@ -1206,7 +1218,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     data.group_by = r.join();
                 }
 
-                if (sources_scope.source && (sources_scope.source.value === 'ec2' || sources_scope.source.value === 'custom')) {
+                if (sources_scope.source && (sources_scope.source.value === 'ec2' )) {
                     // for ec2, validate variable data
                     data.source_vars = ToJSON(sources_scope.envParseType, sources_scope.source_vars, true);
                 }
@@ -1215,6 +1227,11 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     data.source_vars = ToJSON(sources_scope.envParseType, sources_scope.extra_vars, true);
                 }
 
+                if (sources_scope.source && (sources_scope.source.value === 'vmware')) {
+                    data.source_vars = ToJSON(sources_scope.envParseType, sources_scope.inventory_variables, true);
+                }
+
+                // the API doesn't expect the credential to be passed with a custom inv script
                 if(sources_scope.source.value === 'custom'){
                     delete(data.credential);
                 }

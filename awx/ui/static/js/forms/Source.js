@@ -125,7 +125,7 @@ angular.module('SourceFormDefinition', [])
                 rows: 6,
                 'default': '---',
                 parseTypeName: 'envParseType',
-                dataTitle: "Environment Variables",   //'<p ng-show=source.value=="ec2">Source Variables<p>',
+                dataTitle: "Environment Variables",
                 dataPlacement: 'right',
                 awPopOver:  "<p>Provide key/value pairs using either YAML or JSON.</p>" +
                     "JSON:<br />\n" +
@@ -147,6 +147,29 @@ angular.module('SourceFormDefinition', [])
                 dataPlacement: 'right',
                 awPopOver: "<p>Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables " +
                     "<a href=\"https://github.com/ansible/ansible/blob/devel/plugins/inventory/ec2.ini\" target=\"_blank\">" +
+                    "view ec2.ini in the Ansible github repo.</a></p>" +
+                    "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                    "JSON:<br />\n" +
+                    "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    "YAML:<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                    '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                    '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+                dataContainer: 'body'
+            },
+            inventory_variables: {
+                label: 'Source Variables', //"{{vars_label}}" ,
+                ngShow: "source && (source.value == 'vmware')",
+                type: 'textarea',
+                addRequired: false,
+                editRequird: false,
+                rows: 6,
+                'default': '---',
+                parseTypeName: 'envParseType',
+                dataTitle: "Source Variables",
+                dataPlacement: 'right',
+                awPopOver: "<p>Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables " +
+                    "<a href=\"https://github.com/ansible/ansible/blob/devel/plugins/inventory/vmware.ini\" target=\"_blank\">" +
                     "view ec2.ini in the Ansible github repo.</a></p>" +
                     "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                     "JSON:<br />\n" +
