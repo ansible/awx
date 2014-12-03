@@ -1274,6 +1274,10 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inv_src_data['instance_filters'] = 'tag-key_123=Name,'
         with self.current_user(self.super_django_user):
             response = self.put(inv_src_url1, inv_src_data, expect=400)
+        # Invalid field name for instance filters.
+        inv_src_data['instance_filters'] = 'foo=bar,'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=400)
         # Valid string for instance filters.
         inv_src_data['instance_filters'] = 'tag-key=Name'
         with self.current_user(self.super_django_user):
@@ -1514,11 +1518,13 @@ class InventoryUpdatesTest(BaseTransactionTest):
         for host in self.inventory.hosts.filter(active=True):
             self.assertEqual(host.variables_dict['ec2_instance_type'], instance_type)
 
-        # Try invalid instance filters: empty, only "=", more than one "=", whitespace
+        # Try invalid instance filters that should be ignored:
+        # empty filter, only "=", more than one "=", whitespace, invalid value
+        # for given filter name.
         cache_path = tempfile.mkdtemp(prefix='awx_ec2_')
         self._temp_paths.append(cache_path)
         key_name = max(key_names.items(), key=lambda x: len(x[1]))[0]
-        inventory_source.instance_filters = ',=,image-id=ami=12345678,instance-type=%s, key-name=%s' % (instance_type, key_name)
+        inventory_source.instance_filters = ',=,image-id=ami=12345678,instance-type=%s, key-name=%s, architecture=ppc' % (instance_type, key_name)
         inventory_source.source_vars = '---\n\nnested_groups: false\ncache_path: %s\n' % cache_path
         inventory_source.save()
         self.check_inventory_source(inventory_source, initial=False)
