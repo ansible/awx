@@ -320,6 +320,10 @@ function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventor
 
         scope.formReset = function () {
             generator.reset();
+            //$('#forks-slider').slider("option", "value", $scope.forks);
+            for (var fld in master) {
+                scope[fld] = master[fld];
+            }
         };
     };
 }]);
