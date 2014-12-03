@@ -1140,7 +1140,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         return reverse('api:inventory_source_detail', args=(self.pk,))
 
     def _can_update(self):
-        return bool(self.source in CLOUD_INVENTORY_SOURCES)
+        if self.source == 'custom':
+            return bool(self.source_script and self.source_script.active)
+        else:
+            return bool(self.source in CLOUD_INVENTORY_SOURCES)
 
     def create_inventory_update(self, **kwargs):
         return self.create_unified_job(**kwargs)

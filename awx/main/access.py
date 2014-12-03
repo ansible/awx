@@ -1472,7 +1472,7 @@ class CustomInventoryScriptAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         if not self.active:
-            return Flase
+            return False
         return bool(obj.organization in self.user.organizations.all() or obj.organization in self.user.admin_of_organizations.all())
 
     def can_add(self, data):

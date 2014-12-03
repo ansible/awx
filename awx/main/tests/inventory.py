@@ -1116,7 +1116,10 @@ class InventoryUpdatesTest(BaseTransactionTest):
         should_error = kwargs.pop('should_error', False)
         if not inventory_update:
             inventory_update = inventory_source.update(**kwargs)
-            self.assertTrue(inventory_update)
+            if not should_fail and not should_error:
+                self.assertTrue(inventory_update)
+            elif not inventory_update:
+                return None
         inventory_update = InventoryUpdate.objects.get(pk=inventory_update.pk)
         #print inventory_update.result_stdout
         if should_error:
@@ -1746,7 +1749,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # Create the inventory script
         self.create_test_license_file()
         inventory_scripts = reverse('api:inventory_script_list')
-        new_script = dict(name="Test", description="Test Script", script=TEST_SIMPLE_INVENTORY_SCRIPT)
+        new_script = dict(name="Test", description="Test Script", script=TEST_SIMPLE_INVENTORY_SCRIPT, organization=self.organization.id)
         script_data = self.post(inventory_scripts, data=new_script, expect=201, auth=self.get_super_credentials())
 
         custom_inv = self.organization.inventories.create(name='Custom Script Inventory')
@@ -1762,3 +1765,11 @@ class InventoryUpdatesTest(BaseTransactionTest):
         with self.current_user(self.super_django_user):
             response = self.put(custom_inv_src, inv_src_opts, expect=200)
         self.check_inventory_source(custom_group.inventory_source)
+        
+        # Delete script, verify that update fails.
+        inventory_source = InventorySource.objects.get(pk=custom_group.inventory_source.pk)
+        self.assertTrue(inventory_source.can_update)
+        self.delete(script_data['url'], expect=204, auth=self.get_super_credentials())
+        inventory_source = InventorySource.objects.get(pk=inventory_source.pk)
+        self.assertFalse(inventory_source.can_update)
+        self.check_inventory_update(inventory_source, should_fail=True)
