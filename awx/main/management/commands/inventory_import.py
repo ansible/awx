@@ -184,7 +184,12 @@ class BaseLoader(object):
             port = int(m.groups()[1])
         elif name.count(':') == 1:
             host_name = name.split(':')[0]
-            port = int(name.split(':')[1])
+            try:
+                port = int(name.split(':')[1])
+            except (ValueError, UnicodeDecodeError):
+                logger.warning(u'Invalid port "%s" for host "%s"',
+                               name.split(':')[1], host_name)
+                port = None
         else:
             host_name = name
             port = None

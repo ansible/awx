@@ -23,6 +23,20 @@ __all__ = ['InventoryTest', 'InventoryUpdatesTest']
 
 TEST_SIMPLE_INVENTORY_SCRIPT = "#!/usr/bin/env python\nimport json\nprint json.dumps({'hosts': ['ahost-01', 'ahost-02', 'ahost-03', 'ahost-04']})"
 
+TEST_UNICODE_INVENTORY_SCRIPT = u"""#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import json
+inventory = dict()
+inventory['group-\u037c\u03b4\u0138\u0137\u03cd\u03a1\u0121\u0137\u0138\u01a1'] = list()
+inventory['group-\u037c\u03b4\u0138\u0137\u03cd\u03a1\u0121\u0137\u0138\u01a1'].append('host-\xb3\u01a0\u0157\u0157\u0157\u0157:\u02fe\u032d\u015f')
+inventory['group-\u037c\u03b4\u0138\u0137\u03cd\u03a1\u0121\u0137\u0138\u01a1'].append('host-\u0124\u01bd\u03d1j\xffFK\u0145\u024c\u024c')
+inventory['group-\u037c\u03b4\u0138\u0137\u03cd\u03a1\u0121\u0137\u0138\u01a1'].append('host-@|\u022e|\u022e\xbf\u03db\u0148\u02b9\xbf')
+inventory['group-\u037c\u03b4\u0138\u0137\u03cd\u03a1\u0121\u0137\u0138\u01a1'].append('host-;\u023a\u023a\u0181\u017f\u0242\u0242\u029c\u0250')
+inventory['group-\u037c\u03b4\u0138\u0137\u03cd\u03a1\u0121\u0137\u0138\u01a1'].append('host-B\u0338\u0338\u0330\u0365\u01b2\u02fa\xdd\u013b\u01b2')
+print json.dumps(inventory)
+"""
+
 class InventoryTest(BaseTest):
 
     def setUp(self):
@@ -1773,3 +1787,18 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inventory_source = InventorySource.objects.get(pk=inventory_source.pk)
         self.assertFalse(inventory_source.can_update)
         self.check_inventory_update(inventory_source, should_fail=True)
+
+        # Test again using a script containing some funky unicode gibberish.
+        unicode_script = dict(name="Unicodes", description="", script=TEST_UNICODE_INVENTORY_SCRIPT, organization=self.organization.id)
+        script_data = self.post(inventory_scripts, data=unicode_script, expect=201, auth=self.get_super_credentials())
+
+        custom_inv = self.organization.inventories.create(name='Unicode Script Inventory')
+        custom_group = custom_inv.groups.create(name="Unicode Script Group")
+        custom_inv_src = reverse('api:inventory_source_detail',
+                                 args=(custom_group.inventory_source.pk,))
+        custom_inv_update = reverse('api:inventory_source_update_view',
+                                    args=(custom_group.inventory_source.pk,))
+        inv_src_opts = {'source': 'custom', 'source_script': script_data["id"]}
+        with self.current_user(self.super_django_user):
+            response = self.put(custom_inv_src, inv_src_opts, expect=200)
+        self.check_inventory_source(custom_group.inventory_source)
