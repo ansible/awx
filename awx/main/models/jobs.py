@@ -445,17 +445,30 @@ class Job(UnifiedJob, JobOptions):
         return dependencies
 
     def handle_extra_data(self, extra_data):
-        print("Extra data: " + str(extra_data))
         if type(extra_data) == dict:
-            evars = extra_data
+            extra_vars = extra_data
+        elif extra_data is None:
+            return
         else:
             if extra_data == "":
                 return
             try:
-                evars = json.loads(self.extra_vars)
+                extra_vars = json.loads(extra_data)
             except Exception, e:
                 logger.warn("Exception deserializing extra vars: " + str(e))
-        print("Evars: " + str(evars))
+        if self.extra_vars is None or self.extra_vars == "":
+            evars = {}
+        elif type(self.extra_vars) == dict:
+            evars = self.extra_vars
+        else:
+            try:
+                evars = json.loads(self.extra_vars)
+            except ValueError:
+                try:
+                    evars = yaml.safe_load(self.extra_vars)
+                except yaml.YAMLError:
+                    evars = {}
+        evars.update(extra_vars)
         self.update_fields(extra_vars=json.dumps(evars))
 
     def copy(self):
