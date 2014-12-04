@@ -13,8 +13,10 @@ class HostManager(models.Manager):
 
     def active_count(self):
         """Return count of active, unique hosts for licensing."""
-        return self.filter(active=True, inventory__active=True).distinct('name').count()
-
+        try:
+            return self.filter(active=True, inventory__active=True).distinct('name').count()
+        except NotImplementedError: # For unit tests only, SQLite doesn't support distinct('name')
+            return len(set(self.filter(active=True, inventory__active=True).values_list('name', flat=True)))
 
 class InstanceManager(models.Manager):
     """A custom manager class for the Instance model.
