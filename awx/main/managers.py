@@ -8,6 +8,14 @@ from django.db import models
 from django.utils.functional import cached_property
 
 
+class HostManager(models.Manager):
+    """Custom manager class for Hosts model."""
+
+    def active_count(self):
+        """Return count of active, unique hosts for licensing."""
+        return self.filter(active=True, inventory__active=True).distinct('name').count()
+
+
 class InstanceManager(models.Manager):
     """A custom manager class for the Instance model.
 

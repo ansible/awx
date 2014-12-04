@@ -1125,7 +1125,7 @@ class Command(NoArgsCommand):
         available_instances = license_info.get('available_instances', 0)
         free_instances = license_info.get('free_instances', 0)
         time_remaining = license_info.get('time_remaining', 0)
-        new_count = Host.objects.filter(active=True).count()
+        new_count = Host.objects.active_count()
         if time_remaining <= 0 and not license_info.get('demo', False):
             self.logger.error('License has expired')
             raise CommandError("License has expired!")

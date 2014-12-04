@@ -31,6 +31,7 @@ from django.core.cache import cache
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.fields import AutoOneToOneField
+from awx.main.managers import HostManager
 from awx.main.models.base import *
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import *
@@ -386,6 +387,8 @@ class Host(CommonModelNameNotUnique):
         editable=False,
         help_text=_('Inventory source(s) that created or modified this host.'),
     )
+
+    objects = HostManager()
 
     def __unicode__(self):
         return self.name
