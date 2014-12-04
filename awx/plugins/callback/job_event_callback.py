@@ -79,7 +79,7 @@ class CallbackModule(object):
         self.job_id = int(os.getenv('JOB_ID'))
         self.base_url = os.getenv('REST_API_URL', '')
         self.auth_token = os.getenv('REST_API_TOKEN', '')
-        self.callback_consumer_port = os.getenv('CALLBACK_CONSUMER_PORT', 5556)
+        self.callback_consumer_port = os.getenv('CALLBACK_CONSUMER_PORT', '')
         self.context = None
         self.socket = None
         self._init_logging()
@@ -111,7 +111,7 @@ class CallbackModule(object):
     def _start_connection(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect("tcp://127.0.0.1:%s" % str(self.callback_consumer_port))
+        self.socket.connect(str(self.callback_consumer_port))
 
     def _post_job_event_queue_msg(self, event, event_data):
         self.counter += 1
@@ -182,13 +182,10 @@ class CallbackModule(object):
         if role_name and event not in self.EVENTS_WITHOUT_TASK:
             event_data['role'] = role_name
 
-        # FIXME:
-        # This seems to check if anything is listening for the callback.
-        # We probably need to duplicate this in the new Redis system.
-        # if self.callback_consumer_port:
-        self._post_job_event_queue_msg(event, event_data)
-        # else:
-        #    self._post_rest_api_event(event, event_data)
+        if self.callback_consumer_port:
+            self._post_job_event_queue_msg(event, event_data)
+        else:
+            self._post_rest_api_event(event, event_data)
 
     def on_any(self, *args, **kwargs):
         pass
