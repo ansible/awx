@@ -181,8 +181,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                         relatedSets: relatedSets
                     });
 
-
-                    scope.$emit('jobTemplateLoaded', data.related.cloud_credential);
+                    scope.$emit('jobTemplateLoaded', data.related.cloud_credential, master);
                 })
                 .error(function (data, status) {
                     ProcessErrors(scope, data, status, form, {

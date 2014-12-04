@@ -762,8 +762,9 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     if ($scope.jobTemplateLoadedRemove) {
         $scope.jobTemplateLoadedRemove();
     }
-    $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, related_cloud_credential) {
+    $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, related_cloud_credential, masterObject) {
         var dft;
+        master = masterObject;
         getPlaybooks($scope.project);
 
         dft = ($scope.host_config_key === "" || $scope.host_config_key === null) ? 'false' : 'true';
