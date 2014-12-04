@@ -14,9 +14,6 @@ import uuid
 import copy
 import random
 
-# PyYAML
-import yaml
-
 # Django
 from django.conf import settings
 from django.db import models, connection

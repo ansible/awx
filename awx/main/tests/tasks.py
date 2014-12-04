@@ -887,14 +887,14 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue('"--forks=3"' in job.job_args)
         self.assertTrue('"-vv"' in job.job_args)
         self.assertTrue('"-e"' in job.job_args)
-        # Test with extra_vars as key=value (old format).
-        # TODO: Do we still support this?
-        # job_template2 = self.create_test_job_template(extra_vars='foo=1')
-        # job2 = self.create_test_job(job_template=job_template2)
-        # self.assertEqual(job2.status, 'new')
-        # self.assertTrue(job2.signal_start())
-        # job2 = Job.objects.get(pk=job2.pk)
-        # self.check_job_result(job2, 'successful')
+        # Test with extra_vars as key=value (old format, still supported by
+        # -e option to ansible-playbook).
+        job_template2 = self.create_test_job_template(extra_vars='foo=1')
+        job2 = self.create_test_job(job_template=job_template2)
+        self.assertEqual(job2.status, 'new')
+        self.assertTrue(job2.signal_start())
+        job2 = Job.objects.get(pk=job2.pk)
+        self.check_job_result(job2, 'successful')
         # Test with extra_vars as YAML (should be converted to JSON in args).
         job_template3 = self.create_test_job_template(extra_vars='abc: 1234')
         job3 = self.create_test_job(job_template=job_template3)

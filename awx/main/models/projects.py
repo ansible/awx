@@ -13,9 +13,6 @@ import shlex
 import urlparse
 import uuid
 
-# PyYAML
-import yaml
-
 # Django
 from django.conf import settings
 from django.db import models

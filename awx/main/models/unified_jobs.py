@@ -11,9 +11,6 @@ import os
 import os.path
 from StringIO import StringIO
 
-# PyYAML
-import yaml
-
 # Django
 from django.conf import settings
 from django.db import models

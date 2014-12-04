@@ -12,9 +12,6 @@ import re
 import shlex
 import uuid
 
-# PyYAML
-import yaml
-
 # Django
 from django.conf import settings
 from django.db import models
@@ -456,18 +453,7 @@ class Job(UnifiedJob, JobOptions):
                 extra_vars = json.loads(extra_data)
             except Exception, e:
                 logger.warn("Exception deserializing extra vars: " + str(e))
-        if self.extra_vars is None or self.extra_vars == "":
-            evars = {}
-        elif type(self.extra_vars) == dict:
-            evars = self.extra_vars
-        else:
-            try:
-                evars = json.loads(self.extra_vars)
-            except ValueError:
-                try:
-                    evars = yaml.safe_load(self.extra_vars)
-                except yaml.YAMLError:
-                    evars = {}
+        evars = self.extra_vars_dict
         evars.update(extra_vars)
         self.update_fields(extra_vars=json.dumps(evars))
 
