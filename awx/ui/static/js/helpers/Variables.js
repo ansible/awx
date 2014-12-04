@@ -87,6 +87,10 @@ angular.module('VariablesHelper', ['Utilities'])
             // lines, i, newVars = [];
             if (parseType === 'json') {
                 try {
+                    // perform a check to see if the user cleared the field completly
+                    if(variables === "" ){
+                        variables = "{}";
+                    }
                     //parse a JSON string
                     if (reviver) {
                         json_data = JSON.parse(variables, reviver);
@@ -103,7 +107,7 @@ angular.module('VariablesHelper', ['Utilities'])
                 }
             } else {
                 try {
-                    if(variables=== ""){
+                    if(variables === ""){
                         variables = '---';
                     }
                     json_data = jsyaml.load(variables);
