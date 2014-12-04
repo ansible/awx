@@ -493,7 +493,7 @@ else:
     INTERNAL_API_URL = 'http://127.0.0.1:8000'
 
 # ZeroMQ callback settings.
-CALLBACK_CONSUMER_PORT = 5556
+CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5556"
 CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver.ipc"
 
 TASK_COMMAND_PORT = 6559

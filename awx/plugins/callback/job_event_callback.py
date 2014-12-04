@@ -111,7 +111,7 @@ class CallbackModule(object):
     def _start_connection(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect(str(self.callback_consumer_port))
+        self.socket.connect(self.callback_consumer_port)
 
     def _post_job_event_queue_msg(self, event, event_data):
         self.counter += 1
