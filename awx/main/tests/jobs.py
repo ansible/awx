@@ -961,6 +961,10 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
             response = self.get(launch_url)
             self.assertTrue('favorite_color' in response['variables_needed_to_start'])
+            response = self.post(launch_url, dict(favorite_color="green"), expect=202)
+            job = Job.objects.get(pk=response["job"])
+            job_extra = json.loads(job.extra_vars)
+            self.assertTrue("favorite_color" in job_extra)
 
         with self.current_user(self.user_sue):
             response = self.post(url, json.loads(TEST_SIMPLE_NONREQUIRED_SURVEY), expect=200)

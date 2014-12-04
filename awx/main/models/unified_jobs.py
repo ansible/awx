@@ -695,12 +695,14 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             self.job_explanation = u'Missing needed fields: %s.' % missing_fields
             self.save(update_fields=['job_explanation'])
             return False
+        extra_data = dict([(field, kwargs[field]) for field in kwargs
+                           if field not in needed])
+        self.handle_extra_data(extra_data)
         task_class().apply_async((self.pk,), opts, link_error=error_callback)
         return True
 
     def signal_start(self, **kwargs):
         """Notify the task runner system to begin work on this task."""
-
         # Sanity check: If we are running unit tests, then run synchronously.
         if getattr(settings, 'CELERY_UNIT_TEST', False):
             return self.start(None, **kwargs)
