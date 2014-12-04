@@ -905,7 +905,7 @@ class RunJobTest(BaseCeleryTest):
 
     def test_lots_of_extra_vars(self):
         self.create_test_project(TEST_EXTRA_VARS_PLAYBOOK)
-        extra_vars = dict(('var_%d' % x, x) for x in xrange(200))
+        extra_vars = json.dumps(dict(('var_%d' % x, x) for x in xrange(200)))
         job_template = self.create_test_job_template(extra_vars=extra_vars)
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
