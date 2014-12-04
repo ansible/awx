@@ -105,7 +105,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'textarea',
                 //"class": 'col-lg-6',
                 showonly: true,
-                ngShow: "scm_type.value == ''",
+                ngShow: "scm_type.value == 'manual' " ,
                 awPopOver: '<p>Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
                     'Together the base path and selected playbook directory provide the full path used to locate playbooks.</p>' +
                     '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
@@ -122,7 +122,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     variable: "pathRequired",
                     init: false
                 },
-                ngShow: "scm_type.value == '' && !showMissingPlaybooksAlert",
+                ngShow: "scm_type.value == 'manual' && !showMissingPlaybooksAlert",
                 awPopOver: '<p>Select from the list of directories found in the base path.' +
                     'Together the base path and the playbook directory provide the full path used to locate playbooks.</p>' +
                     '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
@@ -133,7 +133,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             scm_url: {
                 label: 'SCM URL',
                 type: 'text',
-                ngShow: "scm_type && scm_type.value !== ''",
+                ngShow: "scm_type && scm_type.value !== 'manual'",
                 awRequiredWhen: {
                     variable: "scmRequired",
                     init: false
@@ -166,14 +166,14 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             scm_branch: {
                 labelBind: "scmBranchLabel",
                 type: 'text',
-                ngShow: "scm_type && scm_type.value !== ''",
+                ngShow: "scm_type && scm_type.value !== 'manual'",
                 addRequired: false,
                 editRequired: false
             },
             credential: {
                 label: 'SCM Credential',
                 type: 'lookup',
-                ngShow: "scm_type && scm_type.value !== ''",
+                ngShow: "scm_type && scm_type.value !== 'manual'",
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
@@ -183,7 +183,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             checkbox_group: {
                 label: 'SCM Update Options',
                 type: 'checkbox_group',
-                ngShow: "scm_type && scm_type.value !== ''",
+                ngShow: "scm_type && scm_type.value !== 'manual'",
                 fields: [{
                     name: 'scm_clean',
                     label: 'Clean',

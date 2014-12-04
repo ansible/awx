@@ -417,7 +417,8 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
         var i;
         for (i = 0; i < $scope.scm_type_options.length; i++) {
             if ($scope.scm_type_options[i].value === '') {
-                $scope.scm_type = $scope.scm_type_options[i];
+                $scope.scm_type_options[i].value="manual";
+                //$scope.scm_type = $scope.scm_type_options[i];
                 break;
             }
         }
@@ -467,7 +468,9 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
                 }
             }
         }
-        data.scm_type = $scope.scm_type.value;
+        if(data.scm_type.value==="manual" ){
+            data.scm_type = "";
+        } else data.scm_type = $scope.scm_type.value;
         if ($scope.scm_type.value !== '') {
             delete data.local_path;
         } else {
@@ -509,8 +512,8 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
     $scope.scmChange = function () {
         // When an scm_type is set, path is not required
         if ($scope.scm_type) {
-            $scope.pathRequired = ($scope.scm_type.value === '') ? true : false;
-            $scope.scmRequired = ($scope.scm_type.value !== '') ? true : false;
+            $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
+            $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
             $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
         }
     };
