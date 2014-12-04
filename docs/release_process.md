@@ -11,7 +11,9 @@ successful release.
 
 1. Verify that the `__version__` variable has been updated in `awx/__init__.py`.
 
+```
     __version__ = 'X.Y.Z'
+```
 
 2. Update the rpm package changelog by adding a new entry to the file `packaging/rpm/ansible-tower.spec`.
 
@@ -19,14 +21,18 @@ successful release.
 
 4. Tag and push the release to git.
 
+```
     git tag <X.Y.Z>
     git push --tags
+```
 
 5. Create and push a release branch to git.
 
+```
     git branch release_<X.Y.Z>
     git checkout release_<X.Y.Z>
     git push origin release_<X.Y.Z>
+```
 
 Monitor Jenkins
 ---------------
