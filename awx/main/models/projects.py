@@ -164,7 +164,7 @@ class ProjectOptions(models.Model):
         results = []
         project_path = self.get_project_path()
         if project_path:
-            for dirpath, dirnames, filenames in os.walk(project_path):
+            for dirpath, dirnames, filenames in os.walk(unicode(project_path)):
                 for filename in filenames:
                     if os.path.splitext(filename)[-1] not in ['.yml', '.yaml']:
                         continue

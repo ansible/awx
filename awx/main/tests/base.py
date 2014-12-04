@@ -182,7 +182,7 @@ class BaseTestMixin(object):
         self._temp_paths.append(project_dir)
         # Create temp playbook in project (if playbook content is given).
         if playbook_content:
-            handle, playbook_path = tempfile.mkstemp(suffix='.yml',
+            handle, playbook_path = tempfile.mkstemp(suffix=u'\u2620.yml',
                                                      dir=project_dir)
             test_playbook_file = os.fdopen(handle, 'w')
             test_playbook_file.write(playbook_content.encode('utf-8'))
@@ -210,7 +210,7 @@ class BaseTestMixin(object):
             self.object_ctr = self.object_ctr + 1
             results.append(self.make_project(
                 name="proj%s-%s" % (x, self.object_ctr),
-                description="proj%s" % x,
+                description=u"proj%s" % x,
                 created_by=created_by,
                 playbook_content=playbook_content,
                 role_playbooks=role_playbooks,
