@@ -19,14 +19,14 @@ successful release.
 
 4. Tag and push the release to git.
 
-    # git tag <X.Y.Z>
-    # git push --tags
+    git tag <X.Y.Z>
+    git push --tags
 
 5. Create and push a release branch to git.
 
-    # git branch release_<X.Y.Z>
-    # git checkout release_<X.Y.Z>
-    # git push origin release_<X.Y.Z>
+    git branch release_<X.Y.Z>
+    git checkout release_<X.Y.Z>
+    git push origin release_<X.Y.Z>
 
 Monitor Jenkins
 ---------------
