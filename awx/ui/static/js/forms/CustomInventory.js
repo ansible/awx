@@ -34,6 +34,15 @@ angular.module('CustomInventoryFormDefinition', [])
                 addRequired: false,
                 editRequired: false
             },
+            organization: {
+                label: 'Organization',
+                type: 'lookup',
+                sourceModel: 'organization',
+                sourceField: 'name',
+                ngClick: 'lookUpOrganization()',
+                addRequired: false,
+                editRequired: false
+            },
             script: {
                 label: 'Custom Script',
                 type: 'textarea',

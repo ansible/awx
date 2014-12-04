@@ -177,9 +177,9 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
 
 
 .factory('CustomInventoryAdd', ['$compile','SchedulerInit', 'Rest', 'Wait', 'CustomInventoryList', 'CustomInventoryForm', 'ProcessErrors', 'GetBasePath', 'Empty', 'GenerateForm',
-    'SearchInit' , 'PaginateInit', 'GenerateList',
+    'SearchInit' , 'PaginateInit', 'GenerateList', 'LookUpInit', 'OrganizationList',
 function($compile, SchedulerInit, Rest, Wait, CustomInventoryList, CustomInventoryForm, ProcessErrors, GetBasePath, Empty, GenerateForm,
-    SearchInit, PaginateInit, GenerateList) {
+    SearchInit, PaginateInit, GenerateList, LookUpInit, OrganizationList) {
     return function(params) {
         var scope = params.scope,
             generator = GenerateForm,
@@ -191,12 +191,22 @@ function($compile, SchedulerInit, Rest, Wait, CustomInventoryList, CustomInvento
         generator.inject(form, { id:'custom-script-dialog', mode: 'add' , scope:scope, related: false, breadCrumbs: false});
         generator.reset();
 
+        LookUpInit({
+                url: GetBasePath('organization'),
+                scope: scope,
+                form: form,
+                // hdr: "Select Custom Inventory",
+                list: OrganizationList,
+                field: 'organization',
+                input_type: 'radio'
+            });
+
         // Save
         scope.formSave = function () {
             generator.clearApiErrors();
             Wait('start');
             Rest.setUrl(url);
-            Rest.post({ name: scope.name, description: scope.description, script: scope.script })
+            Rest.post({ name: scope.name, description: scope.description, organization: scope.organization, script: scope.script })
                 .success(function () {
                     view.inject( list, {
                         id : 'custom-script-dialog',
@@ -238,9 +248,9 @@ function($compile, SchedulerInit, Rest, Wait, CustomInventoryList, CustomInvento
 }])
 
 .factory('CustomInventoryEdit', ['$compile','CustomInventoryList', 'Rest', 'Wait', 'GenerateList', 'CustomInventoryForm', 'ProcessErrors', 'GetBasePath', 'Empty', 'GenerateForm',
-    'SearchInit', 'PaginateInit', '$routeParams',
+    'SearchInit', 'PaginateInit', '$routeParams', 'OrganizationList', 'LookUpInit',
 function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventoryForm, ProcessErrors, GetBasePath, Empty, GenerateForm,
-    SearchInit, PaginateInit, $routeParams) {
+    SearchInit, PaginateInit, $routeParams, OrganizationList, LookUpInit) {
     return function(params) {
         var scope = params.scope,
             id = params.id,
@@ -260,6 +270,15 @@ function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventor
                 activityStream: false
             });
         generator.reset();
+        LookUpInit({
+                url: GetBasePath('organization'),
+                scope: scope,
+                form: form,
+                // hdr: "Select Custom Inventory",
+                list: OrganizationList,
+                field: 'organization',
+                input_type: 'radio'
+            });
 
         // Retrieve detail record and prepopulate the form
         Wait('start');
@@ -271,6 +290,14 @@ function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventor
                     if (data[fld]) {
                         scope[fld] = data[fld];
                         master[fld] = data[fld];
+                    }
+
+                    if (form.fields[fld].sourceModel && data.summary_fields &&
+                        data.summary_fields[form.fields[fld].sourceModel]) {
+                        scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                            data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                        master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                            data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                     }
                 }
                 Wait('stop');
@@ -284,7 +311,7 @@ function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventor
             generator.clearApiErrors();
             Wait('start');
             Rest.setUrl(url+ id+'/');
-            Rest.put({ name: scope.name, description: scope.description, script: scope.script })
+            Rest.put({ name: scope.name, description: scope.description, organization: scope.organization, script: scope.script })
                 .success(function () {
                     view.inject( list, {
                         id : 'custom-script-dialog',
@@ -320,10 +347,11 @@ function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventor
 
         scope.formReset = function () {
             generator.reset();
-            //$('#forks-slider').slider("option", "value", $scope.forks);
             for (var fld in master) {
                 scope[fld] = master[fld];
             }
+            scope.organization_name = master.organization_name;
+
         };
     };
 }]);
