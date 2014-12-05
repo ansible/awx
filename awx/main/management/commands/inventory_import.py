@@ -27,7 +27,7 @@ from django.contrib.auth.models import User
 
 # AWX
 from awx.main.models import *
-from awx.main.utils import ignore_inventory_computed_fields
+from awx.main.utils import ignore_inventory_computed_fields, check_proot_installed, build_proot_temp_dir, wrap_args_with_proot
 from awx.main.signals import disable_activity_stream
 from awx.main.task_engine import TaskSerializer as LicenseReader
 
@@ -165,13 +165,14 @@ class BaseLoader(object):
     Common functions for an inventory loader from a given source.
     '''
 
-    def __init__(self, source, all_group=None, group_filter_re=None, host_filter_re=None):
+    def __init__(self, source, all_group=None, group_filter_re=None, host_filter_re=None, is_custom=False):
         self.source = source
         self.source_dir = os.path.dirname(self.source)
         self.all_group = all_group or MemGroup('all', self.source_dir)
         self.group_filter_re = group_filter_re
         self.host_filter_re = host_filter_re
         self.ipv6_port_re = re.compile(r'^\[([A-Fa-f0-9:]{3,})\]:(\d+?)$')
+        self.is_custom = is_custom
 
     def get_host(self, name):
         '''
@@ -268,7 +269,7 @@ class IniLoader(BaseLoader):
     '''
     Loader to read inventory from an INI-formatted text file.
     '''
-    
+
     def load(self):
         logger.info('Reading INI source: %s', self.source)
         group = self.all_group
@@ -345,6 +346,11 @@ class ExecutableJsonLoader(BaseLoader):
         data = {}
         stdout, stderr = '', ''
         try:
+            if self.is_custom and getattr(settings, 'AWX_PROOT_ENABLED', False):
+                if not check_proot_installed():
+                    raise RuntimeError("proot is not installed but is configured for use")
+                kwargs = {'proot_temp_dir': self.source_dir} # TODO: Remove proot dir
+                cmd = wrap_args_with_proot(cmd, self.source_dir, **kwargs)
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             if proc.returncode != 0:
@@ -444,7 +450,7 @@ class ExecutableJsonLoader(BaseLoader):
 
 
 def load_inventory_source(source, all_group=None, group_filter_re=None,
-                          host_filter_re=None, exclude_empty_groups=False):
+                          host_filter_re=None, exclude_empty_groups=False, is_custom=False):
     '''
     Load inventory from given source directory or file.
     '''
@@ -470,7 +476,7 @@ def load_inventory_source(source, all_group=None, group_filter_re=None,
     else:
         all_group = all_group or MemGroup('all', os.path.dirname(source))
         if os.access(source, os.X_OK):
-            ExecutableJsonLoader(source, all_group, group_filter_re, host_filter_re).load()
+            ExecutableJsonLoader(source, all_group, group_filter_re, host_filter_re, is_custom).load()
         else:
             IniLoader(source, all_group, group_filter_re, host_filter_re).load()
 
@@ -513,6 +519,9 @@ class Command(NoArgsCommand):
         make_option('--keep-vars', dest='keep_vars', action='store_true',
                     metavar="k", default=False,
                     help='use database variables if set'),
+        make_option('--custom', dest='custom', action='store_true',
+                    metavar="c", default=False,
+                    help='this is a custom inventory script'),
         make_option('--source', dest='source', type='str', default=None,
                     metavar='s', help='inventory directory, file, or script '
                     'to load'),
@@ -1148,6 +1157,7 @@ class Command(NoArgsCommand):
         self.overwrite = bool(options.get('overwrite', False))
         self.overwrite_vars = bool(options.get('overwrite_vars', False))
         self.keep_vars = bool(options.get('keep_vars', False))
+        self.is_custom = bool(options.get('custom', False))
         self.source = options.get('source', None)
         self.enabled_var = options.get('enabled_var', None)
         self.enabled_value = options.get('enabled_value', None)
@@ -1195,7 +1205,8 @@ class Command(NoArgsCommand):
             self.all_group = load_inventory_source(self.source, None,
                                                    self.group_filter_re,
                                                    self.host_filter_re,
-                                                   self.exclude_empty_groups)
+                                                   self.exclude_empty_groups,
+                                                   self.is_custom)
             self.all_group.debug_tree()
 
             # Ensure that this is managed as an atomic SQL transaction,

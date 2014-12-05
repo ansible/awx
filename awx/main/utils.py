@@ -5,18 +5,24 @@
 import base64
 import hashlib
 import logging
+import os
 import re
 import subprocess
+import stat
 import sys
 import urlparse
 import threading
 import contextlib
+import tempfile
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
 
 # PyCrypto
 from Crypto.Cipher import AES
+
+# Tower
+from django.conf import settings
 
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
@@ -395,3 +401,62 @@ def ignore_inventory_group_removal():
         yield
     finally:
         _inventory_updates.is_removing = previous_value
+
+def check_proot_installed():
+    '''
+    Check that proot is installed.
+    '''
+    cmd = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '--version']
+    try:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        result = proc.communicate()
+        return bool(proc.returncode == 0)
+    except (OSError, ValueError):
+        return False
+
+def build_proot_temp_dir():
+    '''
+    Create a temporary directory for proot to use.
+    '''
+    path = tempfile.mkdtemp(prefix='ansible_tower_proot_')
+    os.chmod(path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
+    return path
+
+def wrap_args_with_proot(args, cwd, **kwargs):
+    '''
+    Wrap existing command line with proot to restrict access to:
+     - /etc/tower (to prevent obtaining db info or secret key)
+     - /var/lib/awx (except for current project)
+     - /var/log/tower
+     - /var/log/supervisor
+     - /tmp (except for own tmp files)
+    '''
+    new_args = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '-r', '/']
+    hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log',
+                  tempfile.gettempdir(), settings.PROJECTS_ROOT,
+                  settings.JOBOUTPUT_ROOT]
+    hide_paths.extend(getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
+    for path in sorted(set(hide_paths)):
+        if not os.path.exists(path):
+            continue
+        if os.path.isdir(path):
+            new_path = tempfile.mkdtemp(dir=kwargs['proot_temp_dir'])
+            os.chmod(new_path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
+        else:
+            handle, new_path = tempfile.mkstemp(dir=kwargs['proot_temp_dir'])
+            os.close(handle)
+            os.chmod(new_path, stat.S_IRUSR|stat.S_IWUSR)
+        new_args.extend(['-b', '%s:%s' % (new_path, path)])
+    if 'private_data_dir' in kwargs:
+        show_paths = [cwd, kwargs['private_data_dir']]
+    else:
+        show_paths = [cwd]
+    show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
+    for path in sorted(set(show_paths)):
+        if not os.path.exists(path):
+            continue
+        new_args.extend(['-b', '%s:%s' % (path, path)])
+    new_args.extend(['-w', cwd])
+    new_args.extend(args)
+    return new_args
