@@ -32,8 +32,17 @@ angular.module('CustomInventoryListDefinition', [])
             description: {
                 label: 'Description',
                 excludeModal: true,
-                columnClass: 'col-md-5 hidden-sm hidden-xs'
+                columnClass: 'col-md-4 hidden-sm hidden-xs'
             },
+            organization: {
+                label: 'Organization',
+                ngBind: 'custom_inventory.summary_fields.organization.name',
+                // linkTo: '/#/organizations/{{ custom_inventory.organization }}',
+                sourceModel: 'organization',
+                sourceField: 'name',
+                excludeModal: true,
+                columnClass: 'col-md-4 hidden-sm hidden-xs'
+            }
         },
 
         actions: {
