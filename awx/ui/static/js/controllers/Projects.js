@@ -549,7 +549,7 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
         generator = GenerateForm,
         defaultUrl = GetBasePath('projects') + $routeParams.id + '/',
         base = $location.path().replace(/^\//, '').split('/')[0],
-        master = {},
+        master = {}, i,
         id = $routeParams.id,
         relatedSets = {};
 
@@ -614,8 +614,8 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
             input_type: 'radio'
         });
 
-        $scope.pathRequired = ($scope.scm_type.value === '') ? true : false;
-        $scope.scmRequired = ($scope.scm_type.value !== '') ? true : false;
+        $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
+        $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
         $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
         Wait('stop');
     });
@@ -624,6 +624,12 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
         $scope.removeChoicesReady();
     }
     $scope.removeChoicesReady = $scope.$on('choicesReady', function () {
+        for (i = 0; i < $scope.scm_type_options.length; i++) {
+            if ($scope.scm_type_options[i].value === '') {
+                $scope.scm_type_options[i].value = "manual";
+                break;
+            }
+        }
         // Retrieve detail record and prepopulate the form
         Rest.setUrl(defaultUrl);
         Rest.get({ params: { id: id } })
@@ -653,8 +659,9 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
 
                 relatedSets = form.relatedSets(data.related);
 
-                data.scm_type = (Empty(data.scm_type)) ? '' : data.scm_type;
 
+
+                data.scm_type = (Empty(data.scm_type)) ? 'manual' : data.scm_type;
                 for (i = 0; i < $scope.scm_type_options.length; i++) {
                     if ($scope.scm_type_options[i].value === data.scm_type) {
                         $scope.scm_type = $scope.scm_type_options[i];
@@ -662,7 +669,7 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
                     }
                 }
 
-                if ($scope.scm_type.value !== '') {
+                if ($scope.scm_type.value !== 'manual') {
                     $scope.pathRequired = false;
                     $scope.scmRequired = true;
                 } else {
@@ -758,7 +765,9 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
             }
         }
 
-        params.scm_type = $scope.scm_type.value;
+        if(params.scm_type.value === 'manual'){
+            params.scm_type = '';
+        } else params.scm_type = $scope.scm_type.value;
         if ($scope.scm_type.value !== '') {
             delete params.local_path;
         } else {
@@ -824,8 +833,8 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
 
     $scope.scmChange = function () {
         if ($scope.scm_type) {
-            $scope.pathRequired = ($scope.scm_type.value === '') ? true : false;
-            $scope.scmRequired = ($scope.scm_type.value !== '') ? true : false;
+            $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
+            $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
             $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
         }
     };
