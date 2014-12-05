@@ -21,9 +21,6 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # PyCrypto
 from Crypto.Cipher import AES
 
-# Tower
-from django.conf import settings
-
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version', 'update_scm_url',
@@ -406,6 +403,7 @@ def check_proot_installed():
     '''
     Check that proot is installed.
     '''
+    from django.conf import settings
     cmd = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '--version']
     try:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
@@ -432,6 +430,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
      - /var/log/supervisor
      - /tmp (except for own tmp files)
     '''
+    from django.conf import settings
     new_args = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '-r', '/']
     hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log',
                   tempfile.gettempdir(), settings.PROJECTS_ROOT,
