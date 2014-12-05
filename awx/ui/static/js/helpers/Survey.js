@@ -652,7 +652,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.default_float = "";
                 scope.default_int = "";
                 scope.default_textarea = "";
-                scope.survey_question_form.choices.$setPristine();
                 scope.choices = "";
                 scope.text_min = "";
                 scope.text_max = "" ;
@@ -662,6 +661,12 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.int_max = "";
                 scope.float_min = "";
                 scope.float_max = "";
+                scope.survey_question_form.default.$setPristine();
+                scope.survey_question_form.default_multiselect.$setPristine();
+                scope.survey_question_form.default_float.$setPristine();
+                scope.survey_question_form.default_int.$setPristine();
+                scope.survey_question_form.default_textarea.$setPristine();
+                scope.survey_question_form.choices.$setPristine();
             };
 
             scope.submitQuestion = function(){
