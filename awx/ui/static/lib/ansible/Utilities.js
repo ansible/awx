@@ -40,6 +40,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             $(this).remove();
         });
 
+        $('.ui-dialog-content').each(function(){
+            $(this).dialog('close');
+        });
+
         try {
             $('#help-modal').dialog('close');
         } catch (e) {

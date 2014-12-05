@@ -60,12 +60,14 @@
 'use strict';
 
 function Authenticate($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
-    Timer, Empty) {
+    Timer, Empty, ClearScope) {
 
     var setLoginFocus, lastPath, sessionExpired, loginAgain,
         e, html, scope = $rootScope.$new();
 
     setLoginFocus = function () {
+        // Need to clear out any open dialog windows that might be open when this modal opens.
+        ClearScope();
         $('#login-username').focus();
     };
 
@@ -249,5 +251,5 @@ function Authenticate($log, $cookieStore, $compile, $window, $rootScope, $locati
 }
 
 Authenticate.$inject = ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
-    'Timer', 'Empty'
+    'Timer', 'Empty', 'ClearScope'
 ];

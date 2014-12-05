@@ -437,7 +437,7 @@ angular.module('Tower', [
     }])
 
     .run(['$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'LicenseViewer', 'AboutAnsibleHelp', 'ConfigureTower', 'CreateCustomInventory' ,
+        'LoadConfig', 'Store', 'ShowSocketHelp', 'LicenseViewer', 'AboutAnsibleHelp', 'ConfigureTower', 'CreateCustomInventory',
         function ($compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
         LoadConfig, Store, ShowSocketHelp, LicenseViewer, AboutAnsibleHelp, ConfigureTower, CreateCustomInventory) {
 
