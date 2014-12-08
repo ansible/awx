@@ -373,7 +373,7 @@ InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeP
 
 function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, OrganizationList, SearchInit, PaginateInit,
-    LookUpInit, GetBasePath, ParseTypeChange, Wait) {
+    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON) {
 
     ClearScope();
 
@@ -415,17 +415,7 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routePar
         try {
             var fld, json_data, data;
 
-            // Make sure we have valid variable data
-            if ( $scope.inventoryParseType === 'json') {
-                json_data = JSON.parse( $scope.variables); //make sure JSON parses
-            } else {
-                json_data = jsyaml.load( $scope.variables); //parse yaml
-            }
-
-            // Make sure our JSON is actually an object
-            if (typeof json_data !== 'object') {
-                throw "failed to return an object!";
-            }
+            json_data = ToJSON($scope.parseType, $scope.variables, true);
 
             data = {};
             for (fld in form.fields) {
@@ -486,7 +476,7 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routePar
 
 InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList', 'OrganizationList', 'SearchInit',
-    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait'
+    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON'
 ];
 
 
