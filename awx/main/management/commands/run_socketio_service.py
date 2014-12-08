@@ -35,14 +35,22 @@ from socketio.namespace import BaseNamespace
 def print_log(message):
     print("[%s] %s" % (now().isoformat(), message))
 
+valid_sockets = []
+
 class TowerBaseNamespace(BaseNamespace):
 
     def get_allowed_methods(self):
         return []
     
     def get_initial_acl(self):
+        global valid_sockets
         print self
-        if self.valid_user() is not None:
+        v_user = self.valid_user()
+        if v_user:
+            if self.socket.sessid not in valid_sockets:
+                valid_sockets.append(self.socket.sessid)
+                if len(valid_sockets) > 1000:
+                    valid_sockets = valid_sockets[1:]
             return set(['recv_connect'] + self.get_allowed_methods())
         return set()
 
@@ -75,9 +83,6 @@ class TestNamespace(TowerBaseNamespace):
 
 class JobNamespace(TowerBaseNamespace):
 
-    def get_allowed_methods(self):
-        return ['summary_complete', 'status_changed']
-
     def recv_connect(self):
         print_log("Received client connect for job namespace from %s" % str(self.environ['REMOTE_ADDR']))
 
@@ -108,7 +113,6 @@ class TowerSocket(object):
 
     def __call__(self, environ, start_response):
         path = environ['PATH_INFO'].strip('/') or 'index.html'
-        print path
         if path.startswith('socket.io'):
             socketio_manage(environ, {'/socket.io/test': TestNamespace,
                                       '/socket.io/jobs': JobNamespace,
@@ -128,7 +132,8 @@ def notification_handler(server):
                 'type': 'event',
             }
             for session_id, socket in list(server.sockets.iteritems()):
-                socket.send_packet(packet)
+                if session_id in valid_sockets:
+                    socket.send_packet(packet)
 
 class Command(NoArgsCommand):
     '''
