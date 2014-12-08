@@ -975,9 +975,17 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
 
 class CustomInventoryScriptSerializer(BaseSerializer):
 
+    script = serializers.SerializerMethodField('get_script')
+
     class Meta:
         model = CustomInventoryScript
         fields = ('*', "script", "organization")
+
+    def get_script(self, obj):
+        request = self.context.get('request', None)
+        if request is not None and request.user is not None and request.user.is_superuser:
+            return obj.script
+        return None
 
 class InventorySourceOptionsSerializer(BaseSerializer):
 
