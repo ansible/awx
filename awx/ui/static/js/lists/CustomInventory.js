@@ -24,7 +24,8 @@ angular.module('CustomInventoryListDefinition', [])
 
         fields: {
             name: {
-                //key: true,
+                key: true,
+                noLink: true,
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-8'
