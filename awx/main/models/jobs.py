@@ -194,7 +194,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'job_type', 'inventory', 'project',
-                'playbook', 'credential', 'cloud_credential', 'forks',
+                'playbook', 'credential', 'cloud_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'extra_vars', 'job_tags', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task']
 

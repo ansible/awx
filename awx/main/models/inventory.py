@@ -1085,7 +1085,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars',
+        return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
                 'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars']
 
     def save(self, *args, **kwargs):
