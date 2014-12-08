@@ -37,11 +37,13 @@ angular.module('CustomInventoryFormDefinition', [])
             organization: {
                 label: 'Organization',
                 type: 'lookup',
+                awRequiredWhen: {
+                    variable: "orgrequired",
+                    init: true
+                },
                 sourceModel: 'organization',
                 sourceField: 'name',
-                ngClick: 'lookUpOrganization()',
-                addRequired: false,
-                editRequired: false
+                ngClick: 'lookUpOrganization()'
             },
             script: {
                 label: 'Custom Script',
