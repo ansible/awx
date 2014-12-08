@@ -360,6 +360,8 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                             event_data.id = event.id;
                             event_data.parent = event.parent;
                             event_data.event = (event.event_display) ? event.event_display : event.event;
+                            event_data.msg = event_data.msg.replace(/</g, "&lt;");
+                            event_data.msg = event_data.msg.replace(/>/g, "&gt;");
                             results.push(event_data);
                         });
                         if (show_event) {
