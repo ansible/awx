@@ -96,6 +96,9 @@ JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_output')
 # The heartbeat file for the tower scheduler
 SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
 
+# Maximum number of the same job that can be waiting to run when launching from scheduler
+SCHEDULE_MAX_JOBS = 10
+
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
