@@ -273,7 +273,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     ParseTypeChange({ scope: scope, variable: 'extra_vars', parse_variable: form.fields.extra_vars.parseTypeName,
                         field_id: 'source_extra_vars', onReady: callback });
                 }
-
+                if(scope.source.value==="vmware"){
+                    scope.inventory_variables = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
+                    ParseTypeChange({ scope: scope, variable: 'inventory_variables', parse_variable: form.fields.inventory_variables.parseTypeName,
+                        field_id: 'source_inventory_variables', onReady: callback });
+                }
                 if (scope.source.value === 'rax' || scope.source.value === 'ec2'|| scope.source.value==='gce' || scope.source.value === 'azure' || scope.source.value === 'vmware') {
                     kind = (scope.source.value === 'rax') ? 'rax' : (scope.source.value==='gce') ? 'gce' : (scope.source.value==='azure') ? 'azure' : (scope.source.value === 'vmware') ? 'vmware' : 'aws' ;
                     url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;
@@ -291,13 +295,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         scope.source_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
                         ParseTypeChange({ scope: scope, variable: 'source_vars', parse_variable: form.fields.source_vars.parseTypeName,
                             field_id: 'source_source_vars', onReady: callback });
-                    }
-                    if ($('#group_tabs .active a').text() === 'Source' && (scope.source.value === 'vmware' )) {
-                        callback = function(){ Wait('stop'); };
-                        Wait('start');
-                        scope.inventory_variables = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
-                        ParseTypeChange({ scope: scope, variable: 'inventory_variables', parse_variable: form.fields.inventory_variables.parseTypeName,
-                            field_id: 'source_inventory_variables', onReady: callback });
                     }
                 }
             }
