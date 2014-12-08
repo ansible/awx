@@ -59,6 +59,7 @@
  * | columnClick | Adds an ng-click directive to the &lt;td&gt; element. |
  * | excludeModal | true or false. If false, the field will not be included in the generated HTML when the mode is 'lookup' |
  * | key | true or false. If set to true, helpers/search.js will use the field name as the default sort order when generating the API request. |
+ * | noLink | true or false. If set to true this will override any 'key', 'linkTo', 'ngClick', or other option that would cause the field to be a link. Used in portal mode and custom inv. script. |
  * | label | Text string used as the column header text. |
  * | linkTo | Wraps the field value with an &lt;a&gt; element. Set to the value of the href attribute. |
  * | ngClick | Wraps the field value with an &lt;a&gt; and adds the ng-click directive. Set to the JS expression that ng-click will evaluate. |
