@@ -360,8 +360,6 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                             event_data.id = event.id;
                             event_data.parent = event.parent;
                             event_data.event = (event.event_display) ? event.event_display : event.event;
-                            event_data.msg = event_data.msg.replace(/</g, "&lt;");
-                            event_data.msg = event_data.msg.replace(/>/g, "&gt;");
                             results.push(event_data);
                         });
                         if (show_event) {
@@ -434,6 +432,12 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                             ">" + itm + "</a>";
                     }
                     else {
+                        if( typeof itm === "string"){
+                            if(itm.indexOf('<') > -1 || itm.indexOf('>') > -1){
+                                itm = itm.replace(/</g, "&lt;");
+                                itm = itm.replace(/>/g, "&gt;");
+                            }
+                        }
                         html += "<span ng-non-bindable>" + itm + "</span>";
                     }
 
@@ -525,6 +529,12 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
             var id = params.id,
                 val = params.val,
                 html;
+            if( typeof val === "string"){
+                if(val.indexOf('<') > -1 || val.indexOf('>') > -1){
+                    val = val.replace(/</g, "&lt;");
+                    val = val.replace(/>/g, "&gt;");
+                }
+            }
             html = "<pre ng-non-bindable>" + val + "</pre>\n";
             $('#' + id).empty().html(html);
         };
