@@ -22,6 +22,7 @@ class Migration(SchemaMigration):
             ('organization', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['main.Organization'])),
         ))
         db.send_create_signal('main', ['CustomInventoryScript'])
+        db.create_unique(u'main_custominventoryscript', ['name', 'organization_id'])
 
         # Adding field 'InventoryUpdate.source_script'
         db.add_column(u'main_inventoryupdate', 'source_script',
