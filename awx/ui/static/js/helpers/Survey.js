@@ -30,7 +30,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 buttons = [{
                 "label": "Cancel",
                 "onClick": function() {
-                    $(this).dialog('close');
+                    scope.cancelSurvey(this);
                 },
                 "icon": "fa-times",
                 "class": "btn btn-default",
@@ -67,6 +67,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 onOpen: function() {
                     Wait('stop');
                     if(mode!=="survey-taker"){
+                        // if(scope.mode === 'add'){
+                        //     $('#survey-save-button').attr('disabled' , true);
+                        // } else
                         $('#survey-save-button').attr('ng-disabled', "survey_questions.length<1 ");
                         element = angular.element(document.getElementById('survey-save-button'));
                         $compile(element)(scope);
@@ -107,14 +110,15 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             if(scope.mode === 'add'){
                 tempSurv.survey_name = scope.survey_name;
                 tempSurv.survey_description = scope.survey_description;
+                tempSurv.survey_questions = scope.survey_questions;
 
                 ShowSurveyModal({ title: "Edit Survey", scope: scope, callback: 'DialogReady' });
 
-                scope.survey_name = tempSurv.survey_name;
-                scope.survey_description = tempSurv.survey_description;
-                // scope.survey_questions = data.spec;
-                for(i=0; i<scope.survey_questions.length; i++){
-                    scope.finalizeQuestion(scope.survey_questions[i], i);
+                // scope.survey_name = tempSurv.survey_name;
+                // scope.survey_description = tempSurv.survey_description;
+
+                for(i=0; i<tempSurv.survey_questions.length; i++){
+                    scope.finalizeQuestion(tempSurv.survey_questions[i], i);
                 }
             }
             else{
@@ -162,31 +166,13 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.removeDialogReady();
             }
             scope.removeDialogReady = scope.$on('DialogReady', function() {
-
                 $('#survey-modal-dialog').dialog('open');
                 scope.addQuestion();
-
-                // $('#surveyName').focus();
-                // $('#question_unique_required_chbox').prop('checked' , true);
             });
-
             Wait('start');
             $('#form-container').empty();
-
             scope.resetForm();
-            // generator.inject(form, { id: 'survey-modal-dialog' , mode: 'add', related: false, scope: scope, breadCrumbs: false });
             ShowSurveyModal({ title: "Add Survey", scope: scope, callback: 'DialogReady' });
-
-            // if (scope.removeScheduleSaved) {
-            //     scope.removeScheduleSaved();
-            // }
-            // scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
-            //     Wait('stop');
-            //     $('#survey-modal-dialog').dialog('close');
-            //     scope.$emit('surveySaved');
-            // });
-
-
         };
     }])
 
@@ -381,7 +367,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 element,
                 //fld,
                 i,
-                question = scope.survey_questions[index],
+                question = params.question, //scope.survey_questions[index],
                 form = SurveyQuestionForm;
 
             $('#survey-save-button').attr('disabled', 'disabled');
@@ -400,8 +386,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
 
 
-            //GenerateForm.inject(form, { id: 'question_'+index, mode: 'edit' , related: false, scope:scope, breadCrumbs: false});
-
 
             if (scope.removeFillQuestionForm) {
                 scope.removeFillQuestionForm();
@@ -411,7 +395,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     scope[fld] = question[fld];
                     if(form.fields[fld].type === 'select'){
                         for (i = 0; i < scope.answer_types.length; i++) {
-                            if (scope.survey_questions[index][fld] === scope.answer_types[i].type) {
+                            if (question[fld] === scope.answer_types[i].type) {
                                 scope[fld] = scope.answer_types[i];
                             }
                         }
@@ -457,32 +441,15 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
         };
     }])
 
-     .factory('DeleteQuestion' ,
-    function() {
-        return function(params) {
-
-            var scope = params.scope,
-                index = params.index,
-                element;
-
-            element = $('.question_final:eq('+index+')');
-            element.remove();
-            scope.survey_questions.splice(index, 1);
-            scope.reorder();
-            if(scope.survey_questions.length<1){
-                $('#survey-save-button').attr('disabled', 'disabled');
-            }
-        };
-    })
-
     .factory('SurveyControllerInit', ['$location', 'DeleteSurvey', 'EditSurvey', 'AddSurvey', 'GenerateForm', 'SurveyQuestionForm', 'Wait', 'Alert',
-            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion', 'DeleteQuestion',
+            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion',
         function($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
-            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion, DeleteQuestion) {
+            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
                 i, url, html, element,
+                questions = [],
                 form = SurveyQuestionForm;
 
             scope.survey_questions = [];
@@ -504,6 +471,11 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             };
 
             scope.editSurvey = function() {
+                if(scope.mode==='add'){
+                    for(i=0; i<scope.survey_questions.length; i++){
+                        questions.push(scope.survey_questions[i]);
+                    }
+                }
                 EditSurvey({
                     scope: scope,
                     id: id,
@@ -513,12 +485,18 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             scope.addSurvey = function() {
                 AddSurvey({
-                    scope: scope,
-                    // callback: 'SchedulesRefresh'
+                    scope: scope
                 });
             };
-            scope.addQuestion = function(){
 
+            scope.cancelSurvey = function(me){
+                if(scope.mode === 'add'){
+                    questions = [];
+                }
+                $(me).dialog('close');
+            };
+
+            scope.addQuestion = function(){
                 GenerateForm.inject(form, { id:'new_question', mode: 'add' , scope:scope, related: false, breadCrumbs: false});
                 scope.required = true; //set the required checkbox to true via the ngmodel attached to scope.required.
                 scope.text_min = null;
@@ -527,7 +505,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.int_max = null;
                 scope.float_min = null;
                 scope.float_max = null;
-
             };
 
             scope.addNewQuestion = function(){
@@ -542,30 +519,60 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             scope.editQuestion = function(index){
                 EditQuestion({
                     index: index,
-                    scope: scope
+                    scope: scope,
+                    question: (scope.mode==='add') ? questions[index] : scope.survey_questions[index]
                 });
             };
 
             scope.deleteQuestion = function(index){
-                DeleteQuestion({
-                    index:index,
-                    scope: scope
-                });
+                element = $('.question_final:eq('+index+')');
+                element.remove();
+                if(scope.mode === 'add'){
+                    questions.splice(index, 1);
+                    scope.reorder();
+                    if(questions.length<1){
+                        $('#survey-save-button').attr('disabled', 'disabled');
+                    }
+                }
+                else {
+                    scope.survey_questions.splice(index, 1);
+                    scope.reorder();
+                    if(scope.survey_questions.length<1){
+                        $('#survey-save-button').attr('disabled', 'disabled');
+                    }
+                }
             };
+
             scope.cancelQuestion = function(event){
                 var elementID, key;
                 if(event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id==="new_question"){
                     $('#new_question .aw-form-well').remove();
                     $('#add_question_btn').show();
                     $('#add_question_btn').removeAttr('disabled');
+                    if(scope.mode === 'add' && questions.length>0){
+                        $('#survey-save-button').removeAttr('disabled');
+                    }
+                    if(scope.mode === 'edit' && scope.survey_questions.length>0){
+                        $('#survey-save-button').removeAttr('disabled');
+                    }
+
                 } else {
                     elementID = event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id;
                     key = elementID.split('_')[1];
                     $('#'+elementID).empty();
-                    scope.finalizeQuestion(scope.survey_questions[key] , key);
+                    if(scope.mode === 'add'){
+                        if(questions.length>0){
+                            $('#survey-save-button').removeAttr('disabled');
+                        }
+                        scope.finalizeQuestion(questions[key], key);
+                    }
+                    else if(scope.mode=== 'edit' ){
+                        if(scope.survey_questions.length>0){
+                            $('#survey-save-button').removeAttr('disabled');
+                        }
+                        scope.finalizeQuestion(scope.survey_questions[key] , key);
+                    }
                 }
-
-
             };
 
             scope.questionUp = function(index){
@@ -590,9 +597,15 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         clickedDiv.css('top', '0px');
                         clickedDiv.insertBefore(prevDiv);
                         animating = false;
-                        i = scope.survey_questions[index];
-                        scope.survey_questions[index] = scope.survey_questions[index-1];
-                        scope.survey_questions[index-1] = i;
+                        if ( scope.mode === 'add'){
+                            i = questions[index];
+                            questions[index] = questions[index-1];
+                            questions[index-1] = i;
+                        } else {
+                            i = scope.survey_questions[index];
+                            scope.survey_questions[index] = scope.survey_questions[index-1];
+                            scope.survey_questions[index-1] = i;
+                        }
                         scope.reorder();
                     });
                 }
@@ -620,19 +633,32 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         clickedDiv.css('top', '0px');
                         nextDiv.insertBefore(clickedDiv);
                         animating = false;
-                        i = scope.survey_questions[index];
-                        scope.survey_questions[index] = scope.survey_questions[Number(index)+1];
-                        scope.survey_questions[Number(index)+1] = i;
+                        if(scope.mode === 'add'){
+                            i = questions[index];
+                            questions[index] = questions[Number(index)+1];
+                            questions[Number(index)+1] = i;
+                        } else {
+                            i = scope.survey_questions[index];
+                            scope.survey_questions[index] = scope.survey_questions[Number(index)+1];
+                            scope.survey_questions[Number(index)+1] = i;
+                        }
                         scope.reorder();
                     });
                 }
             };
 
             scope.reorder = function(){
-                for(i=0; i<scope.survey_questions.length; i++){
-                    scope.survey_questions[i].index=i;
-                    $('.question_final:eq('+i+')').attr('id', 'question_'+i);
-                    // $('#delete-question_'+question.index+'')
+                if(scope.mode==='add'){
+                    for(i=0; i<questions.length; i++){
+                        questions[i].index=i;
+                        $('.question_final:eq('+i+')').attr('id', 'question_'+i);
+                    }
+                }
+                else {
+                    for(i=0; i<scope.survey_questions.length; i++){
+                        scope.survey_questions[i].index=i;
+                        $('.question_final:eq('+i+')').attr('id', 'question_'+i);
+                    }
                 }
             };
 
@@ -642,7 +668,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     question: data,
                     id: id,
                     index: index
-                    //callback?
                 });
             };
 
@@ -721,16 +746,29 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     Wait('stop');
                     $('#survey-save-button').removeAttr('disabled');
                     if(GenerateForm.mode === 'add'){
-                        scope.survey_questions.push(data);
-                        $('#new_question .aw-form-well').remove();
-                        // scope.addQuestion()
-                        $('#add_question_btn').show();
-                        scope.finalizeQuestion(data , scope.survey_questions.length-1);
+                        if(scope.mode === 'add'){
+                            questions.push(data);
+                            $('#new_question .aw-form-well').remove();
+                            $('#add_question_btn').show();
+                            scope.finalizeQuestion(data , questions.length-1);
+                        }
+                        else if (scope.mode === 'edit'){
+                            scope.survey_questions.push(data);
+                            $('#new_question .aw-form-well').remove();
+                            $('#add_question_btn').show();
+                            scope.finalizeQuestion(data , scope.survey_questions.length-1);
+                        }
+
                     }
                     if(GenerateForm.mode === 'edit'){
                         elementID = event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id;
                         key = elementID.split('_')[1];
-                        scope.survey_questions[key] = data;
+                        if(scope.mode==='add'){
+                            questions[key] = data;
+                        }
+                        else if(scope.mode === 'edit'){
+                            scope.survey_questions[key] = data;
+                        }
                         $('#'+elementID).empty();
                         scope.finalizeQuestion(data , key);
                     }
@@ -761,8 +799,12 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 Wait('start');
                 if(scope.mode==="add"){
                     $('#survey-modal-dialog').dialog('close');
+                    if(questions.length>0){
+                        scope.survey_questions = questions;
+                    }
                     scope.survey_name = "";
                     scope.survey_description = "";
+                    questions = [] ;
                     scope.$emit('SurveySaved');
                 }
                 else{
