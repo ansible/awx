@@ -60,7 +60,7 @@ PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_ADMIN, _('Administrate Inventory')),
     (PERM_INVENTORY_DEPLOY, _('Deploy To Inventory')),
     (PERM_INVENTORY_CHECK, _('Deploy To Inventory (Dry Run)')),
-    (PERM_JOBTEMPLATE_CREATE, _('Create a Job Template used in Deployment')),
+    (PERM_JOBTEMPLATE_CREATE, _('Create a Job Template')),
 ]
 
 CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'custom']
