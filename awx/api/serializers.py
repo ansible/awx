@@ -1332,8 +1332,11 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         if request is not None and request.user is not None:
             d['can_copy'] = request.user.can_access(JobTemplate, 'add', {'inventory': obj.inventory,
                                                                      'project': obj.project})
+            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj, {'inventory': obj.inventory,
+                                                                                 'project': obj.project})
         else:
             d['can_copy'] = False
+            d['can_edit'] = False
         return d
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
