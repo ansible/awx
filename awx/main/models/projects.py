@@ -238,7 +238,7 @@ class Project(UnifiedJobTemplate, ProjectOptions):
         # Create auto-generated local path if project uses SCM.
         if self.pk and self.scm_type and not self.local_path.startswith('_'):
             slug_name = slugify(unicode(self.name)).replace(u'-', u'_')
-            self.local_path = u'_%d__%s' % (self.pk, slug_name)
+            self.local_path = u'_%d__%s' % (int(self.pk), slug_name)
             if 'local_path' not in update_fields:
                 update_fields.append('local_path')
         # Do the actual save.
