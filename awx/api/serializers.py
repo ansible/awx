@@ -231,7 +231,7 @@ class BaseSerializer(serializers.ModelSerializer):
             'job': 'Playbook Run',
             'project_update': 'SCM Update',
             'inventory_update': 'Inventory Sync',
-            'system_job': 'System Task',
+            'system_job': 'Management Job',
         }
         choices = []
         for t in self.get_types():
