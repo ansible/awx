@@ -468,13 +468,13 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
                 }
             }
         }
-        if(data.scm_type.value==="manual" ){
-            data.scm_type = "";
-        } else data.scm_type = $scope.scm_type.value;
-        if ($scope.scm_type.value !== '') {
-            delete data.local_path;
-        } else {
+
+        if($scope.scm_type.value === "manual"){
+            data.scm_type = "" ;
             data.local_path = $scope.local_path.value;
+        } else {
+            data.scm_type = $scope.scm_type.value;
+            delete data.local_path;
         }
 
         url = (base === 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
@@ -765,13 +765,12 @@ function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParam
             }
         }
 
-        if(params.scm_type.value === 'manual'){
-            params.scm_type = '';
-        } else params.scm_type = $scope.scm_type.value;
-        if ($scope.scm_type.value !== '') {
-            delete params.local_path;
-        } else {
+        if($scope.scm_type.value === "manual"){
+            params.scm_type = "" ;
             params.local_path = $scope.local_path.value;
+        } else {
+            params.scm_type = $scope.scm_type.value;
+            delete params.local_path;
         }
 
         Rest.setUrl(defaultUrl);
