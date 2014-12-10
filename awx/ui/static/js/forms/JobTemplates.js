@@ -334,7 +334,7 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
         buttons: { //for now always generates <button> tags
             save: {
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
-                ngDisabled: true          //Disable when $pristine or $invalid, optional
+                ngDisabled: "job_templates_form.$invalid || can_edit!==true"//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
             },
             reset: {
                 ngClick: 'formReset()',
