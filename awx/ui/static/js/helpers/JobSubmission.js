@@ -446,6 +446,11 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
 
             function buildHtml(question, index){
                 question.index = index;
+                question.question_name = question.question_name.replace(/</g, "&lt;");
+                question.question_name = question.question_name.replace(/>/g, "&gt;");
+                question.question_description = (question.question_description) ? question.question_description.replace(/</g, "&lt;") : undefined;
+                question.question_description = (question.question_description) ? question.question_description.replace(/>/g, "&gt;") : undefined;
+
 
                 requiredAsterisk = (question.required===true) ? "prepend-asterisk" : "";
                 requiredClasses = (question.required===true) ? "ng-pristine ng-invalid-required ng-invalid" : "";
@@ -456,6 +461,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 if(!Empty(question.question_description)){
                     html += '<div class="survey_taker_description"><i>'+question.question_description+'</i></div>\n';
                 }
+
+                question.default = (question.default) ? question.default.replace(/</g, "&lt;") : undefined;
+                question.default = (question.default) ? question.default.replace(/>/g, "&gt;") : undefined;
                 scope[question.variable] = question.default;
 
                 if(question.type === 'text' ){
@@ -493,6 +501,8 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     html+='<div class="survey_taker_input" > ';
                     for( j = 0; j<choices.length; j++){
                         checked = (!Empty(question.default) && question.default.indexOf(choices[j])!==-1) ? "checked" : "";
+                        choices[j]  = choices[j].replace(/</g, "&lt;");
+                        choices[j]  = choices[j].replace(/>/g, "&gt;");
                         html+= '<input  type="'+element+'" class="mc" ng-model="'+question.variable+'" ng-required="'+question.required+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[j]+' " '+checked+' >' +
                         '<span>'+choices[j] +'</span><br>' ;
                     }

@@ -266,6 +266,11 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             // }
 
             question.index = index;
+            question.question_name = question.question_name.replace(/</g, "&lt;");
+            question.question_name = question.question_name.replace(/>/g, "&gt;");
+            question.question_description = (question.question_description) ? question.question_description.replace(/</g, "&lt;") : undefined;
+            question.question_description = (question.question_description) ? question.question_description.replace(/>/g, "&gt;") : undefined;
+
 
             if(!$('#question_'+question.index+':eq(0)').is('div')){
                 html+='<div id="question_'+question.index+'" class="question_final row"></div>';
@@ -281,6 +286,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             if(question.type === 'text' ){
                 defaultValue = (question.default) ? question.default : "";
+                defaultValue = defaultValue.replace(/</g, "&lt;");
+                defaultValue = defaultValue.replace(/>/g, "&gt;");
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
                     '<input type="text" placeholder="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" readonly>'+
@@ -288,6 +295,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             }
             if(question.type === "textarea"){
                 defaultValue = (question.default) ? question.default : (question.default_textarea) ? question.default_textarea:  "" ;
+                defaultValue = defaultValue.replace(/</g, "&lt;");
+                defaultValue = defaultValue.replace(/>/g, "&gt;");
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
                     '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3" readonly>'+defaultValue+'</textarea>'+
@@ -300,6 +309,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
                 for( i = 0; i<choices.length; i++){
                     checked = (!Empty(question.default) && question.default.indexOf(choices[i])!==-1) ? "checked" : "";
+                    choices[i] = choices[i] .replace(/</g, "&lt;");
+                    choices[i]  = choices[i] .replace(/>/g, "&gt;");
                     html+= '<input  type="'+element+'"  class="mc" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[i]+' " '+checked+' >' +
                         '<span>'+choices[i] +'</span><br>' ;
                 }
