@@ -263,7 +263,8 @@ function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routePa
                 form: form,
                 current_item: data.project,
                 list: ProjectList,
-                field: 'project'
+                field: 'project',
+                input_type: 'radio'
             });
 
             if (!$scope.PermissionAddAllowed) {

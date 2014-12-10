@@ -41,7 +41,7 @@ angular.module('PermissionFormDefinition', [])
                     value: 'Inventory',
                     selected: true
                 }, {
-                    label: 'Deployment',
+                    label: 'Job Template',
                     value: 'Deploy'
                 }],
                 ngChange: 'selectCategory()'
