@@ -35,12 +35,12 @@ angular.module('PermissionsHelper', [])
                 scope.projectrequired = true;
                 html = "<dl>\n" +
 		    "<dt>Create</dt>\n" +
-		    "<dd>Allow the user or team to create deployments. This implies that they can run and check deployments</dd>\n" +
+		    "<dd>Allow the user or team to create job templates. This implies that they have the Run and Check permissions.</dd>\n" +
                     "<dt>Run</dt>\n" +
-                    "<dd>Allow the user or team to perform a live deployment of the project against the inventory. In Run mode modules will " +
+                    "<dd>Allow the user or team to run a job template from the project against the inventory. In Run mode modules will " +
                     "be executed, and changes to the inventory will occur.</dd>\n" +
                     "<dt>Check</dt>\n" +
-                    "<dd>Only allow the user or team to deploy the project against the inventory as a dry-run operation. In Check mode, module operations " +
+                    "<dd>Only allow the user or team to run the project against the inventory as a dry-run operation. In Check mode, module operations " +
                     "will only be simulated. No changes will occur.</dd>\n" +
                     "</dl>\n";
                 scope.permissionTypeHelp = $sce.trustAsHtml(html);
