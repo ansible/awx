@@ -88,16 +88,6 @@ class JobNamespace(TowerBaseNamespace):
 
 class JobEventNamespace(TowerBaseNamespace):
 
-    def get_initial_acl(self):
-        valid_user = self.valid_user()
-        if valid_user is None or valid_user is False:
-            return set()
-        else:
-            user_jobs = get_user_queryset(valid_user, Job).filter(finished__isnull=True)
-            visible_jobs = set(['recv_connect'] + ["job_events-%s" % str(j.id) for j in user_jobs])
-            print_log("Visible jobs: " + str(visible_jobs))
-            return visible_jobs
-    
     def recv_connect(self):
         print_log("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
 
