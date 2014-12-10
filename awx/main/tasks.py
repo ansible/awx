@@ -371,7 +371,7 @@ class BaseTask(Task):
             # Refresh model instance from the database (to check cancel flag).
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
-                os.kill(child.pid, signal.SIGTERM)
+                os.kill(child.pid, signal.SIGINT)
                 time.sleep(3)
                 # The following line causes orphaned ansible processes
                 # child.terminate(canceled)
