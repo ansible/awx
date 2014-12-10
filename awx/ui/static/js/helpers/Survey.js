@@ -70,7 +70,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         // if(scope.mode === 'add'){
                         //     $('#survey-save-button').attr('disabled' , true);
                         // } else
-                        $('#survey-save-button').attr('ng-disabled', "survey_questions.length<1 ");
+                        if(scope.can_edit === false){
+                            $('#survey-save-button').attr('disabled', "disabled");
+                        }
+                        else $('#survey-save-button').attr('ng-disabled', "survey_questions.length<1 ");
                         element = angular.element(document.getElementById('survey-save-button'));
                         $compile(element)(scope);
 
@@ -552,7 +555,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     if(scope.mode === 'add' && questions.length>0){
                         $('#survey-save-button').removeAttr('disabled');
                     }
-                    if(scope.mode === 'edit' && scope.survey_questions.length>0){
+                    if(scope.mode === 'edit' && scope.survey_questions.length>0 && scope.can_edit===true){
                         $('#survey-save-button').removeAttr('disabled');
                     }
 
@@ -567,7 +570,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         scope.finalizeQuestion(questions[key], key);
                     }
                     else if(scope.mode=== 'edit' ){
-                        if(scope.survey_questions.length>0){
+                        if(scope.survey_questions.length>0 && scope.can_edit === true){
                             $('#survey-save-button').removeAttr('disabled');
                         }
                         scope.finalizeQuestion(scope.survey_questions[key] , key);
@@ -744,7 +747,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         }
                     }
                     Wait('stop');
-                    $('#survey-save-button').removeAttr('disabled');
+                    if(scope.mode === 'add' || scope.mode==="edit" && scope.can_edit === true){
+                        $('#survey-save-button').removeAttr('disabled');
+                    }
+
                     if(GenerateForm.mode === 'add'){
                         if(scope.mode === 'add'){
                             questions.push(data);
