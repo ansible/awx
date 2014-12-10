@@ -1263,7 +1263,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             name = "<deleted host>";
                         }
                         scope.hosts.push({
-                            id: name,
+                            id: row.id,
                             name: name,
                             ok: row.ok,
                             changed: row.changed,
