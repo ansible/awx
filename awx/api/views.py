@@ -2197,7 +2197,7 @@ class SystemJobList(ListCreateAPIView):
         return super(SystemJobList, self).get(request, *args, **kwargs)
 
 
-class SystemJobDetail(RetrieveAPIView):
+class SystemJobDetail(RetrieveDestroyAPIView):
 
     model = SystemJob
     serializer_class = SystemJobSerializer
