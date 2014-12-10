@@ -979,6 +979,12 @@ class CustomInventoryScriptSerializer(BaseSerializer):
         model = CustomInventoryScript
         fields = ('*', "script", "organization")
 
+    def validate_script(self, attrs, source):
+        script_contents = attrs.get(source, '')
+        if not script_contents.startswith("#!"):
+            raise serializers.ValidationError('Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python')
+        return attrs
+
     def to_native(self, obj):
         ret = super(CustomInventoryScriptSerializer, self).to_native(obj)
         if obj is None:

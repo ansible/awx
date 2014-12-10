@@ -22,6 +22,7 @@ from awx.main.tests.base import BaseTest, BaseTransactionTest
 __all__ = ['InventoryTest', 'InventoryUpdatesTest']
 
 TEST_SIMPLE_INVENTORY_SCRIPT = "#!/usr/bin/env python\nimport json\nprint json.dumps({'hosts': ['ahost-01', 'ahost-02', 'ahost-03', 'ahost-04']})"
+TEST_SIMPLE_INVENTORY_SCRIPT_WITHOUT_HASHBANG = "import json\nprint json.dumps({'hosts': ['ahost-01', 'ahost-02', 'ahost-03', 'ahost-04']})"
 
 TEST_UNICODE_INVENTORY_SCRIPT = u"""#!/usr/bin/env python
 # -*- coding: utf-8 -*-
@@ -298,6 +299,10 @@ class InventoryTest(BaseTest):
 
         new_failed_script = dict(name="Shouldfail", description="This test should fail", script=TEST_SIMPLE_INVENTORY_SCRIPT, organization=self.organizations[0].id)
         self.post(inventory_scripts, data=new_failed_script, expect=403, auth=self.get_normal_credentials())
+
+        failed_no_shebang = dict(name="ShouldAlsoFail", descript="This test should also fail", script=TEST_SIMPLE_INVENTORY_SCRIPT_WITHOUT_HASHBANG,
+                                 organization=self.organizations[0].id)
+        self.post(inventory_scripts, data=failed_no_shebang, expect=400, auth=self.get_super_credentials())
 
     def test_main_line(self):
        
