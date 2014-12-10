@@ -259,7 +259,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         callback;
 
     CallbackHelpInit({ scope: $scope });
-
+    $scope.can_edit = true;
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
 
     callback = function() {
