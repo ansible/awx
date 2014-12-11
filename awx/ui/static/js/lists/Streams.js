@@ -71,6 +71,14 @@ angular.module('StreamListDefinition', [])
                 searchWidget: 2,
                 searchField: 'object1'
             },
+            custom_inventory_search: {
+                label: 'Custom Inventory Script',
+                searchOnly: true,
+                searchObject: 'custom_inventory_script',
+                searchPlaceholder: 'Custom inventory script name',
+                searchWidget: 2,
+                searchField: 'object1'
+            },
             group_search: {
                 label: 'Group',
                 searchOnly: true,
@@ -160,6 +168,14 @@ angular.module('StreamListDefinition', [])
                 searchOnly: true,
                 searchObject: 'credential',
                 searchPlaceholder: 'Related credential name',
+                searchWidget: 3,
+                searchField: 'object2'
+            },
+            custom_inventory_script_search3: {
+                label: 'Custom Inventory Script',
+                searchOnly: true,
+                searchObject: 'custom_inventory_script',
+                searchPlaceholder: 'Related custom inventory script name',
                 searchWidget: 3,
                 searchField: 'object2'
             },
