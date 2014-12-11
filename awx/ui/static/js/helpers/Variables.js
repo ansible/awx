@@ -88,7 +88,7 @@ angular.module('VariablesHelper', ['Utilities'])
             if (parseType === 'json') {
                 try {
                     // perform a check to see if the user cleared the field completly
-                    if(variables === "" ){
+                    if(variables.trim() === "" || variables.trim() === "{" || variables.trim() === "}" ){
                         variables = "{}";
                     }
                     //parse a JSON string
@@ -104,10 +104,11 @@ angular.module('VariablesHelper', ['Utilities'])
                     $log.error('Failed to parse JSON string. Parser returned: ' + e.message);
                     ProcessErrors(null, variables, e.message, null, { hdr: 'Error!',
                         msg: 'Failed to parse JSON string. Parser returned: ' + e.message });
+                    throw  'Parse error. Failed to parse variables.';
                 }
             } else {
                 try {
-                    if(variables === ""){
+                    if(variables.trim() === "" || variables.trim() === "-" || variables.trim() === "--"){
                         variables = '---';
                     }
                     json_data = jsyaml.load(variables);
