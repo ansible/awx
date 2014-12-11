@@ -507,6 +507,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 if(scope.mode === 'add'){
                     questions = [];
                 }
+                else scope.survey_questions = [];
                 $(me).dialog('close');
             };
 
