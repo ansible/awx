@@ -60,7 +60,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                 else if (job.type === 'project_update') {
                     typeId = job.project;
                 }
-                else if (job.type === 'job') {
+                else if (job.type === 'job' || job.type === "system_job") {
                     typeId = job.id;
                 }
                 RelaunchJob({ scope: scope, id: typeId, type: job.type, name: job.name });
@@ -118,7 +118,7 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
             if (type === 'inventory_update') {
                 RelaunchInventory({ scope: scope, id: id});
             }
-            else if (type === 'job') {
+            else if (type === 'job' || type === 'system_job') {
                 RelaunchPlaybook({ scope: scope, id: id, name: name });
             }
             else if (type === 'project_update') {

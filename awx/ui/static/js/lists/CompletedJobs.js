@@ -89,7 +89,8 @@ angular.module('CompletedJobsDefinition', [])
                 mode: 'all',
                 ngClick: 'relaunchJob($event, completed_job.id)',
                 awToolTip: 'Relaunch using the same parameters',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngHide: "completed_job.type == 'system_job' "
             },
             "delete": {
                 mode: 'all',
