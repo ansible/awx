@@ -1234,7 +1234,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     def task_impact(self):
         return 50
 
-class CustomInventoryScript(CommonModel):
+class CustomInventoryScript(CommonModelNameNotUnique):
 
     class Meta:
         app_label = 'main'
