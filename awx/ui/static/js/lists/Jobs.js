@@ -84,7 +84,8 @@ angular.module('JobsListDefinition', [])
                 icon: 'icon-rocket',
                 ngClick: 'relaunchJob($event, job.id)',
                 awToolTip: 'Relaunch using the same parameters',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngHide: "job.type == 'system_job' "
             },
             cancel: {
                 mode: 'all',

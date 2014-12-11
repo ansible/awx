@@ -74,7 +74,8 @@ angular.module('RunningJobsDefinition', [])
                 mode: 'all',
                 ngClick: 'relaunchJob($event, running_job.id)',
                 awToolTip: 'Relaunch using the same parameters',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngHide: "running_job.type == 'system_job' "
             },
             cancel: {
                 mode: 'all',

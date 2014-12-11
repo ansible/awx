@@ -73,7 +73,8 @@ angular.module('QueuedJobsDefinition', [])
                 mode: 'all',
                 ngClick: 'relaunchJob($event, queued_job.id)',
                 awToolTip: 'Relaunch using the same parameters',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngHide: "queued_job.type == 'system_job' "
             },
             'cancel': {
                 mode: 'all',
