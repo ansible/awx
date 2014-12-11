@@ -17,7 +17,7 @@ class Migration(SchemaMigration):
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'custominventoryscript', 'app_label': 'main'}(class)s_created+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
             ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'custominventoryscript', 'app_label': 'main'}(class)s_modified+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
+            ('name', self.gf('django.db.models.fields.CharField')(unique=False, max_length=512)),
             ('script', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('organization', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['main.Organization'])),
         ))
