@@ -361,6 +361,9 @@ class Job(UnifiedJob, JobOptions):
             if obj.job_template is not None and obj.job_template == self.job_template:
                 if obj.launch_type == 'callback' and self.launch_type == 'callback':
                     if obj.limit != self.limit:
+                        # NOTE: This is overriden by api/views.py.JobTemplateCallback.post() check
+                        # which limits job runs on a JT to one per host in a callback scenario
+                        # I'm leaving this here in case we change that
                         return False
                 return True
             return False

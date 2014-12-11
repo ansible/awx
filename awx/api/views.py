@@ -1693,6 +1693,12 @@ class JobTemplateCallback(GenericAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         limit = ':&'.join(filter(None, [job_template.limit, host.name]))
 
+        # NOTE: We limit this to one job waiting due to this: https://trello.com/c/yK36dGWp
+        if Job.objects.filter(status__in=['pending', 'waiting', 'running'], job_template=job_template,
+                              limit=limit).count() > 0:
+            data = dict(msg='Host callback job already pending')
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         # Everything is fine; actually create the job.
         with transaction.atomic():
             job = job_template.create_job(limit=limit, launch_type='callback')

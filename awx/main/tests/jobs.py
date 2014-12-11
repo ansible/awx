@@ -1642,6 +1642,14 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         # Try with REMOTE_ADDR set to an unknown address.
         self.post(url, data, expect=400, remote_addr='127.127.0.1')
 
+        # Create a pending job that will block creation of another job
+        j = job_template.create_job(limit=job.limit, launch_type='callback')
+        j.status = 'pending'
+        j.save()
+        # This should fail since there is already a pending/waiting callback job on that job template involving that host
+        self.post(url, data, expect=400, remote_addr=host_ip)
+        j.delete() # Remove that so it's not hanging around
+
         # Try using an alternate IP for the host (but one that also resolves
         # via reverse lookup).
         host = None
