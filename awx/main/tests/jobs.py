@@ -449,6 +449,11 @@ class BaseJobTestMixin(BaseTestMixin):
         from awx.main.tests.tasks import (TEST_SSH_KEY_DATA,
                                           TEST_SSH_KEY_DATA_LOCKED,
                                           TEST_SSH_KEY_DATA_UNLOCK)
+        self.cred_sue = self.user_sue.credentials.create(
+            username='sue',
+            password=TEST_SSH_KEY_DATA,
+            created_by=self.user_sue,
+        )
         self.cred_bob = self.user_bob.credentials.create(
             username='bob',
             password='ASK',
@@ -947,6 +952,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             inventory    = self.inv_eng.pk,
             project      = self.proj_dev.pk,
             playbook     = self.proj_dev.playbooks[0],
+            credential   = self.cred_sue.pk,
             survey_enabled = True,
         )
         with self.current_user(self.user_sue):
@@ -1021,6 +1027,14 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             job_type     = PERM_INVENTORY_DEPLOY,
             inventory    = self.inv_eng.pk,
             project      = self.proj_dev.pk,
+            credential   = self.cred_sue.pk,
+            playbook     = self.proj_dev.playbooks[0],
+        )
+        data_no_cred = dict(
+            name         = 'launched job template no credential',
+            job_type     = PERM_INVENTORY_DEPLOY,
+            inventory    = self.inv_eng.pk,
+            project      = self.proj_dev.pk,
             playbook     = self.proj_dev.playbooks[0],
         )
         with self.current_user(self.user_sue):
@@ -1032,6 +1046,15 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         launch_url = reverse('api:job_template_launch',
                              args=(response['id'],))
 
+        # You can still post the job template without a credential, just can't launch it without one
+        with self.current_user(self.user_sue):
+            response = self.post(url, data_no_cred, expect=201)
+            detail_url = reverse('api:job_template_detail',
+                                 args=(response['id'],))
+            self.assertEquals(response['url'], detail_url)
+
+        no_launch_url = reverse('api:job_template_launch',
+                                args=(response['id'],))
         # Invalid auth can't trigger the launch endpoint
         self.check_invalid_auth(launch_url, {}, methods=('post',))
 
@@ -1045,6 +1068,9 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             j = Job.objects.get(pk=response['job'])
             self.assertTrue(j.status == 'new')
 
+        # Can't launch a job template without a credential defined
+        with self.current_user(self.user_sue):
+            response = self.post(no_launch_url, {}, expect=400)
 
 class JobTest(BaseJobTestMixin, django.test.TestCase):
 
