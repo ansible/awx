@@ -1755,8 +1755,11 @@ class SystemJobTemplateLaunch(GenericAPIView):
         new_job = obj.create_unified_job()
         if 'extra_vars' in request.DATA:
             try:
-                extra_vars = json.loads(request.DATA['extra_vars'])
-            except Exception:
+                if type(request.DATA['extra_vars']) == dict:
+                    extra_vars = request.DATA['extra_vars']
+                else:
+                    extra_vars = json.loads(request.DATA['extra_vars'])
+            except Exception, e:
                 extra_vars = {}
         else:
             extra_vars = {}

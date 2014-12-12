@@ -994,13 +994,15 @@ class SystemJob(UnifiedJob, SystemJobOptions):
     def handle_extra_data(self, extra_data):
         if extra_data == "" or extra_data is None:
             return
+        try:
+            evars = json.loads(self.extra_vars)
+        except Exception, e:
+            evars = {}
         if type(extra_data) == str:
             try:
-                evars = json.loads(self.extra_vars)
+                extra_data = json.loads(extra_data)
             except Exception, e:
-                return
-        else:
-            evars = extra_data
+                extra_data = {}
         if evars is None:
             evars = extra_data
         else:
