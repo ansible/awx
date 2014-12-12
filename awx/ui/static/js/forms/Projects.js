@@ -91,7 +91,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             missing_path_alert: {
                 type: 'alertblock',
                 "class": 'alert-info',
-                ngShow: "showMissingPlaybooksAlert && scm_type.value == ''",
+                ngShow: "showMissingPlaybooksAlert && scm_type.value == 'manual'",
                 alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no unassigned playbook directories in the base ' +
                     'project path {{ base_dir }}. Either the projects directory is empty, or all of the contents are already assigned to ' +
                     'other projects. New projects can be checked out from source control by ' +
