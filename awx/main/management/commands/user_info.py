@@ -11,10 +11,18 @@ class Command(BaseCommand):
     """A command that reports whether a username exists within the
     system or not.
     """
-    def handle(self, username, **options):
+    def handle(self, *args, **options):
         """Print out information about the user to the console."""
 
+        # Sanity check: There should be one and exactly one positional
+        # argument.
+        if len(args) != 1:
+            raise CommandError('This command requires one positional argument '
+                               '(a username).')
+
+        # Get the user.
         try:
+            username = args[0]
             user = User.objects.get(username=username)
 
             # Print a cute header.
