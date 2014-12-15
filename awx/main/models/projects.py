@@ -54,7 +54,7 @@ class ProjectOptions(models.Model):
     @classmethod
     def get_local_path_choices(cls):
         if os.path.exists(settings.PROJECTS_ROOT):
-            paths = [x for x in os.listdir(settings.PROJECTS_ROOT)
+            paths = [x.decode('utf-8') for x in os.listdir(settings.PROJECTS_ROOT)
                      if os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x))
                      and not x.startswith('.') and not x.startswith('_')]
             qs = Project.objects.filter(active=True)
