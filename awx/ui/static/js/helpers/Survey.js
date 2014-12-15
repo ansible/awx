@@ -397,10 +397,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             scope.float_min = null;
             scope.float_max = null;
 
-
-
-
-
             if (scope.removeFillQuestionForm) {
                 scope.removeFillQuestionForm();
             }

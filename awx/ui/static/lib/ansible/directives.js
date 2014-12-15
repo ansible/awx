@@ -239,16 +239,16 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //the awSurveyVariableName directive checks if the field contains any spaces.
     // this could be elaborated in the future for other things we want to check this field against
     .directive('awSurveyVariableName', function() {
-        // var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+        var FLOAT_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
         return {
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
                 ctrl.$parsers.unshift(function(viewValue) {
-                    if (viewValue.indexOf(' ') === -1) {
+                    if (FLOAT_REGEXP.test(viewValue) && viewValue.indexOf(' ') === -1) { //check for a spaces
                         ctrl.$setValidity('variable', true);
                         return viewValue;
                     } else {
-                        ctrl.$setValidity('variable', false);
+                        ctrl.$setValidity('variable', false); // spaces found, therefore throw error
                         return undefined;
                     }
                 });

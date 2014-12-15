@@ -62,7 +62,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                     'data-placement="right" data-container="body" data-title="Answer Variable Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a> </label>'+
                     '<div><input type="text" ng-model="variable" name="variable" id="survey_question_variable" class="form-control ng-pristine ng-invalid ng-invalid-required" required="" aw-survey-variable-name>'+
                     '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty &amp;&amp; survey_question_form.variable.$error.required">A value is required!</div>'+
-                    '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty &amp;&amp; survey_question_form.variable.$error.variable">Please remove spaces</div>'+
+                    '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty &amp;&amp; survey_question_form.variable.$error.variable">The value contains an illegal character!</div>'+
                     '<div class="error api-error ng-binding" id="survey_question-variable-api-error" ng-bind="variable_api_error"></div>'+
                     '</div>',
                 addRequired: true,
