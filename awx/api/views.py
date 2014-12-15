@@ -909,6 +909,16 @@ class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
     model = CustomInventoryScript
     serializer_class = CustomInventoryScriptSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        can_delete = request.user.can_access(self.model, 'delete', obj)
+        if not can_delete:
+            raise PermissionDenied("Cannot delete inventory script")
+        for inv_src in InventorySource.objects.filter(source_script=obj):
+            inv_src.source_script = None
+            inv_src.save()
+        return super(InventoryScriptDetail, self).destroy(request, *args, **kwargs)
+
 class InventoryList(ListCreateAPIView):
 
     model = Inventory
