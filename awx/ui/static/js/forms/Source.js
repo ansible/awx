@@ -113,8 +113,8 @@ angular.module('SourceFormDefinition', [])
                 sourceModel: 'source_script',
                 sourceField: 'name',
                 ngClick: 'lookUpCustom_inventory()',
-                addRequired: false,
-                editRequired: false
+                addRequired: true,
+                editRequired: true
             },
             extra_vars: {
                 label: 'Environment Variables', //"{{vars_label}}" ,
