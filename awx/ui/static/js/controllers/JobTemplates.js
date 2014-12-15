@@ -165,10 +165,14 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
             $scope.removeCopyDialogReady();
         }
         $scope.removeCopyDialogReady = $scope.$on('CopyDialogReady', function() {
+            //clear any old remaining text
+            $scope.new_copy_name = "" ;
+            $scope.copy_form.$setPristine();
             $('#copy-job-modal').dialog('open');
             $('#job-copy-button').attr('ng-disabled', "!copy_form.$valid");
             element = angular.element(document.getElementById('job-copy-button'));
             $compile(element)($scope);
+
         });
 
         if ($scope.removeGoToCopy) {
