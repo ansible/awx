@@ -1229,6 +1229,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
                     })
                 else:
                     data.update({'source': inventory_source.source})
+                if inventory_source.source == 'custom':
+                    data['source_script'] = inventory_source.source_script.pk
                 response = self.put(inv_src_url2, data, expect=400)
                 self.assertTrue('source' in response, response)
         # Make sure we can delete the inventory update.
