@@ -706,54 +706,67 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             };
 
             scope.submitQuestion = function(){
-                var form = SurveyQuestionForm,
-                data = {},
+                var data = {},
+                //form = SurveyQuestionForm,
                 // labels={},
                 // min= "min",
                 // max = "max",
-                fld, key, elementID;
+                // fld,
+                key, elementID;
                 //generator.clearApiErrors();
                 Wait('start');
 
                 try {
-                    for (fld in form.fields) {
-                        if(fld==='required'){
-                            data[fld] = (scope[fld]===true) ? true : false;
-                        }
-                        if(scope[fld]){
-                            if(fld === "type"){
-                                data[fld] = scope[fld].type;
+                    //create data object for each submitted question
+                    data.question_name = scope.question_name;
+                    data.question_description = (scope.question_description) ? scope.question_description : "" ;
+                    data.required = scope.required;
+                    data.type = scope.type.type;
+                    data.variable = scope.variable;
+                    data.min = (scope.type.type === 'text') ? scope.text_min : (scope.type.type === 'textarea') ? scope.textarea_min : (scope.type.type === "float") ? scope.float_min : (scope.type.type==="integer") ? scope.int_min  : "" ;
+                    data.max = (scope.type.type === 'text') ? scope.text_max : (scope.type.type === 'textarea') ? scope.textarea_max : (scope.type.type === "float") ? scope.float_max : (scope.type.type==="integer") ? scope.int_max : "" ;
+                    data.default = (scope.type.type === 'textarea') ? scope.default_textarea : (scope.type.type === "float") ? scope.default_float : (scope.type.type==="integer") ? scope.default_int : (scope.type.type === "multiselect") ? scope.default_multiselect : (scope.default) ? scope.default : "" ;
+                    data.choices = (scope.type.type === "multiplechoice") ? scope.choices : (scope.type.type === 'multiselect') ? scope.choices : "" ;
 
-                                if(scope[fld].type === 'text'){
-                                    data.min = scope.text_min;
-                                    data.max = scope.text_max;
-                                    // data.default = scope.default_text;
-                                }
-                                if(scope[fld].type === 'textarea'){
-                                    data.min = scope.textarea_min;
-                                    data.max = scope.textarea_max;
-                                    // data.default = scope.default_text;
-                                }
-                                if(scope[fld].type === 'float'){
-                                    data.min = scope.float_min;
-                                    data.max = scope.float_max;
-                                    data.default = scope.default_float;
-                                }
-                                if(scope[fld].type==="integer" ){
-                                    data.min = scope.int_min;
-                                    data.max = scope.int_max;
-                                    data.default = scope.default_int;
-                                }
-                            }
-                            else if(fld==='default_multiselect'){
-                                data.default = scope.default_multiselect;
-                            }
-                            else{
-                                data[fld] = scope[fld];
-                            }
+                    // for (fld in form.fields) {
+                    //     if(fld==='required'){
+                    //         data[fld] = (scope[fld]===true) ? true : false;
+                    //     }
+                    //     if(scope[fld]){
+                    //         if(fld === "type"){
+                    //             data[fld] = scope[fld].type;
 
-                        }
-                    }
+                    //             if(scope[fld].type === 'text'){
+                    //                 data.min = scope.text_min;
+                    //                 data.max = scope.text_max;
+                    //                 // data.default = scope.default_text;
+                    //             }
+                    //             if(scope[fld].type === 'textarea'){
+                    //                 data.min = scope.textarea_min;
+                    //                 data.max = scope.textarea_max;
+                    //                 // data.default = scope.default_textarea;
+                    //             }
+                    //             if(scope[fld].type === 'float'){
+                    //                 data.min = scope.float_min;
+                    //                 data.max = scope.float_max;
+                    //                 data.default = scope.default_float;
+                    //             }
+                    //             if(scope[fld].type==="integer" ){
+                    //                 data.min = scope.int_min;
+                    //                 data.max = scope.int_max;
+                    //                 data.default = scope.default_int;
+                    //             }
+                    //         }
+                    //         else if(fld==='default_multiselect'){
+                    //             data.default = scope.default_multiselect;
+                    //         }
+                    //         else{
+                    //             data[fld] = scope[fld];
+                    //         }
+
+                    //     }
+                    // }
+
                     Wait('stop');
                     if(scope.mode === 'add' || scope.mode==="edit" && scope.can_edit === true){
                         $('#survey-save-button').removeAttr('disabled');
