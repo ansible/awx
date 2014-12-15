@@ -38,7 +38,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             }
             if(scope.survey_enabled===true){
                 for (fld in scope.job_launch_form){
-                    if(scope[fld]){
+                    if(scope[fld] || scope[fld] === 0){
                         job_launch_data[fld] = scope[fld];
                     }
                 }
@@ -462,8 +462,12 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     html += '<div class="survey_taker_description"><i>'+question.question_description+'</i></div>\n';
                 }
 
-                question.default = (question.default) ? question.default.replace(/</g, "&lt;") : undefined;
-                question.default = (question.default) ? question.default.replace(/>/g, "&gt;") : undefined;
+                // if(question.default && question.default.indexOf('<') !== -1){
+                //     question.default = (question.default) ? question.default.replace(/</g, "&lt;") : undefined;
+                // }
+                // if (question.default && question.default.indexOf('>') !== -1){
+                //     question.default = (question.default) ? question.default.replace(/>/g, "&gt;") : undefined;
+                // }
                 scope[question.variable] = question.default;
 
                 if(question.type === 'text' ){
