@@ -208,7 +208,7 @@ class BaseTestMixin(object):
         )
 
     def make_projects(self, created_by, count=1, playbook_content='',
-                      role_playbooks=None, unicode_prefix=True):
+                      role_playbooks=None, unicode_prefix=False):
         results = []
         for x in range(0, count):
             self.object_ctr = self.object_ctr + 1
