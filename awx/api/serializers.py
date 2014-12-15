@@ -1015,6 +1015,13 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         # FIXME
         return attrs
 
+    def validate_source_script(self, attrs, source):
+        src = attrs.get(source, None)
+        if 'source' in attrs and attrs.get('source', '') == 'custom':
+            if src is None or src == '':
+                raise serializers.ValidationError("source_script must be provided")
+        return attrs
+
     def validate_source_vars(self, attrs, source):
         # source_env must be blank, a valid JSON or YAML dict, or ...
         # FIXME: support key=value pairs.
