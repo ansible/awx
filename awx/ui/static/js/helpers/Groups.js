@@ -259,7 +259,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     $('#source_form').addClass('squeeze');
                 }
                 if(scope.source.value==="custom"){
-                    invUrl = GetBasePath('inventory_scripts');
+                    // need to filter the possible custom scripts by the organization defined for the current inventory
+                    invUrl = GetBasePath('inventory_scripts') + '?organization='+scope.$parent.inventory.organization;
                     LookUpInit({
                         url: invUrl,
                         scope: scope,
