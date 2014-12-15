@@ -472,7 +472,7 @@ def load_inventory_source(source, all_group=None, group_filter_re=None,
             if filename.endswith(".ini") or os.path.isdir(filename):
                 continue
             load_inventory_source(filename, all_group, group_filter_re,
-                                  host_filter_re)
+                                  host_filter_re, is_custom=is_custom)
     else:
         all_group = all_group or MemGroup('all', os.path.dirname(source))
         if os.access(source, os.X_OK):
