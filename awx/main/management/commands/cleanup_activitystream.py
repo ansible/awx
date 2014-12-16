@@ -41,6 +41,7 @@ class Command(NoArgsCommand):
         self.logger.propagate = False
 
     def cleanup_activitystream(self):
+        n_deleted_items = 0
         for asobj in ActivityStream.objects.all():
             asobj_disp = '"%s" id: %s' % (unicode(asobj), asobj.id)
             if asobj.timestamp >= self.cutoff:
@@ -51,6 +52,8 @@ class Command(NoArgsCommand):
                     self.logger.info("would delete %s" % asobj_disp)
                 if not self.dry_run:
                     asobj.delete()
+                    n_deleted_items += 1
+        print("Removed %s items" % str(n_deleted_items))
 
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
