@@ -131,7 +131,7 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': '"{\'class\': \'custominventoryscript\', \'app_label\': \'main\'}(class)s_modified+"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'False', 'max_length': '512'}),
             'organization': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'custom_inventory_scripts'", 'to': "orm['main.Organization']"}),
             'script': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'})
         },

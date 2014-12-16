@@ -113,7 +113,7 @@ class Migration(DataMigration):
             'vault_password': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'})
         },
         'main.custominventoryscript': {
-            'Meta': {'ordering': "('name',)", 'object_name': 'CustomInventoryScript'},
+            'Meta': {'ordering': "('name',)", 'unique_together': "[('name', 'organization')]", 'object_name': 'CustomInventoryScript'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': '"{\'class\': \'custominventoryscript\', \'app_label\': \'main\'}(class)s_created+"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
@@ -121,7 +121,8 @@ class Migration(DataMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
             'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': '"{\'class\': \'custominventoryscript\', \'app_label\': \'main\'}(class)s_modified+"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'False', 'max_length': '512'}),
+            'organization': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'custom_inventory_scripts'", 'to': "orm['main.Organization']"}),
             'script': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'})
         },
         'main.group': {
