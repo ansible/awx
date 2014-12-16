@@ -1809,3 +1809,16 @@ class InventoryUpdatesTest(BaseTransactionTest):
         with self.current_user(self.super_django_user):
             response = self.put(custom_inv_src, inv_src_opts, expect=200)
         self.check_inventory_source(custom_group.inventory_source)
+
+        # This shouldn't work because we are trying to use a custom script from one organization with
+        # an inventory that belong to a different organization
+        other_org = self.make_organizations(self.super_django_user, 1)[0]
+        other_inv = other_org.inventories.create(name="A Different Org")
+        other_group = other_inv.groups.create(name='A Different Org Group')
+        other_inv_src = reverse('api:inventory_source_detail',
+                                args=(other_group.inventory_source.pk,))
+        other_inv_update = reverse('api:inventory_source_update_view',
+                                   args=(other_group.inventory_source.pk,))
+        other_inv_src_opts = {'source': 'custom', 'source_script': script_data['id']}
+        with self.current_user(self.super_django_user):
+            self.put(other_inv_src, other_inv_src_opts, expect=400)

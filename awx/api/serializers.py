@@ -1020,6 +1020,11 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         if 'source' in attrs and attrs.get('source', '') == 'custom':
             if src is None or src == '':
                 raise serializers.ValidationError("source_script must be provided")
+            try:
+                if src.organization != self.object.inventory.organization:
+                    raise serializers.ValidationError("source_script does not belong to the same organization as the inventory")
+            except Exception, e:
+                raise serializers.ValidationError("source_script doesn't exist")
         return attrs
 
     def validate_source_vars(self, attrs, source):
