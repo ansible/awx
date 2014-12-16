@@ -18,6 +18,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -152,7 +153,7 @@ class ProjectOptions(models.Model):
         local_path = os.path.basename(self.local_path)
         if local_path and not local_path.startswith('.'):
             proj_path = os.path.join(settings.PROJECTS_ROOT, local_path)
-            if not check_if_exists or os.path.exists(proj_path.decode('utf-8')):
+            if not check_if_exists or os.path.exists(smart_str(proj_path)):
                 return proj_path
 
     @property
