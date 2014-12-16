@@ -152,7 +152,7 @@ class ProjectOptions(models.Model):
         local_path = os.path.basename(self.local_path)
         if local_path and not local_path.startswith('.'):
             proj_path = os.path.join(settings.PROJECTS_ROOT, local_path)
-            if not check_if_exists or os.path.exists(proj_path):
+            if not check_if_exists or os.path.exists(proj_path.decode('utf-8')):
                 return proj_path
 
     @property
