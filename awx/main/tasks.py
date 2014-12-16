@@ -1114,12 +1114,14 @@ class RunSystemJob(BaseTask):
             if 'days' in json_vars:
                 args.extend(['--days', str(json_vars['days'])])
             if system_job.job_type == 'cleanup_jobs':
-                if 'jobs' in json_vars and json_vars['jobs']:
-                    args.extend(['--jobs'])
-                if 'project_updates' in json_vars and json_vars['project_updates']:
-                    args.extend(['--project-updates'])
-                if 'inventory_updates' in json_vars and json_vars['inventory_updates']:
-                    args.extend(['--inventory-updates'])
+                args.extend(['--jobs', '--project-updates', '--inventory-updates'])
+            #     Keeping this around in case we want to break this out
+            #     if 'jobs' in json_vars and json_vars['jobs']:
+            #         args.extend(['--jobs'])
+            #     if 'project_updates' in json_vars and json_vars['project_updates']:
+            #         args.extend(['--project-updates'])
+            #     if 'inventory_updates' in json_vars and json_vars['inventory_updates']:
+            #         args.extend(['--inventory-updates'])
         except Exception, e:
             logger.error("Failed to parse system job: " + str(e))
         return args
