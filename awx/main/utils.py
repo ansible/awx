@@ -10,6 +10,7 @@ import re
 import subprocess
 import stat
 import sys
+import urllib
 import urlparse
 import threading
 import contextlib
@@ -235,7 +236,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
             netloc_password = ''
 
     if netloc_username and parts.scheme != 'file':
-        netloc = u':'.join(filter(None, [netloc_username, netloc_password]))
+        netloc = u':'.join([urllib.quote(x) for x in (netloc_username, netloc_password) if x])
     else:
         netloc = u''
     netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
