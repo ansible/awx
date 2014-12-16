@@ -219,7 +219,7 @@ angular.module('GeneratorHelpers', [])
             html += (btn.dataTitle) ? Attr(btn, 'dataTitle') : "";
             html += (btn.ngShow) ? Attr(btn, 'ngShow') : "";
             html += (btn.ngHide) ? Attr(btn, 'ngHide') : "";
-            html += (btn.ngDisabled) ? Attr(btn, 'ngHide') : "";
+            html += (btn.ngDisabled) ? Attr(btn, 'ngDisabled') : "";
             html += (btn.ngClass) ? Attr(btn, 'ngClass') : "";
             html += (btn.awTipPlacement) ? Attr(btn, 'awTipPlacement') : "";
             html += " >";

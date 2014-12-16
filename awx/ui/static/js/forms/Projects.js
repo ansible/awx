@@ -32,7 +32,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 awToolTip: "{{ scm_update_tooltip }}",
                 dataTipWatch: "scm_update_tooltip",
                 ngClass: "scm_type_class",
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngDisabled: "scm_type.value === 'manual' "
             },
             stream: {
                 'class': "btn-primary btn-xs activity-btn",
