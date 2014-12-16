@@ -385,8 +385,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 form = SurveyQuestionForm;
 
             $('#survey-save-button').attr('disabled', 'disabled');
+            angular.element('#survey_question_question_cancel_btn').trigger('click');
             $('#add_question_btn').hide();
-            $('#new_question .aw-form-well').remove();
+            // $('#new_question .aw-form-well').remove();
             element = $('.question_final:eq('+index+')');
             element.css('opacity', 1.0);
             element.empty();
