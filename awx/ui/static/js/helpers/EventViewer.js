@@ -22,6 +22,8 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 parent_id = params.parent_id,
                 title = params.title, //optional
                 scope = parent_scope.$new(true),
+                index = params.index,
+                page,
                 current_event;
 
             if (scope.removeShowNextEvent) {
@@ -257,8 +259,9 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                 });
             });
 
+            page = (index) ? Math.ceil((index+1)/50) : 1;
             url += (/\/$/.test(url)) ? '?' : '&';
-            url += (parent_id) ? 'parent=' + parent_id + '&page_size=50&order=host_name,counter' : 'page_size=50&order=host_name,counter';
+            url += (parent_id) ? 'page='+page +'&parent=' + parent_id + '&page_size=50&order=host_name,counter' : 'page_size=50&order=host_name,counter';
 
             GetEvent({
                 url: url,
