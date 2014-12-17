@@ -23,6 +23,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
 from django.core.cache import cache
 
 # Django REST Framework
@@ -1315,7 +1316,7 @@ class JobOptionsSerializer(BaseSerializer):
     def validate_playbook(self, attrs, source):
         project = attrs.get('project', None)
         playbook = attrs.get('playbook', '')
-        if project and playbook and playbook not in project.playbooks:
+        if project and playbook and smart_str(playbook) not in project.playbooks:
             raise serializers.ValidationError('Playbook not found for project')
         return attrs
 
