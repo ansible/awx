@@ -25,25 +25,28 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 extra_vars;
 
 
-            if(!Empty(scope.passwords_needed_to_start) && scope.passwords_needed_to_start .length>0){
+            if(!Empty(scope.passwords_needed_to_start) && scope.passwords_needed_to_start.length>0){
                 scope.passwords.forEach(function(password) {
                         job_launch_data[password] = scope[password];
+                        scope.passwords_needed_to_start.push(password+'_confirm'); // i'm pushing these values into this array for use during the survey taker parsing
                     });
             }
             if(scope.prompt_for_vars===true){
                 extra_vars = ToJSON(scope.parseType, scope.extra_vars, false);
-                $.each(extra_vars, function(key,value){
-                    job_launch_data[key] = value;
-                });
+                // $.each(extra_vars, function(key,value){
+                //     job_launch_data[key] = value;
+                // });
+                job_launch_data.extra_vars = (extra_vars===null) ? {} :  extra_vars;
             }
             if(scope.survey_enabled===true){
+                job_launch_data.extra_vars = (!job_launch_data.extra_vars || job_launch_data.extra_vars===null) ? {} : job_launch_data.extra_vars;
                 for (fld in scope.job_launch_form){
-                    if(scope[fld] || scope[fld] === 0){
-                        job_launch_data[fld] = scope[fld];
+                    if((scope[fld] || scope[fld] === 0) && scope.passwords_needed_to_start.indexOf(fld) === -1){
+                        job_launch_data.extra_vars[fld] = scope[fld];
                     }
                 }
             }
-            delete(job_launch_data.extra_vars);
+            // delete(job_launch_data.extra_vars);
             if(!Empty(scope.credential)){
                 job_launch_data.credential_id = scope.credential;
             }
@@ -754,7 +757,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     Rest.setUrl(GetBasePath('credentials')+credential);
                     Rest.get()
                         .success(function (data) {
-                            if(data.ssh_key_unlock === "ASK"){
+                            if((data.kind === "ssh" && data.password === "ASK" ) || data.ssh_key_unlock === "ASK"){
                                 passwords.push("ssh_password");
                             }
                             if(data.sudo_password === "ASK"){
@@ -767,6 +770,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                                 passwords.push("vault_password");
                             }
                             if(passwords.length>0){
+                                scope.passwords_needed_to_start = passwords;
                                 scope.$emit('PromptForPasswords', passwords, html, url);
                             }
                             else if (scope.ask_variables_on_launch){
@@ -796,7 +800,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     scope.prompt_for_vars = data.ask_variables_on_launch;
                     scope.survey_enabled = data.survey_enabled;
                     scope.ask_variables_on_launch = data.ask_variables_on_launch;
-
+                    scope.variables_needed_to_start = data.variables_needed_to_start;
                     html = '<form class="ng-valid ng-valid-required" name="job_launch_form" id="job_launch_form" autocomplete="off" nonvalidate>';
 
                     if(data.credential_needed_to_start === true){
