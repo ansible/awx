@@ -269,7 +269,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
         Prompt({
             hdr: 'Delete',
-            body: 'Are you sure you want to delete ' + name + '?',
+            body: '<div class=\"alert alert-info\">Delete project ' + name + '?</div>',
             action: action
         });
     };

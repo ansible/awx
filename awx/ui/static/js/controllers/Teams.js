@@ -102,7 +102,7 @@ function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Aler
 
         Prompt({
             hdr: 'Delete',
-            body: 'Are you sure you want to delete ' + name + '?',
+            body: '<div class=\"alert alert-info\">Delete team ' + name + '?</div>',
             action: action
         });
     };

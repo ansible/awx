@@ -94,7 +94,7 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class=\"alert alert-info\">Delete inventory ' + name + '?</div>',
+            body: '<div class=\"alert alert-info\">Delete job template ' + name + '?</div>',
             action: action
         });
     };

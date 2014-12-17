@@ -89,7 +89,7 @@ function OrganizationsList($routeParams, $scope, $rootScope, $location, $log, Re
 
         Prompt({
             hdr: 'Delete',
-            body: "<div class\"alert alert-info\">Delete organization " + name + "?</div>",
+            body: '<div class=\"alert alert-info\">Delete organization ' + name + '?</div>',
             action: action
         });
     };
