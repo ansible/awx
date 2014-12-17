@@ -42,7 +42,7 @@ angular.module('SourceFormDefinition', [])
             credential: {
                 label: 'Cloud Credential',
                 type: 'lookup',
-                ngShow: "source && source.value !== '' && source.value !== 'custom'",
+                ngShow: "source && source.value !== 'manual' && source.value !== 'custom'",
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
@@ -109,7 +109,7 @@ angular.module('SourceFormDefinition', [])
             source_script: {
                 label :  "Custom Inventory Script",
                 type: 'lookup',
-                ngShow: "source && source.value !== '' && source.value === 'custom'",
+                ngShow: "source && source.value === 'custom'",
                 sourceModel: 'source_script',
                 sourceField: 'name',
                 ngClick: 'lookUpCustom_inventory()',
@@ -118,7 +118,7 @@ angular.module('SourceFormDefinition', [])
             },
             extra_vars: {
                 label: 'Environment Variables', //"{{vars_label}}" ,
-                ngShow: "source && (source.value=='custom')",
+                ngShow: "source && source.value=='custom' ",
                 type: 'textarea',
                 addRequired: false,
                 editRequird: false,
@@ -183,13 +183,13 @@ angular.module('SourceFormDefinition', [])
             checkbox_group: {
                 label: 'Update Options',
                 type: 'checkbox_group',
-                ngShow: "source && (source.value !== '' && source.value !== null)",
+                ngShow: "source && (source.value !== 'manual' && source.value !== null)",
 
                 fields: [{
                     name: 'overwrite',
                     label: 'Overwrite',
                     type: 'checkbox',
-                    ngShow: "source.value !== '' && source.value !== null",
+                    ngShow: "source.value !== 'manual' && source.value !== null",
                     addRequired: false,
                     editRequired: false,
                     awPopOver: '<p>If checked, all child groups and hosts not found on the external source will be deleted from ' +
@@ -203,7 +203,7 @@ angular.module('SourceFormDefinition', [])
                     name: 'overwrite_vars',
                     label: 'Overwrite Variables',
                     type: 'checkbox',
-                    ngShow: "source.value !== '' && source.value !== null",
+                    ngShow: "source.value !== 'manual' && source.value !== null",
                     addRequired: false,
                     editRequired: false,
                     awPopOver: '<p>If checked, all variables for child groups and hosts will be removed and replaced by those ' +
@@ -217,7 +217,7 @@ angular.module('SourceFormDefinition', [])
                     name: 'update_on_launch',
                     label: 'Update on Launch',
                     type: 'checkbox',
-                    ngShow: "source.value !== '' && source.value !== null",
+                    ngShow: "source.value !== 'manual' && source.value !== null",
                     addRequired: false,
                     editRequired: false,
                     awPopOver: '<p>Each time a job runs using this inventory, refresh the inventory from the selected source before ' +
@@ -234,7 +234,7 @@ angular.module('SourceFormDefinition', [])
                 type: 'number',
                 integer: true,
                 min: 0,
-                ngShow: "source && source.value !== '' && update_on_launch",
+                ngShow: "source && source.value !== 'manual' && update_on_launch",
                 spinner: true,
                 "default": 0,
                 addRequired: false,

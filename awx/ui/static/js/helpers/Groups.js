@@ -35,7 +35,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                             if (choices[i][0] !== 'file') {
                                 scope[variable].push({
                                     label: ((choices[i][0] === '') ? 'Manual' : choices[i][1]),
-                                    value: choices[i][0]
+                                    value: (choices[i][0] === '') ? 'manual' : choices[i][0]
                                 });
                             }
                         }
@@ -876,8 +876,8 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 modal_scope.groupVariablesLoadedRemove();
             }
             modal_scope.groupVariablesLoadedRemove = modal_scope.$on('groupVariablesLoaded', function () {
-                modal_scope.showSourceTab = (mode === 'edit' && group.has_inventory_sources && Empty(group.summary_fields.inventory_source.source)) ? false :  true;
-                modal_scope.showSchedulesTab = (mode === 'edit' && sources_scope.source && sources_scope.source.value) ? true : false;
+                modal_scope.showSourceTab = (mode === 'edit' && group.has_inventory_sources && Empty(group.summary_fields.inventory_source.source) && sources_scope.source.value!=='manual') ? false :  true;
+                modal_scope.showSchedulesTab = (mode === 'edit' && sources_scope.source && sources_scope.source.value!=='manual') ? true : false;
                 if (mode === 'edit' && modal_scope.showSourceTab) {
                     // the use has access to the source tab, so they may create a schedule
                     GroupsScheduleListInit({ scope: modal_scope, url: schedules_url });
@@ -945,13 +945,14 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                                 }
                                 if (fld === 'source') {
                                     found = false;
+                                    data.source = (data.source === "" ) ? "manual" : data.source;
                                     for (i = 0; i < sources_scope.source_type_options.length; i++) {
                                         if (sources_scope.source_type_options[i].value === data.source) {
                                             sources_scope.source = sources_scope.source_type_options[i];
                                             found = true;
                                         }
                                     }
-                                    if (!found || sources_scope.source.value === "") {
+                                    if (!found || sources_scope.source.value === "manual") {
                                         sources_scope.groupUpdateHide = true;
                                     } else {
                                         sources_scope.groupUpdateHide = false;
@@ -1187,7 +1188,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                     group_by,
                     data = {
                         group: group_id,
-                        source: ((sources_scope.source && sources_scope.source.value) ? sources_scope.source.value : ''),
+                        source: ((sources_scope.source && sources_scope.source.value!=='manual') ? sources_scope.source.value : ''),
                         source_path: sources_scope.source_path,
                         credential: sources_scope.credential,
                         overwrite: sources_scope.overwrite,
@@ -1230,7 +1231,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                 }
 
                 // the API doesn't expect the credential to be passed with a custom inv script
-                if(sources_scope.source.value === 'custom'){
+                if(sources_scope.source && sources_scope.source.value === 'custom'){
                     delete(data.credential);
                 }
 
@@ -1347,7 +1348,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
             // Start the update process
             modal_scope.updateGroup = function () {
-                if (sources_scope.source === "" || sources_scope.source === null) {
+                if (sources_scope.source === "manual" || sources_scope.source === null) {
                     Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group, provide Source settings, ' +
                         'and then run an update.', 'alert-info');
                 } else if (sources_scope.status === 'updating') {
@@ -1366,7 +1367,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
             // Change the lookup and regions when the source changes
             sources_scope.sourceChange = function () {
-                parent_scope.showSchedulesTab = (mode === 'edit' &&  sources_scope.source && sources_scope.source.value) ? true : false;
+                parent_scope.showSchedulesTab = (mode === 'edit' &&  sources_scope.source && sources_scope.source.value!=="manual") ? true : false;
                 SourceChange({ scope: sources_scope, form: SourceForm });
             };
 
