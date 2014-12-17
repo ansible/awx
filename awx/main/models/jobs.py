@@ -195,7 +195,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'job_type', 'inventory', 'project',
                 'playbook', 'credential', 'cloud_credential', 'forks', 'schedule',
-                'limit', 'verbosity', 'extra_vars', 'job_tags', 'launch_type',
+                'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task']
 
     def create_job(self, **kwargs):
@@ -949,7 +949,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'job_type']
+        return ['name', 'description', 'job_type', 'extra_vars']
 
     def get_absolute_url(self):
         return reverse('api:system_job_template_detail', args=(self.pk,))

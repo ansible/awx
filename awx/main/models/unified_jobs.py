@@ -306,7 +306,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
                     value = value.id
                 create_kwargs[id_field_name] = value
             elif field_name in kwargs:
-                create_kwargs[field_name] = kwargs[field_name]
+                if field_name == 'extra_vars' and type(kwargs[field_name]) == dict:
+                    create_kwargs[field_name] = json.dumps(kwargs['extra_vars'])
+                else:
+                    create_kwargs[field_name] = kwargs[field_name]
             elif hasattr(self, field_name):
                 create_kwargs[field_name] = getattr(self, field_name)
         kwargs = self._update_unified_job_kwargs(**create_kwargs)
@@ -692,9 +695,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             self.job_explanation = u'Missing needed fields: %s.' % missing_fields
             self.save(update_fields=['job_explanation'])
             return False
-        extra_data = dict([(field, kwargs[field]) for field in kwargs
-                           if field not in needed])
-        self.handle_extra_data(extra_data)
+        #extra_data = dict([(field, kwargs[field]) for field in kwargs
+        #                   if field not in needed])
+        if 'extra_vars' in kwargs:
+            self.handle_extra_data(kwargs['extra_vars'])
         task_class().apply_async((self.pk,), opts, link_error=error_callback)
         return True
 
@@ -715,9 +719,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
-        extra_data = dict([(field, kwargs[field]) for field in kwargs
-                           if field not in needed])
-        self.handle_extra_data(extra_data)
+        if 'extra_vars' in kwargs:
+            self.handle_extra_data(kwargs['extra_vars'])
 
         # Save the pending status, and inform the SocketIO listener.
         self.update_fields(start_args=json.dumps(kwargs), status='pending')

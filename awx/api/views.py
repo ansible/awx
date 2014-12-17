@@ -1486,13 +1486,14 @@ class JobTemplateLaunch(GenericAPIView):
                 request_data = {}
             else:
                 request_data = request.DATA
-            validation_errors = obj.survey_variable_validation(request_data)
-            if validation_errors:
-                return Response(dict(errors=validation_errors),
-                                status=status.HTTP_400_BAD_REQUEST)
+            if 'extra_vars' in request_data:
+                validation_errors = obj.survey_variable_validation(request_data['extra_vars'])
+                if validation_errors:
+                    return Response(dict(errors=validation_errors),
+                                    status=status.HTTP_400_BAD_REQUEST)
         if obj.credential is None and ('credential' not in request.DATA and 'credential_id' not in request.DATA):
             return Response(dict(errors="Credential not provided"), status=status.HTTP_400_BAD_REQUEST)
-        new_job = obj.create_unified_job(**request.DATA)
+        new_job = obj.create_unified_job()
         result = new_job.signal_start(**request.DATA)
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
@@ -1773,7 +1774,8 @@ class SystemJobTemplateLaunch(GenericAPIView):
                 extra_vars = {}
         else:
             extra_vars = {}
-        result = new_job.signal_start(**extra_vars)
+        ev = {'extra_vars': extra_vars}
+        result = new_job.signal_start(**ev)
         data = dict(system_job=new_job.id)
         return Response(data, status=status.HTTP_202_ACCEPTED)
 

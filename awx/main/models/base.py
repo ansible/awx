@@ -78,7 +78,10 @@ class VarsDictProperty(object):
     def __get__(self, obj, type=None):
         if obj is None:
             return self
-        v = getattr(obj, self.field).encode('utf-8')
+        v = getattr(obj, self.field)
+        if hasattr(v, 'items'):
+            return v
+        v = v.encode('utf-8')
         d = None
         try:
             d = json.loads(v.strip() or '{}')
