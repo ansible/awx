@@ -14,7 +14,7 @@ from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now, is_aware, make_aware
 
 # AWX
-from awx.main.models import Job, ProjectUpdate, InventoryUpdate
+from awx.main.models import Job, ProjectUpdate, InventoryUpdate, SystemJob
 
 class Command(NoArgsCommand):
     '''
@@ -38,6 +38,9 @@ class Command(NoArgsCommand):
         make_option('--inventory-updates', dest='only_inventory_updates',
                     action='store_true', default=False,
                     help='Only remove inventory updates'),
+        make_option('--management-jobs', default=False,
+                    action='store_true', dest='only_management_jobs',
+                    help='Only remove management jobs')
     )
 
     def cleanup_jobs(self):
@@ -95,6 +98,21 @@ class Command(NoArgsCommand):
                 if not self.dry_run:
                     iu.delete()
 
+    def cleanup_management_jobs(self):
+        for sj in SystemJob.objects.all():
+            sj_display = '"%s" (started %s)' % (unicode(sj), unicode(sj.created))
+            if sj.status in ('pending', 'waiting', 'running'):
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s system_job %s', action_text, sj.status, sj_display)
+            elif sj.created >= self.cutoff:
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s', action_text, sj_display)
+            else:
+                action_text = 'would delete' if self.dry_run else 'deleting'
+                self.logger.info('%s %s', action_text, sj_display)
+                if not self.dry_run:
+                    sj.delete()
+
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO,
                                      logging.DEBUG, 0]))
@@ -115,9 +133,12 @@ class Command(NoArgsCommand):
         self.only_jobs = bool(options.get('only_jobs', False))
         self.only_project_updates = bool(options.get('only_project_updates', False))
         self.only_inventory_updates = bool(options.get('only_inventory_updates', False))
-        if self.only_jobs or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates):
+        self.only_management_jobs = bool(options.get('only_management_jobs', False))
+        if self.only_jobs or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates and not self.only_management_jobs):
             self.cleanup_jobs()
-        if self.only_project_updates or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates):
+        if self.only_project_updates or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates and not self.only_management_jobs):
             self.cleanup_project_updates()
-        if self.only_inventory_updates or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates):
+        if self.only_inventory_updates or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates and not self.only_management_jobs):
             self.cleanup_inventory_updates()
+        if self.only_management_jobs or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates and not self.only_management_jobs):
+            self.cleanup_management_jobs()

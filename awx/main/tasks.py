@@ -1121,7 +1121,7 @@ class RunSystemJob(BaseTask):
             if 'days' in json_vars:
                 args.extend(['--days', str(json_vars['days'])])
             if system_job.job_type == 'cleanup_jobs':
-                args.extend(['--jobs', '--project-updates', '--inventory-updates'])
+                args.extend(['--jobs', '--project-updates', '--inventory-updates', '--management-jobs'])
             #     Keeping this around in case we want to break this out
             #     if 'jobs' in json_vars and json_vars['jobs']:
             #         args.extend(['--jobs'])
