@@ -588,6 +588,7 @@ angular.module('Tower', [
                 };
 
                 $rootScope.leavePortal = function() {
+                    $rootScope.portalMode=false;
                     $location.path('/home/');
                 };
 
