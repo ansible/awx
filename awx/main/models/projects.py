@@ -162,7 +162,7 @@ class ProjectOptions(models.Model):
         results = []
         project_path = self.get_project_path()
         if project_path:
-            for dirpath, dirnames, filenames in os.walk(unicode(project_path)):
+            for dirpath, dirnames, filenames in os.walk(smart_str(project_path)):
                 for filename in filenames:
                     if os.path.splitext(filename)[-1] not in ['.yml', '.yaml']:
                         continue
@@ -183,7 +183,7 @@ class ProjectOptions(models.Model):
                         continue
                     if not matched:
                         continue
-                    playbook = os.path.relpath(playbook, project_path)
+                    playbook = os.path.relpath(playbook, smart_str(project_path))
                     # Filter files in a roles subdirectory.
                     if 'roles' in playbook.split(os.sep):
                         continue
@@ -279,7 +279,7 @@ class Project(UnifiedJobTemplate, ProjectOptions):
             project_path = self.get_project_path()
             if project_path:
                 try:
-                    mtime = os.path.getmtime(project_path)
+                    mtime = os.path.getmtime(smart_str(project_path))
                     dt = datetime.datetime.fromtimestamp(mtime)
                     return make_aware(dt, get_default_timezone())
                 except os.error:
