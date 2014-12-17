@@ -20,6 +20,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.test.client import Client
 from django.test.utils import override_settings
+from django.utils.encoding import smart_str
 
 # Requests
 import requests
@@ -796,7 +797,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         self.assertEqual(jt.inventory.pk, data['inventory'])
         self.assertEqual(jt.credential, None)
         self.assertEqual(jt.project.pk, data['project'])
-        self.assertEqual(jt.playbook, data['playbook'])
+        self.assertEqual(smart_str(jt.playbook), data['playbook'])
 
         # Test that all required fields are really required.
         data['name'] = 'another new job template'
