@@ -284,7 +284,10 @@ class ProjectsTest(BaseTransactionTest):
         # can list playbooks for projects
         proj_playbooks = reverse('api:project_playbooks', args=(self.projects[2].pk,))
         got = self.get(proj_playbooks, expect=200, auth=self.get_super_credentials())
-        self.assertEqual(got, self.projects[2].playbooks)
+        got_new = []
+        for g in got:
+            got_new.append(g.encode('utf-8'))
+        self.assertEqual(got_new, self.projects[2].playbooks)
 
         # can list member organizations for projects
         proj_orgs = reverse('api:project_organizations_list', args=(self.projects[0].pk,))
