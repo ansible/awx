@@ -981,8 +981,9 @@ class RunInventoryUpdate(BaseTask):
         # sync with those in Ansible core at all times.
         passwords = kwargs.get('passwords', {})
         if inventory_update.source == 'ec2':
-            env['AWS_ACCESS_KEY_ID'] = passwords.get('source_username', '')
-            env['AWS_SECRET_ACCESS_KEY'] = passwords.get('source_password', '')
+            if passwords.get('source_username', '') and passwords.get('source_password', ''):
+                env['AWS_ACCESS_KEY_ID'] = passwords['source_username']
+                env['AWS_SECRET_ACCESS_KEY'] = passwords['source_password']
             env['EC2_INI_PATH'] = kwargs.get('private_data_file', '')
         elif inventory_update.source == 'rax':
             env['RAX_CREDS_FILE'] = kwargs.get('private_data_file', '')

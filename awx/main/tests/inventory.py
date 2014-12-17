@@ -1286,6 +1286,12 @@ class InventoryUpdatesTest(BaseTransactionTest):
         with self.current_user(self.super_django_user):
             response = self.put(inv_src_url1, inv_src_data, expect=200)
             self.assertEqual(response['source_regions'], '')
+        # EC2 sources should allow an empty credential (to support IAM roles).
+        inv_src_data['credential'] = None
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+            self.assertEqual(response['credential'], None)
+        inv_src_data['credential'] = aws_cred_id
         # Null for instance filters and group_by should be converted to empty
         # string.
         inv_src_data['instance_filters'] = None

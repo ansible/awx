@@ -976,7 +976,10 @@ class InventorySourceOptions(BaseModel):
                     'Cloud-based inventory sources (such as %s) require '
                     'credentials for the matching cloud service.' % self.source
                 )
-        elif self.source in CLOUD_PROVIDERS:
+        # Allow an EC2 source to omit the credential.  If Tower is running on
+        # an EC2 instance with an IAM Role assigned, boto will use credentials
+        # from the instance metadata instead of those explicitly provided.
+        elif self.source in CLOUD_PROVIDERS and self.source != 'ec2':
             raise ValidationError('Credential is required for a cloud source')
         return cred
 
