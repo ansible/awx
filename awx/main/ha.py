@@ -15,7 +15,7 @@ def is_ha_environment():
         return True
 
     # If the database is not local, then we are in an HA environment.
-    host = settings.DATABASES['default'].get('host', 'localhost')
+    host = settings.DATABASES['default'].get('HOST', 'localhost')
     if host and host.lower() not in ('127.0.0.1', 'localhost'):
         return True
 
