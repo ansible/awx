@@ -191,7 +191,7 @@ class ProjectOptions(models.Model):
                     if 'tasks' in playbook.split(os.sep):
                         continue
                     results.append(playbook)
-        return sorted(results, key=lambda x: unicode(x).lower())
+        return sorted(results, key=lambda x: smart_str(x).lower())
 
 
 class Project(UnifiedJobTemplate, ProjectOptions):

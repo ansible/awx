@@ -18,6 +18,8 @@ import tempfile
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
+from django.utils.encoding import smart_str
+
 
 # PyCrypto
 from Crypto.Cipher import AES
@@ -285,9 +287,9 @@ def model_instance_diff(old, new, serializer_mapping=None):
 
         if old_value != new_value and field not in Credential.PASSWORD_FIELDS:
             if type(old_value) not in (bool, int, type(None)):
-                old_value = unicode(old_value)
+                old_value = smart_str(old_value)
             if type(new_value) not in (bool, int, type(None)):
-                new_value = unicode(new_value)
+                new_value = smart_str(new_value)
             diff[field] = (old_value, new_value)
         elif old_value != new_value and field in Credential.PASSWORD_FIELDS:
             diff[field] = (u"hidden", u"hidden")
@@ -317,7 +319,7 @@ def model_to_dict(obj, serializer_mapping=None):
         if field.name not in Credential.PASSWORD_FIELDS:
             field_val = getattr(obj, field.name, None)
             if type(field_val) not in (bool, int, type(None)):
-                attr_d[field.name] = unicode(field_val)
+                attr_d[field.name] = smart_str(field_val)
             else:
                 attr_d[field.name] = field_val
         else:
