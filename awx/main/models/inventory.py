@@ -1017,7 +1017,7 @@ class InventorySourceOptions(BaseModel):
         if self.source != 'ec2':
             return ''
         invalid_filters = []
-        instance_filter_re = re.compile(r'^(?:tag:.+)|(?:[a-z][a-z\.-]*[a-z])=.*$')
+        instance_filter_re = re.compile(r'^((tag:.+)|([a-z][a-z\.-]*[a-z]))=.*$')
         for instance_filter in instance_filters.split(','):
             instance_filter = instance_filter.strip()
             if not instance_filter:
@@ -1026,6 +1026,8 @@ class InventorySourceOptions(BaseModel):
                 invalid_filters.append(instance_filter)
                 continue
             instance_filter_name = instance_filter.split('=', 1)[0]
+            if instance_filter_name.startswith('tag:'):
+                continue
             if instance_filter_name not in self.INSTANCE_FILTER_NAMES:
                 invalid_filters.append(instance_filter)
         if invalid_filters:

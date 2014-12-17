@@ -1308,8 +1308,24 @@ class InventoryUpdatesTest(BaseTransactionTest):
         inv_src_data['instance_filters'] = 'foo=bar,'
         with self.current_user(self.super_django_user):
             response = self.put(inv_src_url1, inv_src_data, expect=400)
+        # Invalid tag expression for instance filters.
+        inv_src_data['instance_filters'] = 'tag:=,'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=400)
+        # Another invalid tag expression for instance filters.
+        inv_src_data['instance_filters'] = 'tag:Name,'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=400)
         # Valid string for instance filters.
         inv_src_data['instance_filters'] = 'tag-key=Name'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+        # Another valid value for instance filters.
+        inv_src_data['instance_filters'] = 'tag:Name=test*'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+        # Another valid instance filter with nothing after =.
+        inv_src_data['instance_filters'] = 'tag:Name='
         with self.current_user(self.super_django_user):
             response = self.put(inv_src_url1, inv_src_data, expect=200)
         # Invalid string for group_by.
