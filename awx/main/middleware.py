@@ -84,6 +84,10 @@ class HAMiddleware(object):
         if Instance.objects.my_role() == 'primary':
             return None
 
+        # Always allow the /ping/ endpoint.
+        if request.path.startswith('/api/v1/ping'):
+            return None
+
         # Get the primary instance.
         primary = Instance.objects.primary()
 
