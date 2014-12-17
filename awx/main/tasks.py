@@ -39,7 +39,7 @@ from django.utils.timezone import now
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # Job, JobEvent, ProjectUpdate, InventoryUpdate,
-                              # Schedule, UnifiedJobTemplate
+                              # Schedule, UnifiedJobTemplate, Instance
 from awx.main.queue import FifoQueue
 from awx.main.utils import (get_ansible_version, decrypt_field, update_scm_url,
                             ignore_inventory_computed_fields, emit_websocket_notification,
@@ -87,6 +87,12 @@ def tower_periodic_scheduler(self):
         return
     logger.debug("Last run was: %s", last_run)
     write_last_run(run_now)
+
+    # Sanity check: If this is a secondary machine, there is nothing
+    # on the schedule.
+    if Instance.objects.my_role() == 'secondary':
+        return
+
     old_schedules = Schedule.objects.enabled().before(last_run)
     for schedule in old_schedules:
         schedule.save()

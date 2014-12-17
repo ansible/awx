@@ -198,9 +198,9 @@ def rebuild_graph(message):
             # NOTE: Pull status again and make sure it didn't finish in 
             #       the meantime?
             task.status = 'failed'
-            task.job_explanation += ''.join((
+            task.job_explanation += ' '.join((
                 'Task was marked as running in Tower but was not present in',
-                'Celery so it has been marked as failed',
+                'Celery, so it has been marked as failed.',
             ))
             task.save()
             task.socketio_emit_status("failed")
