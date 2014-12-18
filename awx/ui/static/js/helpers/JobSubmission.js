@@ -757,29 +757,35 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                     Rest.setUrl(GetBasePath('credentials')+credential);
                     Rest.get()
                         .success(function (data) {
-                            if((data.kind === "ssh" && data.password === "ASK" ) || data.ssh_key_unlock === "ASK"){
-                                passwords.push("ssh_password");
+                            if(data.kind === "ssh"){
+                                if(data.password === "ASK" ){
+                                    passwords.push("ssh_password");
+                                }
+                                if(data.ssh_key_unlock === "ASK"){
+                                    passwords.push("ssh_key_unlock");
+                                }
+                                if(data.sudo_password === "ASK"){
+                                    passwords.push("sudo_password");
+                                }
+                                if(data.su_password === "ASK"){
+                                    passwords.push("su_password");
+                                }
+                                if(data.vault_password === "ASK"){
+                                    passwords.push("vault_password");
+                                }
+                                if(passwords.length>0){
+                                    scope.passwords_needed_to_start = passwords;
+                                    scope.$emit('PromptForPasswords', passwords, html, url);
+                                }
+                                else if (scope.ask_variables_on_launch){
+                                    scope.$emit('PromptForVars', html, url);
+                                }
+                                else if (!Empty(scope.survey_enabled) &&  scope.survey_enabled===true) {
+                                    scope.$emit('PromptForSurvey', html, url);
+                                }
+                                else scope.$emit('StartPlaybookRun', url);
                             }
-                            if(data.sudo_password === "ASK"){
-                                passwords.push("sudo_password");
-                            }
-                            if(data.su_password === "ASK"){
-                                passwords.push("su_password");
-                            }
-                            if(data.vault_password === "ASK"){
-                                passwords.push("vault_password");
-                            }
-                            if(passwords.length>0){
-                                scope.passwords_needed_to_start = passwords;
-                                scope.$emit('PromptForPasswords', passwords, html, url);
-                            }
-                            else if (scope.ask_variables_on_launch){
-                                scope.$emit('PromptForVars', html, url);
-                            }
-                            else if (!Empty(scope.survey_enabled) &&  scope.survey_enabled===true) {
-                                scope.$emit('PromptForSurvey', html, url);
-                            }
-                            else scope.$emit('StartPlaybookRun', url);
+
                         })
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
