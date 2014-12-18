@@ -1488,7 +1488,7 @@ class JobTemplateLaunch(GenericAPIView):
                 request_data = request.DATA
             validation_errors = obj.survey_variable_validation(request_data.get('extra_vars', {}))
             if validation_errors:
-                return Response(dict(errors=validation_errors),
+                return Response(dict(variables_needed_to_start=validation_errors),
                                 status=status.HTTP_400_BAD_REQUEST)
         if obj.credential is None and ('credential' not in request.DATA and 'credential_id' not in request.DATA):
             return Response(dict(errors="Credential not provided"), status=status.HTTP_400_BAD_REQUEST)
