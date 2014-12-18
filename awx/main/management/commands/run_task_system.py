@@ -164,6 +164,10 @@ def rebuild_graph(message):
     orphaned running tasks, and creating dependencies for new tasks before
     generating directed edge relationships between those tasks.
     """
+    # Sanity check: Only do this on the primary node.
+    if Instance.objects.my_role() == 'secondary':
+        return None
+
     inspector = inspect()
     if not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
         active_task_queues = inspector.active()
