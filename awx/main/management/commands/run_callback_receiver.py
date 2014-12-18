@@ -47,7 +47,7 @@ class CallbackReceiver(object):
                     signal.signal(signum, signal.SIG_DFL)
                     os.kill(os.getpid(), signum) # Rethrow signal, this time without catching it
                 except Exception, e:
-                    os.system('echo "exception %s" > /tmp/foob' % str(e))
+                    pass
             return _handler
         def check_pre_handle(data):
             event = data.get('event', '')
