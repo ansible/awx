@@ -1493,7 +1493,7 @@ class JobTemplateLaunch(GenericAPIView):
                                     status=status.HTTP_400_BAD_REQUEST)
         if obj.credential is None and ('credential' not in request.DATA and 'credential_id' not in request.DATA):
             return Response(dict(errors="Credential not provided"), status=status.HTTP_400_BAD_REQUEST)
-        new_job = obj.create_unified_job()
+        new_job = obj.create_unified_job(**request.DATA)
         result = new_job.signal_start(**request.DATA)
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
