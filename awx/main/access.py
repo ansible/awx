@@ -1137,7 +1137,8 @@ class JobAccess(BaseAccess):
         has_perm = False
         if obj.job_template is not None and self.user.can_access(JobTemplate, 'start', obj.job_template):
             has_perm = True
-
+        dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and \
+                     self.user.can_access(Project, 'read', obj.project)
         return self.can_read(obj) and dep_access and has_perm
 
     def can_cancel(self, obj):
