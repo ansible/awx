@@ -181,7 +181,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
-
+            if ($rootScope.jobDetailInterval) {
+                window.clearInterval($rootScope.jobDetailInterval);
+            }
             $log.debug('Job completed!');
             $log.debug(scope.jobData);
         }
