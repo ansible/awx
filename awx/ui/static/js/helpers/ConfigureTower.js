@@ -120,6 +120,7 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
             scope.cancelConfigure = function () {
                 try {
                     $('#configure-tower-dialog').dialog('close');
+                    $("#configure-save-button").remove();
                 }
                 catch(e) {
                     //ignore
@@ -198,9 +199,6 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                     $('#prompt-for-days').dialog('open');
                     Wait('stop');
                 });
-
-
-
             };
 
             scope.configureSchedule = function(id, name) {
@@ -225,12 +223,10 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                     })
                     .error(function(data, status) {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
+                            msg: 'Failed getting schedule information' });
                     });
 
             };
-
-
 
             parent_scope.refreshJobs = function(){
                 scope.search(SchedulesList.iterator);
@@ -259,17 +255,6 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             container,
             elem;
 
-// <div id='configure-tower-dialog' style="display:none">
-//       <div id="configure-jobs-list"></div>
-//       <div id="configure-schedule-form"></div>
-//     </div>
-
-        // Wait('start');
-        // detail = $('#schedules-detail').hide();
-        // list = $('#schedules-list');
-        // target = $('#schedules-form');
-        // container = $('#schedules-form-container');
-
         Wait('start');
         // $('#configure-jobs').hide();
         detail = $('#configure-schedules-detail').hide();
@@ -289,6 +274,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             $(this).remove();
         });
 
+        $("#configure-cancel-button").after('<button type="button" class="btn btn-primary btn-sm" id="configure-save-button" ng-click="saveScheduleForm()" style="margin-left:5px"><i class="fa fa-check"></i> Save</button>');
         elem = angular.element(document.getElementById('configure-schedules-form-container'));
         $compile(elem)(scope);
 
@@ -367,6 +353,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
         }
         scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
             Wait('stop');
+            $("#configure-save-button").remove();
             container.hide('slide', { direction: 'left' }, 500, restoreList);
             scope.$destroy();
         });
@@ -452,6 +439,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
 
         scope.cancelScheduleForm = function() {
             container.hide('slide', { direction: 'right' }, 500, restoreList);
+            $("#configure-save-button").remove();
             scope.$destroy();
         };
 
