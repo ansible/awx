@@ -1463,7 +1463,7 @@ class CustomInventoryScriptAccess(BaseAccess):
     model = CustomInventoryScript
 
     def get_queryset(self):
-        qs = self.model.objects.filter(active=True).distinct()
+        qs = self.model.objects.filter(active=True, organization__active=True).distinct()
         if not self.user.is_superuser:
             qs = qs.filter(Q(organization__admins__in=[self.user]) | Q(organization__users__in=[self.user]))
         return qs
