@@ -14,55 +14,94 @@
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
     'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog', 'FormGenerator', 'JobVarsPromptFormDefinition'])
 
-.factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors', 'ToJSON', 'Empty',
-    function(Rest, Wait, ProcessErrors, ToJSON, Empty) {
+.factory('LaunchJob', ['Rest', 'Wait', 'ProcessErrors', 'ToJSON', 'Empty', 'GetBasePath',
+    function(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath) {
         return function(params) {
             var scope = params.scope,
                 callback = params.callback || 'JobLaunched',
                 job_launch_data = {},
                 url = params.url,
-                fld,
+                vars_url = GetBasePath('job_templates')+scope.job_template_id + '/',
+                // fld,
                 extra_vars;
 
+            job_launch_data.extra_vars = {};
 
-            if(!Empty(scope.passwords_needed_to_start) && scope.passwords_needed_to_start.length>0){
-                scope.passwords.forEach(function(password) {
+            //gather the extra vars from the job template if survey is enabled and prompt for vars is false
+            if (scope.removeGetExtraVars) {
+                scope.removeGetExtraVars();
+            }
+            scope.removeGetExtraVars = scope.$on('GetExtraVars', function() {
+
+                Rest.setUrl(vars_url);
+                Rest.get()
+                    .success(function (data) {
+                        if(!Empty(data.extra_vars)){
+                            data.extra_vars = ToJSON('json',  data.extra_vars, false);
+                            $.each(data.extra_vars, function(key,value){
+                                job_launch_data.extra_vars[key] = value;
+                            });
+                        }
+                        scope.$emit('BuildData');
+                    })
+                .error(function (data, status) {
+                    ProcessErrors(scope, data, status, { hdr: 'Error!',
+                        msg: 'Failed to retrieve job template extra variables.'  });
+                });
+            });
+
+            //build the data object to be sent to the job launch endpoint.
+            if (scope.removeBuildData) {
+                scope.removeBuildData();
+            }
+            scope.removeBuildData = scope.$on('BuildData', function() {
+                if(!Empty(scope.passwords_needed_to_start) && scope.passwords_needed_to_start.length>0){
+                    scope.passwords.forEach(function(password) {
                         job_launch_data[password] = scope[password];
                         scope.passwords_needed_to_start.push(password+'_confirm'); // i'm pushing these values into this array for use during the survey taker parsing
                     });
-            }
-            if(scope.prompt_for_vars===true){
-                extra_vars = ToJSON(scope.parseType, scope.extra_vars, false);
-                // $.each(extra_vars, function(key,value){
-                //     job_launch_data[key] = value;
-                // });
-                job_launch_data.extra_vars = (extra_vars===null) ? {} :  extra_vars;
-            }
-            if(scope.survey_enabled===true){
-                job_launch_data.extra_vars = (!job_launch_data.extra_vars || job_launch_data.extra_vars===null) ? {} : job_launch_data.extra_vars;
-                for (fld in scope.job_launch_form){
-                    if((scope[fld] || scope[fld] === 0) && scope.passwords_needed_to_start.indexOf(fld) === -1){
-                        job_launch_data.extra_vars[fld] = scope[fld];
+                }
+                if(scope.prompt_for_vars===true){
+                    extra_vars = ToJSON(scope.parseType, scope.extra_vars, false);
+                    $.each(extra_vars, function(key,value){
+                        job_launch_data.extra_vars[key] = value;
+                    });
+                }
+                if(scope.survey_enabled===true){
+                    for (var fld in scope.job_launch_form){
+                        if((scope[fld] || scope[fld] === 0) && scope.passwords_needed_to_start.indexOf(fld) === -1 && fld !== 'extra_vars'){
+                            job_launch_data.extra_vars[fld] = scope[fld];
+                        }
                     }
                 }
+
+                if(!Empty(scope.credential)){
+                    job_launch_data.credential_id = scope.credential;
+                }
+
+                Rest.setUrl(url);
+                Rest.post(job_launch_data)
+                    .success(function(data) {
+                        Wait('stop');
+                        if(!$('#password-modal').is(':hidden')){
+                            $('#password-modal').dialog('close');
+                        }
+                        scope.$emit(callback, data);
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
+                    });
+            });
+
+            // if the user has a survey and does not have 'prompt for vars' selected, then we want to
+            // include the extra vars from the job template in the job launch. so first check for these conditions
+            // and then overlay any survey vars over those.
+            if(scope.prompt_for_vars===false && scope.survey_enabled===true){
+                scope.$emit('GetExtraVars');
             }
-            // delete(job_launch_data.extra_vars);
-            if(!Empty(scope.credential)){
-                job_launch_data.credential_id = scope.credential;
-            }
-            Rest.setUrl(url);
-            Rest.post(job_launch_data)
-                .success(function(data) {
-                    Wait('stop');
-                    if(!$('#password-modal').is(':hidden')){
-                        $('#password-modal').dialog('close');
-                    }
-                    scope.$emit(callback, data);
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
-                });
+            else scope.$emit('BuildData');
+
 
         };
     }])
@@ -421,8 +460,6 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
             ProcessErrors(scope, data, status, { hdr: 'Error!',
                 msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
         });
-
-
 
     };
 }])
