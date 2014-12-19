@@ -83,7 +83,7 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                           .showLabels(true)
                           .labelThreshold(0.01)
                           .tooltipContent(function(x, y) {
-                                return '<b>'+x+'</b>'+ '<p>' +  Math.floor(y) + ' Hosts ' +  '</p>';
+                                return '<b>'+x+'</b>'+ '<p>' +  Math.floor(y.replace(',','')) + ' Hosts ' +  '</p>';
                             })
                           .color(['#00aa00', '#aa0000']);
 
