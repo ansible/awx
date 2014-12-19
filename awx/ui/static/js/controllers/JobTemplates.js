@@ -1039,6 +1039,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     $('#job_templates_create_survey_btn').show();
                 }
                 else{
+                    $scope.survey_exists = true;
                     $('#job_templates_delete_survey_btn').show();
                     $('#job_templates_edit_survey_btn').show();
                     $('#job_templates_create_survey_btn').hide();
