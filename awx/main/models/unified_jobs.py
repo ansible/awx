@@ -290,8 +290,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         unified_job_class = self._get_unified_job_class()
         parent_field_name = unified_job_class._get_parent_field_name()
         kwargs.pop('%s_id' % parent_field_name, None)
-        if 'extra_vars' in kwargs:
-            kwargs.pop('extra_vars')
         create_kwargs = {}
         create_kwargs[parent_field_name] = self
         for field_name in self._get_unified_job_field_names():
