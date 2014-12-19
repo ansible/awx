@@ -521,6 +521,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             scope.addNewQuestion = function(){
                 // $('#add_question_btn').on("click" , function(){
+                scope.duplicate = false;
                 scope.addQuestion();
                 $('#survey_question_question_name').focus();
                 $('#add_question_btn').attr('disabled', 'disabled');
@@ -529,6 +530,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             // });
             };
             scope.editQuestion = function(index){
+                scope.duplicate = false;
                 EditQuestion({
                     index: index,
                     scope: scope,
@@ -708,14 +710,56 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             scope.submitQuestion = function(){
                 var data = {},
-                //form = SurveyQuestionForm,
-                // labels={},
-                // min= "min",
-                // max = "max",
-                // fld,
+                fld,
                 key, elementID;
-                //generator.clearApiErrors();
                 Wait('start');
+
+                // validate that there aren't any questions using this var name.
+                if(GenerateForm.mode === 'add'){
+                    if(scope.mode === 'add'){
+                        for(fld in questions){
+                            if(questions[fld].variable === scope.variable){
+                                scope.duplicate = true;
+                                Wait('stop');
+                                return;
+                            }
+                        }
+                    }
+                    else if (scope.mode === 'edit'){
+                        for(fld in scope.survey_questions){
+                            if(scope.survey_questions[fld].variable === scope.variable){
+                                scope.duplicate = true;
+                                Wait('stop');
+                                return;
+                            }
+                        }
+                    }
+                }
+                if(GenerateForm.mode === 'edit'){
+                    elementID = event.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.id;
+                    key = elementID.split('_')[1];
+                    if(scope.mode==='add'){
+                        for(fld in questions){
+                            if(questions[fld].variable === scope.variable && fld!==key){
+                                scope.duplicate = true;
+
+                                Wait('stop');
+                                return;
+                            }
+                        }
+                    }
+                    else if(scope.mode === 'edit'){
+                        for(fld in scope.survey_questions){
+                            if(scope.survey_questions[fld].variable === scope.variable && fld!==key){
+                                scope.duplicate = true;
+                                Wait('stop');
+                                return;
+                            }
+                        }
+                    }
+
+                }
+
 
                 try {
                     //create data object for each submitted question
@@ -728,45 +772,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     data.max = (scope.type.type === 'text') ? scope.text_max : (scope.type.type === 'textarea') ? scope.textarea_max : (scope.type.type === "float") ? scope.float_max : (scope.type.type==="integer") ? scope.int_max : "" ;
                     data.default = (scope.type.type === 'textarea') ? scope.default_textarea : (scope.type.type === "float") ? scope.default_float : (scope.type.type==="integer") ? scope.default_int : (scope.type.type === "multiselect") ? scope.default_multiselect : (scope.default) ? scope.default : "" ;
                     data.choices = (scope.type.type === "multiplechoice") ? scope.choices : (scope.type.type === 'multiselect') ? scope.choices : "" ;
-
-                    // for (fld in form.fields) {
-                    //     if(fld==='required'){
-                    //         data[fld] = (scope[fld]===true) ? true : false;
-                    //     }
-                    //     if(scope[fld]){
-                    //         if(fld === "type"){
-                    //             data[fld] = scope[fld].type;
-
-                    //             if(scope[fld].type === 'text'){
-                    //                 data.min = scope.text_min;
-                    //                 data.max = scope.text_max;
-                    //                 // data.default = scope.default_text;
-                    //             }
-                    //             if(scope[fld].type === 'textarea'){
-                    //                 data.min = scope.textarea_min;
-                    //                 data.max = scope.textarea_max;
-                    //                 // data.default = scope.default_textarea;
-                    //             }
-                    //             if(scope[fld].type === 'float'){
-                    //                 data.min = scope.float_min;
-                    //                 data.max = scope.float_max;
-                    //                 data.default = scope.default_float;
-                    //             }
-                    //             if(scope[fld].type==="integer" ){
-                    //                 data.min = scope.int_min;
-                    //                 data.max = scope.int_max;
-                    //                 data.default = scope.default_int;
-                    //             }
-                    //         }
-                    //         else if(fld==='default_multiselect'){
-                    //             data.default = scope.default_multiselect;
-                    //         }
-                    //         else{
-                    //             data[fld] = scope[fld];
-                    //         }
-
-                    //     }
-                    // }
 
                     Wait('stop');
                     if(scope.mode === 'add' || scope.mode==="edit" && scope.can_edit === true){
