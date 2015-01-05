@@ -449,6 +449,7 @@ class Job(UnifiedJob, JobOptions):
         return dependencies
 
     def handle_extra_data(self, extra_data):
+        extra_vars = {}
         if type(extra_data) == dict:
             extra_vars = extra_data
         elif extra_data is None:
