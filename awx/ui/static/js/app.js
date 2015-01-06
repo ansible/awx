@@ -509,6 +509,67 @@ angular.module('Tower', [
 
                 $rootScope.browser = detectBrowser();
 
+                if ($rootScope.removeOpenSocket) {
+                    $rootScope.removeOpenSocket();
+                }
+                $rootScope.removeOpenSocket = $rootScope.$on('OpenSocket', function() {
+                    html = "<a href=\"\" ng-click=\"socketHelp()\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
+                    "data-popover-title=\"Live Events\" data-container=\"body\" style=\"font-size: 10px;\"><i class=\"fa icon-socket-{{ socketStatus }}\"></i></a>";
+                    e = angular.element(document.getElementById('socket-beacon-div'));
+                    e.empty().append(html);
+                    $compile(e)($rootScope);
+
+                    e = angular.element(document.getElementById('socket-beacon-li'));
+                    e.empty().append(html);
+                    $compile(e)($rootScope);
+
+                    // Listen for job changes and issue callbacks to initiate
+                    // DOM updates
+                    function openSocket() {
+                        sock = Socket({ scope: $rootScope, endpoint: "jobs" });
+                        sock.init();
+                        sock.on("status_changed", function(data) {
+                            $log.debug('Job ' + data.unified_job_id + ' status changed to ' + data.status);
+                            $rootScope.$emit('JobStatusChange', data);
+                        });
+                        sock.on("summary_complete", function(data) {
+                            $log.debug('Job summary_complete ' + data.unified_job_id);
+                            $rootScope.$emit('JobSummaryComplete', data);
+                        });
+                        sock.on("schedule_change", function(data) {
+                            $log.debug('schedule changed to ' + data.status);
+                            $rootScope.$emit('ScheduleChange', data);
+                        });
+                    }
+                    openSocket();
+
+                    setTimeout(function() {
+                        $rootScope.$apply(function() {
+                            sock.checkStatus();
+                            $log.debug('socket status: ' + $rootScope.socketStatus);
+                        });
+                    },2000);
+
+                    // monitor socket status
+                    checkCount = 0;
+                    setInterval(function() {
+                        if (sock.checkStatus() === 'error' || checkCount > 5) {
+                            // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
+                            $log.debug('socket status: ' + sock.checkStatus());
+                            $log.debug('attempting new socket connection');
+                            sock = null;
+                            openSocket();
+                            checkCount = 0;
+                        }
+                        else if (sock.checkStatus() === 'connecting') {
+                            checkCount++;
+                        }
+                        else {
+                            checkCount = 0;
+                        }
+                    }, 5000);
+                });
+
                 $rootScope.$on("$routeChangeStart", function (event, next) {
                     // Before navigating away from current tab, make sure the primary view is visible
                     if ($('#stream-container').is(':visible')) {
@@ -605,63 +666,71 @@ angular.module('Tower', [
                     });
                 };
 
-                html = "<a href=\"\" ng-click=\"socketHelp()\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
-                    "data-popover-title=\"Live Events\" data-container=\"body\" style=\"font-size: 10px;\"><i class=\"fa icon-socket-{{ socketStatus }}\"></i></a>";
-                e = angular.element(document.getElementById('socket-beacon-div'));
-                e.empty().append(html);
-                $compile(e)($rootScope);
+                // html = "<a href=\"\" ng-click=\"socketHelp()\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
+                //     "data-popover-title=\"Live Events\" data-container=\"body\" style=\"font-size: 10px;\"><i class=\"fa icon-socket-{{ socketStatus }}\"></i></a>";
+                // e = angular.element(document.getElementById('socket-beacon-div'));
+                // e.empty().append(html);
+                // $compile(e)($rootScope);
 
-                e = angular.element(document.getElementById('socket-beacon-li'));
-                e.empty().append(html);
-                $compile(e)($rootScope);
+                // e = angular.element(document.getElementById('socket-beacon-li'));
+                // e.empty().append(html);
+                // $compile(e)($rootScope);
 
-                // Listen for job changes and issue callbacks to initiate
-                // DOM updates
-                function openSocket() {
-                    sock = Socket({ scope: $rootScope, endpoint: "jobs" });
-                    sock.init();
-                    sock.on("status_changed", function(data) {
-                        $log.debug('Job ' + data.unified_job_id + ' status changed to ' + data.status);
-                        $rootScope.$emit('JobStatusChange', data);
-                    });
-                    sock.on("summary_complete", function(data) {
-                        $log.debug('Job summary_complete ' + data.unified_job_id);
-                        $rootScope.$emit('JobSummaryComplete', data);
-                    });
-                    sock.on("schedule_change", function(data) {
-                        $log.debug('schedule changed to ' + data.status);
-                        $rootScope.$emit('ScheduleChange', data);
-                    });
-                }
+                // // Listen for job changes and issue callbacks to initiate
+                // // DOM updates
+                // function openSocket() {
+                //     sock = Socket({ scope: $rootScope, endpoint: "jobs" });
+                //     sock.init();
+                //     sock.on("status_changed", function(data) {
+                //         $log.debug('Job ' + data.unified_job_id + ' status changed to ' + data.status);
+                //         $rootScope.$emit('JobStatusChange', data);
+                //     });
+                //     sock.on("summary_complete", function(data) {
+                //         $log.debug('Job summary_complete ' + data.unified_job_id);
+                //         $rootScope.$emit('JobSummaryComplete', data);
+                //     });
+                //     sock.on("schedule_change", function(data) {
+                //         $log.debug('schedule changed to ' + data.status);
+                //         $rootScope.$emit('ScheduleChange', data);
+                //     });
+                // }
 
-                openSocket();
+                // if ($rootScope.removeOpenSocket) {
+                //     $rootScope.removeOpenSocket();
+                // }
+                // $rootScope.removeOpenSocket = $rootScope.$on('OpenSocket', function() {
 
-                setTimeout(function() {
-                    $rootScope.$apply(function() {
-                        sock.checkStatus();
-                        $log.debug('socket status: ' + $rootScope.socketStatus);
-                    });
-                },2000);
+                //     openSocket();
 
-                // monitor socket status
-                checkCount = 0;
-                setInterval(function() {
-                    if (sock.checkStatus() === 'error' || checkCount > 5) {
-                        // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
-                        $log.debug('socket status: ' + sock.checkStatus());
-                        $log.debug('attempting new socket connection');
-                        sock = null;
-                        openSocket();
-                        checkCount = 0;
-                    }
-                    else if (sock.checkStatus() === 'connecting') {
-                        checkCount++;
-                    }
-                    else {
-                        checkCount = 0;
-                    }
-                }, 5000);
-            });
+                //     setTimeout(function() {
+                //         $rootScope.$apply(function() {
+                //             sock.checkStatus();
+                //             $log.debug('socket status: ' + $rootScope.socketStatus);
+                //         });
+                //     },2000);
+
+                //     // monitor socket status
+                //     checkCount = 0;
+                //     setInterval(function() {
+                //         if (sock.checkStatus() === 'error' || checkCount > 5) {
+                //             // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
+                //             $log.debug('socket status: ' + sock.checkStatus());
+                //             $log.debug('attempting new socket connection');
+                //             sock = null;
+                //             openSocket();
+                //             checkCount = 0;
+                //         }
+                //         else if (sock.checkStatus() === 'connecting') {
+                //             checkCount++;
+                //         }
+                //         else {
+                //             checkCount = 0;
+                //         }
+                //     }, 5000);
+                // });
+
+            }); // end of 'ConfigReady'
+
 
             if (!$AnsibleConfig) {
                 // there may be time lag when loading the config file, so temporarily use what's in local storage

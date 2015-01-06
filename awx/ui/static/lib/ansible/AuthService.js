@@ -136,10 +136,12 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 // store the response values in $rootScope so we can get to them later
                 $rootScope.current_user = response.results[0];
                 $cookieStore.put('current_user', response.results[0]); //keep in session cookie in the event of browser refresh
+                $rootScope.$emit('OpenSocket');
             },
 
             restoreUserInfo: function () {
                 $rootScope.current_user = $cookieStore.get('current_user');
+                $rootScope.$emit('OpenSocket');
             },
 
             getUserInfo: function (key) {
