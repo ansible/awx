@@ -25,7 +25,7 @@ angular.module('VariablesHelper', ['Utilities'])
         return function (variables) {
             var result = "---", json_obj;
             if (typeof variables === 'string') {
-                if (variables === "{}" || variables === "null" || variables === "") {
+                if (variables === "{}" || variables === "null" || variables === "" ||  variables === "\"\"") {
                     // String is empty, return ---
                 } else {
                     try {
@@ -156,7 +156,9 @@ angular.module('VariablesHelper', ['Utilities'])
         return function(variableObj) {
             var newObj;
             function sortIt(objToSort) {
-                var i, keys = Object.keys(objToSort), newObj = {};
+                var i,
+                    keys = Object.keys(objToSort),
+                    newObj = {};
                 keys = keys.sort();
                 for (i=0; i < keys.length; i++) {
                     if (typeof objToSort[keys[i]] === 'object' && objToSort[keys[i]] !== null && !Array.isArray(objToSort[keys[i]])) {
