@@ -20,6 +20,7 @@ from django.db.models import Q, Count, Sum
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.utils.datastructures import SortedDict
+from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 
@@ -2263,7 +2264,7 @@ class UnifiedJobStdout(RetrieveAPIView):
             content, start, end, absolute_end = unified_job.result_stdout_raw_limited(start_line, end_line)
             if content_only:
                 headers = conv.produce_headers()
-                body = conv.convert(content, full=False)
+                body = conv.convert(content, full=False) # Escapes any HTML that may be in content.
                 data = '\n'.join([headers, body])
                 data = '<div class="nocode body_foreground body_background">%s</div>' % data
             else:
@@ -2271,6 +2272,8 @@ class UnifiedJobStdout(RetrieveAPIView):
             # Fix ugly grey background used by default.
             data = data.replace('.body_background { background-color: #AAAAAA; }',
                                 '.body_background { background-color: #f5f5f5; }')
+            if request.accepted_renderer.format == 'api':
+                return Response(mark_safe(data))
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
             return Response(data)
