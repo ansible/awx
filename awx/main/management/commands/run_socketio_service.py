@@ -52,7 +52,7 @@ class TowerBaseNamespace(BaseNamespace):
                 if len(valid_sockets) > 1000:
                     valid_sockets = valid_sockets[1:]
             return set(['recv_connect'] + self.get_allowed_methods())
-        return set()
+        return set(['recv_connect'])
 
     def valid_user(self):
         if 'HTTP_COOKIE' not in self.environ:
