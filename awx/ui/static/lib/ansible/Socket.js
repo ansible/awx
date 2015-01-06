@@ -115,6 +115,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                         self.socket.on('error', function(reason) {
                             var r = reason || 'connection refused by host';
                             $log.debug('Socket error: ' + r);
+                            $log.error('Socket error: ' + r);
                             self.scope.$apply(function() {
                                 self.scope.socketStatus = 'error';
                                 self.scope.socketTip = getSocketTip(self.scope.socketStatus);
