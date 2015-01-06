@@ -233,7 +233,7 @@ def rebuild_graph(message):
     graph = SimpleDAG()
     for task in running_tasks:
         graph.add_node(task)
-    for wait_task in waiting_tasks[:500]:
+    for wait_task in waiting_tasks[:50]:
         node_dependencies = []
         for node in graph:
             if wait_task.is_blocked_by(node['node_object']):
