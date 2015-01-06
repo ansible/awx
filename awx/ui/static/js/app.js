@@ -646,7 +646,7 @@ angular.module('Tower', [
                 // monitor socket status
                 checkCount = 0;
                 setInterval(function() {
-                    if (sock.checkStatus() === 'error' || checkCount > 2) {
+                    if (sock.checkStatus() === 'error' || checkCount > 5) {
                         // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
                         $log.debug('socket status: ' + sock.checkStatus());
                         $log.debug('attempting new socket connection');
@@ -660,7 +660,7 @@ angular.module('Tower', [
                     else {
                         checkCount = 0;
                     }
-                }, 3000);
+                }, 5000);
             });
 
             if (!$AnsibleConfig) {
