@@ -309,11 +309,20 @@ class BaseTask(Task):
     def args2cmdline(self, *args):
         return ' '.join([pipes.quote(a) for a in args])
 
-    def wrap_args_with_ssh_agent(self, args, ssh_key_path):
+    def get_ssh_key_path(self, instance, **kwargs):
+        '''
+        Return the path to the SSH key file, if present.
+        '''
+        return ''
+
+    def wrap_args_with_ssh_agent(self, args, ssh_key_path, ssh_auth_sock=None):
         if ssh_key_path:
             cmd = ' && '.join([self.args2cmdline('ssh-add', ssh_key_path),
                                self.args2cmdline(*args)])
-            args = ['ssh-agent', 'sh', '-c', cmd]
+            args = ['ssh-agent']
+            if ssh_auth_sock:
+                args.extend(['-a', ssh_auth_sock])
+            args.extend(['sh', '-c', cmd])
         return args
 
     def should_use_proot(self, instance, **kwargs):
@@ -439,6 +448,12 @@ class BaseTask(Task):
                 kwargs['proot_temp_dir'] = build_proot_temp_dir()
                 args = wrap_args_with_proot(args, cwd, **kwargs)
                 safe_args = wrap_args_with_proot(safe_args, cwd, **kwargs)
+            # If there is an SSH key path defined, wrap args with ssh-agent.
+            ssh_key_path = self.get_ssh_key_path(instance, **kwargs)
+            if ssh_key_path:
+                ssh_auth_sock = os.path.join(kwargs['private_data_dir'], 'ssh_auth.sock')
+                args = self.wrap_args_with_ssh_agent(args, ssh_key_path, ssh_auth_sock)
+                safe_args = self.wrap_args_with_ssh_agent(safe_args, ssh_key_path, ssh_auth_sock)
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
                                          job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
             status, rc = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
@@ -653,11 +668,6 @@ class RunJob(BaseTask):
         # Add path to playbook (relative to project.local_path).
         args.append(job.playbook)
 
-        # If using an SSH key, run using ssh-agent.
-        ssh_key_path = kwargs.get('private_data_file', '')
-        if ssh_key_path:
-            args = self.wrap_args_with_ssh_agent(args, ssh_key_path)
-
         return args
 
     def build_cwd(self, job, **kwargs):
@@ -681,6 +691,12 @@ class RunJob(BaseTask):
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
         return d
+
+    def get_ssh_key_path(self, instance, **kwargs):
+        '''
+        If using an SSH key, return the path for use by ssh-agent.
+        '''
+        return kwargs.get('private_data_file', '')
 
     def should_use_proot(self, instance, **kwargs):
         '''
@@ -804,12 +820,6 @@ class RunProjectUpdate(BaseTask):
         })
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
-
-        # If using an SSH key, run using ssh-agent.
-        ssh_key_path = kwargs.get('private_data_file', '')
-        if ssh_key_path:
-            args = self.wrap_args_with_ssh_agent(args, ssh_key_path)
-
         return args
 
     def build_safe_args(self, project_update, **kwargs):
@@ -874,6 +884,11 @@ class RunProjectUpdate(BaseTask):
     def get_idle_timeout(self):
         return getattr(settings, 'PROJECT_UPDATE_IDLE_TIMEOUT', None)
 
+    def get_ssh_key_path(self, instance, **kwargs):
+        '''
+        If using an SSH key, return the path for use by ssh-agent.
+        '''
+        return kwargs.get('private_data_file', '')
 
 class RunInventoryUpdate(BaseTask):
 
