@@ -386,11 +386,11 @@ class BaseTask(Task):
                 child.close(True)
                 canceled = True
         if canceled:
-            return 'canceled'
+            return 'canceled', child.exitstatus
         elif child.exitstatus == 0:
-            return 'successful'
+            return 'successful', child.exitstatus
         else:
-            return 'failed'
+            return 'failed', child.exitstatus
 
     def post_run_hook(self, instance, **kwargs):
         '''
@@ -404,7 +404,7 @@ class BaseTask(Task):
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
 
         instance.socketio_emit_status("running")
-        status, tb = 'error', ''
+        status, rc, tb = 'error', None, ''
         output_replacements = []
         try:
             if instance.cancel_flag:
@@ -441,7 +441,7 @@ class BaseTask(Task):
                 safe_args = wrap_args_with_proot(safe_args, cwd, **kwargs)
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
                                          job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
-            status = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
+            status, rc = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
         except Exception:
             if status != 'canceled':
                 tb = traceback.format_exc()
@@ -469,9 +469,9 @@ class BaseTask(Task):
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
             if status == 'canceled':
-                raise Exception("Task %s(pk:%s) was canceled" % (str(self.model.__class__), str(pk)))
+                raise Exception("Task %s(pk:%s) was canceled (rc=%s)" % (str(self.model.__class__), str(pk), str(rc)))
             else:
-                raise Exception("Task %s(pk:%s) encountered an error" % (str(self.model.__class__), str(pk)))
+                raise Exception("Task %s(pk:%s) encountered an error (rc=%s)" % (str(self.model.__class__), str(pk), str(rc)))
         if not hasattr(settings, 'CELERY_UNIT_TEST'):
             self.signal_finished(pk)
 
