@@ -1348,13 +1348,16 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         if obj.survey_enabled and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
         request = self.context.get('request', None)
-        if request is not None and request.user is not None:
+        if request is not None and request.user is not None and obj.inventory is not None and obj.project is not None:
             d['can_copy'] = request.user.can_access(JobTemplate, 'add',
                                                     {'inventory': obj.inventory.pk,
                                                      'project': obj.project.pk})
             d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj,
                                                     {'inventory': obj.inventory.pk,
                                                      'project': obj.project.pk})
+        elif request.user is not None and request.user.is_superuser:
+            d['can_copy'] = True
+            d['can_edit'] = True
         else:
             d['can_copy'] = False
             d['can_edit'] = False
