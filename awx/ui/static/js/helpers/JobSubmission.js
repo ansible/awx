@@ -25,6 +25,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 // fld,
                 extra_vars;
 
+            //found it easier to assume that there will be extra vars, and then check for a blank object at the end
             job_launch_data.extra_vars = {};
 
             //gather the extra vars from the job template if survey is enabled and prompt for vars is false
@@ -50,7 +51,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 });
             });
 
-            //build the data object to be sent to the job launch endpoint.
+            //build the data object to be sent to the job launch endpoint. Any variables gathered from the survey and the extra variables text editor are inserted into the extra_vars dict of the job_launch_data
             if (scope.removeBuildData) {
                 scope.removeBuildData();
             }
@@ -63,22 +64,29 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 }
                 if(scope.prompt_for_vars===true){
                     extra_vars = ToJSON(scope.parseType, scope.extra_vars, false);
-                    $.each(extra_vars, function(key,value){
-                        job_launch_data.extra_vars[key] = value;
-                    });
+                    if(!Empty(extra_vars)){
+                        $.each(extra_vars, function(key,value){
+                            job_launch_data.extra_vars[key] = value;
+                        });
+                    }
+
                 }
                 if(scope.survey_enabled===true){
                     for (var fld in scope.job_launch_form){
-                        if((scope[fld] || scope[fld] === 0) && scope.passwords_needed_to_start.indexOf(fld) === -1 && fld !== 'extra_vars'){
+                        //grab only survey question fields, including those that are zero or a blank answer (for optional questions)
+                        if((scope[fld] || scope[fld] === 0 || scope[fld]==="") && scope.passwords_needed_to_start.indexOf(fld) === -1 && fld !== 'extra_vars'){
                             job_launch_data.extra_vars[fld] = scope[fld];
                         }
                     }
                 }
 
+                // include the credential used if the user was prompted to choose a cred
                 if(!Empty(scope.credential)){
                     job_launch_data.credential_id = scope.credential;
                 }
-                if(jQuery.isEmptyObject(job_launch_data.extra_vars)===true){
+
+                // If the extra_vars dict is empty, we don't want to include it if we didn't prompt for anything.
+                if(jQuery.isEmptyObject(job_launch_data.extra_vars)===true && scope.prompt_for_vars===false){
                     delete job_launch_data.extra_vars;
                 }
 
