@@ -25,6 +25,8 @@ Release schedule
 * 2.0.2, October 6, 2014
 * 2.0.3, November 14, 2014
 * 2.0.4, November 21, 2014
+* 2.0.5, ...
+* 2.1.0, January 7, 2014
 
 Any fixes should be applied on the appropriate release branch and be cherry-picked to
 master.
