@@ -323,7 +323,8 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                         form: form,
                         current_item: scope.organization,
                         list: OrganizationList,
-                        field: 'organization'
+                        field: 'organization',
+                        input_type: 'radio'
                     });
 
                     scope.$emit('inventoryPropertiesLoaded');
