@@ -417,6 +417,8 @@ class Job(UnifiedJob, JobOptions):
 
     def generate_dependencies(self, active_tasks):
         from awx.main.models import InventoryUpdate, ProjectUpdate
+        if self.inventory is None or self.project is None:
+            return []
         inventory_sources = self.inventory.inventory_sources.filter(active=True, update_on_launch=True)
         project_found = False
         inventory_sources_found = []

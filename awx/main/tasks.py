@@ -163,6 +163,7 @@ def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     i = Inventory.objects.filter(id=inventory_id)
     if not i.exists():
         logger.error("Update Inventory Computed Fields failed due to missing inventory: " + str(inventory_id))
+        return
     i = i[0]
     i.update_computed_fields(update_hosts=should_update_hosts)
 

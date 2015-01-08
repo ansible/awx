@@ -102,7 +102,8 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
     except Inventory.DoesNotExist:
         pass
     else:
-        update_inventory_computed_fields.delay(inventory.id, True)
+        if inventory is not None:
+            update_inventory_computed_fields.delay(inventory.id, True)
 
 def store_initial_active_state(sender, **kwargs):
     instance = kwargs['instance']
