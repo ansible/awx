@@ -12,8 +12,8 @@
 angular.module('CustomInventoryListDefinition', [])
     .value('CustomInventoryList', {
 
-        name: 'custom_inventories',
-        iterator: 'custom_inventory',
+        name:  'source_scripts' ,  // 'custom_inventories',
+        iterator: 'source_script',  //'custom_inventory',
         selectTitle: 'Add custom inventory',
         editTitle: 'Custom Inventories',
         // selectInstructions: "<p>Select existing credentials by clicking each credential or checking the related checkbox. When " +
@@ -37,7 +37,7 @@ angular.module('CustomInventoryListDefinition', [])
             },
             organization: {
                 label: 'Organization',
-                ngBind: 'custom_inventory.summary_fields.organization.name',
+                ngBind: 'source_script.summary_fields.organization.name',
                 // linkTo: '/#/organizations/{{ custom_inventory.organization }}',
                 sourceModel: 'organization',
                 sourceField: 'name',
@@ -56,7 +56,7 @@ angular.module('CustomInventoryListDefinition', [])
 
         fieldActions: {
             edit: {
-                ngClick: "editCustomInv(custom_inventory.id)",
+                ngClick: "editCustomInv(source_script.id)",
                 icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
@@ -65,7 +65,7 @@ angular.module('CustomInventoryListDefinition', [])
             },
 
             "delete": {
-                ngClick: "deleteCustomInv(custom_inventory.id, custom_inventory.name)",
+                ngClick: "deleteCustomInv(source_script.id, source_script.name)",
                 icon: 'fa-trash',
                 label: 'Delete',
                 "class": 'btn-sm',

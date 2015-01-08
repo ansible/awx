@@ -63,7 +63,7 @@ angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'Sc
 
             SearchInit({
                 scope: scope,
-                set: 'custom_inventories',
+                set: 'source_scripts' ,  // 'custom_inventories',
                 list: list,
                 url: defaultUrl
             });
@@ -219,7 +219,7 @@ function($compile, SchedulerInit, Rest, Wait, CustomInventoryList, CustomInvento
 
                     SearchInit({
                         scope: scope,
-                        set: 'custom_inventories',
+                        set: 'source_scripts', //'custom_inventories',
                         list: list,
                         url: url
                     });
@@ -324,7 +324,7 @@ function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventor
 
                     SearchInit({
                         scope: scope,
-                        set: 'custom_inventories',
+                        set: 'source_scripts',  //'custom_inventories',
                         list: list,
                         url: url
                     });

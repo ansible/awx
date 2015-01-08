@@ -112,7 +112,7 @@ angular.module('SourceFormDefinition', [])
                 ngShow: "source && source.value === 'custom'",
                 sourceModel: 'source_script',
                 sourceField: 'name',
-                ngClick: 'lookUpCustom_inventory()',
+                ngClick: 'lookUpSource_script()' , //'lookUpCustom_inventory()',
                 addRequired: true,
                 editRequired: true
             },
