@@ -559,6 +559,13 @@ class Ec2Inventory(object):
             if self.nested_groups:
                 self.push_group(self.inventory, 'types', type_name)
 
+        # Inventory: Group by VPC
+        if self.group_by_vpc_id and instance.subnet_group and instance.subnet_group.vpc_id:
+            vpc_id_name = self.to_safe(instance.subnet_group.vpc_id)
+            self.push(self.inventory, vpc_id_name, dest)
+            if self.nested_groups:
+                self.push_group(self.inventory, 'vpcs', vpc_id_name)
+
         # Inventory: Group by security group
         if self.group_by_security_group:
             try:
