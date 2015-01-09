@@ -257,6 +257,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'collection',
                 title: 'Organizations',
                 iterator: 'organization',
+                index: false,
                 open: false,
 
                 actions: {
@@ -297,7 +298,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             },
 
             schedules: {
-                include: "SchedulesList"
+                include: "SchedulesList",
+                index: false
             }
 
         },

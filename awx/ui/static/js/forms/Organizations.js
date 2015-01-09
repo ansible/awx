@@ -68,6 +68,7 @@ angular.module('OrganizationFormDefinition', [])
                 type: 'collection',
                 title: 'Users',
                 iterator: 'user',
+                index: false,
                 open: false,
 
                 actions: {
@@ -114,6 +115,7 @@ angular.module('OrganizationFormDefinition', [])
                 type: 'collection',
                 title: 'Administrators',
                 iterator: 'admin', // Singular form of name (e.g.  thing)
+                index: false,
                 open: false, // Open accordion on load?
                 base: '/users',
                 actions: { // Actions displayed top right of list

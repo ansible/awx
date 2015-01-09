@@ -132,6 +132,7 @@ angular.module('UserFormDefinition', [])
                 title: 'Credentials',
                 iterator: 'credential',
                 open: false,
+                index: false,
 
                 actions: {
                     add: {
@@ -175,6 +176,7 @@ angular.module('UserFormDefinition', [])
                 title: 'Permissions',
                 iterator: 'permission',
                 open: false,
+                index: false,
 
                 actions: {
                     add: {
@@ -236,6 +238,7 @@ angular.module('UserFormDefinition', [])
                 title: 'Admin of Organizations',
                 iterator: 'adminof', // Singular form of name (e.g.  thing)
                 open: false, // Open accordion on load?
+                index: false,
                 base: '/organizations',
 
                 actions: {},
@@ -255,6 +258,7 @@ angular.module('UserFormDefinition', [])
                 type: 'collection',
                 title: 'Organizations',
                 iterator: 'organization',
+                index: false,
                 open: false,
 
                 actions: {},
@@ -275,6 +279,7 @@ angular.module('UserFormDefinition', [])
                 title: 'Teams',
                 iterator: 'team',
                 open: false,
+                index: false,
 
                 actions: {},
 

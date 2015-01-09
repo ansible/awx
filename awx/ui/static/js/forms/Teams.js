@@ -80,6 +80,7 @@ angular.module('TeamFormDefinition', [])
                 title: 'Credentials',
                 iterator: 'credential',
                 open: false,
+                index: false,
 
                 actions: {
                     add: {
@@ -123,6 +124,7 @@ angular.module('TeamFormDefinition', [])
                 title: 'Permissions',
                 iterator: 'permission',
                 open: false,
+                index: false,
 
                 actions: {
                     add: {
@@ -183,6 +185,7 @@ angular.module('TeamFormDefinition', [])
                 title: 'Projects',
                 iterator: 'project',
                 open: false,
+                index: false,
 
                 actions: {
                     add: {
@@ -225,6 +228,7 @@ angular.module('TeamFormDefinition', [])
                 title: 'Users',
                 iterator: 'user',
                 open: false,
+                index: false,
 
                 actions: {
                     add: {
