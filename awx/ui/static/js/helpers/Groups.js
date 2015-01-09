@@ -6,25 +6,31 @@
  *  Routines that handle group add/edit/delete on the Inventory tree widget.
  *
  */
-   /**
+'use strict';
+
+/**
  * @ngdoc function
  * @name helpers.function:Groups
  * @description    inventory tree widget add/edit/delete
 */
-'use strict';
-
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition', 'SearchHelper',
-    'PaginationHelpers', 'ListGenerator', 'AuthService', 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
-    'JobSubmissionHelper', 'RefreshHelper', 'PromptDialog', 'CredentialsListDefinition', 'InventoryTree',
-    'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition', 'LogViewerHelper',
-    'SchedulesHelper' ])
+'PaginationHelpers', 'ListGenerator', 'AuthService', 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
+'JobSubmissionHelper', 'RefreshHelper', 'PromptDialog', 'CredentialsListDefinition', 'InventoryTree',
+'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition', 'LogViewerHelper',
+'SchedulesHelper'
+])
 
+/**
+ *
+ * Lookup options for group source and build an array of drop-down choices
+ *
+ */
 .factory('GetSourceTypeOptions', ['Rest', 'ProcessErrors', 'GetBasePath',
     function (Rest, ProcessErrors, GetBasePath) {
         return function (params) {
-            // Lookup options for source and build an array of drop-down choices
             var scope = params.scope,
                 variable = params.variable;
+
             if (scope[variable] === undefined) {
                 scope[variable] = [];
                 Rest.setUrl(GetBasePath('inventory_sources'));
@@ -51,7 +57,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     }
 ])
 
-
+/**
+ *
+ * TODO: Document
+ *
+ */
 .factory('ViewUpdateStatus', ['Rest', 'ProcessErrors', 'GetBasePath', 'Alert', 'Wait', 'Empty', 'Find', 'LogViewer',
     function (Rest, ProcessErrors, GetBasePath, Alert, Wait, Empty, Find, LogViewer) {
         return function (params) {
@@ -96,6 +106,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     }
 ])
 
+/**
+ *
+ * TODO: Document
+ *
+ */
 .factory('GetHostsStatusMsg', [
     function () {
         return function (params) {
@@ -132,6 +147,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     }
 ])
 
+/**
+ *
+ * TODO: Document
+ *
+ */
 .factory('GetSyncStatusMsg', [ 'Empty',
     function (Empty) {
         return function (params) {
@@ -207,6 +227,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     }
 ])
 
+/**
+ *
+ * TODO: Document
+ *
+ */
 .factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange', 'CustomInventoryList' ,
     function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange, CustomInventoryList) {
         return function (params) {
@@ -303,8 +328,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     }
 ])
 
-
-// Cancel a pending or running inventory sync
+/**
+ *
+ * Cancel a pending or running inventory sync
+ *
+ */
 .factory('GroupsCancelUpdate', ['Empty', 'Rest', 'ProcessErrors', 'Alert', 'Wait', 'Find',
     function (Empty, Rest, ProcessErrors, Alert, Wait, Find) {
         return function (params) {
@@ -389,119 +417,124 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
  * Add the list of schedules to the Group Edit modal
  *
  */
-.factory('GroupsScheduleListInit', ['GroupsScheduleEdit', 'SchedulesList', 'GenerateList', 'SearchInit', 'PaginateInit', 'Rest', 'PageRangeSetup',
-'Wait', 'ProcessErrors', 'Find', 'ToggleSchedule', 'DeleteSchedule', 'GetBasePath', 'SchedulesListInit',
-function(GroupsScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Rest, PageRangeSetup, Wait, ProcessErrors, Find,
-ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
-    return function(params) {
-        var schedule_scope = params.scope,
-            url = params.url,
-            list;
+.factory('GroupsScheduleListInit', ['GroupsScheduleEdit', 'SchedulesList', 'GenerateList', 'SearchInit', 'PaginateInit', 'Rest',
+'PageRangeSetup', 'Wait', 'ProcessErrors', 'Find', 'ToggleSchedule', 'DeleteSchedule', 'GetBasePath', 'SchedulesListInit',
+    function(GroupsScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Rest, PageRangeSetup, Wait, ProcessErrors, Find,
+    ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
+        return function(params) {
+            var schedule_scope = params.scope,
+                url = params.url,
+                list;
 
-        // Clean up
-        $('#schedules-list').hide().empty();
-        $('#schedules-form-container').hide();
-        $('#schedules-form').empty();
-        $('.tooltip').each(function () {
-            $(this).remove();
-        });
-        $('.popover').each(function () {
-            $(this).remove();
-        });
-
-        // Add schedules list
-        list = angular.copy(SchedulesList);
-        delete list.fields.dtend;
-        delete list.actions.stream;
-        list.well = false;
-        GenerateList.inject(list, {
-            mode: 'edit',
-            id: 'schedules-list',
-            breadCrumbs: false,
-            searchSize: 'col-lg-6 col-md-5 col-sm-5 col-xs-5',
-            scope: schedule_scope
-        });
-
-        $('#schedules-list').show();
-
-        // Removing screws up /home/groups page
-        // if (schedule_scope.removePostRefresh) {
-        //    schedule_scope.removePostRefresh();
-        //}
-        schedule_scope.removePostRefresh = schedule_scope.$on('PostRefresh', function() {
-            SchedulesListInit({
-                scope: schedule_scope,
-                list: list,
-                choices: null
+            // Clean up
+            $('#schedules-list').hide().empty();
+            $('#schedules-form-container').hide();
+            $('#schedules-form').empty();
+            $('.tooltip').each(function () {
+                $(this).remove();
             });
-        });
-        SearchInit({
-            scope: schedule_scope,
-            set: 'schedules',
-            list: SchedulesList,
-            url: url
-        });
-        PaginateInit({
-            scope: schedule_scope,
-            list: SchedulesList,
-            url: url,
-            pageSize: 5
-        });
-        schedule_scope.search(list.iterator);
+            $('.popover').each(function () {
+                $(this).remove();
+            });
 
-        schedule_scope.refreshSchedules = function() {
+            // Add schedules list
+            list = angular.copy(SchedulesList);
+            delete list.fields.dtend;
+            delete list.actions.stream;
+            list.well = false;
+            GenerateList.inject(list, {
+                mode: 'edit',
+                id: 'schedules-list',
+                breadCrumbs: false,
+                searchSize: 'col-lg-6 col-md-5 col-sm-5 col-xs-5',
+                scope: schedule_scope
+            });
+
+            $('#schedules-list').show();
+
+            // Removing screws up /home/groups page
+            // if (schedule_scope.removePostRefresh) {
+            //    schedule_scope.removePostRefresh();
+            //}
+            schedule_scope.removePostRefresh = schedule_scope.$on('PostRefresh', function() {
+                SchedulesListInit({
+                    scope: schedule_scope,
+                    list: list,
+                    choices: null
+                });
+            });
+            SearchInit({
+                scope: schedule_scope,
+                set: 'schedules',
+                list: SchedulesList,
+                url: url
+            });
+            PaginateInit({
+                scope: schedule_scope,
+                list: SchedulesList,
+                url: url,
+                pageSize: 5
+            });
             schedule_scope.search(list.iterator);
-        };
 
-        schedule_scope.editSchedule = function(id) {
-            GroupsScheduleEdit({ scope: schedule_scope, mode: 'edit', url: GetBasePath('schedules') + id + '/' });
-        };
+            schedule_scope.refreshSchedules = function() {
+                schedule_scope.search(list.iterator);
+            };
 
-        schedule_scope.addSchedule = function() {
-            GroupsScheduleEdit({ scope: schedule_scope, mode: 'add', url: url });
-        };
+            schedule_scope.editSchedule = function(id) {
+                GroupsScheduleEdit({ scope: schedule_scope, mode: 'edit', url: GetBasePath('schedules') + id + '/' });
+            };
 
-        if (schedule_scope.removeSchedulesRefresh) {
-            schedule_scope.removeSchedulesRefresh();
-        }
-        schedule_scope.removeSchedulesRefresh = schedule_scope.$on('SchedulesRefresh', function() {
-            schedule_scope.search(list.iterator);
-        });
+            schedule_scope.addSchedule = function() {
+                GroupsScheduleEdit({ scope: schedule_scope, mode: 'add', url: url });
+            };
 
-        schedule_scope.toggleSchedule = function(event, id) {
-            try {
-                $(event.target).tooltip('hide');
+            if (schedule_scope.removeSchedulesRefresh) {
+                schedule_scope.removeSchedulesRefresh();
             }
-            catch(e) {
-                // ignore
-            }
-            ToggleSchedule({
-                scope: schedule_scope,
-                id: id,
-                callback: 'SchedulesRefresh'
+            schedule_scope.removeSchedulesRefresh = schedule_scope.$on('SchedulesRefresh', function() {
+                schedule_scope.search(list.iterator);
             });
+
+            schedule_scope.toggleSchedule = function(event, id) {
+                try {
+                    $(event.target).tooltip('hide');
+                }
+                catch(e) {
+                    // ignore
+                }
+                ToggleSchedule({
+                    scope: schedule_scope,
+                    id: id,
+                    callback: 'SchedulesRefresh'
+                });
+            };
+
+            schedule_scope.deleteSchedule = function(id) {
+                DeleteSchedule({
+                    scope: schedule_scope,
+                    id: id,
+                    callback: 'SchedulesRefresh'
+                });
+            };
         };
+    }
+])
 
-        schedule_scope.deleteSchedule = function(id) {
-            DeleteSchedule({
-                scope: schedule_scope,
-                id: id,
-                callback: 'SchedulesRefresh'
-            });
+/**
+ *
+ * TODO: Document
+ *
+ */
+.factory('SetSchedulesInnerDialogSize', [
+    function() {
+        return function() {
+            var height = $('#group-modal-dialog').outerHeight() - $('#group_tabs').outerHeight() - 25;
+            height = height - 110 - $('#schedules-buttons').outerHeight();
+            $('#schedules-form-container-body').height(height);
         };
-
-    };
-}])
-
-
-.factory('SetSchedulesInnerDialogSize', [ function() {
-    return function() {
-        var height = $('#group-modal-dialog').outerHeight() - $('#group_tabs').outerHeight() - 25;
-        height = height - 110 - $('#schedules-buttons').outerHeight();
-        $('#schedules-form-container-body').height(height);
-    };
-}])
-
+    }
+])
 
 /**
  *
@@ -509,156 +542,161 @@ ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
  *
  */
 .factory('GroupsScheduleEdit', ['$compile','SchedulerInit', 'Rest', 'Wait', 'SetSchedulesInnerDialogSize', 'SchedulePost', 'ProcessErrors',
-function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, ProcessErrors) {
-    return function(params) {
-        var parent_scope = params.scope,
-            mode = params.mode,  // 'add' or 'edit'
-            url = params.url,
-            scope = parent_scope.$new(),
-            schedule = {},
-            scheduler,
-            target,
-            showForm,
-            list,
-            detail,
-            restoreList,
-            container,
-            elem;
+    function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, SchedulePost, ProcessErrors) {
+        return function(params) {
+            var parent_scope = params.scope,
+                mode = params.mode,  // 'add' or 'edit'
+                url = params.url,
+                scope = parent_scope.$new(),
+                schedule = {},
+                scheduler,
+                target,
+                showForm,
+                list,
+                detail,
+                restoreList,
+                container,
+                elem;
 
-        Wait('start');
-        detail = $('#schedules-detail').hide();
-        list = $('#schedules-list');
-        target = $('#schedules-form');
-        container = $('#schedules-form-container');
-        // Clean up any lingering stuff
-        container.hide();
-        target.empty();
-        $('.tooltip').each(function () {
-            $(this).remove();
-        });
-        $('.popover').each(function () {
-            $(this).remove();
-        });
+            Wait('start');
+            detail = $('#schedules-detail').hide();
+            list = $('#schedules-list');
+            target = $('#schedules-form');
+            container = $('#schedules-form-container');
+            // Clean up any lingering stuff
+            container.hide();
+            target.empty();
+            $('.tooltip').each(function () {
+                $(this).remove();
+            });
+            $('.popover').each(function () {
+                $(this).remove();
+            });
 
-        elem = angular.element(document.getElementById('schedules-form-container'));
-        $compile(elem)(scope);
+            elem = angular.element(document.getElementById('schedules-form-container'));
+            $compile(elem)(scope);
 
-        if (scope.removeScheduleReady) {
-            scope.removeScheduleReady();
-        }
-        scope.removeScheduleReady = scope.$on('ScheduleReady', function() {
-            // Insert the scheduler widget into the hidden div
-            scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
-            scheduler.inject('schedules-form', false);
-            scheduler.injectDetail('schedules-detail', false);
-            scheduler.clear();
-            scope.formShowing = true;
-            scope.showRRuleDetail = false;
-            scope.schedulesTitle = (mode === 'edit') ? 'Edit Schedule' : 'Create Schedule';
+            if (scope.removeScheduleReady) {
+                scope.removeScheduleReady();
+            }
+            scope.removeScheduleReady = scope.$on('ScheduleReady', function() {
+                // Insert the scheduler widget into the hidden div
+                scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
+                scheduler.inject('schedules-form', false);
+                scheduler.injectDetail('schedules-detail', false);
+                scheduler.clear();
+                scope.formShowing = true;
+                scope.showRRuleDetail = false;
+                scope.schedulesTitle = (mode === 'edit') ? 'Edit Schedule' : 'Create Schedule';
 
-            // display the scheduler widget
-            showForm = function() {
-                Wait('stop');
-                $('#schedules-overlay').width($('#schedules-tab')
-                    .width()).height($('#schedules-tab').height()).show();
-                container.width($('#schedules-tab').width() - 18);
-                SetSchedulesInnerDialogSize();
-                container.show('slide', { direction: 'left' }, 300);
-                $('#group-save-button').prop('disabled', true);
-                target.show();
-                if (mode === 'edit') {
-                    scope.$apply(function() {
-                        scheduler.setRRule(schedule.rrule);
-                        scheduler.setName(schedule.name);
-                    });
+                // display the scheduler widget
+                showForm = function() {
+                    Wait('stop');
+                    $('#schedules-overlay').width($('#schedules-tab')
+                        .width()).height($('#schedules-tab').height()).show();
+                    container.width($('#schedules-tab').width() - 18);
+                    SetSchedulesInnerDialogSize();
+                    container.show('slide', { direction: 'left' }, 300);
+                    $('#group-save-button').prop('disabled', true);
+                    target.show();
+                    if (mode === 'edit') {
+                        scope.$apply(function() {
+                            scheduler.setRRule(schedule.rrule);
+                            scheduler.setName(schedule.name);
+                        });
+                    }
+                };
+                setTimeout(function() { showForm(); }, 1000);
+            });
+
+            restoreList = function() {
+                $('#group-save-button').prop('disabled', false);
+                list.show('slide', { direction: 'right' }, 500);
+                $('#schedules-overlay').width($('#schedules-tab').width()).height($('#schedules-tab').height()).hide();
+                parent_scope.refreshSchedules();
+            };
+
+            scope.showScheduleDetail = function() {
+                if (scope.formShowing) {
+                    if (scheduler.isValid()) {
+                        detail.width($('#schedules-form').width()).height($('#schedules-form').height());
+                        target.hide();
+                        detail.show();
+                        scope.formShowing = false;
+                    }
+                }
+                else {
+                    detail.hide();
+                    target.show();
+                    scope.formShowing = true;
                 }
             };
-            setTimeout(function() { showForm(); }, 1000);
-        });
 
-        restoreList = function() {
-            $('#group-save-button').prop('disabled', false);
-            list.show('slide', { direction: 'right' }, 500);
-            $('#schedules-overlay').width($('#schedules-tab').width()).height($('#schedules-tab').height()).hide();
-            parent_scope.refreshSchedules();
-        };
+            if (scope.removeScheduleSaved) {
+                scope.removeScheduleSaved();
+            }
+            scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
+                Wait('stop');
+                container.hide('slide', { direction: 'right' }, 500, restoreList);
+                scope.$destroy();
+            });
 
-        scope.showScheduleDetail = function() {
-            if (scope.formShowing) {
+            scope.saveScheduleForm = function() {
                 if (scheduler.isValid()) {
-                    detail.width($('#schedules-form').width()).height($('#schedules-form').height());
-                    target.hide();
-                    detail.show();
-                    scope.formShowing = false;
+                    scope.schedulerIsValid = true;
+                    SchedulePost({
+                        scope: scope,
+                        url: url,
+                        scheduler: scheduler,
+                        callback: 'ScheduleSaved',
+                        mode: mode,
+                        schedule: schedule
+                    });
                 }
+                else {
+                    scope.schedulerIsValid = false;
+                }
+            };
+
+            scope.cancelScheduleForm = function() {
+                container.hide('slide', { direction: 'right' }, 500, restoreList);
+                scope.$destroy();
+            };
+
+            if (mode === 'edit') {
+                // Get the existing record
+                Rest.setUrl(url);
+                Rest.get()
+                    .success(function(data) {
+                        schedule = data;
+                        if (!/DTSTART/.test(schedule.rrule)) {
+                            schedule.rrule += ";DTSTART=" + schedule.dtstart.replace(/\.\d+Z$/,'Z');
+                        }
+                        schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
+                        schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
+                        scope.$emit('ScheduleReady');
+                    })
+                    .error(function(data,status){
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to get: ' + url + ' GET returned: ' + status });
+                    });
             }
             else {
-                detail.hide();
-                target.show();
-                scope.formShowing = true;
+                scope.$emit('ScheduleReady');
             }
         };
+    }
+])
 
-        if (scope.removeScheduleSaved) {
-            scope.removeScheduleSaved();
-        }
-        scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
-            Wait('stop');
-            container.hide('slide', { direction: 'right' }, 500, restoreList);
-            scope.$destroy();
-        });
-
-        scope.saveScheduleForm = function() {
-            if (scheduler.isValid()) {
-                scope.schedulerIsValid = true;
-                SchedulePost({
-                    scope: scope,
-                    url: url,
-                    scheduler: scheduler,
-                    callback: 'ScheduleSaved',
-                    mode: mode,
-                    schedule: schedule
-                });
-            }
-            else {
-                scope.schedulerIsValid = false;
-            }
-        };
-
-        scope.cancelScheduleForm = function() {
-            container.hide('slide', { direction: 'right' }, 500, restoreList);
-            scope.$destroy();
-        };
-
-        if (mode === 'edit') {
-            // Get the existing record
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    schedule = data;
-                    if (!/DTSTART/.test(schedule.rrule)) {
-                        schedule.rrule += ";DTSTART=" + schedule.dtstart.replace(/\.\d+Z$/,'Z');
-                    }
-                    schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
-                    schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
-                    scope.$emit('ScheduleReady');
-                })
-                .error(function(data,status){
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to get: ' + url + ' GET returned: ' + status });
-                });
-        }
-        else {
-            scope.$emit('ScheduleReady');
-        }
-    };
-}])
-
-
+/**
+ *
+ * TODO: Document
+ *
+ */
 .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
-    'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-    'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find', 'WatchInventoryWindowResize',
-    'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize',
+'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
+'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find', 'WatchInventoryWindowResize',
+'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize',
     function ($rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
         GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, GroupsScheduleListInit,
@@ -1375,10 +1413,15 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
     }
 ])
 
+/**
+ *
+ * Set's up the process for deleting a group from an inventory page
+ *
+ */
 .factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
-    'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'BuildTree', 'Find', 'CreateDialog',
+'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'BuildTree', 'Find', 'CreateDialog',
     function ($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, Wait, BuildTree, Find, CreateDialog) {
+    GetBasePath, Wait, BuildTree, Find, CreateDialog) {
         return function (params) {
 
             var scope = params.scope,
@@ -1420,6 +1463,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             if (scope.removeDeleteDialogReady) {
                 scope.removeDeleteDialogReady();
             }
+
             scope.removeDeleteDialogReady = scope.$on('DeleteDialogReady', function() {
                 Wait('stop');
                 $('#group-delete-dialog').dialog('open');
@@ -1428,6 +1472,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             if (scope.removeShowDeleteDialog) {
                 scope.removeShowDeleteDialog();
             }
+
             scope.removeShowDeleteDialog = scope.$on('ShowDeleteDialog', function() {
                 scope.group_name = node.name;
                 scope.groupsCount = groups.length;
@@ -1447,6 +1492,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             if (scope.removeChildrenReady) {
                 scope.removeChildrenReady();
             }
+
             scope.removeChildrenReady = scope.$on('ChildrenReady', function() {
                 childCount++;
                 if (childCount === 2) {
@@ -1455,6 +1501,43 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             });
 
             Wait('start');
+
+            // this function is used to make sure that we get all of the groups/hosts,
+            // not just the first page
+            scope.next_iterator = function(next_url, type) {
+                Rest.setUrl(next_url);
+                Rest.get()
+                    .success(function(data) {
+                        if (data.count) {
+                            if (type === "groups") {
+                                data.results.forEach(function(group) {
+                                    groups.push(group);
+                                });
+                            }
+                            else if (type === "hosts") {
+                                data.results.forEach(function(host) {
+                                    hosts.push(host);
+                                });
+                            }
+                        }
+
+                        if (data.next) {
+                            if (type === "groups") {
+                                scope.next_iterator(data.next, "groups");
+                            } else if (type === "hosts") {
+                                scope.next_iterator(data.next, "hosts");
+                            }
+                        }
+                        else {
+                            scope.$emit('ChildrenReady');
+                        }
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to retrieve related groups. GET returned: ' + status
+                        });
+                    });
+            };
 
             if (node.related.children) {
                 Rest.setUrl(node.related.children);
@@ -1465,7 +1548,12 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                                 groups.push(group);
                             });
                         }
-                        scope.$emit('ChildrenReady');
+
+                        if (data.next) {
+                            scope.next_iterator(data.next, "groups");
+                        } else {
+                            scope.$emit('ChildrenReady');
+                        }
                     })
                     .error(function(data, status) {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -1486,7 +1574,11 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
                                 hosts.push(host);
                             });
                         }
-                        scope.$emit('ChildrenReady');
+                        if (data.next) {
+                            scope.next_iterator(data.next, "hosts");
+                        } else {
+                            scope.$emit('ChildrenReady');
+                        }
                     })
                     .error( function(data, status) {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -1501,6 +1593,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             if (scope.removeDisassociateGroup) {
                 scope.removeDisassociateGroup();
             }
+
             scope.removeDisassociateGroup = scope.$on('DisassociateGroup', function() {
                 var data, url;
                 if (!scope.selected_group_id) {
@@ -1527,6 +1620,7 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
             if (scope.removeDeleteGroup) {
                 scope.removeDeleteGroup();
             }
+
             scope.removeDeleteGroup = scope.$on('DeleteGroup', function() {
                 var url = GetBasePath('groups') + node.id + '/';
                 Rest.setUrl(url);
@@ -1560,328 +1654,346 @@ function($compile, SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize, Sched
     }
 ])
 
-.factory('GetRootGroups', ['Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
-    return function(params) {
-        var scope = params.scope,
-            inventory_id = params.inventory_id,
-            //group_id = params.group_id,
-            callback = params.callback,
-            url;
+/**
+ *
+ * TODO: Document
+ *
+ */
+.factory('GetRootGroups', ['Rest', 'ProcessErrors', 'GetBasePath',
+    function(Rest, ProcessErrors, GetBasePath) {
+        return function(params) {
+            var scope = params.scope,
+                inventory_id = params.inventory_id,
+                //group_id = params.group_id,
+                callback = params.callback,
+                url;
 
-        url = GetBasePath('inventory') + inventory_id + '/root_groups/';
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                scope.$emit(callback, data.results);
-            })
-            .error(function(data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-            });
-    };
-}])
-
-.factory('GroupsCopy', ['$compile', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'GenerateList', 'GroupList', 'SearchInit',
-    'PaginateInit', 'GetRootGroups',
-    function($compile, Rest, ProcessErrors, CreateDialog, GetBasePath, Wait, GenerateList, GroupList, SearchInit, PaginateInit, GetRootGroups) {
-    return function(params) {
-
-        var group_id = params.group_id,
-            parent_scope = params.scope,
-            scope = parent_scope.$new(),
-            parent_group = parent_scope.selected_group_id,
-            buttonSet, url, group;
-
-        buttonSet = [{
-            label: "Cancel",
-            onClick: function() {
-                scope.cancel();
-            },
-            icon: "fa-times",
-            "class": "btn btn-default",
-            "id": "group-copy-cancel-button"
-        },{
-            label: "OK",
-            onClick: function() {
-                scope.performCopy();
-            },
-            icon: "fa-check",
-            "class": "btn btn-primary",
-            "id": "group-copy-ok-button"
-        }];
-
-        if (scope.removeGroupsCopyPostRefresh) {
-            scope.removeGroupsCopyPostRefresh();
-        }
-        scope.removeGroupCopyPostRefresh = scope.$on('PostRefresh', function() {
-            scope.copy_groups.forEach(function(row, i) {
-                scope.copy_groups[i].checked = '0';
-            });
-            Wait('stop');
-            $('#group-copy-dialog').dialog('open');
-            $('#group-copy-ok-button').attr('disabled','disabled');
-
-            // prevent backspace from navigation when not in input or textarea field
-            $(document).on("keydown", function (e) {
-                if (e.which === 8 && !$(e.target).is('input[type="text"], textarea')) {
-                    e.preventDefault();
-                }
-            });
-
-        });
-
-        if (scope.removeCopyDialogReady) {
-            scope.removeCopyDialogReady();
-        }
-        scope.removeCopyDialogReady = scope.$on('CopyDialogReady', function() {
-            var url = GetBasePath('inventory') + parent_scope.inventory.id + '/groups/';
-            url += (parent_group) ? '?not__id__in=' + group_id + ',' + parent_group : '?not__id=' + group_id;
-            GenerateList.inject(GroupList, {
-                mode: 'lookup',
-                id: 'copy-select-container',
-                scope: scope
-                //,
-                //instructions: instructions
-            });
-            SearchInit({
-                scope: scope,
-                set: GroupList.name,
-                list: GroupList,
-                url: url
-            });
-            PaginateInit({
-                scope: scope,
-                list: GroupList,
-                url: url,
-                mode: 'lookup'
-            });
-            scope.search(GroupList.iterator);
-        });
-
-        if (scope.removeShowDialog) {
-            scope.removeShowDialog();
-        }
-        scope.removeShowDialog = scope.$on('ShowDialog', function() {
-            var d;
-            scope.name = group.name;
-            scope.copy_choice = "copy";
-            d = angular.element(document.getElementById('group-copy-dialog'));
-            $compile(d)(scope);
-
-            CreateDialog({
-                id: 'group-copy-dialog',
-                scope: scope,
-                buttons: buttonSet,
-                width: 650,
-                height: 650,
-                minWidth: 600,
-                title: 'Copy or Move Group',
-                callback: 'CopyDialogReady',
-                onClose: function() {
-                    scope.cancel();
-                }
-            });
-        });
-
-        if (scope.removeRootGroupsReady) {
-            scope.removeRootGroupsReady();
-        }
-        scope.removeRootGroupsReady = scope.$on('RootGroupsReady', function(e, root_groups) {
-            scope.offer_root_group = true;
-            scope.use_root_group = false;
-            root_groups.every(function(row) {
-                if (row.id === group_id) {
-                    scope.offer_root_group = false;
-                    return false;
-                }
-                return true;
-            });
-            url = GetBasePath('groups') + group_id + '/';
+            url = GetBasePath('inventory') + inventory_id + '/root_groups/';
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    group = data;
-                    scope.$emit('ShowDialog');
+                    scope.$emit(callback, data.results);
                 })
                 .error(function(data, status) {
                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                         msg: 'Call to ' + url + ' failed. GET returned: ' + status });
                 });
-        });
-
-        Wait('start');
-
-        GetRootGroups({
-            scope: scope,
-            group_id: group_id,
-            inventory_id: parent_scope.inventory.id,
-            callback: 'RootGroupsReady'
-        });
-
-        scope.cancel = function() {
-            $(document).off("keydown");
-            try {
-                $('#group-copy-dialog').dialog('close');
-            }
-            catch(e) {
-                // ignore
-            }
-            scope.searchCleanup();
-            parent_scope.restoreSearch();
-            scope.$destroy();
         };
+    }
+])
 
-        scope['toggle_' + GroupList.iterator] = function (id) {
-            var count = 0,
-                list = GroupList;
-            scope[list.name].forEach( function(row, i) {
-                if (row.id === id) {
-                    if (row.checked === '0') {
-                        scope[list.name][i].checked = '1';
-                        scope[list.name][i].success_class = 'success';
-                    }
-                    else {
-                        scope[list.name][i].checked = '0';
-                        scope[list.name][i].success_class = '';
-                    }
-                } else {
-                    scope[list.name][i].checked = '0';
-                    scope[list.name][i].success_class = '';
-                }
-            });
-            // Check if any rows are checked
-            scope[list.name].forEach(function(row) {
-                if (row.checked === '1') {
-                    count++;
-                }
-            });
-            if (count === 0) {
-                $('#group-copy-ok-button').attr('disabled','disabled');
-            }
-            else {
-                $('#group-copy-ok-button').removeAttr('disabled');
-            }
-        };
+/**
+ *
+ * TODO: Document
+ *
+ */
+.factory('GroupsCopy', ['$compile', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'GenerateList', 'GroupList', 'SearchInit',
+'PaginateInit', 'GetRootGroups',
+    function($compile, Rest, ProcessErrors, CreateDialog, GetBasePath, Wait, GenerateList, GroupList, SearchInit, PaginateInit, GetRootGroups) {
+        return function(params) {
 
-        scope.toggleUseRootGroup = function() {
-            var list = GroupList;
-            //console.log("scope.use_root_group: " + scope.use_root_group);
-            if (scope.use_root_group) {
-                $('#group-copy-ok-button').removeAttr('disabled');
+            var group_id = params.group_id,
+                parent_scope = params.scope,
+                scope = parent_scope.$new(),
+                parent_group = parent_scope.selected_group_id,
+                buttonSet, url, group;
+
+            buttonSet = [{
+                label: "Cancel",
+                onClick: function() {
+                    scope.cancel();
+                },
+                icon: "fa-times",
+                "class": "btn btn-default",
+                "id": "group-copy-cancel-button"
+            },{
+                label: "OK",
+                onClick: function() {
+                    scope.performCopy();
+                },
+                icon: "fa-check",
+                "class": "btn btn-primary",
+                "id": "group-copy-ok-button"
+            }];
+
+            if (scope.removeGroupsCopyPostRefresh) {
+                scope.removeGroupsCopyPostRefresh();
             }
-            else {
-                // check for group selection
+            scope.removeGroupCopyPostRefresh = scope.$on('PostRefresh', function() {
+                scope.copy_groups.forEach(function(row, i) {
+                    scope.copy_groups[i].checked = '0';
+                });
+                Wait('stop');
+                $('#group-copy-dialog').dialog('open');
                 $('#group-copy-ok-button').attr('disabled','disabled');
-                scope[list.name].every(function(row) {
-                    if (row.checked === '1') {
-                        $('#group-copy-ok-button').removeAttr('disabled');
+
+                // prevent backspace from navigation when not in input or textarea field
+                $(document).on("keydown", function (e) {
+                    if (e.which === 8 && !$(e.target).is('input[type="text"], textarea')) {
+                        e.preventDefault();
+                    }
+                });
+
+            });
+
+            if (scope.removeCopyDialogReady) {
+                scope.removeCopyDialogReady();
+            }
+            scope.removeCopyDialogReady = scope.$on('CopyDialogReady', function() {
+                var url = GetBasePath('inventory') + parent_scope.inventory.id + '/groups/';
+                url += (parent_group) ? '?not__id__in=' + group_id + ',' + parent_group : '?not__id=' + group_id;
+                GenerateList.inject(GroupList, {
+                    mode: 'lookup',
+                    id: 'copy-select-container',
+                    scope: scope
+                    //,
+                    //instructions: instructions
+                });
+                SearchInit({
+                    scope: scope,
+                    set: GroupList.name,
+                    list: GroupList,
+                    url: url
+                });
+                PaginateInit({
+                    scope: scope,
+                    list: GroupList,
+                    url: url,
+                    mode: 'lookup'
+                });
+                scope.search(GroupList.iterator);
+            });
+
+            if (scope.removeShowDialog) {
+                scope.removeShowDialog();
+            }
+            scope.removeShowDialog = scope.$on('ShowDialog', function() {
+                var d;
+                scope.name = group.name;
+                scope.copy_choice = "copy";
+                d = angular.element(document.getElementById('group-copy-dialog'));
+                $compile(d)(scope);
+
+                CreateDialog({
+                    id: 'group-copy-dialog',
+                    scope: scope,
+                    buttons: buttonSet,
+                    width: 650,
+                    height: 650,
+                    minWidth: 600,
+                    title: 'Copy or Move Group',
+                    callback: 'CopyDialogReady',
+                    onClose: function() {
+                        scope.cancel();
+                    }
+                });
+            });
+
+            if (scope.removeRootGroupsReady) {
+                scope.removeRootGroupsReady();
+            }
+            scope.removeRootGroupsReady = scope.$on('RootGroupsReady', function(e, root_groups) {
+                scope.offer_root_group = true;
+                scope.use_root_group = false;
+                root_groups.every(function(row) {
+                    if (row.id === group_id) {
+                        scope.offer_root_group = false;
                         return false;
                     }
                     return true;
                 });
-            }
-        };
-
-        scope.performCopy = function() {
-            var list = GroupList,
-                target,
-                url;
+                url = GetBasePath('groups') + group_id + '/';
+                Rest.setUrl(url);
+                Rest.get()
+                    .success(function(data) {
+                        group = data;
+                        scope.$emit('ShowDialog');
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Call to ' + url + ' failed. GET returned: ' + status });
+                    });
+            });
 
             Wait('start');
 
-            if (scope.use_root_group) {
-                target = null;
-            }
-            else {
-                scope[list.name].every(function(row) {
-                    if (row.checked === '1') {
-                        target = row;
-                        return false;
-                    }
-                    return true;
-                });
-            }
+            GetRootGroups({
+                scope: scope,
+                group_id: group_id,
+                inventory_id: parent_scope.inventory.id,
+                callback: 'RootGroupsReady'
+            });
 
-            if (scope.copy_choice === 'move') {
-                // Respond to move
-
-                // disassociate the group from the original parent
-                if (scope.removeGroupRemove) {
-                    scope.removeGroupRemove();
+            scope.cancel = function() {
+                $(document).off("keydown");
+                try {
+                    $('#group-copy-dialog').dialog('close');
                 }
-                scope.removeGroupRemove = scope.$on('RemoveGroup', function () {
-                    if (parent_group > 0) {
-                        // Only remove a group from a parent when the parent is a group and not the inventory root
-                        url = GetBasePath('groups') + parent_group + '/children/';
-                        Rest.setUrl(url);
-                        Rest.post({ id: group.id, disassociate: 1 })
-                            .success(function () {
-                                scope.cancel();
-                            })
-                            .error(function (data, status) {
-                                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                    msg: 'Failed to remove ' + group.name + ' from group ' + parent_group + '. POST returned: ' + status });
-                            });
+                catch(e) {
+                    // ignore
+                }
+                scope.searchCleanup();
+                parent_scope.restoreSearch();
+                scope.$destroy();
+            };
+
+            scope['toggle_' + GroupList.iterator] = function (id) {
+                var count = 0,
+                    list = GroupList;
+                scope[list.name].forEach( function(row, i) {
+                    if (row.id === id) {
+                        if (row.checked === '0') {
+                            scope[list.name][i].checked = '1';
+                            scope[list.name][i].success_class = 'success';
+                        }
+                        else {
+                            scope[list.name][i].checked = '0';
+                            scope[list.name][i].success_class = '';
+                        }
                     } else {
-                        scope.cancel();
+                        scope[list.name][i].checked = '0';
+                        scope[list.name][i].success_class = '';
                     }
                 });
+                // Check if any rows are checked
+                scope[list.name].forEach(function(row) {
+                    if (row.checked === '1') {
+                        count++;
+                    }
+                });
+                if (count === 0) {
+                    $('#group-copy-ok-button').attr('disabled','disabled');
+                }
+                else {
+                    $('#group-copy-ok-button').removeAttr('disabled');
+                }
+            };
 
-                // add the new group to the target
-                url = (target) ?
-                    GetBasePath('groups') + target.id + '/children/' :
-                    GetBasePath('inventory') + parent_scope.inventory.id + '/groups/';
-                group = {
-                    id: group.id,
-                    name: group.name,
-                    description: group.description,
-                    inventory: parent_scope.inventory.id
-                };
-                Rest.setUrl(url);
-                Rest.post(group)
-                    .success(function () {
-                        scope.$emit('RemoveGroup');
-                    })
-                    .error(function (data, status) {
-                        var target_name = (target) ? target.name : 'inventory';
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed to add ' + group.name + ' to ' + target_name + '. POST returned: ' + status });
+            scope.toggleUseRootGroup = function() {
+                var list = GroupList;
+                //console.log("scope.use_root_group: " + scope.use_root_group);
+                if (scope.use_root_group) {
+                    $('#group-copy-ok-button').removeAttr('disabled');
+                }
+                else {
+                    // check for group selection
+                    $('#group-copy-ok-button').attr('disabled','disabled');
+                    scope[list.name].every(function(row) {
+                        if (row.checked === '1') {
+                            $('#group-copy-ok-button').removeAttr('disabled');
+                            return false;
+                        }
+                        return true;
                     });
-            }
-            else {
-                // Respond to copy by adding the new group to the target
-                url = (target) ?
-                      GetBasePath('groups') + target.id + '/children/' :
-                      GetBasePath('inventory') + parent_scope.inventory.id + '/groups/';
+                }
+            };
 
-                group = {
-                    id: group.id,
-                    name: group.name,
-                    description: group.description,
-                    inventory: parent_scope.inventory.id
-                };
+            scope.performCopy = function() {
+                var list = GroupList,
+                    target,
+                    url;
 
-                Rest.setUrl(url);
-                Rest.post(group)
-                    .success(function () {
-                        scope.cancel();
-                    })
-                    .error(function (data, status) {
-                        var target_name = (target) ? target.name : 'inventory';
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed to add ' + group.name + ' to ' + target_name + '. POST returned: ' + status
+                Wait('start');
+
+                if (scope.use_root_group) {
+                    target = null;
+                }
+                else {
+                    scope[list.name].every(function(row) {
+                        if (row.checked === '1') {
+                            target = row;
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+                if (scope.copy_choice === 'move') {
+                    // Respond to move
+
+                    // disassociate the group from the original parent
+                    if (scope.removeGroupRemove) {
+                        scope.removeGroupRemove();
+                    }
+                    scope.removeGroupRemove = scope.$on('RemoveGroup', function () {
+                        if (parent_group > 0) {
+                            // Only remove a group from a parent when the parent is a group and not the inventory root
+                            url = GetBasePath('groups') + parent_group + '/children/';
+                            Rest.setUrl(url);
+                            Rest.post({ id: group.id, disassociate: 1 })
+                                .success(function () {
+                                    scope.cancel();
+                                })
+                                .error(function (data, status) {
+                                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                        msg: 'Failed to remove ' + group.name + ' from group ' + parent_group + '. POST returned: ' + status });
+                                });
+                        } else {
+                            scope.cancel();
+                        }
+                    });
+
+                    // add the new group to the target
+                    url = (target) ?
+                        GetBasePath('groups') + target.id + '/children/' :
+                        GetBasePath('inventory') + parent_scope.inventory.id + '/groups/';
+                    group = {
+                        id: group.id,
+                        name: group.name,
+                        description: group.description,
+                        inventory: parent_scope.inventory.id
+                    };
+                    Rest.setUrl(url);
+                    Rest.post(group)
+                        .success(function () {
+                            scope.$emit('RemoveGroup');
+                        })
+                        .error(function (data, status) {
+                            var target_name = (target) ? target.name : 'inventory';
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Failed to add ' + group.name + ' to ' + target_name + '. POST returned: ' + status });
                         });
-                    });
-            }
+                }
+                else {
+                    // Respond to copy by adding the new group to the target
+                    url = (target) ?
+                          GetBasePath('groups') + target.id + '/children/' :
+                          GetBasePath('inventory') + parent_scope.inventory.id + '/groups/';
+
+                    group = {
+                        id: group.id,
+                        name: group.name,
+                        description: group.description,
+                        inventory: parent_scope.inventory.id
+                    };
+
+                    Rest.setUrl(url);
+                    Rest.post(group)
+                        .success(function () {
+                            scope.cancel();
+                        })
+                        .error(function (data, status) {
+                            var target_name = (target) ? target.name : 'inventory';
+                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Failed to add ' + group.name + ' to ' + target_name + '. POST returned: ' + status
+                            });
+                        });
+                }
+            };
+
         };
+    }
+])
 
-    };
-}])
-
+/**
+ *
+ * TODO: Document
+ *
+ */
 .factory('ShowUpdateStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm',
-    'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait',
+'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait',
     function ($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
-        FormatDate, InventoryStatusForm, Wait) {
+    FormatDate, InventoryStatusForm, Wait) {
         return function (params) {
 
             var group_name = params.group_name,
