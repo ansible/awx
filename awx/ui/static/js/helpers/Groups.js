@@ -256,7 +256,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         id: 'all',
                         text: 'All'
                     }]);
-                    $('#source_form').removeClass('squeeze');
+                    $('#source_form').addClass('squeeze');
                 } else if (scope.source.value === 'ec2') {
                     scope.source_region_choices = scope.ec2_regions;
                     $('#s2id_source_source_regions').select2('data', [{

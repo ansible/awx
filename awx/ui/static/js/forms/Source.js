@@ -46,8 +46,8 @@ angular.module('SourceFormDefinition', [])
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
-                addRequired: false,
-                editRequired: false
+                addRequired: true,
+                editRequired: true
             },
             source_regions: {
                 label: 'Regions',
@@ -108,6 +108,7 @@ angular.module('SourceFormDefinition', [])
             },
             source_script: {
                 label :  "Custom Inventory Script",
+                labelClass: 'prepend-asterisk',
                 type: 'lookup',
                 ngShow: "source && source.value === 'custom'",
                 sourceModel: 'source_script',
