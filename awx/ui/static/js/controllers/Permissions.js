@@ -215,78 +215,86 @@ function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routePa
     generator.reset();
 
 
-    CheckAccess({ scope: $scope });
+
 
     $scope.selectCategory = function (resetIn) {
         var reset = (resetIn === false) ? false : true;
         PermissionCategoryChange({ scope: $scope, reset: reset });
     };
-
-    // Retrieve detail record and prepopulate the form
-    Wait('start');
-    Rest.setUrl(defaultUrl);
-    Rest.get()
-        .success(function (data) {
-            var fld, sourceModel, sourceField;
-            LoadBreadCrumbs({ path: '/users/' + base_id + '/permissions/' + id, title: data.name });
-            for (fld in form.fields) {
-                if (data[fld]) {
-                    if (form.fields[fld].sourceModel) {
-                        sourceModel = form.fields[fld].sourceModel;
-                        sourceField = form.fields[fld].sourceField;
-                        $scope[sourceModel + '_' + sourceField] = data.summary_fields[sourceModel][sourceField];
-                        master[sourceModel + '_' + sourceField] = data.summary_fields[sourceModel][sourceField];
+    if ($scope.removeFillForm) {
+        $scope.removeFillForm();
+    }
+    $scope.removeFillForm = $scope.$on('FillForm', function () {
+        // Retrieve detail record and prepopulate the form
+        Wait('start');
+        Rest.setUrl(defaultUrl);
+        Rest.get()
+            .success(function (data) {
+                var fld, sourceModel, sourceField;
+                LoadBreadCrumbs({ path: '/users/' + base_id + '/permissions/' + id, title: data.name });
+                for (fld in form.fields) {
+                    if (data[fld]) {
+                        if (form.fields[fld].sourceModel) {
+                            sourceModel = form.fields[fld].sourceModel;
+                            sourceField = form.fields[fld].sourceField;
+                            $scope[sourceModel + '_' + sourceField] = data.summary_fields[sourceModel][sourceField];
+                            master[sourceModel + '_' + sourceField] = data.summary_fields[sourceModel][sourceField];
+                        }
+                        $scope[fld] = data[fld];
+                        master[fld] = $scope[fld];
                     }
-                    $scope[fld] = data[fld];
-                    master[fld] = $scope[fld];
                 }
-            }
 
-            $scope.category = 'Deploy';
-            if (data.permission_type !== 'run' && data.permission_type !== 'check') {
-                $scope.category = 'Inventory';
-            }
-            master.category = $scope.category;
-            $scope.selectCategory(false); //call without resetting $scope.category value
+                $scope.category = 'Deploy';
+                if (data.permission_type !== 'run' && data.permission_type !== 'check') {
+                    $scope.category = 'Inventory';
+                }
+                master.category = $scope.category;
+                $scope.selectCategory(false); //call without resetting $scope.category value
 
-            LookUpInit({
-                scope: $scope,
-                form: form,
-                current_item: data.inventory,
-                list: InventoryList,
-                field: 'inventory',
-                input_type: "radio"
-            });
-
-            LookUpInit({
-                scope: $scope,
-                form: form,
-                current_item: data.project,
-                list: ProjectList,
-                field: 'project',
-                input_type: 'radio'
-            });
-
-            if (!$scope.PermissionAddAllowed) {
-                // If not a privileged user, disable access
-                $('form[name="permission_form"]').find('select, input, button').each(function () {
-                    if ($(this).is('input') || $(this).is('select')) {
-                        $(this).attr('readonly', 'readonly');
-                    }
-                    if ($(this).is('input[type="checkbox"]') ||
-                        $(this).is('input[type="radio"]') ||
-                        $(this).is('button')) {
-                        $(this).attr('disabled', 'disabled');
-                    }
+                LookUpInit({
+                    scope: $scope,
+                    form: form,
+                    current_item: data.inventory,
+                    list: InventoryList,
+                    field: 'inventory',
+                    input_type: "radio"
                 });
-            }
-            Wait('stop');
-        })
-        .error(function (data, status) {
-            ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                msg: 'Failed to retrieve Permission: ' + id + '. GET status: ' + status });
-        });
 
+                LookUpInit({
+                    scope: $scope,
+                    form: form,
+                    current_item: data.project,
+                    list: ProjectList,
+                    field: 'project',
+                    input_type: 'radio'
+                });
+
+                if (!$scope.PermissionAddAllowed) {
+                    // If not a privileged user, disable access
+                    $('form[name="permission_form"]').find('select, input, button').each(function () {
+                        if ($(this).is('input') || $(this).is('select')) {
+                            $(this).attr('readonly', 'readonly');
+                        }
+                        if ($(this).is('input[type="checkbox"]') ||
+                            $(this).is('input[type="radio"]') ||
+                            $(this).is('button')) {
+                            $(this).attr('disabled', 'disabled');
+                        }
+                    });
+                }
+                Wait('stop');
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                    msg: 'Failed to retrieve Permission: ' + id + '. GET status: ' + status });
+            });
+    });
+
+    CheckAccess({
+        scope: $scope,
+        callback: 'FillForm'
+    });
 
     // Save changes to the parent
     $scope.formSave = function () {

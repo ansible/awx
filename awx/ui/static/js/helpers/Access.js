@@ -20,7 +20,9 @@ angular.module('AccessHelper', ['RestServices', 'Utilities'])
         return function (params) {
             // set PermissionAddAllowed to true or false based on user access. admins and org admins are granted
             // accesss.
-            var scope = params.scope, me;
+            var scope = params.scope,
+                callback = params.callback || undefined,
+                me;
 
             // uer may have refreshed the browser, in which case retrieve current user info from session cookie
             me = ($rootScope.current_user) ? $rootScope.current_user : $cookieStore.get('current_user');
@@ -37,6 +39,7 @@ angular.module('AccessHelper', ['RestServices', 'Utilities'])
                             } else {
                                 scope.PermissionAddAllowed = false;
                             }
+
                         })
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, null, {
@@ -46,6 +49,9 @@ angular.module('AccessHelper', ['RestServices', 'Utilities'])
                             });
                         });
                 }
+            }
+            if(callback){
+                scope.$emit(callback);
             }
             //if (!access) {
             //   Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
