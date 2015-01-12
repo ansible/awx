@@ -111,15 +111,18 @@ angular.module('VariablesHelper', ['Utilities'])
                     if(variables.trim() === "" || variables.trim() === "-" || variables.trim() === "--"){
                         variables = '---';
                     }
-                    json_data = jsyaml.load(variables);
+                    json_data = jsyaml.safeLoad(variables);
                     if(json_data!==null){
-                        $.each( json_data, function( key, value ) {
-                            // console.log( key + ": " + value );
-                            if(value.toString() === "[object Object]"){
-                                json_data = undefined;
-                                throw 'Failed to parse YAML string. Parser returned ' + key + ' : ' + value + '.';
-                            }
-                        });
+                        // $.each( json_data, function( key, value ) {
+                        //     if(value.toString() === "[object Object]"){
+                        //         json_data = undefined;
+                        //         throw 'Failed to parse YAML string. Parser returned ' + key + ' : ' + value + '.';
+                        //     }
+                        // });
+                        var tmp = jsyaml.dump(json_data);
+                        if(tmp.indexOf('[object Object]')!==-1){
+                            throw "Failed to parse YAML string. Parser returned' + key + ' : ' +value + '.' ";
+                        }
                     }
                 }
                 catch(e) {
@@ -132,7 +135,7 @@ angular.module('VariablesHelper', ['Utilities'])
             // Make sure our JSON is actually an object
             if (typeof json_data !== 'object') {
                 ProcessErrors(null, variables, null, null, { hdr: 'Error!',
-                    msg: 'Failed to parse variables. Attempted to parse ' + parseType + ' Parser did not return an object.' });
+                    msg: 'Failed to parse variables. Attempted to parse ' + parseType + '. Parser did not return an object.' });
                 // setTimeout( function() {
                 throw  'Parse error. Failed to parse variables.';
                 // }, 1000);
