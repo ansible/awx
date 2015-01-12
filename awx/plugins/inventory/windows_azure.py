@@ -103,7 +103,8 @@ class AzureInventory(object):
             if len(data) > 0:
                 for host in set(reduce(lambda x, y: x + y,
                                        [i for i in data.values()])):
-                    _meta[host] = self.get_host(host, jsonify=False)
+                    if host is not None:
+                        _meta[host] = self.get_host(host, jsonify=False)
             data['_meta'] = _meta
 
             # JSONify the data.
