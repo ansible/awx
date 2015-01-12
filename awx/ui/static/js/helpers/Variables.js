@@ -81,7 +81,8 @@ angular.module('VariablesHelper', ['Utilities'])
     .factory('ToJSON', ['$log', 'ProcessErrors', function($log, ProcessErrors) {
         return function(parseType, variables, stringify, reviver) {
             var json_data,
-            result;
+            result,
+            tmp;
             // bracketVar,
             // key,
             // lines, i, newVars = [];
@@ -119,7 +120,7 @@ angular.module('VariablesHelper', ['Utilities'])
                         //         throw 'Failed to parse YAML string. Parser returned ' + key + ' : ' + value + '.';
                         //     }
                         // });
-                        var tmp = jsyaml.dump(json_data);
+                        tmp = jsyaml.dump(json_data);
                         if(tmp.indexOf('[object Object]')!==-1){
                             throw "Failed to parse YAML string. Parser returned' + key + ' : ' +value + '.' ";
                         }
