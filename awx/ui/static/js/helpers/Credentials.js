@@ -57,7 +57,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.username_required = true;
                     break;
                 case 'ssh':
-                    scope.usernameLabel = 'SSH Username';
+                    scope.usernameLabel = 'Username'; //formally 'SSH Username'
                     break;
                 case 'scm':
                     scope.sshKeyDataLabel = 'SCM Private Key';

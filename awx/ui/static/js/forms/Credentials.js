@@ -246,7 +246,7 @@ angular.module('CredentialFormDefinition', [])
                 }
             },
             "ssh_password": {
-                label: 'SSH Password',
+                label: 'Password', // formally 'SSH Password'
                 type: 'password',
                 ngShow: "kind.value == 'ssh'",
                 ngChange: "clearPWConfirm('ssh_password_confirm')",
@@ -258,7 +258,7 @@ angular.module('CredentialFormDefinition', [])
                 autocomplete: false
             },
             "ssh_password_confirm": {
-                label: 'Confirm SSH Password',
+                label: 'Confirm Password', // formally 'Confirm SSH password'
                 type: 'password',
                 ngShow: "kind.value == 'ssh'",
                 addRequired: false,
