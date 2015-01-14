@@ -31,9 +31,11 @@
 
 # Python
 import datetime
+import glob
 import json
 import logging
 import os
+import pwd
 import sys
 import urllib
 import urlparse
@@ -43,7 +45,15 @@ from contextlib import closing
 # Requests
 import requests
 
+# ZeroMQ
 import zmq
+
+# PSUtil
+try:
+    import psutil
+except ImportError:
+    psutil = None
+
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -271,3 +281,60 @@ class CallbackModule(object):
         for attr in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
             d[attr] = getattr(stats, attr)
         self._log_event('playbook_on_stats', **d)
+        self._terminate_ssh_control_masters()
+
+    def _terminate_ssh_control_masters(self):
+        # Determine if control persist is being used and if any open sockets
+        # exist after running the playbook.
+        cp_path = os.environ.get('ANSIBLE_SSH_CONTROL_PATH', '')
+        if not cp_path:
+            return
+        cp_dir = os.path.dirname(cp_path)
+        if not os.path.exists(cp_dir):
+            return
+        cp_pattern = os.path.join(cp_dir, 'ansible-ssh-*')
+        cp_files = glob.glob(cp_pattern)
+        if not cp_files:
+            return
+
+        # HACK: If psutil isn't available, sleep and allow the control master
+        # processes to timeout and die.
+        if not psutil:
+            time.sleep(60)
+
+        # Attempt to find any running control master processes.
+        username = pwd.getpwuid(os.getuid())[0]
+        ssh_cm_procs = []
+        for proc in psutil.process_iter():
+            try:
+                pinfo = proc.as_dict(attrs=['pid', 'name', 'cmdline', 'username'])
+            except psutil.NoSuchProcess:
+                continue
+            if pinfo['username'] != username:
+                continue
+            if pinfo['name'] != 'ssh':
+                continue
+            for cp_file in cp_files:
+                if pinfo['cmdline'] and cp_file in pinfo['cmdline'][0]:
+                    ssh_cm_procs.append(proc)
+                    break
+
+        # Terminate then kill control master processes.  Workaround older
+        # version of psutil that may not have wait_procs implemented.
+        for proc in ssh_cm_procs:
+            proc.terminate()
+        if hasattr(psutil, 'wait_procs'):
+            procs_gone, procs_alive = psutil.wait_procs(ssh_cm_procs, timeout=5)
+        else:
+            procs_gone = []
+            procs_alive = ssh_cm_procs[:]
+            for x in xrange(5):
+                for proc in procs_alive[:]:
+                    if not proc.is_running():
+                        procs_alive.remove(proc)
+                        procs_gone.append(proc)
+                if not procs_alive:
+                    break
+                time.sleep(1)
+        for proc in procs_alive:
+            proc.kill()

@@ -558,6 +558,13 @@ class RunJob(BaseTask):
         elif settings.DEBUG:
             env['JOB_CALLBACK_DEBUG'] = '1'
 
+        # Create a directory for ControlPath sockets that is unique to each
+        # job and visible inside the proot environment (when enabled).
+        cp_dir = os.path.join(kwargs['private_data_dir'], 'cp')
+        if not os.path.exists(cp_dir):
+            os.mkdir(cp_dir, 0700)
+        env['ANSIBLE_SSH_CONTROL_PATH'] = os.path.join(cp_dir, 'ansible-ssh-%%h-%%p-%%r')
+
         # When using Ansible >= 1.3, allow the inventory script to include host
         # variables inline via ['_meta']['hostvars'].
         try:
