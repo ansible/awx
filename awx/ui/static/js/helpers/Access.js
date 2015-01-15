@@ -39,7 +39,9 @@ angular.module('AccessHelper', ['RestServices', 'Utilities'])
                             } else {
                                 scope.PermissionAddAllowed = false;
                             }
-
+                            if(callback){
+                                scope.$emit(callback);
+                            }
                         })
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, null, {
@@ -50,9 +52,7 @@ angular.module('AccessHelper', ['RestServices', 'Utilities'])
                         });
                 }
             }
-            if(callback){
-                scope.$emit(callback);
-            }
+
             //if (!access) {
             //   Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
             //}
