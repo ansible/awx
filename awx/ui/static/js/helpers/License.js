@@ -497,7 +497,7 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
                 } else {
                     days = Math.floor(scope.time_remaining / 86400000);
                 }
-                scope.time_remaining = $filter('number')(days, 0) + ' days';
+                scope.time_remaining = (days>1) ? $filter('number')(days, 0) + ' days' : $filter('number')(days, 0) + ' day';
             }
 
             if (parseInt(scope.free_instances) <= 0) {
