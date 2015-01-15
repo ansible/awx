@@ -108,7 +108,7 @@ def tower_periodic_scheduler(self):
         if not can_start:
             new_unified_job.status = 'failed'
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
-            new_unified_job.save(update_fields=['job_status', 'job_explanation'])
+            new_unified_job.save(update_fields=['status', 'job_explanation'])
             new_unified_job.socketio_emit_status("failed")
         emit_websocket_notification('/socket.io/schedules', 'schedule_changed', dict(id=schedule.id))
 
