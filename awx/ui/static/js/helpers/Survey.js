@@ -278,7 +278,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             }
 
             required = (question.required===true) ? "prepend-asterisk" : "";
-            html = '<div class="col-xs-12 '+required+'"><b>'+question.question_name+'</b></div>\n';
+            html = '<div class="question_title col-xs-12 '+required+'"><b>'+question.question_name+'</b></div>\n';
             if(!Empty(question.question_description)){
                 html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
             }
@@ -298,7 +298,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 defaultValue = defaultValue.replace(/</g, "&lt;");
                 defaultValue = defaultValue.replace(/>/g, "&gt;");
                 html+='<div class="row">'+
-                    '<div class="col-xs-8">'+
+                    '<div class="col-xs-8 input_area">'+
                     '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3" readonly>'+defaultValue+'</textarea>'+
                     '</div></div>';
             }
@@ -306,14 +306,15 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 choices = question.choices.split(/\n/);
                 element = (question.type==="multiselect") ? "checkbox" : 'radio';
                 question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
-
+                html += '<div class="input_area">';
                 for( i = 0; i<choices.length; i++){
                     checked = (!Empty(question.default) && question.default.indexOf(choices[i])!==-1) ? "checked" : "";
                     choices[i] = choices[i] .replace(/</g, "&lt;");
                     choices[i]  = choices[i] .replace(/>/g, "&gt;");
-                    html+= '<input  type="'+element+'"  class="mc" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[i]+' " '+checked+' >' +
+                    html+= '<input  type="'+element+'"  class="mc" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[i]+' " '+checked+' disabled>' +
                         '<span>'+choices[i] +'</span><br>' ;
                 }
+                html += '</div>';
             }
 
             if(question.type === 'integer'){
@@ -321,7 +322,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 max = (!Empty(question.max)) ? question.max : "" ;
                 defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_int)) ? question.default_int : "" ;
                 html+='<div class="row">'+
-                    '<div class="col-xs-8">'+
+                    '<div class="col-xs-8 input_area">'+
                     '<input type="number" class="final form-control" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly>'+
                     '</div></div>';
 
@@ -331,12 +332,12 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 max = (!Empty(question.max)) ? question.max : "" ;
                 defaultValue = (!Empty(question.default)) ? question.default : (!Empty(question.default_float)) ? question.default_float : "" ;
                 html+='<div class="row">'+
-                    '<div class="col-xs-8">'+
+                    '<div class="col-xs-8 input_area">'+
                     '<input type="number" class="final form-control" name="'+question.variable+'" min="'+min+'" max="'+max+'" value="'+defaultValue+'" readonly>'+
                     '</div></div>';
 
             }
-            html += '<div class="col-xs-12 text-right" id="question_actions">';
+            html += '<div class="col-xs-12 text-right question_actions">';
             html += '<a id="edit-question_'+question.index+'" data-placement="top" aw-tool-tip="Edit question" data-original-title="" title=""><i class="fa fa-pencil"></i> </a>';
             html += '<a id="delete-question_'+question.index+'" data-placement="top" aw-tool-tip="Delete question" data-original-title="" title=""><i class="fa fa-trash-o"></i> </a>';
             html += '<a id="question-up_'+question.index+'" data-placement="top" aw-tool-tip="Move up" data-original-title="" title=""><i class="fa fa-arrow-up"></i> </a>';
@@ -346,8 +347,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             $('#question_'+question.index).append(html);
 
             element = angular.element(document.getElementById('question_'+question.index));
-            // element.html(html);
-            element.css('opacity', 0.7);
+            // // element.html(html);
+            //element.css('opacity', 0.7);
             $compile(element)(scope);
             // var questionScope = scope.$new;
 
@@ -420,7 +421,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 if( question.type === 'textarea'){
                     scope.textarea_min = question.min;
                     scope.textarea_max = question.max;
-                    // scope.default_text = question.default;
+                    scope.default_textarea= question.default;
                 }
                 if( question.type === 'integer'){
                     scope.int_min = question.min;
