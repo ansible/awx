@@ -709,7 +709,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.survey_question_form.choices.$setPristine();
             };
 
-            scope.submitQuestion = function(){
+            scope.submitQuestion = function(event){
                 var data = {},
                 fld,
                 key, elementID;

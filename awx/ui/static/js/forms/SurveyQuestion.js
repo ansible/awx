@@ -261,7 +261,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 ngClick: 'cancelQuestion($event)'
             },
             submit_question: {
-                ngClick: 'submitQuestion()',
+                ngClick: 'submitQuestion($event)',
                 ngDisabled: true, //'survey_question.$valid', //"!question_name || !variable || !type || ((type.type==='multiplechoice' || type.type === 'multiselect' ) && !choices)", //|| type.type===multiselect ',//'!question_name || !variable || !type' ,
                 'class': 'btn btn-sm btn-primary',
                 label: 'Add Question'
