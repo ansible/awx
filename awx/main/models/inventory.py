@@ -922,6 +922,7 @@ class InventorySourceOptions(BaseModel):
             ('security_group', 'Security Group'),
             ('tag_keys', 'Tags'),
             ('vpc_id', 'VPC ID'),
+            ('tag_none', 'Tag None'),
         ]
 
     @classmethod
