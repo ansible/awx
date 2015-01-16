@@ -264,6 +264,7 @@ class Ec2Inventory(object):
             'group_by_vpc_id',
             'group_by_security_group',
             'group_by_tag_keys',
+            'group_by_tag_none',
             'group_by_route53_names',
             'group_by_rds_engine',
             'group_by_rds_parameter_group',
@@ -507,6 +508,10 @@ class Ec2Inventory(object):
                 self.push(self.inventory, name, dest)
                 if self.nested_groups:
                     self.push_group(self.inventory, 'route53', name)
+
+        # Global Tag: instances without tags
+        if self.group_by_tag_none and len(instance.tags) == 0:
+            self.push(self.inventory, 'tag_none', dest)
 
         # Global Tag: tag all EC2 instances
         self.push(self.inventory, 'ec2', dest)
