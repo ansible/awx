@@ -202,41 +202,44 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         scope.removeLoadHostSummaries();
     }
     scope.removeHostSummaries = scope.$on('LoadHostSummaries', function() {
-        var url = scope.job.related.job_host_summaries + '?';
-        url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
+        if(scope.job.related.job_host_summaries){
+            var url = scope.job.related.job_host_summaries + '?';
+            url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
 
-        Rest.setUrl(url);
-        Rest.get()
-            .success(function(data) {
-                scope.next_host_summaries = data.next;
-                if (data.results.length > 0) {
-                    // only dump what's in memory when job_host_summaries is available.
-                    scope.jobData.hostSummaries = {};
-                }
-                data.results.forEach(function(event) {
-                    var name;
-                    if (event.host_name) {
-                        name = event.host_name;
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function(data) {
+                    scope.next_host_summaries = data.next;
+                    if (data.results.length > 0) {
+                        // only dump what's in memory when job_host_summaries is available.
+                        scope.jobData.hostSummaries = {};
                     }
-                    else {
-                        name = "<deleted host>";
-                    }
-                    scope.jobData.hostSummaries[name] = {
-                        id: event.host,
-                        name: name,
-                        ok: event.ok,
-                        changed: event.changed,
-                        unreachable: event.dark,
-                        failed: event.failures,
-                        status: (event.failed) ? 'failed' : 'successful'
-                    };
+                    data.results.forEach(function(event) {
+                        var name;
+                        if (event.host_name) {
+                            name = event.host_name;
+                        }
+                        else {
+                            name = "<deleted host>";
+                        }
+                        scope.jobData.hostSummaries[name] = {
+                            id: event.host,
+                            name: name,
+                            ok: event.ok,
+                            changed: event.changed,
+                            unreachable: event.dark,
+                            failed: event.failures,
+                            status: (event.failed) ? 'failed' : 'successful'
+                        };
+                    });
+                    scope.$emit('InitialLoadComplete');
+                })
+                .error(function(data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
-                scope.$emit('InitialLoadComplete');
-            })
-            .error(function(data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to ' + url + '. GET returned: ' + status });
-            });
+        }
+
     });
 
     if (scope.removeLoadHosts) {
