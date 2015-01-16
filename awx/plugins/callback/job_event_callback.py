@@ -307,15 +307,17 @@ class CallbackModule(object):
         ssh_cm_procs = []
         for proc in psutil.process_iter():
             try:
-                pinfo = proc.as_dict(attrs=['pid', 'name', 'cmdline', 'username'])
+                pname = proc.name
+                pcmdline = proc.cmdline
+                pusername = proc.username
             except psutil.NoSuchProcess:
                 continue
-            if pinfo['username'] != username:
+            if pusername != username:
                 continue
-            if pinfo['name'] != 'ssh':
+            if pname != 'ssh':
                 continue
             for cp_file in cp_files:
-                if pinfo['cmdline'] and cp_file in pinfo['cmdline'][0]:
+                if pcmdline and cp_file in pcmdline[0]:
                     ssh_cm_procs.append(proc)
                     break
 
