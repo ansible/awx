@@ -27,10 +27,24 @@ class Command(BaseCommand):
         existing registration plus `--timid`.
     """
     option_list = BaseCommand.option_list + (
-        make_option('--timid', action='store_true', dest='timid'),
-        make_option('--hostname', dest='hostname', default=''),
-        make_option('--primary', action='store_true', dest='primary'),
-        make_option('--secondary', action='store_false', dest='primary'),
+        make_option('--timid',
+            action='store_true',
+            dest='timid',
+            help='Fail if the primary host specified is already registered as '
+            'another instance or there already exists a primary different '
+            'from the one specified.'),
+        make_option('--hostname',
+            dest='hostname',
+            default='',
+            help='instance to register'),
+        make_option('--primary',
+            action='store_true',
+            dest='primary',
+            help='register instance as primary'),
+        make_option('--secondary',
+            action='store_false',
+            dest='primary',
+            help='register instance as secondary'),
     )
 
     def handle(self, **options):
