@@ -101,7 +101,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                     })
                     .error(function(data, status) {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
+                            msg: 'Failed updating job ' + scope.job_template_id + ' with variables. POST returned: ' + status });
                     });
             });
 

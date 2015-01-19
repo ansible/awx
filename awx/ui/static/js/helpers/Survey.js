@@ -230,7 +230,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     })
                     .error(function (data, status) {
                         ProcessErrors(scope, data, status, { hdr: 'Error!',
-                            msg: 'Failed to add new survey. Post returned status: ' + status });
+                            msg: 'Failed to delete survey. DELETE returned status: ' + status });
                     });
             }
         };
@@ -854,7 +854,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         })
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, { hdr: 'Error!',
-                                msg: 'Failed to add new survey. Post returned status: ' + status });
+                                msg: 'Failed to add new survey. POST returned status: ' + status });
                         });
                 }
             };
