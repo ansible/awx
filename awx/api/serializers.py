@@ -995,6 +995,14 @@ class CustomInventoryScriptSerializer(BaseSerializer):
             ret['script'] = None
         return ret
 
+    def get_related(self, obj):
+        res = super(CustomInventoryScriptSerializer, self).get_related(obj)
+
+        if obj.organization and obj.organization.active:
+            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
+        return res
+
+
 class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
