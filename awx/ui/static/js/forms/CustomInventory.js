@@ -54,7 +54,8 @@ angular.module('CustomInventoryFormDefinition', [])
                 awDropFile: true,
                 'class': 'ssh-key-field',
                 rows: 10,
-                awPopOver: "<p>Drag and drop your custom inventory script file here or create one in the field to import your custom inventory. </p>",
+                awPopOver: "<p>Drag and drop your custom inventory script file here or create one in the field to import your custom inventory. " +
+                                    "<br><br> Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python</p>",
                 dataTitle: 'Custom Script',
                 dataPlacement: 'right',
                 dataContainer: "body"
