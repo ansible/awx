@@ -19,6 +19,7 @@ from django.conf import settings
 from django.db import models, connection
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
+from django.db import transaction
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -535,6 +536,7 @@ class Group(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:group_detail', args=(self.pk,))
 
+    @transaction.atomic
     def mark_inactive_recursive(self):
         from awx.main.tasks import update_inventory_computed_fields, bulk_inventory_element_delete
         from awx.main.utils import ignore_inventory_computed_fields
