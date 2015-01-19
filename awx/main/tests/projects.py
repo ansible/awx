@@ -421,10 +421,14 @@ class ProjectsTest(BaseTransactionTest):
             self.post(team_users, data=x, expect=403, auth=self.get_nobody_credentials())
             self.post(team_users, data=dict(x, is_superuser=False),
                                   expect=204, auth=self.get_normal_credentials())
-            self.post(team_users, data=dict(x, is_superuser=True),
-                                  expect=403, auth=self.get_normal_credentials())
+        # The normal admin user can't create a super user vicariously through the team/project
+        self.post(team_users, data=dict(username='attempted_superuser_create', is_superuser=True),
+                  expect=403, auth=self.get_normal_credentials())
+        # ... but a superuser can
+        self.post(team_users, data=dict(username='attempted_superuser_create', is_superuser=True),
+                  expect=201, auth=self.get_super_credentials())
 
-        self.assertEqual(Team.objects.get(pk=team.pk).users.count(), 4)
+        self.assertEqual(Team.objects.get(pk=team.pk).users.count(), 5)
 
         # can remove users from teams
         for x in all_users['results']:
@@ -432,7 +436,7 @@ class ProjectsTest(BaseTransactionTest):
             self.post(team_users, data=y, expect=403, auth=self.get_nobody_credentials())
             self.post(team_users, data=y, expect=204, auth=self.get_normal_credentials())
 
-        self.assertEquals(Team.objects.get(pk=team.pk).users.count(), 0)
+        self.assertEquals(Team.objects.get(pk=team.pk).users.count(), 1) # Leaving just the super user we created
 
         # =====================================================================
         # USER TEAMS

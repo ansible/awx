@@ -438,35 +438,6 @@ class DashboardInventoryGraphView(APIView):
         return Response(dashboard_data)
 
 
-def disallow_superuser_escalation(cls):
-    """Decorator that ensures that the post, put, and patch methods on the
-    class, if they exist, perform a sanity check and disallow superuser
-    escalation by non-superusers.
-    """
-    # Create a method decorator that ensures superuser escalation by
-    # non-superusers is disallowed.
-    def superuser_lockdown(method):
-        @functools.wraps(method)
-        def fx(self, request, *a, **kw):
-            if not request.user.is_superuser:
-                is_su = request.DATA.get('is_superuser', False)
-                if is_su and is_su not in ('false', 'f', 'False', '0'):
-                    raise PermissionDenied('Only superusers may create '
-                                           'other superusers.')
-            return method(self, request, *a, **kw)
-        return fx
-
-    # Ensure that if post, put, or patch methods exist, that they are decorated
-    # with the sanity check decorator.
-    for vuln_method in ('post', 'put', 'patch'):
-        original_method = getattr(cls, vuln_method, None)
-        if original_method is not None:
-            setattr(cls, vuln_method, superuser_lockdown(original_method))
-
-    # Return the class object.
-    return cls
-
-
 class ScheduleList(ListAPIView):
 
     view_name = "Schedules"
@@ -528,7 +499,6 @@ class OrganizationInventoriesList(SubListAPIView):
     parent_model = Organization
     relationship = 'inventories'
 
-@disallow_superuser_escalation
 class OrganizationUsersList(SubListCreateAPIView):
 
     model = User
@@ -536,7 +506,6 @@ class OrganizationUsersList(SubListCreateAPIView):
     parent_model = Organization
     relationship = 'users'
 
-@disallow_superuser_escalation
 class OrganizationAdminsList(SubListCreateAPIView):
 
     model = User
@@ -577,7 +546,6 @@ class TeamDetail(RetrieveUpdateDestroyAPIView):
     model = Team
     serializer_class = TeamSerializer
 
-@disallow_superuser_escalation
 class TeamUsersList(SubListCreateAPIView):
 
     model = User
@@ -764,13 +732,11 @@ class ProjectUpdateCancel(RetrieveAPIView):
             return self.http_method_not_allowed(request, *args, **kwargs)
 
 
-@disallow_superuser_escalation
 class UserList(ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
 
-@disallow_superuser_escalation
 class UserMeList(ListAPIView):
 
     model = User
@@ -845,7 +811,6 @@ class UserActivityStreamList(SubListAPIView):
         return qs.filter(Q(actor=parent) | Q(user__in=[parent]))
 
 
-@disallow_superuser_escalation
 class UserDetail(RetrieveUpdateDestroyAPIView):
 
     model = User
