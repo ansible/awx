@@ -117,6 +117,8 @@ class AzureInventory(object):
         """Return information about the given hostname, based on what
         the Windows Azure API provides.
         """
+        if hostname not in self.host_metadata:
+            return "No host found: %s" % hostname
         if jsonify:
             return json.dumps(self.host_metadata[hostname])
         return self.host_metadata[hostname]
