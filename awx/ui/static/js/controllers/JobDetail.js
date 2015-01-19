@@ -202,7 +202,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
         scope.removeLoadHostSummaries();
     }
     scope.removeHostSummaries = scope.$on('LoadHostSummaries', function() {
-        if(scope.job.related.job_host_summaries){
+        if(scope.job.related){
             var url = scope.job.related.job_host_summaries + '?';
             url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
 
@@ -376,7 +376,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                             }
                             else {
                                 // no next event (task), get the end time of the play
-                                end = scope.jobData.plays[scope.activePlay].finished;
+                                if(scope.jobData.plays[scope.activePlay]){
+                                    end = scope.jobData.plays[scope.activePlay].finished;
+                                }
                             }
 
                             if (end) {
