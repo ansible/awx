@@ -236,7 +236,7 @@ function($compile, SchedulerInit, Rest, Wait, CustomInventoryList, CustomInvento
                 })
                 .error(function (data, status) {
                     ProcessErrors(scope, data, status, form, { hdr: 'Error!',
-                        msg: 'Failed to add new inventory script. Post returned status: ' + status });
+                        msg: 'Failed to add new inventory script. POST returned status: ' + status });
                 });
         };
 
@@ -341,7 +341,7 @@ function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventor
                 })
                 .error(function (data, status) {
                     ProcessErrors(scope, data, status, form, { hdr: 'Error!',
-                        msg: 'Failed to add new inventory script. Post returned status: ' + status });
+                        msg: 'Failed to add new inventory script. PUT returned status: ' + status });
                 });
         };
 

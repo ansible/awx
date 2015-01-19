@@ -97,7 +97,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
                                 msg: 'Failed to retrieve inventory source: ' + group.related.inventory_source +
-                                    ' POST returned status: ' + status });
+                                    ' GET returned status: ' + status });
                         });
                 }
             }

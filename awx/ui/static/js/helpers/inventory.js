@@ -177,7 +177,7 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                 })
                 .error(function (data, status) {
                     ProcessErrors(scope, data, status, form, { hdr: 'Error!',
-                        msg: 'Failed to update inventory. POST returned status: ' + status });
+                        msg: 'Failed to update inventory. PUT returned status: ' + status });
                 });
         };
     }
