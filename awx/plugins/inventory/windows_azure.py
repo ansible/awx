@@ -241,7 +241,7 @@ class AzureInventory(object):
         self.push(self.inventory, self.to_safe(cloud_service.service_name), hostname)
 
         if int(ssh_port) == 22:
-            self.push(self.inventory, "primaries", hostname)
+            self.push(self.inventory, "Cloud_services", hostname)
 
         # Inventory: Group by region
         self.push(self.inventory, self.to_safe(cloud_service.hosted_service_properties.location), hostname)
