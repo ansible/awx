@@ -35,7 +35,7 @@ from rest_framework import serializers
 from polymorphic import PolymorphicModel
 
 # AWX
-from awx.main.constants import CLOUD_PROVIDERS
+from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import *
 from awx.main.utils import update_scm_url, get_type_for_model, get_model_for_type
 
@@ -1563,7 +1563,7 @@ class ScheduleSerializer(BaseSerializer):
 
     def validate_unified_job_template(self, attrs, source):
         ujt = attrs[source]
-        if type(ujt) == InventorySource and ujt.source not in CLOUD_PROVIDERS:
+        if type(ujt) == InventorySource and ujt.source not in SCHEDULEABLE_PROVIDERS:
             raise serializers.ValidationError('Inventory Source must be a cloud resource')
         return attrs
 
