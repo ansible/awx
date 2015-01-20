@@ -51,6 +51,15 @@ class UsersTest(BaseTest):
         new_user3 = dict(username='blippy3')
         self.post(url, expect=403, data=new_user3, auth=self.get_normal_credentials())
 
+    def test_only_super_user_can_use_superuser_flag(self):
+        url = reverse('api:user_list')
+        new_super_user = dict(username='nommy', is_superuser=True)
+        patch_new_super_user = dict(is_superuser=True)
+        self.post(url, expect=401, data=new_super_user, auth=self.get_invalid_credentials())
+        self.post(url, expect=403, data=new_super_user, auth=self.get_other_credentials())
+        self.post(url, expect=403, data=new_super_user, auth=self.get_normal_credentials())
+        self.post(url, expect=201, data=new_super_user, auth=self.get_super_credentials())
+
     def test_auth_token_login(self):
         auth_token_url = reverse('api:auth_token_view')
         user_me_url = reverse('api:user_me_list')
