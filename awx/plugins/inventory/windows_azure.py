@@ -65,6 +65,7 @@ class AzureInventory(object):
         self.inventory = {}
         # Index of deployment name -> host
         self.index = {}
+        self.host_metadata = {}
 
         # Read settings and parse CLI arguments
         self.read_settings()
@@ -87,50 +88,40 @@ class AzureInventory(object):
         elif not self.is_cache_valid():
             self.do_api_calls_update_cache()
 
-        if self.args.host:
-            data_to_print = self.get_host(self.args.host)
-        elif self.args.list_images:
+        if self.args.list_images:
             data_to_print = self.json_format_dict(self.get_images(), True)
-        elif self.args.list:
+        elif self.args.list or self.args.host:
             # Display list of nodes for inventory
             if len(self.inventory) == 0:
                 data = json.loads(self.get_inventory_from_cache())
             else:
                 data = self.inventory
 
-            # Add the `_meta` information.
-            _meta = {}
-            if len(data) > 0:
-                for host in set(reduce(lambda x, y: x + y,
-                                       [i for i in data.values()])):
-                    if host is not None:
-                        _meta[host] = self.get_host(host, jsonify=False)
-            data['_meta'] = _meta
+            if self.args.host:
+                data_to_print = self.get_host(self.args.host)
+            else:
+                # Add the `_meta` information.
+                _meta = {}
+                if len(data) > 0:
+                    for host in set(reduce(lambda x, y: x + y,
+                                           [i for i in data.values()])):
+                        if host is not None:
+                            _meta[host] = self.get_host(host, jsonify=False)
+                data['_meta'] = _meta
 
-            # JSONify the data.
-            data_to_print = self.json_format_dict(data, pretty=True)
-
+                # JSONify the data.
+                data_to_print = self.json_format_dict(data, pretty=True)
         print data_to_print
 
     def get_host(self, hostname, jsonify=True):
         """Return information about the given hostname, based on what
         the Windows Azure API provides.
         """
-        # Strip ".cloudapp.net" off of the end of the hostname if
-        # it is present.
-        if hostname.endswith('.cloudapp.net'):
-            hostname = hostname.replace('.cloudapp.net', '')
-
-        # Retrieve information about the host.
-        host = self.sms.get_hosted_service_properties(hostname)
-        hsp = host.hosted_service_properties  # Because reasons.
-        answer = {
-            'label': hsp.label,
-            'status': hsp.status.lower(),
-        }
+        if hostname not in self.host_metadata:
+            return "No host found: %s" % hostname
         if jsonify:
-            return json.dumps(answer)
-        return answer
+            return json.dumps(self.host_metadata[hostname])
+        return self.host_metadata[hostname]
 
     def get_images(self):
         images = []
@@ -217,8 +208,9 @@ class AzureInventory(object):
         """
         try:
             for deployment in self.sms.get_hosted_service_properties(cloud_service.service_name,embed_detail=True).deployments.deployments:
-                if deployment.deployment_slot == "Production":
-                    self.add_deployment(cloud_service, deployment)
+                self.add_deployment(cloud_service, deployment)
+                #if deployment.deployment_slot == "Production":
+                #    self.add_deployment(cloud_service, deployment)
         except WindowsAzureError as e:
             print "Looks like Azure's API is down:"
             print
@@ -227,20 +219,34 @@ class AzureInventory(object):
 
     def add_deployment(self, cloud_service, deployment):
         """Adds a deployment to the inventory and index"""
+        for role in deployment.role_instance_list.role_instances:
+            for ie in role.instance_endpoints.instance_endpoints:
+                if ie.name == 'SSH':
+                    self.add_instance(role.instance_name, deployment, ie.public_port, cloud_service)
+                    break
+
+    def add_instance(self, hostname, deployment, ssh_port, cloud_service):
+        """Adds an instance to the inventory and index"""
 
         dest = urlparse(deployment.url).hostname
 
         # Add to index
-        self.index[dest] = deployment.name
+        self.index[hostname] = deployment.name
+
+        self.host_metadata[hostname] = dict(ansible_ssh_host=dest,
+                                            ansible_ssh_port=int(ssh_port))
 
         # List of all azure deployments
-        self.push(self.inventory, "azure", dest)
+        self.push(self.inventory, "azure", hostname)
 
         # Inventory: Group by service name
-        self.push(self.inventory, self.to_safe(cloud_service.service_name), dest)
+        self.push(self.inventory, self.to_safe(cloud_service.service_name), hostname)
+
+        if int(ssh_port) == 22:
+            self.push(self.inventory, "Cloud_services", hostname)
 
         # Inventory: Group by region
-        self.push(self.inventory, self.to_safe(cloud_service.hosted_service_properties.location), dest)
+        self.push(self.inventory, self.to_safe(cloud_service.hosted_service_properties.location), hostname)
 
     def push(self, my_dict, key, element):
         """Pushed an element onto an array that may not have been defined in the dict."""
