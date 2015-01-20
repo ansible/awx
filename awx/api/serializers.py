@@ -1024,6 +1024,13 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         # FIXME
         return attrs
 
+    def validate_credential(self, attrs, source):
+        src = attrs.get('source', '')
+        if src in CLOUD_PROVIDERS:
+            if attrs.get(source, None) is None:
+                raise serializers.ValidationError("Credential is required for Cloud source types")
+        return attrs
+
     def validate_source_script(self, attrs, source):
         src = attrs.get(source, None)
         if 'source' in attrs and attrs.get('source', '') == 'custom':
