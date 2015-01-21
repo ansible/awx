@@ -18,11 +18,13 @@ if ($basePath) {
     urlPrefix = $basePath;
 }
 
+
 angular.module('Tower', [
     'ngRoute',
     'ngSanitize',
     'ngCookies',
     'RestServices',
+    'DataServices',
     'AuthService',
     'Utilities',
     'LicenseHelper',
@@ -131,7 +133,6 @@ angular.module('Tower', [
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
     .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')
-
     .config(['$routeProvider',
         function ($routeProvider) {
 
