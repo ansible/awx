@@ -25,10 +25,9 @@
  *                  Host count graph should only be loaded if the user is a super user
  *
 */
-function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, HostGraph, JobStatusGraph, HostPieChart, DashboardJobs,
+function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, HostGraph, HostPieChart, DashboardJobs,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button, graphData){
 
-      console.log('graphData:', graphData);
     ClearScope('home');
 
     var buttons, html, e, waitCount, loadedCount,borderStyles, jobs_scope, schedule_scope;
@@ -118,11 +117,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
             dashboard: data
         });
 
-        JobStatusGraph({
-            scope: $scope,
-            target: 'dash-job-status-graph',
-            data: graphData.jobStatus
-        });
+        $scope.graphData = graphData;
 
         if ($rootScope.user_is_superuser === true) {
             waitCount = 5;
@@ -151,11 +146,11 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
     }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function() {
-        jobs_scope.refreshJobs();
-        $scope.$emit('ReloadJobStatusGraph');
+    // $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function() {
+    //     jobs_scope.refreshJobs();
+    //     $scope.$emit('ReloadJobStatusGraph');
 
-    });
+    // });
 
     if ($rootScope.removeScheduleChange) {
         $rootScope.removeScheduleChange();
@@ -188,7 +183,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'HostGraph','JobStatusGraph', 'HostPieChart', 'DashboardJobs',
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'HostGraph', 'HostPieChart', 'DashboardJobs',
     'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button', 'graphData'
 ];
 

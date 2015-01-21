@@ -25,6 +25,7 @@ angular.module('Tower', [
     'ngCookies',
     'RestServices',
     'DataServices',
+    'GraphDirectives',
     'AuthService',
     'Utilities',
     'LicenseHelper',
@@ -86,7 +87,6 @@ angular.module('Tower', [
     'SelectionHelper',
     'HostGroupsFormDefinition',
     'DashboardCountsWidget',
-    'JobStatusGraphWidget',
     'HostPieChartWidget',
     'HostGraphWidget',
     'DashboardJobsWidget',
@@ -405,8 +405,7 @@ angular.module('Tower', [
                   graphData: function($q, jobStatusGraphData) {
                     return $q.all({
                       jobStatus: jobStatusGraphData.get("month", "all").then(function(data) {
-                        console.log('got data: ', data);
-                        return data.data;
+                        return data;
                       })
                     });
                   }

@@ -11,24 +11,30 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
  var callbacks = {};
  var currentCallbackId = 0;
 
+ function pluck(property, promise) {
+   return promise.then(function(value) {
+     return value[property];
+   });
+ }
+
  function getData(period, jobType) {
    var url = getBasePath('dashboard')+'graphs/jobs/?period='+period+'&job_type='+jobType;
    Rest.setUrl(url);
-   return Rest.get();
+   return pluck('data', Rest.get());
  }
 
  return {
    destroyWatcher: angular.noop,
-   setupWatcher: function() {
+   setupWatcher: function(period, jobType) {
      this.destroyWatcher =
        $rootScope.$on('JobStatusChange', function() {
-         getData().then(function(result) {
+         getData(period, jobType).then(function(result) {
            $rootScope.
              $broadcast('DataReceived:JobStatusGraph',
                         result);
             return result;
          }).catch(function(response) {
-           var errorMessage = 'Failed to get: ' + url + ' GET returned: ' + status;
+           var errorMessage = 'Failed to get: ' + response.url + ' GET returned: ' + response.status;
 
            ProcessErrors(null,
                          response.data,
@@ -44,7 +50,7 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
    get: function(period, jobType) {
 
      this.destroyWatcher();
-     this.setupWatcher();
+     this.setupWatcher(period, jobType);
 
      return getData(period, jobType);
 

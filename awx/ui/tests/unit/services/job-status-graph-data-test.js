@@ -69,7 +69,7 @@ describe('Job Status Graph Data Service', function() {
 
     var result = jobStatusGraphData.get('', '');
 
-    restStub.succeed(firstResult);
+    restStub.succeed({ data: firstResult });
 
     flushPromises();
 
@@ -97,7 +97,7 @@ describe('Job Status Graph Data Service', function() {
         result.resolve(data);
       });
       $rootScope.$emit('JobStatusChange');
-      restStub.succeed(expected);
+      restStub.succeed({ data: expected });
       flushPromises();
     });
 

@@ -1,28 +1,22 @@
-/*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
- */
-    /**
- * @ngdoc function
- * @name widgets.function:JobStatusGraph
- * @description
- */
+angular.module('GraphDirectives', [])
+  .directive('jobStatusGraph', ['$rootScope', '$compile', '$location' , '$window', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'jobStatusGraphData',
+        function ($rootScope, $compile , $location, $window, Rest, GetBasePath, ProcessErrors, Wait, jobStatusGraphData) {
+            return function (scope, element, attr) {
 
-
-'use strict';
-
-angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
-    .factory('JobStatusGraph', ['$rootScope', '$compile', '$location' , 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'jobStatusGraphData',
-        function ($rootScope, $compile , $location, Rest, GetBasePath, ProcessErrors, jobStatusGraphData) {
-            return function (params) {
-
-                var scope = params.scope,
-                    target = params.target,
-                    data = params.data,
-                    html, element, url, job_status_chart,
+                var html, url, job_status_chart,
                     period="month",
                     job_type="all";
 
-                // html = "<div class=\"graph-container\">\n";
+                var cleanup = angular.noop;
+
+                var data;
+                scope.$watch(attr.data, function(value) {
+                  if (value) {
+                    scope.$emit('graphDataReady', value);
+                  }
+                });
+
+                scope.$on('$destroy', cleanup);
 
                 html = "<div class=\"row\">\n";
                 html += "<div id=\"job-status-title\" class=\"h6 col-xs-2 col-sm-3 col-lg-4 text-center\"><b>Job Status</b></div>\n";  // for All Jobs, Past Month
@@ -65,41 +59,41 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 // html += "</div>\n";
 
-                scope.$on('DataReceived:JobStatusGraph',
-                          function(data) {
+                cleanup = _.compose(
+                  [ cleanup,
+                    scope.$on('DataReceived:JobStatusGraph',
+                          function(e, data) {
                             scope.$emit('graphDataReady', data);
-                          });
+                          })
+                  ]);
 
                 function createGraph(period, jobtype){
-                  // console.log(jobStatusGraphData);
-                  // jobStatusGraphData.get(period, jobtype);
+                  jobStatusGraphData.get(period, jobtype).then(function(data) {
+                    scope.$emit('graphDataReady', data);
+                  });
                 }
 
-                element = angular.element(document.getElementById(target));
-                element.html(html);
-                $compile(element)(scope);
+                element.html($compile(html)(scope));
 
-                createGraph();
-
-                if (scope.removeResizeJobGraph) {
-                    scope.removeResizeJobGraph();
-                }
-                scope.removeResizeJobGraph= scope.$on('ResizeJobGraph', function () {
-                    if($(window).width()<500){
-                        $('.graph-container').height(300);
-                    }
-                    else{
-                        var winHeight = $(window).height(),
-                        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
-                        $('.graph-container').height(available_height/2);
-                        job_status_chart.update();
-                    }
-                });
+                cleanup = _.compose(
+                  [ cleanup,
+                    angular.element($window).bind('resize', function() {
+                      if($(window).width()<500){
+                          $('.graph-container').height(300);
+                      }
+                      else{
+                          var winHeight = $(window).height(),
+                          available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
+                          $('.graph-container').height(available_height/2);
+                          job_status_chart.update();
+                      }
+                    })
+                  ]);
 
                 if (scope.removeGraphDataReady) {
                     scope.removeGraphDataReady();
                 }
-                scope.removeGraphDataReady = scope.$on('graphDataReady', function (e, data) {
+                scope.removeGraphDataReady = scope.$on('graphDataReady', function (e, data, third) {
 
 
                     var timeFormat, graphData = [
@@ -202,8 +196,6 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 });
 
-                scope.$emit('graphDataReady', data);
 
             };
-        }
-    ]);
+        }]);
