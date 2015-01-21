@@ -42,6 +42,7 @@ class Command(BaseCommand):
     def cleanup_model(self, model):
         name_field = None
         active_field = None
+        n_deleted_items = 0
         for field in model._meta.fields:
             if field.name in ('name', 'username'):
                 name_field = field.name
@@ -75,8 +76,14 @@ class Command(BaseCommand):
             else:
                 action_text = 'would delete' if self.dry_run else 'deleting'
                 self.logger.info('%s %s', action_text, instance)
+                n_deleted_items += 1
                 if not self.dry_run:
                     instance.delete()
+
+        if not self.dry_run:
+            print("Removed %s items" % str(n_deleted_items))
+        else:
+            print("Would have removed %s items" % str(n_deleted_items))
 
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO,
