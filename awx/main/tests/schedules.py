@@ -180,6 +180,7 @@ class ScheduleTest(BaseTest):
         with self.current_user(self.normal_django_user):
             data = self.put(new_schedule_url, data=data, expect=200)
         self.assertNotEqual(data['next_run'], None)
+        #TODO: Test path needed for non org-admin users, but rather regular users who have permission to create the JT associated with the Schedule
 
     def test_infinite_schedule(self):
         first_url = reverse('api:inventory_source_schedules_list', args=(self.first_inventory_source.pk,))

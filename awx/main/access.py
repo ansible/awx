@@ -1318,8 +1318,8 @@ class ScheduleAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         if obj and obj.unified_job_template:
-            job_class = obj.unified_job_template._get_unified_job_class()
-            return self.user.can_access(job_class, 'read', obj.unified_job_template)
+            job_class = obj.unified_job_template
+            return self.user.can_access(type(job_class), 'read', obj.unified_job_template)
         else:
             return False
 
@@ -1338,7 +1338,7 @@ class ScheduleAccess(BaseAccess):
             return True
         if obj and obj.unified_job_template:
             job_class = obj.unified_job_template
-            return self.user.can_access(type(job_class), 'change', job_class, data)
+            return self.user.can_access(type(job_class), 'change', job_class, None)
         else:
             return False
 
