@@ -129,7 +129,10 @@ class Command(NoArgsCommand):
         self.init_logging()
         self.days = int(options.get('days', 90))
         self.dry_run = bool(options.get('dry_run', False))
-        self.cutoff = now() - datetime.timedelta(days=self.days)
+        try:
+            self.cutoff = now() - datetime.timedelta(days=self.days)
+        except OverflowError as e:
+            raise CommandError('--days specified is too large. Try something less than 99999 (about 270 years).')
         self.only_jobs = bool(options.get('only_jobs', False))
         self.only_project_updates = bool(options.get('only_project_updates', False))
         self.only_inventory_updates = bool(options.get('only_inventory_updates', False))
