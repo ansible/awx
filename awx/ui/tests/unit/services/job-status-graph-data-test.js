@@ -8,12 +8,16 @@ describe('Job Status Graph Data Service', function() {
     $on: sinon.spy(),
   };
 
+  var getBasePath = function(path) {
+    return '/' + path + '/';
+  }
+
   function flushPromises() {
     window.setTimeout(function() {
       inject(function($rootScope) {
         $rootScope.$apply();
       });
-    }, 100);
+    });
   }
 
   var restStub = {
@@ -42,7 +46,8 @@ describe('Job Status Graph Data Service', function() {
 
     $provide.value("$cookieStore", { get: angular.noop });
 
-    $provide.value('RestServices', restStub);
+    $provide.value('Rest', restStub);
+    $provide.value('GetBasePath', getBasePath);
   }));
 
   afterEach(function() {
@@ -97,6 +102,14 @@ describe('Job Status Graph Data Service', function() {
     });
 
     return expect(result.promise).to.eventually.equal(expected);
+  });
+
+  it('requests data with given period and jobType', function() {
+    restStub.setUrl = sinon.spy();
+
+    jobStatusGraphData.get('1', '2');
+
+    expect(restStub.setUrl).to.have.been.calledWith('/dashboard/graphs/jobs/?period=1&job_type=2');
   });
 
 });

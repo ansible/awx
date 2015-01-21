@@ -11,13 +11,13 @@
 'use strict';
 
 angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
-    .factory('JobStatusGraph', ['$rootScope', '$compile', '$location' , 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
-        function ($rootScope, $compile , $location, Rest, GetBasePath, ProcessErrors) {
+    .factory('JobStatusGraph', ['$rootScope', '$compile', '$location' , 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'jobStatusGraphData',
+        function ($rootScope, $compile , $location, Rest, GetBasePath, ProcessErrors, jobStatusGraphData) {
             return function (params) {
 
                 var scope = params.scope,
                     target = params.target,
-                    // dashboard = params.dashboard,
+                    data = params.data,
                     html, element, url, job_status_chart,
                     period="month",
                     job_type="all";
@@ -65,28 +65,15 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                 // html += "</div>\n";
 
-                function createGraph(){
-
-                    url = GetBasePath('dashboard')+'graphs/jobs/?period='+period+'&job_type='+job_type;
-                    Rest.setUrl(url);
-                    Rest.get()
-                        .success(function (data){
+                scope.$on('DataReceived:JobStatusGraph',
+                          function(data) {
                             scope.$emit('graphDataReady', data);
-                            return job_type, period;
+                          });
 
-                        })
-                        .error(function (data, status) {
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Failed to get: ' + url + ' GET returned: ' + status });
-                        });
+                function createGraph(period, jobtype){
+                  // console.log(jobStatusGraphData);
+                  // jobStatusGraphData.get(period, jobtype);
                 }
-
-                if ($rootScope.removeReloadJobStatusGraph) {
-                    $rootScope.removeReloadJobStatusGraph();
-                }
-                $rootScope.removeReloadJobStatusGraph = $rootScope.$on('ReloadJobStatusGraph', function() {
-                    createGraph();
-                });
 
                 element = angular.element(document.getElementById(target));
                 element.html(html);
@@ -192,7 +179,7 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                             period = this.getAttribute("id");
                                             $('#period-dropdown').replaceWith("<a id=\"period-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+"<span class=\"caret\"><span>\n");
 
-                                            createGraph();
+                                            createGraph(period, job_type);
                                         });
 
                                          //On click, update with new data
@@ -201,7 +188,8 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                                             job_type = this.getAttribute("id");
                                             $('#type-dropdown').replaceWith("<a id=\"type-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+"<span class=\"caret\"><span>\n");
 
-                                            createGraph();
+                                            data
+                                            createGraph(period, job_type);
                                         });
 
                                     scope.$emit('WidgetLoaded');
@@ -213,6 +201,8 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
                     });
 
                 });
+
+                scope.$emit('graphDataReady', data);
 
             };
         }

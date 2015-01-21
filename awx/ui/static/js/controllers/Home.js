@@ -26,8 +26,9 @@
  *
 */
 function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, HostGraph, JobStatusGraph, HostPieChart, DashboardJobs,
-    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button){
+    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button, graphData){
 
+      console.log('graphData:', graphData);
     ClearScope('home');
 
     var buttons, html, e, waitCount, loadedCount,borderStyles, jobs_scope, schedule_scope;
@@ -120,7 +121,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
         JobStatusGraph({
             scope: $scope,
             target: 'dash-job-status-graph',
-            dashboard: data
+            data: graphData.jobStatus
         });
 
         if ($rootScope.user_is_superuser === true) {
@@ -188,7 +189,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 }
 
 Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'HostGraph','JobStatusGraph', 'HostPieChart', 'DashboardJobs',
-    'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
+    'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button', 'graphData'
 ];
 
 

@@ -400,7 +400,17 @@ angular.module('Tower', [
 
             when('/home', {
                 templateUrl: urlPrefix + 'partials/home.html',
-                controller: 'Home'
+                controller: 'Home',
+                resolve: {
+                  graphData: function($q, jobStatusGraphData) {
+                    return $q.all({
+                      jobStatus: jobStatusGraphData.get("month", "all").then(function(data) {
+                        console.log('got data: ', data);
+                        return data.data;
+                      })
+                    });
+                  }
+                }
             }).
 
             when('/home/groups', {
