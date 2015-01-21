@@ -22,6 +22,18 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
          $rootScope.
            $broadcast('DataReceived:JobStatusGraph',
                       result);
+          return result;
+       }).catch(function(response) {
+         var errorMessage = 'Failed to get: ' + url + ' GET returned: ' + status;
+
+         ProcessErrors(null,
+                       response.data,
+                       response.status,
+                       null, {
+                         hdr: 'Error!',
+                         msg: errorMessage
+                       });
+         return response;
        });
      });
    },

@@ -71,6 +71,17 @@ describe('Job Status Graph Data Service', function() {
     return expect(result).to.eventually.equal(firstResult);;
   });
 
+  it('processes errors through error handler', function() {
+    var expected = { data: "error", status: "bad" };
+    var actual = jobStatusGraphData.get();
+
+    restStub.fail(expected);
+
+    flushPromises();
+
+    return expect(actual).to.be.rejectedWith(expected);
+  });
+
   it('broadcasts event when data is received', function() {
     var expected = "value";
     var result = q.defer();
@@ -86,9 +97,6 @@ describe('Job Status Graph Data Service', function() {
     });
 
     return expect(result.promise).to.eventually.equal(expected);
-  });
-
-  xit('processes errors through error handler', function() {
   });
 
 });
