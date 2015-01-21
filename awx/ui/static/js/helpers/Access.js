@@ -29,6 +29,9 @@ angular.module('AccessHelper', ['RestServices', 'Utilities'])
 
             if (me.is_superuser) {
                 scope.PermissionAddAllowed = true;
+                if(callback){
+                    scope.$emit(callback);
+                }
             } else {
                 if (me.related.admin_of_organizations) {
                     Rest.setUrl(me.related.admin_of_organizations);
