@@ -1038,6 +1038,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             project      = self.proj_dev.pk,
             playbook     = self.proj_dev.playbooks[0],
         )
+
         with self.current_user(self.user_sue):
             response = self.post(url, data, expect=201)
             detail_url = reverse('api:job_template_detail',
@@ -1072,6 +1073,28 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         # Can't launch a job template without a credential defined
         with self.current_user(self.user_sue):
             response = self.post(no_launch_url, {}, expect=400)
+
+        # Job Templates without projects can not be launched
+        with self.current_user(self.user_sue):
+            data['name'] = "missing proj"
+            response = self.post(url, data, expect=201)
+            jt = JobTemplate.objects.get(pk=response['id'])
+            jt.project = None
+            jt.save()
+            launch_url = reverse('api:job_template_launch',
+                                 args=(response['id'],))
+            self.post(launch_url, {}, expect=400)
+
+        # Job Templates without inventory can not be launched
+        with self.current_user(self.user_sue):
+            data['name'] = "missing inv"
+            response = self.post(url, data, expect=201)
+            jt = JobTemplate.objects.get(pk=response['id'])
+            jt.inventory = None
+            jt.save()
+            launch_url = reverse('api:job_template_launch',
+                                 args=(response['id'],))
+            self.post(launch_url, {}, expect=400)
 
 class JobTest(BaseJobTestMixin, django.test.TestCase):
 

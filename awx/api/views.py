@@ -1458,6 +1458,10 @@ class JobTemplateLaunch(GenericAPIView):
                                 status=status.HTTP_400_BAD_REQUEST)
         if obj.credential is None and ('credential' not in request.DATA and 'credential_id' not in request.DATA):
             return Response(dict(errors="Credential not provided"), status=status.HTTP_400_BAD_REQUEST)
+        if obj.project is None or not obj.project.active:
+            return Response(dict(errors="Job Template Project is missing or undefined"), status=status.HTTP_400_BAD_REQUEST)
+        if obj.inventory is None or not obj.inventory.active:
+            return Response(dict(errors="Job Template Inventory is missing or undefined"), status=status.HTTP_400_BAD_REQUEST)
         new_job = obj.create_unified_job(**request.DATA)
         result = new_job.signal_start(**request.DATA)
         if not result:
