@@ -1,114 +1,61 @@
 # Copyright (c) 2014 Ansible, Inc.
 # All Rights Reserved
 
-from optparse import make_option
-
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+
+from awx.main.management.commands._base_instance import BaseCommandInstance
+instance_str = BaseCommandInstance.instance_str
 
 from awx.main.models import Instance
 
 
-class Command(BaseCommand):
-    """Regsiter this instance with the database for HA tracking.
+class Command(BaseCommandInstance):
+    """Internal tower command.
+    Regsiter this instance with the database for HA tracking.
 
-    This command is idempotent. It will register the machine if it is not
-    yet present and do nothing if the machine is already registered.
+    This command is idempotent.
 
-    If a second primary machine is registered, the first primary machine will
-    become a secondary machine, and the newly registered primary machine
-    will be primary (unless `--timid` is provided, in which case the command
-    will simply error out).
-
-    This command will also error out under the following circumstances:
+    This command will error out in the following conditions:
 
       * Attempting to register a secondary machine with no primary machines.
-      * Attempting to register this machine with a different state than its
-        existing registration plus `--timid`.
+      * Attempting to register a primary instance when a different primary
+      instance exists.
+      * Attempting to re-register an instance with changed values.
     """
-    option_list = BaseCommand.option_list + (
-        make_option('--timid',
-            action='store_true',
-            dest='timid',
-            help='Fail if the primary host specified is already registered as '
-            'another instance or there already exists a primary different '
-            'from the one specified.'),
-        make_option('--hostname',
-            dest='hostname',
-            default='',
-            help='instance to register'),
-        make_option('--primary',
-            action='store_true',
-            dest='primary',
-            help='register instance as primary'),
-        make_option('--secondary',
-            action='store_false',
-            dest='primary',
-            help='register instance as secondary'),
-    )
+    def __init__(self):
+        super(Command, self).__init__()
 
-    def handle(self, **options):
-        uuid = settings.SYSTEM_UUID
-        timid = options['timid']
+        self.include_options_roles()
+        self.include_option_hostname_set()
 
-        # Is there an existing record for this machine?
-        # If so, retrieve that record and look for issues.
+    def handle(self, *args, **options):
+        super(Command, self).handle(*args, **options)
+
+        uuid = self.get_UUID()
+
+        # Is there an existing record for this machine? If so, retrieve that record and look for issues.
         try:
             instance = Instance.objects.get(uuid=uuid)
-            existing = True
+            if instance.hostname != self.get_option_hostname():
+                raise CommandError('Instance already registered with a different hostname %s.' % instance_str(instance))
+            print("Instance already registered %s" % instance_str(instance))
         except Instance.DoesNotExist:
-            instance = Instance(uuid=uuid)
-            existing = False
+            # Get a status on primary machines (excluding this one, regardless of its status).
+            other_instances = Instance.objects.exclude(uuid=uuid)
+            primaries = other_instances.filter(primary=True).count()
 
-        # Get a status on primary machines (excluding this one, regardless
-        # of its status).
-        other_instances = Instance.objects.exclude(uuid=uuid)
-        primaries = other_instances.filter(primary=True).count()
+            # If this instance is being set to primary and a *different* primary machine alreadyexists, error out.
+            if self.is_option_primary() and primaries:
+                raise CommandError('Another instance is already registered as primary.')
 
-        # Sanity check: If we're supposed to be being timid, then ensure
-        # that there's no crazy mosh pits happening here.
-        #
-        # If the primacy setting doesn't match what is already on
-        # the instance, error out.
-        if existing and timid and instance.primary != options['primary']:
-            raise CommandError('This instance is already registered as a '
-                               '%s instance.' % instance.role)
+            # Lastly, if there are no primary machines at all, then don't allow this to be registered as a secondary machine.
+            if self.is_option_secondary() and not primaries:
+                raise CommandError('Unable to register a secondary machine until another primary machine has been registered.')
 
-        # If this instance is being set to primary and a *different* primary
-        # machine alreadyexists, error out if we're supposed to be timid.
-        if timid and options['primary'] and primaries:
-            raise CommandError('Another instance is already registered as '
-                               'primary.')
+            # Okay, we've checked for appropriate errata; perform the registration.
+            instance = Instance(uuid=uuid, primary=self.is_option_primary(), hostname=self.get_option_hostname())
+            instance.save()
 
-        # Lastly, if there are no primary machines at all, then don't allow
-        # this to be registered as a secondary machine.
-        if not options['primary'] and not primaries:
-            raise CommandError('Unable to register a secondary machine until '
-                               'another primary machine has been registered.')
-
-        # Sanity check: An IP address is required if this is an initial
-        # registration.
-        if not existing and not options['hostname']:
-            raise CommandError('An explicit hostname is required at initial '
-                               'registration.')
-
-        # If this is a primary machine and there is another primary machine,
-        # it must be de-primary-ified.
-        if options['primary'] and primaries:
-            for old_primary in other_instances.filter(primary=True):
-                old_primary.primary = False
-                old_primary.save()
-
-        # Okay, we've checked for appropriate errata; perform the registration.
-        dirty = any([
-            instance.primary is not options['primary'],
-            options['hostname'] and
-                instance.hostname != options['hostname'],
-        ])
-        instance.primary = options['primary']
-        if options['hostname']:
-            instance.hostname = options['hostname']
-        instance.save()
-
-        # Done!
-        print('Instance %s registered (changed: %r).' % (uuid, dirty))
+            # Done!
+            print('Successfully registered instance %s.' % instance_str(instance))
