@@ -354,7 +354,7 @@ RAX_GROUP_FILTER = r'^(?!instance-.+).+$'
 RAX_HOST_FILTER = r'^.+$'
 RAX_EXCLUDE_EMPTY_GROUPS = True
 
-INV_ENV_VARIABLE_BLACKLIST = ("HOME", "USER", "_")
+INV_ENV_VARIABLE_BLACKLIST = ("HOME", "USER", "_", "TERM")
 
 # ----------------
 # -- Amazon EC2 --
