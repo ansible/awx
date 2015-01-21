@@ -43,12 +43,82 @@ angular.module('PromptDialog', ['Utilities'])
 
                 $('#prompt_action_btn').removeClass(cls).addClass(cls);
 
+                // bootstrap modal's have an open defect with disallowing tab index's of the background of the modal
+                // This will keep the tab indexing on the modal's focus. This is to fix an issue with tabbing working when
+                // the user is attempting to delete something. Might need to be checked for other occurances of the bootstrap
+                // modal other than deleting
+                 function disableTabModalShown() {
+
+                    $('.modal').on('shown.bs.modal', function() {
+
+                        var modal = $(this);
+                        var focusableChildren = modal.find('a[href], a[data-dismiss], area[href], input, select, textarea, button, iframe, object, embed, *[tabindex], *[contenteditable]');
+                        var numElements = focusableChildren.length;
+                        var currentIndex = 0;
+
+                        $(document.activeElement).blur();
+
+                        var focus = function() {
+                            var focusableElement = focusableChildren[currentIndex];
+                            if (focusableElement)
+                                focusableElement.focus();
+                        };
+
+                        var focusPrevious = function () {
+                            currentIndex--;
+                            if (currentIndex < 0)
+                                currentIndex = numElements - 1;
+
+                            focus();
+
+                            return false;
+                        };
+
+                        var focusNext = function () {
+                            currentIndex++;
+                            if (currentIndex >= numElements)
+                                currentIndex = 0;
+
+                            focus();
+
+                            return false;
+                        };
+
+                        $(document).on('keydown', function (e) {
+
+                            if (e.keyCode == 9 && e.shiftKey) {
+                                e.preventDefault();
+                                focusPrevious();
+                            }
+                            else if (e.keyCode == 9) {
+                                e.preventDefault();
+                                focusNext();
+                            }
+                        });
+
+                        $(this).focus();
+                    });
+
+                    $('.modal').on('hidden.bs.modal', function() {
+                        $(document).unbind('keydown');
+                    });
+                };
+
+
                 $('#prompt-modal').off('hidden.bs.modal');
                 $('#prompt-modal').modal({
-                    backdrop: local_backdrop,
+                    backdrop: 'local_backdrop',
                     keyboard: true,
                     show: true
                 });
+                disableTabModalShown();
+                // $('#prompt-modal').on('shown.bs.modal', function (e) {
+                //     if($('#prompt_action_btn')){
+                //         $('#prompt_action_btn').focus();
+                //     }
+                // });
+
+
             };
         }
     ]);
