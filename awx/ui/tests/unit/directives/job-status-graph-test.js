@@ -15,12 +15,9 @@ describe('Job Status Graph Directive', function() {
     $httpBackend.whenGET('/static/partials/job_status_graph.html')
       .respond("<div class='m'></div><div class='n'></div><div class='job-status-graph'><svg></svg></div>");
 
-    // $httpBackend.whenGET('/api/').respond(200,
-    //                                       {"available_versions": {"v1": "/api/v1/"}, "description": "Ansible Tower REST API", "current_version": "/api/v1/"});
-
     scope = $rootScope.$new();
 
-    element = '<div job-status-graph class="job-status-graph" data="data"></div>';
+    element = '<job-status-graph class="job-status-graph" data="data" job-type="all" period="month"></job-status-graph>';
 
     // Takes jobs grouped by result (successful or failure
     //  Then looks at each array of arrays, where index 0 is the timestamp & index 1 is the count of jobs with that status

@@ -1,8 +1,8 @@
 angular.module('GraphDirectives', [])
   .directive('jobStatusGraph', ['$rootScope', '$compile', '$location' , '$window', 'Wait', 'jobStatusGraphData',
-        function ($rootScope, $compile , $location, $window, Rest, Wait, jobStatusGraphData) {
+        function ($rootScope, $compile , $location, $window, Wait, jobStatusGraphData) {
             return {
-              restrict: 'A',
+              restrict: 'E',
               templateUrl: '/static/partials/job_status_graph.html',
               link: link
             };
@@ -26,17 +26,12 @@ angular.module('GraphDirectives', [])
 
             cleanup = _.compose(
               [ cleanup,
-                scope.$on('DataReceived:JobStatusGraph',
-                          function(e, data) {
-                            scope.$emit('graphDataReady', data);
-                          })
             ]);
 
             function createGraph(period, jobtype){
-              console.log('createGraph');
-              // jobStatusGraphData.get(period, jobtype).then(function(data) {
-              //   scope.$emit('graphDataReady', data);
-              // });
+              jobStatusGraphData.get(period, jobtype).then(function(data) {
+                scope.$emit('graphDataReady', data);
+              });
             }
 
             cleanup = _.compose(
