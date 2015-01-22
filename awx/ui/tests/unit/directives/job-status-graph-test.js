@@ -56,7 +56,6 @@ describe('Job Status Graph Directive', function() {
     var successfulSeries = filterDataSeries(0, lineData);
     var failedSeries = filterDataSeries(1, lineData);
 
-    console.log("test done");
     expect(successfulSeries).to.eql(
     [ {x: 1, y: 0, series: 0},
       {x: 2, y: 0, series: 0},

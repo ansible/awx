@@ -59,8 +59,6 @@ angular.module('GraphDirectives', [])
             }
             scope.removeGraphDataReady = scope.$on('graphDataReady', function (e, data) {
 
-              console.log("building graph", data);
-
               var timeFormat, graphData = [
                 {
                 "color": "#00aa00",
@@ -133,7 +131,7 @@ angular.module('GraphDirectives', [])
               });
 
               // when the Period drop down filter is used, create a new graph based on the
-              d3.selectAll(element.find(".n")[0])
+              d3.selectAll(element.find(".n"))
               .on("click", function() {
                 period = this.getAttribute("id");
                 $('#period-dropdown').replaceWith("<a id=\"period-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+"<span class=\"caret\"><span>\n");
@@ -142,7 +140,7 @@ angular.module('GraphDirectives', [])
               });
 
               //On click, update with new data
-              d3.selectAll(element.find(".m")[0])
+              d3.selectAll(element.find(".m"))
               .on("click", function() {
                 job_type = this.getAttribute("id");
                 $('#type-dropdown').replaceWith("<a id=\"type-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+"<span class=\"caret\"><span>\n");
