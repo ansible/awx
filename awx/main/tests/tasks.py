@@ -602,6 +602,12 @@ class RunJobTest(BaseCeleryTest):
             qs = qs.exclude(event='runner_on_failed')
         else:
             qs = qs.exclude(event=('runner_on_%s' % runner_status))
+            if runner_status == 'skipped':
+                # NOTE: Ansible >= 1.8.2 emits a runner_on_ok event in some cases
+                # of runner_on_skipped.  We may need to revisit this if this assumption
+                # is not universal
+                qs = qs.exclude(event='runner_on_ok')
+
         if async:
             if runner_status == 'failed':
                 qs = qs.exclude(event='runner_on_ok')
