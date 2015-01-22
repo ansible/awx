@@ -504,6 +504,12 @@ angular.module('GeneratorHelpers', [])
             html += (field.dataTipWatch) ? Attr(field, 'dataTipWatch') : "";
             html += (field.awTipPlacement) ? Attr(field, 'awTipPlacement') : "";
         }
+        if (field.awToolTipEllipses) {
+            html += Attr(field, 'awToolTipEllipses');
+            html += (field.dataPlacement && !field.awPopOver) ? Attr(field, 'dataPlacement') : "";
+            html += (field.dataTipWatch) ? Attr(field, 'dataTipWatch') : "";
+            html += (field.awTipPlacement) ? Attr(field, 'awTipPlacement') : "";
+        }
         if (field.awPopOver) {
             html += "aw-pop-over=\"" + field.awPopOver + "\" ";
             html += (field.dataPlacement) ? "data-placement=\"" + field.dataPlacement + "\" " : "";

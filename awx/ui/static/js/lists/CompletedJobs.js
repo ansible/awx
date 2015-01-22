@@ -69,7 +69,8 @@ angular.module('CompletedJobsDefinition', [])
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-4 col-xs-4',
                 ngClick: "viewJobLog(completed_job.id, completed_job.nameHref)",
-                defaultSearchField: true
+                defaultSearchField: true,
+                awToolTipEllipses: "{{ completed_job.name }}"
             },
             failed: {
                 label: 'Job failed?',

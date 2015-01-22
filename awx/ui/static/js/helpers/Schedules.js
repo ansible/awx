@@ -505,8 +505,11 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 list = params.list,
                 choices = params.choices;
             scope[list.name].forEach(function(item, item_idx) {
-                var fld, field,
-                    itm = scope[list.name][item_idx];
+                var fld,
+                    field,
+                    itm = scope[list.name][item_idx],
+                    job = item.summary_fields.unified_job_template;
+
                 itm.enabled = (itm.enabled) ? true : false;
                 if (itm.enabled) {
                     itm.play_tip = 'Schedule is active. Click to stop.';
@@ -518,7 +521,17 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                     itm.status = 'stopped';
                     itm.status_tip = 'Schedule is stopped. Click to activate.';
                 }
-                itm.nameTip = item.name + " schedule. Click to edit.";
+                itm.nameTip = item.name;
+                // include the word schedule if the schedule name does not include the word schedule
+                if (item.name.indexOf("schedule") == -1 && item.name.indexOf("Schedule") == -1) {
+                    itm.nameTip += " schedule";
+                }
+                itm.nameTip += " for "
+                if (job.name.indexOf("job") == -1 && job.name.indexOf("Job") == -1) {
+                    itm.nameTip += "job ";
+                }
+                itm.nameTip += job.name;
+                itm.nameTip += ". Click to edit schedule.";
                 // Copy summary_field values
                 for (field in list.fields) {
                     fld = list.fields[field];
