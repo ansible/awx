@@ -1,0 +1,39 @@
+<div class="row">
+<div id="job-status-title" class="h6 col-xs-2 col-sm-3 col-lg-4 text-center"><b>Job Status</b></div>
+
+<div class="h6 col-xs-5 col-sm-5 col-lg-4">
+<div class="dropdown">
+Job Type: <a id="type-dropdown" role="button" data-toggle="dropdown" data-target="#" href="/page.html">
+All<span class="caret"></span>
+  </a>
+
+<ul class="dropdown-menu" role="menu" aria-labelledby="type-dropdown">
+<li><a class="m" id="all">All</a></li>
+<li><a class="m" id="inv_sync">Inventory Sync</a></li>
+<li><a class="m" id="scm_update">SCM Update</a></li>
+<li><a class="m" id="playbook_run">Playbook Run</a></li>
+</ul>
+</div>
+
+</div>
+
+<div class="h6 col-xs-5 col-sm-4 col-lg-4">
+<div class="dropdown">
+Period: <a id="period-dropdown" role="button" data-toggle="dropdown" data-target="#" href="/page.html">
+Past Month<span class="caret"></span>
+  </a>
+
+<ul class="dropdown-menu" role="menu" aria-labelledby="period-dropdown">
+<li><a class="n" id="day" >Past 24 Hours </a></li>
+<li><a class="n" id="week">Past Week</a></li>
+<li><a class="n" id="month">Past Month</a></li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div class="row">
+<div class="job-status-graph"><svg></svg></div>
+</div>
+
