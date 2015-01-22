@@ -23,6 +23,7 @@ from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
+from django.template.loader import render_to_string
 
 # Django REST Framework
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -183,6 +184,7 @@ class ApiV1ConfigView(APIView):
             license_info=license_data,
             version=get_awx_version(),
             ansible_version=get_ansible_version(),
+            eula=render_to_string("eula.md"),
         )
 
         # If LDAP is enabled, user_ldap_fields will return a list of field
@@ -205,6 +207,11 @@ class ApiV1ConfigView(APIView):
     def post(self, request):
         if not request.user.is_superuser:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
+        if "eula_accepted" not in request.DATA:
+            return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
+        if not request.DATA["eula_accepted"]:
+            return Response({"error": "'eula_accepted' must be True"}, status=status.HTTP_400_BAD_REQUEST)
+        request.DATA.pop("eula_accepted")
         try:
             data_actual = json.dumps(request.DATA)
         except Exception, e:
