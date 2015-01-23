@@ -30,12 +30,21 @@
                     <div class="form-horizontal" role="form" id="job-status-form">
 
                         <div class="form-group">
-                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Status</label>
-                            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
-                            <div class="col-lg-8 col-md-7 col-sm-6 col-xs-5" ng-bind-html="job_status.explanation"></div>
+                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12 control-label">Status</label>
+                            <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 job_status"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" ng-show="job_status.explanation">
+                            <label class="col-lg-2 col-md-12 col-sm-12 col-xs-12">Explanation</label>
+                            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12  job_status_explanation" ng-bind-html="job_status.explanation"></div>
+                        </div>
+
+                        <div class="form-group" ng-show="job_status.traceback">
+                            <label class="col-lg-2 col-md-12 col-sm-12 col-xs-12">Results Traceback</label>
+                            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12  job_status_traceback" ng-bind-html="job_status.traceback"></div>
+                        </div>
+
+                        <div class="form-group" ng-show="job_status.started">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Timing</label>
                             <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
                                 <div ng-show="job_status.started" id="started-time">Started &nbsp;{{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</div>

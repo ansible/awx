@@ -478,7 +478,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                     scope.selectedPlay = scope.activePlay;
                 } else {
                     // if we are here, there are no plays and the job has failed, let the user know they may want to consult stdout
-                    if (scope.job_status.status === 'failed' || scope.job_status.status === 'error' &&
+                    if ( (scope.job_status.status === 'failed' || scope.job_status.status === 'error') &&
                         (!scope.job_status.explanation)) {
                         scope.job_status.explanation = "<a href=\"/#/jobs/" + scope.job_id + "/stdout\" target=\"_blank\">View stdout for more detail <i class=\"fa fa-external-link\"></i></a>";
                     }
@@ -671,7 +671,9 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 scope.job_status.started = data.started;
                 scope.job_status.status_class = ((data.status === 'error' || data.status === 'failed') && data.job_explanation) ? "alert alert-danger" : "";
                 scope.job_status.explanation = data.job_explanation;
-
+                if(data.result_traceback) {
+                    scope.job_status.traceback = data.result_traceback;
+                }
                 if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
                     scope.job_status.finished = data.finished;
                     scope.liveEventProcessing = false;
