@@ -46,8 +46,8 @@ angular.module('SourceFormDefinition', [])
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
-                addRequired: true,
-                editRequired: true
+                addRequired: false,
+                editRequired: false
             },
             source_regions: {
                 label: 'Regions',
@@ -122,7 +122,7 @@ angular.module('SourceFormDefinition', [])
                 ngShow: "source && source.value=='custom' ",
                 type: 'textarea',
                 addRequired: false,
-                editRequird: false,
+                editRequired: false,
                 rows: 6,
                 'default': '---',
                 parseTypeName: 'envParseType',
