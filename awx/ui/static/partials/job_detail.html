@@ -14,7 +14,10 @@
             <div id="job-detail-container">
                 <div class="job_well">
                     <div class="row">
-                        <div class="col-md-12 text-right">
+                        <label class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Status</label>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 job_status"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
+
+                        <div class="col-lg-4 text-right">
                             <a href="" id="play-help" aw-pop-over="Live event processing is now paused. Click here to resume." id="play-button-help" data-placement="left" ng-show="pauseLiveEvents" ><i class="fa fa-question"></i></a>
                             <a href="" ng-click="togglePlayButton()" id="play-button" class="btn btn-primary btn-xs" aw-tool-tip="Resume viewing live events" data-placement="top" ng-show="pauseLiveEvents" style="margin-right:25px;"><i class="fa fa-play"></i></a>
                             <a href="/#/jobs/{{ job_id }}/stdout" id="view-stdout-button" target="_blank" type="button" class="btn btn-primary btn-xs" aw-tool-tip="View standard out. Opens in new tab or window." data-placement="top"><i class="fa fa-external-link"></i></a>
@@ -29,13 +32,17 @@
 
                     <div class="form-horizontal" role="form" id="job-status-form">
 
-                        <div class="form-group">
-                            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Status</label>
-                            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-4"><i class="fa icon-job-{{ job_status.status }}"></i> {{ job_status.status }}</div>
-                            <div class="col-lg-8 col-md-7 col-sm-6 col-xs-5" ng-bind-html="job_status.explanation"></div>
+                        <div class="form-group" ng-show="job_status.explanation">
+                            <label class="col-lg-2 col-md-12 col-sm-12 col-xs-12">Explanation</label>
+                            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12  job_status_explanation" ng-bind-html="job_status.explanation"></div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" ng-show="job_status.traceback">
+                            <label class="col-lg-2 col-md-12 col-sm-12 col-xs-12">Results Traceback</label>
+                            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12  job_status_traceback" ng-bind-html="job_status.traceback"></div>
+                        </div>
+
+                        <div class="form-group" ng-show="job_status.started">
                             <label class="col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Timing</label>
                             <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
                                 <div ng-show="job_status.started" id="started-time">Started &nbsp;{{ job_status.started | date:'MM/dd/yy HH:mm:ss' }}</div>
