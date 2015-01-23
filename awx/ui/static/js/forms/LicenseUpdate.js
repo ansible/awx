@@ -25,15 +25,30 @@ angular.module('LicenseUpdateFormDefinition', [])
                 editRequird: true,
                 rows: 10,
                 'default': '---'
+            },
+            eula: {
+                label: 'End User License Agreement',
+                type: 'textarea',
+                addRequired: true,
+                editRequird: true,
+                rows: 5,
+                readonly: true
+            },
+            eula_agreement: {
+                label: 'I agree to the End User License Agreement',
+                type: 'checkbox',
+                addRequired: true,
+                editRequird: true,
+                trueValue: 'true',
+                falseValue: 'false'
             }
         },
-
         buttons: {
             form_submit: {
                 label: "Submit",
                 "class": "pull-right btn-primary",
                 ngClick: "submitLicenseKey()",
-                ngDisabled: true
+                // ngDisabled:  "true"
             }
         },
 

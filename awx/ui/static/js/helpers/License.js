@@ -1,4 +1,3 @@
-
 /******************************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
@@ -157,6 +156,7 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
             scope = (in_scope) ? in_scope : self.scope;
 
             json_data = ToJSON('json', license_key);
+            json_data.eula_accepted = (scope.eula_agreement === "true") ? true : false;
             if (typeof json_data === 'object' && Object.keys(json_data).length > 0) {
                 Rest.setUrl(url);
                 Rest.post(json_data)
@@ -359,6 +359,8 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
 
                 scope.parseType = 'json';
                 scope.license_json = JSON.stringify(self.license, null, ' ');
+                scope.eula = self.eula;
+                scope.eula_agreement = false;
                 h = CheckLicense.getHTML(self.getLicense(),true).body;
                 $('#license-modal-dialog #license_tabs').append("<li><a id=\"update_license_link\" ng-click=\"toggleTab($event, 'update_license_link', 'license_tabs')\" href=\"#update_license\" data-toggle=\"tab\">Update License</a></li>");
                 $('#license-modal-dialog .tab-content').append("<div class=\"tab-pane\" id=\"update_license\"></div>");
@@ -367,6 +369,15 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
                 setTimeout(function() {
                     $compile(e)(scope);
                     $('#license-modal-dialog').dialog('open');
+                    $('#license_form_submit_btn').attr('disabled' , 'true' );
+                    $('#license_eula_agreement_chbox').on('click' , function(){
+                        if(scope.eula_agreement === "false"){
+                            $('#license_form_submit_btn').attr('disabled' , 'true' );
+                        }
+                        if(scope.eula_agreement === "true"){
+                            $('#license_form_submit_btn').removeAttr('disabled');
+                        }
+                    });
                 }, 300);
             });
 
@@ -387,7 +398,7 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
                 scope: scope,
                 buttons: buttons,
                 width: 675,
-                height: 600,
+                height: (IsAdmin()) ? 745 : 600,
                 minWidth: 400,
                 title: 'Ansible Tower License',
                 id: 'license-modal-dialog',
@@ -497,7 +508,7 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
                 } else {
                     days = Math.floor(scope.time_remaining / 86400000);
                 }
-                scope.time_remaining = (days!==1) ? $filter('number')(days, 0) + ' days' : $filter('number')(days, 0) + ' day';
+                scope.time_remaining = (days!==1) ? $filter('number')(days, 0) + ' days' : $filter('number')(days, 0) + ' day'; // '1 day' and '0 days/2 days' or more
             }
 
             if (parseInt(scope.free_instances) <= 0) {
@@ -554,6 +565,7 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
                 self.setLicense(data.license_info, version);
                 html = self.getDefaultHTML(data.license_info);
                 self.loadDefaultScope(data.license_info, version);
+                self.eula = (data.eula) ? data.eula : "" ;
                 self.createDialog(html);
             });
             CheckLicense.GetLicense('LicenseDataReady', scope);
@@ -572,7 +584,6 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
                 purchase_msg = '<p>To purchase a license or extend an existing license ' +
                 '<a href="http://www.ansible.com/ansible-pricing" target="_blank"><strong>visit the Ansible online store</strong></a>, ' +
                 'or visit <strong><a href="https://support.ansible.com" target="_blank">support.ansible.com</a></strong> for assistance.</p>';
-
             if (license && !Authorization.licenseTested()) {
                 // This is our first time evaluating the license
                 license.tested = true;
@@ -619,3 +630,4 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
     }
 ]);
 */
+
