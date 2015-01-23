@@ -994,25 +994,6 @@ class SystemJob(UnifiedJob, SystemJobOptions):
         from awx.main.tasks import RunSystemJob
         return RunSystemJob
 
-    def handle_extra_data(self, extra_data):
-        if extra_data == "" or extra_data is None:
-            return
-        try:
-            evars = json.loads(self.extra_vars)
-        except Exception, e:
-            evars = {}
-        if type(extra_data) == str:
-            try:
-                extra_data = json.loads(extra_data)
-            except Exception, e:
-                extra_data = {}
-        if evars is None:
-            evars = extra_data
-        else:
-            evars.update(extra_data)
-        self.update_fields(extra_vars=json.dumps(evars))
-
-
     def socketio_emit_data(self):
         return {}
 
