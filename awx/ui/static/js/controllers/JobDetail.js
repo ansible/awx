@@ -672,7 +672,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
                 scope.job_status.status_class = ((data.status === 'error' || data.status === 'failed') && data.job_explanation) ? "alert alert-danger" : "";
                 scope.job_status.explanation = data.job_explanation;
                 if(data.result_traceback) {
-                    scope.job_status.traceback = data.result_traceback;
+                    scope.job_status.traceback = data.result_traceback.trim().split('\n').join('<br />');
                 }
                 if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
                     scope.job_status.finished = data.finished;
