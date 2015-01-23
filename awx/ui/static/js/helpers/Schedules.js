@@ -523,11 +523,11 @@ angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelpe
                 }
                 itm.nameTip = item.name;
                 // include the word schedule if the schedule name does not include the word schedule
-                if (item.name.indexOf("schedule") == -1 && item.name.indexOf("Schedule") == -1) {
+                if (item.name.indexOf("schedule") === -1 && item.name.indexOf("Schedule") === -1) {
                     itm.nameTip += " schedule";
                 }
-                itm.nameTip += " for "
-                if (job.name.indexOf("job") == -1 && job.name.indexOf("Job") == -1) {
+                itm.nameTip += " for ";
+                if (job.name.indexOf("job") === -1 && job.name.indexOf("Job") === -1) {
                     itm.nameTip += "job ";
                 }
                 itm.nameTip += job.name;

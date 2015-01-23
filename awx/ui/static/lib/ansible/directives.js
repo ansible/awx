@@ -470,8 +470,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     container: 'body',
                     trigger: 'hover focus'
                 });
-            } 
-        }
+            }
+        };
     }])
 
     /*
