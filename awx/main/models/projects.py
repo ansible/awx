@@ -257,8 +257,8 @@ class Project(UnifiedJobTemplate, ProjectOptions):
 
     def _get_current_status(self):
         if self.scm_type:
-            if self.current_update:
-                return 'running'
+            if self.current_job and self.current_job.status:
+                return self.current_job.status
             elif not self.last_job:
                 return 'never updated'
             elif self.last_job_failed:
@@ -363,18 +363,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()
         if parent_instance:
-            if self.status in ('pending', 'waiting', 'running'):
-                if parent_instance.current_job != self:
-                    parent_instance.current_job = self
-                    parent_instance.save(update_fields=['current_job'])
-            elif self.status in ('successful', 'failed', 'error', 'canceled'):
-                if parent_instance.current_job == self:
-                    parent_instance.current_job = None
-                parent_instance.last_job = self
-                parent_instance.last_job_failed = self.failed
-                if not self.failed and parent_instance.scm_delete_on_next_update:
-                    parent_instance.scm_delete_on_next_update = False
-                parent_instance.save(update_fields=['current_job',
-                                                    'last_job',
-                                                    'last_job_failed',
-                                                    'scm_delete_on_next_update'])
+            update_fields = self._update_parent_instance_no_save(parent_instance)
+            if not self.failed and parent_instance.scm_delete_on_next_update:
+                parent_instance.scm_delete_on_next_update = False
+                update_fields.append(scm_delete_on_next_update)
+            parent_instance.save(update_fields=update_fields)
