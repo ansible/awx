@@ -1503,7 +1503,7 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'change', obj, request.DATA):
+        if not request.user.can_access(self.model, 'change', obj, None):
             raise PermissionDenied()
         try:
             obj.survey_spec = json.dumps(request.DATA)
