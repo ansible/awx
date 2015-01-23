@@ -783,8 +783,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if self.can_cancel:
             if not self.cancel_flag:
                 self.cancel_flag = True
-                self.status = 'canceled'
-                self.save(update_fields=['cancel_flag', 'status'])
+                cancel_fields = ['cancel_flag']
+                if self.status in ('pending', 'waiting'):
+                    self.status = 'canceled'
+                    cancel_fields.append('status')
+                self.save(update_fields=cancel_fields)
                 self.socketio_emit_status("canceled")
             if settings.BROKER_URL.startswith('amqp://'):
                 self._force_cancel()
