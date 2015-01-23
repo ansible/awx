@@ -90,6 +90,9 @@ class VarsDictProperty(object):
         if d is None:
             try:
                 d = yaml.safe_load(v)
+                # This can happen if the whole file is commented out
+                if d is None:
+                    d = {}
             except yaml.YAMLError:
                 pass
         if d is None and self.key_value:
