@@ -312,8 +312,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
                     create_kwargs[field_name] = kwargs[field_name]
             elif hasattr(self, field_name):
                 create_kwargs[field_name] = getattr(self, field_name)
-        kwargs = self._update_unified_job_kwargs(**create_kwargs)
-        unified_job = unified_job_class(**create_kwargs)
+        new_kwargs = self._update_unified_job_kwargs(**create_kwargs)
+        unified_job = unified_job_class(**new_kwargs)
         if save_unified_job:
             unified_job.save()
         return unified_job
