@@ -136,7 +136,7 @@ class FieldLookupBackend(BaseFilterBackend):
     def value_to_python(self, model, lookup, value):
         field, new_lookup = self.get_field_from_lookup(model, lookup)
         if new_lookup.endswith('__isnull'):
-            value = self.to_python_boolean(value)
+            value = to_python_boolean(value)
         elif new_lookup.endswith('__in'):
             items = []
             for item in value.split(','):
