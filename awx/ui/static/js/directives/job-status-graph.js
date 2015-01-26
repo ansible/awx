@@ -34,24 +34,49 @@ angular.module('GraphDirectives', [])
               });
             }
 
-            cleanup = _.compose(
-              [ cleanup,
-                angular.element($window).bind('resize', function() {
-                  if($(window).width()<500){
-                    $('.graph-container').height(300);
-                  }
-                  else{
-                    var winHeight = $(window).height(),
-                    available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
-                    $('.graph-container').height(available_height/2);
-                    job_status_chart.update();
-                  }
-                })
-            ]);
+            var w = angular.element($window);
+
+            function adjustGraphSize() {
+              var parentHeight = element.parent().height();
+              var toolbarHeight = element.find('.toolbar').height();
+              var container = element.find('svg').parent();
+              var margins = job_status_chart.margin();
+
+              $(container).height(parentHeight - toolbarHeight - margins.bottom);
+
+              var graph = d3.select(element.find('svg')[0]);
+              var width = parseInt(graph.style('width')) - margins.left - margins.right;
+              var height = parseInt(graph.style('height')) - margins.top - margins.bottom;
+
+
+              job_status_chart.xRange([0, width]);
+              job_status_chart.yRange([height, 0]);
+
+              job_status_chart.xAxis.ticks(Math.max(width / 75, 2));
+              job_status_chart.yAxis.ticks(Math.max(height / 50, 2));
+
+              if (height < 160) {
+                graph.select('.y.axis').select('.domain').style('display', 'none');
+                graph.select('.y.axis').select('.domain').style('display', 'initial');
+              }
+
+              graph.select('.x.axis')
+                .attr('transform', 'translate(0, ' + height + ')')
+                .call(job_status_chart.xAxis);
+
+              graph.selectAll('.line')
+                    .attr('d', job_status_chart.lines)
+
+              job_status_chart.update();
+            }
+
+            $window.addEventListener('resize', adjustGraphSize);
 
             if (scope.removeGraphDataReady) {
               scope.removeGraphDataReady();
             }
+
+            var job_status_chart;
             scope.removeGraphDataReady = scope.$on('graphDataReady', function (e, data) {
 
               var timeFormat, graphData = [
@@ -83,11 +108,10 @@ angular.module('GraphDirectives', [])
                 return series;
               });
 
-              var job_status_chart = nv.models.lineChart()
-              .margin({top: 5, right: 75, bottom: 80, left: 85})  //Adjust chart margins to give the x-axis some breathing room.
+              job_status_chart = nv.models.lineChart()
+              .margin({top: 5, right: 75, bottom: 50, left: 85})  //Adjust chart margins to give the x-axis some breathing room.
               .x(function(d,i) { return i; })
               .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
-              .transitionDuration(350)  //how fast do you want the lines to transition?
               .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
               .showYAxis(true)        //Show the y-axis
               .showXAxis(true)        //Show the x-axis
@@ -111,10 +135,10 @@ angular.module('GraphDirectives', [])
               .tickFormat(d3.format('.f'));
 
               d3.select(element.find('svg')[0])
-              .datum(graphData).transition()
-              .attr('width', width)
-              .attr('height', height)
-              .duration(1000)
+              .datum(graphData)
+              // .attr('width', width)
+              // .attr('height', height)
+              // .transition().duration(100)
               .call(job_status_chart)
               .style({
                 // 'width': width,
@@ -142,6 +166,8 @@ angular.module('GraphDirectives', [])
 
                 createGraph(period, job_type);
               });
+
+              adjustGraphSize();
 
               return job_status_chart;
 
