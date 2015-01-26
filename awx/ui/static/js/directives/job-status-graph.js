@@ -1,6 +1,6 @@
 angular.module('DashboardGraphs')
-  .directive('jobStatusGraph', ['$rootScope', '$compile', '$location' , '$window', 'Wait', 'jobStatusGraphData',
-        function ($rootScope, $compile , $location, $window, Wait, jobStatusGraphData) {
+  .directive('jobStatusGraph', ['$rootScope', '$compile', '$location' , '$window', 'Wait', 'adjustGraphSize', 'jobStatusGraphData',
+        function ($rootScope, $compile , $location, $window, Wait, adjustGraphSize, jobStatusGraphData) {
             return {
               restrict: 'E',
               templateUrl: '/static/partials/job_status_graph.html',
@@ -35,43 +35,10 @@ angular.module('DashboardGraphs')
 
             var w = angular.element($window);
 
-            function adjustGraphSize() {
-              var parentHeight = element.parent().parent().height();
-              var toolbarHeight = element.find('.toolbar').height();
-              var container = element.find('svg').parent();
-              var margins = job_status_chart.margin();
 
-              var newHeight = parentHeight - toolbarHeight - margins.bottom;
-
-              $(container).height(newHeight);
-
-              var graph = d3.select(element.find('svg')[0]);
-              var width = parseInt(graph.style('width')) - margins.left - margins.right;
-              var height = parseInt(graph.style('height')) - margins.top - margins.bottom;
-
-
-              job_status_chart.xRange([0, width]);
-              job_status_chart.yRange([height, 0]);
-
-              job_status_chart.xAxis.ticks(Math.max(width / 75, 2));
-              job_status_chart.yAxis.ticks(Math.max(height / 50, 2));
-
-              if (height < 160) {
-                graph.select('.y.axis').select('.domain').style('display', 'none');
-                graph.select('.y.axis').select('.domain').style('display', 'initial');
-              }
-
-              graph.select('.x.axis')
-                .attr('transform', 'translate(0, ' + height + ')')
-                .call(job_status_chart.xAxis);
-
-              graph.selectAll('.line')
-                    .attr('d', job_status_chart.lines)
-
-              job_status_chart.update();
-            }
-
-            $window.addEventListener('resize', adjustGraphSize);
+            $window.addEventListener('resize', function() {
+              adjustGraphSize(job_status_chart, element);
+            });
 
             if (scope.removeGraphDataReady) {
               scope.removeGraphDataReady();
@@ -168,7 +135,7 @@ angular.module('DashboardGraphs')
                 createGraph(period, job_type);
               });
 
-              adjustGraphSize();
+              adjustGraphSize(job_status_chart, element);
 
               return job_status_chart;
 

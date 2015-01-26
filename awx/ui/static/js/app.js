@@ -95,7 +95,6 @@ angular.module('Tower', [
     'SelectionHelper',
     'HostGroupsFormDefinition',
     'DashboardCountsWidget',
-    'HostGraphWidget',
     'DashboardJobsWidget',
     'PortalJobsWidget',
     'StreamWidget',

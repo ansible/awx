@@ -25,7 +25,7 @@
  *                  Host count graph should only be loaded if the user is a super user
  *
 */
-function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, HostGraph, DashboardJobs,
+function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, DashboardJobs,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button, graphData){
 
     ClearScope('home');
@@ -84,7 +84,6 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
         loadedCount++;
         if (loadedCount === waitCount) {
             $(window).resize(_.debounce(function() {
-                $scope.$emit('ResizeHostGraph');
                 Wait('stop');
             }, 500));
             $(window).resize();
@@ -118,15 +117,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 
         $scope.graphData = graphData;
 
-        if ($rootScope.user_is_superuser === true) {
-            waitCount = 5;
-            HostGraph({
-                scope: $scope,
-                target: 'dash-host-count-graph',
-                dashboard: data
-            });
-        }
-        else{
+        if ($rootScope.user_is_superuser !== true) {
             $('#dash-host-count-graph').remove(); //replaceWith("<div id='dash-host-count-graph' class='left-side col-sm-12 col-xs-12'></div>");
         }
         DashboardJobs({
@@ -178,7 +169,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'HostGraph', 'DashboardJobs',
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'DashboardJobs',
     'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button', 'graphData'
 ];
 
