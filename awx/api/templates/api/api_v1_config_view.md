@@ -14,5 +14,7 @@ the following fields (some fields may not be visible to all users):
 
 (_New in Ansible Tower 2.0.0_) Make a POST request to this resource as a super
 user to install or update the existing license.  The license data itself can
-be POSTed as a normal json data structure.  The POST must include a `eula_accepted`
-boolean element indicating acceptance of the End-User License Agreement.
+be POSTed as a normal json data structure.
+
+(_New in Ansible Tower 2.1.1_) The POST must include a `eula_accepted` boolean
+element indicating acceptance of the End-User License Agreement.
