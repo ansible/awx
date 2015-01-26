@@ -36,12 +36,14 @@ angular.module('DashboardGraphs')
             var w = angular.element($window);
 
             function adjustGraphSize() {
-              var parentHeight = element.parent().height();
+              var parentHeight = element.parent().parent().height();
               var toolbarHeight = element.find('.toolbar').height();
               var container = element.find('svg').parent();
               var margins = job_status_chart.margin();
 
-              $(container).height(parentHeight - toolbarHeight - margins.bottom);
+              var newHeight = parentHeight - toolbarHeight - margins.bottom;
+
+              $(container).height(newHeight);
 
               var graph = d3.select(element.find('svg')[0]);
               var width = parseInt(graph.style('width')) - margins.left - margins.right;
