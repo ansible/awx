@@ -129,7 +129,7 @@ class FieldLookupBackend(BaseFilterBackend):
         elif isinstance(field, models.BooleanField):
             return to_python_boolean(value)
         elif isinstance(field, RelatedObject):
-            return to_python_related(value)
+            return self.to_python_related(value)
         else:
             return field.to_python(value)
 
