@@ -223,8 +223,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                     $(this).remove();
                 });
 
-                $(window).unbind('resize');
-
                 // Prepend an asterisk to required field label
                 $('.form-control[required], input[type="radio"][required]').each(function () {
                     var label, span;
