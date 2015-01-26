@@ -27,7 +27,7 @@ from Crypto.Cipher import AES
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version', 'update_scm_url',
-           'get_type_for_model', 'get_model_for_type',
+           'get_type_for_model', 'get_model_for_type', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates']
 
