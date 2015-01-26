@@ -215,7 +215,7 @@ class BaseTask(Task):
                 )
             else:
                 logger.error('Failed to update %s after %d retries.',
-                             self.model._meta.object_name, retry_count)
+                             self.model._meta.object_name, _attempt)
 
     def signal_finished(self, pk):
         pass
