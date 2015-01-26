@@ -17,17 +17,16 @@ angular.module('DashboardGraphs')
         });
 
         function adjustGraphSize() {
-          if($($window).width()<500){
-            $('.graph-container').height(300);
-          }
-          else{
-            var winHeight = $($window).height(),
-            available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
-            $('.graph-container').height(available_height/2);
-            if(host_pie_chart){
-              host_pie_chart.update();
-            }
-          }
+          var parentHeight = element.parent().parent().height();
+          var toolbarHeight = element.find('.toolbar').height();
+          var container = element.find('svg').parent();
+          var margins = host_pie_chart.margin();
+
+          var newHeight = parentHeight - toolbarHeight - margins.bottom;
+
+          $(container).height(newHeight);
+
+          host_pie_chart.update();
         }
 
         $window.addEventListener('resize', adjustGraphSize);
@@ -51,44 +50,42 @@ angular.module('DashboardGraphs')
             }
             ];
 
-            nv.addGraph(function() {
-              var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
-              height = $('.graph-container').height()*0.7; //nv.utils.windowSize().height/5,
-              host_pie_chart = nv.models.pieChart()
-              .margin({top: 5, right: 75, bottom: 40, left: 85})
-              .x(function(d) { return d.label; })
-              .y(function(d) { return d.value; })
-              .showLabels(true)
-              .labelThreshold(0.01)
-              .tooltipContent(function(x, y) {
-                return '<b>'+x+'</b>'+ '<p>' +  Math.floor(y.replace(',','')) + ' Hosts ' +  '</p>';
-              })
-              .color(['#00aa00', '#aa0000']);
+            var width = $('.graph-container').width(), // nv.utils.windowSize().width/3,
+            height = $('.graph-container').height()*0.7; //nv.utils.windowSize().height/5,
+            host_pie_chart = nv.models.pieChart()
+            .margin({top: 5, right: 75, bottom: 25, left: 85})
+            .x(function(d) { return d.label; })
+            .y(function(d) { return d.value; })
+            .showLabels(true)
+            .labelThreshold(0.01)
+            .tooltipContent(function(x, y) {
+              return '<b>'+x+'</b>'+ '<p>' +  Math.floor(y.replace(',','')) + ' Hosts ' +  '</p>';
+            })
+            .color(['#00aa00', '#aa0000']);
 
-              host_pie_chart.pie.pieLabelsOutside(true).labelType("percent");
+            host_pie_chart.pie.pieLabelsOutside(true).labelType("percent");
 
-              d3.select(".host-pie-chart svg")
-              .datum(data)
-              .attr('width', width)
-              .attr('height', height)
-              .transition().duration(350)
-              .call(host_pie_chart)
-              .style({
-                "font-family": 'Open Sans',
-                "font-style": "normal",
-                "font-weight":400,
-                "src": "url(/static/fonts/OpenSans-Regular.ttf)"
-              });
-              // nv.utils.windowResize(host_pie_chart.update);
-              scope.$emit('WidgetLoaded');
-              return host_pie_chart;
+            d3.select(element.find('svg')[0])
+            .datum(data)
+            // .attr('width', width)
+            // .attr('height', height)
+            .transition().duration(350)
+            .call(host_pie_chart)
+            .style({
+              "font-family": 'Open Sans',
+              "font-style": "normal",
+              "font-weight":400,
+              "src": "url(/static/fonts/OpenSans-Regular.ttf)"
             });
+            // nv.utils.windowResize(host_pie_chart.update);
+            adjustGraphSize();
+            return host_pie_chart;
           }
           else{
             winHeight = $($window).height();
             available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
-            $('.graph-container:eq(1)').height(available_height/2);
-            $('.host-pie-chart svg').replaceWith('<canvas id="circlecanvas" width="120" height="120"></canvas>');
+            element.find('.graph-wrapper').height(available_height/2);
+            element.find('svg').replaceWith('<canvas id="circlecanvas" width="120" height="120"></canvas>');
 
             canvas = document.getElementById("circlecanvas");
             context = canvas.getContext("2d");
@@ -99,6 +96,7 @@ angular.module('DashboardGraphs')
             context.font = "12px Open Sans";
             context.fillText("No Host data",18,55);
           }
+
         }
       }
   }]);
