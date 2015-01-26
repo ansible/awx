@@ -61,6 +61,16 @@ def get_object_or_403(klass, *args, **kwargs):
     except queryset.model.MultipleObjectsReturned, e:
         raise PermissionDenied(*e.args)
 
+def to_python_boolean(value, allow_none=False):
+    value = unicode(value)
+    if value.lower() in ('true', '1'):
+        return True
+    elif value.lower() in ('false', '0'):
+        return False
+    elif allow_none and value.lower() in ('none', 'null'):
+        return None
+    else:
+        raise ValueError(u'Unable to convert "%s" to boolean' % unicode(value))
 
 def camelcase_to_underscore(s):
     '''

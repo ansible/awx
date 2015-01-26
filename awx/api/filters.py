@@ -17,7 +17,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework.filters import BaseFilterBackend
 
 # Ansible Tower
-from awx.main.utils import get_type_for_model
+from awx.main.utils import get_type_for_model, to_python_boolean
 
 class ActiveOnlyBackend(BaseFilterBackend):
     '''
@@ -116,17 +116,6 @@ class FieldLookupBackend(BaseFilterBackend):
         new_lookup = '__'.join(new_parts)
         return field, new_lookup
 
-    def to_python_boolean(self, value, allow_none=False):
-        value = unicode(value)
-        if value.lower() in ('true', '1'):
-            return True
-        elif value.lower() in ('false', '0'):
-            return False
-        elif allow_none and value.lower() in ('none', 'null'):
-            return None
-        else:
-            raise ValueError(u'Unable to convert "%s" to boolean' % unicode(value))
-
     def to_python_related(self, value):
         value = unicode(value)
         if value.lower() in ('none', 'null'):
@@ -136,11 +125,11 @@ class FieldLookupBackend(BaseFilterBackend):
 
     def value_to_python_for_field(self, field, value):
         if isinstance(field, models.NullBooleanField):
-            return self.to_python_boolean(value, allow_none=True)
+            return to_python_boolean(value, allow_none=True)
         elif isinstance(field, models.BooleanField):
-            return self.to_python_boolean(value)
+            return to_python_boolean(value)
         elif isinstance(field, RelatedObject):
-            return self.to_python_related(value)
+            return to_python_related(value)
         else:
             return field.to_python(value)
 
