@@ -207,15 +207,15 @@ class ApiV1ConfigView(APIView):
     def post(self, request):
         if not request.user.is_superuser:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
-        if "eula_accepted" not in request.DATA:
-            return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
-        if not request.DATA["eula_accepted"]:
-            return Response({"error": "'eula_accepted' must be True"}, status=status.HTTP_400_BAD_REQUEST)
-        request.DATA.pop("eula_accepted")
         try:
             data_actual = json.dumps(request.DATA)
         except Exception, e:
             return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
+        if "eula_accepted" not in data_actual:
+            return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
+        if not data_actual["eula_accepted"]:
+            return Response({"error": "'eula_accepted' must be True"}, status=status.HTTP_400_BAD_REQUEST)
+        data_actual.pop("eula_accepted")
         license_reader = TaskSerializer()
         try:
             license_data = license_reader.from_string(data_actual)
