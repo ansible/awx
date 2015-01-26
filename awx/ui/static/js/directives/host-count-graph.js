@@ -12,9 +12,15 @@ angular.module('DashboardGraphs').
 
     url = getBasePath('config');
 
-    $window.addEventListener('resize', function() {
+    angular.element($window).on('resize', function(e) {
+      if(!license_graph) return;
       adjustGraphSize(license_graph, element);
     });
+
+    element.on('$destroy', function() {
+      angular.element($window).off('resize', adjustGraphSize);
+    });
+
 
     Rest.setUrl(url);
     Rest.get()

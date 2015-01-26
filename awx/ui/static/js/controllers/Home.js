@@ -26,7 +26,7 @@
  *
 */
 function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, DashboardJobs,
-    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button, graphData){
+    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button, $window, graphData){
 
     ClearScope('home');
 
@@ -64,7 +64,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
     e.html(html);
     $compile(e)($scope);
 
-    waitCount = 4;
+    waitCount = 3;
     loadedCount = 0;
 
     if (!$routeParams.login) {
@@ -83,10 +83,12 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
         }
         loadedCount++;
         if (loadedCount === waitCount) {
-            $(window).resize(_.debounce(function() {
-                Wait('stop');
-            }, 500));
-            $(window).resize();
+          // console.log('binding to resize');
+            // angular.element($window).on('resize', _.debounce(function() {
+            //   console.log('resize from controller');
+            //     Wait('stop');
+            // }, 500));
+            // $(window).resize();
         }
     });
 
@@ -170,7 +172,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 }
 
 Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'DashboardJobs',
-    'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button', 'graphData'
+    'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button', '$window', 'graphData'
 ];
 
 

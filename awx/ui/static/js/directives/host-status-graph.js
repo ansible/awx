@@ -29,10 +29,10 @@ angular.module('DashboardGraphs')
           host_pie_chart.update();
         }
 
-        $window.addEventListener('resize', adjustGraphSize);
+        angular.element($window).on('resize', adjustGraphSize);
 
         element.on('$destroy', function() {
-          $window.removeEventListener('resize', adjustGraphSize);
+          angular.element($window).off('resize', adjustGraphSize);
         });
 
         function buildGraph(data) {

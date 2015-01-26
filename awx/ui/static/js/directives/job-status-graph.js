@@ -36,8 +36,12 @@ angular.module('DashboardGraphs')
             var w = angular.element($window);
 
 
-            $window.addEventListener('resize', function() {
+            angular.element($window).on('resize', function() {
               adjustGraphSize(job_status_chart, element);
+            });
+
+            element.on('$destroy', function() {
+              angular.element($window).off('resize', adjustGraphSize);
             });
 
             if (scope.removeGraphDataReady) {
