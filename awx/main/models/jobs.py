@@ -1003,6 +1003,24 @@ class SystemJob(UnifiedJob, SystemJobOptions):
     def is_blocked_by(self, obj):
         return True
 
+    
+    def handle_extra_data(self, extra_data):
+        extra_vars = {}
+        if type(extra_data) == dict:
+            extra_vars = extra_data
+        elif extra_data is None:
+            return
+        else:
+            if extra_data == "":
+                return
+            try:
+                extra_vars = json.loads(extra_data)
+            except Exception, e:
+                logger.warn("Exception deserializing extra vars: " + str(e))
+        evars = self.extra_vars_dict
+        evars.update(extra_vars)
+        self.update_fields(extra_vars=json.dumps(evars))
+
     @property
     def task_impact(self):
         return 150
