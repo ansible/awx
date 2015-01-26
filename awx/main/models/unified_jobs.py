@@ -47,11 +47,20 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     Concrete base class for unified job templates.
     '''
 
-    COMMON_STATUS_CHOICES = [
+    # status inherits from related jobs. Thus, status must be able to be set to any status that a job status is settable to.
+    JOB_STATUS_CHOICES = [
+        ('new', _('New')),                  # Job has been created, but not started.
+        ('pending', _('Pending')),          # Job has been queued, but is not yet running.
+        ('waiting', _('Waiting')),          # Job is waiting on an update/dependency.
+        ('running', _('Running')),          # Job is currently running.
+        ('successful', _('Successful')),    # Job completed successfully.
+        ('failed', _('Failed')),            # Job completed, but with failures.
+        ('error', _('Error')),              # The job was unable to run.
+        ('canceled', _('Canceled')),        # The job was canceled before completion.
+    ]
+
+    COMMON_STATUS_CHOICES = JOB_STATUS_CHOICES + [
         ('never updated', 'Never Updated'),     # A job has never been run using this template.
-        ('running', 'Running'),                 # A job is currently running (or pending/waiting) using this template.
-        ('failed', 'Failed'),                   # The last completed job using this template failed (failed, error, canceled).
-        ('successful', 'Successful'),           # The last completed job using this template succeeded.
     ]
 
     PROJECT_STATUS_CHOICES = COMMON_STATUS_CHOICES + [
@@ -228,8 +237,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
 
     def _get_current_status(self):
         # Override in subclasses as needed.
-        if self.current_job:
-            return 'running'
+        if self.current_job and self.current_job.status:
+            return self.current_job.status
         elif not self.last_job:
             return 'never updated'
         elif self.last_job_failed:
@@ -324,16 +333,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     Concrete base class for unified job run by the task engine.
     '''
 
-    STATUS_CHOICES = [
-        ('new', _('New')),                  # Job has been created, but not started.
-        ('pending', _('Pending')),          # Job has been queued, but is not yet running.
-        ('waiting', _('Waiting')),          # Job is waiting on an update/dependency.
-        ('running', _('Running')),          # Job is currently running.
-        ('successful', _('Successful')),    # Job completed successfully.
-        ('failed', _('Failed')),            # Job completed, but with failures.
-        ('error', _('Error')),              # The job was unable to run.
-        ('canceled', _('Canceled')),        # The job was canceled before completion.
-    ]
+    STATUS_CHOICES = UnifiedJobTemplate.JOB_STATUS_CHOICES
 
     LAUNCH_TYPE_CHOICES = [
         ('manual', _('Manual')),            # Job was started manually by a user.
@@ -477,21 +477,31 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def _get_parent_instance(self):
         return getattr(self, self._get_parent_field_name())
 
-    def _update_parent_instance(self):
-        parent_instance = self._get_parent_instance()
+    def _update_parent_instance_no_save(self, parent_instance, update_fields=[]):
+        def parent_instance_set(key, val):
+            setattr(parent_instance, key, val)
+            update_fields.append(key)
+
         if parent_instance:
             if self.status in ('pending', 'waiting', 'running'):
                 if parent_instance.current_job != self:
-                    parent_instance.current_job = self
-                    parent_instance.save(update_fields=['current_job'])
+                    parent_instance_set('current_job', self)
+                # Update parent with all the 'good' states of it's child
+                if parent_instance.status != self.status:
+                    parent_instance_set('status', self.status)
             elif self.status in ('successful', 'failed', 'error', 'canceled'):
                 if parent_instance.current_job == self:
-                    parent_instance.current_job = None
-                parent_instance.last_job = self
-                parent_instance.last_job_failed = self.failed
-                parent_instance.save(update_fields=['current_job',
-                                                    'last_job',
-                                                    'last_job_failed'])
+                    parent_instance_set('current_job', None)
+                parent_instance_set('last_job', self)
+                parent_instance_set('last_job_failed', self.failed)
+
+        return update_fields
+
+    def _update_parent_instance(self):
+        parent_instance = self._get_parent_instance()
+        if parent_instance:
+            update_fields = self._update_parent_instance_no_save(parent_instance)
+            parent_instance.save(update_fields=update_fields)
 
     def save(self, *args, **kwargs):
         """Save the job, with current status, to the database.

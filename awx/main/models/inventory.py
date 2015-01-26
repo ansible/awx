@@ -1133,8 +1133,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
 
     def _get_current_status(self):
         if self.source:
-            if self.current_job:
-                return 'running'
+            if self.current_job and self.current_job.status:
+                return self.current_job.status
             elif not self.last_job:
                 return 'never updated'
             elif self.last_job_failed:
