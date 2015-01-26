@@ -1,4 +1,4 @@
-angular.module('GraphDirectives', [])
+angular.module('DashboardGraphs')
   .directive('jobStatusGraph', ['$rootScope', '$compile', '$location' , '$window', 'Wait', 'jobStatusGraphData',
         function ($rootScope, $compile , $location, $window, Wait, jobStatusGraphData) {
             return {
@@ -8,7 +8,6 @@ angular.module('GraphDirectives', [])
             };
 
           function link(scope, element, attr) {
-
             var html, url, job_status_chart,
             period="month",
             job_type="all";

@@ -25,7 +25,7 @@
  *                  Host count graph should only be loaded if the user is a super user
  *
 */
-function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, HostGraph, HostPieChart, DashboardJobs,
+function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, HostGraph, DashboardJobs,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button, graphData){
 
     ClearScope('home');
@@ -84,9 +84,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
         loadedCount++;
         if (loadedCount === waitCount) {
             $(window).resize(_.debounce(function() {
-                $scope.$emit('ResizeJobGraph');
                 $scope.$emit('ResizeHostGraph');
-                $scope.$emit('ResizeHostPieGraph');
                 Wait('stop');
             }, 500));
             $(window).resize();
@@ -97,6 +95,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
         $scope.removeDashboardReady();
     }
     $scope.removeDashboardReady = $scope.$on('dashboardReady', function (e, data) {
+
         nv.dev=false;
 
 
@@ -135,11 +134,6 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
             target: 'dash-jobs-list',
             dashboard: data
         });
-        HostPieChart({
-            scope: $scope,
-            target: 'dash-host-status-graph',
-            dashboard: data
-        });
 
     });
 
@@ -172,7 +166,8 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
         Rest.setUrl(GetBasePath('dashboard'));
         Rest.get()
             .success(function (data) {
-                $scope.$emit('dashboardReady', data);
+              $scope.dashboardData = data;
+              $scope.$emit('dashboardReady', data);
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
@@ -183,7 +178,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'HostGraph', 'HostPieChart', 'DashboardJobs',
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'HostGraph', 'DashboardJobs',
     'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button', 'graphData'
 ];
 

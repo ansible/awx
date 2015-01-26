@@ -12,8 +12,16 @@
          <div id="dash-counts" class="col-sm-12 col-xs-12"></div>
       </div>
       <div class="row">
-        <div class="left-side col-sm-6 col-xs-12"><div  id="dash-job-status-graph" class="graph-container"><job-status-graph data="graphData.jobStatus" period="month" job-type="all"></job-status-graph> </div></div>
-         <div  class="right-side col-sm-6 col-xs-12"><div id="dash-host-status-graph" class="graph-container"></div></div>
+        <div class="left-side col-sm-6 col-xs-12">
+          <div  id="dash-job-status-graph" class="graph-container">
+            <job-status-graph data="graphData.jobStatus" period="month" job-type="all"></job-status-graph>
+          </div>
+        </div>
+         <div  class="right-side col-sm-6 col-xs-12">
+           <div id="dash-host-status-graph" class="graph-container">
+             <host-status-graph data="dashboardData"></host-status-graph>
+           </div>
+         </div>
       </div>
       <div class="row">
          <div id="dash-jobs-list" class="left-side col-sm-6 col-xs-12"></div>
