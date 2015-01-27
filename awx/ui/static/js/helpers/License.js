@@ -199,7 +199,7 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
 
             // Don't do anything when the license is valid
             if (!notify) {
-                return true;
+                return true; // if the license is valid it would exit 'test' here, otherwise it moves on to making the modal for the license
             }
 
             html = this.getHTML(license);
@@ -209,7 +209,13 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
             scope.parseType = 'json';
 
             scope.removeLicenseDialogReady = scope.$on('LicenseDialogReady', function() {
+                // scope.eula_agreement = false;
+                $('#license_license_json').attr('ng-required' , 'true' );
+                $('#license_eula_agreement_chbox').attr('ng-required' , 'true' );
+                $('#license-submit-button').attr('ng-disabled' , "license_form.$invalid" );
                 var e = angular.element(document.getElementById('license-modal-dialog'));
+                $compile(e)(scope);
+                e = angular.element(document.getElementById('license-submit-button'));
                 $compile(e)(scope);
                 $('#license-modal-dialog').dialog('open');
             });
@@ -245,14 +251,15 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
                 }];
             }
 
-            height = (IsAdmin()) ? 600 : 350;
+            height = (IsAdmin()) ? 675 : 350;
 
             if (scope.removeLicenseReady) {
                 scope.removeLicenseReady();
             }
             scope.removeLicenseReady = scope.$on('LicenseReady', function(e, data) {
 
-                scope.license_json = " ";
+                scope.license_json = "";
+                scope.eula = data.eula;
                 if (data.license_info && data.license_info.valid_key !== undefined) {
                     scope.license_json = JSON.stringify(data.license_info, null, ' ');
                 }

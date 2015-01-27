@@ -38,9 +38,7 @@ angular.module('LicenseUpdateFormDefinition', [])
                 label: 'I agree to the End User License Agreement',
                 type: 'checkbox',
                 addRequired: true,
-                editRequird: true,
-                trueValue: 'true',
-                falseValue: 'false'
+                editRequird: true
             }
         },
         buttons: {
