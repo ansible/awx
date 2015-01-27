@@ -1021,6 +1021,36 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             # Nested json
             self.post(launch_url, dict(extra_vars=dict(json_answer=dict(test="val", num=1), reqd_answer="foo")), expect=202)
 
+        # Bob can access and update the survey because he's an org-admin
+        with self.current_user(self.user_bob):
+            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
+
+        # Chuck is the lead engineer and has the right permissions to edit it also
+        with self.current_user(self.user_chuck):
+            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
+
+        # Doug shouldn't be able to access this playbook
+        with self.current_user(self.user_doug):
+            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=403)
+
+        # Neither can juan because he doesn't have the job template create permission
+        with self.current_user(self.user_juan):
+            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=403)
+
+        # Bob and chuck can read the template
+        with self.current_user(self.user_bob):
+            self.get(url, expect=200)
+
+        with self.current_user(self.user_chuck):
+            self.get(url, expect=200)    
+
+        # Doug and Juan can't
+        with self.current_user(self.user_doug):
+            self.get(url, expect=403)
+            
+        with self.current_user(self.user_juan):
+            self.get(url, expect=403)    
+
     def test_launch_job_template(self):
         url = reverse('api:job_template_list')
         data = dict(
