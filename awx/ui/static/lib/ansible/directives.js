@@ -488,7 +488,13 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             var placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left',
                 title = (attrs.title) ? attrs.title : (attrs.popoverTitle) ? attrs.popoverTitle : 'Help',
                 container = (attrs.container !== undefined) ? attrs.container : false,
-                trigger = (attrs.trigger !== undefined) ? attrs.trigger : 'manual';
+                trigger = (attrs.trigger !== undefined) ? attrs.trigger : 'manual',
+                template = '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>';
+
+            if (element[0].id) {
+                template = '<div id="' + element[0].id + '_popover_container" class="popover" role="tooltip"><div class="arrow"></div><h3 id="' + element[0].id + '_popover_title" class="popover-title"></h3><div id="' + element[0].id + '_popover_content" class="popover-content"></div></div>';
+            }
+
             if (attrs.awPopOverWatch) {
                 $(element).popover({
                     placement: placement,
@@ -499,7 +505,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     },
                     trigger: trigger,
                     html: true,
-                    container: container
+                    container: container,
+                    template: template
                 });
             } else {
                 $(element).popover({
@@ -509,7 +516,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     content: attrs.awPopOver,
                     trigger: trigger,
                     html: true,
-                    container: container
+                    container: container,
+                    template: template
                 });
             }
             $(element).attr('tabindex',-1);
