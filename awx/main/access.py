@@ -1005,7 +1005,14 @@ class JobTemplateAccess(BaseAccess):
         return dep_access and has_perm
 
     def can_change(self, obj, data):
-        return self.can_read(obj) and self.can_add(data)
+        data_for_change = data
+        if data is not None:
+            data_for_change = dict(data)
+            for required_field in ('credential', 'cloud_credential', 'inventory', 'project'):
+                required_obj = getattr(obj, required_field, None)
+                if required_field not in data_for_change and required_obj is not None:
+                    data_for_change[required_field] = required_obj.pk
+        return self.can_read(obj) and self.can_add(data_for_change)
 
     def can_delete(self, obj):
         add_obj = dict(credential=obj.credential.id if obj.credential is not None else None,

@@ -1493,6 +1493,7 @@ class JobTemplateSchedulesList(SubListCreateAPIView):
 class JobTemplateSurveySpec(GenericAPIView):
 
     model = JobTemplate
+    parent_model = JobTemplate
     # FIXME: Add serializer class to define fields in OPTIONS request!
 
     def get(self, request, *args, **kwargs):
@@ -1537,6 +1538,8 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()
+        if not request.user.can_access(self.model, 'delete', obj):
+            raise PermissionDenied()
         obj.survey_spec = {}
         obj.save()
         return Response()
