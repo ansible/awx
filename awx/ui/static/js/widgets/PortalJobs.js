@@ -11,33 +11,19 @@
 'use strict';
 
 angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
-.factory('PortalJobsWidget', ['$rootScope', '$compile', 'LoadSchedulesScope', 'LoadJobsScope', 'PortalJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'PortalJobTemplateList',
-    function ($rootScope, $compile, LoadSchedulesScope, LoadJobsScope, PortalJobsList, ScheduledJobsList, GetChoices, GetBasePath, PortalJobTemplateList) {
+.factory('PortalJobsWidget', ['$rootScope', '$compile', 'LoadSchedulesScope', 'LoadJobsScope', 'PortalJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'PortalJobTemplateList' ,
+    function ($rootScope, $compile, LoadSchedulesScope, LoadJobsScope, PortalJobsList, ScheduledJobsList, GetChoices, GetBasePath, PortalJobTemplateList    ) {
     return function (params) {
         var scope = params.scope,
             target = params.target,
+            filter = params.filter || "User" ,
             choicesCount = 0,
             listCount = 0,
             jobs_scope = scope.$new(true),
             max_rows,
             user,
-            html, e;
-
-        html = '';
-        html += "<div class=\"portal-job-template-container\">\n";
-        html += "<div class=\"tab-pane active\" id=\"active-jobs-tab\">\n";
-        html += "<div class=\"row search-row\" id='portal-job-template-search'>\n";
-        html += "<div class=\"col-lg-6 col-md-6\" id=\"active-jobs-search-container\"></div>\n";
-        html += "</div>\n"; //row
-        html += "<div class=\"job-list\" id=\"active-jobs-container\">\n";
-        html += "<div id=\"active-jobs\" class=\"job-list-target\"></div>\n";
-        html += "</div>\n"; //list
-        html += "</div>\n"; //active-jobs-tab
-        html += "</div>\n";
-
-        e = angular.element(document.getElementById(target));
-        e.html(html);
-        $compile(e)(scope);
+            html, e,
+            url;
 
         if (scope.removeListLoaded) {
             scope.removeListLoaded();
@@ -59,17 +45,16 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
                 PortalJobsList.fields.type.searchOptions = scope.type_choices;
             }
             user = scope.$parent.current_user.id;
+            url = (filter === "Team" ) ? GetBasePath('jobs') : GetBasePath('jobs')+'?created_by='+user ;
             LoadJobsScope({
                 parent_scope: scope,
                 scope: jobs_scope,
                 list: PortalJobsList,
                 id: 'active-jobs',
-                url: GetBasePath('jobs')+'?created_by='+user,
+                url: url , //GetBasePath('jobs')+'?created_by='+user,
                 pageSize: max_rows,
                 spinner: true
             });
-
-
 
             $(window).resize(_.debounce(function() {
                 resizePortalJobsWidget();
@@ -86,6 +71,47 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
                 scope.$emit('buildJobsList');
             }
         });
+
+
+        scope.filterPortalJobs = function(filter) {
+            $("#active-jobs").empty();
+            $("#active-jobs-search-container").empty();
+            user = scope.$parent.current_user.id;
+            url = (filter === "Team" ) ? GetBasePath('jobs') : GetBasePath('jobs')+'?created_by='+user ;
+            LoadJobsScope({
+                parent_scope: scope,
+                scope: jobs_scope,
+                list: PortalJobsList,
+                id: 'active-jobs',
+                url: url , //GetBasePath('jobs')+'?created_by='+user,
+                pageSize: max_rows,
+                spinner: true
+            });
+        };
+
+        html = '';
+        html += "<div class=\"portal-job-template-container\">\n";
+        html += "<div class=\"tab-pane active\" id=\"active-jobs-tab\">\n";
+        html += "<div class=\"row search-row\" id='portal-job-template-search'>\n";
+        html += "<div class=\"col-lg-6 col-md-6\" id=\"active-jobs-search-container\"></div>\n";
+        html += "<div class=\"form-group\">" ;
+        html += "<div class=\"btn-group\" aw-toggle-button data-after-toggle=\"filterPortalJobs\">" ;
+        html += " <button class=\"btn btn-xs btn-primary active\">User</button>" ;
+        html += "<button class=\"btn btn-xs btn-default\">Team</button>" ;
+        html += "</div>" ;
+        html += "</div>" ;
+        html += "</div>\n"; //row
+
+        html += "<div class=\"job-list\" id=\"active-jobs-container\">\n";
+        html += "<div id=\"active-jobs\" class=\"job-list-target\"></div>\n";
+        html += "</div>\n"; //list
+        html += "</div>\n"; //active-jobs-tab
+        html += "</div>\n";
+
+        e = angular.element(document.getElementById(target));
+        e.html(html);
+        $compile(e)(scope);
+
 
         GetChoices({
             scope: scope,
