@@ -207,7 +207,6 @@ class ApiV1ConfigView(APIView):
     def post(self, request):
         if not request.user.is_superuser:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
-        print request.DATA
         if "eula_accepted" not in request.DATA:
             return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
         if not request.DATA["eula_accepted"]:
