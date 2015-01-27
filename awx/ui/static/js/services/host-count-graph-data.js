@@ -35,9 +35,12 @@ function HostCountGraphData(Rest, getBasePath, processErrors, $q) {
       return $q.all({
         license: getLicenseData(),
         hosts: getHostData()
-      }).catch(function (data, status) {
-          processErrors(null, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to get: ' + url + ' GET returned: ' + status });
+      }).catch(function (response) {
+        var errorMessage = 'Failed to get: ' + response.url + ' GET returned: ' + response.status;
+        processErrors(null, response.data, response.status, null, { hdr: 'Error!',
+                      msg: errorMessage
+        });
+        return response;
         });
     }
   };
