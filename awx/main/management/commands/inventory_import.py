@@ -55,12 +55,16 @@ class MemObject(object):
     
     def load_vars(self, base_path):
         all_vars = {}
+        files_found = 0
         for suffix in ('', '.yml', '.yaml', '.json'):
             path = ''.join([base_path, suffix])
             if not os.path.exists(path):
                 continue
             if not os.path.isfile(path):
                 continue
+            files_found += 1
+            if files_found > 1:
+                raise RuntimeError('Multiple variable files found. There should only be one. %s ' % self.name)
             vars_name = os.path.basename(os.path.dirname(path))
             logger.debug('Loading %s from %s', vars_name, path)
             try:
