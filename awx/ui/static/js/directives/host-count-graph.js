@@ -94,8 +94,6 @@ angular.module('DashboardGraphs').
       .duration(500)
       .call(license_graph)
       .style({
-        // 'width': width,
-        // 'height': height,
         "font-family": 'Open Sans',
         "font-style": "normal",
         "font-weight":400,
@@ -103,7 +101,6 @@ angular.module('DashboardGraphs').
       });
 
 
-      // nv.utils.windowResize(license_graph.update);
       scope.$emit('WidgetLoaded');
 
       adjustGraphSize(license_graph, element);

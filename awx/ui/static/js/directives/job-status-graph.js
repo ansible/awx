@@ -11,7 +11,6 @@ angular.module('DashboardGraphs')
             var html;
             var url;
             var job_status_chart;
-            var job_status_chart;
             var cleanup = angular.noop;
 
             scope.period="month";
@@ -64,10 +63,7 @@ angular.module('DashboardGraphs')
                 .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                 .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
                 .showYAxis(true)        //Show the y-axis
-                .showXAxis(true)        //Show the x-axis
-                //  .width(width)
-                // .height(height)
-                ;
+                .showXAxis(true);       //Show the x-axis
 
 
                 var width = $('.graph-container').width(); // nv.utils.windowSize().width/3,
@@ -86,13 +82,8 @@ angular.module('DashboardGraphs')
 
                 d3.select(element.find('svg')[0])
                 .datum(graphData)
-                // .attr('width', width)
-                // .attr('height', height)
-                // .transition().duration(100)
                 .call(job_status_chart)
                 .style({
-                  // 'width': width,
-                  // 'height': height,
                   "font-family": 'Open Sans',
                   "font-style": "normal",
                   "font-weight":400,
@@ -121,9 +112,6 @@ angular.module('DashboardGraphs')
 
             }
 
-            var w = angular.element($window);
-
-
             angular.element($window).on('resize', function() {
               adjustGraphSize(job_status_chart, element);
             });
@@ -136,10 +124,5 @@ angular.module('DashboardGraphs')
               scope.removeGraphDataReady();
             }
 
-            scope.removeGraphDataReady = scope.$on('graphDataReady', function (e, data) {
-
-              return job_status_chart;
-
-            });
           }
         }]);

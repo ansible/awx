@@ -67,8 +67,6 @@ angular.module('DashboardGraphs')
 
             d3.select(element.find('svg')[0])
             .datum(data)
-            // .attr('width', width)
-            // .attr('height', height)
             .transition().duration(350)
             .call(host_pie_chart)
             .style({
@@ -77,7 +75,7 @@ angular.module('DashboardGraphs')
               "font-weight":400,
               "src": "url(/static/fonts/OpenSans-Regular.ttf)"
             });
-            // nv.utils.windowResize(host_pie_chart.update);
+
             adjustGraphSize();
             return host_pie_chart;
           }

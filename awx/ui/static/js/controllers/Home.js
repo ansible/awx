@@ -72,26 +72,6 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
         //Wait('start');
     }
 
-    if ($scope.removeWidgetLoaded) {
-        $scope.removeWidgetLoaded();
-    }
-    $scope.removeWidgetLoaded = $scope.$on('WidgetLoaded', function (e, label, jobscope, schedulescope) {
-        // Once all the widgets report back 'loaded', turn off Wait widget
-        if(label==="dashboard_jobs"){
-            jobs_scope = jobscope;
-            schedule_scope = schedulescope;
-        }
-        loadedCount++;
-        if (loadedCount === waitCount) {
-          // console.log('binding to resize');
-            // angular.element($window).on('resize', _.debounce(function() {
-            //   console.log('resize from controller');
-            //     Wait('stop');
-            // }, 500));
-            // $(window).resize();
-        }
-    });
-
     if ($scope.removeDashboardReady) {
         $scope.removeDashboardReady();
     }
@@ -128,23 +108,6 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
             dashboard: data
         });
 
-    });
-
-    if ($rootScope.removeJobStatusChange) {
-        $rootScope.removeJobStatusChange();
-    }
-    // $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function() {
-    //     jobs_scope.refreshJobs();
-    //     $scope.$emit('ReloadJobStatusGraph');
-
-    // });
-
-    if ($rootScope.removeScheduleChange) {
-        $rootScope.removeScheduleChange();
-    }
-    $rootScope.removeScheduleChange = $rootScope.$on('ScheduleChange', function() {
-        schedule_scope.refreshSchedules();
-        $scope.$emit('ReloadJobStatusGraph');
     });
 
     $scope.showActivity = function () {
