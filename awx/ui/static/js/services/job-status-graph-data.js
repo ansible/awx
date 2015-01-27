@@ -20,7 +20,21 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
  function getData(period, jobType) {
    var url = getBasePath('dashboard')+'graphs/jobs/?period='+period+'&job_type='+jobType;
    Rest.setUrl(url);
-   return pluck('data', Rest.get());
+   var result = Rest.get()
+     .catch(function(response) {
+       var errorMessage = 'Failed to get: ' + response.url + ' GET returned: ' + response.status;
+
+       processErrors(null,
+                     response.data,
+                     response.status,
+                     null, {
+                       hdr: 'Error!',
+                       msg: errorMessage
+                     });
+                     return response;
+     });
+
+   return pluck('data', result);
  }
 
  return {
@@ -33,17 +47,6 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
              $broadcast('DataReceived:JobStatusGraph',
                         result);
             return result;
-         }).catch(function(response) {
-           var errorMessage = 'Failed to get: ' + response.url + ' GET returned: ' + response.status;
-
-           ProcessErrors(null,
-                         response.data,
-                         response.status,
-                         null, {
-                           hdr: 'Error!',
-                           msg: errorMessage
-                         });
-           return response;
          });
      });
    },

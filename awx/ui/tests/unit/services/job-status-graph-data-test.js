@@ -8,6 +8,8 @@ describe('Job Status Graph Data Service', function() {
     $on: sinon.spy(),
   };
 
+  var processErrors = sinon.spy();
+
   var getBasePath = function(path) {
     return '/' + path + '/';
   }
@@ -46,6 +48,7 @@ describe('Job Status Graph Data Service', function() {
 
     $provide.value("$cookieStore", { get: angular.noop });
 
+    $provide.value('ProcessErrors', processErrors);
     $provide.value('Rest', restStub);
     $provide.value('GetBasePath', getBasePath);
   }));
@@ -77,14 +80,20 @@ describe('Job Status Graph Data Service', function() {
   });
 
   it('processes errors through error handler', function() {
-    var expected = { data: "error", status: "bad" };
-    var actual = jobStatusGraphData.get();
+    var expected = { data: "blah", status: "bad" };
+    var actual = jobStatusGraphData.get().catch(function() {
+      return processErrors;
+    });
 
     restStub.fail(expected);
 
     flushPromises();
 
-    return expect(actual).to.be.rejectedWith(expected);
+    return actual.catch(function() {
+      expect(processErrors).to
+        .have.been.calledWith(null, expected.data, expected.status);
+    });
+
   });
 
   it('broadcasts event when data is received', function() {
