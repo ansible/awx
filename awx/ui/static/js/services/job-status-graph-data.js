@@ -1,4 +1,4 @@
-angular.module('DataServices', [])
+angular.module('DataServices')
   .service('jobStatusGraphData',
            ["Rest",
             "GetBasePath",

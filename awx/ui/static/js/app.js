@@ -408,11 +408,10 @@ angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/home.html',
                 controller: 'Home',
                 resolve: {
-                  graphData: function($q, jobStatusGraphData) {
+                  graphData: function($q, jobStatusGraphData, hostCountGraphData) {
                     return $q.all({
-                      jobStatus: jobStatusGraphData.get("month", "all").then(function(data) {
-                        return data;
-                      })
+                      jobStatus: jobStatusGraphData.get("month", "all"),
+                      hostCounts: hostCountGraphData.get()
                     });
                   }
                 }

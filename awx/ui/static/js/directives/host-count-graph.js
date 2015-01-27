@@ -7,10 +7,13 @@ angular.module('DashboardGraphs').
     link: link
   };
 
-  function link(scope, element, attrs) {
+  function link(scope, element, attr) {
     var url, license, license_graph;
 
-    url = getBasePath('config');
+    scope.$watch(attr.data, function(data) {
+      if(!data) return;
+      createGraph(data.hosts, data.license);
+    });
 
     angular.element($window).on('resize', function(e) {
       if(!license_graph) return;
@@ -22,38 +25,8 @@ angular.module('DashboardGraphs').
     });
 
 
-    Rest.setUrl(url);
-    Rest.get()
-    .success(function (data){
-      license = data.license_info.instance_count;
-      scope.$emit('licenseCountReady', license);
-    })
-    .error(function (data, status) {
-      ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Failed to get: ' + url + ' GET returned: ' + status });
-    });
 
-    if (scope.removeLicenseCountReady) {
-      scope.removeLicenseCountReady();
-    }
-    scope.removeLicenseCountReady = scope.$on('licenseCountReady', function (e, license) {
-      url = getBasePath('dashboard')+'graphs/inventory/';
-      Rest.setUrl(url);
-      Rest.get()
-      .success(function (data) {
-        scope.$emit('hostDataReady', data, license);
-      })
-      .error(function (data, status) {
-        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                      msg: 'Failed to get: ' + url + ' GET returned: ' + status });
-      });
-
-    });
-
-    if (scope.removeHostDataReady) {
-      scope.removeHostDataReady();
-    }
-    scope.removeHostDataReady = scope.$on('hostDataReady', function (e, data, license) {
+    function createGraph(data, license) {
 
       //url = getBasePath('dashboard')+'graphs/';
       var graphData = [
@@ -137,6 +110,6 @@ angular.module('DashboardGraphs').
 
       return license_graph;
 
-    });
+    }
   }
 }]);
