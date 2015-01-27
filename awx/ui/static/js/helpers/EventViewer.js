@@ -461,7 +461,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
             }
 
             function parseJSON(obj) {
-                var h, html = '', key, keys, found = false;
+                var h, html = '', key, keys, found = false, i = 0, string_warnings = "", string_cmd = "";
                 if (typeof obj === "object") {
                     html += "<table class=\"table eventviewer-status\">\n";
                     html += "<tbody>\n";
@@ -498,9 +498,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                                 // only show cmd if it's a cmd that was run
                                 if (!EventsViewerForm.fields[key] && obj[key].length > 0) {
                                     // include the label head Shell Command instead of CMD in the modal
-                                    var i = 0,
-                                        string_cmd = "";
-                                    for (i; i < obj[key].length; i++) {
+                                    for (i = 0; i < obj[key].length; i++) {
                                         string_cmd += obj[key][i] + " ";
                                     }
                                     h = parseItem(string_cmd, key, "Shell Command");
@@ -511,9 +509,7 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                                 }
                             } else if (key === 'warnings') {
                                 if (!EventsViewerForm.fields[key] && obj[key].length > 0) {
-                                    var i = 0,
-                                        string_warnings = "";
-                                    for (i; i < obj[key].length; i++) {
+                                    for (i = 0; i < obj[key].length; i++) {
                                         string_warnings += obj[key][i] + " ";
                                     }
                                     h = parseItem(string_warnings, key, "Warnings");
