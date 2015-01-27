@@ -15,178 +15,15 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/novus-nvd3/nv.d3.css"  type="text/css">
 
-  {% if settings.USE_MINIFIED_JS %}
-  <link rel="stylesheet" href="{{ STATIC_URL }}css/awx.min.css" />
-  {% else %}
   <link rel="stylesheet/less" type="text/css" href="{{ STATIC_URL }}less/ansible-ui.less" />
-  {% endif %}
 
   <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" />
   <script>
       var $basePath = "{{ STATIC_URL }}";
   </script>
-  <script src="{{ STATIC_URL }}lib/jquery/dist/jquery.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular/angular.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular-route/angular-route.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular-resource/angular-resource.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular-cookies/angular-cookies.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular-sanitize/angular-sanitize.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular-md5/angular-md5.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular-codemirror/lib/AngularCodeMirror.js"></script>
 
-  <!-- scheduler pieces -->
-  <script src="{{ STATIC_URL }}lib/timezone-js/src/date.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular-tz-extensions/packages/jstimezonedetect/jstz.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/underscore/underscore.js"></script>
-  <script src="{{ STATIC_URL }}lib/rrule/lib/rrule.js"></script>
-  <script src="{{ STATIC_URL }}lib/rrule/lib/nlp.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular-tz-extensions/lib/angular-tz-extensions.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular-scheduler/lib/angular-scheduler.min.js"></script>
-
-  {% if settings.USE_MINIFIED_JS %}
-    <script src="{{ STATIC_URL }}js/awx.min.js"></script>
-  {% else %}
-    <script src="{{ STATIC_URL }}lib/less.js/dist/less-1.6.2.min.js"></script>
-    <script src="{{ STATIC_URL }}js/app.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/AuthService.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/RestServices.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/Utilities.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/form-generator.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/list-generator.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/prompt-dialog.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/generator-helpers.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/directives.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/filters.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/api-loader.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/pwdmeter.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/InventoryTree.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/Timer.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/Modal.js"></script>
-    <script src="{{ STATIC_URL }}lib/ansible/Socket.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Authentication.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Organizations.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Users.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Admins.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Inventories.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Home.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Teams.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Credentials.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Sockets.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Projects.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Jobs.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/JobDetail.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/JobTemplates.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/JobStdout.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Portal.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Permissions.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Schedules.js"></script>
-    <script src="{{ STATIC_URL }}js/controllers/Sockets.js"></script>
-    <script src="{{ STATIC_URL }}js/services/_data-services.js"></script>
-    <script src="{{ STATIC_URL }}js/services/host-count-graph-data.js"></script>
-    <script src="{{ STATIC_URL }}js/services/job-status-graph-data.js"></script>
-    <script src="{{ STATIC_URL }}js/directives/_dashboard-graphs.js"></script>
-    <script src="{{ STATIC_URL }}js/services/adjust-graph-size.js"></script>
-    <script src="{{ STATIC_URL }}js/directives/auto-size-module.js"></script>
-    <script src="{{ STATIC_URL }}js/directives/job-status-graph.js"></script>
-    <script src="{{ STATIC_URL }}js/directives/host-status-graph.js"></script>
-    <script src="{{ STATIC_URL }}js/directives/host-count-graph.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Users.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Organizations.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Inventories.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/InventoryStatus.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Teams.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Hosts.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Groups.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Credentials.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/CustomInventory.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/JobTemplates.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Jobs.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Projects.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/ProjectStatus.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Permissions.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/EventsViewer.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/HostGroups.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/ActivityDetail.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/JobSummary.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/JobVarsPrompt.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/LicenseForm.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/LicenseUpdate.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/Source.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/SurveyQuestion.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/LogViewerStatus.js"></script>
-    <script src="{{ STATIC_URL }}js/forms/LogViewerOptions.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Users.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/ConfigureTowerJobs.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Organizations.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Admins.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Inventories.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Teams.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/InventoryGroups.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/InventoryHosts.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Credentials.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/CustomInventory.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/JobTemplates.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/PortalJobTemplates.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Projects.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Jobs.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/PortalJobs.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/CompletedJobs.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/RunningJobs.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/QueuedJobs.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Permissions.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Streams.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/HomeGroups.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/HomeHosts.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Groups.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Hosts.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/Schedules.js"></script>
-    <script src="{{ STATIC_URL }}js/lists/ScheduledJobs.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/SocketHelper.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/LoadConfig.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/ConfigureTower.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/CustomInventory.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/refresh-related.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/related-search.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/refresh.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/search.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/PaginationHelpers.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/inventory.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/teams.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/JobSubmission.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Lookup.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Parse.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Children.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/ProjectPath.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/md5.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Access.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Selection.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Projects.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Users.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Jobs.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Credentials.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Permissions.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Groups.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Hosts.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Variables.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Schedules.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/Survey.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/LogViewer.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/EventViewer.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/JobDetail.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/JobTemplates.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/HostEventsViewer.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/License.js"></script>
-    <script src="{{ STATIC_URL }}js/helpers/AboutAnsible.js"></script>
-    <script src="{{ STATIC_URL }}js/widgets/JobStatus.js"></script>
-    <script src="{{ STATIC_URL }}js/widgets/DashboardCounts.js"></script>
-    <script src="{{ STATIC_URL }}js/widgets/DashboardJobs.js"></script>
-    <script src="{{ STATIC_URL }}js/widgets/PortalJobs.js"></script>
-    <script src="{{ STATIC_URL }}js/widgets/Stream.js"></script>
-    <script src="{{ STATIC_URL }}js/help/InventoryGroups.js"></script>
-    <script src="{{ STATIC_URL }}js/help/FirefoxSocketHelp.js"></script>
-    <script src="{{ STATIC_URL }}js/help/SafariSocketHelp.js"></script>
-    <script src="{{ STATIC_URL }}js/help/ChromeSocketHelp.js"></script>
-  {% endif %}
+  <script src="{{ STATIC_URL }}lib/less.js/dist/less-1.6.2.min.js"></script>
+  <script src="{{ STATIC_URL }}dist/tower-concat.min.js"></script>
 
 </head>
 <body>
@@ -469,29 +306,6 @@
 -->
 <div class="site-footer"></div>
 
-  <script src="{{ STATIC_URL }}lib/jqueryui/ui/minified/jquery-ui.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/bootstrap/dist/js/bootstrap.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/js-yaml/dist/js-yaml.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/select2/select2.min.js"></script>
-
-  <!-- Codemirror bits to make variable editing possible -->
-  <script src="{{ STATIC_URL }}lib/jsonlint/lib/jsonlint.js"></script>
-  <script src="{{ STATIC_URL }}lib/codemirror/lib/codemirror.js"></script>
-  <script src="{{ STATIC_URL }}lib/codemirror/mode/javascript/javascript.js"></script>
-  <script src="{{ STATIC_URL }}lib/codemirror/mode/yaml/yaml.js"></script>
-  <script src="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.js"></script>
-  <script src="{{ STATIC_URL }}lib/codemirror/addon/lint/json-lint.js"></script>
-  <script src="{{ STATIC_URL }}lib/angular-codemirror/lib/yaml-lint.js"></script>
-  <script src="{{ STATIC_URL }}lib/codemirror/addon/edit/closebrackets.js"></script>
-  <script src="{{ STATIC_URL }}lib/codemirror/addon/edit/matchbrackets.js"></script>
-  <script src="{{ STATIC_URL }}lib/codemirror/addon/selection/active-line.js"></script>
-  <script src="{{ STATIC_URL }}lib/scrollto/lib/jquery-scrollto.js"></script>
-  <script src="{{ STATIC_URL }}lib/socket.io-client/dist/socket.io.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/d3js/build/d3.v3.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/novus-nvd3/nv.d3.min.js"></script>
-  <script src="{{ STATIC_URL }}lib/d3Donut/d3Donut.js"></script>
-  <script src="{{ STATIC_URL }}lib/jPushMenu/jPushMenu.js"></script>
-  <script src="{{ STATIC_URL }}lib/lrInfiniteScroll/lrInfiniteScroll.js"></script>
 
   <script>
       $('#main-menu-toggle-button').jPushMenu();
