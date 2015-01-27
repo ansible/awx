@@ -486,9 +486,37 @@ angular.module('EventViewerHelper', ['ModalDialog', 'Utilities', 'EventsViewerFo
                             h = '';
                             if (key !== 'host_id' && key !== 'parent' && key !== 'event' && key !== 'src' && key !== 'md5sum' &&
                                 key !== 'stdout' && key !== 'traceback' && key !== 'stderr' && key !== 'cmd' && key !=='changed' && key !== "verbose_override" &&
-                                key !== 'feature_result') {
+                                key !== 'feature_result' && key !== 'warnings') {
                                 if (!EventsViewerForm.fields[key]) {
                                     h = parseItem(obj[key], key, key);
+                                    if (h) {
+                                        html += h;
+                                        found = true;
+                                    }
+                                }
+                            } else if (key === 'cmd') {
+                                // only show cmd if it's a cmd that was run
+                                if (!EventsViewerForm.fields[key] && obj[key].length > 0) {
+                                    // include the label head Shell Command instead of CMD in the modal
+                                    var i = 0,
+                                        string_cmd = "";
+                                    for (i; i < obj[key].length; i++) {
+                                        string_cmd += obj[key][i] + " ";
+                                    }
+                                    h = parseItem(string_cmd, key, "Shell Command");
+                                    if (h) {
+                                        html += h;
+                                        found = true;
+                                    }
+                                }
+                            } else if (key === 'warnings') {
+                                if (!EventsViewerForm.fields[key] && obj[key].length > 0) {
+                                    var i = 0,
+                                        string_warnings = "";
+                                    for (i; i < obj[key].length; i++) {
+                                        string_warnings += obj[key][i] + " ";
+                                    }
+                                    h = parseItem(string_warnings, key, "Warnings");
                                     if (h) {
                                         html += h;
                                         found = true;
