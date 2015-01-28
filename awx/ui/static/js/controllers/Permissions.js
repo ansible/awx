@@ -142,7 +142,8 @@ function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routePar
         form: form,
         current_item: null,
         list: ProjectList,
-        field: 'project'
+        field: 'project',
+        input_type: 'radio'
     });
 
     // Save
@@ -246,7 +247,7 @@ function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routePa
                 }
 
                 $scope.category = 'Deploy';
-                if (data.permission_type !== 'run' && data.permission_type !== 'check') {
+                if (data.permission_type !== 'run' && data.permission_type !== 'check' && data.permission_type !== 'create') {
                     $scope.category = 'Inventory';
                 }
                 master.category = $scope.category;
@@ -305,6 +306,9 @@ function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routePa
             data[fld] = $scope[fld];
         }
         Rest.setUrl(defaultUrl);
+        if($scope.category === "Inventory"){
+            delete data.project;
+        }
         Rest.put(data)
             .success(function () {
                 Wait('stop');
