@@ -30,7 +30,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 
     ClearScope('home');
 
-    var buttons, html, e, waitCount, loadedCount,borderStyles, jobs_scope, schedule_scope;
+    var buttons, html, e, borderStyles, jobs_scope, schedule_scope;
 
     // Add buttons to the top of the Home page. We're using lib/ansible/generator_helpers.js-> Buttons()
     // to build buttons dynamically and insure all styling and icons match the rest of the application.
@@ -63,9 +63,6 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
     e = angular.element(document.getElementById('home-list-actions'));
     e.html(html);
     $compile(e)($scope);
-
-    waitCount = 3;
-    loadedCount = 0;
 
     if (!$routeParams.login) {
         // If we're not logging in, start the Wait widget. Otherwise, it's already running.
@@ -112,7 +109,6 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 
     $scope.refresh = function () {
         Wait('start');
-        loadedCount = 0;
         Rest.setUrl(GetBasePath('dashboard'));
         Rest.get()
             .success(function (data) {
