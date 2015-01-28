@@ -480,7 +480,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def _update_parent_instance_no_save(self, parent_instance, update_fields=[]):
         def parent_instance_set(key, val):
             setattr(parent_instance, key, val)
-            update_fields.append(key)
+            if key not in update_fields:
+                update_fields.append(key)
 
         if parent_instance:
             if self.status in ('pending', 'waiting', 'running'):

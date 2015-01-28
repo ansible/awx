@@ -364,7 +364,9 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
         parent_instance = self._get_parent_instance()
         if parent_instance:
             update_fields = self._update_parent_instance_no_save(parent_instance)
-            if not self.failed and parent_instance.scm_delete_on_next_update:
-                parent_instance.scm_delete_on_next_update = False
-                update_fields.append('scm_delete_on_next_update')
-            parent_instance.save(update_fields=update_fields)
+            if self.status in ('successful', 'failed', 'error', 'canceled'):
+                if not self.failed and parent_instance.scm_delete_on_next_update:
+                    parent_instance.scm_delete_on_next_update = False
+                    if 'scm_delete_on_next_update' not in update_fields:
+                        update_fields.append('scm_delete_on_next_update')
+                parent_instance.save(update_fields=update_fields)
