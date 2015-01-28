@@ -14,7 +14,6 @@ angular.module('DashboardGraphs').
         var width = parseInt(graph.style('width')) - margins.left - margins.right;
         var height = parseInt(graph.style('height')) - margins.top - margins.bottom;
 
-
         chartModel.xRange([0, width]);
         chartModel.yRange([height, 0]);
 
