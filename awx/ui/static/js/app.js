@@ -10,14 +10,6 @@
 var urlPrefix,
     $AnsibleConfig;
 
-window.Debug = {};
-window.Debug.log = function(label, obj) {
-  if (Debug.enabled) {
-    console.log(label + ":", obj);
-  }
-  return obj;
-};
-
 if ($basePath) {
     urlPrefix = $basePath;
 } else {
