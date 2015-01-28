@@ -63,9 +63,9 @@ def get_object_or_403(klass, *args, **kwargs):
 
 def to_python_boolean(value, allow_none=False):
     value = unicode(value)
-    if value.lower() in ('true', '1'):
+    if value.lower() in ('true', '1', 't'):
         return True
-    elif value.lower() in ('false', '0'):
+    elif value.lower() in ('false', '0', 'f'):
         return False
     elif allow_none and value.lower() in ('none', 'null'):
         return None
