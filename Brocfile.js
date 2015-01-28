@@ -4,10 +4,12 @@ var concatFiles = require('broccoli-sourcemap-concat');
 var pickFiles = require('broccoli-static-compiler');
 var findBowerTrees = require('broccoli-bower');
 
-var vendorMin = pickFiles('awx/ui/static/lib', {
-  srcDir: '/',
-  destDir: 'out',
-  files: [
+var vendorMin = concatFiles('awx/ui/static/lib', {
+  sourceMapConfig: {
+    enabled: false
+  },
+  outputFile: '/out/vendor-min.js',
+  inputFiles: [
     'jquery/dist/jquery.min.js',
     'angular/angular.min.js',
     'angular-route/angular-route.min.js',
@@ -37,14 +39,6 @@ var sourceMaps = pickFiles('awx/ui/static/lib', {
   ]
 });
 
-vendorMin = concatFiles(vendorMin, {
-  sourceMapConfig: {
-    enabled: false
-  },
-  outputFile: '/out/vendor-min.js',
-  inputFiles: ['out/**/*.js']
-});
-
 var vendorMaps = concatFiles(sourceMaps, {
   sourceMapConfig: {
     enabled: false
@@ -55,17 +49,15 @@ var vendorMaps = concatFiles(sourceMaps, {
 
 var vendorMinWithMaps = mergeTrees([vendorMin, vendorMaps]);
 
-var vendor = pickFiles('awx/ui/static/lib', {
-  srcDir: '/',
-  destDir: 'out',
-  files: [
+var vendorConcat = concatFiles('awx/ui/static/lib', {
+  outputFile: 'out/vendor-concat.js',
+  inputFiles: [
     'angular-codemirror/lib/AngularCodeMirror.js',
     'timezone-js/src/date.js',
     'underscore/underscore.js',
     'rrule/lib/rrule.js',
     'rrule/lib/nlp.js',
     'angular-tz-extensions/lib/angular-tz-extensions.js',
-    'underscore/underscore.js',
     'angular-scheduler/lib/angular-scheduler.js',
     'angular-filters/dist/angular-filters.js',
     'bootstrap/dist/js/bootstrap.js',
@@ -104,7 +96,7 @@ var src = pickFiles('awx/ui/static/js', {
   destDir: 'out'
 });
 
-var filesToConcat = mergeTrees([vendor, ansibleLib, src]);
+var filesToConcat = mergeTrees([vendorConcat, ansibleLib, src]);
 
 console.log('here1');
 var concated = concatFiles(filesToConcat, {
@@ -115,7 +107,7 @@ var merged = mergeTrees([vendorMinWithMaps, concated], {
                                     description: "TreeMerge (vendor and sourcemaps)",
 })
 var minified = uglifyFast(merged, {
-  outSourceMap: 'tower-concat.min.map'
+  outSourceMap: 'tower-concat.map'
 });
 
 var finalMap = pickFiles(minified, {
@@ -128,8 +120,8 @@ var finalized = concatFiles(minified, {
   sourceMapConfig: {
     enabled: false
   },
-  outputFile: '/tower-concat.min.js',
-  inputFiles: ['out/*.js']
+  outputFile: '/tower-concat.js',
+  inputFiles: ['out/vendor-min.js', 'out/tower-concat.js']
 });
 
 module.exports = mergeTrees([finalMap, finalized]);
