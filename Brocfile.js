@@ -3,6 +3,7 @@ var uglifyFiles = require('broccoli-uglify-sourcemap');
 var concatFiles = require('broccoli-sourcemap-concat');
 var pickFiles = require('broccoli-static-compiler');
 var findBowerTrees = require('broccoli-bower');
+var compileLess = require('broccoli-less-single');
 
 var vendorMin = concatFiles('awx/ui/static/lib', {
   sourceMapConfig: {
@@ -124,4 +125,6 @@ var finalized = concatFiles(minified, {
   inputFiles: ['out/vendor-min.js', 'out/tower-concat.js']
 });
 
-module.exports = mergeTrees([finalMap, finalized]);
+var less = compileLess('awx/ui/static/less', 'ansible-ui.less', 'awx.min.css');
+
+module.exports = mergeTrees([finalMap, finalized, less]);
