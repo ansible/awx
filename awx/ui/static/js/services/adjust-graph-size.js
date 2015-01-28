@@ -22,11 +22,11 @@ angular.module('DashboardGraphs').
         chartModel.yAxis.ticks(Math.max(height / 50, 2));
 
         if (height < 160) {
-          graph.select('.y.axis').select('.domain').style('display', 'none');
-          graph.select('.y.axis').select('.domain').style('display', 'initial');
+          graph.select('.y.nv-axis').select('.domain').style('display', 'none');
+          graph.select('.y.nv-axis').select('.domain').style('display', 'initial');
         }
 
-        graph.select('.x.axis')
+        graph.select('.x.nv-axis')
           .attr('transform', 'translate(0, ' + height + ')')
           .call(chartModel.xAxis);
 
