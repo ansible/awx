@@ -96,9 +96,6 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 
         $scope.graphData = graphData;
 
-        if ($rootScope.user_is_superuser !== true) {
-            $('#dash-host-count-graph').remove(); //replaceWith("<div id='dash-host-count-graph' class='left-side col-sm-12 col-xs-12'></div>");
-        }
         DashboardJobs({
             scope: $scope,
             target: 'dash-jobs-list',

@@ -17,6 +17,11 @@ angular.module('DashboardGraphs')
         });
 
         function adjustGraphSize() {
+
+          if (angular.isUndefined(host_pie_chart)) {
+            return;
+          }
+
           var parentHeight = element.parent().parent().height();
           var toolbarHeight = element.find('.toolbar').height();
           var container = element.find('svg').parent();
@@ -80,19 +85,20 @@ angular.module('DashboardGraphs')
             return host_pie_chart;
           }
           else{
-            winHeight = $($window).height();
-            available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
-            element.find('.graph-wrapper').height(available_height/2);
-            element.find('svg').replaceWith('<canvas id="circlecanvas" width="120" height="120"></canvas>');
+            // This should go in a template or something
+            // but I'm at the end of a card and need to get this done.
+            // We definitely need to refactor this, I'm letting
+            // good enough be good enough for right now.
+            var notFoundContainer = $('<div></div>');
+            notFoundContainer.css({
+              'text-align': 'center',
+              'width': '100%',
+              'padding-top': '2em'
+            });
 
-            canvas = document.getElementById("circlecanvas");
-            context = canvas.getContext("2d");
-            context.arc(55, 55, 50, 0, Math.PI * 2, false);
-            context.lineWidth = 1;
-            context.strokeStyle = '#1778c3';
-            context.stroke();
-            context.font = "12px Open Sans";
-            context.fillText("No Host data",18,55);
+            notFoundContainer.text('No host data');
+
+            element.find('svg').replaceWith(notFoundContainer);
           }
 
         }
