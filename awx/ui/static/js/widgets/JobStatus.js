@@ -11,7 +11,7 @@
 *
 */
 
-'use strict';
+
 
 angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
     .factory('JobStatus', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',

@@ -8,7 +8,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
 .factory('DashboardJobs', ['$rootScope', '$compile', 'LoadSchedulesScope', 'LoadJobsScope', 'JobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath',

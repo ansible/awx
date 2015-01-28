@@ -7,7 +7,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('InventoryHostsDefinition', [])
     .value('InventoryHosts', {

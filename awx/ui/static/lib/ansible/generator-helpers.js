@@ -11,7 +11,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('GeneratorHelpers', [])
 

@@ -11,7 +11,7 @@
  *  'show' attribute of each job_event in the set of job_events.
  *  See the filter in job_events.js list.
 */
-'use strict';
+
 
 angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
     .factory('ToggleChildren', ['$location', 'Store', function ($location, Store) {

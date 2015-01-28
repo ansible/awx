@@ -6,7 +6,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('InventoriesListDefinition', [])
     .value('InventoryList', {

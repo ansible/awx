@@ -14,7 +14,7 @@
  *      })
  */
 
-'use strict';
+
 
 angular.module('SelectionHelper', ['Utilities', 'RestServices'])
 

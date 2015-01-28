@@ -14,7 +14,7 @@
  * @name controllers.function:Portal
  * @description This controller's for portal mode
 */
-'use strict';
+
 
 /**
  * @ngdoc method

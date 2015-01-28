@@ -37,7 +37,7 @@
 
 */
 
-'use strict';
+
 
 angular.module('JobDetailHelper', ['Utilities', 'RestServices', 'ModalDialog'])
 

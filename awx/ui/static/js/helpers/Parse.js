@@ -12,7 +12,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('ParseHelper', ['Utilities', 'AngularCodeMirrorModule'])
     .factory('ParseTypeChange', ['Alert', 'AngularCodeMirror', function (Alert, AngularCodeMirror) {

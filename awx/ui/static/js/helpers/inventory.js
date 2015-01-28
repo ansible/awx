@@ -10,7 +10,7 @@
  *  for the menu piece. The routine for building the menu is in InventoriesEdit controller
  *  (controllers/Inventories.js)
 */
-'use strict';
+
 
 angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', 'ListGenerator', 'AuthService',
     'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper', 'VariablesHelper',

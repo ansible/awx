@@ -7,7 +7,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('StreamListDefinition', [])
     .value('StreamList', {

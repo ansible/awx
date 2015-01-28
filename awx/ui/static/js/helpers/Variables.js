@@ -10,7 +10,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('VariablesHelper', ['Utilities'])
 

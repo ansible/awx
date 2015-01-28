@@ -19,7 +19,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities', 'PaginationHelpers'])
     .factory('RefreshRelated', ['ProcessErrors', 'Rest', 'Wait', 'PageRangeSetup',

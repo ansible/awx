@@ -11,7 +11,7 @@
  * @name controllers.function:Credentials
  * @description This controller's for the credentials page
 */
-'use strict';
+
 
 function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,

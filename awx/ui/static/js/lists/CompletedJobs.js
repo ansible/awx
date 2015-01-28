@@ -6,7 +6,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('CompletedJobsDefinition', [])
     .value( 'CompletedJobsList', {

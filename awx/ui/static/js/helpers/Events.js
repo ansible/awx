@@ -11,7 +11,7 @@
  * @name helpers.function:Events
  * @description    EventView - show the job_events form in a modal dialog
 */
-'use strict';
+
 
 angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefinition', 'JobEventsFormDefinition'])
 

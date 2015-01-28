@@ -11,7 +11,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
     'GeneratorHelpers', 'CustomInventoryFormDefinition'])

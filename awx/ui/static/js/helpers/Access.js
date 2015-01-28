@@ -12,7 +12,7 @@
  * @description  routines checking user access
 */
 
-'use strict';
+
 
 angular.module('AccessHelper', ['RestServices', 'Utilities'])
 

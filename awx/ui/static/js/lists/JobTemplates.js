@@ -7,7 +7,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('JobTemplatesListDefinition', [])
     .value('JobTemplateList', {

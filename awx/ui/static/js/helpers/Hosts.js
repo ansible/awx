@@ -14,7 +14,7 @@
  * @description    Routines that handle host add/edit/delete on the Inventory detail page.
 */
 
-'use strict';
+
 
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
                                 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'AuthService', 'HostsHelper',

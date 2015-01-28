@@ -12,7 +12,7 @@
  * @name controllers.function:Organizations
  * @description This controller's for the Organizations page
 */
-'use strict';
+
 
 function OrganizationsList($routeParams, $scope, $rootScope, $location, $log, Rest, Alert, LoadBreadCrumbs, Prompt,
     GenerateList, OrganizationList, SearchInit, PaginateInit, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {

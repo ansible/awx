@@ -17,7 +17,7 @@
  *  Controller functions for ading Admins to an Organization.
  *
 */
-'use strict';
+
 
 function AdminsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, AdminList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, GetBasePath, SelectionInit) {

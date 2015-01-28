@@ -11,7 +11,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
     .factory('InventorySyncStatus', ['$rootScope', '$compile', function ($rootScope, $compile) {

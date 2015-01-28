@@ -26,7 +26,7 @@
 //  *
 //  *  The variables in local memory are cleaned out whenever the user navigates to a page (other than the Survey Maker page)
 // */
-// 'use strict';
+// 
 
 // function SurveyController($scope, $rootScope, $compile, $location, $log, $routeParams, SurveyMakerForm,
 //     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath,

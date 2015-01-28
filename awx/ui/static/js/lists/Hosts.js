@@ -7,7 +7,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('HostListDefinition', [])
     .value('HostList', {

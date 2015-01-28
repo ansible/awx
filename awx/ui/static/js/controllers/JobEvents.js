@@ -12,7 +12,7 @@
  * @name controllers.function:JobEvent
  * @description This controller's for the job event page
 */
-'use strict';
+
 
 function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList, GenerateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,

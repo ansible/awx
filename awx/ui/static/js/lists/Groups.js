@@ -7,7 +7,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('GroupListDefinition', [])
     .value('GroupList', {

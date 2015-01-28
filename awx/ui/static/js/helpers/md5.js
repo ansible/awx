@@ -13,7 +13,7 @@
  * discussion
  */
 
-'use strict';
+
 
 angular.module('md5Helper', ['RestServices', 'Utilities', 'angular-md5'])
     .factory('md5Setup', ['md5', function (md5) {

@@ -7,7 +7,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('ProjectsListDefinition', [])
     .value('ProjectList', {

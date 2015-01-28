@@ -6,7 +6,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('ScheduledJobsDefinition', [])
     .value( 'ScheduledJobsList', {

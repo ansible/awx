@@ -7,7 +7,7 @@
  *  @dict
  */
 
-'use strict';
+
 
 angular.module('AdminListDefinition', [])
     .value('AdminList', {

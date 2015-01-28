@@ -10,7 +10,7 @@
  * @name forms.function:LicenseForm
  * @description This form is for viewing the license information
 */
-'use strict';
+
 
 angular.module('LicenseFormDefinition', [])
     .value('LicenseForm', {

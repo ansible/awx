@@ -19,7 +19,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
 

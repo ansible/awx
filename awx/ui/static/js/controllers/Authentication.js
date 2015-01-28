@@ -57,7 +57,7 @@
  * @Usage
  * This is usage information.
  */
-'use strict';
+
 
 function Authenticate($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
     Timer, Empty, ClearScope) {

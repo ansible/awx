@@ -11,7 +11,7 @@
  * @name helpers.function:HostEventsViewer
  * @description   view a list of events for a given job and host
 */
-'use strict';
+
 
 angular.module('HostEventsViewerHelper', ['ModalDialog', 'Utilities', 'EventViewerHelper'])
 

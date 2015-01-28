@@ -12,7 +12,7 @@
 
 /* global io */
 
-'use strict';
+
 /**
  * @ngdoc method
  * @name lib.ansible.function:Socket#SocketIO

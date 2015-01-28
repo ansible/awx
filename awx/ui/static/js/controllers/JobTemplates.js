@@ -12,7 +12,7 @@
  * @name controllers.function:JobTemplate
  * @description This controller's for the Job Template page
 */
-'use strict';
+
 
 function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobTemplateList,
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,

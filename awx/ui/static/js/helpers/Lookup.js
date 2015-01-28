@@ -22,7 +22,7 @@
  *  })
  */
 
-'use strict';
+
 
 angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ApiLoader', 'ModalDialog'])
 

@@ -8,7 +8,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('HomeHostListDefinition', [])
     .value('HomeHostList', {

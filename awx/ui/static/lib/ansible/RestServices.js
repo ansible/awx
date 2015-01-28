@@ -51,7 +51,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('RestServices', ['ngCookies', 'AuthService'])
     .factory('Rest', ['$http', '$rootScope', '$cookieStore', '$q', 'Authorization',

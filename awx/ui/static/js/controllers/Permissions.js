@@ -12,7 +12,7 @@
  * @name controllers.function:Permissions
  * @description This controller's for permissions
 */
-'use strict';
+
 
 function PermissionsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, PermissionList,
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,

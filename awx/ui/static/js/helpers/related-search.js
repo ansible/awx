@@ -19,7 +19,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRelatedHelper'])
     .factory('RelatedSearchInit', ['$timeout', 'Alert', 'Rest', 'RefreshRelated', 'Wait', 'Empty',

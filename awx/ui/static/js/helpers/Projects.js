@@ -13,7 +13,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDefinition', 'ProjectFormDefinition'])
 

@@ -17,7 +17,7 @@
  *
  *
 */
-'use strict';
+
 
 angular.module('LicenseHelper', ['RestServices', 'Utilities', 'LicenseUpdateFormDefinition', 'FormGenerator', 'ParseHelper', 'ModalDialog', 'VariablesHelper', 'LicenseFormDefinition', 'AccessHelper'])
 

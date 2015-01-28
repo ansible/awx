@@ -8,7 +8,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('HomeGroupListDefinition', [])
     .value('HomeGroupList', {

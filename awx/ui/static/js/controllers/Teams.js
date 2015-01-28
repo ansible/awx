@@ -12,7 +12,7 @@
  * @name controllers.function:Teams
  * @description This controller's for teams
 */
-'use strict';
+
 
 function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, TeamList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit, Wait,

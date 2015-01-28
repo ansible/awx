@@ -7,7 +7,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('JobEventsListDefinition', [])
     .value('JobEventList', {

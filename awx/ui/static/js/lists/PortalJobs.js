@@ -9,7 +9,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('PortalJobsListDefinition', [])
     .value( 'PortalJobsList', {

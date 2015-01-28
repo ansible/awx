@@ -18,7 +18,7 @@
  *           }
  */
 
-'use strict';
+
 /**
 * @ngdoc method
 * @name lib.ansible.function:prompt-dialog#PromptDialog

@@ -12,7 +12,7 @@
  * @name controllers.function:JobHosts
  * @description This controller's for the job hosts page
 */
-'use strict';
+
 
 function JobHostSummaryList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobHostList, GenerateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Refresh,

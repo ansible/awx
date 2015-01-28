@@ -10,7 +10,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('UserHelper', ['UserFormDefinition'])
     .factory('ResetForm', ['UserForm',

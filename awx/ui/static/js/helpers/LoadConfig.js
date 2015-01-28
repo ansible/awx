@@ -14,7 +14,7 @@
 
 /*jshint evil:true */
 
-'use strict';
+
 
 angular.module('LoadConfigHelper', ['Utilities'])
 

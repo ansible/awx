@@ -10,7 +10,7 @@
  * @name helpers.function:api-defaults
  * @description this could use more discussion
 */
-'use strict';
+
 
 angular.module('APIDefaults', ['RestServices', 'Utilities'])
     .factory('GetAPIDefaults', ['Alert', 'Rest', '$rootScope',

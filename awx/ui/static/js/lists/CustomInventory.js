@@ -7,7 +7,7 @@
  *  @dict
  */
 
-'use strict';
+
 
 angular.module('CustomInventoryListDefinition', [])
     .value('CustomInventoryList', {

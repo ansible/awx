@@ -9,7 +9,7 @@
  *
  */
 
-'use strict';
+
 
 /* global chkPass:false */
 

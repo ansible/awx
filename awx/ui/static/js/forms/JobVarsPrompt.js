@@ -11,7 +11,7 @@
  * @name forms.function:JobVarsPrompt
  * @description This form is for job variables prompt modal
 */
-'use strict';
+
 
 angular.module('JobVarsPromptFormDefinition', [])
 

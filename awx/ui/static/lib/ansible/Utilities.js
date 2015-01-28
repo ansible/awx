@@ -12,7 +12,7 @@
 
 /* jshint devel:true */
 
-'use strict';
+
 
 angular.module('Utilities', ['RestServices', 'Utilities'])
 

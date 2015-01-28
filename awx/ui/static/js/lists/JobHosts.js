@@ -7,7 +7,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('JobHostDefinition', [])
     .value('JobHostList', {

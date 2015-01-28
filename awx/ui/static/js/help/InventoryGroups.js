@@ -12,7 +12,7 @@
  * @name help.function:InventoryGroups
  * @description This help modal walks the user how to add groups to an inventory or a subgroup to an existing group.
 */
-'use strict';
+
 
 angular.module('InventoryGroupsHelpDefinition', [])
     .value('InventoryGroupsHelp', {

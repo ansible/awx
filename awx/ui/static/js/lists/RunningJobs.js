@@ -6,7 +6,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('RunningJobsDefinition', [])
     .value( 'RunningJobsList', {

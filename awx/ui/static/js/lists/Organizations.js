@@ -7,7 +7,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('OrganizationListDefinition', [])
     .value('OrganizationList', {

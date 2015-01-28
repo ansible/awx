@@ -12,7 +12,7 @@
  * @name controllers.function:Projects
  * @description This controller's for the projects page
 */
-'use strict';
+
 
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate,

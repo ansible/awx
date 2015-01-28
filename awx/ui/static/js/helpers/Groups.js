@@ -6,7 +6,7 @@
  *  Routines that handle group add/edit/delete on the Inventory tree widget.
  *
  */
-'use strict';
+
 
 /**
  * @ngdoc function

@@ -7,7 +7,7 @@
  *  @dict
  */
 
-'use strict';
+
 
 angular.module('CloudCredentialsListDefinition', [])
     .value('CloudCredentialList', {

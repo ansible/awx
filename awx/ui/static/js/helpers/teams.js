@@ -9,7 +9,7 @@
  *  Routines shared amongst the team controllers
  */
 
-'use strict';
+
 
 angular.module('TeamHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', 'SearchHelper',
     'PaginationHelpers', 'ListGenerator'

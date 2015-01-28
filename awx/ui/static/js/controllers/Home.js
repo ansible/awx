@@ -14,7 +14,7 @@
  * @name controllers.function:Home
  * @description This controller's for the dashboard
 */
-'use strict';
+
 
 /**
  * @ngdoc method
