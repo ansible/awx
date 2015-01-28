@@ -58,7 +58,7 @@ angular.module('DashboardGraphs')
                 });
 
                 job_status_chart = nv.models.lineChart()
-                .margin({top: 5, right: 75, bottom: 50, left: 85})  //Adjust chart margins to give the x-axis some breathing room.
+                .margin({top: 5, right: 75, bottom: 40, left: 85})  //Adjust chart margins to give the x-axis some breathing room.
                 .x(function(d,i) { return i; })
                 .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                 .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
