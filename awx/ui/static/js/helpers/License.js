@@ -156,7 +156,7 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
             scope = (in_scope) ? in_scope : self.scope;
 
             json_data = ToJSON('json', license_key);
-            json_data.eula_accepted = (scope.eula_agreement === "true") ? true : false;
+            json_data.eula_accepted = scope.eula_agreement;
             if (typeof json_data === 'object' && Object.keys(json_data).length > 0) {
                 Rest.setUrl(url);
                 Rest.post(json_data)
@@ -209,7 +209,6 @@ function($rootScope, $compile, CreateDialog, Store, LicenseUpdateForm, GenerateF
             scope.parseType = 'json';
 
             scope.removeLicenseDialogReady = scope.$on('LicenseDialogReady', function() {
-                // scope.eula_agreement = false;
                 $('#license_license_json').attr('ng-required' , 'true' );
                 $('#license_eula_agreement_chbox').attr('ng-required' , 'true' );
                 $('#license-submit-button').attr('ng-disabled' , "license_form.$invalid" );
@@ -368,23 +367,20 @@ function ($location, $rootScope, $compile, $filter, GenerateForm, Rest, Alert, G
                 scope.license_json = JSON.stringify(self.license, null, ' ');
                 scope.eula = self.eula;
                 scope.eula_agreement = false;
+
+
                 h = CheckLicense.getHTML(self.getLicense(),true).body;
                 $('#license-modal-dialog #license_tabs').append("<li><a id=\"update_license_link\" ng-click=\"toggleTab($event, 'update_license_link', 'license_tabs')\" href=\"#update_license\" data-toggle=\"tab\">Update License</a></li>");
                 $('#license-modal-dialog .tab-content').append("<div class=\"tab-pane\" id=\"update_license\"></div>");
                 $('#license-modal-dialog #update_license').html(h);
 
                 setTimeout(function() {
+                    $('#license_license_json').attr('ng-required' , 'true' );
+                    $('#license_eula_agreement_chbox').attr('ng-required' , 'true' );
+                    $('#license_form_submit_btn').attr('ng-disabled' , "license_form.$invalid" );
+                    var e = angular.element(document.getElementById('license-modal-dialog'));
                     $compile(e)(scope);
                     $('#license-modal-dialog').dialog('open');
-                    $('#license_form_submit_btn').attr('disabled' , 'true' );
-                    $('#license_eula_agreement_chbox').on('click' , function(){
-                        if(scope.eula_agreement === "false"){
-                            $('#license_form_submit_btn').attr('disabled' , 'true' );
-                        }
-                        if(scope.eula_agreement === "true"){
-                            $('#license_form_submit_btn').removeAttr('disabled');
-                        }
-                    });
                 }, 300);
             });
 
