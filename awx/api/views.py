@@ -211,7 +211,12 @@ class ApiV1ConfigView(APIView):
             return Response({"error": "Invalid license data"}, status=status.HTTP_400_BAD_REQUEST)
         if "eula_accepted" not in request.DATA:
             return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
-        if not request.DATA["eula_accepted"]:
+        try:
+            eula_accepted = to_python_boolean(request.DATA["eula_accepted"])
+        except ValueError, e:
+            return Response({"error": "'eula_accepted' value is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not eula_accepted:
             return Response({"error": "'eula_accepted' must be True"}, status=status.HTTP_400_BAD_REQUEST)
         request.DATA.pop("eula_accepted")
         try:
