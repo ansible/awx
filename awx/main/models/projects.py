@@ -369,4 +369,4 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
                     parent_instance.scm_delete_on_next_update = False
                     if 'scm_delete_on_next_update' not in update_fields:
                         update_fields.append('scm_delete_on_next_update')
-                parent_instance.save(update_fields=update_fields)
+            parent_instance.save(update_fields=update_fields)
