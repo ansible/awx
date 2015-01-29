@@ -10,7 +10,7 @@ called from the command line.
     import markdown
     html = markdown.markdown(your_text_string)
 
-See <http://packages.python.org/Markdown/> for more
+See <https://pythonhosted.org/Markdown/> for more
 information and instructions on how to extend the functionality of
 Python Markdown.  Read that before you try modifying this file.
 
@@ -36,6 +36,8 @@ from .__version__ import version, version_info
 import codecs
 import sys
 import logging
+import warnings
+import importlib
 from . import util
 from .preprocessors import build_preprocessors
 from .blockprocessors import build_block_parser
@@ -48,6 +50,7 @@ from .serializers import to_html_string, to_xhtml_string
 __all__ = ['Markdown', 'markdown', 'markdownFromFile']
 
 logger = logging.getLogger('MARKDOWN')
+logging.captureWarnings(True)
 
 
 class Markdown(object):
@@ -96,8 +99,8 @@ class Markdown(object):
             Note that it is suggested that the more specific formats ("xhtml1"
             and "html4") be used as "xhtml" or "html" may change in the future
             if it makes sense at that time.
-        * safe_mode: Disallow raw html. One of "remove", "replace" or "escape".
-        * html_replacement_text: Text used when safe_mode is set to "replace".
+        * safe_mode: Deprecated! Disallow raw html. One of "remove", "replace" or "escape".
+        * html_replacement_text: Deprecated! Text used when safe_mode is set to "replace".
         * tab_length: Length of tabs in the source. Default: 4
         * enable_attributes: Enable the conversion of attributes. Default: True
         * smart_emphasis: Treat `_connected_words_` intelligently Default: True
@@ -107,14 +110,16 @@ class Markdown(object):
 
         # For backward compatibility, loop through old positional args
         pos = ['extensions', 'extension_configs', 'safe_mode', 'output_format']
-        c = 0
-        for arg in args:
+        for c, arg in enumerate(args):
             if pos[c] not in kwargs:
                 kwargs[pos[c]] = arg
-            c += 1
-            if c == len(pos):
+            if c+1 == len(pos): #pragma: no cover
                 # ignore any additional args
                 break
+        if len(args):
+            warnings.warn('Positional arguments are pending depreacted in Markdown '
+                          'and will be deprecated in version 2.6. Use keyword '
+                          'arguments only.', PendingDeprecationWarning)
 
         # Loop through kwargs and assign defaults
         for option, default in self.option_defaults.items():
@@ -124,6 +129,18 @@ class Markdown(object):
         if self.safeMode and 'enable_attributes' not in kwargs:
             # Disable attributes in safeMode when not explicitly set
             self.enable_attributes = False
+
+        if 'safe_mode' in kwargs:
+            warnings.warn('"safe_mode" is pending deprecation in Python-Markdown '
+                          'and will be deprecated in version 2.6. Use an HTML '
+                          'sanitizer (like Bleach http://bleach.readthedocs.org/) '
+                          'if you are parsing untrusted markdown text. See the '
+                          '2.5 release notes for more info', PendingDeprecationWarning)
+
+        if 'html_replacement_text' in kwargs:
+            warnings.warn('The "html_replacement_text" keyword is pending deprecation '
+                          'in Python-Markdown and will be deprecated in version 2.6 '
+                          'along with "safe_mode".', PendingDeprecationWarning)
 
         self.registeredExtensions = []
         self.docType = ""
@@ -160,9 +177,11 @@ class Markdown(object):
         """
         for ext in extensions:
             if isinstance(ext, util.string_type):
-                ext = self.build_extension(ext, configs.get(ext, []))
+                ext = self.build_extension(ext, configs.get(ext, {}))
             if isinstance(ext, Extension):
                 ext.extendMarkdown(self, globals())
+                logger.debug('Successfully loaded extension "%s.%s".' 
+                            % (ext.__class__.__module__, ext.__class__.__name__))
             elif ext is not None:
                 raise TypeError(
                     'Extension "%s.%s" must be of type: "markdown.Extension"'
@@ -170,51 +189,86 @@ class Markdown(object):
 
         return self
 
-    def build_extension(self, ext_name, configs = []):
+    def build_extension(self, ext_name, configs):
         """Build extension by name, then return the module.
 
         The extension name may contain arguments as part of the string in the
         following format: "extname(key1=value1,key2=value2)"
 
         """
-
-        # Parse extensions config params (ignore the order)
+        
         configs = dict(configs)
+        
+        # Parse extensions config params (ignore the order)
         pos = ext_name.find("(") # find the first "("
         if pos > 0:
             ext_args = ext_name[pos+1:-1]
             ext_name = ext_name[:pos]
             pairs = [x.split("=") for x in ext_args.split(",")]
             configs.update([(x.strip(), y.strip()) for (x, y) in pairs])
+            warnings.warn('Setting configs in the Named Extension string is pending deprecation. '
+                          'It is recommended that you pass an instance of the extension class to '
+                          'Markdown or use the "extension_configs" keyword. The current behavior '
+                          'will be deprecated in version 2.6 and raise an error in version 2.7. '
+                          'See the Release Notes for Python-Markdown version 2.5 for more info.', 
+                          PendingDeprecationWarning)
 
-        # Setup the module name
-        module_name = ext_name
-        if '.' not in ext_name:
-            module_name = '.'.join(['markdown.extensions', ext_name])
+        # Get class name (if provided): `path.to.module:ClassName`
+        ext_name, class_name = ext_name.split(':', 1) if ':' in ext_name else (ext_name, '')
 
         # Try loading the extension first from one place, then another
-        try: # New style (markdown.extensions.<extension>)
-            module = __import__(module_name, {}, {}, [module_name.rpartition('.')[0]])
+        try: 
+            # Assume string uses dot syntax (`path.to.some.module`)
+            module = importlib.import_module(ext_name)
+            logger.debug('Successfuly imported extension module "%s".' % ext_name)
+            # For backward compat (until deprecation) check that this is an extension
+            if '.' not in ext_name and not (hasattr(module, 'extendMarkdown') or (class_name and hasattr(module, class_name))):
+                # We have a name conflict (eg: extensions=['tables'] and PyTables is installed)
+                raise ImportError
         except ImportError:
-            module_name_old_style = '_'.join(['mdx', ext_name])
-            try: # Old style (mdx_<extension>)
-                module = __import__(module_name_old_style)
-            except ImportError as e:
-                message = "Failed loading extension '%s' from '%s' or '%s'" \
-                    % (ext_name, module_name, module_name_old_style)
+            # Preppend `markdown.extensions.` to name
+            module_name = '.'.join(['markdown.extensions', ext_name])
+            try: 
+                module = importlib.import_module(module_name)
+                logger.debug('Successfuly imported extension module "%s".' % module_name)
+                warnings.warn('Using short names for Markdown\'s builtin extensions is pending deprecation. '
+                              'Use the full path to the extension with Python\'s dot notation '
+                              '(eg: "%s" instead of "%s"). The current behavior will be deprecated in '
+                              'version 2.6 and raise an error in version 2.7. See the Release Notes for '
+                              'Python-Markdown version 2.5 for more info.' % (module_name, ext_name), 
+                              PendingDeprecationWarning) 
+            except ImportError:
+                # Preppend `mdx_` to name
+                module_name_old_style = '_'.join(['mdx', ext_name])
+                try: 
+                    module = importlib.import_module(module_name_old_style)
+                    logger.debug('Successfuly imported extension module "%s".' % module_name_old_style)
+                    warnings.warn('Markdown\'s behavuor of appending "mdx_" to an extension name '
+                                  'is pending deprecation. Use the full path to the extension with '
+                                  'Python\'s dot notation (eg: "%s" instead of "%s"). The '
+                                  'current behavior will be deprecated in version 2.6 and raise an '
+                                  'error in version 2.7. See the Release Notes for Python-Markdown '
+                                  'version 2.5 for more info.' % (module_name_old_style, ext_name),
+                                  PendingDeprecationWarning) 
+                except ImportError as e:
+                    message = "Failed loading extension '%s' from '%s', '%s' or '%s'" \
+                        % (ext_name, ext_name, module_name, module_name_old_style)
+                    e.args = (message,) + e.args[1:]
+                    raise
+
+        if class_name:
+            # Load given class name from module.
+            return getattr(module, class_name)(**configs)
+        else:
+            # Expect  makeExtension() function to return a class.
+            try:
+                return module.makeExtension(**configs)
+            except AttributeError as e:
+                message = e.args[0]
+                message = "Failed to initiate extension " \
+                          "'%s': %s" % (ext_name, message)
                 e.args = (message,) + e.args[1:]
                 raise
-
-        # If the module is loaded successfully, we expect it to define a
-        # function called makeExtension()
-        try:
-            return module.makeExtension(configs.items())
-        except AttributeError as e:
-            message = e.args[0]
-            message = "Failed to initiate extension " \
-                      "'%s': %s" % (ext_name, message)
-            e.args = (message,) + e.args[1:]
-            raise
 
     def registerExtension(self, extension):
         """ This gets called by the extension """
@@ -303,7 +357,7 @@ class Markdown(object):
                 start = output.index('<%s>'%self.doc_tag)+len(self.doc_tag)+2
                 end = output.rindex('</%s>'%self.doc_tag)
                 output = output[start:end].strip()
-            except ValueError:
+            except ValueError: #pragma: no cover
                 if output.strip().endswith('<%s />'%self.doc_tag):
                     # We have an empty document
                     output = ''
@@ -434,6 +488,10 @@ def markdownFromFile(*args, **kwargs):
         c += 1
         if c == len(pos):
             break
+    if len(args):
+        warnings.warn('Positional arguments are pending depreacted in Markdown '
+                      'and will be deprecated in version 2.6. Use keyword '
+                      'arguments only.', PendingDeprecationWarning)
 
     md = Markdown(**kwargs)
     md.convertFile(kwargs.get('input', None),

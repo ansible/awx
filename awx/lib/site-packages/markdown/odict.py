@@ -82,11 +82,11 @@ class OrderedDict(dict):
         for key in self.keyOrder:
             yield self[key]
 
-    if util.PY3:
+    if util.PY3: #pragma: no cover
         items = _iteritems
         keys = _iterkeys
         values = _itervalues
-    else:
+    else: #pragma: no cover
         iteritems = _iteritems
         iterkeys = _iterkeys
         itervalues = _itervalues

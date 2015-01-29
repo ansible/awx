@@ -10,11 +10,11 @@ Python 3 Stuff
 """
 PY3 = sys.version_info[0] == 3
 
-if PY3:
+if PY3: #pragma: no cover
     string_type = str
     text_type = str
     int2str = chr
-else:
+else: #pragma: no cover
     string_type = basestring
     text_type = unicode
     int2str = unichr
@@ -58,14 +58,15 @@ RTL_BIDI_RANGES = ( ('\u0590', '\u07FF'),
 # Extensions should use "markdown.util.etree" instead of "etree" (or do `from
 # markdown.util import etree`).  Do not import it by yourself.
 
-try: # Is the C implementation of ElementTree available?
+try: #pragma: no cover
+    # Is the C implementation of ElementTree available?
     import xml.etree.cElementTree as etree
     from xml.etree.ElementTree import Comment
     # Serializers (including ours) test with non-c Comment
     etree.test_comment = Comment
     if etree.VERSION < "1.0.5":
         raise RuntimeError("cElementTree version 1.0.5 or higher is required.")
-except (ImportError, RuntimeError):
+except (ImportError, RuntimeError): #pragma: no cover
     # Use the Python implementation of ElementTree?
     import xml.etree.ElementTree as etree
     if etree.VERSION < "1.1":
@@ -85,15 +86,20 @@ def isBlockLevel(tag):
     # Some ElementTree tags are not strings, so return False.
     return False
 
-def parseBoolValue(value, fail_on_errors=True):
+def parseBoolValue(value, fail_on_errors=True, preserve_none=False):
     """Parses a string representing bool value. If parsing was successful,
-       returns True or False. If parsing was not successful, raises
-       ValueError, or, if fail_on_errors=False, returns None."""
+       returns True or False. If preserve_none=True, returns True, False, 
+       or None. If parsing was not successful, raises  ValueError, or, if 
+       fail_on_errors=False, returns None."""
     if not isinstance(value, string_type):
+        if preserve_none and value is None:
+            return  value
         return bool(value)
+    elif preserve_none and value.lower() == 'none':
+        return None
     elif value.lower() in ('true', 'yes', 'y', 'on', '1'):
         return True
-    elif value.lower() in ('false', 'no', 'n', 'off', '0'):
+    elif value.lower() in ('false', 'no', 'n', 'off', '0', 'none'):
         return False
     elif fail_on_errors:
         raise ValueError('Cannot parse bool value: %r' % value)

@@ -2,19 +2,16 @@
 Sane List Extension for Python-Markdown
 =======================================
 
-Modify the behavior of Lists in Python-Markdown t act in a sane manor.
+Modify the behavior of Lists in Python-Markdown to act in a sane manor.
 
-In standard Markdown syntax, the following would constitute a single 
-ordered list. However, with this extension, the output would include 
-two lists, the first an ordered list and the second and unordered list.
+See <https://pythonhosted.org/Markdown/extensions/sane_lists.html> 
+for documentation.
 
-    1. ordered
-    2. list
+Original code Copyright 2011 [Waylan Limberg](http://achinghead.com)
 
-    * unordered
-    * list
+All changes Copyright 2011-2014 The Python Markdown Project
 
-Copyright 2011 - [Waylan Limberg](http://achinghead.com)
+License: [BSD](http://www.opensource.org/licenses/bsd-license.php) 
 
 """
 
@@ -46,6 +43,6 @@ class SaneListExtension(Extension):
         md.parser.blockprocessors['ulist'] = SaneUListProcessor(md.parser)
 
 
-def makeExtension(configs={}):
-    return SaneListExtension(configs=configs)
+def makeExtension(*args, **kwargs):
+    return SaneListExtension(*args, **kwargs)
 

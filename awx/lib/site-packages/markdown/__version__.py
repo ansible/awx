@@ -5,7 +5,7 @@
 # (major, minor, micro, alpha/beta/rc/final, #)
 # (1, 1, 2, 'alpha', 0) => "1.1.2.dev"
 # (1, 2, 0, 'beta', 2) => "1.2b2"
-version_info = (2, 4, 1, 'final', 0)
+version_info = (2, 5, 2, 'final', 0)
 
 def _get_version():
     " Returns a PEP 386-compliant version number from version_info. "

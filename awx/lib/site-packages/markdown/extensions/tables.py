@@ -4,14 +4,15 @@ Tables Extension for Python-Markdown
 
 Added parsing of tables to Python-Markdown.
 
-A simple example:
+See <https://pythonhosted.org/Markdown/extensions/tables.html> 
+for documentation.
 
-    First Header  | Second Header
-    ------------- | -------------
-    Content Cell  | Content Cell
-    Content Cell  | Content Cell
+Original code Copyright 2009 [Waylan Limberg](http://achinghead.com)
 
-Copyright 2009 - [Waylan Limberg](http://achinghead.com)
+All changes Copyright 2008-2014 The Python Markdown Project
+
+License: [BSD](http://www.opensource.org/licenses/bsd-license.php)
+
 """
 
 from __future__ import absolute_import
@@ -71,7 +72,7 @@ class TableProcessor(BlockProcessor):
             c = etree.SubElement(tr, tag)
             try:
                 c.text = cells[i].strip()
-            except IndexError:
+            except IndexError: #pragma: no cover
                 c.text = ""
             if a:
                 c.set('align', a)
@@ -96,5 +97,6 @@ class TableExtension(Extension):
                                       '<hashheader')
 
 
-def makeExtension(configs={}):
-    return TableExtension(configs=configs)
+def makeExtension(*args, **kwargs):
+    return TableExtension(*args, **kwargs)
+

@@ -42,7 +42,7 @@ class Postprocessor(util.Processor):
         (possibly modified) string.
 
         """
-        pass
+        pass #pragma: no cover
 
 
 class RawHtmlPostprocessor(Postprocessor):
