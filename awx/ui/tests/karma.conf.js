@@ -1,8 +1,8 @@
 // Karma configuration
 // Generated on Mon Aug 04 2014 21:17:04 GMT-0400 (EDT)
 
-module.exports = function() {
-    return {
+module.exports = function(config) {
+    config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
@@ -53,7 +53,11 @@ module.exports = function() {
       '../static/js/config.js',
       '../static/js/directives/dashboard-graphs.js',
       '../static/js/*/*.js',
-      '../static/js/app.js'
+      '../static/js/app.js',
+      '../static/lib/angular-mocks/angular-mocks.js',
+      '../../../node_modules/ng-midway-tester/src/ngMidwayTester.js',
+      './unit/*',
+      './unit/**/*'
     ],
 
 
@@ -72,7 +76,7 @@ module.exports = function() {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['dots', 'progress'],
 
     client: {
       mocha: {
@@ -102,5 +106,5 @@ module.exports = function() {
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: false
 
-    };
+    });
 };

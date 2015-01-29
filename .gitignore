@@ -6,6 +6,7 @@ awx/projects
 awx/job_output
 awx/public/media
 awx/public/static
+awx/ui/tests/test-results.xml
 awx/ui/static/js/awx.min.js
 awx/ui/static/js/local_config.js
 awx/ui/static/css/awx.min.css

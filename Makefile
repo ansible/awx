@@ -240,9 +240,9 @@ test_coverage:
 coverage_html:
 	coverage html
 
-# Run UI unit tests using Selenium.
-test_ui:
-	$(PYTHON) manage.py test -v2 awx.ui.tests
+# Run UI unit tests
+test_ui: node_modules
+	$(GRUNT) karma:ci
 
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:
