@@ -14,7 +14,7 @@
 'use strict';
 
 angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginationHelpers',
-    'RefreshHelper', 'ListGenerator', 'StreamWidget', 'AuthService'
+    'RefreshHelper', 'ListGenerator', 'StreamWidget', 'AuthService',
 ])
 
 .factory('setStreamHeight', [
@@ -175,8 +175,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     }
 ])
 
-.factory('BuildDescription', ['FixUrl', 'BuildUrl',
-    function (FixUrl, BuildUrl) {
+.factory('BuildDescription', ['FixUrl', 'BuildUrl','$sce',
+    function (FixUrl, BuildUrl, $sce) {
         return function (activity) {
 
             function stripDeleted(s) {
@@ -264,7 +264,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 descr += obj1 + name;
                 descr_nolink += obj1 + name_nolink;
             }
-            activity.description = descr;
+            descr = descr.replace(/</g, "&lt;");
+            descr = descr.replace(/>/g, "&gt;");
+            activity.description = $sce.getTrustedHtml(descr);
             activity.description_nolink = descr_nolink;
         };
     }
