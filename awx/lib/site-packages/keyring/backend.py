@@ -5,9 +5,15 @@ Keyring implementation support
 from __future__ import absolute_import
 
 import abc
+import logging
 
 try:
     import importlib
+except ImportError:
+    pass
+
+try:
+    import pkg_resources
 except ImportError:
     pass
 
@@ -15,6 +21,10 @@ from . import errors, util
 from . import backends
 from .util import properties
 from .py27compat import add_metaclass, filter
+
+
+log = logging.getLogger(__name__)
+
 
 class KeyringBackendMeta(abc.ABCMeta):
     """
@@ -127,6 +137,38 @@ def _load_backends():
     backends = ('file', 'Gnome', 'Google', 'keyczar', 'kwallet', 'multi',
         'OS_X', 'pyfs', 'SecretService', 'Windows')
     list(map(_load_backend, backends))
+    _load_plugins()
+
+def _load_plugins():
+    """
+    Locate all setuptools entry points by the name 'keyring backends'
+    and initialize them.
+    Any third-party library may register an entry point by adding the
+    following to their setup.py::
+
+        entry_points = {
+            'keyring backends': [
+                'plugin_name = mylib.mymodule:initialize_func',
+            ],
+        },
+
+    `plugin_name` can be anything, and is only used to display the name
+    of the plugin at initialization time.
+
+    `initialize_func` is optional, but will be invoked if callable.
+    """
+    if 'pkg_resources' not in globals():
+        return
+    group = 'keyring backends'
+    entry_points = pkg_resources.iter_entry_points(group=group)
+    for ep in entry_points:
+        try:
+            log.info('Loading %s', ep.name)
+            init_func = ep.load()
+            if callable(init_func):
+                init_func()
+        except Exception:
+            log.exception("Error initializing plugin %s." % ep)
 
 @util.once
 def get_all_keyring():
