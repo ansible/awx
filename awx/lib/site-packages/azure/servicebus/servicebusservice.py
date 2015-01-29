@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+import datetime
 import os
 import time
 
@@ -21,10 +22,13 @@ from azure import (
     _convert_response_to_feeds,
     _dont_fail_not_exist,
     _dont_fail_on_exist,
+    _encode_base64,
     _get_request_body,
     _get_request_body_bytes_only,
     _int_or_none,
+    _sign_string,
     _str,
+    _unicode_type,
     _update_request_uri_query,
     url_quote,
     url_unquote,
@@ -55,43 +59,93 @@ from azure.servicebus import (
     _service_bus_error_handler,
     )
 
-# Token cache for Authentication
-# Shared by the different instances of ServiceBusService
-_tokens = {}
-
 
 class ServiceBusService(object):
 
     def __init__(self, service_namespace=None, account_key=None, issuer=None,
-                 x_ms_version='2011-06-01', host_base=SERVICE_BUS_HOST_BASE):
-        # x_ms_version is not used, but the parameter is kept for backwards
-        # compatibility
+                 x_ms_version='2011-06-01', host_base=SERVICE_BUS_HOST_BASE,
+                 shared_access_key_name=None, shared_access_key_value=None,
+                 authentication=None):
+        '''
+        Initializes the service bus service for a namespace with the specified
+        authentication settings (SAS or ACS).
+
+        service_namespace:
+            Service bus namespace, required for all operations. If None,
+            the value is set to the AZURE_SERVICEBUS_NAMESPACE env variable.
+        account_key:
+            ACS authentication account key. If None, the value is set to the
+            AZURE_SERVICEBUS_ACCESS_KEY env variable.
+            Note that if both SAS and ACS settings are specified, SAS is used.
+        issuer:
+            ACS authentication issuer. If None, the value is set to the
+            AZURE_SERVICEBUS_ISSUER env variable.
+            Note that if both SAS and ACS settings are specified, SAS is used.
+        x_ms_version: Unused. Kept for backwards compatibility.
+        host_base:
+            Optional. Live host base url. Defaults to Azure url. Override this
+            for on-premise.
+        shared_access_key_name:
+            SAS authentication key name.
+            Note that if both SAS and ACS settings are specified, SAS is used.
+        shared_access_key_value:
+            SAS authentication key value.
+            Note that if both SAS and ACS settings are specified, SAS is used.
+        authentication:
+            Instance of authentication class. If this is specified, then
+            ACS and SAS parameters are ignored.
+        '''
         self.requestid = None
         self.service_namespace = service_namespace
-        self.account_key = account_key
-        self.issuer = issuer
         self.host_base = host_base
 
-        # Get service namespace, account key and issuer.
-        # If they are set when constructing, then use them, else find them
-        # from environment variables.
         if not self.service_namespace:
             self.service_namespace = os.environ.get(AZURE_SERVICEBUS_NAMESPACE)
-        if not self.account_key:
-            self.account_key = os.environ.get(AZURE_SERVICEBUS_ACCESS_KEY)
-        if not self.issuer:
-            self.issuer = os.environ.get(AZURE_SERVICEBUS_ISSUER)
 
-        if not self.service_namespace or \
-           not self.account_key or not self.issuer:
-            raise WindowsAzureError(
-                'You need to provide servicebus namespace, access key and Issuer')
+        if not self.service_namespace:
+            raise WindowsAzureError('You need to provide servicebus namespace')
 
-        self._httpclient = _HTTPClient(service_instance=self,
-                                       service_namespace=self.service_namespace,
-                                       account_key=self.account_key,
-                                       issuer=self.issuer)
+        if authentication:
+            self.authentication = authentication
+        else:
+            if not account_key:
+                account_key = os.environ.get(AZURE_SERVICEBUS_ACCESS_KEY)
+            if not issuer:
+                issuer = os.environ.get(AZURE_SERVICEBUS_ISSUER)
+
+            if shared_access_key_name and shared_access_key_value:
+                self.authentication = ServiceBusSASAuthentication(
+                    shared_access_key_name,
+                    shared_access_key_value)
+            elif account_key and issuer:
+                self.authentication = ServiceBusWrapTokenAuthentication(
+                    account_key,
+                    issuer)
+            else:
+                raise WindowsAzureError(
+                    'You need to provide servicebus access key and Issuer OR shared access key and value')
+
+        self._httpclient = _HTTPClient(service_instance=self)
         self._filter = self._httpclient.perform_request
+
+    # Backwards compatibility:
+    # account_key and issuer used to be stored on the service class, they are
+    # now stored on the authentication class.
+    @property
+    def account_key(self):
+        return self.authentication.account_key
+
+    @account_key.setter
+    def account_key(self, value):
+        self.authentication.account_key = value
+
+    @property
+    def issuer(self):
+        return self.authentication.issuer
+
+    @issuer.setter
+    def issuer(self, value):
+        self.authentication.issuer = value
 
     def with_filter(self, filter):
         '''
@@ -102,8 +156,10 @@ class ServiceBusService(object):
         request, pass it off to the next lambda, and then perform any
         post-processing on the response.
         '''
-        res = ServiceBusService(self.service_namespace, self.account_key,
-                                self.issuer)
+        res = ServiceBusService(
+            service_namespace=self.service_namespace,
+            authentication=self.authentication)
+
         old_filter = self._filter
 
         def new_filter(request):
@@ -855,17 +911,30 @@ class ServiceBusService(object):
                     ('Content-Type',
                      'application/atom+xml;type=entry;charset=utf-8'))
 
-        # Adds authoriaztion header for authentication.
-        request.headers.append(
-            ('Authorization', self._sign_service_bus_request(request)))
+        # Adds authorization header for authentication.
+        self.authentication.sign_request(request, self._httpclient)
 
         return request.headers
 
-    def _sign_service_bus_request(self, request):
-        ''' return the signed string with token. '''
 
+# Token cache for Authentication
+# Shared by the different instances of ServiceBusWrapTokenAuthentication
+_tokens = {}
+
+
+class ServiceBusWrapTokenAuthentication:
+    def __init__(self, account_key, issuer):
+        self.account_key = account_key
+        self.issuer = issuer
+
+    def sign_request(self, request, httpclient):
+        request.headers.append(
+            ('Authorization', self._get_authorization(request, httpclient)))
+
+    def _get_authorization(self, request, httpclient):
+        ''' return the signed string with token. '''
         return 'WRAP access_token="' + \
-               self._get_token(request.host, request.path) + '"'
+                self._get_token(request.host, request.path, httpclient) + '"'
 
     def _token_is_expired(self, token):
         ''' Check if token expires or not. '''
@@ -878,7 +947,7 @@ class ServiceBusService(object):
         # token to server.
         return (token_expire_time - time_now) < 30
 
-    def _get_token(self, host, path):
+    def _get_token(self, host, path, httpclient):
         '''
         Returns token for the request.
 
@@ -905,10 +974,38 @@ class ServiceBusService(object):
                         '&wrap_scope=' +
                         url_quote('http://' + host + path)).encode('utf-8')
         request.headers.append(('Content-Length', str(len(request.body))))
-        resp = self._httpclient.perform_request(request)
+        resp = httpclient.perform_request(request)
 
         token = resp.body.decode('utf-8')
         token = url_unquote(token[token.find('=') + 1:token.rfind('&')])
         _tokens[wrap_scope] = token
 
         return token
+
+
+class ServiceBusSASAuthentication:
+    def __init__(self, key_name, key_value):
+        self.key_name = key_name
+        self.key_value = key_value
+
+    def sign_request(self, request, httpclient):
+        request.headers.append(
+            ('Authorization', self._get_authorization(request, httpclient)))
+
+    def _get_authorization(self, request, httpclient):
+        uri = httpclient.get_uri(request)
+        uri = url_quote(uri, '').lower()
+        expiry = str(self._get_expiry())
+
+        to_sign = uri + '\n' + expiry
+        signature = url_quote(_sign_string(self.key_value, to_sign, False), '')
+
+        auth_format = 'SharedAccessSignature sig={0}&se={1}&skn={2}&sr={3}'
+        auth = auth_format.format(signature, expiry, self.key_name, uri)
+
+        return auth
+
+    def _get_expiry(self):
+        '''Returns the UTC datetime, in seconds since Epoch, when this signed 
+        request expires (5 minutes from now).'''
+        return int(round(time.time() + 300))

@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from azure import url_quote
-from azure.storage import _sign_string, X_MS_VERSION
+from azure import _sign_string, url_quote
+from azure.storage import X_MS_VERSION
 
 #-------------------------------------------------------------------------
 # Constants for the share access signature
+SIGNED_VERSION = 'sv'
 SIGNED_START = 'st'
 SIGNED_EXPIRY = 'se'
 SIGNED_RESOURCE = 'sr'

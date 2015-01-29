@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{25b2c65a-0553-4452-8907-8b5b17544e68}</ProjectGuid>
+    <ProjectHome>
+    </ProjectHome>
+    <StartupFile>storage\blobservice.py</StartupFile>
+    <SearchPath>..</SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>azure</Name>
+    <RootNamespace>azure</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments />
+    <InterpreterPath />
+    <InterpreterArguments />
+    <InterpreterId>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</InterpreterId>
+    <InterpreterVersion>2.7</InterpreterVersion>
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="http\batchclient.py" />
+    <Compile Include="http\httpclient.py" />
+    <Compile Include="http\requestsclient.py" />
+    <Compile Include="http\winhttp.py" />
+    <Compile Include="http\__init__.py" />
+    <Compile Include="servicemanagement\schedulermanagementservice.py" />
+    <Compile Include="servicemanagement\servicebusmanagementservice.py" />
+    <Compile Include="servicemanagement\servicemanagementclient.py" />
+    <Compile Include="servicemanagement\servicemanagementservice.py" />
+    <Compile Include="servicemanagement\sqldatabasemanagementservice.py" />
+    <Compile Include="servicemanagement\websitemanagementservice.py" />
+    <Compile Include="servicemanagement\__init__.py" />
+    <Compile Include="servicebus\servicebusservice.py" />
+    <Compile Include="storage\blobservice.py" />
+    <Compile Include="storage\queueservice.py" />
+    <Compile Include="storage\cloudstorageaccount.py" />
+    <Compile Include="storage\tableservice.py" />
+    <Compile Include="storage\sharedaccesssignature.py" />
+    <Compile Include="__init__.py" />
+    <Compile Include="servicebus\__init__.py" />
+    <Compile Include="storage\storageclient.py" />
+    <Compile Include="storage\__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="http" />
+    <Folder Include="servicemanagement" />
+    <Folder Include="servicebus" />
+    <Folder Include="storage" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\2.6" />
+    <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\2.7" />
+    <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\3.3" />
+    <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\3.4" />
+    <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\2.7" />
+    <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\3.3" />
+    <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\3.4" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <PtvsTargetsFile>$(VSToolsPath)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <Import Condition="Exists($(PtvsTargetsFile))" Project="$(PtvsTargetsFile)" />
+  <Import Condition="!Exists($(PtvsTargetsFile))" Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+</Project>

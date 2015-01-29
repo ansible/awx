@@ -37,12 +37,19 @@ from azure.servicemanagement import (
     OperatingSystemFamilies,
     OSImage,
     PersistentVMRole,
+    ResourceExtensions,
+    ReservedIP,
+    ReservedIPs,
+    RoleSize,
+    RoleSizes,
     StorageService,
     StorageServices,
     Subscription,
+    Subscriptions,
     SubscriptionCertificate,
     SubscriptionCertificates,
     VirtualNetworkSites,
+    VMImages,
     _XmlSerializer,
     )
 from azure.servicemanagement.servicemanagementclient import (
@@ -52,9 +59,49 @@ from azure.servicemanagement.servicemanagementclient import (
 class ServiceManagementService(_ServiceManagementClient):
 
     def __init__(self, subscription_id=None, cert_file=None,
-                 host=MANAGEMENT_HOST):
+                 host=MANAGEMENT_HOST, request_session=None):
+        '''
+        Initializes the management service.
+
+        subscription_id: Subscription to manage.
+        cert_file:
+            Path to .pem certificate file (httplib), or location of the
+            certificate in your Personal certificate store (winhttp) in the
+            CURRENT_USER\my\CertificateName format.
+            If a request_session is specified, then this is unused.
+        host: Live ServiceClient URL. Defaults to Azure public cloud.
+        request_session:
+            Session object to use for http requests. If this is specified, it
+            replaces the default use of httplib or winhttp. Also, the cert_file
+            parameter is unused when a session is passed in.
+            The session object handles authentication, and as such can support
+            multiple types of authentication: .pem certificate, oauth.
+            For example, you can pass in a Session instance from the requests
+            library. To use .pem certificate authentication with requests
+            library, set the path to the .pem file on the session.cert
+            attribute.
+        '''
         super(ServiceManagementService, self).__init__(
-            subscription_id, cert_file, host)
+            subscription_id, cert_file, host, request_session)
+
+    #--Operations for subscriptions --------------------------------------
+    def list_role_sizes(self):
+        '''
+        Lists the role sizes that are available under the specified
+        subscription.
+        '''
+        return self._perform_get(self._get_role_sizes_path(),
+                                 RoleSizes)
+
+    def list_subscriptions(self):
+        '''
+        Returns a list of subscriptions that you can access.
+
+        You must make sure that the request that is made to the management
+        service is secure using an Active Directory access token.
+        '''
+        return self._perform_get(self._get_subscriptions_path(),
+                                 Subscriptions)
 
     #--Operations for storage accounts -----------------------------------
     def list_storage_accounts(self):
@@ -107,8 +154,9 @@ class ServiceManagementService(_ServiceManagementClient):
 
     def create_storage_account(self, service_name, description, label,
                                affinity_group=None, location=None,
-                               geo_replication_enabled=True,
-                               extended_properties=None):
+                               geo_replication_enabled=None,
+                               extended_properties=None,
+                               account_type='Standard_GRS'):
         '''
         Creates a new storage account in Windows Azure.
 
@@ -131,12 +179,7 @@ class ServiceManagementService(_ServiceManagementClient):
             The location where the storage account is created. You can specify
             either a location or affinity_group, but not both.
         geo_replication_enabled:
-            Specifies whether the storage account is created with the
-            geo-replication enabled. If the element is not included in the
-            request body, the default value is true. If set to true, the data
-            in the storage account is replicated across more than one
-            geographic location so as to enable resilience in the face of
-            catastrophic service loss.
+            Deprecated. Replaced by the account_type parameter.
         extended_properties:
             Dictionary containing name/value pairs of storage account
             properties. You can have a maximum of 50 extended property
@@ -144,6 +187,12 @@ class ServiceManagementService(_ServiceManagementClient):
             characters, only alphanumeric characters and underscores are valid
             in the Name, and the name must start with a letter. The value has
             a maximum length of 255 characters.
+        account_type:
+            Specifies whether the account supports locally-redundant storage,
+            geo-redundant storage, zone-redundant storage, or read access
+            geo-redundant storage.
+            Possible values are:
+                Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS
         '''
         _validate_not_none('service_name', service_name)
         _validate_not_none('description', description)
@@ -154,6 +203,8 @@ class ServiceManagementService(_ServiceManagementClient):
         if affinity_group is not None and location is not None:
             raise WindowsAzureError(
                 'Only one of location or affinity_group needs to be specified')
+        if geo_replication_enabled == False:
+            account_type = 'Standard_LRS'
         return self._perform_post(
             self._get_storage_service_path(),
             _XmlSerializer.create_storage_service_input_to_xml(
@@ -162,13 +213,14 @@ class ServiceManagementService(_ServiceManagementClient):
                 label,
                 affinity_group,
                 location,
-                geo_replication_enabled,
+                account_type,
                 extended_properties),
             async=True)
 
     def update_storage_account(self, service_name, description=None,
                                label=None, geo_replication_enabled=None,
-                               extended_properties=None):
+                               extended_properties=None,
+                               account_type='Standard_GRS'):
         '''
         Updates the label, the description, and enables or disables the
         geo-replication status for a storage account in Windows Azure.
@@ -182,12 +234,7 @@ class ServiceManagementService(_ServiceManagementClient):
             characters in length. The name can be used to identify the storage
             account for your tracking purposes.
         geo_replication_enabled:
-            Specifies whether the storage account is created with the
-            geo-replication enabled. If the element is not included in the
-            request body, the default value is true. If set to true, the data
-            in the storage account is replicated across more than one
-            geographic location so as to enable resilience in the face of
-            catastrophic service loss.
+            Deprecated. Replaced by the account_type parameter.
         extended_properties:
             Dictionary containing name/value pairs of storage account
             properties. You can have a maximum of 50 extended property
@@ -195,14 +242,22 @@ class ServiceManagementService(_ServiceManagementClient):
             characters, only alphanumeric characters and underscores are valid
             in the Name, and the name must start with a letter. The value has
             a maximum length of 255 characters.
+        account_type:
+            Specifies whether the account supports locally-redundant storage,
+            geo-redundant storage, zone-redundant storage, or read access
+            geo-redundant storage.
+            Possible values are:
+                Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS
         '''
         _validate_not_none('service_name', service_name)
+        if geo_replication_enabled == False:
+            account_type = 'Standard_LRS'
         return self._perform_put(
             self._get_storage_service_path(service_name),
             _XmlSerializer.update_storage_service_input_to_xml(
                 description,
                 label,
-                geo_replication_enabled,
+                account_type,
                 extended_properties))
 
     def delete_storage_account(self, service_name):
@@ -697,6 +752,50 @@ class ServiceManagementService(_ServiceManagementClient):
             '',
             async=True)
 
+    def rebuild_role_instance(self, service_name, deployment_name,
+                             role_instance_name):
+        '''
+        Reinstalls the operating system on instances of web roles or worker
+        roles and initializes the storage resources that are used by them. If
+        you do not want to initialize storage resources, you can use
+        reimage_role_instance.
+
+        service_name: Name of the hosted service.
+        deployment_name: The name of the deployment.
+        role_instance_name: The name of the role instance.
+        '''
+        _validate_not_none('service_name', service_name)
+        _validate_not_none('deployment_name', deployment_name)
+        _validate_not_none('role_instance_name', role_instance_name)
+        return self._perform_post(
+            self._get_deployment_path_using_name(
+                service_name, deployment_name) + \
+                    '/roleinstances/' + _str(role_instance_name) + \
+                    '?comp=rebuild&resources=allLocalDrives',
+            '',
+            async=True)
+
+    def delete_role_instances(self, service_name, deployment_name,
+                             role_instance_names):
+        '''
+        Reinstalls the operating system on instances of web roles or worker
+        roles and initializes the storage resources that are used by them. If
+        you do not want to initialize storage resources, you can use
+        reimage_role_instance.
+
+        service_name: Name of the hosted service.
+        deployment_name: The name of the deployment.
+        role_instance_names: List of role instance names.
+        '''
+        _validate_not_none('service_name', service_name)
+        _validate_not_none('deployment_name', deployment_name)
+        _validate_not_none('role_instance_names', role_instance_names)
+        return self._perform_post(
+            self._get_deployment_path_using_name(
+                service_name, deployment_name) + '/roleinstances/?comp=delete',
+            _XmlSerializer.role_instances_to_xml(role_instance_names),
+            async=True)
+
     def check_hosted_service_name_availability(self, service_name):
         '''
         Checks to see if the specified hosted service name is available, or if
@@ -980,6 +1079,53 @@ class ServiceManagementService(_ServiceManagementClient):
         return self._perform_get('/' + self.subscription_id + '',
                                  Subscription)
 
+    #--Operations for reserved ip addresses  -----------------------------
+    def create_reserved_ip_address(self, name, label=None, location=None):
+        '''
+        Reserves an IPv4 address for the specified subscription.
+
+        name:
+            Required. Specifies the name for the reserved IP address.
+        label:
+            Optional. Specifies a label for the reserved IP address. The label
+            can be up to 100 characters long and can be used for your tracking
+            purposes.
+        location:
+            Required. Specifies the location of the reserved IP address. This
+            should be the same location that is assigned to the cloud service
+            containing the deployment that will use the reserved IP address.
+            To see the available locations, you can use list_locations.
+        '''
+        _validate_not_none('name', name)
+        return self._perform_post(
+            self._get_reserved_ip_path(),
+            _XmlSerializer.create_reserved_ip_to_xml(name, label, location))
+
+    def delete_reserved_ip_address(self, name):
+        '''
+        Deletes a reserved IP address from the specified subscription.
+
+        name: Required. Name of the reserved IP address.
+        '''
+        _validate_not_none('name', name)
+        return self._perform_delete(self._get_reserved_ip_path(name))
+
+    def get_reserved_ip_address(self, name):
+        '''
+        Retrieves information about the specified reserved IP address.
+
+        name: Required. Name of the reserved IP address.
+        '''
+        _validate_not_none('name', name)
+        return self._perform_get(self._get_reserved_ip_path(name), ReservedIP)
+
+    def list_reserved_ip_addresses(self):
+        '''
+        Lists the IP addresses that have been reserved for the specified
+        subscription.
+        '''
+        return self._perform_get(self._get_reserved_ip_path(), ReservedIPs)
+
     #--Operations for virtual machines -----------------------------------
     def get_role(self, service_name, deployment_name, role_name):
         '''
@@ -1004,7 +1150,13 @@ class ServiceManagementService(_ServiceManagementClient):
                                           data_virtual_hard_disks=None,
                                           role_size=None,
                                           role_type='PersistentVMRole',
-                                          virtual_network_name=None):
+                                          virtual_network_name=None,
+                                          resource_extension_references=None,
+                                          provision_guest_agent=None,
+                                          vm_image_name=None,
+                                          media_location=None,
+                                          dns_servers=None,
+                                          reserved_ip_name=None):
         '''
         Provisions a virtual machine based on the supplied configuration.
 
@@ -1025,7 +1177,8 @@ class ServiceManagementService(_ServiceManagementClient):
             WindowsConfigurationSet or LinuxConfigurationSet.
         os_virtual_hard_disk:
             Contains the parameters Windows Azure uses to create the operating
-            system disk for the virtual machine.
+            system disk for the virtual machine. If you are creating a Virtual
+            Machine by using a VM Image, this parameter is not used.
         network_config:
             Encapsulates the metadata required to create the virtual network
             configuration for a virtual machine. If you do not include a
@@ -1053,14 +1206,36 @@ class ServiceManagementService(_ServiceManagementClient):
         virtual_network_name:
             Specifies the name of an existing virtual network to which the
             deployment will belong.
+        resource_extension_references:
+            Optional. Contains a collection of resource extensions that are to
+            be installed on the Virtual Machine. This element is used if
+            provision_guest_agent is set to True.
+        provision_guest_agent:
+            Optional. Indicates whether the VM Agent is installed on the
+            Virtual Machine. To run a resource extension in a Virtual Machine,
+            this service must be installed.
+        vm_image_name:
+            Optional. Specifies the name of the VM Image that is to be used to
+            create the Virtual Machine. If this is specified, the
+            system_config and network_config parameters are not used.
+        media_location:
+            Optional. Required if the Virtual Machine is being created from a
+            published VM Image. Specifies the location of the VHD file that is
+            created when VMImageName specifies a published VM Image.
+        dns_servers:
+            Optional. List of DNS servers (use DnsServer class) to associate
+            with the Virtual Machine.
+        reserved_ip_name:
+            Optional. Specifies the name of a reserved IP address that is to be
+            assigned to the deployment. You must run create_reserved_ip_address
+            before you can assign the address to the deployment using this
+            element.
         '''
         _validate_not_none('service_name', service_name)
         _validate_not_none('deployment_name', deployment_name)
         _validate_not_none('deployment_slot', deployment_slot)
         _validate_not_none('label', label)
         _validate_not_none('role_name', role_name)
-        _validate_not_none('system_config', system_config)
-        _validate_not_none('os_virtual_hard_disk', os_virtual_hard_disk)
         return self._perform_post(
             self._get_deployment_path_using_name(service_name),
             _XmlSerializer.virtual_machine_deployment_to_xml(
@@ -1075,13 +1250,22 @@ class ServiceManagementService(_ServiceManagementClient):
                 availability_set_name,
                 data_virtual_hard_disks,
                 role_size,
-                virtual_network_name),
+                virtual_network_name,
+                resource_extension_references,
+                provision_guest_agent,
+                vm_image_name,
+                media_location,
+                dns_servers,
+                reserved_ip_name),
             async=True)
 
     def add_role(self, service_name, deployment_name, role_name, system_config,
                  os_virtual_hard_disk, network_config=None,
                  availability_set_name=None, data_virtual_hard_disks=None,
-                 role_size=None, role_type='PersistentVMRole'):
+                 role_size=None, role_type='PersistentVMRole',
+                 resource_extension_references=None,
+                 provision_guest_agent=None, vm_image_name=None,
+                 media_location=None):
         '''
         Adds a virtual machine to an existing deployment.
 
@@ -1094,7 +1278,8 @@ class ServiceManagementService(_ServiceManagementClient):
             WindowsConfigurationSet or LinuxConfigurationSet.
         os_virtual_hard_disk:
             Contains the parameters Windows Azure uses to create the operating
-            system disk for the virtual machine.
+            system disk for the virtual machine. If you are creating a Virtual
+            Machine by using a VM Image, this parameter is not used.
         network_config:
             Encapsulates the metadata required to create the virtual network
             configuration for a virtual machine. If you do not include a
@@ -1119,12 +1304,26 @@ class ServiceManagementService(_ServiceManagementClient):
         role_type:
             The type of the role for the virtual machine. The only supported
             value is PersistentVMRole.
+        resource_extension_references:
+            Optional. Contains a collection of resource extensions that are to
+            be installed on the Virtual Machine. This element is used if
+            provision_guest_agent is set to True.
+        provision_guest_agent:
+            Optional. Indicates whether the VM Agent is installed on the
+            Virtual Machine. To run a resource extension in a Virtual Machine,
+            this service must be installed.
+        vm_image_name:
+            Optional. Specifies the name of the VM Image that is to be used to
+            create the Virtual Machine. If this is specified, the
+            system_config and network_config parameters are not used.
+        media_location:
+            Optional. Required if the Virtual Machine is being created from a
+            published VM Image. Specifies the location of the VHD file that is
+            created when VMImageName specifies a published VM Image.
         '''
         _validate_not_none('service_name', service_name)
         _validate_not_none('deployment_name', deployment_name)
         _validate_not_none('role_name', role_name)
-        _validate_not_none('system_config', system_config)
-        _validate_not_none('os_virtual_hard_disk', os_virtual_hard_disk)
         return self._perform_post(
             self._get_role_path(service_name, deployment_name),
             _XmlSerializer.add_role_to_xml(
@@ -1135,13 +1334,19 @@ class ServiceManagementService(_ServiceManagementClient):
                 network_config,
                 availability_set_name,
                 data_virtual_hard_disks,
-                role_size),
+                role_size,
+                resource_extension_references,
+                provision_guest_agent,
+                vm_image_name,
+                media_location),
             async=True)
 
     def update_role(self, service_name, deployment_name, role_name,
                     os_virtual_hard_disk=None, network_config=None,
                     availability_set_name=None, data_virtual_hard_disks=None,
-                    role_size=None, role_type='PersistentVMRole'):
+                    role_size=None, role_type='PersistentVMRole',
+                    resource_extension_references=None,
+                    provision_guest_agent=None):
         '''
         Updates the specified virtual machine.
 
@@ -1175,6 +1380,14 @@ class ServiceManagementService(_ServiceManagementClient):
         role_type:
             The type of the role for the virtual machine. The only supported
             value is PersistentVMRole.
+        resource_extension_references:
+            Optional. Contains a collection of resource extensions that are to
+            be installed on the Virtual Machine. This element is used if
+            provision_guest_agent is set to True.
+        provision_guest_agent:
+            Optional. Indicates whether the VM Agent is installed on the
+            Virtual Machine. To run a resource extension in a Virtual Machine,
+            this service must be installed.
         '''
         _validate_not_none('service_name', service_name)
         _validate_not_none('deployment_name', deployment_name)
@@ -1188,7 +1401,9 @@ class ServiceManagementService(_ServiceManagementClient):
                 network_config,
                 availability_set_name,
                 data_virtual_hard_disks,
-                role_size),
+                role_size,
+                resource_extension_references,
+                provision_guest_agent),
             async=True)
 
     def delete_role(self, service_name, deployment_name, role_name):
@@ -1354,7 +1569,307 @@ class ServiceManagementService(_ServiceManagementClient):
                 role_names, post_shutdown_action),
             async=True)
 
+    def add_dns_server(self, service_name, deployment_name, dns_server_name, address):
+        '''
+        Adds a DNS server definition to an existing deployment.
+
+        service_name: The name of the service.
+        deployment_name: The name of the deployment.
+        dns_server_name: Specifies the name of the DNS server.
+        address: Specifies the IP address of the DNS server.
+        '''
+        _validate_not_none('service_name', service_name)
+        _validate_not_none('deployment_name', deployment_name)
+        _validate_not_none('dns_server_name', dns_server_name)
+        _validate_not_none('address', address)
+        return self._perform_post(
+            self._get_dns_server_path(service_name, deployment_name),
+            _XmlSerializer.dns_server_to_xml(dns_server_name, address),
+            async=True)
+
+    def update_dns_server(self, service_name, deployment_name, dns_server_name, address):
+        '''
+        Updates the ip address of a DNS server.
+
+        service_name: The name of the service.
+        deployment_name: The name of the deployment.
+        dns_server_name: Specifies the name of the DNS server.
+        address: Specifies the IP address of the DNS server.
+        '''
+        _validate_not_none('service_name', service_name)
+        _validate_not_none('deployment_name', deployment_name)
+        _validate_not_none('dns_server_name', dns_server_name)
+        _validate_not_none('address', address)
+        return self._perform_put(
+            self._get_dns_server_path(service_name,
+                                      deployment_name,
+                                      dns_server_name),
+            _XmlSerializer.dns_server_to_xml(dns_server_name, address),
+            async=True)
+
+    def delete_dns_server(self, service_name, deployment_name, dns_server_name):
+        '''
+        Deletes a DNS server from a deployment.
+
+        service_name: The name of the service.
+        deployment_name: The name of the deployment.
+        dns_server_name: Name of the DNS server that you want to delete.
+        '''
+        _validate_not_none('service_name', service_name)
+        _validate_not_none('deployment_name', deployment_name)
+        _validate_not_none('dns_server_name', dns_server_name)
+        return self._perform_delete(
+            self._get_dns_server_path(service_name,
+                                      deployment_name,
+                                      dns_server_name),
+            async=True)
+
+    def list_resource_extensions(self):
+        '''
+        Lists the resource extensions that are available to add to a
+        Virtual Machine.
+        '''
+        return self._perform_get(self._get_resource_extensions_path(),
+                                 ResourceExtensions)
+
+    def list_resource_extension_versions(self, publisher_name, extension_name):
+        '''
+        Lists the versions of a resource extension that are available to add
+        to a Virtual Machine.
+
+        publisher_name: Name of the resource extension publisher.
+        extension_name: Name of the resource extension.
+        '''
+        return self._perform_get(self._get_resource_extension_versions_path(
+                                    publisher_name, extension_name),
+                                 ResourceExtensions)
+
     #--Operations for virtual machine images -----------------------------
+    def capture_vm_image(self, service_name, deployment_name, role_name, options):
+        '''
+        Creates a copy of the operating system virtual hard disk (VHD) and all
+        of the data VHDs that are associated with the Virtual Machine, saves
+        the VHD copies in the same storage location as the original VHDs, and
+        registers the copies as a VM Image in the image repository that is
+        associated with the specified subscription.
+
+        service_name: The name of the service.
+        deployment_name: The name of the deployment.
+        role_name: The name of the role.
+        options: An instance of CaptureRoleAsVMImage class.
+        options.os_state:
+            Required. Specifies the state of the operating system in the image.
+            Possible values are: Generalized, Specialized 
+            A Virtual Machine that is fully configured and running contains a
+            Specialized operating system. A Virtual Machine on which the
+            Sysprep command has been run with the generalize option contains a
+            Generalized operating system. If you capture an image from a
+            generalized Virtual Machine, the machine is deleted after the image
+            is captured. It is recommended that all Virtual Machines are shut
+            down before capturing an image.
+        options.vm_image_name:
+            Required. Specifies the name of the VM Image.
+        options.vm_image_name:
+            Required. Specifies the label of the VM Image.
+        options.description:
+            Optional. Specifies the description of the VM Image.
+        options.language:
+            Optional. Specifies the language of the VM Image.
+        options.image_family:
+            Optional. Specifies a value that can be used to group VM Images.
+        options.recommended_vm_size:
+            Optional. Specifies the size to use for the Virtual Machine that
+            is created from the VM Image.
+        '''
+        _validate_not_none('service_name', service_name)
+        _validate_not_none('deployment_name', deployment_name)
+        _validate_not_none('role_name', role_name)
+        _validate_not_none('options', options)
+        _validate_not_none('options.os_state', options.os_state)
+        _validate_not_none('options.vm_image_name', options.vm_image_name)
+        _validate_not_none('options.vm_image_label', options.vm_image_label)
+        return self._perform_post(
+            self._get_capture_vm_image_path(service_name, deployment_name, role_name),
+            _XmlSerializer.capture_vm_image_to_xml(options),
+            async=True)
+
+    def create_vm_image(self, vm_image):
+        '''
+        Creates a VM Image in the image repository that is associated with the
+        specified subscription using a specified set of virtual hard disks.
+
+        vm_image: An instance of VMImage class.
+        vm_image.name: Required. Specifies the name of the image.
+        vm_image.label: Required. Specifies an identifier for the image.
+        vm_image.description: Optional. Specifies the description of the image.
+        vm_image.os_disk_configuration:
+            Required. Specifies configuration information for the operating 
+            system disk that is associated with the image.
+        vm_image.os_disk_configuration.host_caching:
+            Optional. Specifies the caching behavior of the operating system disk.
+            Possible values are: None, ReadOnly, ReadWrite 
+        vm_image.os_disk_configuration.os_state:
+            Required. Specifies the state of the operating system in the image.
+            Possible values are: Generalized, Specialized
+            A Virtual Machine that is fully configured and running contains a
+            Specialized operating system. A Virtual Machine on which the
+            Sysprep command has been run with the generalize option contains a
+            Generalized operating system.
+        vm_image.os_disk_configuration.os:
+            Required. Specifies the operating system type of the image.
+        vm_image.os_disk_configuration.media_link:
+            Required. Specifies the location of the blob in Windows Azure
+            storage. The blob location belongs to a storage account in the
+            subscription specified by the <subscription-id> value in the
+            operation call.
+        vm_image.data_disk_configurations:
+            Optional. Specifies configuration information for the data disks
+            that are associated with the image. A VM Image might not have data
+            disks associated with it.
+        vm_image.data_disk_configurations[].host_caching:
+            Optional. Specifies the caching behavior of the data disk.
+            Possible values are: None, ReadOnly, ReadWrite 
+        vm_image.data_disk_configurations[].lun:
+            Optional if the lun for the disk is 0. Specifies the Logical Unit
+            Number (LUN) for the data disk.
+        vm_image.data_disk_configurations[].media_link:
+            Required. Specifies the location of the blob in Windows Azure
+            storage. The blob location belongs to a storage account in the
+            subscription specified by the <subscription-id> value in the
+            operation call.
+        vm_image.data_disk_configurations[].logical_size_in_gb:
+            Required. Specifies the size, in GB, of the data disk.
+        vm_image.language: Optional. Specifies the language of the image.
+        vm_image.image_family:
+            Optional. Specifies a value that can be used to group VM Images.
+        vm_image.recommended_vm_size:
+            Optional. Specifies the size to use for the Virtual Machine that
+            is created from the VM Image.
+        vm_image.eula:
+            Optional. Specifies the End User License Agreement that is
+            associated with the image. The value for this element is a string,
+            but it is recommended that the value be a URL that points to a EULA.
+        vm_image.icon_uri:
+            Optional. Specifies the URI to the icon that is displayed for the
+            image in the Management Portal.
+        vm_image.small_icon_uri:
+            Optional. Specifies the URI to the small icon that is displayed for
+            the image in the Management Portal.
+        vm_image.privacy_uri:
+            Optional. Specifies the URI that points to a document that contains
+            the privacy policy related to the image.
+        vm_image.published_date:
+            Optional. Specifies the date when the image was added to the image
+            repository.
+        vm_image.show_in_gui:
+            Optional. Indicates whether the VM Images should be listed in the
+            portal.
+        '''
+        _validate_not_none('vm_image', vm_image)
+        _validate_not_none('vm_image.name', vm_image.name)
+        _validate_not_none('vm_image.label', vm_image.label)
+        _validate_not_none('vm_image.os_disk_configuration.os_state',
+                           vm_image.os_disk_configuration.os_state)
+        _validate_not_none('vm_image.os_disk_configuration.os',
+                           vm_image.os_disk_configuration.os)
+        _validate_not_none('vm_image.os_disk_configuration.media_link',
+                           vm_image.os_disk_configuration.media_link)
+        return self._perform_post(
+            self._get_vm_image_path(),
+            _XmlSerializer.create_vm_image_to_xml(vm_image),
+            async=True)
+
+    def delete_vm_image(self, vm_image_name, delete_vhd=False):
+        '''
+        Deletes the specified VM Image from the image repository that is
+        associated with the specified subscription.
+
+        vm_image_name: The name of the image.
+        delete_vhd: Deletes the underlying vhd blob in Azure storage.
+        '''
+        _validate_not_none('vm_image_name', vm_image_name)
+        path = self._get_vm_image_path(vm_image_name)
+        if delete_vhd:
+            path += '?comp=media'
+        return self._perform_delete(path, async=True)
+
+    def list_vm_images(self, location=None, publisher=None, category=None):
+        '''
+        Retrieves a list of the VM Images from the image repository that is
+        associated with the specified subscription.
+        '''
+        path = self._get_vm_image_path()
+        query = ''
+        if location:
+            query += '&location=' + location
+        if publisher:
+            query += '&publisher=' + publisher
+        if category:
+            query += '&category=' + category
+        if query:
+            path = path + '?' + query.lstrip('&')
+        return self._perform_get(path, VMImages)
+
+    def update_vm_image(self, vm_image_name, vm_image):
+        '''
+        Updates a VM Image in the image repository that is associated with the
+        specified subscription.
+
+        vm_image_name: Name of image to update.
+        vm_image: An instance of VMImage class.
+        vm_image.label: Optional. Specifies an identifier for the image.
+        vm_image.os_disk_configuration:
+            Required. Specifies configuration information for the operating 
+            system disk that is associated with the image.
+        vm_image.os_disk_configuration.host_caching:
+            Optional. Specifies the caching behavior of the operating system disk.
+            Possible values are: None, ReadOnly, ReadWrite 
+        vm_image.data_disk_configurations:
+            Optional. Specifies configuration information for the data disks
+            that are associated with the image. A VM Image might not have data
+            disks associated with it.
+        vm_image.data_disk_configurations[].name:
+            Required. Specifies the name of the data disk.
+        vm_image.data_disk_configurations[].host_caching:
+            Optional. Specifies the caching behavior of the data disk.
+            Possible values are: None, ReadOnly, ReadWrite 
+        vm_image.data_disk_configurations[].lun:
+            Optional if the lun for the disk is 0. Specifies the Logical Unit
+            Number (LUN) for the data disk.
+        vm_image.description: Optional. Specifies the description of the image.
+        vm_image.language: Optional. Specifies the language of the image.
+        vm_image.image_family:
+            Optional. Specifies a value that can be used to group VM Images.
+        vm_image.recommended_vm_size:
+            Optional. Specifies the size to use for the Virtual Machine that
+            is created from the VM Image.
+        vm_image.eula:
+            Optional. Specifies the End User License Agreement that is
+            associated with the image. The value for this element is a string,
+            but it is recommended that the value be a URL that points to a EULA.
+        vm_image.icon_uri:
+            Optional. Specifies the URI to the icon that is displayed for the
+            image in the Management Portal.
+        vm_image.small_icon_uri:
+            Optional. Specifies the URI to the small icon that is displayed for
+            the image in the Management Portal.
+        vm_image.privacy_uri:
+            Optional. Specifies the URI that points to a document that contains
+            the privacy policy related to the image.
+        vm_image.published_date:
+            Optional. Specifies the date when the image was added to the image
+            repository.
+        vm_image.show_in_gui:
+            Optional. Indicates whether the VM Images should be listed in the
+            portal.
+        '''
+        _validate_not_none('vm_image_name', vm_image_name)
+        _validate_not_none('vm_image', vm_image)
+        return self._perform_put(self._get_vm_image_path(vm_image_name),
+                                 _XmlSerializer.update_vm_image_to_xml(vm_image),
+                                 async=True)
+
+    #--Operations for operating system images ----------------------------
     def list_os_images(self):
         '''
         Retrieves a list of the OS images from the image repository.
@@ -1707,6 +2222,12 @@ class ServiceManagementService(_ServiceManagementClient):
         return self._perform_get(self._get_virtual_network_site_path(), VirtualNetworkSites)
   
       #--Helper functions --------------------------------------------------
+    def _get_role_sizes_path(self):
+        return self._get_path('rolesizes', None)
+
+    def _get_subscriptions_path(self):
+        return '/subscriptions'
+
     def _get_virtual_network_site_path(self):
         return self._get_path('services/networking/virtualnetwork', None)
 
@@ -1740,6 +2261,31 @@ class ServiceManagementService(_ServiceManagementClient):
         return self._get_path('services/hostedservices/' + _str(service_name) +
                               '/deployments/' + deployment_name +
                               '/roles/Operations', None)
+
+    def _get_resource_extensions_path(self):
+        return self._get_path('services/resourceextensions', None)
+
+    def _get_resource_extension_versions_path(self, publisher_name, extension_name):
+        return self._get_path('services/resourceextensions',
+                              publisher_name + '/' + extension_name)
+
+    def _get_dns_server_path(self, service_name, deployment_name,
+                             dns_server_name=None):
+        return self._get_path('services/hostedservices/' + _str(service_name) +
+                              '/deployments/' + deployment_name +
+                              '/dnsservers', dns_server_name)
+
+    def _get_capture_vm_image_path(self, service_name, deployment_name, role_name):
+        return self._get_path('services/hostedservices/' + _str(service_name) +
+                              '/deployments/' + _str(deployment_name) +
+                              '/roleinstances/' + _str(role_name) + '/Operations',
+                              None)
+
+    def _get_vm_image_path(self, image_name=None):
+        return self._get_path('services/vmimages', image_name)
+
+    def _get_reserved_ip_path(self, name=None):
+        return self._get_path('services/networking/reservedips', name)
 
     def _get_data_disk_path(self, service_name, deployment_name, role_name,
                             lun=None):
