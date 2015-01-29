@@ -109,15 +109,16 @@ angular.module('DashboardGraphs')
                 });
 
                 adjustGraphSize(job_status_chart, element);
-
             }
 
-            angular.element($window).on('resize', function() {
+            function onResize() {
               adjustGraphSize(job_status_chart, element);
-            });
+            }
+
+            angular.element($window).on('resize', onResize);
 
             element.on('$destroy', function() {
-              angular.element($window).off('resize', adjustGraphSize);
+              angular.element($window).off('resize', onResize);
             });
 
             if (scope.removeGraphDataReady) {

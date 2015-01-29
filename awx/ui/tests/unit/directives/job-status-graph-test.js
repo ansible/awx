@@ -1,10 +1,13 @@
 describe('Job Status Graph Directive', function() {
   var element, scope, httpBackend;
 
+  var resizeHandler = sinon.spy();
+
   beforeEach(module('Tower'));
 
   beforeEach(module(function($provide) {
     $provide.value('LoadBasePaths', angular.noop);
+    $provide.value('adjustGraphSize', resizeHandler);
   }));
 
   beforeEach(inject(function($rootScope, $compile, $httpBackend) {
@@ -36,8 +39,9 @@ describe('Job Status Graph Directive', function() {
   }));
 
   afterEach(function() {
-     httpBackend.verifyNoOutstandingExpectation();
-     httpBackend.verifyNoOutstandingRequest();
+    element.trigger('$destroy');
+      httpBackend.verifyNoOutstandingExpectation();
+    httpBackend.verifyNoOutstandingRequest();
   });
 
   function filterDataSeries(key, data) {
@@ -66,6 +70,18 @@ describe('Job Status Graph Directive', function() {
         {x: 3, y: 0, series: 1},
         {x: 4, y: 0, series: 1},
         {x: 5, y: 0, series: 1}]);
+  });
+
+  it('cleans up external bindings', function() {
+    element.trigger('$destroy');
+
+    resizeHandler.reset();
+
+    inject(['$window', function($window) {
+      angular.element($window).trigger('resize');
+    }]);
+
+    expect(resizeHandler).not.to.have.been.called;
   });
 
 });

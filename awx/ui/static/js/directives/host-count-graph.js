@@ -15,13 +15,18 @@ angular.module('DashboardGraphs').
       createGraph(data.hosts, data.license);
     });
 
+    function onResize() {
+      if(!license_graph) return;
+      adjustGraphSize(license_graph, element);
+    }
+
     angular.element($window).on('resize', function(e) {
       if(!license_graph) return;
       adjustGraphSize(license_graph, element);
     });
 
     element.on('$destroy', function() {
-      angular.element($window).off('resize', adjustGraphSize);
+      angular.element($window).off('resize', onResize);
     });
 
 
