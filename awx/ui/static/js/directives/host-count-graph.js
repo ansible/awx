@@ -32,7 +32,6 @@ angular.module('DashboardGraphs').
 
 
     function createGraph(data, license) {
-
       //url = getBasePath('dashboard')+'graphs/';
       var graphData = [
         {

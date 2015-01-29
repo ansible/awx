@@ -31,7 +31,7 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
                        hdr: 'Error!',
                        msg: errorMessage
                      });
-                     return response;
+       return response;
      });
 
    return pluck('data', result);

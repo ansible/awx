@@ -12,7 +12,7 @@ angular.module('DashboardGraphs')
 
         scope.$watch(attr.data, function(data) {
           if (data && data.hosts) {
-            buildGraph(data);
+            createGraph(data);
           }
         });
 
@@ -40,7 +40,7 @@ angular.module('DashboardGraphs')
           angular.element($window).off('resize', adjustGraphSize);
         });
 
-        function buildGraph(data) {
+        function createGraph(data) {
           if(data.hosts.total+data.hosts.failed>0){
             data = [
               {
