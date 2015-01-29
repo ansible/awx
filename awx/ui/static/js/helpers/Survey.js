@@ -13,7 +13,7 @@
 
 'use strict';
 
-angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
+angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog' ,
     'GeneratorHelpers'])
 
     .factory('ShowSurveyModal', ['Wait', 'CreateDialog', 'Empty', '$compile' ,
@@ -288,6 +288,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 defaultValue = (question.default) ? question.default : "";
                 defaultValue = defaultValue.replace(/</g, "&lt;");
                 defaultValue = defaultValue.replace(/>/g, "&gt;");
+                defaultValue = scope.serialize(defaultValue);
                 html+='<div class="row">'+
                     '<div class="col-xs-8">'+
                     '<input type="text" placeholder="'+defaultValue+'"  class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" readonly>'+
@@ -297,6 +298,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 defaultValue = (question.default) ? question.default : (question.default_textarea) ? question.default_textarea:  "" ;
                 defaultValue = defaultValue.replace(/</g, "&lt;");
                 defaultValue = defaultValue.replace(/>/g, "&gt;");
+                defaultValue = scope.serialize(defaultValue);
                 html+='<div class="row">'+
                     '<div class="col-xs-8 input_area">'+
                     '<textarea class="form-control ng-pristine ng-invalid-required ng-invalid final" required="" rows="3" readonly>'+defaultValue+'</textarea>'+
@@ -311,6 +313,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     checked = (!Empty(question.default) && question.default.indexOf(choices[i])!==-1) ? "checked" : "";
                     choices[i] = choices[i] .replace(/</g, "&lt;");
                     choices[i]  = choices[i] .replace(/>/g, "&gt;");
+                    choices[i] = scope.serialize(choices[i]);
                     html+= '<input  type="'+element+'"  class="mc" ng-required="!'+question.variable+'" name="'+question.variable+ ' " id="'+question.variable+'" value=" '+choices[i]+' " '+checked+' disabled>' +
                         '<span>'+choices[i] +'</span><br>' ;
                 }
@@ -462,8 +465,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 id = params.id,
                 i, url, html, element,
                 questions = [],
-                form = SurveyQuestionForm;
-
+                form = SurveyQuestionForm,
+                sce = params.sce;
+            scope.sce = sce;
             scope.survey_questions = [];
             scope.answer_types=[
                 {name: 'Text' , type: 'text'},
@@ -473,6 +477,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 {name: 'Integer', type: 'integer'},
                 {name: 'Float', type: 'float'}
             ];
+
+            scope.serialize = function(expression){
+                return scope.sce.getTrustedHtml(expression);
+            };
 
             scope.deleteSurvey = function() {
                 DeleteSurvey({

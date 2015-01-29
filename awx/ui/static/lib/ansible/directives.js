@@ -117,11 +117,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     };
 })
 
-    // caplitalize  Add to any input field where the first letter of each
-    //              word should be capitalized. Use in place of css test-transform.
-    //              For some reason "text-transform: capitalize" in breadcrumbs
-    //              causes a break at each blank space. And of course,
-    //              "autocapitalize='word'" only works in iOS. Use this as a fix.
+
     .directive('awSurveyQuestion', function() {
         return {
             require: 'ngModel',
