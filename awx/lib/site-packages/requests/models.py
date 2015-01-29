@@ -19,30 +19,34 @@ from .cookies import cookiejar_from_dict, get_cookie_header
 from .packages.urllib3.fields import RequestField
 from .packages.urllib3.filepost import encode_multipart_formdata
 from .packages.urllib3.util import parse_url
-from .packages.urllib3.exceptions import DecodeError
+from .packages.urllib3.exceptions import (
+    DecodeError, ReadTimeoutError, ProtocolError, LocationParseError)
 from .exceptions import (
-    HTTPError, RequestException, MissingSchema, InvalidURL,
-    ChunkedEncodingError, ContentDecodingError)
+    HTTPError, MissingSchema, InvalidURL, ChunkedEncodingError,
+    ContentDecodingError, ConnectionError, StreamConsumedError)
 from .utils import (
     guess_filename, get_auth_from_url, requote_uri,
     stream_decode_response_unicode, to_key_val_list, parse_header_links,
     iter_slices, guess_json_utf, super_len, to_native_string)
 from .compat import (
     cookielib, urlunparse, urlsplit, urlencode, str, bytes, StringIO,
-    is_py2, chardet, json, builtin_str, basestring, IncompleteRead)
+    is_py2, chardet, json, builtin_str, basestring)
 from .status_codes import codes
 
 #: The set of HTTP status codes that indicate an automatically
 #: processable redirect.
 REDIRECT_STATI = (
-    codes.moved,  # 301
-    codes.found,  # 302
-    codes.other,  # 303
-    codes.temporary_moved,  # 307
+    codes.moved,              # 301
+    codes.found,              # 302
+    codes.other,              # 303
+    codes.temporary_redirect, # 307
+    codes.permanent_redirect, # 308
 )
 DEFAULT_REDIRECT_LIMIT = 30
 CONTENT_CHUNK_SIZE = 10 * 1024
 ITER_CHUNK_SIZE = 512
+
+json_dumps = json.dumps
 
 
 class RequestEncodingMixin(object):
@@ -187,7 +191,8 @@ class Request(RequestHooksMixin):
     :param url: URL to send.
     :param headers: dictionary of headers to send.
     :param files: dictionary of {filename: fileobject} files to multipart upload.
-    :param data: the body to attach the request. If a dictionary is provided, form-encoding will take place.
+    :param data: the body to attach to the request. If a dictionary is provided, form-encoding will take place.
+    :param json: json for the body to attach to the request (if data is not specified).
     :param params: dictionary of URL parameters to append to the URL.
     :param auth: Auth handler or (user, pass) tuple.
     :param cookies: dictionary or CookieJar of cookies to attach to this request.
@@ -210,7 +215,8 @@ class Request(RequestHooksMixin):
         params=None,
         auth=None,
         cookies=None,
-        hooks=None):
+        hooks=None,
+        json=None):
 
         # Default empty dicts for dict params.
         data = [] if data is None else data
@@ -228,6 +234,7 @@ class Request(RequestHooksMixin):
         self.headers = headers
         self.files = files
         self.data = data
+        self.json = json
         self.params = params
         self.auth = auth
         self.cookies = cookies
@@ -244,6 +251,7 @@ class Request(RequestHooksMixin):
             headers=self.headers,
             files=self.files,
             data=self.data,
+            json=self.json,
             params=self.params,
             auth=self.auth,
             cookies=self.cookies,
@@ -287,14 +295,15 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
         self.hooks = default_hooks()
 
     def prepare(self, method=None, url=None, headers=None, files=None,
-                data=None, params=None, auth=None, cookies=None, hooks=None):
+                data=None, params=None, auth=None, cookies=None, hooks=None,
+                json=None):
         """Prepares the entire request with the given parameters."""
 
         self.prepare_method(method)
         self.prepare_url(url, params)
         self.prepare_headers(headers)
         self.prepare_cookies(cookies)
-        self.prepare_body(data, files)
+        self.prepare_body(data, files, json)
         self.prepare_auth(auth, url)
         # Note that prepare_auth must be last to enable authentication schemes
         # such as OAuth to work on a fully prepared request.
@@ -309,8 +318,8 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
         p = PreparedRequest()
         p.method = self.method
         p.url = self.url
-        p.headers = self.headers.copy()
-        p._cookies = self._cookies.copy()
+        p.headers = self.headers.copy() if self.headers is not None else None
+        p._cookies = self._cookies.copy() if self._cookies is not None else None
         p.body = self.body
         p.hooks = self.hooks
         return p
@@ -324,21 +333,27 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
     def prepare_url(self, url, params):
         """Prepares the given HTTP URL."""
         #: Accept objects that have string representations.
-        try:
-            url = unicode(url)
-        except NameError:
-            # We're on Python 3.
-            url = str(url)
-        except UnicodeDecodeError:
-            pass
+        #: We're unable to blindy call unicode/str functions
+        #: as this will include the bytestring indicator (b'')
+        #: on python 3.x.
+        #: https://github.com/kennethreitz/requests/pull/2238
+        if isinstance(url, bytes):
+            url = url.decode('utf8')
+        else:
+            url = unicode(url) if is_py2 else str(url)
 
-        # Don't do any URL preparation for oddball schemes
+        # Don't do any URL preparation for non-HTTP schemes like `mailto`,
+        # `data` etc to work around exceptions from `url_parse`, which
+        # handles RFC 3986 only.
         if ':' in url and not url.lower().startswith('http'):
             self.url = url
             return
 
         # Support for unicode domain names and paths.
-        scheme, auth, host, port, path, query, fragment = parse_url(url)
+        try:
+            scheme, auth, host, port, path, query, fragment = parse_url(url)
+        except LocationParseError as e:
+            raise InvalidURL(*e.args)
 
         if not scheme:
             raise MissingSchema("Invalid URL {0!r}: No schema supplied. "
@@ -395,7 +410,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
         else:
             self.headers = CaseInsensitiveDict()
 
-    def prepare_body(self, data, files):
+    def prepare_body(self, data, files, json=None):
         """Prepares the given HTTP body data."""
 
         # Check if file, fo, generator, iterator.
@@ -405,6 +420,10 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
         body = None
         content_type = None
         length = None
+
+        if json is not None:
+            content_type = 'application/json'
+            body = json_dumps(json)
 
         is_stream = all([
             hasattr(data, '__iter__'),
@@ -431,9 +450,9 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
             if files:
                 (body, content_type) = self._encode_files(files, data)
             else:
-                if data:
+                if data and json is None:
                     body = self._encode_params(data)
-                    if isinstance(data, str) or isinstance(data, builtin_str) or hasattr(data, 'read'):
+                    if isinstance(data, basestring) or hasattr(data, 'read'):
                         content_type = None
                     else:
                         content_type = 'application/x-www-form-urlencoded'
@@ -441,7 +460,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
             self.prepare_content_length(body)
 
             # Add content-type if it wasn't explicitly provided.
-            if (content_type) and (not 'content-type' in self.headers):
+            if content_type and ('content-type' not in self.headers):
                 self.headers['Content-Type'] = content_type
 
         self.body = body
@@ -455,7 +474,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
             l = super_len(body)
             if l:
                 self.headers['Content-Length'] = builtin_str(l)
-        elif self.method not in ('GET', 'HEAD'):
+        elif (self.method not in ('GET', 'HEAD')) and (self.headers.get('Content-Length') is None):
             self.headers['Content-Length'] = '0'
 
     def prepare_auth(self, auth, url=''):
@@ -556,6 +575,10 @@ class Response(object):
         #: and the arrival of the response (as a timedelta)
         self.elapsed = datetime.timedelta(0)
 
+        #: The :class:`PreparedRequest <PreparedRequest>` object to which this
+        #: is a response.
+        self.request = None
+
     def __getstate__(self):
         # Consume everything; accessing the content attribute makes
         # sure the content has been fully read.
@@ -594,7 +617,7 @@ class Response(object):
     def ok(self):
         try:
             self.raise_for_status()
-        except RequestException:
+        except HTTPError:
             return False
         return True
 
@@ -604,6 +627,11 @@ class Response(object):
         been processed automatically (by :meth:`Session.resolve_redirects`).
         """
         return ('location' in self.headers and self.status_code in REDIRECT_STATI)
+
+    @property
+    def is_permanent_redirect(self):
+        """True if this Response one of the permanant versions of redirect"""
+        return ('location' in self.headers and self.status_code in (codes.moved_permanently, codes.permanent_redirect))
 
     @property
     def apparent_encoding(self):
@@ -626,10 +654,12 @@ class Response(object):
                 try:
                     for chunk in self.raw.stream(chunk_size, decode_content=True):
                         yield chunk
-                except IncompleteRead as e:
+                except ProtocolError as e:
                     raise ChunkedEncodingError(e)
                 except DecodeError as e:
                     raise ContentDecodingError(e)
+                except ReadTimeoutError as e:
+                    raise ConnectionError(e)
             except AttributeError:
                 # Standard file-like object.
                 while True:
@@ -640,6 +670,8 @@ class Response(object):
 
             self._content_consumed = True
 
+        if self._content_consumed and isinstance(self._content, bool):
+            raise StreamConsumedError()
         # simulate reading small chunks of the content
         reused_chunks = iter_slices(self._content, chunk_size)
 
@@ -652,7 +684,7 @@ class Response(object):
 
         return chunks
 
-    def iter_lines(self, chunk_size=ITER_CHUNK_SIZE, decode_unicode=None):
+    def iter_lines(self, chunk_size=ITER_CHUNK_SIZE, decode_unicode=None, delimiter=None):
         """Iterates over the response data, one line at a time.  When
         stream=True is set on the request, this avoids reading the
         content at once into memory for large responses.
@@ -664,7 +696,11 @@ class Response(object):
 
             if pending is not None:
                 chunk = pending + chunk
-            lines = chunk.splitlines()
+
+            if delimiter:
+                lines = chunk.split(delimiter)
+            else:
+                lines = chunk.splitlines()
 
             if lines and lines[-1] and chunk and lines[-1][-1] == chunk[-1]:
                 pending = lines.pop()
