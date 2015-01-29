@@ -5,6 +5,8 @@ import operator
 import functools
 import itertools
 import re
+import contextlib
+import pickle
 
 import pkg_resources
 
@@ -20,58 +22,221 @@ _open = open
 from distutils.errors import DistutilsError
 from pkg_resources import working_set
 
-from setuptools.compat import builtins, execfile
+from setuptools import compat
+from setuptools.compat import builtins
 
 __all__ = [
     "AbstractSandbox", "DirectorySandbox", "SandboxViolation", "run_setup",
 ]
 
+def _execfile(filename, globals, locals=None):
+    """
+    Python 3 implementation of execfile.
+    """
+    mode = 'rb'
+    # Python 2.6 compile requires LF for newlines, so use deprecated
+    #  Universal newlines support.
+    if sys.version_info < (2, 7):
+        mode += 'U'
+    with open(filename, mode) as stream:
+        script = stream.read()
+    if locals is None:
+        locals = globals
+    code = compile(script, filename, 'exec')
+    exec(code, globals, locals)
+
+
+@contextlib.contextmanager
+def save_argv():
+    saved = sys.argv[:]
+    try:
+        yield saved
+    finally:
+        sys.argv[:] = saved
+
+
+@contextlib.contextmanager
+def save_path():
+    saved = sys.path[:]
+    try:
+        yield saved
+    finally:
+        sys.path[:] = saved
+
+
+@contextlib.contextmanager
+def override_temp(replacement):
+    """
+    Monkey-patch tempfile.tempdir with replacement, ensuring it exists
+    """
+    if not os.path.isdir(replacement):
+        os.makedirs(replacement)
+
+    saved = tempfile.tempdir
+
+    tempfile.tempdir = replacement
+
+    try:
+        yield
+    finally:
+        tempfile.tempdir = saved
+
+
+@contextlib.contextmanager
+def pushd(target):
+    saved = os.getcwd()
+    os.chdir(target)
+    try:
+        yield saved
+    finally:
+        os.chdir(saved)
+
+
+class UnpickleableException(Exception):
+    """
+    An exception representing another Exception that could not be pickled.
+    """
+    @classmethod
+    def dump(cls, type, exc):
+        """
+        Always return a dumped (pickled) type and exc. If exc can't be pickled,
+        wrap it in UnpickleableException first.
+        """
+        try:
+            return pickle.dumps(type), pickle.dumps(exc)
+        except Exception:
+            return cls.dump(cls, cls(repr(exc)))
+
+
+class ExceptionSaver:
+    """
+    A Context Manager that will save an exception, serialized, and restore it
+    later.
+    """
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, exc, tb):
+        if not exc:
+            return
+
+        # dump the exception
+        self._saved = UnpickleableException.dump(type, exc)
+        self._tb = tb
+
+        # suppress the exception
+        return True
+
+    def resume(self):
+        "restore and re-raise any exception"
+
+        if '_saved' not in vars(self):
+            return
+
+        type, exc = map(pickle.loads, self._saved)
+        compat.reraise(type, exc, self._tb)
+
+
+@contextlib.contextmanager
+def save_modules():
+    """
+    Context in which imported modules are saved.
+
+    Translates exceptions internal to the context into the equivalent exception
+    outside the context.
+    """
+    saved = sys.modules.copy()
+    with ExceptionSaver() as saved_exc:
+        yield saved
+
+    sys.modules.update(saved)
+    # remove any modules imported since
+    del_modules = (
+        mod_name for mod_name in sys.modules
+        if mod_name not in saved
+        # exclude any encodings modules. See #285
+        and not mod_name.startswith('encodings.')
+    )
+    _clear_modules(del_modules)
+
+    saved_exc.resume()
+
+
+def _clear_modules(module_names):
+    for mod_name in list(module_names):
+        del sys.modules[mod_name]
+
+
+@contextlib.contextmanager
+def save_pkg_resources_state():
+    saved = pkg_resources.__getstate__()
+    try:
+        yield saved
+    finally:
+        pkg_resources.__setstate__(saved)
+
+
+@contextlib.contextmanager
+def setup_context(setup_dir):
+    temp_dir = os.path.join(setup_dir, 'temp')
+    with save_pkg_resources_state():
+        with save_modules():
+            hide_setuptools()
+            with save_path():
+                with save_argv():
+                    with override_temp(temp_dir):
+                        with pushd(setup_dir):
+                            # ensure setuptools commands are available
+                            __import__('setuptools')
+                            yield
+
+
+def _needs_hiding(mod_name):
+    """
+    >>> _needs_hiding('setuptools')
+    True
+    >>> _needs_hiding('pkg_resources')
+    True
+    >>> _needs_hiding('setuptools_plugin')
+    False
+    >>> _needs_hiding('setuptools.__init__')
+    True
+    >>> _needs_hiding('distutils')
+    True
+    """
+    pattern = re.compile('(setuptools|pkg_resources|distutils)(\.|$)')
+    return bool(pattern.match(mod_name))
+
+
+def hide_setuptools():
+    """
+    Remove references to setuptools' modules from sys.modules to allow the
+    invocation to import the most appropriate setuptools. This technique is
+    necessary to avoid issues such as #315 where setuptools upgrading itself
+    would fail to find a function declared in the metadata.
+    """
+    modules = filter(_needs_hiding, sys.modules)
+    _clear_modules(modules)
+
+
 def run_setup(setup_script, args):
     """Run a distutils setup script, sandboxed in its directory"""
-    old_dir = os.getcwd()
-    save_argv = sys.argv[:]
-    save_path = sys.path[:]
     setup_dir = os.path.abspath(os.path.dirname(setup_script))
-    temp_dir = os.path.join(setup_dir,'temp')
-    if not os.path.isdir(temp_dir): os.makedirs(temp_dir)
-    save_tmp = tempfile.tempdir
-    save_modules = sys.modules.copy()
-    pr_state = pkg_resources.__getstate__()
-    try:
-        tempfile.tempdir = temp_dir
-        os.chdir(setup_dir)
+    with setup_context(setup_dir):
         try:
             sys.argv[:] = [setup_script]+list(args)
             sys.path.insert(0, setup_dir)
             # reset to include setup dir, w/clean callback list
             working_set.__init__()
             working_set.callbacks.append(lambda dist:dist.activate())
-            DirectorySandbox(setup_dir).run(
-                lambda: execfile(
-                    "setup.py",
-                    {'__file__':setup_script, '__name__':'__main__'}
-                )
-            )
-        except SystemExit:
-            v = sys.exc_info()[1]
+            def runner():
+                ns = dict(__file__=setup_script, __name__='__main__')
+                _execfile(setup_script, ns)
+            DirectorySandbox(setup_dir).run(runner)
+        except SystemExit as v:
             if v.args and v.args[0]:
                 raise
             # Normal exit, just return
-    finally:
-        pkg_resources.__setstate__(pr_state)
-        sys.modules.update(save_modules)
-        # remove any modules imported within the sandbox
-        del_modules = [
-            mod_name for mod_name in sys.modules
-            if mod_name not in save_modules
-            # exclude any encodings modules. See #285
-            and not mod_name.startswith('encodings.')
-        ]
-        list(map(sys.modules.__delitem__, del_modules))
-        os.chdir(old_dir)
-        sys.path[:] = save_path
-        sys.argv[:] = save_argv
-        tempfile.tempdir = save_tmp
 
 
 class AbstractSandbox:
@@ -268,7 +433,7 @@ class DirectorySandbox(AbstractSandbox):
             self._violation(operation, src, dst, *args, **kw)
         return (src,dst)
 
-    def open(self, file, flags, mode=0x1FF, *args, **kw):    # 0777
+    def open(self, file, flags, mode=0o777, *args, **kw):
         """Called for low-level os.open()"""
         if flags & WRITE_FLAGS and not self._ok(file):
             self._violation("os.open", file, flags, mode, *args, **kw)

@@ -1,10 +1,10 @@
-from distutils.command.register import register as _register
+import distutils.command.register as orig
 
-class register(_register):
-    __doc__ = _register.__doc__
+
+class register(orig.register):
+    __doc__ = orig.register.__doc__
 
     def run(self):
         # Make sure that we are using valid current name/version info
         self.run_command('egg_info')
-        _register.run(self)
-
+        orig.register.run(self)

@@ -5,6 +5,10 @@ Implements a Distutils 'upload_docs' subcommand (upload documentation to
 PyPI's pythonhosted.org).
 """
 
+from base64 import standard_b64encode
+from distutils import log
+from distutils.errors import DistutilsOptionError
+from distutils.command.upload import upload
 import os
 import socket
 import zipfile
@@ -12,14 +16,9 @@ import tempfile
 import sys
 import shutil
 
-from base64 import standard_b64encode
+from setuptools.compat import httplib, urlparse, unicode, iteritems, PY3
 from pkg_resources import iter_entry_points
 
-from distutils import log
-from distutils.errors import DistutilsOptionError
-from distutils.command.upload import upload
-
-from setuptools.compat import httplib, urlparse, unicode, iteritems, PY3
 
 errors = 'surrogateescape' if PY3 else 'strict'
 
@@ -33,7 +32,6 @@ def b(s, encoding='utf-8'):
 
 
 class upload_docs(upload):
-
     description = 'Upload documentation to PyPI'
 
     user_options = [
@@ -42,7 +40,7 @@ class upload_docs(upload):
         ('show-response', None,
          'display full response text from server'),
         ('upload-dir=', None, 'directory to upload'),
-        ]
+    ]
     boolean_options = upload.boolean_options
 
     def has_sphinx(self):
@@ -159,7 +157,7 @@ class upload_docs(upload):
         elif schema == 'https':
             conn = httplib.HTTPSConnection(netloc)
         else:
-            raise AssertionError("unsupported schema "+schema)
+            raise AssertionError("unsupported schema " + schema)
 
         data = ''
         try:
@@ -171,8 +169,7 @@ class upload_docs(upload):
             conn.putheader('Authorization', auth)
             conn.endheaders()
             conn.send(body)
-        except socket.error:
-            e = sys.exc_info()[1]
+        except socket.error as e:
             self.announce(str(e), log.ERROR)
             return
 
@@ -190,4 +187,4 @@ class upload_docs(upload):
             self.announce('Upload failed (%s): %s' % (r.status, r.reason),
                           log.ERROR)
         if self.show_response:
-            print('-'*75, r.read(), '-'*75)
+            print('-' * 75, r.read(), '-' * 75)

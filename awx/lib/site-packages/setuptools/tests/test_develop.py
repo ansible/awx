@@ -1,14 +1,12 @@
 """develop tests
 """
-import sys
-import os, shutil, tempfile, unittest
-import tempfile
+import os
+import shutil
 import site
+import sys
+import tempfile
 
-from distutils.errors import DistutilsError
 from setuptools.command.develop import develop
-from setuptools.command import easy_install as easy_install_pkg
-from setuptools.compat import StringIO
 from setuptools.dist import Distribution
 
 SETUP_PY = """\
@@ -23,10 +21,10 @@ setup(name='foo',
 INIT_PY = """print "foo"
 """
 
-class TestDevelopTest(unittest.TestCase):
+class TestDevelopTest:
 
-    def setUp(self):
-        if sys.version < "2.6" or hasattr(sys, 'real_prefix'):
+    def setup_method(self, method):
+        if hasattr(sys, 'real_prefix'):
             return
 
         # Directory structure
@@ -50,8 +48,8 @@ class TestDevelopTest(unittest.TestCase):
         self.old_site = site.USER_SITE
         site.USER_SITE = tempfile.mkdtemp()
 
-    def tearDown(self):
-        if sys.version < "2.6" or hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
+    def teardown_method(self, method):
+        if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
             return
 
         os.chdir(self.old_cwd)
@@ -62,7 +60,7 @@ class TestDevelopTest(unittest.TestCase):
         site.USER_SITE = self.old_site
 
     def test_develop(self):
-        if sys.version < "2.6" or hasattr(sys, 'real_prefix'):
+        if hasattr(sys, 'real_prefix'):
             return
         dist = Distribution(
             dict(name='foo',
@@ -86,7 +84,7 @@ class TestDevelopTest(unittest.TestCase):
         # let's see if we got our egg link at the right place
         content = os.listdir(site.USER_SITE)
         content.sort()
-        self.assertEqual(content, ['easy-install.pth', 'foo.egg-link'])
+        assert content == ['easy-install.pth', 'foo.egg-link']
 
         # Check that we are using the right code.
         egg_link_file = open(os.path.join(site.USER_SITE, 'foo.egg-link'), 'rt')
@@ -100,23 +98,6 @@ class TestDevelopTest(unittest.TestCase):
         finally:
             init_file.close()
         if sys.version < "3":
-            self.assertEqual(init, 'print "foo"')
+            assert init == 'print "foo"'
         else:
-            self.assertEqual(init, 'print("foo")')
-
-    def notest_develop_with_setup_requires(self):
-
-        wanted = ("Could not find suitable distribution for "
-                  "Requirement.parse('I-DONT-EXIST')")
-        old_dir = os.getcwd()
-        os.chdir(self.dir)
-        try:
-            try:
-                dist = Distribution({'setup_requires': ['I_DONT_EXIST']})
-            except DistutilsError:
-                e = sys.exc_info()[1]
-                error = str(e)
-                if error ==  wanted:
-                    pass
-        finally:
-            os.chdir(old_dir)
+            assert init == 'print("foo")'

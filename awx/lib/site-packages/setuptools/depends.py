@@ -1,7 +1,9 @@
-from __future__ import generators
-import sys, imp, marshal
+import sys
+import imp
+import marshal
 from imp import PKG_DIRECTORY, PY_COMPILED, PY_SOURCE, PY_FROZEN
-from distutils.version import StrictVersion, LooseVersion
+from distutils.version import StrictVersion
+from setuptools import compat
 
 __all__ = [
     'Require', 'find_module', 'get_module_constant', 'extract_constant'
@@ -10,9 +12,8 @@ __all__ = [
 class Require:
     """A prerequisite to building or installing a distribution"""
 
-    def __init__(self,name,requested_version,module,homepage='',
-        attribute=None,format=None
-    ):
+    def __init__(self, name, requested_version, module, homepage='',
+            attribute=None, format=None):
 
         if format is None and requested_version is not None:
             format = StrictVersion
@@ -25,19 +26,16 @@ class Require:
         self.__dict__.update(locals())
         del self.self
 
-
     def full_name(self):
         """Return full package/distribution name, w/version"""
         if self.requested_version is not None:
             return '%s-%s' % (self.name,self.requested_version)
         return self.name
 
-
-    def version_ok(self,version):
+    def version_ok(self, version):
         """Is 'version' sufficiently up-to-date?"""
         return self.attribute is None or self.format is None or \
             str(version) != "unknown" and version >= self.requested_version
-
 
     def get_version(self, paths=None, default="unknown"):
 
@@ -59,20 +57,18 @@ class Require:
             except ImportError:
                 return None
 
-        v = get_module_constant(self.module,self.attribute,default,paths)
+        v = get_module_constant(self.module, self.attribute, default, paths)
 
         if v is not None and v is not default and self.format is not None:
             return self.format(v)
 
         return v
 
-
-    def is_present(self,paths=None):
+    def is_present(self, paths=None):
         """Return true if dependency is present on 'paths'"""
         return self.get_version(paths) is not None
 
-
-    def is_current(self,paths=None):
+    def is_current(self, paths=None):
         """Return true if dependency is present and up-to-date on 'paths'"""
         version = self.get_version(paths)
         if version is None:
@@ -103,7 +99,7 @@ def _iter_code(code):
             ptr += 3
 
             if op==EXTENDED_ARG:
-                extended_arg = arg * long_type(65536)
+                extended_arg = arg * compat.long_type(65536)
                 continue
 
         else:
@@ -111,14 +107,6 @@ def _iter_code(code):
             ptr += 1
 
         yield op,arg
-
-
-
-
-
-
-
-
 
 
 def find_module(module, paths=None):
@@ -140,28 +128,6 @@ def find_module(module, paths=None):
     return info
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def get_module_constant(module, symbol, default=-1, paths=None):
 
     """Find 'module' by searching 'paths', and extract 'symbol'
@@ -171,7 +137,7 @@ def get_module_constant(module, symbol, default=-1, paths=None):
     constant.  Otherwise, return 'default'."""
 
     try:
-        f, path, (suffix,mode,kind) = find_module(module,paths)
+        f, path, (suffix, mode, kind) = find_module(module, paths)
     except ImportError:
         # Module doesn't exist
         return None
@@ -187,23 +153,17 @@ def get_module_constant(module, symbol, default=-1, paths=None):
         else:
             # Not something we can parse; we'll have to import it.  :(
             if module not in sys.modules:
-                imp.load_module(module,f,path,(suffix,mode,kind))
-            return getattr(sys.modules[module],symbol,None)
+                imp.load_module(module, f, path, (suffix, mode, kind))
+            return getattr(sys.modules[module], symbol, None)
 
     finally:
         if f:
             f.close()
 
-    return extract_constant(code,symbol,default)
+    return extract_constant(code, symbol, default)
 
 
-
-
-
-
-
-
-def extract_constant(code,symbol,default=-1):
+def extract_constant(code, symbol, default=-1):
     """Extract the constant value of 'symbol' from 'code'
 
     If the name 'symbol' is bound to a constant value by the Python code
@@ -236,11 +196,20 @@ def extract_constant(code,symbol,default=-1):
             return const
         else:
             const = default
-            
-if sys.platform.startswith('java') or sys.platform == 'cli':
-    # XXX it'd be better to test assertions about bytecode instead...
-    del extract_constant, get_module_constant
-    __all__.remove('extract_constant')
-    __all__.remove('get_module_constant')
 
 
+def _update_globals():
+    """
+    Patch the globals to remove the objects not available on some platforms.
+
+    XXX it'd be better to test assertions about bytecode instead.
+    """
+
+    if not sys.platform.startswith('java') and sys.platform != 'cli':
+        return
+    incompatible = 'extract_constant', 'get_module_constant'
+    for name in incompatible:
+        del globals()[name]
+        __all__.remove(name)
+
+_update_globals()

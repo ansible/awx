@@ -178,12 +178,19 @@ class VerifyingHTTPSConn(HTTPSConnection):
         if hasattr(self, '_tunnel') and getattr(self, '_tunnel_host', None):
             self.sock = sock
             self._tunnel()
+            # http://bugs.python.org/issue7776: Python>=3.4.1 and >=2.7.7
+            # change self.host to mean the proxy server host when tunneling is
+            # being used. Adapt, since we are interested in the destination
+            # host for the match_hostname() comparison.
+            actual_host = self._tunnel_host
+        else:
+            actual_host = self.host
 
         self.sock = ssl.wrap_socket(
             sock, cert_reqs=ssl.CERT_REQUIRED, ca_certs=self.ca_bundle
         )
         try:
-            match_hostname(self.sock.getpeercert(), self.host)
+            match_hostname(self.sock.getpeercert(), actual_host)
         except CertificateError:
             self.sock.shutdown(socket.SHUT_RDWR)
             self.sock.close()

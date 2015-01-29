@@ -1,5 +1,6 @@
 def __boot():
-    import sys, os, os.path
+    import sys
+    import os
     PYTHONPATH = os.environ.get('PYTHONPATH')
     if PYTHONPATH is None or (sys.platform=='win32' and not PYTHONPATH):
         PYTHONPATH = []
@@ -49,13 +50,13 @@ def __boot():
         addsitedir(item)
 
     sys.__egginsert += oldpos           # restore effective old position
-    
-    d,nd = makepath(stdpath[0])
+
+    d, nd = makepath(stdpath[0])
     insert_at = None
     new_path = []
 
     for item in sys.path:
-        p,np = makepath(item)
+        p, np = makepath(item)
 
         if np==nd and insert_at is None:
             # We've hit the first 'system' path entry, so added entries go here
@@ -67,17 +68,9 @@ def __boot():
             # new path after the insert point, back-insert it
             new_path.insert(insert_at, item)
             insert_at += 1
-            
+
     sys.path[:] = new_path
 
-if __name__=='site':    
+if __name__=='site':
     __boot()
     del __boot
-    
-
-
-
-
-
-
-

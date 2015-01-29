@@ -2,22 +2,30 @@
 
 Create a distribution's .egg-info directory and contents"""
 
+from distutils.filelist import FileList as _FileList
+from distutils.util import convert_path
+from distutils import log
+import distutils.errors
+import distutils.filelist
 import os
 import re
 import sys
 
-from setuptools import Command
-import distutils.errors
-from distutils import log
-from setuptools.command.sdist import sdist
-from setuptools.compat import basestring
-from setuptools import svn_utils
-from distutils.util import convert_path
-from distutils.filelist import FileList as _FileList
-from pkg_resources import (parse_requirements, safe_name, parse_version,
-    safe_version, yield_lines, EntryPoint, iter_entry_points, to_filename)
-from setuptools.command.sdist import walk_revctrl
+try:
+    from setuptools_svn import svn_utils
+except ImportError:
+    pass
 
+from setuptools import Command
+from setuptools.command.sdist import sdist
+from setuptools.compat import basestring, PY3, StringIO
+from setuptools.command.sdist import walk_revctrl
+from pkg_resources import (
+    parse_requirements, safe_name, parse_version,
+    safe_version, yield_lines, EntryPoint, iter_entry_points, to_filename)
+import setuptools.unicode_utils as unicode_utils
+
+from pkg_resources import packaging
 
 class egg_info(Command):
     description = "create a distribution's .egg-info directory"
@@ -26,11 +34,11 @@ class egg_info(Command):
         ('egg-base=', 'e', "directory containing .egg-info directories"
                            " (default: top of the source tree)"),
         ('tag-svn-revision', 'r',
-            "Add subversion revision ID to version number"),
+         "Add subversion revision ID to version number"),
         ('tag-date', 'd', "Add date stamp (e.g. 20050528) to version number"),
         ('tag-build=', 'b', "Specify explicit tag to add to version number"),
         ('no-svn-revision', 'R',
-            "Don't add subversion revision ID [default]"),
+         "Don't add subversion revision ID [default]"),
         ('no-date', 'D', "Don't include date stamp [default]"),
     ]
 
@@ -51,6 +59,7 @@ class egg_info(Command):
 
     def save_version_info(self, filename):
         from setuptools.command.setopt import edit_config
+
         values = dict(
             egg_info=dict(
                 tag_svn_revision=0,
@@ -65,25 +74,32 @@ class egg_info(Command):
         self.vtags = self.tags()
         self.egg_version = self.tagged_version()
 
+        parsed_version = parse_version(self.egg_version)
+
         try:
+            is_version = isinstance(parsed_version, packaging.version.Version)
+            spec = (
+                "%s==%s" if is_version else "%s===%s"
+            )
             list(
-                parse_requirements('%s==%s' % (self.egg_name,self.egg_version))
+                parse_requirements(spec % (self.egg_name, self.egg_version))
             )
         except ValueError:
             raise distutils.errors.DistutilsOptionError(
                 "Invalid distribution name or version syntax: %s-%s" %
-                (self.egg_name,self.egg_version)
+                (self.egg_name, self.egg_version)
             )
 
         if self.egg_base is None:
             dirs = self.distribution.package_dir
-            self.egg_base = (dirs or {}).get('',os.curdir)
+            self.egg_base = (dirs or {}).get('', os.curdir)
 
         self.ensure_dirname('egg_base')
-        self.egg_info = to_filename(self.egg_name)+'.egg-info'
+        self.egg_info = to_filename(self.egg_name) + '.egg-info'
         if self.egg_base != os.curdir:
             self.egg_info = os.path.join(self.egg_base, self.egg_info)
-        if '-' in self.egg_name: self.check_broken_egg_info()
+        if '-' in self.egg_name:
+            self.check_broken_egg_info()
 
         # Set package version for the benefit of dumber commands
         # (e.g. sdist, bdist_wininst, etc.)
@@ -95,7 +111,7 @@ class egg_info(Command):
         # to the version info
         #
         pd = self.distribution._patched_dist
-        if pd is not None and pd.key==self.egg_name.lower():
+        if pd is not None and pd.key == self.egg_name.lower():
             pd._version = self.egg_version
             pd._parsed_version = parse_version(self.egg_version)
             self.distribution._patched_dist = None
@@ -127,7 +143,7 @@ class egg_info(Command):
         to the file.
         """
         log.info("writing %s to %s", what, filename)
-        if sys.version_info >= (3,):
+        if PY3:
             data = data.encode("utf-8")
         if not self.dry_run:
             f = open(filename, 'wb')
@@ -153,7 +169,7 @@ class egg_info(Command):
         installer = self.distribution.fetch_build_egg
         for ep in iter_entry_points('egg_info.writers'):
             writer = ep.load(installer=installer)
-            writer(self, ep.name, os.path.join(self.egg_info,ep.name))
+            writer(self, ep.name, os.path.join(self.egg_info, ep.name))
 
         # Get rid of native_libs.txt if it was put there by older bdist_egg
         nl = os.path.join(self.egg_info, "native_libs.txt")
@@ -165,68 +181,96 @@ class egg_info(Command):
     def tags(self):
         version = ''
         if self.tag_build:
-            version+=self.tag_build
-        if self.tag_svn_revision and (
-            os.path.exists('.svn') or os.path.exists('PKG-INFO')
-        ):  version += '-r%s' % self.get_svn_revision()
+            version += self.tag_build
+        if self.tag_svn_revision:
+            rev = self.get_svn_revision()
+            if rev:     # is 0 if it's not an svn working copy
+                version += '-r%s' % rev
         if self.tag_date:
             import time
+
             version += time.strftime("-%Y%m%d")
         return version
 
     @staticmethod
     def get_svn_revision():
+        if 'svn_utils' not in globals():
+            return "0"
         return str(svn_utils.SvnInfo.load(os.curdir).get_revision())
 
     def find_sources(self):
         """Generate SOURCES.txt manifest file"""
-        manifest_filename = os.path.join(self.egg_info,"SOURCES.txt")
+        manifest_filename = os.path.join(self.egg_info, "SOURCES.txt")
         mm = manifest_maker(self.distribution)
         mm.manifest = manifest_filename
         mm.run()
         self.filelist = mm.filelist
 
     def check_broken_egg_info(self):
-        bei = self.egg_name+'.egg-info'
+        bei = self.egg_name + '.egg-info'
         if self.egg_base != os.curdir:
             bei = os.path.join(self.egg_base, bei)
         if os.path.exists(bei):
             log.warn(
-                "-"*78+'\n'
+                "-" * 78 + '\n'
                 "Note: Your current .egg-info directory has a '-' in its name;"
                 '\nthis will not work correctly with "setup.py develop".\n\n'
-                'Please rename %s to %s to correct this problem.\n'+'-'*78,
+                'Please rename %s to %s to correct this problem.\n' + '-' * 78,
                 bei, self.egg_info
             )
             self.broken_egg_info = self.egg_info
-            self.egg_info = bei     # make it work for now
+            self.egg_info = bei  # make it work for now
+
 
 class FileList(_FileList):
     """File list that accepts only existing, platform-independent paths"""
 
     def append(self, item):
-        if item.endswith('\r'):     # Fix older sdists built on Windows
+        if item.endswith('\r'):  # Fix older sdists built on Windows
             item = item[:-1]
         path = convert_path(item)
 
-        if sys.version_info >= (3,):
-            try:
-                if os.path.exists(path) or os.path.exists(path.encode('utf-8')):
-                    self.files.append(path)
-            except UnicodeEncodeError:
-                # Accept UTF-8 filenames even if LANG=C
-                if os.path.exists(path.encode('utf-8')):
-                    self.files.append(path)
-                else:
-                    log.warn("'%s' not %s encodable -- skipping", path,
-                        sys.getfilesystemencoding())
-        else:
-            if os.path.exists(path):
-                self.files.append(path)
+        if self._safe_path(path):
+            self.files.append(path)
+
+    def extend(self, paths):
+        self.files.extend(filter(self._safe_path, paths))
+
+    def _repair(self):
+        """
+        Replace self.files with only safe paths
+
+        Because some owners of FileList manipulate the underlying
+        ``files`` attribute directly, this method must be called to
+        repair those paths.
+        """
+        self.files = list(filter(self._safe_path, self.files))
+
+    def _safe_path(self, path):
+        enc_warn = "'%s' not %s encodable -- skipping"
+
+        # To avoid accidental trans-codings errors, first to unicode
+        u_path = unicode_utils.filesys_decode(path)
+        if u_path is None:
+            log.warn("'%s' in unexpected encoding -- skipping" % path)
+            return False
+
+        # Must ensure utf-8 encodability
+        utf8_path = unicode_utils.try_encode(u_path, "utf-8")
+        if utf8_path is None:
+            log.warn(enc_warn, path, 'utf-8')
+            return False
+
+        try:
+            # accept is either way checks out
+            if os.path.exists(u_path) or os.path.exists(utf8_path):
+                return True
+        # this will catch any encode errors decoding u_path
+        except UnicodeEncodeError:
+            log.warn(enc_warn, path, sys.getfilesystemencoding())
 
 
 class manifest_maker(sdist):
-
     template = "MANIFEST.in"
 
     def initialize_options(self):
@@ -241,7 +285,7 @@ class manifest_maker(sdist):
     def run(self):
         self.filelist = FileList()
         if not os.path.exists(self.manifest):
-            self.write_manifest()   # it must exist so it'll get in the list
+            self.write_manifest()  # it must exist so it'll get in the list
         self.filelist.findall()
         self.add_defaults()
         if os.path.exists(self.template):
@@ -251,30 +295,23 @@ class manifest_maker(sdist):
         self.filelist.remove_duplicates()
         self.write_manifest()
 
+    def _manifest_normalize(self, path):
+        path = unicode_utils.filesys_decode(path)
+        return path.replace(os.sep, '/')
+
     def write_manifest(self):
-        """Write the file list in 'self.filelist' (presumably as filled in
-        by 'add_defaults()' and 'read_template()') to the manifest file
+        """
+        Write the file list in 'self.filelist' to the manifest file
         named by 'self.manifest'.
         """
-        # The manifest must be UTF-8 encodable. See #303.
-        if sys.version_info >= (3,):
-            files = []
-            for file in self.filelist.files:
-                try:
-                    file.encode("utf-8")
-                except UnicodeEncodeError:
-                    log.warn("'%s' not UTF-8 encodable -- skipping" % file)
-                else:
-                    files.append(file)
-            self.filelist.files = files
+        self.filelist._repair()
 
-        files = self.filelist.files
-        if os.sep!='/':
-            files = [f.replace(os.sep,'/') for f in files]
-        self.execute(write_file, (self.manifest, files),
-                     "writing manifest file '%s'" % self.manifest)
+        # Now _repairs should encodability, but not unicode
+        files = [self._manifest_normalize(f) for f in self.filelist.files]
+        msg = "writing manifest file '%s'" % self.manifest
+        self.execute(write_file, (self.manifest, files), msg)
 
-    def warn(self, msg):    # suppress missing-file warnings from sdist
+    def warn(self, msg):  # suppress missing-file warnings from sdist
         if not msg.startswith("standard file not found:"):
             sdist.warn(self, msg)
 
@@ -288,7 +325,32 @@ class manifest_maker(sdist):
         elif os.path.exists(self.manifest):
             self.read_manifest()
         ei_cmd = self.get_finalized_command('egg_info')
+        self._add_egg_info(cmd=ei_cmd)
         self.filelist.include_pattern("*", prefix=ei_cmd.egg_info)
+
+    def _add_egg_info(self, cmd):
+        """
+        Add paths for egg-info files for an external egg-base.
+
+        The egg-info files are written to egg-base. If egg-base is
+        outside the current working directory, this method
+        searchs the egg-base directory for files to include
+        in the manifest. Uses distutils.filelist.findall (which is
+        really the version monkeypatched in by setuptools/__init__.py)
+        to perform the search.
+
+        Since findall records relative paths, prefix the returned
+        paths with cmd.egg_base, so add_default's include_pattern call
+        (which is looking for the absolute cmd.egg_info) will match
+        them.
+        """
+        if cmd.egg_base == os.curdir:
+            # egg-info files were already added by something else
+            return
+
+        discovered = distutils.filelist.findall(cmd.egg_base)
+        resolved = (os.path.join(cmd.egg_base, path) for path in discovered)
+        self.filelist.allfiles.extend(resolved)
 
     def prune_file_list(self):
         build = self.get_finalized_command('build')
@@ -296,7 +358,8 @@ class manifest_maker(sdist):
         self.filelist.exclude_pattern(None, prefix=build.build_base)
         self.filelist.exclude_pattern(None, prefix=base_dir)
         sep = re.escape(os.sep)
-        self.filelist.exclude_pattern(sep+r'(RCS|CVS|\.svn)'+sep, is_regex=1)
+        self.filelist.exclude_pattern(r'(^|' + sep + r')(RCS|CVS|\.svn)' + sep,
+                                      is_regex=1)
 
 
 def write_file(filename, contents):
@@ -304,11 +367,13 @@ def write_file(filename, contents):
     sequence of strings without line terminators) to it.
     """
     contents = "\n".join(contents)
-    if sys.version_info >= (3,):
-        contents = contents.encode("utf-8")
-    f = open(filename, "wb")        # always write POSIX-style manifest
-    f.write(contents)
-    f.close()
+
+    # assuming the contents has been vetted for utf-8 encoding
+    contents = contents.encode("utf-8")
+
+    with open(filename, "wb") as f:  # always write POSIX-style manifest
+        f.write(contents)
+
 
 def write_pkg_info(cmd, basename, filename):
     log.info("writing %s", filename)
@@ -323,9 +388,11 @@ def write_pkg_info(cmd, basename, filename):
         finally:
             metadata.name, metadata.version = oldname, oldver
 
-        safe = getattr(cmd.distribution,'zip_safe',None)
+        safe = getattr(cmd.distribution, 'zip_safe', None)
         from setuptools.command import bdist_egg
+
         bdist_egg.write_safety_flag(cmd.egg_info, safe)
+
 
 def warn_depends_obsolete(cmd, basename, filename):
     if os.path.exists(filename):
@@ -335,55 +402,75 @@ def warn_depends_obsolete(cmd, basename, filename):
         )
 
 
+def _write_requirements(stream, reqs):
+    lines = yield_lines(reqs or ())
+    append_cr = lambda line: line + '\n'
+    lines = map(append_cr, lines)
+    stream.writelines(lines)
+
+
 def write_requirements(cmd, basename, filename):
     dist = cmd.distribution
-    data = ['\n'.join(yield_lines(dist.install_requires or ()))]
-    for extra,reqs in (dist.extras_require or {}).items():
-        data.append('\n\n[%s]\n%s' % (extra, '\n'.join(yield_lines(reqs))))
-    cmd.write_or_delete_file("requirements", filename, ''.join(data))
+    data = StringIO()
+    _write_requirements(data, dist.install_requires)
+    extras_require = dist.extras_require or {}
+    for extra in sorted(extras_require):
+        data.write('\n[{extra}]\n'.format(**vars()))
+        _write_requirements(data, extras_require[extra])
+    cmd.write_or_delete_file("requirements", filename, data.getvalue())
+
+
+def write_setup_requirements(cmd, basename, filename):
+    data = StringIO()
+    _write_requirements(data, cmd.distribution.setup_requires)
+    cmd.write_or_delete_file("setup-requirements", filename, data.getvalue())
+
 
 def write_toplevel_names(cmd, basename, filename):
     pkgs = dict.fromkeys(
         [
-            k.split('.',1)[0]
+            k.split('.', 1)[0]
             for k in cmd.distribution.iter_distribution_names()
         ]
     )
-    cmd.write_file("top-level names", filename, '\n'.join(pkgs)+'\n')
+    cmd.write_file("top-level names", filename, '\n'.join(sorted(pkgs)) + '\n')
 
 
 def overwrite_arg(cmd, basename, filename):
     write_arg(cmd, basename, filename, True)
 
+
 def write_arg(cmd, basename, filename, force=False):
     argname = os.path.splitext(basename)[0]
     value = getattr(cmd.distribution, argname, None)
     if value is not None:
-        value = '\n'.join(value)+'\n'
+        value = '\n'.join(value) + '\n'
     cmd.write_or_delete_file(argname, filename, value, force)
+
 
 def write_entries(cmd, basename, filename):
     ep = cmd.distribution.entry_points
 
-    if isinstance(ep,basestring) or ep is None:
+    if isinstance(ep, basestring) or ep is None:
         data = ep
     elif ep is not None:
         data = []
-        for section, contents in ep.items():
-            if not isinstance(contents,basestring):
+        for section, contents in sorted(ep.items()):
+            if not isinstance(contents, basestring):
                 contents = EntryPoint.parse_group(section, contents)
-                contents = '\n'.join(map(str,contents.values()))
-            data.append('[%s]\n%s\n\n' % (section,contents))
+                contents = '\n'.join(sorted(map(str, contents.values())))
+            data.append('[%s]\n%s\n\n' % (section, contents))
         data = ''.join(data)
 
     cmd.write_or_delete_file('entry points', filename, data, True)
+
 
 def get_pkg_info_revision():
     # See if we can get a -r### off of PKG-INFO, in case this is an sdist of
     # a subversion revision
     #
     if os.path.exists('PKG-INFO'):
-        f = open('PKG-INFO','rU')
+        f = open('PKG-INFO', 'rU')
         for line in f:
             match = re.match(r"Version:.*-r(\d+)\s*$", line)
             if match:

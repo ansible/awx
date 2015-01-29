@@ -1,11 +1,10 @@
 """Basic http server for tests to simulate PyPI or custom indexes
 """
-import sys
+
 import time
 import threading
 from setuptools.compat import BaseHTTPRequestHandler
-from setuptools.compat import (urllib2, URLError, HTTPServer,
-                               SimpleHTTPRequestHandler)
+from setuptools.compat import HTTPServer, SimpleHTTPRequestHandler
 
 class IndexServer(HTTPServer):
     """Basic single-threaded http server simulating a package index
@@ -23,12 +22,8 @@ class IndexServer(HTTPServer):
         HTTPServer.__init__(self, server_address, RequestHandlerClass)
         self._run = True
 
-    def serve(self):
-        while self._run:
-            self.handle_request()
-
     def start(self):
-        self.thread = threading.Thread(target=self.serve)
+        self.thread = threading.Thread(target=self.serve_forever)
         self.thread.start()
 
     def stop(self):
@@ -37,19 +32,7 @@ class IndexServer(HTTPServer):
         # Let the server finish the last request and wait for a new one.
         time.sleep(0.1)
 
-        # self.shutdown is not supported on python < 2.6, so just
-        #  set _run to false, and make a request, causing it to
-        #  terminate.
-        self._run = False
-        url = 'http://127.0.0.1:%(server_port)s/' % vars(self)
-        try:
-            if sys.version_info >= (2, 6):
-                urllib2.urlopen(url, timeout=5)
-            else:
-                urllib2.urlopen(url)
-        except URLError:
-            # ignore any errors; all that's important is the request
-            pass
+        self.shutdown()
         self.thread.join()
         self.socket.close()
 
@@ -77,6 +60,6 @@ class MockServer(HTTPServer, threading.Thread):
     def run(self):
         self.serve_forever()
 
+    @property
     def url(self):
         return 'http://localhost:%(server_port)s/' % vars(self)
-    url = property(url)
