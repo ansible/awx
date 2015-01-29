@@ -12,3 +12,5 @@ from awx.main.tests.licenses import LicenseTests
 from awx.main.tests.jobs import *
 from awx.main.tests.activity_stream import *
 from awx.main.tests.schedules import *
+from awx.main.tests.redact import *
+from awx.main.tests.views import *

@@ -33,8 +33,51 @@ from awx.main.management.commands.run_task_system import run_taskmanager
 from awx.main.utils import get_ansible_version
 from awx.main.task_engine import TaskEngager as LicenseWriter
 
+TEST_PLAYBOOK = '''- hosts: mygroup
+  gather_facts: false
+  tasks:
+  - name: woohoo
+    command: test 1 = 1
+'''
 
-class BaseTestMixin(object):
+class QueueTestMixin(object):
+    def start_queue(self):
+        self.start_redis()
+        receiver = CallbackReceiver()
+        self.queue_process = Process(target=receiver.run_subscriber,
+                                     args=(False,))
+        self.queue_process.start()
+
+    def terminate_queue(self):
+        if hasattr(self, 'queue_process'):
+            self.queue_process.terminate()
+        self.stop_redis()
+
+    def start_redis(self):
+        if not getattr(self, 'redis_process', None):
+            self.redis_process = Popen('redis-server --port 16379 > /dev/null',
+                                       shell=True, executable='/bin/bash')
+
+    def stop_redis(self):
+        if getattr(self, 'redis_process', None):
+            self.redis_process.kill()
+            self.redis_process = None
+            
+
+# The observed effect of not calling terminate_queue() if you call start_queue() are
+# an hang on test cleanup database delete. Thus, to ensure terminate_queue() is called 
+# whenever start_queue() is called just inherit  from this class when you want to use the queue.
+class QueueStartStopTestMixin(QueueTestMixin):
+    def setUp(self):
+        super(QueueStartStopTestMixin, self).setUp()
+        self.start_queue()
+
+    def tearDown(self):
+        super(QueueStartStopTestMixin, self).tearDown()
+        self.terminate_queue()
+
+
+class BaseTestMixin(QueueTestMixin):
     '''
     Mixin with shared code for use by all test cases.
     '''
@@ -117,6 +160,10 @@ class BaseTestMixin(object):
         # Restore previous settings after each test.
         settings._wrapped = self._wrapped
 
+    def unique_name(self, string):
+        rnd_str = '____' + str(random.randint(1, 9999999))
+        return __name__ + '-generated-' + string + rnd_str
+
     def create_test_license_file(self, instance_count=10000):
         writer = LicenseWriter( 
            company_name='AWX',
@@ -173,6 +220,9 @@ class BaseTestMixin(object):
             ))
         return results
 
+    def make_organization(self, created_by):
+        return self.make_organizations(created_by, 1)[0]
+
     def make_project(self, name, description='', created_by=None,
                      playbook_content='', role_playbooks=None, unicode_prefix=True):
         if not os.path.exists(settings.PROJECTS_ROOT):
@@ -221,6 +271,56 @@ class BaseTestMixin(object):
                 unicode_prefix=unicode_prefix
             ))
         return results
+
+    def decide_created_by(self, created_by=None):
+        if created_by:
+            return created_by
+        if self.super_django_user:
+            return self.super_django_user
+        raise RuntimeError('please call setup_users() or specify a user')
+
+    def make_inventory(self, organization=None, name=None, created_by=None):
+        created_by = self.decide_created_by(created_by)
+        if not organization:
+            organization = self.make_organization(created_by=created_by)
+
+        return Inventory.objects.create(name=name or self.unique_name('Inventory'), organization=organization, created_by=created_by)
+
+    def make_job_template(self, name=None, created_by=None, organization=None, inventory=None, project=None, playbook=None):
+        created_by = self.decide_created_by(created_by)
+        if not inventory:
+            inventory = self.make_inventory(organization=organization, created_by=created_by)
+        if not organization:
+            organization = inventory.organization
+        if not project:
+            project = self.make_project(self.unique_name('Project'), created_by=created_by, playbook_content=playbook if playbook else TEST_PLAYBOOK)
+
+        if project and project.playbooks and len(project.playbooks) > 0:
+            playbook = project.playbooks[0]
+        else:
+            raise RuntimeError('Expected project to have at least one playbook')
+
+        if project not in organization.projects.all():
+            organization.projects.add(project)
+
+        return JobTemplate.objects.create(
+            name=name or self.unique_name('JobTemplate'),
+            job_type='check',
+            inventory=inventory,
+            project=project,
+            playbook=project.playbooks[0],
+            host_config_key=settings.SYSTEM_UUID,
+            created_by=created_by,
+        )
+
+    def make_job(self, job_template=None, created_by=None, inital_state='new'):
+        created_by = self.decide_created_by(created_by)
+        if not job_template:
+            job_template = self.make_job_template(created_by=created_by)
+
+        job = job_template.create_job(created_by=created_by)
+        job.status = inital_state
+        return job
 
     def setup_instances(self):
         instance = Instance(uuid=settings.SYSTEM_UUID, primary=True, hostname='127.0.0.1')
@@ -457,6 +557,13 @@ class BaseTestMixin(object):
                     msg += 'fields %s not returned ' % ', '.join(not_returned)
                 self.assertTrue(set(obj.keys()) <= set(fields), msg)
 
+    def check_not_found(self, string, substr):
+        self.assertEqual(string.find(substr), -1, "'%s' found in:\n%s" % (substr, string))
+
+    def check_found(self, string, substr, count=1):
+        count_actual = string.count(substr)
+        self.assertEqual(count_actual, count, "Found %d occurances of '%s' instead of %d in:\n%s" % (count_actual, substr, count, string))
+
     def start_taskmanager(self, command_port):
         self.start_redis()
         self.taskmanager_process = Process(target=run_taskmanager,
@@ -467,29 +574,6 @@ class BaseTestMixin(object):
         if hasattr(self, 'taskmanager_process'):
             self.taskmanager_process.terminate()
         self.stop_redis()
-
-    def start_queue(self):
-        self.start_redis()
-        receiver = CallbackReceiver()
-        self.queue_process = Process(target=receiver.run_subscriber,
-                                     args=(False,))
-        self.queue_process.start()
-
-    def terminate_queue(self):
-        if hasattr(self, 'queue_process'):
-            self.queue_process.terminate()
-        self.stop_redis()
-
-    def start_redis(self):
-        if not getattr(self, 'redis_process', None):
-            self.redis_process = Popen('redis-server --port 16379 > /dev/null',
-                                       shell=True, executable='/bin/bash')
-
-    def stop_redis(self):
-        if getattr(self, 'redis_process', None):
-            self.redis_process.kill()
-            self.redis_process = None
-
 
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''
@@ -506,3 +590,47 @@ class BaseLiveServerTest(BaseTestMixin, django.test.LiveServerTestCase):
     '''
     Base class for tests requiring a live test server.
     '''
+
+# Helps with test cases.
+# Save all components of a uri (i.e. scheme, username, password, etc.) so that
+# when we construct a uri string and decompose it, we can verify the decomposition
+class URI(object):
+    DEFAULTS = {
+        'scheme' : 'http',
+        'username' : 'MYUSERNAME',
+        'password' : 'MYPASSWORD',
+        'host' : 'host.com',
+    }
+
+    def __init__(self, description='N/A', scheme=DEFAULTS['scheme'], username=DEFAULTS['username'], password=DEFAULTS['password'], host=DEFAULTS['host']):
+        self.description = description
+        self.scheme = scheme
+        self.username = username
+        self.password = password
+        self.host = host
+
+    def get_uri(self):
+        uri = "%s://" % self.scheme
+        if self.username:
+            uri += "%s" % self.username
+        if self.password:
+            uri += ":%s" % self.password
+        if (self.username or self.password) and self.host is not None:
+            uri += "@%s" % self.host
+        elif self.host is not None:
+            uri += "%s" % self.host
+        return uri
+
+    def get_secret_count(self):
+        secret_count = 0
+        if self.username:
+            secret_count += 1
+        if self.password:
+            secret_count += 1
+        return secret_count
+
+    def __string__(self):
+        return self.get_uri()
+    def __repr__(self):
+        return self.get_uri()
+
