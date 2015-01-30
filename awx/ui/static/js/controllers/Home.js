@@ -30,7 +30,7 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 
     ClearScope('home');
 
-    var buttons, html, e, borderStyles, jobs_scope, schedule_scope;
+    var buttons, html, e, borderStyles;
 
     // Add buttons to the top of the Home page. We're using lib/ansible/generator_helpers.js-> Buttons()
     // to build buttons dynamically and insure all styling and icons match the rest of the application.
@@ -111,13 +111,13 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
         Wait('start');
         Rest.setUrl(GetBasePath('dashboard'));
         Rest.get()
-            .success(function (data) {
-              $scope.dashboardData = data;
-              $scope.$emit('dashboardReady', data);
-            })
-            .error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
-            });
+        .success(function (data) {
+            $scope.dashboardData = data;
+            $scope.$emit('dashboardReady', data);
+        })
+        .error(function (data, status) {
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
+        });
     };
 
     $scope.refresh();
