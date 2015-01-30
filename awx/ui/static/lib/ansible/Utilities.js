@@ -49,7 +49,6 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
         } catch (e) {
             // ignore
         }
-        $(window).unbind('resize');
     };
 }])
 

@@ -111,7 +111,9 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             if(scope.prompt_for_vars===false && scope.survey_enabled===true){
                 scope.$emit('GetExtraVars');
             }
-            else scope.$emit('BuildData');
+            else {
+                scope.$emit('BuildData');
+            }
 
 
         };
@@ -831,7 +833,9 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                                 else if (!Empty(scope.survey_enabled) &&  scope.survey_enabled===true) {
                                     scope.$emit('PromptForSurvey', html, url);
                                 }
-                                else scope.$emit('StartPlaybookRun', url);
+                                else {
+                                    scope.$emit('StartPlaybookRun', url);
+                                }
                             }
 
                         })

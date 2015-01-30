@@ -18,11 +18,14 @@ if ($basePath) {
     urlPrefix = $basePath;
 }
 
+
 angular.module('Tower', [
     'ngRoute',
     'ngSanitize',
     'ngCookies',
     'RestServices',
+    'DataServices',
+    'DashboardGraphs',
     'AuthService',
     'Utilities',
     'LicenseHelper',
@@ -84,9 +87,6 @@ angular.module('Tower', [
     'SelectionHelper',
     'HostGroupsFormDefinition',
     'DashboardCountsWidget',
-    'JobStatusGraphWidget',
-    'HostPieChartWidget',
-    'HostGraphWidget',
     'DashboardJobsWidget',
     'PortalJobsWidget',
     'StreamWidget',
@@ -131,7 +131,6 @@ angular.module('Tower', [
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
     .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')
-
     .config(['$routeProvider',
         function ($routeProvider) {
 
@@ -399,7 +398,15 @@ angular.module('Tower', [
 
             when('/home', {
                 templateUrl: urlPrefix + 'partials/home.html',
-                controller: 'Home'
+                controller: 'Home',
+                resolve: {
+                    graphData: function($q, jobStatusGraphData, hostCountGraphData) {
+                        return $q.all({
+                            jobStatus: jobStatusGraphData.get("month", "all"),
+                            hostCounts: hostCountGraphData.get()
+                        });
+                    }
+                }
             }).
 
             when('/home/groups', {

@@ -1,23 +1,23 @@
 // Karma configuration
 // Generated on Mon Aug 04 2014 21:17:04 GMT-0400 (EDT)
 
-module.exports = function() {
-    return {
+module.exports = function(config) {
+    config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine'],
+    frameworks: ['mocha', 'chai', 'sinon-chai', 'chai-as-promised'],
 
     // list of files / patterns to load in the browser
     files: [
       '../static/lib/jquery/dist/jquery.min.js',
-      '../static/lib/angular/angular.min.js',
-      '../static/lib/angular-route/angular-route.min.js',
-      '../static/lib/angular-resource/angular-resource.min.js',
-      '../static/lib/angular-cookies/angular-cookies.min.js',
+      '../static/lib/angular/angular.js',
+      '../static/lib/angular-route/angular-route.js',
+      '../static/lib/angular-resource/angular-resource.js',
+      '../static/lib/angular-cookies/angular-cookies.js',
       '../static/lib/angular-sanitize/angular-sanitize.min.js',
       '../static/lib/angular-md5/angular-md5.min.js',
       '../static/lib/angular-codemirror/lib/AngularCodeMirror.js',
@@ -30,9 +30,8 @@ module.exports = function() {
       '../static/lib/angular-scheduler/lib/angular-scheduler.min.js',
       '../static/lib/jqueryui/ui/minified/jquery-ui.min.js',
       '../static/lib/bootstrap/dist/js/bootstrap.min.js',
-      '../static/lib/js-yaml/js-yaml.min.js',
+      '../static/lib/js-yaml/dist/js-yaml.min.js',
       '../static/lib/select2/select2.min.js',
-      '../static/lib/js-yaml/js-yaml.min.js',
       '../static/lib/jsonlint/lib/jsonlint.js',
       '../static/lib/codemirror/lib/codemirror.js',
       '../static/lib/codemirror/mode/javascript/javascript.js',
@@ -52,8 +51,13 @@ module.exports = function() {
       '../static/lib/lrInfiniteScroll/lrInfiniteScroll.js',
       '../static/lib/ansible/*.js',
       '../static/js/config.js',
+      '../static/js/directives/dashboard-graphs.js',
       '../static/js/*/*.js',
-      '../static/js/app.js'
+      '../static/js/app.js',
+      '../static/lib/angular-mocks/angular-mocks.js',
+      '../../../node_modules/ng-midway-tester/src/ngMidwayTester.js',
+      './unit/*',
+      './unit/**/*'
     ],
 
 
@@ -72,7 +76,13 @@ module.exports = function() {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['dots', 'progress'],
+
+    client: {
+      mocha: {
+        ui: 'bdd'
+      }
+    },
 
 
     // web server port
@@ -84,7 +94,7 @@ module.exports = function() {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
+    autoWatch: true,
 
 
     // start these browsers
@@ -96,5 +106,5 @@ module.exports = function() {
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: false
 
-    };
+    });
 };

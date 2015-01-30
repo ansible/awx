@@ -1208,10 +1208,12 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             keys;
 
         function listSort(a,b) {
-            if (parseInt(a,10) < parseInt(b,10))
+            if (parseInt(a,10) < parseInt(b,10)) {
                 return -1;
-            if (parseInt(a,10) > parseInt(b,10))
+            }
+            if (parseInt(a,10) > parseInt(b,10)) {
                 return 1;
+            }
             return 0;
         }
 
@@ -1276,10 +1278,12 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             idx, key, keys, newKeys, tasks, t;
 
         function listSort(a,b) {
-            if (parseInt(a,10) < parseInt(b,10))
+            if (parseInt(a,10) < parseInt(b,10)) {
                 return -1;
-            if (parseInt(a,10) > parseInt(b,10))
+            }
+            if (parseInt(a,10) > parseInt(b,10)) {
                 return 1;
+            }
             return 0;
         }
 
@@ -1385,15 +1389,19 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             keys = Object.keys(filteredListB);
             keys.sort(function compare(a, b) {
                 if (filteredListB[a].name === filteredListB[b].name) {
-                    if (filteredListB[a].counter < filteredListB[b].counter)
+                    if (filteredListB[a].counter < filteredListB[b].counter) {
                         return -1;
-                    if (filteredListB[a].counter >filteredListB[b].counter)
+                    }
+                    if (filteredListB[a].counter >filteredListB[b].counter) {
                         return 1;
+                    }
                 } else {
-                    if (filteredListB[a].name < filteredListB[b].name)
+                    if (filteredListB[a].name < filteredListB[b].name) {
                         return -1;
-                    if (filteredListB[a].name > filteredListB[b].name)
+                    }
+                    if (filteredListB[a].name > filteredListB[b].name) {
                         return 1;
+                    }
                 }
                 // a must be equal to b
                 return 0;
@@ -1453,10 +1461,12 @@ function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, Ge
             keys = Object.keys(filteredListB);
 
             keys.sort(function(a,b) {
-                if (filteredListB[a].name > filteredListB[b].name)
+                if (filteredListB[a].name > filteredListB[b].name) {
                     return 1;
-                if (filteredListB[a].name < filteredListB[b].name)
+                }
+                if (filteredListB[a].name < filteredListB[b].name) {
                     return -1;
+                }
                 // a must be equal to b
                 return 0;
             });

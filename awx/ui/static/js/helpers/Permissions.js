@@ -34,8 +34,8 @@ angular.module('PermissionsHelper', [])
             } else {
                 scope.projectrequired = true;
                 html = "<dl>\n" +
-		    "<dt>Create</dt>\n" +
-		    "<dd>Allow the user or team to create job templates. This implies that they have the Run and Check permissions.</dd>\n" +
+        "<dt>Create</dt>\n" +
+        "<dd>Allow the user or team to create job templates. This implies that they have the Run and Check permissions.</dd>\n" +
                     "<dt>Run</dt>\n" +
                     "<dd>Allow the user or team to run a job template from the project against the inventory. In Run mode modules will " +
                     "be executed, and changes to the inventory will occur.</dd>\n" +

@@ -25,12 +25,12 @@
  *                  Host count graph should only be loaded if the user is a super user
  *
 */
-function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, HostGraph, JobStatusGraph, HostPieChart, DashboardJobs,
-    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button){
+function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, DashboardJobs,
+    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button, $window, graphData){
 
     ClearScope('home');
 
-    var buttons, html, e, waitCount, loadedCount,borderStyles, jobs_scope, schedule_scope;
+    var buttons, html, e, borderStyles;
 
     // Add buttons to the top of the Home page. We're using lib/ansible/generator_helpers.js-> Buttons()
     // to build buttons dynamically and insure all styling and icons match the rest of the application.
@@ -64,39 +64,16 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
     e.html(html);
     $compile(e)($scope);
 
-    waitCount = 4;
-    loadedCount = 0;
-
     if (!$routeParams.login) {
         // If we're not logging in, start the Wait widget. Otherwise, it's already running.
         //Wait('start');
     }
 
-    if ($scope.removeWidgetLoaded) {
-        $scope.removeWidgetLoaded();
-    }
-    $scope.removeWidgetLoaded = $scope.$on('WidgetLoaded', function (e, label, jobscope, schedulescope) {
-        // Once all the widgets report back 'loaded', turn off Wait widget
-        if(label==="dashboard_jobs"){
-            jobs_scope = jobscope;
-            schedule_scope = schedulescope;
-        }
-        loadedCount++;
-        if (loadedCount === waitCount) {
-            $(window).resize(_.debounce(function() {
-                $scope.$emit('ResizeJobGraph');
-                $scope.$emit('ResizeHostGraph');
-                $scope.$emit('ResizeHostPieGraph');
-                Wait('stop');
-            }, 500));
-            $(window).resize();
-        }
-    });
-
     if ($scope.removeDashboardReady) {
         $scope.removeDashboardReady();
     }
     $scope.removeDashboardReady = $scope.$on('dashboardReady', function (e, data) {
+
         nv.dev=false;
 
 
@@ -106,62 +83,22 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
             "margin-bottom": "15px"};
         $('.graph-container').css(borderStyles);
 
-        var winHeight = $(window).height(),
-        available_height = winHeight - $('#main-menu-container .navbar').outerHeight() - $('#count-container').outerHeight() - 120;
-        $('.graph-container').height(available_height/2);
-        // // chart.update();
-
         DashboardCounts({
             scope: $scope,
             target: 'dash-counts',
             dashboard: data
         });
 
-        JobStatusGraph({
-            scope: $scope,
-            target: 'dash-job-status-graph',
-            dashboard: data
-        });
+        // // chart.update();
 
-        if ($rootScope.user_is_superuser === true) {
-            waitCount = 5;
-            HostGraph({
-                scope: $scope,
-                target: 'dash-host-count-graph',
-                dashboard: data
-            });
-        }
-        else{
-            $('#dash-host-count-graph').remove(); //replaceWith("<div id='dash-host-count-graph' class='left-side col-sm-12 col-xs-12'></div>");
-        }
+        $scope.graphData = graphData;
+
         DashboardJobs({
             scope: $scope,
             target: 'dash-jobs-list',
             dashboard: data
         });
-        HostPieChart({
-            scope: $scope,
-            target: 'dash-host-status-graph',
-            dashboard: data
-        });
 
-    });
-
-    if ($rootScope.removeJobStatusChange) {
-        $rootScope.removeJobStatusChange();
-    }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange', function() {
-        jobs_scope.refreshJobs();
-        $scope.$emit('ReloadJobStatusGraph');
-
-    });
-
-    if ($rootScope.removeScheduleChange) {
-        $rootScope.removeScheduleChange();
-    }
-    $rootScope.removeScheduleChange = $rootScope.$on('ScheduleChange', function() {
-        schedule_scope.refreshSchedules();
-        $scope.$emit('ReloadJobStatusGraph');
     });
 
     $scope.showActivity = function () {
@@ -172,23 +109,23 @@ function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait,
 
     $scope.refresh = function () {
         Wait('start');
-        loadedCount = 0;
         Rest.setUrl(GetBasePath('dashboard'));
         Rest.get()
-            .success(function (data) {
-                $scope.$emit('dashboardReady', data);
-            })
-            .error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
-            });
+        .success(function (data) {
+            $scope.dashboardData = data;
+            $scope.$emit('dashboardReady', data);
+        })
+        .error(function (data, status) {
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
+        });
     };
 
     $scope.refresh();
 
 }
 
-Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'HostGraph','JobStatusGraph', 'HostPieChart', 'DashboardJobs',
-    'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'
+Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'DashboardJobs',
+    'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button', '$window', 'graphData'
 ];
 
 

@@ -66,7 +66,7 @@ MOCK_CFG ?=
 
 .PHONY: clean rebase push requirements requirements_pypi requirements_jenkins \
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
-	receiver test test_coverage coverage_html test_ui test_jenkins dev_build \
+	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm \
 	deb deb-src debian reprepro setup_tarball
 
@@ -240,9 +240,12 @@ test_coverage:
 coverage_html:
 	coverage html
 
-# Run UI unit tests using Selenium.
-test_ui:
-	$(PYTHON) manage.py test -v2 awx.ui.tests
+ui_analysis_report: node_modules
+	$(GRUNT) plato:report
+
+# Run UI unit tests
+test_ui: node_modules
+	$(GRUNT) karma:ci
 
 # Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:

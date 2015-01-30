@@ -100,8 +100,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             scope.update = function(){
                 var val = [];
                 angular.forEach(scope.cbModel, function(v,k){
-                    if (v)
+                    if (v) {
                         val.push(k);
+                    }
                 });
                 if (val.length>0){
                     scope.ngModel.value = val;
