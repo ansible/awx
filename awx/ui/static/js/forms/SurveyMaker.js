@@ -30,7 +30,7 @@ angular.module('SurveyMakerFormDefinition', [])
                     //             '<label for="survey_name"><span class="label-text prepend-asterisk">Survey Name</span></label>
                     //                 <div>'+
                     //                     '<input type="text" ng-model="survey_name" name="survey_name" id="survey_maker_survey_name" class="form-control ng-pristine ng-invalid ng-invalid-required" required="" capitalize>'+
-                    //                         '<div class="error ng-hide" id="survey_maker-survey_name-required-error" ng-show="survey_maker_form.survey_name.$dirty &amp;&amp; survey_maker_form.survey_name.$error.required">A value is required.</div>'+
+                    //                         '<div class="error ng-hide" id="survey_maker-survey_name-required-error" ng-show="survey_maker_form.survey_name.$dirty &amp;&amp; survey_maker_form.survey_name.$error.required">Please enter a survey name.</div>'+
                     //                         '<div class="error api-error ng-binding" id="survey_maker-survey_name-api-error" ng-bind="survey_name_api_error"></div>'+
                     // '</div></div></div>'+
                     // '<div class="col-sm-6"><div class="form-group">'+

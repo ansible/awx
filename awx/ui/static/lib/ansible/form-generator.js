@@ -776,11 +776,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">A value is required.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">Please enter a value.</div>\n";
                         }
                         if (field.type === "email") {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-email-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.email\">A valid email address is required.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.email\">Please enter a valid email address.</div>\n";
                         }
                         if (field.awPassMatch) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-passmatch-error\" ng-show=\"" + this.form.name + '_form.' + fld +
@@ -788,7 +788,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         }
                         if (field.awValidUrl) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-url-error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.awvalidurl\">This URL must begin with ssh, http or https and may not contain '@'. </div>\n";
+                                ".$error.awvalidurl\">Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character. </div>\n";
                         }
 
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
@@ -796,7 +796,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         if (field.chkPass) {
                             // complexity error
                             html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.complexity\">The password should be stronger (see strength bar below).</div>\n";
+                                ".$error.complexity\">Please enter a stronger password (see strength bar below).</div>\n";
 
                             // progress bar
                             html += "<div class=\"pw-progress\">\n";
@@ -876,7 +876,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">A value is required.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">Please enter a value.</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
                         html += "</div>\n";
@@ -916,7 +916,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">A value is required.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">Please select a value.</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
 
@@ -962,15 +962,15 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">A value is required.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">Please enter a value.</div>\n";
                         }
                         if (field.integer) {
-                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-integer-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Must be an integer value</div>\n";
+                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-integer-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Please enter a number.</div>\n";
                         }
                         if (field.min !== undefined || field.max !== undefined) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-minmax-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.min || " +
-                                this.form.name + '_form.' + fld + ".$error.max\">Must be an integer between " + field.min + " and ";
-                            html += (field.max !== undefined) ? field.max : 'unlimited';
+                                this.form.name + '_form.' + fld + ".$error.max\">Please enter a number greater than " + field.min;
+                            html += (field.max !== undefined) ? " and less than " + field.max + "." : ".";
                             html += "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
@@ -995,14 +995,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">A value is required.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">Please select at least one value.</div>\n";
                         }
                         if (field.integer) {
-                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-integer-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Must be an integer value</div>\n";
+                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-integer-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Please select a number.</div>\n";
                         }
                         if (field.min || field.max) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-minmax-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.min || " +
-                                this.form.name + '_form.' + fld + ".$error.max\">Must be in range " + field.min + " to " +
+                                this.form.name + '_form.' + fld + ".$error.max\">Please select a number between " + field.min + " and " +
                                 field.max + "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
@@ -1066,7 +1066,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" +
                                 this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">A value is required.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">Please select a value.</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" +
                             fld + "_api_error\"></div>\n";
@@ -1145,13 +1145,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                                 this.form.name + '_form.' +
                                 field.sourceModel + '_' + field.sourceField + ".$dirty && " +
                                 this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
-                                ".$error.required\">A value is required.</div>\n";
+                                ".$error.required\">Please select a value.</div>\n";
                         }
                         html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
                             this.form.name + '_form.' +
                             field.sourceModel + '_' + field.sourceField + ".$dirty && " +
                             this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
-                            ".$error.awlookup\">Value not found.</div>\n";
+                            ".$error.awlookup\">That value was not found.  Please enter or select a valid value.</div>\n";
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + field.sourceModel + '_' + field.sourceField +
                             "_api_error\"></div>\n";
                         html += "</div>\n";
