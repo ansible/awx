@@ -92,7 +92,12 @@ class APIView(views.APIView):
         Log warning for 400 requests.  Add header with elapsed time.
         '''
         if response.status_code >= 400:
-            logger.warn("status %s received by user %s attempting to access %s" % (response.status_code, request.user, request.path))
+            status_msg = "status %s received by user %s attempting to access %s from %s" % \
+                         (response.status_code, request.user, request.path, request.META.get('REMOTE_ADDR', None))
+            if response.status_code == 401:
+                logger.info(status_msg)
+            else:
+                logger.warn(status_msg)
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
         if time_started:
