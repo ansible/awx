@@ -16,23 +16,16 @@ class UriCleaner(object):
                 break
             o = urlparse.urlsplit(match.group(1))
             if not o.username and not o.password:
-                flag_continue = False
-                if o.netloc:
+                if o.netloc and ":" in o.netloc:
                     # Handle the special case url http://username:password that can appear in SCM url
                     # on account of a bug? in ansible redaction
-                    try:
-                        (username, password) = o.netloc.split(':')
-                    except ValueError as e:
-                        flag_continue = True
-                        pass
-
-                if flag_continue:
+                    (username, password) = o.netloc.split(':')
+                else:
                     text_index += len(match.group(1))
                     continue
             else:
                 username = o.username
                 password = o.password
-
 
             # Given a python MatchObject, with respect to redactedtext, find and 
             # replace the first occurance of username and the first and second
