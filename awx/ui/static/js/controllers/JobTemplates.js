@@ -527,7 +527,9 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
         if($scope.survey_enabled === true && $scope.survey_exists!==true){
             $scope.$emit("PromptForSurvey");
-        } else $scope.$emit("GatherFormFields");
+        } else {
+            $scope.$emit("GatherFormFields");
+        }
 
 
     };
@@ -634,7 +636,9 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                         ' project or make the playbooks available on the file system.', 'alert-info');
                 });
         }
-        else Wait('stop');
+        else {
+            Wait('stop');
+        }
     };
 
     // Detect and alert user to potential SCM status issues
@@ -964,7 +968,9 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
         if($scope.survey_enabled === true && $scope.survey_exists!==true){
             $scope.$emit("PromptForSurvey");
-        } else $scope.$emit("GatherFormFields");
+        } else {
+            $scope.$emit("GatherFormFields");
+        }
 
     };
 
@@ -1021,11 +1027,12 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         if($scope.survey_enabled === true && $scope.survey_exists!==true){
             $scope.$emit("PromptForSurvey");
         }
-        else
+        else {
             PlaybookRun({
                 scope: $scope,
                 id: id
             });
+        }
     };
 
     // handler for 'Enable Survey' button

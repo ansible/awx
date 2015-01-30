@@ -425,10 +425,11 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                         list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-value=\"1\" " +
                         "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
                     }
-                    else // its assumed that options.input_type = checkbox
+                    else { // its assumed that options.input_type = checkbox
                         html += "<td><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                         list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
                         "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
+                    }
                 } else if ((options.mode === 'edit' || options.mode === 'summary') && list.fieldActions) {
 
                     // Row level actions

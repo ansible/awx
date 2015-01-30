@@ -95,7 +95,9 @@ angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'Job
                     if(scope.$parent.portalMode===true){
                         $window.open('/#/jobs/' + job.id, '_blank');
                     }
-                    else $location.url('/jobs/' + job.id);
+                    else {
+                        $location.url('/jobs/' + job.id);
+                    }
                 }
                 else {
                     LogViewer({

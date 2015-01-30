@@ -1074,8 +1074,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                 msg: 'Failed to retrieve inventory source. GET status: ' + status });
                         });
                 }
-                else
+                else {
                     modal_scope.$emit('groupVariablesLoaded');  // JT-- "groupVariablesLoaded" is where the schedule info is loaded, so I make a call after the sources_scope.source has been loaded
+                }
             });
 
             if (sources_scope.removeScopeSourceTypeOptionsReady) {

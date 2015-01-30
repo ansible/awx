@@ -63,14 +63,16 @@ angular.module('PromptDialog', ['Utilities'])
 
                         focus = function() {
                             var focusableElement = focusableChildren[currentIndex];
-                            if (focusableElement)
+                            if (focusableElement) {
                                 focusableElement.focus();
+                            }
                         };
 
                         focusPrevious = function () {
                             currentIndex--;
-                            if (currentIndex < 0)
+                            if (currentIndex < 0) {
                                 currentIndex = numElements - 1;
+                            }
 
                             focus();
 
@@ -79,8 +81,9 @@ angular.module('PromptDialog', ['Utilities'])
 
                         focusNext = function () {
                             currentIndex++;
-                            if (currentIndex >= numElements)
+                            if (currentIndex >= numElements) {
                                 currentIndex = 0;
+                            }
 
                             focus();
 

@@ -73,7 +73,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         if(scope.can_edit === false){
                             $('#survey-save-button').attr('disabled', "disabled");
                         }
-                        else $('#survey-save-button').attr('ng-disabled', "survey_questions.length<1 ");
+                        else {
+                            $('#survey-save-button').attr('ng-disabled', "survey_questions.length<1 ");
+                        }
                         element = angular.element(document.getElementById('survey-save-button'));
                         $compile(element)(scope);
 
@@ -513,7 +515,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 if(scope.mode === 'add'){
                     questions = [];
                 }
-                else scope.survey_questions = [];
+                else {
+                    scope.survey_questions = [];
+                }
                 $(me).dialog('close');
             };
 
