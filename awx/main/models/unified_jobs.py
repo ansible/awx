@@ -34,6 +34,7 @@ from djcelery.models import TaskMeta
 from awx.main.models.base import *
 from awx.main.models.schedules import Schedule
 from awx.main.utils import decrypt_field, get_type_for_model, emit_websocket_notification, _inventory_updates
+from awx.main.redact import UriCleaner
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 
@@ -618,7 +619,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     @property
     def result_stdout(self):
         ansi_escape = re.compile(r'\x1b[^m]*m')
-        return ansi_escape.sub('', self.result_stdout_raw)
+        return ansi_escape.sub('', UriCleaner.remove_sensitive(self.result_stdout_raw))
 
     def result_stdout_raw_limited(self, start_line=0, end_line=None):
         return_buffer = u""
@@ -641,7 +642,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def result_stdout_limited(self, start_line=0, end_line=None):
         ansi_escape = re.compile(r'\x1b[^m]*m')
-        content, start, end, absolute_end = self.result_stdout_raw_limited(start_line, end_line)
+        content, start, end, absolute_end = UriCleaner.remove_sensitive(self.result_stdout_raw_limited(start_line, end_line))
         return ansi_escape.sub('', content), start, end, absolute_end
 
     @property
