@@ -141,7 +141,6 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
 
             restoreUserInfo: function () {
                 $rootScope.current_user = $cookieStore.get('current_user');
-                // $rootScope.$emit('OpenSocket');
             },
 
             getUserInfo: function (key) {
