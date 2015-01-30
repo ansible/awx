@@ -26,6 +26,6 @@
       <form name="prompt_for_days_form" id="prompt_for_days_form">
             How many days of data would you like to <b>keep</b>? <br>
             <input type="number" min="1" id="days_to_keep" name="days_to_keep" value="30" ng-required="true" class="form-control  ng-pristine ng-invalid-required ng-invalid" style="margin-top:10px;">
-            <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && copy_form.new_copy_name.$error.required">A value is required!</div></input>
+            <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && copy_form.new_copy_name.$error.required">Please enter the number of days you would like to keep this data.</div></input>
             </form>
     </div>

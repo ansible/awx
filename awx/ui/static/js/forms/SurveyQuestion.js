@@ -61,9 +61,9 @@ angular.module('SurveyQuestionFormDefinition', [])
                     'user_id<br>host_name<br><div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>" '+
                     'data-placement="right" data-container="body" data-title="Answer Variable Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a> </label>'+
                     '<div><input type="text" ng-model="variable" name="variable" id="survey_question_variable" class="form-control ng-pristine ng-invalid ng-invalid-required" required="" aw-survey-variable-name>'+
-                    '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty &amp;&amp; survey_question_form.variable.$error.required">A value is required!</div>'+
-                    '<div class="error ng-hide" id="survey_question-variable-variable-error" ng-show="survey_question_form.variable.$dirty &amp;&amp; survey_question_form.variable.$error.variable">The value contains an illegal character!</div>'+
-                    '<div class="error ng-hide" id=survey_question-variable-duplicate-error" ng-show="duplicate">This variable is already in use.</div>' +
+                    '<div class="error ng-hide" id="survey_question-variable-required-error" ng-show="survey_question_form.variable.$dirty &amp;&amp; survey_question_form.variable.$error.required">Please enter an answer variable name.</div>'+
+                    '<div class="error ng-hide" id="survey_question-variable-variable-error" ng-show="survey_question_form.variable.$dirty &amp;&amp; survey_question_form.variable.$error.variable">Please remove the illegal character from the survey question variable name.</div>'+
+                    '<div class="error ng-hide" id=survey_question-variable-duplicate-error" ng-show="duplicate">This question variable is already in use.  Please enter a different variable name.</div>' +
                     '<div class="error api-error ng-binding" id="survey_question-variable-api-error" ng-bind="variable_api_error"></div>'+
                     '</div>',
                 addRequired: true,
@@ -104,14 +104,14 @@ angular.module('SurveyQuestionFormDefinition', [])
                 control:'<div class="row">'+
                                 '<div class="col-xs-6">'+
                                     '<label for="text_min"><span class="label-text">Minimum Length</span></label><input id="text_min" type="number" name="text_min" ng-model="text_min" min=0 aw-min="0" aw-max="text_max" class="form-control" integer />'+
-                                    '<div class="error" ng-show="survey_question_form.text_min.$error.number || survey_question_form.text_min.$error.integer">This is not valid integer!</div>'+
-                                    '<div class="error" ng-show="survey_question_form.text_min.$error.awMax">Too high!</div>'+
-                                    '<div class="error" ng-show="survey_question_form.text_min.$error.awMin">Too low!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.text_min.$error.number || survey_question_form.text_min.$error.integer">The minimum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.text_min.$error.awMax">The minimium length is too high.  Please enter a lower number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.text_min.$error.awMin">The minimum length is too low.  Please enter a positive number.</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6">'+
                                     '<label for="text_max"><span class="label-text">Maximum Length</span></label><input id="text_max" type="number" name="text_max" ng-model="text_max" aw-min="text_min || 0" class="form-control" integer >'+
-                                    '<div class="error" ng-show="survey_question_form.text_max.$error.number || survey_question_form.text_max.$error.integer">This is not valid integer!</div>'+
-                                    '<div class="error" ng-show="survey_question_form.text_max.$error.awMin">Too low!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.text_max.$error.number || survey_question_form.text_max.$error.integer">The maximum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.text_max.$error.awMin">The maximum length is too low.  Please enter a number larger than the minimum length you set.</div>'+
                                 '</div>'+
                             '</div>',
                 ngShow: 'type.type==="text" ',
@@ -125,14 +125,14 @@ angular.module('SurveyQuestionFormDefinition', [])
                 control:'<div class="row">'+
                                 '<div class="col-xs-6">'+
                                     '<label for="textarea_min"><span class="label-text">Minimum Length</span></label><input id="textarea_min" type="number" name="textarea_min" ng-model="textarea_min"  min=0 aw-min="0" aw-max="textarea_max" class="form-control" integer />'+
-                                    '<div class="error" ng-show="survey_question_form.textarea_min.$error.number || survey_question_form.textarea_min.$error.integer">This is not valid integer!</div>'+
-                                    '<div class="error" ng-show="survey_question_form.textarea_min.$error.awMax">Too high!</div>'+
-                                    '<div class="error" ng-show="survey_question_form.textarea_min.$error.awMin">Too low!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_min.$error.number || survey_question_form.textarea_min.$error.integer">The minimum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_min.$error.awMax">The minimium length is too high.  Please enter a lower number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_min.$error.awMin">The minimum length is too low.  Please enter a positive number.</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6">'+
                                     '<label for="textarea_max"><span class="label-text">Maximum Length</span></label><input id="textarea_max" type="number" name="textarea_max" ng-model="textarea_max" aw-min="textarea_min || 0" class="form-control" integer >'+
-                                    '<div class="error" ng-show="survey_question_form.textarea_max.$error.number || survey_question_form.textarea_max.$error.integer">This is not valid integer!</div>'+
-                                    '<div class="error" ng-show="survey_question_form.textarea_max.$error.awMin">Too low!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_max.$error.number || survey_question_form.textarea_max.$error.integer">The maximum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_max.$error.awMin">The maximum length is too low.  Please enter a number larger than the minimum length you set.</div>'+
                                 '</div>'+
                             '</div>',
                 ngShow: 'type.type==="textarea" ',
@@ -146,13 +146,13 @@ angular.module('SurveyQuestionFormDefinition', [])
                 control:'<div class="row">'+
                                 '<div class="col-xs-6">'+
                                     '<label for="minimum"><span class="label-text">Minimum</span></label><input id="int_min" type="number" name="int_min" ng-model="int_min" aw-max="int_max" class="form-control" integer >'+
-                                    '<div class="error" ng-show="survey_question_form.int_min.$error.number || survey_question_form.int_min.$error.integer">This is not valid integer!</div>'+
-                                    '<div class="error" ng-show="survey_question_form.int_min.$error.awMax">Too high!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.int_min.$error.number || survey_question_form.int_min.$error.integer">Please enter a valid integer.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.int_min.$error.awMax">Please enter a smaller integer.</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6">'+
                                     '<label for="minimum"><span class="label-text">Maximum</span></label><input id="int_max" type="number" name="int_max" ng-model="int_max" aw-min="int_min" class="form-control" integer >'+
-                                    '<div class="error" ng-show="survey_question_form.int_max.$error.number || survey_question_form.int_max.$error.integer">This is not valid integer!</div>'+
-                                    '<div class="error" ng-show="survey_question_form.int_max.$error.awMin">Too low!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.int_max.$error.number || survey_question_form.int_max.$error.integer">Please enter a valid integer.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.int_max.$error.awMin">Please enter a larger integer.</div>'+
                                 '</div>'+
                             '</div>',
                 ngShow: 'type.type==="integer" ',
@@ -166,13 +166,13 @@ angular.module('SurveyQuestionFormDefinition', [])
                 control: '<div class="row">'+
                                 '<div class="col-xs-6">'+
                                     '<label for="minimum"><span class="label-text">Minimum</span></label><input id="float_min" type="number" name="float_min" ng-model="float_min" class="form-control" smart-float aw-max="float_max">'+
-                                    '<div class="error" ng-show="survey_question_form.float_min.$error.float">This is not valid float!</div>'+
-                                    '<div class="error" ng-show="survey_question_form.float_min.$error.awMax">Too high!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.float_min.$error.float">Please enter a valid float.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.float_min.$error.awMax">Please enter a smaller float.</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6">'+
                                     '<label for="maximum"><span class="label-text">Maximum</span></label><input id="float_max" type="number" name="float_max" ng-model="float_max" class="form-control" smart-float  aw-min="float_min">'+
-                                    '<div class="error" ng-show="survey_question_form.float_max.$error.float">This is not valid float!</div>'+
-                                    '<div class="error" ng-show="survey_question_form.float_max.$error.awMin">Too low!</div>'+
+                                    '<div class="error" ng-show="survey_question_form.float_max.$error.float">Please enter a valid float.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.float_max.$error.awMin">Please enter a larger float.</div>'+
 
                                 '</div>'+
                             '</div>',
@@ -217,8 +217,8 @@ angular.module('SurveyQuestionFormDefinition', [])
                 control:  '<div>'+
                     '<label for="default_int"><span class="label-text">Default Answer</span></label>'+
                     '<input type="number" ng-model="default_int" name="default_int" aw-min="int_min" aw-max="int_max"  class="form-control" integer />'+
-                    '<div class="error" ng-show="survey_question_form.default_int.$error.number || survey_question_form.default_int.$error.integer">This is not valid integer!</div>'+
-                    '<div class="error" ng-show="survey_question_form.default_int.$error.awMin || survey_question_form.default_int.$error.awMax"> The value must be in range {{int_min}} to {{int_max}}!</div>'+
+                    '<div class="error" ng-show="survey_question_form.default_int.$error.number || survey_question_form.default_int.$error.integer">Please enter a valid integer.</div>'+
+                    '<div class="error" ng-show="survey_question_form.default_int.$error.awMin || survey_question_form.default_int.$error.awMax"> Please enter a value in the range of {{int_min}} to {{int_max}}.</div>'+
                     '</div>',
                 column: 2,
                 ngShow: 'type.type === "integer" '
@@ -229,8 +229,8 @@ angular.module('SurveyQuestionFormDefinition', [])
                 control: '<div>'+
                     '<label for="default_float"><span class="label-text">Default Answer</span></label>'+
                     '<input type="number" ng-model="default_float" name="default_float" aw-min="float_min" aw-max="float_max"  class="form-control"  />'+
-                    '<div class="error" ng-show="survey_question_form.default_float.$error.number || survey_question_form.default_float.$error.float">This is not valid float!</div>'+
-                    '<div class="error" ng-show="survey_question_form.default_float.$error.awMin || survey_question_form.default_float.$error.awMax"> The value must be in range {{float_min}} to {{float_max}}!</div>'+
+                    '<div class="error" ng-show="survey_question_form.default_float.$error.number || survey_question_form.default_float.$error.float">Please enter a valid float.</div>'+
+                    '<div class="error" ng-show="survey_question_form.default_float.$error.awMin || survey_question_form.default_float.$error.awMax"> Please enter a value in the range of {{float_min}} to {{float_max}}!</div>'+
                     '</div>',
                 column: 2,
                 ngShow: 'type.type=== "float" '

@@ -12,7 +12,7 @@
                 <label class="control-label">Username:</label>
                 <div class="controls">
                   <input type="text" name="login_username" ng-model="login_username" id="login-username" autocomplete="off" required><br />
-                  <span class="error" ng-show="loginForm.login_username.$dirty && loginForm.login_username.$error.required">A value is required!</span>
+                  <span class="error" ng-show="loginForm.login_username.$dirty && loginForm.login_username.$error.required">Please enter a username.</span>
                   <span class="error api-error" ng-bind="usernameError"></span>
                 </div>
               </div>
@@ -20,7 +20,7 @@
                 <label class="control-label">Password:</label>
                 <div class="controls">
                   <input type="password" name="login_password" id="login-password" ng-model="login_password" required autocomplete="off"><br />
-                  <span class="error" ng-show="loginForm.login_password.$dirty && loginForm.login_password.$error.required">A value is required!</span>
+                  <span class="error" ng-show="loginForm.login_password.$dirty && loginForm.login_password.$error.required">Please enter a password.</span>
                   <span class="error api-error" ng-bind="passwordError"></span>
                 </div>
               </div>

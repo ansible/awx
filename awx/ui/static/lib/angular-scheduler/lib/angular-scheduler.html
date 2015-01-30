@@ -19,14 +19,14 @@
             <div class="form-group">
                 <label><span class="red-text">*</span> Name</label>
                 <input type="text" class="form-control input-sm" name="schedulerName" id="schedulerName" ng-model="schedulerName" required placeholder="Schedule name">
-                <div class="error" ng-show="scheduler_form.schedulerName.$dirty && scheduler_form.schedulerName.$error.required">Schedule name is required</div>
+                <div class="error" ng-show="scheduler_form.schedulerName.$dirty && scheduler_form.schedulerName.$error.required">A schedule name is required.</div>
             </div>
 
             <div class="form-group" ng-show="cleanupJob">
                 <label><span class="red-text">*</span>Days of data to keep</label>
                 <input type="number" class="form-control input-sm" name="schedulerPurgeDays" id="schedulerPurgeDays" min="1" ng-model="schedulerPurgeDays" required placeholder="Days of data to keep">
-                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required">A value is required</div>
-                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.number">This is not valid number</div>
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required">A value is required.</div>
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.number">This is not a valid number.</div>
             </div>
 
             <div class="row">
@@ -53,7 +53,7 @@
                             <span>:</span><input name="schedulerStartMinute" id="schedulerStartMinute" sch-spinner="scheduler_form" class="scheduler-time-spinner" ng-model="schedulerStartMinute" placeholder="MM" min="0" max="59" data-zero-pad="2" required ng-change="scheduleTimeChange()" >
                             <span>:</span><input name="schedulerStartSecond" id="schedulerStartSecond" sch-spinner="scheduler_form" class="scheduler-time-spinner" ng-model="schedulerStartSecond" placeholder="SS" min="0" max="59" data-zero-pad="2" required ng-change="scheduleTimeChange()" >
                         </div>
-                        <div class="error" ng-show="scheduler_startTime_error">Time must be in HH24:MM:SS format</div>
+                        <div class="error" ng-show="scheduler_startTime_error">The time must be in HH24:MM:SS format.</div>
                     </div>
                 </div>
             </div>
@@ -96,7 +96,7 @@
                         <input name="schedulerInterval" id="schedulerInterval" sch-spinner="scheduler_form" class="scheduler-spinner"
                             ng-model="schedulerInterval" min="1" max="999" ng-change="resetError('scheduler_interval_error')">
                         <label class="inline-label" ng-bind="schedulerIntervalLabel"></label>
-                    <div class="error" ng-show="scheduler_interval_error">Provide a value between 1 and 999</div>
+                    <div class="error" ng-show="scheduler_interval_error">Please provide a value between 1 and 999.</div>
                     </div>
                 </div>
             </div>
@@ -111,7 +111,7 @@
                         <div class="col-md-3" style="padding-top:5px">
                             <input name="monthDay" id="monthDay" sch-spinner="scheduler_form" class="scheduler-spinner"
                                 ng-model="monthDay" min="1" max="31" ng-change="resetError('scheduler_monthDay_error')" >
-                            <div class="error" ng-show="scheduler_monthDay_error">Must be between 1 and 31</div>
+                            <div class="error" ng-show="scheduler_monthDay_error">The day must be between 1 and 31.</div>
                         </div>
                     </div>
                 </div>
@@ -148,7 +148,7 @@
                         <div class="col-md-3 padding-top-slim">
                             <input name="yearlyMonthDay" id="yearlyMonthDay" sch-spinner="scheduler_form" class="scheduler-spinner"
                                 ng-model="yearlyMonthDay" min="1" max="31" ng-change="resetError('scheduler_yearlyMonthDay_error')" >
-                            <div class="error" ng-show="scheduler_yearlyMonthDay_error">Must be between 1 and 31</div>
+                            <div class="error" ng-show="scheduler_yearlyMonthDay_error">The day must be between 1 and 31.</div>
                         </div>
                     </div>
                 </div>
@@ -190,7 +190,7 @@
                         <button type="button" ng-class="weekDaySAClass" class="btn btn-default" data-value="SA" ng-click="setWeekday($event,'sa')">Sat</button>
                     </div>
                 </div>
-                <div class="error" ng-show="scheduler_weekDays_error">Select one or more days</div>
+                <div class="error" ng-show="scheduler_weekDays_error">Please select one or more days.</div>
             </div>
 
             <div class="row">
@@ -209,7 +209,7 @@
                                 ng-model="schedulerOccurrenceCount" min="1" max="999" on-change="resetError('scheduler_occurrenceCount_error')" >
                             <label class="inline-label">Occurrence(s)</label>
                         </div>
-                        <div class="error" ng-show="scheduler_occurrenceCount_error">Provide a value between 1 and 999</div>
+                        <div class="error" ng-show="scheduler_occurrenceCount_error">Please provide a value between 1 and 999.</div>
                     </div>
                 </div>
                 <div class="col-md-4" ng-show="schedulerEnd && schedulerEnd.value == 'on'">
@@ -222,7 +222,7 @@
                                     <i class="fa fa-calendar"></i></button>
                             </span>
                         </div>
-                        <div class="error" ng-show="scheduler_endDt_error">Provide a valid date</div>
+                        <div class="error" ng-show="scheduler_endDt_error">Please provide a valid date.</div>
                     </div>
                 </div>
             </div>
