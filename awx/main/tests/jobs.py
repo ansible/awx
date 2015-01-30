@@ -219,11 +219,6 @@ class BaseJobTestMixin(BaseTestMixin):
                 group.hosts.add(host)
         return inventory
 
-    def make_job(self, job_template, created_by, inital_state='new'):
-        j_actual = job_template.create_job(created_by=created_by)
-        j_actual.status = inital_state
-        return j_actual
-
     def populate(self):
         # Here's a little story about the Ansible Bread Company, or ABC.  They
         # make machines that make bread - bakers, slicers, and packagers - and

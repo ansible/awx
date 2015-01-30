@@ -50,6 +50,7 @@ from awx.main.models import *
 from awx.main.utils import *
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
+from awx.main.redact import UriCleaner
 from awx.api.authentication import JobTaskAuthentication
 from awx.api.permissions import *
 from awx.api.renderers import *
@@ -2232,12 +2233,12 @@ class UnifiedJobStdout(RetrieveAPIView):
                 scheme = 'ansi2html'
             dark_val = request.QUERY_PARAMS.get('dark', '')
             dark = bool(dark_val and dark_val[0].lower() in ('1', 't', 'y'))
-            content_only = bool(request.accepted_renderer.format == 'api' or \
-                                request.accepted_renderer.format == 'json')
+            content_only = bool(request.accepted_renderer.format in ('api', 'json'))
             dark_bg = (content_only and dark) or (not content_only and (dark or not dark_val))
             conv = Ansi2HTMLConverter(scheme=scheme, dark_bg=dark_bg,
                                       title=get_view_name(self.__class__))
             content, start, end, absolute_end = unified_job.result_stdout_raw_limited(start_line, end_line)
+            content = UriCleaner.remove_sensitive(content)
             if content_only:
                 headers = conv.produce_headers()
                 body = conv.convert(content, full=False) # Escapes any HTML that may be in content.
