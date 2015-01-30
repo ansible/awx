@@ -784,7 +784,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         }
                         if (field.awPassMatch) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-passmatch-error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.awpassmatch\">This must match the password value input above.</div>\n";
+                                ".$error.awpassmatch\">This value does not match the password you entered previously.  Please confirm that password.</div>\n";
                         }
                         if (field.awValidUrl) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-url-error\" ng-show=\"" + this.form.name + '_form.' + fld +

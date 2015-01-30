@@ -166,13 +166,13 @@ angular.module('SurveyQuestionFormDefinition', [])
                 control: '<div class="row">'+
                                 '<div class="col-xs-6">'+
                                     '<label for="minimum"><span class="label-text">Minimum</span></label><input id="float_min" type="number" name="float_min" ng-model="float_min" class="form-control" smart-float aw-max="float_max">'+
-                                    '<div class="error" ng-show="survey_question_form.float_min.$error.float">Please enter a valid decimal number.</div>'+
-                                    '<div class="error" ng-show="survey_question_form.float_min.$error.awMax">Please enter a smaller decimal number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.float_min.$error.float">Please enter a valid float.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.float_min.$error.awMax">Please enter a smaller float.</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6">'+
                                     '<label for="maximum"><span class="label-text">Maximum</span></label><input id="float_max" type="number" name="float_max" ng-model="float_max" class="form-control" smart-float  aw-min="float_min">'+
-                                    '<div class="error" ng-show="survey_question_form.float_max.$error.float">Please enter a valid decimal number.</div>'+
-                                    '<div class="error" ng-show="survey_question_form.float_max.$error.awMin">Please enter a larger decimal number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.float_max.$error.float">Please enter a valid float.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.float_max.$error.awMin">Please enter a larger float.</div>'+
 
                                 '</div>'+
                             '</div>',
@@ -229,7 +229,7 @@ angular.module('SurveyQuestionFormDefinition', [])
                 control: '<div>'+
                     '<label for="default_float"><span class="label-text">Default Answer</span></label>'+
                     '<input type="number" ng-model="default_float" name="default_float" aw-min="float_min" aw-max="float_max"  class="form-control"  />'+
-                    '<div class="error" ng-show="survey_question_form.default_float.$error.number || survey_question_form.default_float.$error.float">Please enter a valid decimal number.</div>'+
+                    '<div class="error" ng-show="survey_question_form.default_float.$error.number || survey_question_form.default_float.$error.float">Please enter a valid float.</div>'+
                     '<div class="error" ng-show="survey_question_form.default_float.$error.awMin || survey_question_form.default_float.$error.awMax"> Please enter a value in the range of {{float_min}} to {{float_max}}!</div>'+
                     '</div>',
                 column: 2,
