@@ -2238,6 +2238,7 @@ class UnifiedJobStdout(RetrieveAPIView):
             conv = Ansi2HTMLConverter(scheme=scheme, dark_bg=dark_bg,
                                       title=get_view_name(self.__class__))
             content, start, end, absolute_end = unified_job.result_stdout_raw_limited(start_line, end_line)
+            content = UriCleaner.remove_sensitive(content)
             if content_only:
                 headers = conv.produce_headers()
                 body = conv.convert(content, full=False) # Escapes any HTML that may be in content.
