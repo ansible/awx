@@ -44,14 +44,17 @@ class TowerBaseNamespace(BaseNamespace):
     
     def get_initial_acl(self):
         global valid_sockets
-        print self
         v_user = self.valid_user()
+        self.is_valid_connection = False
         if v_user:
             if self.socket.sessid not in valid_sockets:
                 valid_sockets.append(self.socket.sessid)
+                self.is_valid_connection = True
                 if len(valid_sockets) > 1000:
                     valid_sockets = valid_sockets[1:]
             return set(['recv_connect'] + self.get_allowed_methods())
+        else:
+            self.emit("connect_failed", "Authentication failed")
         return set(['recv_connect'])
 
     def valid_user(self):
@@ -75,21 +78,28 @@ class TowerBaseNamespace(BaseNamespace):
             except Exception, e:
                 return False
 
+    def recv_connect(self):
+        if not self.is_valid_connection:
+            self.disconnect(silent=False)
+
 class TestNamespace(TowerBaseNamespace):
 
     def recv_connect(self):
         print_log("Received client connect for test namespace from %s" % str(self.environ['REMOTE_ADDR']))
-        self.emit('test', "If you see this then you are connected to the test socket endpoint")
+        self.emit('test', "If you see this then you attempted to connect to the test socket endpoint")
+        super(TestNamespace, self).recv_connect()
 
 class JobNamespace(TowerBaseNamespace):
 
     def recv_connect(self):
         print_log("Received client connect for job namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        super(JobNamespace, self).recv_connect()
 
 class JobEventNamespace(TowerBaseNamespace):
 
     def recv_connect(self):
         print_log("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        super(JobEventNamespace, self).recv_connect()
 
 class ScheduleNamespace(TowerBaseNamespace):
 
@@ -98,6 +108,7 @@ class ScheduleNamespace(TowerBaseNamespace):
 
     def recv_connect(self):
         print_log("Received client connect for schedule namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        super(ScheduleNamespace, self).recv_connect()
 
 class TowerSocket(object):
 
