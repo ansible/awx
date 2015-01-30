@@ -784,11 +784,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         }
                         if (field.awPassMatch) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-passmatch-error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.awpassmatch\">Must match Password value</div>\n";
+                                ".$error.awpassmatch\">This must match the password value input above.</div>\n";
                         }
                         if (field.awValidUrl) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-url-error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.awvalidurl\">URL must begin with ssh, http or https and may not contain '@'</div>\n";
+                                ".$error.awvalidurl\">This URL must begin with ssh, http or https and may not contain '@'. </div>\n";
                         }
 
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
@@ -796,7 +796,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                         if (field.chkPass) {
                             // complexity error
                             html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.complexity\">Password must be stronger</div>\n";
+                                ".$error.complexity\">The password should be stronger (see strength bar below).</div>\n";
 
                             // progress bar
                             html += "<div class=\"pw-progress\">\n";
@@ -1151,7 +1151,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator
                             this.form.name + '_form.' +
                             field.sourceModel + '_' + field.sourceField + ".$dirty && " +
                             this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
-                            ".$error.awlookup\">Value not found</div>\n";
+                            ".$error.awlookup\">Value not found.</div>\n";
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + field.sourceModel + '_' + field.sourceField +
                             "_api_error\"></div>\n";
                         html += "</div>\n";
