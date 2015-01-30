@@ -120,7 +120,7 @@ function Authenticate($log, $cookieStore, $compile, $window, $rootScope, $locati
         "<div class=\"col-md-8 col-sm-8 col-xs-9\">\n" +
         "<input type=\"text\" name=\"login_username\" class=\"form-control\" ng-model=\"login_username\"" +
         "id=\"login-username\" autocomplete=\"off\" required>\n" +
-        "<div class=\"error\" ng-show=\"loginForm.login_username.$dirty && loginForm.login_username.$error.required\">A value is required!</div>\n" +
+        "<div class=\"error\" ng-show=\"loginForm.login_username.$dirty && loginForm.login_username.$error.required\">A value is required.</div>\n" +
         "<div class=\"error api-error\" ng-bind=\"usernameError\"></div>\n" +
         "</div>\n" +
         "</div>\n" +
@@ -129,7 +129,7 @@ function Authenticate($log, $cookieStore, $compile, $window, $rootScope, $locati
         "<div class=\"col-md-8 col-sm-8 col-xs-9\">\n" +
         "<input type=\"password\" name=\"login_password\" id=\"login-password\" class=\"form-control\"" +
         "ng-model=\"login_password\" required autocomplete=\"off\">\n" +
-        "<div class=\"error\" ng-show=\"loginForm.login_password.$dirty && loginForm.login_password.$error.required\">A value is required!</div>\n" +
+        "<div class=\"error\" ng-show=\"loginForm.login_password.$dirty && loginForm.login_password.$error.required\">A value is required.</div>\n" +
         "<div class=\"error api-error\" ng-bind=\"passwordError\"></div>\n" +
         "</div>\n" +
         "</div>\n" +

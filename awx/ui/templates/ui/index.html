@@ -426,8 +426,8 @@
       <form name="prompt_for_days_form" id="prompt_for_days_form">
             How many days of data would you like to <b>keep</b>? <br>
             <input type="number" id="days_to_keep" name="days_to_keep" ng-model="days_to_keep" ng-required="true" class="form-control" aw-min=0  min=0 style="margin-top:10px;" integer></input>
-            <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && prompt_for_days_form.days_to_keep.$error.required">A value is required!</div>
-            <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.number || prompt_for_days_form.days_to_keep.$error.integer" >This is not valid integer!</div>
+            <div class="error" ng-show="prompt_for_days_form.days_to_keep.$dirty && prompt_for_days_form.days_to_keep.$error.required">A value is required.</div>
+            <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.number || prompt_for_days_form.days_to_keep.$error.integer" >This is not a valid integer.</div>
             <div class="error survey_error" ng-show="prompt_for_days_form.days_to_keep.$error.awMin"> This value cannot be negative!</div>
 
             </form>
