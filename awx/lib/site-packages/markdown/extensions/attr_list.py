@@ -6,15 +6,14 @@ Adds attribute list syntax. Inspired by
 [maruku](http://maruku.rubyforge.org/proposal.html#attribute_lists)'s
 feature of the same name.
 
-Copyright 2011 [Waylan Limberg](http://achinghead.com/).
+See <https://pythonhosted.org/Markdown/extensions/attr_list.html> 
+for documentation.
 
-Contact: markdown@freewisdom.org
+Original code Copyright 2011 [Waylan Limberg](http://achinghead.com/).
 
-License: BSD (see ../LICENSE.md for details) 
+All changes Copyright 2011-2014 The Python Markdown Project
 
-Dependencies:
-* [Python 2.4+](http://python.org)
-* [Markdown 2.1+](http://packages.python.org/Markdown/)
+License: [BSD](http://www.opensource.org/licenses/bsd-license.php) 
 
 """
 
@@ -27,7 +26,7 @@ import re
 
 try:
     Scanner = re.Scanner
-except AttributeError:
+except AttributeError: #pragma: no cover
     # must be on Python 2.4
     from sre import Scanner
 
@@ -164,5 +163,5 @@ class AttrListExtension(Extension):
         md.treeprocessors.add('attr_list', AttrListTreeprocessor(md), '>prettify')
 
 
-def makeExtension(configs={}):
-    return AttrListExtension(configs=configs)
+def makeExtension(*args, **kwargs):
+    return AttrListExtension(*args, **kwargs)

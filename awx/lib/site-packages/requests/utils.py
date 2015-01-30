@@ -19,6 +19,7 @@ import re
 import sys
 import socket
 import struct
+import warnings
 
 from . import __version__
 from . import certs
@@ -114,7 +115,7 @@ def get_netrc_auth(url):
 def guess_filename(obj):
     """Tries to guess the filename of the given object."""
     name = getattr(obj, 'name', None)
-    if name and name[0] != '<' and name[-1] != '>':
+    if name and isinstance(name, builtin_str) and name[0] != '<' and name[-1] != '>':
         return os.path.basename(name)
 
 
@@ -287,6 +288,11 @@ def get_encodings_from_content(content):
 
     :param content: bytestring to extract encodings from.
     """
+    warnings.warn((
+        'In requests 3.0, get_encodings_from_content will be removed. For '
+        'more information, please see the discussion on issue #2266. (This'
+        ' warning should only appear once.)'),
+        DeprecationWarning)
 
     charset_re = re.compile(r'<meta.*?charset=["\']*(.+?)["\'>]', flags=re.I)
     pragma_re = re.compile(r'<meta.*?content=["\']*;?charset=(.+?)["\'>]', flags=re.I)
@@ -351,12 +357,14 @@ def get_unicode_from_response(r):
     Tried:
 
     1. charset from content-type
-
-    2. every encodings from ``<meta ... charset=XXX>``
-
-    3. fall back and replace all unicode characters
+    2. fall back and replace all unicode characters
 
     """
+    warnings.warn((
+        'In requests 3.0, get_unicode_from_response will be removed. For '
+        'more information, please see the discussion on issue #2266. (This'
+        ' warning should only appear once.)'),
+        DeprecationWarning)
 
     tried_encodings = []
 
@@ -554,7 +562,8 @@ def default_headers():
     return CaseInsensitiveDict({
         'User-Agent': default_user_agent(),
         'Accept-Encoding': ', '.join(('gzip', 'deflate')),
-        'Accept': '*/*'
+        'Accept': '*/*',
+        'Connection': 'keep-alive',
     })
 
 
@@ -569,7 +578,7 @@ def parse_header_links(value):
 
     replace_chars = " '\""
 
-    for val in value.split(","):
+    for val in re.split(", *<", value):
         try:
             url, params = val.split(";", 1)
         except ValueError:
@@ -671,3 +680,18 @@ def to_native_string(string, encoding='ascii'):
             out = string.decode(encoding)
 
     return out
+
+
+def urldefragauth(url):
+    """
+    Given a url remove the fragment and the authentication part
+    """
+    scheme, netloc, path, params, query, fragment = urlparse(url)
+
+    # see func:`prepend_scheme_if_needed`
+    if not netloc:
+        netloc, path = path, netloc
+
+    netloc = netloc.rsplit('@', 1)[-1]
+
+    return urlunparse((scheme, netloc, path, params, query, ''))

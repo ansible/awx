@@ -1,109 +1,108 @@
 # -*- coding: utf-8 -*-
-"""
-Copyright (c) 2003-2005  Gustavo Niemeyer <gustavo@niemeyer.net>
-
-This module offers extensions to the standard Python
-datetime module.
-"""
 import logging
 import os
-from subprocess import call
+import warnings
+import tempfile
+import shutil
+from subprocess import check_call
 from tarfile import TarFile
+from pkgutil import get_data
+from io import BytesIO
+from contextlib import closing
 
 from dateutil.tz import tzfile
 
-__author__ = "Tomi Pieviläinen <tomi.pievilainen@iki.fi>"
-__license__ = "Simplified BSD"
-
 __all__ = ["setcachesize", "gettz", "rebuild"]
 
-CACHE = []
-CACHESIZE = 10
+_ZONEFILENAME = "dateutil-zoneinfo.tar.gz"
+
+# python2.6 compatability. Note that TarFile.__exit__ != TarFile.close, but
+# it's close enough for python2.6
+_tar_open = TarFile.open
+if not hasattr(TarFile, '__exit__'):
+    def _tar_open(*args, **kwargs):
+        return closing(TarFile.open(*args, **kwargs))
+
 
 class tzfile(tzfile):
     def __reduce__(self):
         return (gettz, (self._filename,))
 
-def getzoneinfofile():
-    filenames = sorted(os.listdir(os.path.join(os.path.dirname(__file__))))
-    filenames.reverse()
-    for entry in filenames:
-        if entry.startswith("zoneinfo") and ".tar." in entry:
-            return os.path.join(os.path.dirname(__file__), entry)
-    return None
 
-ZONEINFOFILE = getzoneinfofile()
+def getzoneinfofile_stream():
+    try:
+        return BytesIO(get_data(__name__, _ZONEFILENAME))
+    except IOError as e:  # TODO  switch to FileNotFoundError?
+        warnings.warn("I/O error({0}): {1}".format(e.errno, e.strerror))
+        return None
 
-del getzoneinfofile
 
-def setcachesize(size):
-    global CACHESIZE, CACHE
-    CACHESIZE = size
-    del CACHE[size:]
+class ZoneInfoFile(object):
+    def __init__(self, zonefile_stream=None):
+        if zonefile_stream is not None:
+            with _tar_open(fileobj=zonefile_stream, mode='r') as tf:
+                # dict comprehension does not work on python2.6
+                # TODO: get back to the nicer syntax when we ditch python2.6
+                # self.zones = {zf.name: tzfile(tf.extractfile(zf),
+                #               filename = zf.name)
+                #              for zf in tf.getmembers() if zf.isfile()}
+                self.zones = dict((zf.name, tzfile(tf.extractfile(zf),
+                                                   filename=zf.name))
+                                  for zf in tf.getmembers() if zf.isfile())
+                # deal with links: They'll point to their parent object. Less
+                # waste of memory
+                # links = {zl.name: self.zones[zl.linkname]
+                #        for zl in tf.getmembers() if zl.islnk() or zl.issym()}
+                links = dict((zl.name, self.zones[zl.linkname])
+                             for zl in tf.getmembers() if
+                             zl.islnk() or zl.issym())
+                self.zones.update(links)
+        else:
+            self.zones = dict()
+
+
+# The current API has gettz as a module function, although in fact it taps into
+# a stateful class. So as a workaround for now, without changing the API, we
+# will create a new "global" class instance the first time a user requests a
+# timezone. Ugly, but adheres to the api.
+#
+# TODO: deprecate this.
+_CLASS_ZONE_INSTANCE = list()
+
 
 def gettz(name):
-    tzinfo = None
-    if ZONEINFOFILE:
-        for cachedname, tzinfo in CACHE:
-            if cachedname == name:
-                break
-        else:
-            tf = TarFile.open(ZONEINFOFILE)
-            try:
-                zonefile = tf.extractfile(name)
-            except KeyError:
-                tzinfo = None
-            else:
-                tzinfo = tzfile(zonefile)
-            tf.close()
-            CACHE.insert(0, (name, tzinfo))
-            del CACHE[CACHESIZE:]
-    return tzinfo
+    if len(_CLASS_ZONE_INSTANCE) == 0:
+        _CLASS_ZONE_INSTANCE.append(ZoneInfoFile(getzoneinfofile_stream()))
+    return _CLASS_ZONE_INSTANCE[0].zones.get(name)
 
-def rebuild(filename, tag=None, format="gz"):
+
+def rebuild(filename, tag=None, format="gz", zonegroups=[]):
     """Rebuild the internal timezone info in dateutil/zoneinfo/zoneinfo*tar*
 
     filename is the timezone tarball from ftp.iana.org/tz.
 
     """
-    import tempfile, shutil
     tmpdir = tempfile.mkdtemp()
     zonedir = os.path.join(tmpdir, "zoneinfo")
     moduledir = os.path.dirname(__file__)
-    if tag: tag = "-"+tag
-    targetname = "zoneinfo%s.tar.%s" % (tag, format)
     try:
-        tf = TarFile.open(filename)
-        # The "backwards" zone file contains links to other files, so must be
-        # processed as last
-        for name in sorted(tf.getnames(),
-                           key=lambda k: k != "backward" and k or "z"):
-            if not (name.endswith(".sh") or
-                    name.endswith(".tab") or
-                    name == "leapseconds"):
+        with _tar_open(filename) as tf:
+            for name in zonegroups:
                 tf.extract(name, tmpdir)
-                filepath = os.path.join(tmpdir, name)
-                try:
-                    # zic will return errors for nontz files in the package
-                    # such as the Makefile or README, so check_call cannot
-                    # be used (or at least extra checks would be needed)
-                    call(["zic", "-d", zonedir, filepath])
-                except OSError as e:
-                    if e.errno == 2:
-                        logging.error(
-                            "Could not find zic. Perhaps you need to install "
-                            "libc-bin or some other package that provides it, "
-                            "or it's not in your PATH?")
+            filepaths = [os.path.join(tmpdir, n) for n in zonegroups]
+            try:
+                check_call(["zic", "-d", zonedir] + filepaths)
+            except OSError as e:
+                if e.errno == 2:
+                    logging.error(
+                        "Could not find zic. Perhaps you need to install "
+                        "libc-bin or some other package that provides it, "
+                        "or it's not in your PATH?")
                     raise
-        tf.close()
-        target = os.path.join(moduledir, targetname)
-        for entry in os.listdir(moduledir):
-            if entry.startswith("zoneinfo") and ".tar." in entry:
-                os.unlink(os.path.join(moduledir, entry))
-        tf = TarFile.open(target, "w:%s" % format)
-        for entry in os.listdir(zonedir):
-            entrypath = os.path.join(zonedir, entry)
-            tf.add(entrypath, entry)
-        tf.close()
+        target = os.path.join(moduledir, _ZONEFILENAME)
+        with _tar_open(target, "w:%s" % format) as tf:
+            for entry in os.listdir(zonedir):
+                entrypath = os.path.join(zonedir, entry)
+                tf.add(entrypath, entry)
     finally:
         shutil.rmtree(tmpdir)

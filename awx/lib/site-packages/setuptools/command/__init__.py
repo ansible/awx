@@ -5,10 +5,11 @@ __all__ = [
     'register', 'bdist_wininst', 'upload_docs',
 ]
 
-from setuptools.command import install_scripts
+from distutils.command.bdist import bdist
 import sys
 
-from distutils.command.bdist import bdist
+from setuptools.command import install_scripts
+
 
 if 'egg' not in bdist.format_commands:
     bdist.format_command['egg'] = ('bdist_egg', "Python .egg file")

@@ -1,18 +1,24 @@
+# -*- coding: utf-8 -*-
 """
-Copyright (c) 2003-2007  Gustavo Niemeyer <gustavo@niemeyer.net>
-
-This module offers extensions to the standard Python
-datetime module.
+This module offers timezone implementations subclassing the abstract
+:py:`datetime.tzinfo` type. There are classes to handle tzfile format files
+(usually are in :file:`/etc/localtime`, :file:`/usr/share/zoneinfo`, etc), TZ
+environment string (in all known formats), given ranges (with help from
+relative deltas), local machine timezone, fixed offset timezone, and UTC
+timezone.
 """
-__license__ = "Simplified BSD"
-
-from six import string_types, PY3
-
 import datetime
 import struct
 import time
 import sys
 import os
+
+from six import string_types, PY3
+
+try:
+    from dateutil.tzwin import tzwin, tzwinlocal
+except ImportError:
+    tzwin = tzwinlocal = None
 
 relativedelta = None
 parser = None
@@ -21,10 +27,6 @@ rrule = None
 __all__ = ["tzutc", "tzoffset", "tzlocal", "tzfile", "tzrange",
            "tzstr", "tzical", "tzwin", "tzwinlocal", "gettz"]
 
-try:
-    from dateutil.tzwin import tzwin, tzwinlocal
-except (ImportError, OSError):
-    tzwin, tzwinlocal = None, None
 
 def tzname_in_python2(myfunc):
     """Change unicode output into bytestrings in Python 2
@@ -42,11 +44,12 @@ def tzname_in_python2(myfunc):
 ZERO = datetime.timedelta(0)
 EPOCHORDINAL = datetime.datetime.utcfromtimestamp(0).toordinal()
 
+
 class tzutc(datetime.tzinfo):
 
     def utcoffset(self, dt):
         return ZERO
-     
+
     def dst(self, dt):
         return ZERO
 
@@ -65,6 +68,7 @@ class tzutc(datetime.tzinfo):
         return "%s()" % self.__class__.__name__
 
     __reduce__ = object.__reduce__
+
 
 class tzoffset(datetime.tzinfo):
 
@@ -96,6 +100,7 @@ class tzoffset(datetime.tzinfo):
 
     __reduce__ = object.__reduce__
 
+
 class tzlocal(datetime.tzinfo):
 
     _std_offset = datetime.timedelta(seconds=-time.timezone)
@@ -123,25 +128,25 @@ class tzlocal(datetime.tzinfo):
     def _isdst(self, dt):
         # We can't use mktime here. It is unstable when deciding if
         # the hour near to a change is DST or not.
-        # 
+        #
         # timestamp = time.mktime((dt.year, dt.month, dt.day, dt.hour,
         #                         dt.minute, dt.second, dt.weekday(), 0, -1))
         # return time.localtime(timestamp).tm_isdst
         #
         # The code above yields the following result:
         #
-        #>>> import tz, datetime
-        #>>> t = tz.tzlocal()
-        #>>> datetime.datetime(2003,2,15,23,tzinfo=t).tzname()
-        #'BRDT'
-        #>>> datetime.datetime(2003,2,16,0,tzinfo=t).tzname()
-        #'BRST'
-        #>>> datetime.datetime(2003,2,15,23,tzinfo=t).tzname()
-        #'BRST'
-        #>>> datetime.datetime(2003,2,15,22,tzinfo=t).tzname()
-        #'BRDT'
-        #>>> datetime.datetime(2003,2,15,23,tzinfo=t).tzname()
-        #'BRDT'
+        # >>> import tz, datetime
+        # >>> t = tz.tzlocal()
+        # >>> datetime.datetime(2003,2,15,23,tzinfo=t).tzname()
+        # 'BRDT'
+        # >>> datetime.datetime(2003,2,16,0,tzinfo=t).tzname()
+        # 'BRST'
+        # >>> datetime.datetime(2003,2,15,23,tzinfo=t).tzname()
+        # 'BRST'
+        # >>> datetime.datetime(2003,2,15,22,tzinfo=t).tzname()
+        # 'BRDT'
+        # >>> datetime.datetime(2003,2,15,23,tzinfo=t).tzname()
+        # 'BRDT'
         #
         # Here is a more stable implementation:
         #
@@ -165,6 +170,7 @@ class tzlocal(datetime.tzinfo):
         return "%s()" % self.__class__.__name__
 
     __reduce__ = object.__reduce__
+
 
 class _ttinfo(object):
     __slots__ = ["offset", "delta", "isdst", "abbr", "isstd", "isgmt"]
@@ -205,15 +211,20 @@ class _ttinfo(object):
             if name in state:
                 setattr(self, name, state[name])
 
+
 class tzfile(datetime.tzinfo):
 
     # http://www.twinsun.com/tz/tz-link.htm
     # ftp://ftp.iana.org/tz/tz*.tar.gz
-    
-    def __init__(self, fileobj):
+
+    def __init__(self, fileobj, filename=None):
+        file_opened_here = False
         if isinstance(fileobj, string_types):
             self._filename = fileobj
             fileobj = open(fileobj, 'rb')
+            file_opened_here = True
+        elif filename is not None:
+            self._filename = filename
         elif hasattr(fileobj, "name"):
             self._filename = fileobj.name
         else:
@@ -228,125 +239,128 @@ class tzfile(datetime.tzinfo):
         # six four-byte values of type long, written in a
         # ``standard'' byte order (the high-order  byte
         # of the value is written first).
+        try:
+            if fileobj.read(4).decode() != "TZif":
+                raise ValueError("magic not found")
 
-        if fileobj.read(4).decode() != "TZif":
-            raise ValueError("magic not found")
+            fileobj.read(16)
 
-        fileobj.read(16)
+            (
+                # The number of UTC/local indicators stored in the file.
+                ttisgmtcnt,
 
-        (
-         # The number of UTC/local indicators stored in the file.
-         ttisgmtcnt,
+                # The number of standard/wall indicators stored in the file.
+                ttisstdcnt,
 
-         # The number of standard/wall indicators stored in the file.
-         ttisstdcnt,
-         
-         # The number of leap seconds for which data is
-         # stored in the file.
-         leapcnt,
+                # The number of leap seconds for which data is
+                # stored in the file.
+                leapcnt,
 
-         # The number of "transition times" for which data
-         # is stored in the file.
-         timecnt,
+                # The number of "transition times" for which data
+                # is stored in the file.
+                timecnt,
 
-         # The number of "local time types" for which data
-         # is stored in the file (must not be zero).
-         typecnt,
+                # The number of "local time types" for which data
+                # is stored in the file (must not be zero).
+                typecnt,
 
-         # The  number  of  characters  of "time zone
-         # abbreviation strings" stored in the file.
-         charcnt,
+                # The  number  of  characters  of "time zone
+                # abbreviation strings" stored in the file.
+                charcnt,
 
-        ) = struct.unpack(">6l", fileobj.read(24))
+            ) = struct.unpack(">6l", fileobj.read(24))
 
-        # The above header is followed by tzh_timecnt four-byte
-        # values  of  type long,  sorted  in ascending order.
-        # These values are written in ``standard'' byte order.
-        # Each is used as a transition time (as  returned  by
-        # time(2)) at which the rules for computing local time
-        # change.
+            # The above header is followed by tzh_timecnt four-byte
+            # values  of  type long,  sorted  in ascending order.
+            # These values are written in ``standard'' byte order.
+            # Each is used as a transition time (as  returned  by
+            # time(2)) at which the rules for computing local time
+            # change.
 
-        if timecnt:
-            self._trans_list = struct.unpack(">%dl" % timecnt,
-                                             fileobj.read(timecnt*4))
-        else:
-            self._trans_list = []
+            if timecnt:
+                self._trans_list = struct.unpack(">%dl" % timecnt,
+                                                 fileobj.read(timecnt*4))
+            else:
+                self._trans_list = []
 
-        # Next come tzh_timecnt one-byte values of type unsigned
-        # char; each one tells which of the different types of
-        # ``local time'' types described in the file is associated
-        # with the same-indexed transition time. These values
-        # serve as indices into an array of ttinfo structures that
-        # appears next in the file.
-        
-        if timecnt:
-            self._trans_idx = struct.unpack(">%dB" % timecnt,
-                                            fileobj.read(timecnt))
-        else:
-            self._trans_idx = []
-        
-        # Each ttinfo structure is written as a four-byte value
-        # for tt_gmtoff  of  type long,  in  a  standard  byte
-        # order, followed  by a one-byte value for tt_isdst
-        # and a one-byte  value  for  tt_abbrind.   In  each
-        # structure, tt_gmtoff  gives  the  number  of
-        # seconds to be added to UTC, tt_isdst tells whether
-        # tm_isdst should be set by  localtime(3),  and
-        # tt_abbrind serves  as an index into the array of
-        # time zone abbreviation characters that follow the
-        # ttinfo structure(s) in the file.
+            # Next come tzh_timecnt one-byte values of type unsigned
+            # char; each one tells which of the different types of
+            # ``local time'' types described in the file is associated
+            # with the same-indexed transition time. These values
+            # serve as indices into an array of ttinfo structures that
+            # appears next in the file.
 
-        ttinfo = []
+            if timecnt:
+                self._trans_idx = struct.unpack(">%dB" % timecnt,
+                                                fileobj.read(timecnt))
+            else:
+                self._trans_idx = []
 
-        for i in range(typecnt):
-            ttinfo.append(struct.unpack(">lbb", fileobj.read(6)))
+            # Each ttinfo structure is written as a four-byte value
+            # for tt_gmtoff  of  type long,  in  a  standard  byte
+            # order, followed  by a one-byte value for tt_isdst
+            # and a one-byte  value  for  tt_abbrind.   In  each
+            # structure, tt_gmtoff  gives  the  number  of
+            # seconds to be added to UTC, tt_isdst tells whether
+            # tm_isdst should be set by  localtime(3),  and
+            # tt_abbrind serves  as an index into the array of
+            # time zone abbreviation characters that follow the
+            # ttinfo structure(s) in the file.
 
-        abbr = fileobj.read(charcnt).decode()
+            ttinfo = []
 
-        # Then there are tzh_leapcnt pairs of four-byte
-        # values, written in  standard byte  order;  the
-        # first  value  of  each pair gives the time (as
-        # returned by time(2)) at which a leap second
-        # occurs;  the  second  gives the  total  number of
-        # leap seconds to be applied after the given time.
-        # The pairs of values are sorted in ascending order
-        # by time.
+            for i in range(typecnt):
+                ttinfo.append(struct.unpack(">lbb", fileobj.read(6)))
 
-        # Not used, for now
-        if leapcnt:
-            leap = struct.unpack(">%dl" % (leapcnt*2),
-                                 fileobj.read(leapcnt*8))
+            abbr = fileobj.read(charcnt).decode()
 
-        # Then there are tzh_ttisstdcnt standard/wall
-        # indicators, each stored as a one-byte value;
-        # they tell whether the transition times associated
-        # with local time types were specified as standard
-        # time or wall clock time, and are used when
-        # a time zone file is used in handling POSIX-style
-        # time zone environment variables.
+            # Then there are tzh_leapcnt pairs of four-byte
+            # values, written in  standard byte  order;  the
+            # first  value  of  each pair gives the time (as
+            # returned by time(2)) at which a leap second
+            # occurs;  the  second  gives the  total  number of
+            # leap seconds to be applied after the given time.
+            # The pairs of values are sorted in ascending order
+            # by time.
 
-        if ttisstdcnt:
-            isstd = struct.unpack(">%db" % ttisstdcnt,
-                                  fileobj.read(ttisstdcnt))
+            # Not used, for now
+            # if leapcnt:
+            #    leap = struct.unpack(">%dl" % (leapcnt*2),
+            #                         fileobj.read(leapcnt*8))
 
-        # Finally, there are tzh_ttisgmtcnt UTC/local
-        # indicators, each stored as a one-byte value;
-        # they tell whether the transition times associated
-        # with local time types were specified as UTC or
-        # local time, and are used when a time zone file
-        # is used in handling POSIX-style time zone envi-
-        # ronment variables.
+            # Then there are tzh_ttisstdcnt standard/wall
+            # indicators, each stored as a one-byte value;
+            # they tell whether the transition times associated
+            # with local time types were specified as standard
+            # time or wall clock time, and are used when
+            # a time zone file is used in handling POSIX-style
+            # time zone environment variables.
 
-        if ttisgmtcnt:
-            isgmt = struct.unpack(">%db" % ttisgmtcnt,
-                                  fileobj.read(ttisgmtcnt))
+            if ttisstdcnt:
+                isstd = struct.unpack(">%db" % ttisstdcnt,
+                                      fileobj.read(ttisstdcnt))
 
-        # ** Everything has been read **
+            # Finally, there are tzh_ttisgmtcnt UTC/local
+            # indicators, each stored as a one-byte value;
+            # they tell whether the transition times associated
+            # with local time types were specified as UTC or
+            # local time, and are used when a time zone file
+            # is used in handling POSIX-style time zone envi-
+            # ronment variables.
+
+            if ttisgmtcnt:
+                isgmt = struct.unpack(">%db" % ttisgmtcnt,
+                                      fileobj.read(ttisgmtcnt))
+
+            # ** Everything has been read **
+        finally:
+            if file_opened_here:
+                fileobj.close()
 
         # Build ttinfo list
         self._ttinfo_list = []
         for i in range(typecnt):
-            gmtoff, isdst, abbrind =  ttinfo[i]
+            gmtoff, isdst, abbrind = ttinfo[i]
             # Round to full-minutes if that's not the case. Python's
             # datetime doesn't accept sub-minute timezones. Check
             # http://python.org/sf/1447945 for some information.
@@ -464,7 +478,7 @@ class tzfile(datetime.tzinfo):
         # However, this class stores historical changes in the
         # dst offset, so I belive that this wouldn't be the right
         # way to implement this.
-        
+
     @tzname_in_python2
     def tzname(self, dt):
         if not self._ttinfo_std:
@@ -481,7 +495,6 @@ class tzfile(datetime.tzinfo):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, repr(self._filename))
 
@@ -490,8 +503,8 @@ class tzfile(datetime.tzinfo):
             raise ValueError("Unpickable %s class" % self.__class__.__name__)
         return (self.__class__, (self._filename,))
 
-class tzrange(datetime.tzinfo):
 
+class tzrange(datetime.tzinfo):
     def __init__(self, stdabbr, stdoffset=None,
                  dstabbr=None, dstoffset=None,
                  start=None, end=None):
@@ -512,12 +525,12 @@ class tzrange(datetime.tzinfo):
             self._dst_offset = ZERO
         if dstabbr and start is None:
             self._start_delta = relativedelta.relativedelta(
-                    hours=+2, month=4, day=1, weekday=relativedelta.SU(+1))
+                hours=+2, month=4, day=1, weekday=relativedelta.SU(+1))
         else:
             self._start_delta = start
         if dstabbr and end is None:
             self._end_delta = relativedelta.relativedelta(
-                    hours=+1, month=10, day=31, weekday=relativedelta.SU(-1))
+                hours=+1, month=10, day=31, weekday=relativedelta.SU(-1))
         else:
             self._end_delta = end
 
@@ -570,8 +583,9 @@ class tzrange(datetime.tzinfo):
 
     __reduce__ = object.__reduce__
 
+
 class tzstr(tzrange):
-    
+
     def __init__(self, s):
         global parser
         if not parser:
@@ -645,15 +659,17 @@ class tzstr(tzrange):
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, repr(self._s))
 
+
 class _tzicalvtzcomp(object):
     def __init__(self, tzoffsetfrom, tzoffsetto, isdst,
-                       tzname=None, rrule=None):
+                 tzname=None, rrule=None):
         self.tzoffsetfrom = datetime.timedelta(seconds=tzoffsetfrom)
         self.tzoffsetto = datetime.timedelta(seconds=tzoffsetto)
         self.tzoffsetdiff = self.tzoffsetto-self.tzoffsetfrom
         self.isdst = isdst
         self.tzname = tzname
         self.rrule = rrule
+
 
 class _tzicalvtz(datetime.tzinfo):
     def __init__(self, tzid, comps=[]):
@@ -718,6 +734,7 @@ class _tzicalvtz(datetime.tzinfo):
 
     __reduce__ = object.__reduce__
 
+
 class tzical(object):
     def __init__(self, fileobj):
         global rrule
@@ -726,7 +743,8 @@ class tzical(object):
 
         if isinstance(fileobj, string_types):
             self._s = fileobj
-            fileobj = open(fileobj, 'r')  # ical should be encoded in UTF-8 with CRLF
+            # ical should be encoded in UTF-8 with CRLF
+            fileobj = open(fileobj, 'r')
         elif hasattr(fileobj, "name"):
             self._s = fileobj.name
         else:
@@ -754,7 +772,7 @@ class tzical(object):
         if not s:
             raise ValueError("empty offset")
         if s[0] in ('+', '-'):
-            signal = (-1, +1)[s[0]=='+']
+            signal = (-1, +1)[s[0] == '+']
             s = s[1:]
         else:
             signal = +1
@@ -815,7 +833,8 @@ class tzical(object):
                         if not tzid:
                             raise ValueError("mandatory TZID not found")
                         if not comps:
-                            raise ValueError("at least one component is needed")
+                            raise ValueError(
+                                "at least one component is needed")
                         # Process vtimezone
                         self._vtz[tzid] = _tzicalvtz(tzid, comps)
                         invtz = False
@@ -823,9 +842,11 @@ class tzical(object):
                         if not founddtstart:
                             raise ValueError("mandatory DTSTART not found")
                         if tzoffsetfrom is None:
-                            raise ValueError("mandatory TZOFFSETFROM not found")
+                            raise ValueError(
+                                "mandatory TZOFFSETFROM not found")
                         if tzoffsetto is None:
-                            raise ValueError("mandatory TZOFFSETFROM not found")
+                            raise ValueError(
+                                "mandatory TZOFFSETFROM not found")
                         # Process component
                         rr = None
                         if rrulelines:
@@ -848,15 +869,18 @@ class tzical(object):
                         rrulelines.append(line)
                     elif name == "TZOFFSETFROM":
                         if parms:
-                            raise ValueError("unsupported %s parm: %s "%(name, parms[0]))
+                            raise ValueError(
+                                "unsupported %s parm: %s " % (name, parms[0]))
                         tzoffsetfrom = self._parse_offset(value)
                     elif name == "TZOFFSETTO":
                         if parms:
-                            raise ValueError("unsupported TZOFFSETTO parm: "+parms[0])
+                            raise ValueError(
+                                "unsupported TZOFFSETTO parm: "+parms[0])
                         tzoffsetto = self._parse_offset(value)
                     elif name == "TZNAME":
                         if parms:
-                            raise ValueError("unsupported TZNAME parm: "+parms[0])
+                            raise ValueError(
+                                "unsupported TZNAME parm: "+parms[0])
                         tzname = value
                     elif name == "COMMENT":
                         pass
@@ -865,7 +889,8 @@ class tzical(object):
                 else:
                     if name == "TZID":
                         if parms:
-                            raise ValueError("unsupported TZID parm: "+parms[0])
+                            raise ValueError(
+                                "unsupported TZID parm: "+parms[0])
                         tzid = value
                     elif name in ("TZURL", "LAST-MODIFIED", "COMMENT"):
                         pass
@@ -885,6 +910,7 @@ if sys.platform != "win32":
 else:
     TZFILES = []
     TZPATHS = []
+
 
 def gettz(name=None):
     tz = None
@@ -933,11 +959,11 @@ def gettz(name=None):
                     pass
             else:
                 tz = None
-                if tzwin:
+                if tzwin is not None:
                     try:
                         tz = tzwin(name)
-                    except OSError:
-                        pass
+                    except WindowsError:
+                        tz = None
                 if not tz:
                     from dateutil.zoneinfo import gettz
                     tz = gettz(name)

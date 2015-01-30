@@ -1,69 +1,43 @@
 """develop tests
 """
-import sys
 import os
-import shutil
-import unittest
-import tempfile
 import types
+
+import pytest
 
 import pkg_resources
 import setuptools.sandbox
-from setuptools.sandbox import DirectorySandbox, SandboxViolation
+from setuptools.sandbox import DirectorySandbox
 
-def has_win32com():
-    """
-    Run this to determine if the local machine has win32com, and if it
-    does, include additional tests.
-    """
-    if not sys.platform.startswith('win32'):
-        return False
-    try:
-        mod = __import__('win32com')
-    except ImportError:
-        return False
-    return True
 
-class TestSandbox(unittest.TestCase):
+class TestSandbox:
 
-    def setUp(self):
-        self.dir = tempfile.mkdtemp()
-
-    def tearDown(self):
-        shutil.rmtree(self.dir)
-
-    def test_devnull(self):
-        if sys.version < '2.4':
-            return
-        sandbox = DirectorySandbox(self.dir)
+    def test_devnull(self, tmpdir):
+        sandbox = DirectorySandbox(str(tmpdir))
         sandbox.run(self._file_writer(os.devnull))
 
+    @staticmethod
     def _file_writer(path):
         def do_write():
-            f = open(path, 'w')
-            f.write('xxx')
-            f.close()
+            with open(path, 'w') as f:
+                f.write('xxx')
         return do_write
 
-    _file_writer = staticmethod(_file_writer)
-
-    if has_win32com():
-        def test_win32com(self):
-            """
-            win32com should not be prevented from caching COM interfaces
-            in gen_py.
-            """
-            import win32com
-            gen_py = win32com.__gen_path__
-            target = os.path.join(gen_py, 'test_write')
-            sandbox = DirectorySandbox(self.dir)
-            try:
-                try:
-                    sandbox.run(self._file_writer(target))
-                except SandboxViolation:
-                    self.fail("Could not create gen_py file due to SandboxViolation")
-            finally:
-                if os.path.exists(target): os.remove(target)
+    def test_win32com(self, tmpdir):
+        """
+        win32com should not be prevented from caching COM interfaces
+        in gen_py.
+        """
+        win32com = pytest.importorskip('win32com')
+        gen_py = win32com.__gen_path__
+        target = os.path.join(gen_py, 'test_write')
+        sandbox = DirectorySandbox(str(tmpdir))
+        try:
+            # attempt to create gen_py file
+            sandbox.run(self._file_writer(target))
+        finally:
+            if os.path.exists(target):
+                os.remove(target)
 
     def test_setup_py_with_BOM(self):
         """
@@ -72,8 +46,57 @@ class TestSandbox(unittest.TestCase):
         target = pkg_resources.resource_filename(__name__,
             'script-with-bom.py')
         namespace = types.ModuleType('namespace')
-        setuptools.sandbox.execfile(target, vars(namespace))
+        setuptools.sandbox._execfile(target, vars(namespace))
         assert namespace.result == 'passed'
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_setup_py_with_CRLF(self, tmpdir):
+        setup_py = tmpdir / 'setup.py'
+        with setup_py.open('wb') as stream:
+            stream.write(b'"degenerate script"\r\n')
+        setuptools.sandbox._execfile(str(setup_py), globals())
+
+
+class TestExceptionSaver:
+    def test_exception_trapped(self):
+        with setuptools.sandbox.ExceptionSaver():
+            raise ValueError("details")
+
+    def test_exception_resumed(self):
+        with setuptools.sandbox.ExceptionSaver() as saved_exc:
+            raise ValueError("details")
+
+        with pytest.raises(ValueError) as caught:
+            saved_exc.resume()
+
+        assert isinstance(caught.value, ValueError)
+        assert str(caught.value) == 'details'
+
+    def test_exception_reconstructed(self):
+        orig_exc = ValueError("details")
+
+        with setuptools.sandbox.ExceptionSaver() as saved_exc:
+            raise orig_exc
+
+        with pytest.raises(ValueError) as caught:
+            saved_exc.resume()
+
+        assert isinstance(caught.value, ValueError)
+        assert caught.value is not orig_exc
+
+    def test_no_exception_passes_quietly(self):
+        with setuptools.sandbox.ExceptionSaver() as saved_exc:
+            pass
+
+        saved_exc.resume()
+
+    def test_unpickleable_exception(self):
+        class CantPickleThis(Exception):
+            "This Exception is unpickleable because it's not in globals"
+
+        with setuptools.sandbox.ExceptionSaver() as saved_exc:
+            raise CantPickleThis('detail')
+
+        with pytest.raises(setuptools.sandbox.UnpickleableException) as caught:
+            saved_exc.resume()
+
+        assert str(caught.value) == "CantPickleThis('detail',)"

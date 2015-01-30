@@ -2,7 +2,7 @@
 # packages).  Install using "pip --no-index -r dev_local.txt".
 
 # May need to install these packages separately the first time:
-setuptools-2.2.tar.gz
+setuptools-12.0.5.tar.gz
 distribute-0.7.3.zip
 Django-1.6.7.tar.gz
 

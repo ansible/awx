@@ -42,9 +42,9 @@ from __future__ import unicode_literals
 from . import util
 ElementTree = util.etree.ElementTree
 QName = util.etree.QName
-if hasattr(util.etree, 'test_comment'):
+if hasattr(util.etree, 'test_comment'): #pragma: no cover
     Comment = util.etree.test_comment
-else:
+else: #pragma: no cover
     Comment = util.etree.Comment
 PI = util.etree.PI
 ProcessingInstruction = util.etree.ProcessingInstruction
@@ -56,7 +56,7 @@ HTML_EMPTY = ("area", "base", "basefont", "br", "col", "frame", "hr",
 
 try:
     HTML_EMPTY = set(HTML_EMPTY)
-except NameError:
+except NameError: #pragma: no cover
     pass
 
 _namespace_map = {
@@ -73,7 +73,7 @@ _namespace_map = {
 }
 
 
-def _raise_serialization_error(text):
+def _raise_serialization_error(text): #pragma: no cover
     raise TypeError(
         "cannot serialize %r (type %s)" % (text, type(text).__name__)
         )
@@ -81,7 +81,7 @@ def _raise_serialization_error(text):
 def _encode(text, encoding):
     try:
         return text.encode(encoding, "xmlcharrefreplace")
-    except (TypeError, AttributeError):
+    except (TypeError, AttributeError): #pragma: no cover
         _raise_serialization_error(text)
 
 def _escape_cdata(text):
@@ -97,7 +97,7 @@ def _escape_cdata(text):
         if ">" in text:
             text = text.replace(">", "&gt;")
         return text
-    except (TypeError, AttributeError):
+    except (TypeError, AttributeError): #pragma: no cover
         _raise_serialization_error(text)
 
 
@@ -115,7 +115,7 @@ def _escape_attrib(text):
         if "\n" in text:
             text = text.replace("\n", "&#10;")
         return text
-    except (TypeError, AttributeError):
+    except (TypeError, AttributeError): #pragma: no cover
         _raise_serialization_error(text)
 
 def _escape_attrib_html(text):
@@ -130,7 +130,7 @@ def _escape_attrib_html(text):
         if "\"" in text:
             text = text.replace("\"", "&quot;")
         return text
-    except (TypeError, AttributeError):
+    except (TypeError, AttributeError): #pragma: no cover
         _raise_serialization_error(text)
 
 
@@ -240,7 +240,7 @@ def _namespaces(elem, default_namespace=None):
                         "default_namespace option"
                         )
                 qnames[qname] = qname
-        except TypeError:
+        except TypeError: #pragma: no cover
             _raise_serialization_error(qname)
 
     # populate qname and namespaces table

@@ -75,7 +75,9 @@ is_solaris = ('solar==' in str(sys.platform).lower())   # Complete guess.
 
 try:
     import simplejson as json
-except ImportError:
+except (ImportError, SyntaxError):
+    # simplejson does not support Python 3.2, it throws a SyntaxError
+    # because of u'...' Unicode literals.
     import json
 
 # ---------
@@ -90,7 +92,6 @@ if is_py2:
     from Cookie import Morsel
     from StringIO import StringIO
     from .packages.urllib3.packages.ordered_dict import OrderedDict
-    from httplib import IncompleteRead
 
     builtin_str = str
     bytes = str
@@ -106,7 +107,6 @@ elif is_py3:
     from http.cookies import Morsel
     from io import StringIO
     from collections import OrderedDict
-    from http.client import IncompleteRead
 
     builtin_str = str
     str = str

@@ -1,18 +1,17 @@
+# -*- coding: utf-8 -*-
 """
-Copyright (c) 2003-2007  Gustavo Niemeyer <gustavo@niemeyer.net>
-
-This module offers extensions to the standard Python
-datetime module.
+This module offers a generic easter computing method for any given year, using
+Western, Orthodox or Julian algorithms.
 """
-__license__ = "Simplified BSD"
 
 import datetime
 
 __all__ = ["easter", "EASTER_JULIAN", "EASTER_ORTHODOX", "EASTER_WESTERN"]
 
-EASTER_JULIAN   = 1
+EASTER_JULIAN = 1
 EASTER_ORTHODOX = 2
-EASTER_WESTERN  = 3
+EASTER_WESTERN = 3
+
 
 def easter(year, method=EASTER_WESTERN):
     """
@@ -24,7 +23,7 @@ def easter(year, method=EASTER_WESTERN):
 
     This algorithm implements three different easter
     calculation methods:
-    
+
     1 - Original calculation in Julian calendar, valid in
         dates after 326 AD
     2 - Original method, with date converted to Gregorian
@@ -39,7 +38,7 @@ def easter(year, method=EASTER_WESTERN):
     EASTER_WESTERN  = 3
 
     The default method is method 3.
-    
+
     More about the algorithm may be found at:
 
     http://users.chariot.net.au/~gmarts/eastalg.htm
@@ -68,24 +67,23 @@ def easter(year, method=EASTER_WESTERN):
     e = 0
     if method < 3:
         # Old method
-        i = (19*g+15)%30
-        j = (y+y//4+i)%7
+        i = (19*g + 15) % 30
+        j = (y + y//4 + i) % 7
         if method == 2:
             # Extra dates to convert Julian to Gregorian date
             e = 10
             if y > 1600:
-                e = e+y//100-16-(y//100-16)//4
+                e = e + y//100 - 16 - (y//100 - 16)//4
     else:
         # New method
         c = y//100
-        h = (c-c//4-(8*c+13)//25+19*g+15)%30
-        i = h-(h//28)*(1-(h//28)*(29//(h+1))*((21-g)//11))
-        j = (y+y//4+i+2-c+c//4)%7
+        h = (c - c//4 - (8*c + 13)//25 + 19*g + 15) % 30
+        i = h - (h//28)*(1 - (h//28)*(29//(h + 1))*((21 - g)//11))
+        j = (y + y//4 + i + 2 - c + c//4) % 7
 
     # p can be from -6 to 56 corresponding to dates 22 March to 23 May
     # (later dates apply to method 2, although 23 May never actually occurs)
-    p = i-j+e
-    d = 1+(p+27+(p+6)//40)%31
-    m = 3+(p+26)//30
+    p = i - j + e
+    d = 1 + (p + 27 + (p + 6)//40) % 31
+    m = 3 + (p + 26)//30
     return datetime.date(int(y), int(m), int(d))
-

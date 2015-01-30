@@ -122,7 +122,9 @@ def notification_handler(server):
                 'type': 'event',
             }
             for session_id, socket in list(server.sockets.iteritems()):
+                print("Going to emit an event, here are our sessions: %s" % valid_sockets)
                 if session_id in valid_sockets:
+                    print("Sending to session: %s" % str(session_id))
                     socket.send_packet(packet)
 
 class Command(NoArgsCommand):

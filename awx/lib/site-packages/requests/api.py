@@ -22,12 +22,17 @@ def request(method, url, **kwargs):
     :param url: URL for the new :class:`Request` object.
     :param params: (optional) Dictionary or bytes to be sent in the query string for the :class:`Request`.
     :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
+    :param json: (optional) json data to send in the body of the :class:`Request`.
     :param headers: (optional) Dictionary of HTTP Headers to send with the :class:`Request`.
     :param cookies: (optional) Dict or CookieJar object to send with the :class:`Request`.
-    :param files: (optional) Dictionary of 'name': file-like-objects (or {'name': ('filename', fileobj)}) for multipart encoding upload.
+    :param files: (optional) Dictionary of ``'name': file-like-objects`` (or ``{'name': ('filename', fileobj)}``) for multipart encoding upload.
     :param auth: (optional) Auth tuple to enable Basic/Digest/Custom HTTP Auth.
-    :param timeout: (optional) Float describing the timeout of the request in seconds.
+    :param timeout: (optional) How long to wait for the server to send data
+        before giving up, as a float, or a (`connect timeout, read timeout
+        <user/advanced.html#timeouts>`_) tuple.
+    :type timeout: float or tuple
     :param allow_redirects: (optional) Boolean. Set to True if POST/PUT/DELETE redirect following is allowed.
+    :type allow_redirects: bool
     :param proxies: (optional) Dictionary mapping protocol to the URL of the proxy.
     :param verify: (optional) if ``True``, the SSL cert will be verified. A CA_BUNDLE path can also be provided.
     :param stream: (optional) if ``False``, the response content will be immediately downloaded.
@@ -41,7 +46,12 @@ def request(method, url, **kwargs):
     """
 
     session = sessions.Session()
-    return session.request(method=method, url=url, **kwargs)
+    response = session.request(method=method, url=url, **kwargs)
+    # By explicitly closing the session, we avoid leaving sockets open which
+    # can trigger a ResourceWarning in some cases, and look like a memory leak
+    # in others.
+    session.close()
+    return response
 
 
 def get(url, **kwargs):
@@ -77,15 +87,16 @@ def head(url, **kwargs):
     return request('head', url, **kwargs)
 
 
-def post(url, data=None, **kwargs):
+def post(url, data=None, json=None, **kwargs):
     """Sends a POST request. Returns :class:`Response` object.
 
     :param url: URL for the new :class:`Request` object.
     :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
+    :param json: (optional) json data to send in the body of the :class:`Request`.
     :param \*\*kwargs: Optional arguments that ``request`` takes.
     """
 
-    return request('post', url, data=data, **kwargs)
+    return request('post', url, data=data, json=json, **kwargs)
 
 
 def put(url, data=None, **kwargs):

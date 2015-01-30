@@ -1,12 +1,17 @@
-from setuptools import Command
 from distutils.errors import DistutilsOptionError
+from unittest import TestLoader
+import unittest
 import sys
-from pkg_resources import *
-from pkg_resources import _namespace_packages
-from unittest import TestLoader, main
+
+from pkg_resources import (resource_listdir, resource_exists, normalize_path,
+                           working_set, _namespace_packages,
+                           add_activation_listener, require, EntryPoint)
+from setuptools import Command
+from setuptools.compat import PY3
+from setuptools.py31compat import unittest_main
+
 
 class ScanningLoader(TestLoader):
-
     def loadTestsFromModule(self, module):
         """Return a suite of all tests cases contained in the given module
 
@@ -15,48 +20,45 @@ class ScanningLoader(TestLoader):
         the return value to the tests.
         """
         tests = []
-        if module.__name__!='setuptools.tests.doctest':  # ugh
-            tests.append(TestLoader.loadTestsFromModule(self,module))
+        tests.append(TestLoader.loadTestsFromModule(self, module))
 
         if hasattr(module, "additional_tests"):
             tests.append(module.additional_tests())
 
         if hasattr(module, '__path__'):
             for file in resource_listdir(module.__name__, ''):
-                if file.endswith('.py') and file!='__init__.py':
-                    submodule = module.__name__+'.'+file[:-3]
+                if file.endswith('.py') and file != '__init__.py':
+                    submodule = module.__name__ + '.' + file[:-3]
                 else:
-                    if resource_exists(
-                        module.__name__, file+'/__init__.py'
-                    ):
-                        submodule = module.__name__+'.'+file
+                    if resource_exists(module.__name__, file + '/__init__.py'):
+                        submodule = module.__name__ + '.' + file
                     else:
                         continue
                 tests.append(self.loadTestsFromName(submodule))
 
-        if len(tests)!=1:
+        if len(tests) != 1:
             return self.suiteClass(tests)
         else:
-            return tests[0] # don't create a nested suite for only one return
+            return tests[0]  # don't create a nested suite for only one return
 
 
 class test(Command):
-
     """Command to run unit tests after in-place build"""
 
     description = "run unit tests after in-place build"
 
     user_options = [
-        ('test-module=','m', "Run 'test_suite' in specified module"),
-        ('test-suite=','s',
-            "Test suite to run (e.g. 'some_module.test_suite')"),
+        ('test-module=', 'm', "Run 'test_suite' in specified module"),
+        ('test-suite=', 's',
+         "Test suite to run (e.g. 'some_module.test_suite')"),
+        ('test-runner=', 'r', "Test runner to use"),
     ]
 
     def initialize_options(self):
         self.test_suite = None
         self.test_module = None
         self.test_loader = None
-
+        self.test_runner = None
 
     def finalize_options(self):
 
@@ -64,7 +66,7 @@ class test(Command):
             if self.test_module is None:
                 self.test_suite = self.distribution.test_suite
             else:
-                self.test_suite = self.test_module+".test_suite"
+                self.test_suite = self.test_module + ".test_suite"
         elif self.test_module:
             raise DistutilsOptionError(
                 "You may specify a module or a suite, but not both"
@@ -73,16 +75,18 @@ class test(Command):
         self.test_args = [self.test_suite]
 
         if self.verbose:
-            self.test_args.insert(0,'--verbose')
+            self.test_args.insert(0, '--verbose')
         if self.test_loader is None:
-            self.test_loader = getattr(self.distribution,'test_loader',None)
+            self.test_loader = getattr(self.distribution, 'test_loader', None)
         if self.test_loader is None:
             self.test_loader = "setuptools.command.test:ScanningLoader"
-
-
+        if self.test_runner is None:
+            self.test_runner = getattr(self.distribution, 'test_runner', None)
 
     def with_project_on_sys_path(self, func):
-        if sys.version_info >= (3,) and getattr(self.distribution, 'use_2to3', False):
+        with_2to3 = PY3 and getattr(self.distribution, 'use_2to3', False)
+
+        if with_2to3:
             # If we run 2to3 we can not do this inplace:
 
             # Ensure metadata is up-to-date
@@ -122,10 +126,10 @@ class test(Command):
             sys.modules.update(old_modules)
             working_set.__init__()
 
-
     def run(self):
         if self.distribution.install_requires:
-            self.distribution.fetch_build_eggs(self.distribution.install_requires)
+            self.distribution.fetch_build_eggs(
+                self.distribution.install_requires)
         if self.distribution.tests_require:
             self.distribution.fetch_build_eggs(self.distribution.tests_require)
 
@@ -137,14 +141,11 @@ class test(Command):
                 self.announce('running "unittest %s"' % cmd)
                 self.with_project_on_sys_path(self.run_tests)
 
-
     def run_tests(self):
-        import unittest
-
         # Purge modules under test from sys.modules. The test loader will
         # re-import them from the build location. Required when 2to3 is used
         # with namespace packages.
-        if sys.version_info >= (3,) and getattr(self.distribution, 'use_2to3', False):
+        if PY3 and getattr(self.distribution, 'use_2to3', False):
             module = self.test_args[-1].split('.')[0]
             if module in _namespace_packages:
                 del_modules = []
@@ -156,43 +157,19 @@ class test(Command):
                         del_modules.append(name)
                 list(map(sys.modules.__delitem__, del_modules))
 
-        loader_ep = EntryPoint.parse("x="+self.test_loader)
-        loader_class = loader_ep.load(require=False)
-        cks = loader_class()
-        unittest.main(
-            None, None, [unittest.__file__]+self.test_args,
-            testLoader = cks
+        unittest_main(
+            None, None, [unittest.__file__] + self.test_args,
+            testLoader=self._resolve_as_ep(self.test_loader),
+            testRunner=self._resolve_as_ep(self.test_runner),
         )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @staticmethod
+    def _resolve_as_ep(val):
+        """
+        Load the indicated attribute value, called, as a as if it were
+        specified as an entry point.
+        """
+        if val is None:
+            return
+        parsed = EntryPoint.parse("x=" + val)
+        return parsed.resolve()()

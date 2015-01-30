@@ -3,28 +3,20 @@
 import os
 import shutil
 import tempfile
-import unittest
-import textwrap
 
-try:
-    import ast
-except:
-    pass
+import pytest
 
 import pkg_resources
+from .textwrap import DALS
 
-from setuptools.tests.py26compat import skipIf
 
-def DALS(s):
-    "dedent and left-strip"
-    return textwrap.dedent(s).lstrip()
-
-class TestDistInfo(unittest.TestCase):
+class TestDistInfo:
 
     def test_distinfo(self):
-        dists = {}
-        for d in pkg_resources.find_distributions(self.tmpdir):
-            dists[d.project_name] = d
+        dists = dict(
+            (d.project_name, d)
+            for d in pkg_resources.find_distributions(self.tmpdir)
+        )
 
         assert len(dists) == 2, dists
 
@@ -34,50 +26,45 @@ class TestDistInfo(unittest.TestCase):
         assert versioned.version == '2.718' # from filename
         assert unversioned.version == '0.3' # from METADATA
 
-    @skipIf('ast' not in globals(),
-        "ast is used to test conditional dependencies (Python >= 2.6)")
+    @pytest.mark.importorskip('ast')
     def test_conditional_dependencies(self):
-        requires = [pkg_resources.Requirement.parse('splort==4'),
-                    pkg_resources.Requirement.parse('quux>=1.1')]
+        specs = 'splort==4', 'quux>=1.1'
+        requires = list(map(pkg_resources.Requirement.parse, specs))
 
         for d in pkg_resources.find_distributions(self.tmpdir):
-            self.assertEqual(d.requires(), requires[:1])
-            self.assertEqual(d.requires(extras=('baz',)), requires)
-            self.assertEqual(d.extras, ['baz'])
+            assert d.requires() == requires[:1]
+            assert d.requires(extras=('baz',)) == requires
+            assert d.extras == ['baz']
 
-    def setUp(self):
+    metadata_template = DALS("""
+        Metadata-Version: 1.2
+        Name: {name}
+        {version}
+        Requires-Dist: splort (==4)
+        Provides-Extra: baz
+        Requires-Dist: quux (>=1.1); extra == 'baz'
+        """)
+
+    def setup_method(self, method):
         self.tmpdir = tempfile.mkdtemp()
-        versioned = os.path.join(self.tmpdir,
-                                 'VersionedDistribution-2.718.dist-info')
+        dist_info_name = 'VersionedDistribution-2.718.dist-info'
+        versioned = os.path.join(self.tmpdir, dist_info_name)
         os.mkdir(versioned)
-        metadata_file = open(os.path.join(versioned, 'METADATA'), 'w+')
-        try:
-            metadata_file.write(DALS(
-                """
-                Metadata-Version: 1.2
-                Name: VersionedDistribution
-                Requires-Dist: splort (4)
-                Provides-Extra: baz
-                Requires-Dist: quux (>=1.1); extra == 'baz'
-                """))
-        finally:
-            metadata_file.close()
-        unversioned = os.path.join(self.tmpdir,
-                                   'UnversionedDistribution.dist-info')
+        with open(os.path.join(versioned, 'METADATA'), 'w+') as metadata_file:
+            metadata = self.metadata_template.format(
+                name='VersionedDistribution',
+                version='',
+            ).replace('\n\n', '\n')
+            metadata_file.write(metadata)
+        dist_info_name = 'UnversionedDistribution.dist-info'
+        unversioned = os.path.join(self.tmpdir, dist_info_name)
         os.mkdir(unversioned)
-        metadata_file = open(os.path.join(unversioned, 'METADATA'), 'w+')
-        try:
-            metadata_file.write(DALS(
-                """
-                Metadata-Version: 1.2
-                Name: UnversionedDistribution
-                Version: 0.3
-                Requires-Dist: splort (==4)
-                Provides-Extra: baz
-                Requires-Dist: quux (>=1.1); extra == 'baz'
-                """))
-        finally:
-            metadata_file.close()
+        with open(os.path.join(unversioned, 'METADATA'), 'w+') as metadata_file:
+            metadata = self.metadata_template.format(
+                name='UnversionedDistribution',
+                version='Version: 0.3',
+            )
+            metadata_file.write(metadata)
 
-    def tearDown(self):
+    def teardown_method(self, method):
         shutil.rmtree(self.tmpdir)

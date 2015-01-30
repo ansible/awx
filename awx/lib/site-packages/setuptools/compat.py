@@ -1,15 +1,15 @@
 import sys
 import itertools
 
-if sys.version_info[0] < 3:
-    PY3 = False
+PY3 = sys.version_info >= (3,)
+PY2 = not PY3
 
+if PY2:
     basestring = basestring
     import __builtin__ as builtins
     import ConfigParser
     from StringIO import StringIO
     BytesIO = StringIO
-    execfile = execfile
     func_code = lambda o: o.func_code
     func_globals = lambda o: o.func_globals
     im_func = lambda o: o.im_func
@@ -21,8 +21,6 @@ if sys.version_info[0] < 3:
     iteritems = lambda o: o.iteritems()
     long_type = long
     maxsize = sys.maxint
-    next = lambda o: o.next()
-    numeric_types = (int, long, float)
     unichr = unichr
     unicode = unicode
     bytes = str
@@ -34,9 +32,8 @@ if sys.version_info[0] < 3:
 
     exec("""def reraise(tp, value, tb=None):
     raise tp, value, tb""")
-else:
-    PY3 = True
 
+if PY3:
     basestring = str
     import builtins
     import configparser as ConfigParser
@@ -51,8 +48,6 @@ else:
     iteritems = lambda o: o.items()
     long_type = int
     maxsize = sys.maxsize
-    next = next
-    numeric_types = (int, float)
     unichr = chr
     unicode = str
     bytes = bytes
@@ -64,18 +59,6 @@ else:
         urlunsplit, splittag,
     )
     filterfalse = itertools.filterfalse
-
-    def execfile(fn, globs=None, locs=None):
-        if globs is None:
-            globs = globals()
-        if locs is None:
-            locs = globs
-        f = open(fn, 'rb')
-        try:
-            source = f.read()
-        finally:
-            f.close()
-        exec(compile(source, fn, 'exec'), globs, locs)
 
     def reraise(tp, value, tb=None):
         if value.__traceback__ is not tb:
