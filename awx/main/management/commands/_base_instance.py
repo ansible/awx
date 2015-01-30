@@ -1,6 +1,13 @@
-from django.core.management.base import BaseCommand, CommandError
+# Copyright (c) 2014 Ansible, Inc.
+# All Rights Reserved.
+
 from optparse import make_option
+
+from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+
+from awx.main.models import Project
+
 
 class OptionEnforceError(Exception):
     def __init__(self, value):
@@ -137,3 +144,10 @@ class BaseCommandInstance(BaseCommand):
     @staticmethod
     def instance_str(instance):
         return BaseCommandInstance.__instance_str(instance, ('uuid', 'hostname', 'role'))
+
+    def update_projects(self, instance):
+        """Update all projects, ensuring the job runs against this instance,
+        which is the primary instance.
+        """
+        for project in Project.objects.all():
+            project.update()

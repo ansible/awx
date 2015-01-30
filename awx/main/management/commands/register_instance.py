@@ -57,5 +57,9 @@ class Command(BaseCommandInstance):
             instance = Instance(uuid=uuid, primary=self.is_option_primary(), hostname=self.get_option_hostname())
             instance.save()
 
+            # If this is a primary instance, update projects.
+            if instance.primary:
+                self.update_projects(instance)
+                
             # Done!
             print('Successfully registered instance %s.' % instance_str(instance))
