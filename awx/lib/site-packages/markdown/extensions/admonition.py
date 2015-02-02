@@ -4,16 +4,39 @@ Admonition extension for Python-Markdown
 
 Adds rST-style admonitions. Inspired by [rST][] feature with the same name.
 
+The syntax is (followed by an indented block with the contents):
+    !!! [type] [optional explicit title]
+
+Where `type` is used as a CSS class name of the div. If not present, `title`
+defaults to the capitalized `type`, so "note" -> "Note".
+
+rST suggests the following `types`, but you're free to use whatever you want:
+    attention, caution, danger, error, hint, important, note, tip, warning
+
+
+A simple example:
+    !!! note
+        This is the first line inside the box.
+
+Outputs:
+    <div class="admonition note">
+    <p class="admonition-title">Note</p>
+    <p>This is the first line inside the box</p>
+    </div>
+
+You can also specify the title and CSS class of the admonition:
+    !!! custom "Did you know?"
+        Another line here.
+
+Outputs:
+    <div class="admonition custom">
+    <p class="admonition-title">Did you know?</p>
+    <p>Another line here.</p>
+    </div>
+
 [rST]: http://docutils.sourceforge.net/docs/ref/rst/directives.html#specific-admonitions
 
-See <https://pythonhosted.org/Markdown/extensions/admonition.html> 
-for documentation.
-
-Original code Copyright [Tiago Serafim](http://www.tiagoserafim.com/).
-
-All changes Copyright The Python Markdown Project
-
-License: [BSD](http://www.opensource.org/licenses/bsd-license.php) 
+By [Tiago Serafim](http://www.tiagoserafim.com/).
 
 """
 
@@ -91,6 +114,5 @@ class AdmonitionProcessor(BlockProcessor):
         return klass, title
 
 
-def makeExtension(*args, **kwargs):
-    return AdmonitionExtension(*args, **kwargs)
-
+def makeExtension(configs={}):
+    return AdmonitionExtension(configs=configs)

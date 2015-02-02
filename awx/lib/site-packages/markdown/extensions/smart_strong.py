@@ -4,14 +4,21 @@ Smart_Strong Extension for Python-Markdown
 
 This extention adds smarter handling of double underscores within words.
 
-See <https://pythonhosted.org/Markdown/extensions/smart_strong.html> 
-for documentation.
+Simple Usage:
 
-Original code Copyright 2011 [Waylan Limberg](http://achinghead.com)
+    >>> import markdown
+    >>> print markdown.markdown('Text with double__underscore__words.',
+    ...                   extensions=['smart_strong'])
+    <p>Text with double__underscore__words.</p>
+    >>> print markdown.markdown('__Strong__ still works.',
+    ...                   extensions=['smart_strong'])
+    <p><strong>Strong</strong> still works.</p>
+    >>> print markdown.markdown('__this__works__too__.',
+    ...                   extensions=['smart_strong'])
+    <p><strong>this__works__too</strong>.</p>
 
-All changes Copyright 2011-2014 The Python Markdown Project
-
-License: [BSD](http://www.opensource.org/licenses/bsd-license.php) 
+Copyright 2011
+[Waylan Limberg](http://achinghead.com)
 
 '''
 
@@ -31,5 +38,5 @@ class SmartEmphasisExtension(Extension):
         md.inlinePatterns['strong'] = SimpleTagPattern(STRONG_RE, 'strong')
         md.inlinePatterns.add('strong2', SimpleTagPattern(SMART_STRONG_RE, 'strong'), '>emphasis2')
 
-def makeExtension(*args, **kwargs):
-    return SmartEmphasisExtension(*args, **kwargs)
+def makeExtension(configs={}):
+    return SmartEmphasisExtension(configs=dict(configs))

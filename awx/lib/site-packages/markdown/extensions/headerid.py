@@ -4,14 +4,73 @@ HeaderID Extension for Python-Markdown
 
 Auto-generate id attributes for HTML headers.
 
-See <https://pythonhosted.org/Markdown/extensions/header_id.html> 
-for documentation.
+Basic usage:
 
-Original code Copyright 2007-2011 [Waylan Limberg](http://achinghead.com/).
+    >>> import markdown
+    >>> text = "# Some Header #"
+    >>> md = markdown.markdown(text, ['headerid'])
+    >>> print md
+    <h1 id="some-header">Some Header</h1>
 
-All changes Copyright 2011-2014 The Python Markdown Project
+All header IDs are unique:
 
-License: [BSD](http://www.opensource.org/licenses/bsd-license.php) 
+    >>> text = '''
+    ... #Header
+    ... #Header
+    ... #Header'''
+    >>> md = markdown.markdown(text, ['headerid'])
+    >>> print md
+    <h1 id="header">Header</h1>
+    <h1 id="header_1">Header</h1>
+    <h1 id="header_2">Header</h1>
+
+To fit within a html template's hierarchy, set the header base level:
+
+    >>> text = '''
+    ... #Some Header
+    ... ## Next Level'''
+    >>> md = markdown.markdown(text, ['headerid(level=3)'])
+    >>> print md
+    <h3 id="some-header">Some Header</h3>
+    <h4 id="next-level">Next Level</h4>
+
+Works with inline markup.
+
+    >>> text = '#Some *Header* with [markup](http://example.com).'
+    >>> md = markdown.markdown(text, ['headerid'])
+    >>> print md
+    <h1 id="some-header-with-markup">Some <em>Header</em> with <a href="http://example.com">markup</a>.</h1>
+
+Turn off auto generated IDs:
+
+    >>> text = '''
+    ... # Some Header
+    ... # Another Header'''
+    >>> md = markdown.markdown(text, ['headerid(forceid=False)'])
+    >>> print md
+    <h1>Some Header</h1>
+    <h1>Another Header</h1>
+
+Use with MetaData extension:
+
+    >>> text = '''header_level: 2
+    ... header_forceid: Off
+    ...
+    ... # A Header'''
+    >>> md = markdown.markdown(text, ['headerid', 'meta'])
+    >>> print md
+    <h2>A Header</h2>
+
+Copyright 2007-2011 [Waylan Limberg](http://achinghead.com/).
+
+Project website: <http://packages.python.org/Markdown/extensions/header_id.html>
+Contact: markdown@freewisdom.org
+
+License: BSD (see ../docs/LICENSE for details) 
+
+Dependencies:
+* [Python 2.3+](http://python.org)
+* [Markdown 2.0+](http://packages.python.org/Markdown/)
 
 """
 
@@ -68,7 +127,7 @@ def stashedHTML2text(text, md):
     def _html_sub(m):
         """ Substitute raw html with plain text. """
         try:
-            raw, safe = md.htmlStash.rawHtmlBlocks[int(m.group(1))]
+    	    raw, safe = md.htmlStash.rawHtmlBlocks[int(m.group(1))]
         except (IndexError, TypeError):
             return m.group(0)
         if md.safeMode and not safe:
@@ -117,7 +176,7 @@ class HeaderIdTreeprocessor(Treeprocessor):
 
 
 class HeaderIdExtension(Extension):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, configs):
         # set defaults
         self.config = {
                 'level' : ['1', 'Base level for headers.'],
@@ -126,7 +185,8 @@ class HeaderIdExtension(Extension):
                 'slugify' : [slugify, 'Callable to generate anchors'], 
             }
 
-        super(HeaderIdExtension, self).__init__(*args, **kwargs)
+        for key, value in configs:
+            self.setConfig(key, value)
 
     def extendMarkdown(self, md, md_globals):
         md.registerExtension(self)
@@ -144,6 +204,5 @@ class HeaderIdExtension(Extension):
         self.processor.IDs = set()
 
 
-def makeExtension(*args, **kwargs):
-    return HeaderIdExtension(*args, **kwargs)
-
+def makeExtension(configs=None):
+    return HeaderIdExtension(configs=configs)

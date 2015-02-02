@@ -2,16 +2,19 @@
 Definition List Extension for Python-Markdown
 =============================================
 
-Adds parsing of Definition Lists to Python-Markdown.
+Added parsing of Definition Lists to Python-Markdown.
 
-See <https://pythonhosted.org/Markdown/extensions/definition_lists.html> 
-for documentation.
+A simple example:
 
-Original code Copyright 2008 [Waylan Limberg](http://achinghead.com)
+    Apple
+    :   Pomaceous fruit of plants of the genus Malus in 
+        the family Rosaceae.
+    :   An american computer company.
 
-All changes Copyright 2008-2014 The Python Markdown Project
+    Orange
+    :   The fruit of an evergreen tree of the genus Citrus.
 
-License: [BSD](http://www.opensource.org/licenses/bsd-license.php) 
+Copyright 2008 - [Waylan Limberg](http://achinghead.com)
 
 """
 
@@ -110,6 +113,6 @@ class DefListExtension(Extension):
                                       '>ulist')
 
 
-def makeExtension(*args, **kwargs):
-    return DefListExtension(*args, **kwargs)
+def makeExtension(configs={}):
+    return DefListExtension(configs=configs)
 

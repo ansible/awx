@@ -1,15 +1,25 @@
 """
-Footnotes Extension for Python-Markdown
-=======================================
+========================= FOOTNOTES =================================
 
-Adds footnote handling to Python-Markdown.
+This section adds footnote handling to markdown.  It can be used as
+an example for extending python-markdown with relatively complex
+functionality.  While in this case the extension is included inside
+the module itself, it could just as easily be added from outside the
+module.  Not that all markdown classes above are ignorant about
+footnotes.  All footnote functionality is provided separately and
+then added to the markdown instance at the run time.
 
-See <https://pythonhosted.org/Markdown/extensions/footnotes.html> 
-for documentation.
+Footnote functionality is attached by calling extendMarkdown()
+method of FootnoteExtension.  The method also registers the
+extension to allow it's state to be reset by a call to reset()
+method.
 
-Copyright The Python Markdown Project
+Example:
+    Footnotes[^1] have a label[^label] and a definition[^!DEF].
 
-License: [BSD](http://www.opensource.org/licenses/bsd-license.php) 
+    [^1]: This is a footnote
+    [^label]: A footnote on "label"
+    [^!DEF]: The footnote for definition
 
 """
 
@@ -32,23 +42,23 @@ TABBED_RE = re.compile(r'((\t)|(    ))(.*)')
 class FootnoteExtension(Extension):
     """ Footnote Extension. """
 
-    def __init__ (self, *args, **kwargs):
+    def __init__ (self, configs):
         """ Setup configs. """
+        self.config = {'PLACE_MARKER':
+                       ["///Footnotes Go Here///",
+                        "The text string that marks where the footnotes go"],
+                       'UNIQUE_IDS':
+                       [False,
+                        "Avoid name collisions across "
+                        "multiple calls to reset()."],
+                       "BACKLINK_TEXT":
+                       ["&#8617;",
+                        "The text string that links from the footnote to the reader's place."]
+                       }
 
-        self.config = {
-            'PLACE_MARKER':
-                 ["///Footnotes Go Here///",
-                  "The text string that marks where the footnotes go"],
-            'UNIQUE_IDS':
-                 [False,
-                  "Avoid name collisions across "
-                  "multiple calls to reset()."],
-            "BACKLINK_TEXT":
-                 ["&#8617;",
-                  "The text string that links from the footnote to the reader's place."]
-        }
-        super(FootnoteExtension, self).__init__(*args, **kwargs)
-        
+        for key, value in configs:
+            self.config[key][0] = value
+
         # In multiple invocations, emit links that don't get tangled.
         self.unique_prefix = 0
 
@@ -299,7 +309,7 @@ class FootnotePostprocessor(Postprocessor):
         text = text.replace(FN_BACKLINK_TEXT, self.footnotes.getConfig("BACKLINK_TEXT"))
         return text.replace(NBSP_PLACEHOLDER, "&#160;")
 
-def makeExtension(*args, **kwargs):
+def makeExtension(configs=[]):
     """ Return an instance of the FootnoteExtension """
-    return FootnoteExtension(*args, **kwargs)
+    return FootnoteExtension(configs=configs)
 

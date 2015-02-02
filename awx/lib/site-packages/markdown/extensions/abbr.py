@@ -4,15 +4,22 @@ Abbreviation Extension for Python-Markdown
 
 This extension adds abbreviation handling to Python-Markdown.
 
-See <https://pythonhosted.org/Markdown/extensions/abbreviations.html> 
-for documentation.
+Simple Usage:
 
-Oringinal code Copyright 2007-2008 [Waylan Limberg](http://achinghead.com/) and
- [Seemant Kulleen](http://www.kulleen.org/)
+    >>> import markdown
+    >>> text = """
+    ... Some text with an ABBR and a REF. Ignore REFERENCE and ref.
+    ...
+    ... *[ABBR]: Abbreviation
+    ... *[REF]: Abbreviation Reference
+    ... """
+    >>> print markdown.markdown(text, ['abbr'])
+    <p>Some text with an <abbr title="Abbreviation">ABBR</abbr> and a <abbr title="Abbreviation Reference">REF</abbr>. Ignore REFERENCE and ref.</p>
 
-All changes Copyright 2008-2014 The Python Markdown Project
-
-License: [BSD](http://www.opensource.org/licenses/bsd-license.php) 
+Copyright 2007-2008
+* [Waylan Limberg](http://achinghead.com/)
+* [Seemant Kulleen](http://www.kulleen.org/)
+	
 
 '''
 
@@ -85,5 +92,5 @@ class AbbrPattern(Pattern):
         abbr.set('title', self.title)
         return abbr
 
-def makeExtension(*args, **kwargs):
-    return AbbrExtension(*args, **kwargs)
+def makeExtension(configs=None):
+    return AbbrExtension(configs=configs)
