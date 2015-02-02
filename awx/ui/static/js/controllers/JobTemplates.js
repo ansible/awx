@@ -337,8 +337,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
     SurveyControllerInit({
         scope: $scope,
-        parent_scope: $scope,
-        // iterator: 'schedule'
+        parent_scope: $scope
     });
 
     // Update playbook select whenever project value changes
@@ -556,7 +555,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit, JobsControllerInit, JobsListUpdate,
-    GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit, $sce){
+    GetChoices, SchedulesListInit, SchedulesList, CallbackHelpInit, PlaybookRun, SurveyControllerInit){
 
     ClearScope();
 
@@ -595,8 +594,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     SurveyControllerInit({
         scope: $scope,
         parent_scope: $scope,
-        id: id,
-        sce: $sce
+        id: id
     });
 
     callback = function() {
@@ -1069,5 +1067,5 @@ JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$l
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
     'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
     'ParseVariableString', 'ToJSON', 'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate', 'GetChoices',
-    'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit', 'PlaybookRun' , 'SurveyControllerInit', '$sce'
+    'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit', 'PlaybookRun' , 'SurveyControllerInit'
 ];

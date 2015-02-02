@@ -459,9 +459,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
     }])
 
     .factory('SurveyControllerInit', ['$location', 'DeleteSurvey', 'EditSurvey', 'AddSurvey', 'GenerateForm', 'SurveyQuestionForm', 'Wait', 'Alert',
-            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion',
+            'GetBasePath', 'Rest', 'ProcessErrors' , '$compile', 'FinalizeQuestion', 'EditQuestion', '$sce',
         function($location, DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
-            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion) {
+            GetBasePath, Rest, ProcessErrors, $compile, FinalizeQuestion, EditQuestion, $sce) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -481,7 +481,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             ];
 
             scope.serialize = function(expression){
-                return scope.sce.getTrustedHtml(expression);
+                return $sce.getTrustedHtml(expression);
             };
 
             scope.deleteSurvey = function() {
