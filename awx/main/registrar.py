@@ -18,7 +18,6 @@ class ActivityStreamRegistrar(object):
             return
         from awx.main.signals import activity_stream_create, activity_stream_update, activity_stream_delete, activity_stream_associate
         
-        #(receiver, sender=model, dispatch_uid=self._dispatch_uid(signal, model))
         if model not in self.models:
             self.models.append(model)
             post_save.connect(activity_stream_create, sender=model, dispatch_uid=str(self.__class__) + str(model) + "_create")
@@ -32,7 +31,6 @@ class ActivityStreamRegistrar(object):
                                         dispatch_uid=str(self.__class__) + str(m2m_attr.through) + "_associate")
                 except AttributeError:
                     pass
-                    #logger.warning("Failed to attach m2m activity stream tracker on class %s attribute %s" % (model, m2mfield.name))
 
     def disconnect(self, model):
         if model in self.models:

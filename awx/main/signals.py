@@ -270,6 +270,7 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
 class ActivityStreamEnabled(threading.local):
     def __init__(self):
         self.enabled = getattr(settings, 'ACTIVITY_STREAM_ENABLED', True)
+
     def __nonzero__(self):
         return bool(self.enabled)
 

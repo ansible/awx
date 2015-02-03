@@ -42,7 +42,7 @@ from awx.main.utils import update_scm_url, get_type_for_model, get_model_for_typ
 logger = logging.getLogger('awx.api.serializers')
 
 # Fields that should be summarized regardless of object type.
-DEFAULT_SUMMARY_FIELDS = ('name', 'description')#, 'created_by', 'modified_by')#, 'type')
+DEFAULT_SUMMARY_FIELDS = ('name', 'description')# , 'created_by', 'modified_by')#, 'type')
 
 # Keys are fields (foreign keys) where, if found on an instance, summary info
 # should be added to the serialized data.  Values are a tuple of field names on
@@ -93,7 +93,7 @@ class ChoiceField(fields.ChoiceField):
             # Remove extra blank option if one is already present (for writable
             # field) or if present at all for read-only fields.
             if ([x[0] for x in self.choices].count(u'') > 1 or self.read_only) \
-                and BLANK_CHOICE_DASH[0] in self.choices:
+               and BLANK_CHOICE_DASH[0] in self.choices:
                 self.choices = [x for x in self.choices
                                 if x != BLANK_CHOICE_DASH[0]]
 
@@ -450,10 +450,10 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
                    'result_stdout')
 
     def get_types(self):
-       if type(self) is UnifiedJobListSerializer:
-           return ['project_update', 'inventory_update', 'job', 'system_job']
-       else:
-           return super(UnifiedJobListSerializer, self).get_types()
+        if type(self) is UnifiedJobListSerializer:
+            return ['project_update', 'inventory_update', 'job', 'system_job']
+        else:
+            return super(UnifiedJobListSerializer, self).get_types()
 
     def to_native(self, obj):
         serializer_class = None
@@ -495,7 +495,7 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 class UserSerializer(BaseSerializer):
 
     password = serializers.WritableField(required=False, default='',
-        help_text='Write-only field used to change the password.')
+                                         help_text='Write-only field used to change the password.')
     ldap_dn = serializers.Field(source='profile.ldap_dn')
 
     class Meta:
@@ -805,8 +805,7 @@ class HostSerializer(BaseSerializerWithVariables):
             pass
         d.update({'recent_jobs': [{
             'id': j.job.id,
-            'name': j.job.job_template.name if j.job.job_template is not None
-                                            else "",
+            'name': j.job.job_template.name if j.job.job_template is not None else "",
             'status': j.job.status,
             'finished': j.job.finished,
         } for j in obj.job_host_summaries.filter(job__active=True).select_related('job__job_template').order_by('-created')[:5]]})

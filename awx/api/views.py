@@ -82,11 +82,11 @@ class ApiRootView(APIView):
 
         current = reverse('api:api_v1_root_view', args=[])
         data = dict(
-           description = 'Ansible Tower REST API',
-           current_version = current,
-           available_versions = dict(
-              v1 = current
-           )
+            description = 'Ansible Tower REST API',
+            current_version = current,
+            available_versions = dict(
+                v1 = current
+            )
         )
         return Response(data)
 
@@ -335,7 +335,7 @@ class DashboardView(APIView):
         data['organizations'] = {'url': reverse('api:organization_list'),
                                  'total': organization_list.count()}
         data['teams'] = {'url': reverse('api:team_list'),
-                        'total': team_list.count()}
+                         'total': team_list.count()}
         data['credentials'] = {'url': reverse('api:credential_list'),
                                'total': credential_list.count()}
         data['job_templates'] = {'url': reverse('api:job_template_list'),
@@ -421,7 +421,7 @@ class DashboardInventoryGraphView(APIView):
         host_data = []
         for element in created_hosts.time_series(end_date, start_date, interval=interval)[::-1]:
             host_data.append([time.mktime(element[0].timetuple()),
-                                            count_hosts - last_delta])
+                              count_hosts - last_delta])
             count_hosts -= last_delta
             last_delta = element[1]
 
@@ -1068,9 +1068,9 @@ class GroupHostsList(SubListCreateAPIView):
     def create(self, request, *args, **kwargs):
         parent_group = Group.objects.get(id=self.kwargs['pk'])
         existing_hosts = Host.objects.filter(inventory=parent_group.inventory, name=request.DATA['name'])
-        if existing_hosts.count() > 0 and ('variables' not in request.DATA or \
-                                           request.DATA['variables'] == '' or \
-                                           request.DATA['variables'] == '{}' or \
+        if existing_hosts.count() > 0 and ('variables' not in request.DATA or
+                                           request.DATA['variables'] == '' or
+                                           request.DATA['variables'] == '{}' or
                                            request.DATA['variables'] == '---'):
             request.DATA['id'] = existing_hosts[0].id
             return self.attach(request, *args, **kwargs)
@@ -1121,9 +1121,9 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
         # FIXME: Why isn't the active check being caught earlier by RBAC?
-        if getattr(obj, 'active', True) == False:
+        if not getattr(obj, 'active', True):
             raise Http404()
-        if getattr(obj, 'is_active', True) == False:
+        if not getattr(obj, 'is_active', True):
             raise Http404()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
@@ -1178,8 +1178,7 @@ class InventoryScriptView(RetrieveAPIView):
 
     model = Inventory
     serializer_class = InventoryScriptSerializer
-    authentication_classes = [JobTaskAuthentication] + \
-                             api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    authentication_classes = [JobTaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
     filter_backends = ()
 
@@ -1319,9 +1318,9 @@ class InventoryInventorySourcesList(SubListAPIView):
 
 class InventorySourceList(ListAPIView):
 
-     model = InventorySource
-     serializer_class = InventorySourceSerializer
-     new_in_14 = True
+    model = InventorySource
+    serializer_class = InventorySourceSerializer
+    new_in_14 = True
 
 class InventorySourceDetail(RetrieveUpdateAPIView):
 
@@ -1950,8 +1949,7 @@ class GroupJobEventsList(BaseJobEventsList):
 class JobJobEventsList(BaseJobEventsList):
 
     parent_model = Job
-    authentication_classes = [JobTaskAuthentication] + \
-                             api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    authentication_classes = [JobTaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
 
     # Post allowed for job event callback only.
@@ -1973,8 +1971,7 @@ class JobJobPlaysList(BaseJobEventsList):
 
     parent_model = Job
     view_name = 'Job Plays List'
-    authentication_classes = [JobTaskAuthentication] + \
-                             api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    authentication_classes = [JobTaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
     new_in_200 = True
 
@@ -2028,7 +2025,7 @@ class JobJobPlaysList(BaseJobEventsList):
                 elif event_aggregate['event'] == 'runner_on_unreachable':
                     unreachable_count = event_aggregate['id__count']
             for change_aggregate in change_aggregates:
-                if change_aggregate['changed'] == False:
+                if not change_aggregate['changed']:
                     ok_count = change_aggregate['id__count']
                 else:
                     changed_count = change_aggregate['id__count']
@@ -2050,8 +2047,7 @@ class JobJobTasksList(BaseJobEventsList):
     and their completion status.
     """
     parent_model = Job
-    authentication_classes = [JobTaskAuthentication] + \
-                             api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    authentication_classes = [JobTaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
     view_name = 'Job Play Tasks List'
     new_in_200 = True
@@ -2141,9 +2137,7 @@ class JobJobTasksList(BaseJobEventsList):
                 'host_count': 0,
                 'id': task_start_event.id,
                 'modified': task_start_event.modified,
-                'name': 'Gathering Facts' if
-                            task_start_event.event == 'playbook_on_setup' else
-                            task_start_event.task,
+                'name': 'Gathering Facts' if task_start_event.event == 'playbook_on_setup' else task_start_event.task,
                 'reported_hosts': 0,
                 'skipped_count': 0,
                 'unreachable_count': 0,

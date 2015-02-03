@@ -23,6 +23,7 @@ class PaginatedDecoratorTests(TestCase):
         # that the paginator wraps in the way we expect.
         class View(APIView):
             permission_classes = (AllowAny,)
+
             @paginated
             def get(self, request, limit, ordering, offset):
                 return ['a', 'b', 'c', 'd', 'e'], 26, None

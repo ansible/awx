@@ -431,7 +431,7 @@ def build_proot_temp_dir():
     Create a temporary directory for proot to use.
     '''
     path = tempfile.mkdtemp(prefix='ansible_tower_proot_')
-    os.chmod(path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
+    os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
     return path
 
 def wrap_args_with_proot(args, cwd, **kwargs):
@@ -455,11 +455,11 @@ def wrap_args_with_proot(args, cwd, **kwargs):
             continue
         if os.path.isdir(path):
             new_path = tempfile.mkdtemp(dir=kwargs['proot_temp_dir'])
-            os.chmod(new_path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
+            os.chmod(new_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         else:
             handle, new_path = tempfile.mkstemp(dir=kwargs['proot_temp_dir'])
             os.close(handle)
-            os.chmod(new_path, stat.S_IRUSR|stat.S_IWUSR)
+            os.chmod(new_path, stat.S_IRUSR | stat.S_IWUSR)
         new_args.extend(['-b', '%s:%s' % (new_path, path)])
     if 'private_data_dir' in kwargs:
         show_paths = [cwd, kwargs['private_data_dir']]

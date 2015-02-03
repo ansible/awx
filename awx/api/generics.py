@@ -176,7 +176,7 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         # Override when called from browsable API to generate raw data form;
         # always remove read only fields from sample raw data.
         if hasattr(self, '_raw_data_form_marker'):
-             for name, field in serializer.fields.items():
+            for name, field in serializer.fields.items():
                 if getattr(field, 'read_only', None):
                     del serializer.fields[name]
         return serializer
@@ -476,9 +476,9 @@ class RetrieveDestroyAPIView(RetrieveAPIView, generics.RetrieveDestroyAPIView):
         # somewhat lame that delete has to call it's own permissions check
         obj = self.get_object()
         # FIXME: Why isn't the active check being caught earlier by RBAC?
-        if getattr(obj, 'active', True) == False:
+        if not getattr(obj, 'active', True):
             raise Http404()
-        if getattr(obj, 'is_active', True) == False:
+        if not getattr(obj, 'is_active', True):
             raise Http404()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()

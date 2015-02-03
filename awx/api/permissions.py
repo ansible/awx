@@ -107,8 +107,7 @@ class ModelAccessPermission(permissions.BasePermission):
 
         # Check permissions for the given view and object, based on the request
         # method used.
-        check_method = getattr(self, 'check_%s_permissions' % \
-                               request.method.lower(), None)
+        check_method = getattr(self, 'check_%s_permissions' % request.method.lower(), None)
         result = check_method and check_method(request, view, obj)
         if not result:
             raise PermissionDenied()

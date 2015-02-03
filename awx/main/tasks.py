@@ -74,6 +74,7 @@ def tower_periodic_scheduler(self):
             return last_run
         except Exception, e:
             return None
+
     def write_last_run(last_run):
         fd = open(settings.SCHEDULE_METADATA_LOCATION, 'w')
         fd.write(last_run.isoformat())
@@ -208,7 +209,8 @@ class BaseTask(Task):
             # tried too many times.
             if _attempt < 5:
                 time.sleep(5)
-                return self.update_model(pk,
+                return self.update_model(
+                    pk,
                     _attempt=_attempt + 1,
                     output_replacements=output_replacements,
                     **updates
@@ -238,7 +240,7 @@ class BaseTask(Task):
         Create a temporary directory for job-related files.
         '''
         path = tempfile.mkdtemp(prefix='ansible_tower_')
-        os.chmod(path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
+        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         return path
 
     def build_private_data_file(self, instance, **kwargs):
@@ -251,7 +253,7 @@ class BaseTask(Task):
             f = os.fdopen(handle, 'w')
             f.write(private_data)
             f.close()
-            os.chmod(path, stat.S_IRUSR|stat.S_IWUSR)
+            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
             return path
         else:
             return ''
@@ -750,11 +752,9 @@ class RunProjectUpdate(BaseTask):
         passwords = super(RunProjectUpdate, self).build_passwords(project_update,
                                                                   **kwargs)
         if project_update.credential:
-            passwords['scm_key_unlock'] = decrypt_field(project_update.credential,
-                                                        'ssh_key_unlock')
+            passwords['scm_key_unlock'] = decrypt_field(project_update.credential, 'ssh_key_unlock')
             passwords['scm_username'] = project_update.credential.username
-            passwords['scm_password'] = decrypt_field(project_update.credential,
-                                                     'password')
+            passwords['scm_password'] = decrypt_field(project_update.credential, 'password')
         return passwords
 
     def build_env(self, project_update, **kwargs):
@@ -1113,7 +1113,7 @@ class RunInventoryUpdate(BaseTask):
                 raise RuntimeError('Inventory Script does not exist')
             f.write(inventory_update.source_script.script.encode('utf-8'))
             f.close()
-            os.chmod(path, stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR)
+            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             args.append(runpath)
             args.append("--custom")
             # try:

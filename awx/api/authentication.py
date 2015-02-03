@@ -20,7 +20,7 @@ class TokenAuthentication(authentication.TokenAuthentication):
 
     def _get_x_auth_token_header(self, request):
         auth = request.META.get('HTTP_X_AUTH_TOKEN', '')
-        if type(auth) == type(''):
+        if isinstance(auth, type('')):
             # Work around django test client oddness
             auth = auth.encode(HTTP_HEADER_ENCODING)
         return auth

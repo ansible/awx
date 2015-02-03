@@ -355,7 +355,7 @@ class HostAccess(BaseAccess):
         inventory_pk = get_pk_from_dict(data, 'inventory')
         inventory = get_object_or_400(Inventory, pk=inventory_pk)
         if not self.user.can_access(Inventory, 'change', inventory, None):
-           return False
+            return False
 
         # Check to see if we have enough licenses
         reader = TaskSerializer()
@@ -1000,8 +1000,7 @@ class JobTemplateAccess(BaseAccess):
                obj.job_type == PERM_INVENTORY_CHECK:
                 has_perm = True
                 
-        dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and \
-                     self.user.can_access(Project, 'read', obj.project)
+        dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and self.user.can_access(Project, 'read', obj.project)
         return dep_access and has_perm
 
     def can_change(self, obj, data):
@@ -1150,8 +1149,7 @@ class JobAccess(BaseAccess):
         has_perm = False
         if obj.job_template is not None and self.user.can_access(JobTemplate, 'start', obj.job_template):
             has_perm = True
-        dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and \
-                     self.user.can_access(Project, 'read', obj.project)
+        dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and self.user.can_access(Project, 'read', obj.project)
         return self.can_read(obj) and dep_access and has_perm
 
     def can_cancel(self, obj):
@@ -1317,8 +1315,8 @@ class ScheduleAccess(BaseAccess):
         inventory_source_qs = self.user.get_queryset(InventorySource)
         project_qs = self.user.get_queryset(Project)
         unified_qs = UnifiedJobTemplate.objects.filter(jobtemplate__in=job_template_qs) | \
-                     UnifiedJobTemplate.objects.filter(Q(project__in=project_qs)) | \
-                     UnifiedJobTemplate.objects.filter(Q(inventorysource__in=inventory_source_qs))
+            UnifiedJobTemplate.objects.filter(Q(project__in=project_qs)) | \
+            UnifiedJobTemplate.objects.filter(Q(inventorysource__in=inventory_source_qs))
         return qs.filter(unified_job_template__in=unified_qs)
 
     def can_read(self, obj):

@@ -30,9 +30,9 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
         '''Never show auto-generated form (only raw form).'''
         obj = getattr(view, 'object', None)
         if not self.show_form_for_method(view, method, request, obj):
-             return
+            return
         if method in ('DELETE', 'OPTIONS'):
-             return True  # Don't actually need to return a form
+            return True  # Don't actually need to return a form
 
     def get_context(self, data, accepted_media_type, renderer_context):
         context = super(BrowsableAPIRenderer, self).get_context(data, accepted_media_type, renderer_context)
