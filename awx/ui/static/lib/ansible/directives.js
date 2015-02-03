@@ -488,7 +488,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 title = (attrs.title) ? attrs.title : (attrs.popoverTitle) ? attrs.popoverTitle : 'Help',
                 container = (attrs.container !== undefined) ? attrs.container : false,
                 trigger = (attrs.trigger !== undefined) ? attrs.trigger : 'manual',
-                template = '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>';
+                template = '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
+                id_to_close = "",
+                body_click_count;
 
             if (element[0].id) {
                 template = '<div id="' + element[0].id + '_popover_container" class="popover" role="tooltip"><div class="arrow"></div><h3 id="' + element[0].id + '_popover_title" class="popover-title"></h3><div id="' + element[0].id + '_popover_content" class="popover-content"></div></div>';
@@ -522,15 +524,20 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             $(element).attr('tabindex',-1);
             $(element).click(function() {
                 var self = $(this);
+
+                // remove tool-tip
                 try {
-                    self.tooltip('hide');
+                    element.tooltip('hide');
                 }
                 catch(e) {
                     // ignore
                 }
+
+                // this is called on the help-link (over and over again)
                 $('.help-link, .help-link-white').each( function() {
                     if (self.attr('id') !== $(this).attr('id')) {
                         try {
+                            // not sure what this does different than the method above
                             $(this).popover('hide');
                         }
                         catch(e) {
@@ -543,15 +550,45 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     $(this).remove();
                 });
                 $('.tooltip').each( function() {
-                    // close any lingering tool tipss
+                    // close any lingering tool tips
                     $(this).hide();
                 });
+
+                // set id_to_close of the actual open element
+                id_to_close = "#" + $(element).attr('id') + "_popover_container";
+
+                // set the number of times the body has been clicked since the popover has been opened
+                body_click_count = 0;
+
+                if ($._data(document.body, "events")) {
+                    // in the case that the popOver is retriggered (ie: you click the question mark
+                    // again for that popover.  tread this as a toggle and do not bind another
+                    // click event.
+                    // PROBLEM NOTE: if things are bound to the body this might break.
+                    $('body').off('click');
+                } else {
+                    $('body').on('click', function(e) {
+                        if ($(e.target).parents(id_to_close).length === 0) {
+                            // if you click outside the popover
+                            // increment the body click counter
+                            body_click_count++;
+                            if (body_click_count === 2) {
+                                // if that counter was incremented to 2
+                                // note this value is 2 because an initial fire
+                                // needs to be taken into account when the modal opens...
+                                // toggle the tooltip because this is actually
+                                // the first click outside of the popOver since it has been open
+                                $(element).popover('toggle');
+                                $('body').off('click');
+                            }
+                        }
+                    });
+                }
+
                 $(this).popover('toggle');
+
                 $('.popover').each(function() {
                     $compile($(this))(scope);  //make nested directives work!
-                });
-                $('.popover-content, .popover-title').click(function() {
-                    $(self).popover('hide');
                 });
             });
 
