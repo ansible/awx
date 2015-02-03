@@ -186,9 +186,10 @@ class AuthToken(BaseModel):
         h = hashlib.sha1()
         h.update(settings.SECRET_KEY)
         for header in settings.REMOTE_HOST_HEADERS:
-            value = request.META.get(header, '').strip()
+            value = request.META.get(header, '').split(',')[0].strip()
             if value:
                 h.update(value)
+                break
         h.update(request.META.get('HTTP_USER_AGENT', ''))
         return h.hexdigest()
 

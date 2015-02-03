@@ -362,12 +362,12 @@ class BaseTestMixin(QueueTestMixin):
         
     def _generic_rest(self, url, data=None, expect=204, auth=None, method=None,
                       data_type=None, accept=None, remote_addr=None,
-                      return_response_object=False):
+                      return_response_object=False, client_kwargs=None):
         assert method is not None
         method_name = method.lower()
         #if method_name not in ('options', 'head', 'get', 'delete'):
         #    assert data is not None
-        client_kwargs = {}
+        client_kwargs = client_kwargs or {}
         if accept:
             client_kwargs['HTTP_ACCEPT'] = accept
         if remote_addr is not None:
@@ -447,17 +447,19 @@ class BaseTestMixin(QueueTestMixin):
                                   method='head', accept=accept,
                                   remote_addr=remote_addr)
  
-    def get(self, url, expect=200, auth=None, accept=None, remote_addr=None):
+    def get(self, url, expect=200, auth=None, accept=None, remote_addr=None, client_kwargs={}):
         return self._generic_rest(url, data=None, expect=expect, auth=auth,
                                   method='get', accept=accept,
-                                  remote_addr=remote_addr)
+                                  remote_addr=remote_addr,
+                                  client_kwargs=client_kwargs)
 
     def post(self, url, data, expect=204, auth=None, data_type=None,
-             accept=None, remote_addr=None):
+             accept=None, remote_addr=None, client_kwargs={}):
         return self._generic_rest(url, data=data, expect=expect, auth=auth,
                                   method='post', data_type=data_type,
                                   accept=accept,
-                                  remote_addr=remote_addr)
+                                  remote_addr=remote_addr,
+                                  client_kwargs=client_kwargs)
 
     def put(self, url, data, expect=200, auth=None, data_type=None,
             accept=None, remote_addr=None):
