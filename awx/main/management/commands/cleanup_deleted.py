@@ -50,10 +50,10 @@ class Command(BaseCommand):
                 active_field = field.name
         if not name_field:
             self.logger.warning('skipping model %s, no name field', model)
-            return
+            return n_deleted_items
         if not active_field:
             self.logger.warning('skipping model %s, no active field', model)
-            return
+            return n_deleted_items
         if name_field == 'username' and active_field == 'is_active':
             name_prefix = '_d_'
         else:
@@ -80,10 +80,7 @@ class Command(BaseCommand):
                 if not self.dry_run:
                     instance.delete()
 
-        if not self.dry_run:
-            print("Removed %s items" % str(n_deleted_items))
-        else:
-            print("Would have removed %s items" % str(n_deleted_items))
+        return n_deleted_items
 
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO,
@@ -103,6 +100,13 @@ class Command(BaseCommand):
         self.dry_run = bool(options.get('dry_run', False))
         # FIXME: Handle args to select models.
         self.cutoff = now() - datetime.timedelta(days=self.days)
-        self.cleanup_model(User)
+
+        n_deleted_items = 0
+        n_deleted_items += self.cleanup_model(User)
         for model in self.get_models(PrimordialModel):
-            self.cleanup_model(model)
+            n_deleted_items += self.cleanup_model(model)
+
+        if not self.dry_run:
+            print("Removed %s items" % str(n_deleted_items))
+        else:
+            print("Would have removed %s items" % str(n_deleted_items))
