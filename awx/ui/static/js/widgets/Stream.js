@@ -206,9 +206,12 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             if (obj1 === 'user' || obj2 === 'user') {
                 activity.summary_fields.user[0].name = activity.summary_fields.user[0].username;
             }
-
+            // The block until line 221 is for associative/disassociative operations, such as adding/removing a user to a team or vise versa
             if (obj2_obj && obj2_obj.name && !/^_delete/.test(obj2_obj.name)) {
                 obj2_obj.base = obj2;
+                obj2_obj.name = obj2_obj.name.replace(/</g, "&lt;");
+                obj2_obj.name = obj2_obj.name.replace(/>/g, "&gt;");
+                obj2_obj.name = $sce.getTrustedHtml(obj2_obj.name);
                 descr += obj2 + " <a href=\"" + BuildUrl(obj2_obj) + "\">" + obj2_obj.name + '</a>' + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
                 descr_nolink += obj2 + ' ' + obj2_obj.name + ((activity.operation === 'disassociate') ? ' from ' : ' to ');
             } else if (obj2) {
@@ -221,6 +224,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             }
             if (obj1_obj && obj1_obj.name && !/^\_delete/.test(obj1_obj.name)) {
                 obj1_obj.base = obj1;
+                // Need to character escape the link names, as a malicious url or piece of html could be inserted here that could take the
+                // user to a unknown location.
+                obj1_obj.name = obj1_obj.name.replace(/</g, "&lt;");
+                obj1_obj.name = obj1_obj.name.replace(/>/g, "&gt;");
+                obj1_obj.name = $sce.getTrustedHtml(obj1_obj.name);
                 descr += obj1 + " <a href=\"" + BuildUrl(obj1_obj) + "\" >" + obj1_obj.name + '</a>';
                 descr_nolink += obj1 + ' ' + obj1_obj.name;
             } else if (obj1) {
@@ -264,9 +272,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 descr += obj1 + name;
                 descr_nolink += obj1 + name_nolink;
             }
-            descr = descr.replace(/</g, "&lt;");
-            descr = descr.replace(/>/g, "&gt;");
-            activity.description = $sce.getTrustedHtml(descr);
+            activity.description = descr;
             activity.description_nolink = descr_nolink;
         };
     }
