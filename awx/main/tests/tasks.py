@@ -1258,6 +1258,7 @@ class RunJobTest(BaseCeleryTest):
 
     def test_run_async_job_that_fails(self):
         # FIXME: We are not sure why proot needs to be disabled on this test
+        # Maybe they are simply susceptable to timing and proot adds time
         settings.AWX_PROOT_ENABLED = False
         self.create_test_project(TEST_ASYNC_FAIL_PLAYBOOK)
         job_template = self.create_test_job_template()
@@ -1286,6 +1287,9 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_run_async_job_that_times_out(self):
+        # FIXME: We are not sure why proot needs to be disabled on this test
+        # Maybe they are simply susceptable to timing and proot adds time
+        settings.AWX_PROOT_ENABLED = False
         self.create_test_project(TEST_ASYNC_TIMEOUT_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
