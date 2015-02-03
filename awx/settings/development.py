@@ -23,6 +23,9 @@ if 'celeryd' in sys.argv:
 CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5557"
 CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver_dev.ipc"
 
+# Enable PROOT for tower-qa integration tests
+AWX_PROOT_ENABLED = True
+
 # Use Django-Jenkins if installed. Only run tests for awx.main app.
 try:
     import django_jenkins

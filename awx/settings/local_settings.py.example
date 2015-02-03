@@ -25,7 +25,7 @@ DATABASES = {
         'NAME': 'awx-dev',
         'USER': 'awx-dev',
         'PASSWORD': 'AWXsome1',
-        'HOST': '',
+        'HOST': 'localhost',
         'PORT': '',
     }
 }
