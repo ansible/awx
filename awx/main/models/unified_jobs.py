@@ -601,7 +601,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 pass
         super(UnifiedJob, self).delete()
 
-    def result_stdout_raw_handle(self):
+    def result_stdout_raw_handle(self, attempt=0):
         """Return a file-like object containing the standard out of the
         job's result.
         """
@@ -610,7 +610,23 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         else:
             if not os.path.exists(self.result_stdout_file):
                 return StringIO("stdout capture is missing")
-            return codecs.open(self.result_stdout_file, "r", encoding='utf-8')
+
+            # There is a potential timing issue here, because another
+            # process may be deleting the stdout file after it is written
+            # to the database.
+            #
+            # Therefore, if we get an IOError (which generally means the
+            # file does not exist), reload info from the database and
+            # try again.
+            try:
+                return codecs.open(self.result_stdout_file, "r",
+                                   encoding='utf-8')
+            except IOError:
+                if attempt < 3:
+                    self.result_stdout_text = type(self).objects.get(id=self.id).result_stdout_text
+                    return self.result_stdout_raw_handle(attempt=attempt + 1)
+                else:
+                    return StringIO("stdout capture is missing")
 
     @property
     def result_stdout_raw(self):
