@@ -136,12 +136,12 @@ angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'Schedules
                 }
             };
 
-            scope.submitJob = function (id) {
+            scope.submitJob = function (id, name) {
                 Wait('start');
                 defaultUrl = GetBasePath('system_job_templates')+id+'/launch/';
                 CreateDialog({
                     id: 'prompt-for-days'    ,
-                    title: "Cleanup Job",
+                    title: name,
                     scope: scope,
                     width: 500,
                     height: 300,

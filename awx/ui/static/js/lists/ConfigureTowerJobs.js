@@ -34,7 +34,7 @@ angular.module('ConfigureTowerJobsListDefinition', [])
             submit: {
                 label: 'Launch',
                 mode: 'all',
-                ngClick: 'submitJob(configure_job.id)',
+                ngClick: 'submitJob(configure_job.id, configure_job.name)',
                 awToolTip: 'Start a job using this template',
                 dataPlacement: 'top'
             },
