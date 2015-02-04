@@ -40,7 +40,7 @@ angular.module('CredentialsHelper', ['Utilities'])
             scope.key_required = false;                             // JT -- doing the same for key and project
             scope.project_required = false;
             scope.subscription_required = false;
-            scope.key_description = "Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
+            scope.key_description = "Paste the contents of the SSH private key file.";
             scope.key_hint= "drag and drop an SSH private key file on the field below";
             scope.host_required = false;
             scope.password_required = false;
@@ -68,7 +68,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.email_required = true;
                     scope.key_required = true;
                     scope.project_required = true;
-                    scope.key_description =  'Paste the contents of the PEM file associated with the service account email. <div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>';
+                    scope.key_description =  'Paste the contents of the PEM file associated with the service account email.';
                     scope.key_hint= "drag and drop a private key file on the field below";
                     break;
                 case 'azure':
@@ -76,7 +76,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                     scope.sshKeyDataLabel = 'Management Certificate';
                     scope.subscription_required = true;
                     scope.key_required = true;
-                    scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
+                    scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.";
                     scope.key_hint= "drag and drop a management certificate file on the field below";
                     break;
                 case 'vmware':

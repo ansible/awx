@@ -453,8 +453,7 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
                 "JSON:<br />\n" +
                 "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
                 "YAML:<br />\n" +
-                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n";
 
             scope.extra_vars = ParseVariableString(extra_vars);
             scope.parseType = 'yaml';

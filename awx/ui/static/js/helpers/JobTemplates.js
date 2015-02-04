@@ -47,8 +47,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                 scope.callback_server_path + GetBasePath('job_templates') + scope.example_template_id + "/callback/</pre>\n" +
                 "<p>Note the requesting host must be defined in the inventory associated with the job template. If Tower fails to " +
                 "locate the host, the request will be denied.</p>" +
-                "<p>Successful requests create an entry on the Jobs page, where results and history can be viewed.</p>" +
-                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
+                "<p>Successful requests create an entry on the Jobs page, where results and history can be viewed.</p>";
         };
 
         // The md5 helper emits NewMD5Generated whenever a new key is available

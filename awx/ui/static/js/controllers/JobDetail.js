@@ -90,9 +90,7 @@ function JobDetailController ($location, $rootScope, $scope, $compile, $routePar
     scope.eventsHelpText = "<p><i class=\"fa fa-circle successful-hosts-color\"></i> Successful</p>\n" +
         "<p><i class=\"fa fa-circle changed-hosts-color\"></i> Changed</p>\n" +
         "<p><i class=\"fa fa-circle unreachable-hosts-color\"></i> Unreachable</p>\n" +
-        "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n" +
-        "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
-
+        "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n";
     function openSocket() {
         event_socket =  Socket({
             scope: scope,

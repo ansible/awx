@@ -1439,9 +1439,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 "the associated groups and hosts will no longer appear in the inventory.</dd>\n" +
                 "<dt style=\"margin-top: 5px;\">Promote</dt><dd>Groups and hosts associated with the group being removed will be " +
                 "promoted one level. Note: groups already associated with other groups cannot be promoted to the top level of the " +
-                "tree.</dd></dl>\n" +
-                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
-
+                "tree.</dd></dl>\n";
             buttonSet = [{
                 label: "Cancel",
                 onClick: function() {

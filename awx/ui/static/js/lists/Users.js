@@ -17,7 +17,7 @@ angular.module('UserListDefinition', [])
         editTitle: 'Users',
         selectInstructions: '<p>Select existing users by clicking each user or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p> <p>When available, a brand new user can be created by clicking the ' +
-            '<i class=\"fa fa-plus\"></i> button.</p><div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>',
+            '<i class=\"fa fa-plus\"></i> button.</p>',
         index: false,
         hover: true,
 
