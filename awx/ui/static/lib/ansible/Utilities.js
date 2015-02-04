@@ -303,25 +303,28 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         child = child.charAt(0).toUpperCase() + child.slice(1);
                         // find the correct title
                         found = false;
-                        for (j = 0; j < $rootScope.crumbCache.length; j++) {
-                            if ($rootScope.crumbCache[j].path === '/' + parent + '/' + paths[i]) {
-                                child = $rootScope.crumbCache[j].title;
-                                found = true;
-                                break;
+                        if ($rootScope.crumbCache) {
+                            for (j = 0; j < $rootScope.crumbCache.length; j++) {
+                                if ($rootScope.crumbCache[j].path === '/' + parent + '/' + paths[i]) {
+                                    child = $rootScope.crumbCache[j].title;
+                                    found = true;
+                                    break;
+                                }
                             }
-                        }
 
-                        if (found && $rootScope.crumbCache[j].altPath !== undefined) {
-                            // Use altPath to override default path construction
-                            $rootScope.breadcrumbs.push({
-                                title: child,
-                                path: $rootScope.crumbCache[j].altPath
-                            });
-                        } else {
-                            $rootScope.breadcrumbs.push({
-                                title: child,
-                                path: ppath + '/' + paths[i]
-                            });
+                            if (found && $rootScope.crumbCache[j].altPath !== undefined) {
+                                // Use altPath to override default path construction
+                                $rootScope.breadcrumbs.push({
+                                    title: child,
+                                    path: $rootScope.crumbCache[j].altPath
+                                });
+                            } else {
+                                $rootScope.breadcrumbs.push({
+                                    title: child,
+                                    path: ppath + '/' + paths[i]
+                                });
+                            }
+
                         }
                     } else {
                         //if (/_/.test(paths[i])) {
