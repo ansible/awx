@@ -58,10 +58,9 @@ class InventoryTest(BaseTest):
         # create a permission here on the 'other' user so they have edit access on the org
         # we may add another permission type later.
         self.perm_read = Permission.objects.create(
-             inventory       = self.inventory_b,
-             user            = self.other_django_user,
-             permission_type = 'read'
-        )
+            inventory       = self.inventory_b,
+            user            = self.other_django_user,
+            permission_type = 'read')
 
     def tearDown(self):
         super(InventoryTest, self).tearDown()
@@ -344,10 +343,9 @@ class InventoryTest(BaseTest):
 
         # a normal user with inventory edit permissions (on any inventory) can create hosts
         edit_perm = Permission.objects.create(
-             user            = self.other_django_user,
-             inventory       = Inventory.objects.get(pk=inv.pk),
-             permission_type = PERM_INVENTORY_WRITE
-        )
+            user            = self.other_django_user,
+            inventory       = Inventory.objects.get(pk=inv.pk),
+            permission_type = PERM_INVENTORY_WRITE)
         host_data3 = self.post(hosts, data=new_host_c, expect=201, auth=self.get_other_credentials())
 
         # Port should be split out into host variables, other variables kept intact.
@@ -425,7 +423,7 @@ class InventoryTest(BaseTest):
         undel_group = inv.groups.create(name='nondel')
         del_children_url = reverse('api:group_children_list', args=(del_group.pk,))
         nondel_url         = reverse('api:group_detail',
-                                  args=(Group.objects.get(name='nondel').pk,))
+                                     args=(Group.objects.get(name='nondel').pk,))
         del_group.mark_inactive()
         nondel_detail = self.get(nondel_url, expect=200, auth=self.get_normal_credentials())
         self.post(del_children_url, data=nondel_detail, expect=403, auth=self.get_normal_credentials())
@@ -681,7 +679,7 @@ class InventoryTest(BaseTest):
 
         # a super user can set subgroups
         subgroups_url     = reverse('api:group_children_list',
-                                     args=(Group.objects.get(name='web2').pk,))
+                                    args=(Group.objects.get(name='web2').pk,))
         child_url         = reverse('api:group_detail',
                                     args=(Group.objects.get(name='web4').pk,))
         subgroups_url2    = reverse('api:group_children_list',
@@ -1143,15 +1141,15 @@ class InventoryUpdatesTest(BaseTransactionTest):
         #print inventory_update.result_stdout
         if should_error:
             self.assertEqual(inventory_update.status, 'error',
-                             inventory_update.result_stdout + \
+                             inventory_update.result_stdout +
                              inventory_update.result_traceback)
         elif should_fail:
             self.assertEqual(inventory_update.status, 'failed',
-                             inventory_update.result_stdout + \
+                             inventory_update.result_stdout +
                              inventory_update.result_traceback)
         elif should_fail is False:
             self.assertEqual(inventory_update.status, 'successful',
-                             inventory_update.result_stdout + \
+                             inventory_update.result_stdout +
                              inventory_update.result_traceback)
         else:
             pass # If should_fail is None, we don't care.
@@ -1510,8 +1508,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
         cache_path = tempfile.mkdtemp(prefix='awx_ec2_')
         self._temp_paths.append(cache_path)
         inventory_source = self.update_inventory_source(self.group,
-            source='ec2', credential=credential, source_regions=source_regions,
-            source_vars='---\n\nnested_groups: false\ncache_path: %s\n' % cache_path)
+                                                        source='ec2', credential=credential, source_regions=source_regions,
+                                                        source_vars='---\n\nnested_groups: false\ncache_path: %s\n' % cache_path)
         # Check first without instance_id set (to import by name only).
         with self.settings(EC2_INSTANCE_ID_VAR=''):
             self.check_inventory_source(inventory_source)
@@ -1593,8 +1591,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
         cache_path_pattern = os.path.join(tempfile.gettempdir(), 'awx_ec2_*')
         old_cache_paths = set(glob.glob(cache_path_pattern))
         inventory_source = self.update_inventory_source(self.group,
-            source='ec2', credential=credential, source_regions=source_regions,
-            source_vars='---') # nested_groups is true by default.
+                                                        source='ec2', credential=credential, source_regions=source_regions,
+                                                        source_vars='---') # nested_groups is true by default.
         self.check_inventory_source(inventory_source)
         # Verify that main group is in top level groups (hasn't been added as
         # its own child).
@@ -1673,12 +1671,13 @@ class InventoryUpdatesTest(BaseTransactionTest):
         return
         # Print out group/host tree for debugging.
         print
+
         def draw_tree(g, d=0):
             print ('  ' * d) + '+ ' + g.name
             for h in g.hosts.order_by('name'):
                 print ('  ' * d) + '  - ' + h.name
             for c in g.children.order_by('name'):
-                draw_tree(c, d+1)
+                draw_tree(c, d + 1)
         for g in self.inventory.root_groups.order_by('name'):
             draw_tree(g)
 
@@ -1699,7 +1698,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         group.save()
         self.group = group
         inventory_source = self.update_inventory_source(self.group,
-            source='rax', credential=credential, source_regions=source_regions)
+                                                        source='rax', credential=credential, source_regions=source_regions)
         # Check first without instance_id set (to import by name only).
         with self.settings(RAX_INSTANCE_ID_VAR=''):
             self.check_inventory_source(inventory_source)
@@ -1728,7 +1727,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # If test source regions is given, test again with empty string.
         if source_regions:
             inventory_source2 = self.update_inventory_source(self.group2,
-                source='rax', credential=credential, source_regions='')
+                                                             source='rax', credential=credential, source_regions='')
             self.check_inventory_source(inventory_source2)
         # Verify that main group is in top level groups (hasn't been added as
         # its own child).
@@ -1747,7 +1746,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                                                password=source_password,
                                                host=source_host)
         inventory_source = self.update_inventory_source(self.group,
-            source='vmware', credential=credential)
+                                                        source='vmware', credential=credential)
         # Check first without instance_id set (to import by name only).
         with self.settings(VMWARE_INSTANCE_ID_VAR=''):
             self.check_inventory_source(inventory_source)

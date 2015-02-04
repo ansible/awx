@@ -34,13 +34,13 @@ class ActivityStreamTest(BaseTest):
         self.org_created = self.post(reverse('api:organization_list'), dict(name='test org', description='test descr'), expect=201, auth=self.get_super_credentials())
 
     def test_get_activity_stream_list(self):
-         url = self.collection()
+        url = self.collection()
 
-         with self.current_user(self.super_django_user):
-             self.options(url, expect=200)
-             self.head(url, expect=200)
-             response = self.get(url, expect=200)
-             self.check_pagination_and_size(response, 1, previous=None, next=None)
+        with self.current_user(self.super_django_user):
+            self.options(url, expect=200)
+            self.head(url, expect=200)
+            response = self.get(url, expect=200)
+            self.check_pagination_and_size(response, 1, previous=None, next=None)
 
     def test_basic_fields(self):
         item_id = ActivityStream.objects.order_by('pk')[0].pk

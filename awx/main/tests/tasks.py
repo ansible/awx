@@ -471,8 +471,8 @@ class RunJobTest(BaseCeleryTest):
             self.assertTrue(job.result_stdout)
         else:
             self.assertTrue(job.result_stdout in ('', 'stdout capture is missing'),
-                             u'expected no stdout, got:\n%s' %
-                             job.result_stdout)
+                            u'expected no stdout, got:\n%s' %
+                            job.result_stdout)
         if expect_traceback:
             self.assertTrue(job.result_traceback)
         else:
@@ -580,7 +580,7 @@ class RunJobTest(BaseCeleryTest):
                 self.assertEqual(evt.host, self.host)
                 self.assertTrue(evt.play, evt)
                 self.assertTrue(evt.task, evt)
-                self.assertEqual(evt.failed, False)#should_be_failed)
+                self.assertEqual(evt.failed, False) # should_be_failed)
                 if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
                     self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
                                      host_pks)

@@ -43,12 +43,11 @@ class LicenseTests(BaseTest):
     def test_license_writer(self):
 
         writer = TaskEngager( 
-           company_name='acmecorp',
-           contact_name='Michael DeHaan',
-           contact_email='michael@ansibleworks.com',
-           license_date=25000, # seconds since epoch
-           instance_count=500
-        )
+            company_name='acmecorp',
+            contact_name='Michael DeHaan',
+            contact_email='michael@ansibleworks.com',
+            license_date=25000, # seconds since epoch
+            instance_count=500)
 
         data = writer.get_data()
 
@@ -69,12 +68,12 @@ class LicenseTests(BaseTest):
         assert vdata['available_instances'] == 500
         assert vdata['current_instances'] == 12
         assert vdata['free_instances'] == 488
-        assert vdata['date_warning'] == True
-        assert vdata['date_expired'] == True
+        assert vdata['date_warning'] is True
+        assert vdata['date_expired'] is True
         assert vdata['license_date'] == 25000
         assert vdata['time_remaining'] < 0
-        assert vdata['valid_key'] == True
-        assert vdata['compliant'] == False
+        assert vdata['valid_key'] is True
+        assert vdata['compliant'] is False
 
     def test_expired_licenses(self):
         reader = TaskSerializer()
@@ -88,7 +87,7 @@ class LicenseTests(BaseTest):
         strdata = writer.get_string()
         vdata = reader.from_string(strdata)
 
-        assert vdata['compliant'] == False
+        assert vdata['compliant'] is False
         assert vdata['grace_period_remaining'] < 0
 
         writer = TaskEngager(
@@ -101,7 +100,7 @@ class LicenseTests(BaseTest):
         strdata = writer.get_string()
         vdata = reader.from_string(strdata)
 
-        assert vdata['compliant'] == False
+        assert vdata['compliant'] is False
         assert vdata['grace_period_remaining'] < 0
 
         writer = TaskEngager(
@@ -114,5 +113,5 @@ class LicenseTests(BaseTest):
         strdata = writer.get_string()
         vdata = reader.from_string(strdata)
 
-        assert vdata['compliant'] == False
+        assert vdata['compliant'] is False
         assert vdata['grace_period_remaining'] > 0

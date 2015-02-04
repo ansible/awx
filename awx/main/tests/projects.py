@@ -420,7 +420,7 @@ class ProjectsTest(BaseTransactionTest):
         for x in all_users['results']:
             self.post(team_users, data=x, expect=403, auth=self.get_nobody_credentials())
             self.post(team_users, data=dict(x, is_superuser=False),
-                                  expect=204, auth=self.get_normal_credentials())
+                      expect=204, auth=self.get_normal_credentials())
         # The normal admin user can't create a super user vicariously through the team/project
         self.post(team_users, data=dict(username='attempted_superuser_create', is_superuser=True),
                   expect=403, auth=self.get_normal_credentials())
@@ -932,6 +932,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
 
             # FIXME: Add some invalid URLs.
         ]
+
         def is_exception(e):
             return bool(isinstance(e, Exception) or
                         (isinstance(e, type) and issubclass(e, Exception)))
@@ -951,15 +952,15 @@ class ProjectUpdatesTest(BaseTransactionTest):
                                   url, username='testuser')
             else:
                 updated_url = update_scm_url(scm_type, url,
-                                                  username='testuser')
+                                             username='testuser')
                 self.assertEqual(new_url_u, updated_url)
             if is_exception(new_url_up):
                 self.assertRaises(new_url_up, update_scm_url, scm_type,
                                   url, username='testuser', password='testpass')
             else:
                 updated_url = update_scm_url(scm_type, url,
-                                                  username='testuser',
-                                                  password='testpass')
+                                             username='testuser',
+                                             password='testpass')
                 self.assertEqual(new_url_up, updated_url)
 
     def is_public_key_in_authorized_keys(self):
@@ -1175,7 +1176,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             project.scm_password = 'not a\\ valid\' "password'
             project.save()
             if project.scm_type == 'svn':
-                self.check_project_update(project, should_fail=True)#should_still_fail)
+                self.check_project_update(project, should_fail=True) # should_still_fail)
             else:
                 self.check_project_update(project, should_fail=should_still_fail)
         # Test that we can delete project updates.
@@ -1300,7 +1301,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         scm_url = getattr(settings, 'TEST_GIT_PRIVATE_SSH', '')
         scm_key_data = getattr(settings, 'TEST_GIT_KEY_DATA', '')
         scm_username = getattr(settings, 'TEST_GIT_USERNAME', '')
-        scm_password = 'blahblahblah'#getattr(settings, 'TEST_GIT_PASSWORD', '')
+        scm_password = 'blahblahblah' # getattr(settings, 'TEST_GIT_PASSWORD', '')
         if not all([scm_url, scm_key_data, scm_username, scm_password]):
             self.skipTest('no private git repo defined for ssh!')
         project = self.create_project(
@@ -1320,8 +1321,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_password=scm_password,
         )
         should_error = bool('github.com' in scm_url and scm_username != 'git')
-        self.check_project_update(project2, should_fail=None)#,
-                                  #should_error=should_error)
+        self.check_project_update(project2, should_fail=None) # , should_error=should_error)
 
     def test_scm_key_unlock_on_project_update(self):
         scm_url = 'git@github.com:ansible/ansible.github.com.git'
@@ -1611,40 +1611,39 @@ class ProjectUpdatesTest(BaseTransactionTest):
     # TODO: We need to test this another way due to concurrency conflicts
     #       Will add some tests for the task runner system
     def _test_update_on_launch(self):
-         scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
-                           'https://github.com/ansible/ansible.github.com.git')
-         if not all([scm_url]):
-             self.skipTest('no public git repo defined for https!')
-         self.organization = self.make_organizations(self.super_django_user, 1)[0]
-         self.inventory = Inventory.objects.create(name='test-inventory',
-                                                   description='description for test-inventory',
-                                                   organization=self.organization)
-         self.host = self.inventory.hosts.create(name='host.example.com',
-                                                 inventory=self.inventory)
-         self.group = self.inventory.groups.create(name='test-group',
-                                                   inventory=self.inventory)
-         self.group.hosts.add(self.host)
-         self.credential = Credential.objects.create(name='test-creds',
-                                                     user=self.super_django_user)
-         self.project = self.create_project(
-             name='my public git project over https',
-             scm_type='git',
-             scm_url=scm_url,
-             scm_update_on_launch=True,
-         )
-         # First update triggered by saving a new project with SCM.
-         self.assertEqual(self.project.project_updates.count(), 1)
-         self.check_project_update(self.project)
-         self.assertEqual(self.project.project_updates.count(), 2)
-         job_template = self.create_test_job_template()
-         job = self.create_test_job(job_template=job_template)
-         self.assertEqual(job.status, 'new')
-         self.assertFalse(job.passwords_needed_to_start)
-         self.assertTrue(job.signal_start())
-         time.sleep(10) # Need some time to wait for the dependency to run
-         job = Job.objects.get(pk=job.pk)
-         self.assertTrue(job.status in ('successful', 'failed'))
-         self.assertEqual(self.project.project_updates.count(), 3)
+        scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
+                          'https://github.com/ansible/ansible.github.com.git')
+        if not all([scm_url]):
+            self.skipTest('no public git repo defined for https!')
+        self.organization = self.make_organizations(self.super_django_user, 1)[0]
+        self.inventory = Inventory.objects.create(name='test-inventory',
+                                                  description='description for test-inventory',
+                                                  organization=self.organization)
+        self.host = self.inventory.hosts.create(name='host.example.com',
+                                                inventory=self.inventory)
+        self.group = self.inventory.groups.create(name='test-group',
+                                                  inventory=self.inventory)
+        self.group.hosts.add(self.host)
+        self.credential = Credential.objects.create(name='test-creds',
+                                                    user=self.super_django_user)
+        self.project = self.create_project(
+            name='my public git project over https',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_update_on_launch=True)
+        # First update triggered by saving a new project with SCM.
+        self.assertEqual(self.project.project_updates.count(), 1)
+        self.check_project_update(self.project)
+        self.assertEqual(self.project.project_updates.count(), 2)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
+        time.sleep(10) # Need some time to wait for the dependency to run
+        job = Job.objects.get(pk=job.pk)
+        self.assertTrue(job.status in ('successful', 'failed'))
+        self.assertEqual(self.project.project_updates.count(), 3)
 
     def _test_update_on_launch_with_project_passwords(self):
         scm_url = getattr(settings, 'TEST_GIT_PRIVATE_HTTPS', '')

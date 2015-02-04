@@ -579,7 +579,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         for host in new_inv.hosts.all():
             if host.name == 'web1.example.com':
                 self.assertEqual(host.variables_dict,
-                                {'ansible_ssh_host': 'w1.example.net'})
+                                 {'ansible_ssh_host': 'w1.example.net'})
             elif host.name in ('db1.example.com', 'db2.example.com') and source and os.path.isdir(source):
                 self.assertEqual(host.variables_dict, {'test_host_name': host.name})
             elif host.name in ('web3.example.com', 'fe80::1610:9fff:fedd:b654'):
@@ -670,7 +670,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         for host in new_inv.hosts.filter(active=True):
             if host.name == 'web1.example.com':
                 self.assertEqual(host.variables_dict,
-                                {'ansible_ssh_host': 'w1.example.net'})
+                                 {'ansible_ssh_host': 'w1.example.net'})
             elif host.name in ('web3.example.com', 'fe80::1610:9fff:fedd:b654'):
                 self.assertEqual(host.variables_dict, {'ansible_ssh_port': 1022})
             elif host.name == '10.12.14.16':
@@ -899,7 +899,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)
         inv_file = os.path.join(os.path.dirname(__file__), 'data',
-                                                'splunk_inventory.py')
+                                'splunk_inventory.py')
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
                                                   source=inv_file, verbosity=0)

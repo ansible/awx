@@ -348,7 +348,7 @@ class HostAccess(BaseAccess):
         return obj and self.user.can_access(Inventory, 'read', obj.inventory)
 
     def can_add(self, data):
-        if not data or not 'inventory' in data:
+        if not data or 'inventory' not in data:
             return False
 
         # Checks for admin or change permission on inventory.
@@ -419,7 +419,7 @@ class GroupAccess(BaseAccess):
         return obj and self.user.can_access(Inventory, 'read', obj.inventory)
 
     def can_add(self, data):
-        if not data or not 'inventory' in data:
+        if not data or 'inventory' not in data:
             return False
         # Checks for admin or change permission on inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')

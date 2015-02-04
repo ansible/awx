@@ -109,7 +109,7 @@ class OrganizationsTest(BaseTest):
 
         # make sure super user can fetch records
         data = self.get(urls[0], expect=200, auth=self.get_super_credentials())
-        [self.assertTrue(key in data) for key in ['name', 'description', 'url' ]]
+        [self.assertTrue(key in data) for key in ['name', 'description', 'url']]
 
         # make sure invalid user cannot
         data = self.get(urls[0], expect=401, auth=self.get_invalid_credentials())

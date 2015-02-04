@@ -59,7 +59,7 @@ class AuthTokenProxyTest(BaseTest):
 
     def _request_auth_token(self, remote_addr):
         auth_token_url = reverse('api:auth_token_view')
-        client_kwargs = { 'HTTP_X_FORWARDED_FOR': remote_addr }
+        client_kwargs = {'HTTP_X_FORWARDED_FOR': remote_addr}
 
         # Request a new auth token from the remote address specified via 'HTTP_X_FORWARDED_FOR'
         data = dict(zip(('username', 'password'), self.get_super_credentials()))
@@ -79,7 +79,7 @@ class AuthTokenProxyTest(BaseTest):
         auth_token = self._request_auth_token(remote_addr)
         
         # Verify we can access our own user information, from the remote address specified via HTTP_X_FORWARDED_FOR
-        client_kwargs = { 'HTTP_X_FORWARDED_FOR': remote_addr }
+        client_kwargs = {'HTTP_X_FORWARDED_FOR': remote_addr}
         response = self._get_me(expect=200, auth=auth_token, remote_addr=remote_addr, client_kwargs=client_kwargs)
         self.check_me_is_admin(response)
 
@@ -94,7 +94,7 @@ class AuthTokenProxyTest(BaseTest):
         auth_token = self._request_auth_token(remote_addr)
 
         # Verify we can access our own user information, from the remote address specified via HTTP_X_FORWARDED_FOR
-        client_kwargs = { 'HTTP_X_FORWARDED_FOR': remote_addr_diff }
+        client_kwargs = {'HTTP_X_FORWARDED_FOR': remote_addr_diff}
         response = self._get_me(expect=401, auth=auth_token, remote_addr=remote_addr, client_kwargs=client_kwargs)
         self._get_me(expect=401, auth=auth_token, remote_addr=remote_addr_diff)
 
@@ -104,7 +104,7 @@ class AuthTokenProxyTest(BaseTest):
 
         auth_token = self._request_auth_token(remote_addr)
 
-        client_kwargs = { 'HTTP_X_FORARDED_FOR': '' }
+        client_kwargs = {'HTTP_X_FORARDED_FOR': ''}
         response = self._get_me(expect=200, auth=auth_token, remote_addr=remote_addr, client_kwargs=client_kwargs)
         self.check_me_is_admin(response)
 
@@ -810,14 +810,14 @@ class UsersTest(BaseTest):
         # Check list view with page size of 1, remaining pages.
         qs = base_qs.order_by('username')
         for n in xrange(1, base_qs.count()):
-            url = '%s?order_by=username&page_size=1&page=%d' % (base_url, n+1)
+            url = '%s?order_by=username&page_size=1&page=%d' % (base_url, n + 1)
             self.check_get_list(url, self.super_django_user, qs,
                                 check_order=True, offset=n, limit=1)
 
         # Check list view with page size of 2.
         qs = base_qs.order_by('username')
         for n in xrange(0, base_qs.count(), 2):
-            url = '%s?order_by=username&page_size=2&page=%d' % (base_url, (n/2)+1)
+            url = '%s?order_by=username&page_size=2&page=%d' % (base_url, (n / 2) + 1)
             self.check_get_list(url, self.super_django_user, qs,
                                 check_order=True, offset=n, limit=2)
 

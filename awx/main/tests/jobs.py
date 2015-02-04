@@ -55,15 +55,15 @@ TEST_SIMPLE_REQUIRED_SURVEY = '''
     "description": "Description",
     "spec": [
         {
-    	"type": "text",
-    	"question_name": "favorite color",
-    	"question_description": "What is your favorite color?",
-    	"variable": "favorite_color",
-    	"choices": "",
-    	"min": "",
-	"max": "",
-	"required": true,
-	"default": "blue"
+        "type": "text",
+        "question_name": "favorite color",
+        "question_description": "What is your favorite color?",
+        "variable": "favorite_color",
+        "choices": "",
+        "min": "",
+        "max": "",
+        "required": true,
+        "default": "blue"
         }
     ]
 }
@@ -75,15 +75,15 @@ TEST_SIMPLE_NONREQUIRED_SURVEY = '''
     "description": "Description",
     "spec": [
         {
-	"type": "text",
-	"question_name": "unladen swallow",
-	"question_description": "What is the airspeed velocity of an unladen swallow?",
-	"variable": "unladen_swallow",
-	"choices": "",
-	"min": "",
-	"max": "",
-	"required": false,
-	"default": "european"
+        "type": "text",
+        "question_name": "unladen swallow",
+        "question_description": "What is the airspeed velocity of an unladen swallow?",
+        "variable": "unladen_swallow",
+        "choices": "",
+        "min": "",
+        "max": "",
+        "required": false,
+        "default": "european"
         }
     ]
 }
@@ -95,59 +95,59 @@ TEST_SURVEY_REQUIREMENTS = '''
     "description": "Description",
     "spec": [
         {
-	"type": "text",
-	"question_name": "cantbeshort",
-	"question_description": "What is a long answer",
-	"variable": "long_answer",
-	"choices": "",
-	"min": 5,
-	"max": "",
-	"required": false,
-	"default": "yes"
+        "type": "text",
+        "question_name": "cantbeshort",
+        "question_description": "What is a long answer",
+        "variable": "long_answer",
+        "choices": "",
+        "min": 5,
+        "max": "",
+        "required": false,
+        "default": "yes"
         },
         {
-	"type": "text",
-	"question_name": "cantbelong",
-	"question_description": "What is a short answer",
-	"variable": "short_answer",
-	"choices": "",
-	"min": "",
-	"max": 5,
-	"required": false,
-	"default": "yes"
+        "type": "text",
+        "question_name": "cantbelong",
+        "question_description": "What is a short answer",
+        "variable": "short_answer",
+        "choices": "",
+        "min": "",
+        "max": 5,
+        "required": false,
+        "default": "yes"
         },
         {
-	"type": "text",
-	"question_name": "reqd",
-	"question_description": "I should be required",
-	"variable": "reqd_answer",
-	"choices": "",
-	"min": "",
-	"max": "",
-	"required": true,
-	"default": "yes"
+        "type": "text",
+        "question_name": "reqd",
+        "question_description": "I should be required",
+        "variable": "reqd_answer",
+        "choices": "",
+        "min": "",
+        "max": "",
+        "required": true,
+        "default": "yes"
         },
         {
-	"type": "multiplechoice",
-	"question_name": "achoice",
-	"question_description": "Need one of these",
-	"variable": "single_choice",
-	"choices": ["one", "two"],
-	"min": "",
-	"max": "",
-	"required": false,
-	"default": "yes"
+        "type": "multiplechoice",
+        "question_name": "achoice",
+        "question_description": "Need one of these",
+        "variable": "single_choice",
+        "choices": ["one", "two"],
+        "min": "",
+        "max": "",
+        "required": false,
+        "default": "yes"
         },
         {
-	"type": "multiselect",
-	"question_name": "mchoice",
-	"question_description": "Can have multiples of these",
-	"variable": "multi_choice",
-	"choices": ["one", "two", "three"],
-	"min": "",
-	"max": "",
-	"required": false,
-	"default": "yes"
+        "type": "multiselect",
+        "question_name": "mchoice",
+        "question_description": "Can have multiples of these",
+        "variable": "multi_choice",
+        "choices": ["one", "two", "three"],
+        "min": "",
+        "max": "",
+        "required": false,
+        "default": "yes"
         },
         {
         "type": "integer",
@@ -398,17 +398,15 @@ class BaseJobTestMixin(BaseTestMixin):
         # Operations is divided into teams to work on the east/west servers.
         # Greg and Holly work on east, Greg and iris work on west.
         self.team_ops_east = self.org_ops.teams.create(
-             name='easterners',
-             created_by=self.user_sue,
-        )
+            name='easterners',
+            created_by=self.user_sue)
         self.team_ops_east.projects.add(self.proj_prod)
         self.team_ops_east.projects.add(self.proj_prod_east)
         self.team_ops_east.users.add(self.user_greg)
         self.team_ops_east.users.add(self.user_holly)
         self.team_ops_west = self.org_ops.teams.create(
-             name='westerners',
-             created_by=self.user_sue,
-        )
+            name='westerners',
+            created_by=self.user_sue)
         self.team_ops_west.projects.add(self.proj_prod)
         self.team_ops_west.projects.add(self.proj_prod_west)
         self.team_ops_west.users.add(self.user_greg)
@@ -463,7 +461,7 @@ class BaseJobTestMixin(BaseTestMixin):
         self.cred_doug = self.user_doug.credentials.create(
             username='doug',
             password='doug doesn\'t mind his password being saved. this '
-                         'is why we dont\'t let doug actually run jobs.',
+                     'is why we dont\'t let doug actually run jobs.',
             created_by=self.user_sue,
         )
         self.cred_eve = self.user_eve.credentials.create(

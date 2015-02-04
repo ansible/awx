@@ -52,7 +52,7 @@ class BaseScriptTest(BaseLiveServerTest):
         pargs = [name]
         for k,v in options.items():
             pargs.append('%s%s' % ('-' if len(k) == 1 else '--', k))
-            if not v is True:
+            if v is not True:
                 pargs.append(str(v))
         for arg in args:
             pargs.append(str(arg))
@@ -176,7 +176,7 @@ class InventoryScriptTest(BaseScriptTest):
                 hostnames = hosts.values_list('name', flat=True)
                 self.assertEqual(set(v['hosts']), set(hostnames))
             else:
-                self.assertTrue(v['hosts'] == [ 'localhost' ])
+                self.assertTrue(v['hosts'] == ['localhost'])
 
         for group in inventory.groups.filter(active=False):
             self.assertFalse(group.name in data.keys(),
