@@ -40,7 +40,7 @@ function HostCountGraphData(Rest, getBasePath, processErrors, $q) {
                 processErrors(null, response.data, response.status, null, { hdr: 'Error!',
                               msg: errorMessage
                 });
-                return response;
+                throw response;
             });
         }
     };

@@ -387,12 +387,12 @@ angular.module('Tower', [
             }).
 
             when('/login', {
-                templateUrl: urlPrefix + 'partials/home.html',
+                templateUrl: urlPrefix + 'partials/blank.html',
                 controller: 'Authenticate'
             }).
 
             when('/logout', {
-                templateUrl: urlPrefix + 'partials/home.html',
+                templateUrl: urlPrefix + 'partials/blank.html',
                 controller: 'Authenticate'
             }).
 
