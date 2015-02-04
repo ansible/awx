@@ -9,7 +9,8 @@
 
 
 
-angular.module('GroupListDefinition', [])
+export default
+    angular.module('GroupListDefinition', [])
     .value('GroupList', {
 
         name: 'copy_groups',

@@ -9,7 +9,8 @@
 
 
 
-angular.module('JobHostDefinition', [])
+export default
+    angular.module('JobHostDefinition', [])
     .value('JobHostList', {
 
         name: 'jobhosts',

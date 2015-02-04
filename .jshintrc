@@ -8,6 +8,7 @@
     "latedef": "nofunc",
     "noarg": true,
     "nonew": true,
+    "maxerr": 10000,
     "notypeof": true,
     "globals": {
       "angular":false,

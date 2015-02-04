@@ -12,31 +12,31 @@
  * @description This form is for job variables prompt modal
 */
 
+export default
+    angular.module('JobVarsPromptFormDefinition', [])
 
-angular.module('JobVarsPromptFormDefinition', [])
+        .value ('JobVarsPromptForm', {
 
-    .value ('JobVarsPromptForm', {
+            addTitle: '',
+            editTitle: '',
+            name: 'job',
+            well: false,
 
-        addTitle: '',
-        editTitle: '',
-        name: 'job',
-        well: false,
+            actions: { },
 
-        actions: { },
+            fields: {
+                extra_vars: {
+                    label: null,
+                    type: 'textarea',
+                    rows: 6,
+                    addRequired: false,
+                    editRequired: false,
+                    "default": "---"
+                }
+            },
 
-        fields: {
-            extra_vars: {
-                label: null,
-                type: 'textarea',
-                rows: 6,
-                addRequired: false,
-                editRequired: false,
-                "default": "---"
-            }
-        },
+            buttons: { },
 
-        buttons: { },
+            related: { }
 
-        related: { }
-
-    });
+        });

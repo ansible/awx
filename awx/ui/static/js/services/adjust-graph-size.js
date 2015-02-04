@@ -1,5 +1,4 @@
-angular.module('DashboardGraphs').
-    factory('adjustGraphSize', function() {
+export default function() {
 
 
     // Adjusts the size of graphs based on the current height
@@ -87,4 +86,4 @@ angular.module('DashboardGraphs').
 
         chartModel.update();
     };
-});
+};

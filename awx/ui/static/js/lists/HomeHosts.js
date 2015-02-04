@@ -10,7 +10,8 @@
 
 
 
-angular.module('HomeHostListDefinition', [])
+export default
+    angular.module('HomeHostListDefinition', [])
     .value('HomeHostList', {
 
         name: 'hosts',

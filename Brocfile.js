@@ -10,6 +10,8 @@ var concatFiles = require('broccoli-sourcemap-concat');
 var compileLess = require('broccoli-less-single');
 var gzip = require('broccoli-gzip');
 var debug = require('broccoli-stew').debug;
+var ES6 = require('broccoli-es6modules');
+var Funnel = require('broccoli-funnel');
 
 // Get extra args after '--'
 var allArgs = parseArgs(process.argv.slice(2), { '--': true });
@@ -19,8 +21,15 @@ var shouldCompress = isUndefined(args.compress) ? false : args.compress;
 var debugMode = isUndefined(args.debug) ? false : args.debug;
 var silentMode = isUndefined(args.silent) ? false : args.silent;
 
+var appName = 'tower';
+
+if (debugMode) {
+    log('*** DEBUG MODE ***');
+}
+
 var vendorFiles =
-    [ 'jquery/dist/jquery.js',
+    [ 'loader.js/loader.js',
+      'jquery/dist/jquery.js',
       'angular/angular.js',
       'angular-route/angular-route.js',
       'angular-resource/angular-resource.js',
@@ -34,7 +43,7 @@ var vendorFiles =
       'angular-animate/angular-animate.js',
       'angular-tz-extensions/packages/jstimezonedetect/jstz.js',
       'socket.io-client/dist/socket.io.js',
-      'd3js/build/d3.v3.js',
+      'd3/d3.js',
       'novus-nvd3/nv.d3.js',
       'angular-codemirror/lib/AngularCodeMirror.js',
       'timezone-js/src/date.js',
@@ -59,11 +68,21 @@ var vendorFiles =
     ];
 
 function log() {
-    var msgs = Array.prototype.splice.apply(arguments);
+    var msgs = Array.prototype.slice.apply(arguments);
 
     if (!silentMode) {
         console.log.apply(null, msgs);
     }
+
+    return msgs.slice(-1);
+}
+
+function doDebug(name, tree) {
+    if (debugMode) {
+        tree = debug(tree, { name: name });
+    }
+
+    return tree;
 }
 
 function prependLibDir(file) {
@@ -73,21 +92,44 @@ function prependLibDir(file) {
 vendorFiles = vendorFiles.map(prependLibDir);
 
 var root = 'awx/ui/static';
-var app = root;
+var app = new Funnel(root,
+                       { include: flatten([vendorFiles, 'js/**/*.js'])
+                       });
 
-function log(msg, obj) {
-    console.log(msg + ":", obj);
-    return obj;
-}
+app = doDebug('initial-select', app);
+
+var appStyles = new Funnel(root,
+                           { include: ['**/*.less']
+                           });
+
+var applicationJS = new Funnel(app,
+                     {   include: ['**/*.js'],
+                         srcDir: 'js',
+                         destDir: appName
+                     });
+
+applicationJS = doDebug('app-funnel', applicationJS);
+
+var vendorJS = new Funnel(app,
+                          { include: ['lib/**/*.js']
+                          });
+
+vendorJS = doDebug('vendor-funnel', vendorJS);
+
+applicationJS = new ES6(applicationJS);
+
+app = mergeTrees([vendorJS, applicationJS]);
+
+app = doDebug('merged-app-vendor', app);
 
 app = concatFiles(app,
         {   outputFile: 'tower.concat.js',
-            inputFiles: flatten([vendorFiles, ['js/**/*.js', 'js/app.js', 'js/config.js', 'js/local_config.js']])
+            inputFiles: flatten([vendorFiles, ['tower/**/*.js', 'tower/app.js', 'tower/config.js', 'tower/local_config.js']])
         });
 
-app = debug(app, {name: 'concat'});
+app = doDebug('concat', app);
 
-var styles = compileLess(path.join(root, 'less'), 'ansible-ui.less', 'tower.min.css');
+var styles = compileLess(appStyles, 'less/ansible-ui.less', 'tower.min.css');
 
 app = mergeTrees([app, styles]);
 

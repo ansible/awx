@@ -9,7 +9,8 @@
 
 
 
-angular.module('JobEventsListDefinition', [])
+export default
+    angular.module('JobEventsListDefinition', [])
     .value('JobEventList', {
 
         name: 'jobevents',

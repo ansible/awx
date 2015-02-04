@@ -10,7 +10,8 @@
 
 
 
-angular.module('HomeGroupListDefinition', [])
+export default
+    angular.module('HomeGroupListDefinition', [])
     .value('HomeGroupList', {
 
         name: 'home_groups',

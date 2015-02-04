@@ -9,7 +9,8 @@
 
 
 
-angular.module('InventoryHostsDefinition', [])
+export default
+    angular.module('InventoryHostsDefinition', [])
     .value('InventoryHosts', {
 
         name: 'hosts',

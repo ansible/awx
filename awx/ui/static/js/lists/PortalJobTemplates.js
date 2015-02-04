@@ -9,7 +9,8 @@
 
 
 
-angular.module('PortalJobTemplatesListDefinition', [])
+export default
+    angular.module('PortalJobTemplatesListDefinition', [])
     .value('PortalJobTemplateList', {
 
         name: 'job_templates',

@@ -10,8 +10,7 @@
  *
  */
 
-
-
+export default
 angular.module('VariablesHelper', ['Utilities'])
 
     /**

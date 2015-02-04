@@ -9,7 +9,8 @@
 
 
 
-angular.module('CloudCredentialsListDefinition', [])
+export default
+    angular.module('CloudCredentialsListDefinition', [])
     .value('CloudCredentialList', {
 
         name: 'cloudcredentials',

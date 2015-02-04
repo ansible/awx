@@ -59,7 +59,7 @@
  */
 
 
-function Authenticate($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
+export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
     Timer, Empty, ClearScope) {
 
     var setLoginFocus, lastPath, sessionExpired, loginAgain,

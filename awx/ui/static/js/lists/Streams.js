@@ -9,7 +9,8 @@
 
 
 
-angular.module('StreamListDefinition', [])
+export default
+    angular.module('StreamListDefinition', [])
     .value('StreamList', {
 
         name: 'activities',

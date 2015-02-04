@@ -8,7 +8,8 @@
 
 
 
-angular.module('ScheduledJobsDefinition', [])
+export default
+    angular.module('ScheduledJobsDefinition', [])
     .value( 'ScheduledJobsList', {
 
         name: 'schedules',

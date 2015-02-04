@@ -8,7 +8,8 @@
 
 
 
-angular.module('QueuedJobsDefinition', [])
+export default
+    angular.module('QueuedJobsDefinition', [])
     .value( 'QueuedJobsList', {
 
         name: 'queued_jobs',

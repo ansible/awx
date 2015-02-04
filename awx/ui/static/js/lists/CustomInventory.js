@@ -9,7 +9,8 @@
 
 
 
-angular.module('CustomInventoryListDefinition', [])
+export default
+    angular.module('CustomInventoryListDefinition', [])
     .value('CustomInventoryList', {
 
         name:  'source_scripts' ,  // 'custom_inventories',

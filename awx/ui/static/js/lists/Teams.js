@@ -8,7 +8,8 @@
 
 
 
-angular.module('TeamsListDefinition', [])
+export default
+    angular.module('TeamsListDefinition', [])
     .value('TeamList', {
 
         name: 'teams',

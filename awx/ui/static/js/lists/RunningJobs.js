@@ -8,7 +8,8 @@
 
 
 
-angular.module('RunningJobsDefinition', [])
+export default
+    angular.module('RunningJobsDefinition', [])
     .value( 'RunningJobsList', {
 
         name: 'running_jobs',

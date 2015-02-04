@@ -14,7 +14,7 @@
 */
 
 
-function OrganizationsList($routeParams, $scope, $rootScope, $location, $log, Rest, Alert, LoadBreadCrumbs, Prompt,
+export function OrganizationsList($routeParams, $scope, $rootScope, $location, $log, Rest, Alert, LoadBreadCrumbs, Prompt,
     GenerateList, OrganizationList, SearchInit, PaginateInit, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {
 
     ClearScope();
@@ -101,7 +101,7 @@ OrganizationsList.$inject = ['$routeParams', '$scope', '$rootScope', '$location'
 ];
 
 
-function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm,
+export function OrganizationsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath,
     ReturnToCaller, Wait) {
 
@@ -152,7 +152,7 @@ OrganizationsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$l
 ];
 
 
-function OrganizationsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, GenerateForm, Rest,
+export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt, ClearScope, GetBasePath, Wait, Stream) {
 
     ClearScope();

@@ -4,7 +4,8 @@
  *  InventoryGroups.js
  *
  */
-angular.module('InventoryGroupsDefinition', [])
+export default
+    angular.module('InventoryGroupsDefinition', [])
     .value('InventoryGroups', {
 
         name: 'groups',

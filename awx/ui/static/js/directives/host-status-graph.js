@@ -1,6 +1,10 @@
-angular.module('DashboardGraphs')
-  .directive('hostStatusGraph', ['$compile', '$window',
-    function ($compile, $window) {
+export default
+    [   '$compile',
+        '$window',
+        HostStatusGraph
+    ];
+
+function HostStatusGraph($compile, $window) {
         return {
             restrict: 'E',
             link: link,
@@ -99,4 +103,4 @@ angular.module('DashboardGraphs')
 
             }
         }
-    }]);
+    }

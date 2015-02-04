@@ -307,6 +307,11 @@
 
 
   <script>
+        // HACK: Need this to support global-dependent
+        //  config-loading behavior
+        var $AnsibleConfig;
+
+        require('tower/app');
       $('#main-menu-toggle-button').jPushMenu();
   </script>
 

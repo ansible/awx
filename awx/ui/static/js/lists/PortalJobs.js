@@ -11,7 +11,8 @@
 
 
 
-angular.module('PortalJobsListDefinition', [])
+export default
+    angular.module('PortalJobsListDefinition', [])
     .value( 'PortalJobsList', {
 
         name: 'portal_jobs',

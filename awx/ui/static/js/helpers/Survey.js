@@ -11,8 +11,7 @@
  *
  */
 
-
-
+export default
 angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog' ,
     'GeneratorHelpers'])
 
@@ -876,5 +875,4 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
         };
     }]);
-
 

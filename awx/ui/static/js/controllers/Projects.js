@@ -14,7 +14,7 @@
 */
 
 
-function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs,
+export function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate,
     Refresh, Wait, Stream, GetChoices, Empty, Find, LogViewer, GetProjectIcon, GetProjectToolTip) {
 
@@ -391,7 +391,7 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routePara
 ];
 
 
-function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
+export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
     LoadBreadCrumbs, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
     CredentialList, GetChoices, DebugForm, Wait) {
 
@@ -537,7 +537,7 @@ ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', 
 ];
 
 
-function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm,
+export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, Prompt,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit, GetChoices,
     Empty, DebugForm, Wait, Stream, SchedulesControllerInit, SchedulesListInit, SchedulesList, ProjectUpdate) {

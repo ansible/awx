@@ -11,7 +11,8 @@
 
 
 
-angular.module('JobsListDefinition', [])
+export default
+    angular.module('JobsListDefinition', [])
     .value( 'JobsList', {
 
         name: 'jobs',

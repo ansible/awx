@@ -8,7 +8,8 @@
 
 
 
-angular.module('CompletedJobsDefinition', [])
+export default
+    angular.module('CompletedJobsDefinition', [])
     .value( 'CompletedJobsList', {
 
         name: 'completed_jobs',

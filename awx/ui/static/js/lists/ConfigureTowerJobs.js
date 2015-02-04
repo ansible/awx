@@ -9,7 +9,8 @@
 
 
 
-angular.module('ConfigureTowerJobsListDefinition', [])
+export default
+    angular.module('ConfigureTowerJobsListDefinition', [])
     .value('ConfigureTowerJobsList', {
 
         name: 'configure_jobs',

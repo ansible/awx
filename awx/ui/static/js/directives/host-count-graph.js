@@ -1,5 +1,10 @@
-angular.module('DashboardGraphs').
-    directive('hostCountGraph', ['GetBasePath', 'Rest', 'adjustGraphSize', '$window', function(getBasePath, Rest, adjustGraphSize, $window) {
+export default
+[   'adjustGraphSize',
+    '$window',
+    HostCountGraph
+];
+
+function HostCountGraph(adjustGraphSize, $window) {
 
     return {
         restrict: 'E',
@@ -42,11 +47,11 @@ angular.module('DashboardGraphs').
                 {   "key" : "Hosts" ,
                     "color" : "#1778c3",
                     "values": data.hosts
-                },
-                {   "key" : "License" ,
-                    "color" : "#171717",
-                    "values": data.hosts
-                }
+            },
+            {   "key" : "License" ,
+                "color" : "#171717",
+                "values": data.hosts
+            }
             ];
 
             graphData.map(function(series) {
@@ -116,4 +121,4 @@ angular.module('DashboardGraphs').
 
         }
     }
-}]);
+}

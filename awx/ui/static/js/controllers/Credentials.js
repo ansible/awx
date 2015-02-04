@@ -13,7 +13,7 @@
 */
 
 
-function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,
+export function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices, Wait, Stream) {
 
@@ -134,7 +134,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeP
 ];
 
 
-function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
+export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList,
     GetBasePath, GetChoices, Empty, KindChange, OwnerChange, LoginMethodChange, FormSave) {
 
@@ -286,7 +286,7 @@ CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 ];
 
 
-function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
+export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
     KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, LoginMethodChange, FormSave, Stream, Wait) {
 

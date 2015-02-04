@@ -9,7 +9,8 @@
 
 
 
-angular.module('JobTemplatesListDefinition', [])
+export default
+    angular.module('JobTemplatesListDefinition', [])
     .value('JobTemplateList', {
 
         name: 'job_templates',

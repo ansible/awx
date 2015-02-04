@@ -9,7 +9,8 @@
 
 
 
-angular.module('ProjectsListDefinition', [])
+export default
+    angular.module('ProjectsListDefinition', [])
     .value('ProjectList', {
 
         name: 'projects',

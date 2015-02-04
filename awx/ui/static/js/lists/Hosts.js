@@ -9,7 +9,8 @@
 
 
 
-angular.module('HostListDefinition', [])
+export default
+    angular.module('HostListDefinition', [])
     .value('HostList', {
 
         name: 'copy_hosts',

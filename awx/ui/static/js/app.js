@@ -7,8 +7,7 @@
  *
  */
 
-var urlPrefix,
-    $AnsibleConfig;
+var urlPrefix;
 
 if ($basePath) {
     urlPrefix = $basePath;
@@ -18,17 +17,46 @@ if ($basePath) {
     urlPrefix = $basePath;
 }
 
+import * as Helpers from 'tower/helpers';
+import * as Forms from 'tower/forms';
+import * as Lists from 'tower/lists';
+import * as Widgets from 'tower/widgets';
+import * as Help from 'tower/help';
+import {Home, HomeGroups, HomeHosts} from 'tower/controllers/Home';
+import {SocketsController} from 'tower/controllers/Sockets';
+import {Authenticate} from 'tower/controllers/Authentication';
+import {CredentialsAdd, CredentialsEdit, CredentialsList} from 'tower/controllers/Credentials';
+import {JobsListController} from 'tower/controllers/Jobs';
+import {PortalController} from 'tower/controllers/Portal';
 
-angular.module('Tower', [
+import dataServices from 'tower/services/_data-services';
+import dashboardGraphs from 'tower/directives/_dashboard-graphs';
+
+
+import {JobDetailController} from 'tower/controllers/JobDetail';
+import {JobStdoutController} from 'tower/controllers/JobStdout';
+import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from 'tower/controllers/JobTemplates';
+import {ScheduleEditController} from 'tower/controllers/Schedules';
+import {ProjectsList, ProjectsAdd, ProjectsEdit} from 'tower/controllers/Projects';
+import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from 'tower/controllers/Organizations';
+import {InventoriesList, InventoriesAdd, InventoriesEdit} from 'tower/controllers/Inventories';
+import {AdminsList} from 'tower/controllers/Admins';
+import {UsersList, UsersAdd, UsersEdit} from 'tower/controllers/Users';
+import {TeamsList, TeamsAdd, TeamsEdit} from 'tower/controllers/Teams';
+import {PermissionsAdd, PermissionsList, PermissionsEdit} from 'tower/controllers/Permissions';
+
+
+
+var tower = angular.module('Tower', [
     'ngRoute',
     'ngSanitize',
     'ngCookies',
     'RestServices',
-    'DataServices',
-    'DashboardGraphs',
+    dataServices.name,
+    dashboardGraphs.name,
     'AuthService',
     'Utilities',
-    'LicenseHelper',
+    Helpers.License.name,
     'OrganizationFormDefinition',
     'UserFormDefinition',
     'FormGenerator',
@@ -138,267 +166,267 @@ angular.module('Tower', [
 
             when('/jobs', {
                 templateUrl: urlPrefix + 'partials/jobs.html',
-                controller: 'JobsListController'
+                controller: JobsListController
             }).
 
             when('/portal', {
                 templateUrl: urlPrefix + 'partials/portal.html',
-                controller: 'PortalController'
+                controller: PortalController
             }).
 
             when('/jobs/:id', {
                 templateUrl: urlPrefix + 'partials/job_detail.html',
-                controller: 'JobDetailController'
+                controller: JobDetailController
             }).
 
             when('/jobs/:id/stdout', {
                 templateUrl: urlPrefix + 'partials/job_stdout.html',
-                controller: 'JobStdoutController'
+                controller: JobStdoutController
             }).
 
             when('/job_templates', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: 'JobTemplatesList'
+                controller: JobTemplatesList
             }).
 
             when('/job_templates/add', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: 'JobTemplatesAdd'
+                controller: JobTemplatesAdd
             }).
 
             when('/job_templates/:template_id', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: 'JobTemplatesEdit'
+                controller: JobTemplatesEdit
             }).
 
             when('/job_templates/:id/schedules', {
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
-                controller: 'ScheduleEditController'
+                controller: ScheduleEditController
             }).
 
             when('/projects', {
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: 'ProjectsList'
+                controller: ProjectsList
             }).
 
             when('/projects/add', {
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: 'ProjectsAdd'
+                controller: ProjectsAdd
             }).
 
             when('/projects/:id', {
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: 'ProjectsEdit'
+                controller: ProjectsEdit
             }).
 
             when('/projects/:id/schedules', {
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
-                controller: 'ScheduleEditController'
+                controller: ScheduleEditController
             }).
 
             when('/projects/:project_id/organizations', {
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: 'OrganizationsList'
+                controller: OrganizationsList
             }).
 
             when('/projects/:project_id/organizations/add', {
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: 'OrganizationsAdd'
+                controller: OrganizationsAdd
             }).
 
             when('/inventories', {
                 templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: 'InventoriesList'
+                controller: InventoriesList
             }).
 
             when('/inventories/add', {
                 templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: 'InventoriesAdd'
+                controller: InventoriesAdd
             }).
 
             when('/inventories/:inventory_id', {
                 templateUrl: urlPrefix + 'partials/inventory-edit.html',
-                controller: 'InventoriesEdit'
+                controller: InventoriesEdit
             }).
 
             when('/organizations', {
                 templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: 'OrganizationsList'
+                controller: OrganizationsList
             }).
 
             when('/organizations/add', {
                 templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: 'OrganizationsAdd'
+                controller: OrganizationsAdd
             }).
 
             when('/organizations/:organization_id', {
                 templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: 'OrganizationsEdit'
+                controller: OrganizationsEdit
             }).
 
             when('/organizations/:organization_id/admins', {
                 templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: 'AdminsList'
+                controller: AdminsList
             }).
 
             when('/organizations/:organization_id/users', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: 'UsersList'
+                controller: UsersList
             }).
 
             when('/organizations/:organization_id/users/add', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: 'UsersAdd'
+                controller: UsersAdd
             }).
 
             when('/organizations/:organization_id/users/:user_id', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: 'UsersEdit'
+                controller: UsersEdit
             }).
 
             when('/teams', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'TeamsList'
+                controller: TeamsList
             }).
 
             when('/teams/add', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'TeamsAdd'
+                controller: TeamsAdd
             }).
 
             when('/teams/:team_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'TeamsEdit'
+                controller: TeamsEdit
             }).
 
             when('/teams/:team_id/permissions/add', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'PermissionsAdd'
+                controller: PermissionsAdd
             }).
 
             when('/teams/:team_id/permissions', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'PermissionsList'
+                controller: PermissionsList
             }).
 
             when('/teams/:team_id/permissions/:permission_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'PermissionsEdit'
+                controller: PermissionsEdit
             }).
 
             when('/teams/:team_id/users', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'UsersList'
+                controller: UsersList
             }).
 
             when('/teams/:team_id/users/:user_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'UsersEdit'
+                controller: UsersEdit
             }).
 
             when('/teams/:team_id/projects', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'ProjectsList'
+                controller: ProjectsList
             }).
 
             when('/teams/:team_id/projects/add', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'ProjectsAdd'
+                controller: ProjectsAdd
             }).
 
             when('/teams/:team_id/projects/:project_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'ProjectsEdit'
+                controller: ProjectsEdit
             }).
 
             when('/teams/:team_id/credentials', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'CredentialsList'
+                controller: CredentialsList
             }).
 
             when('/teams/:team_id/credentials/add', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'CredentialsAdd'
+                controller: CredentialsAdd
             }).
 
             when('/teams/:team_id/credentials/:credential_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'CredentialsEdit'
+                controller: CredentialsEdit
             }).
 
             when('/credentials', {
                 templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: 'CredentialsList'
+                controller: CredentialsList
             }).
 
             when('/credentials/add', {
                 templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: 'CredentialsAdd'
+                controller: CredentialsAdd
             }).
 
             when('/credentials/:credential_id', {
                 templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: 'CredentialsEdit'
+                controller: CredentialsEdit
             }).
 
             when('/users', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: 'UsersList'
+                controller: UsersList
             }).
 
             when('/users/add', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: 'UsersAdd'
+                controller: UsersAdd
             }).
 
             when('/users/:user_id', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: 'UsersEdit'
+                controller: UsersEdit
             }).
 
             when('/users/:user_id/credentials', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: 'CredentialsList'
+                controller: CredentialsList
             }).
 
             when('/users/:user_id/permissions/add', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: 'PermissionsAdd'
+                controller: PermissionsAdd
             }).
 
             when('/users/:user_id/permissions', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: 'PermissionsList'
+                controller: PermissionsList
             }).
 
             when('/users/:user_id/permissions/:permission_id', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: 'PermissionsEdit'
+                controller: PermissionsEdit
             }).
 
             when('/users/:user_id/credentials/add', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'CredentialsAdd'
+                controller: CredentialsAdd
             }).
 
             when('/teams/:user_id/credentials/:credential_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: 'CredentialsEdit'
+                controller: CredentialsEdit
             }).
 
             when('/login', {
                 templateUrl: urlPrefix + 'partials/blank.html',
-                controller: 'Authenticate'
+                controller: Authenticate
             }).
 
             when('/logout', {
                 templateUrl: urlPrefix + 'partials/blank.html',
-                controller: 'Authenticate'
+                controller: Authenticate
             }).
 
             when('/home', {
                 templateUrl: urlPrefix + 'partials/home.html',
-                controller: 'Home',
+                controller: Home,
                 resolve: {
                     graphData: ['$q', 'jobStatusGraphData', 'hostCountGraphData', function($q, jobStatusGraphData, hostCountGraphData) {
                         return $q.all({
@@ -411,17 +439,17 @@ angular.module('Tower', [
 
             when('/home/groups', {
                 templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: 'HomeGroups'
+                controller: HomeGroups
             }).
 
             when('/home/hosts', {
                 templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: 'HomeHosts'
+                controller: HomeHosts
             }).
 
             when('/sockets', {
                 templateUrl: urlPrefix + 'partials/sockets.html',
-                controller: 'SocketsController'
+                controller: SocketsController
             }).
 
             otherwise({
@@ -756,3 +784,6 @@ angular.module('Tower', [
             LoadConfig();
         }
     ]);
+
+export default tower;
+

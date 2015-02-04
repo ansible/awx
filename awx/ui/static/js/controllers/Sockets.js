@@ -13,7 +13,7 @@
 */
 
 
-function SocketsController ($scope, $compile, ClearScope, Socket) {
+export function SocketsController ($scope, $compile, ClearScope, Socket) {
 
     ClearScope();
 

@@ -9,7 +9,8 @@
 
 
 
-angular.module('PermissionListDefinition', [])
+export default
+    angular.module('PermissionListDefinition', [])
     .value('PermissionList', {
 
         name: 'permissions',
