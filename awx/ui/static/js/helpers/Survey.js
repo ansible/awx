@@ -152,9 +152,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
                         })
                     .error(function (data, status) {
-                        ProcessErrors(scope, data, status, { hdr: 'Error!',
-                            msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
+                        ProcessErrors(scope, data, status, null,  { hdr: 'Error!',
+                            msg: 'Failed to retrieve survey. GET returned status: ' + status });
                     });
+
             }
         };
     }])
