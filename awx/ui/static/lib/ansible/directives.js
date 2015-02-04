@@ -545,16 +545,15 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             });
 
             function showPopover(e) {
-                console.log(element);
                 e.stopPropagation();
 
-                var self = $(this);
+                var self = $(element);
 
                 // remove tool-tip
                 try {
                     element.tooltip('hide');
                 }
-                catch(e) {
+                catch(ex) {
                     // ignore
                 }
 
@@ -585,7 +584,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
 
                 // $(element).one('click', dismissPopover);
 
-                $(this).popover('toggle');
+                $(element).popover('toggle');
 
                 $('.popover').each(function() {
                     $compile($(this))(scope);  //make nested directives work!
