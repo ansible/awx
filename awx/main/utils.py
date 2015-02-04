@@ -98,8 +98,8 @@ def get_ansible_version():
         proc = subprocess.Popen(['ansible', '--version'],
                                 stdout=subprocess.PIPE)
         result = proc.communicate()[0]
-        stripped_result = result.lower().replace('ansible', '').strip()
-        return stripped_result.split('\n', 1)[0]
+        stripped_result = result.lower().replace('ansible', '').strip().split(" ")[0]
+        return stripped_result
     except:
         return 'unknown'
 
