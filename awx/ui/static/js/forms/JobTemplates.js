@@ -30,12 +30,12 @@ angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'Complet
         collapseOpenFirst: true,   //Always open first panel
 
         actions: {
-            submit: {
-                ngClick: 'launch()',
-                awToolTip: 'Start a job using this template',
-                dataPlacement: 'top',
-                mode: 'edit'
-            },
+            // submit: {
+            //     ngClick: 'launch()',
+            //     awToolTip: 'Start a job using this template',
+            //     dataPlacement: 'top',
+            //     mode: 'edit'
+            // },
             stream: {
                 'class': "btn-primary btn-xs activity-btn",
                 ngClick: "showActivity()",
