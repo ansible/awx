@@ -112,6 +112,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
             scope.resetForm();
             Wait('start');
+            //for adding a job template:
             if(scope.mode === 'add'){
                 tempSurv.survey_name = scope.survey_name;
                 tempSurv.survey_description = scope.survey_description;
@@ -126,6 +127,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     scope.finalizeQuestion(tempSurv.survey_questions[i], i);
                 }
             }
+            //editing an existing job template:
             else{
                 // Get the existing record
                 Rest.setUrl(url);
