@@ -229,6 +229,7 @@ class Inventory(CommonModel):
         # deepest level within the tree.
         root_group_pks = set(self.root_groups.values_list('pk', flat=True))
         group_depths = {} # pk: max_depth
+
         def update_group_depths(group_pk, current_depth=0):
             max_depth = group_depths.get(group_pk, -1)
             if current_depth > max_depth:
@@ -541,6 +542,7 @@ class Group(CommonModelNameNotUnique):
         from awx.main.tasks import update_inventory_computed_fields, bulk_inventory_element_delete
         from awx.main.utils import ignore_inventory_computed_fields
         from awx.main.signals import disable_activity_stream
+
         def mark_actual():
             all_group_hosts = Group.hosts.through.objects.select_related("host", "group").filter(group__inventory=self.inventory)
             group_hosts = {'groups': {}, 'hosts': {}}
@@ -1036,7 +1038,7 @@ class InventorySourceOptions(BaseModel):
         if invalid_filters:
             raise ValidationError('Invalid filter expression%s: %s' %
                                   ('' if len(invalid_filters) == 1 else 's',
-                                  ', '.join(invalid_filters)))
+                                   ', '.join(invalid_filters)))
         return instance_filters
 
     def clean_group_by(self):
@@ -1055,7 +1057,7 @@ class InventorySourceOptions(BaseModel):
         if invalid_choices:
             raise ValidationError('Invalid group by choice%s: %s' %
                                   ('' if len(invalid_choices) == 1 else 's',
-                                  ', '.join(invalid_choices)))
+                                   ', '.join(invalid_choices)))
         return ','.join(choices)
 
 

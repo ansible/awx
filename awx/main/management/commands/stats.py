@@ -24,12 +24,12 @@ class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
         make_option('--stat',
-            action='store',
-            dest='stat',
-            type="string",
-            default="jobs_running",
-            help='Select which stat to get information for'),
-        )
+                    action='store',
+                    dest='stat',
+                    type="string",
+                    default="jobs_running",
+                    help='Select which stat to get information for'),
+    )
 
     def job_stats(self, state):
         return UnifiedJob.objects.filter(status=state).count()

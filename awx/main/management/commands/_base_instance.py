@@ -12,6 +12,7 @@ from awx.main.models import Project
 class OptionEnforceError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
 
@@ -35,39 +36,39 @@ class BaseCommandInstance(BaseCommand):
     @staticmethod
     def generate_option_hostname():
         return make_option('--hostname',
-                dest='hostname',
-                default='',
-                help='Find instance by specified hostname.')
+                           dest='hostname',
+                           default='',
+                           help='Find instance by specified hostname.')
 
     @staticmethod
     def generate_option_hostname_set():
         return make_option('--hostname',
-                dest='hostname',
-                default='',
-                help='Hostname to assign to the new instance.')
+                           dest='hostname',
+                           default='',
+                           help='Hostname to assign to the new instance.')
 
     @staticmethod
     def generate_option_primary():
         return make_option('--primary',
-                action='store_true',
-                default=False,
-                dest='primary',
-                help='Register instance as primary.')
+                           action='store_true',
+                           default=False,
+                           dest='primary',
+                           help='Register instance as primary.')
 
     @staticmethod
     def generate_option_secondary():
         return make_option('--secondary',
-                action='store_true',
-                default=False,
-                dest='secondary',
-                help='Register instance as secondary.')
+                           action='store_true',
+                           default=False,
+                           dest='secondary',
+                           help='Register instance as secondary.')
 
     @staticmethod
     def generate_option_uuid():
         return make_option('--uuid', 
-            dest='uuid', 
-            default='',
-            help='Find instance by specified uuid.')
+                           dest='uuid',
+                           default='',
+                           help='Find instance by specified uuid.')
 
     def include_options_roles(self):
         BaseCommand.option_list += ( BaseCommandInstance.generate_option_primary(), BaseCommandInstance.generate_option_secondary(), )
@@ -83,14 +84,19 @@ class BaseCommandInstance(BaseCommand):
 
     def get_option_hostname(self):
         return self.option_hostname
+
     def get_option_uuid(self):
         return self.option_uuid
+
     def is_option_primary(self):
         return self.option_primary
+
     def is_option_secondary(self):
         return self.option_secondary
+
     def get_UUID(self):
         return self.UUID
+
     # for the enforce_unique_find policy
     def get_unique_fields(self):
         return self.unique_fields

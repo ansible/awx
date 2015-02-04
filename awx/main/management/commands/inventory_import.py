@@ -111,7 +111,7 @@ class MemGroup(MemObject):
             # don't add to child groups if already there
             for g in self.children:
                 if g.name == name:
-                     return g
+                    return g
             logger.debug('Adding child group %s to group %s', group.name, self.name)
             self.children.append(group)
         return group
@@ -122,7 +122,7 @@ class MemGroup(MemObject):
         logger.debug('Adding child group %s to parent %s', group.name, self.name)
         if group not in self.children:
             self.children.append(group)
-        if not self in group.parents:
+        if self not in group.parents:
             group.parents.append(self)
 
     def add_host(self, host):
@@ -202,7 +202,7 @@ class BaseLoader(object):
             logger.debug('Filtering host %s', host_name)
             return None
         host = None
-        if not host_name in self.all_group.all_hosts:
+        if host_name not in self.all_group.all_hosts:
             host = MemHost(host_name, self.source_dir, port)
             self.all_group.all_hosts[host_name] = host
         return self.all_group.all_hosts[host_name]
@@ -258,7 +258,7 @@ class BaseLoader(object):
         if self.group_filter_re and not self.group_filter_re.match(name):
             logger.debug('Filtering group %s', name)
             return None
-        if not name in self.all_group.all_groups:
+        if name not in self.all_group.all_groups:
             group = MemGroup(name, self.source_dir) 
             if not child:
                 all_group.add_child_group(group)
@@ -557,10 +557,12 @@ class Command(NoArgsCommand):
         self.logger = logging.getLogger('awx.main.commands.inventory_import')
         self.logger.setLevel(log_levels.get(self.verbosity, 0))
         handler = logging.StreamHandler()
+
         class Formatter(logging.Formatter):
             def format(self, record):
                 record.relativeSeconds = record.relativeCreated / 1000.0
                 return logging.Formatter.format(self, record)
+
         formatter = Formatter('%(relativeSeconds)9.3f %(levelname)-8s %(message)s')
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
@@ -593,7 +595,7 @@ class Command(NoArgsCommand):
                                                                     inventory=self.inventory,
                                                                     active=True)
             except InventorySource.DoesNotExist:
-                raise CommandError('Inventory source with id=%s not found' % \
+                raise CommandError('Inventory source with id=%s not found' %
                                    inventory_source_id)
             self.inventory_update = None
         # Otherwise, create a new inventory source to capture this invocation
@@ -1252,8 +1254,8 @@ class Command(NoArgsCommand):
                 queries_this_import = connection.queries[queries_before:]
                 sqltime = sum(float(x['time']) for x in queries_this_import)
                 self.logger.warning('Inventory import required %d queries '
-                                 'taking %0.3fs', len(queries_this_import),
-                                 sqltime)
+                                    'taking %0.3fs', len(queries_this_import),
+                                    sqltime)
         except Exception, e:
             if isinstance(e, KeyboardInterrupt):
                 status = 'canceled'

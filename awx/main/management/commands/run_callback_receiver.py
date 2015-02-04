@@ -49,6 +49,7 @@ class CallbackReceiver(object):
                 except Exception, e:
                     pass
             return _handler
+
         def check_pre_handle(data):
             event = data.get('event', '')
             if event == 'playbook_on_play_start':
@@ -111,18 +112,19 @@ class CallbackReceiver(object):
                     job_parent_events = last_parent_events.get(message['job_id'], {})
                     if message['event'] in ('playbook_on_play_start', 'playbook_on_stats', 'playbook_on_vars_prompt'):
                         parent = job_parent_events.get('playbook_on_start', None)
-                    elif message['event'] in ('playbook_on_notify', 'playbook_on_setup',
-                                            'playbook_on_task_start',
-                                            'playbook_on_no_hosts_matched',
-                                            'playbook_on_no_hosts_remaining',
-                                            'playbook_on_import_for_host',
-                                            'playbook_on_not_import_for_host'):
+                    elif message['event'] in ('playbook_on_notify',
+                                              'playbook_on_setup',
+                                              'playbook_on_task_start',
+                                              'playbook_on_no_hosts_matched',
+                                              'playbook_on_no_hosts_remaining',
+                                              'playbook_on_import_for_host',
+                                              'playbook_on_not_import_for_host'):
                         parent = job_parent_events.get('playbook_on_play_start', None)
                     elif message['event'].startswith('runner_on_'):
                         list_parents = []
                         list_parents.append(job_parent_events.get('playbook_on_setup', None))
                         list_parents.append(job_parent_events.get('playbook_on_task_start', None))
-                        list_parents = sorted(filter(lambda x: x is not None, list_parents), cmp=lambda x, y: y.id-x.id)
+                        list_parents = sorted(filter(lambda x: x is not None, list_parents), cmp=lambda x, y: y.id - x.id)
                         parent = list_parents[0] if len(list_parents) > 0 else None
                     else:
                         parent = None

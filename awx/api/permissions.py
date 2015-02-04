@@ -62,8 +62,9 @@ class ModelAccessPermission(permissions.BasePermission):
 
     def check_put_permissions(self, request, view, obj=None):
         if not obj:
-            return True # FIXME: For some reason this needs to return True
-                        # because it is first called with obj=None?
+            # FIXME: For some reason this needs to return True
+            # because it is first called with obj=None?
+            return True
         if getattr(view, 'is_variable_data', False):
             return check_user_access(request.user, view.model, 'change', obj,
                                      dict(variables=request.DATA))
@@ -76,8 +77,10 @@ class ModelAccessPermission(permissions.BasePermission):
 
     def check_delete_permissions(self, request, view, obj=None):
         if not obj:
-            return True # FIXME: For some reason this needs to return True
-                        # because it is first called with obj=None?
+            # FIXME: For some reason this needs to return True
+            # because it is first called with obj=None?
+            return True
+
         return check_user_access(request.user, view.model, 'delete', obj)
 
     def check_permissions(self, request, view, obj=None):

@@ -149,11 +149,11 @@ def get_tasks():
     # TODO: Replace this when we can grab all objects in a sane way.
     graph_jobs = [j for j in Job.objects.filter(status__in=RELEVANT_JOBS)]
     graph_inventory_updates = [iu for iu in
-                InventoryUpdate.objects.filter(status__in=RELEVANT_JOBS)]
+                               InventoryUpdate.objects.filter(status__in=RELEVANT_JOBS)]
     graph_project_updates = [pu for pu in
-                ProjectUpdate.objects.filter(status__in=RELEVANT_JOBS)]
+                             ProjectUpdate.objects.filter(status__in=RELEVANT_JOBS)]
     graph_system_jobs = [sj for sj in
-                SystemJob.objects.filter(status__in=RELEVANT_JOBS)]
+                         SystemJob.objects.filter(status__in=RELEVANT_JOBS)]
     all_actions = sorted(graph_jobs + graph_inventory_updates +
                          graph_project_updates + graph_system_jobs,
                          key=lambda task: task.created)
@@ -197,8 +197,7 @@ def rebuild_graph(message):
     # Check running tasks and make sure they are active in celery
     print_log("Active celery tasks: " + str(active_tasks))
     for task in list(running_tasks):
-        if (task.celery_task_id not in active_tasks and
-                    not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
+        if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
             # NOTE: Pull status again and make sure it didn't finish in 
             #       the meantime?
             task.status = 'failed'
@@ -214,14 +213,14 @@ def rebuild_graph(message):
     # Create and process dependencies for new tasks
     for task in new_tasks:
         print_log("Checking dependencies for: %s" % str(task))
-        task_dependencies = task.generate_dependencies(running_tasks + waiting_tasks) #TODO: other 'new' tasks? Need to investigate this scenario
+        task_dependencies = task.generate_dependencies(running_tasks + waiting_tasks) # TODO: other 'new' tasks? Need to investigate this scenario
         print_log("New dependencies: %s" % str(task_dependencies))
         for dep in task_dependencies:
             # We recalculate the created time for the moment to ensure the
             # dependencies are always sorted in the right order relative to
             # the dependent task.
             time_delt = len(task_dependencies) - task_dependencies.index(dep)
-            dep.created = task.created - datetime.timedelta(seconds=1+time_delt)
+            dep.created = task.created - datetime.timedelta(seconds=1 + time_delt)
             dep.status = 'waiting'
             dep.save()
             waiting_tasks.insert(waiting_tasks.index(task), dep)
@@ -255,9 +254,9 @@ def process_graph(graph, task_capacity):
     ready_nodes = filter(lambda x: x['node_object'].status != 'running', leaf_nodes)
     remaining_volume = task_capacity - running_impact
     print_log('Running Nodes: %s; Capacity: %s; Running Impact: %s; '
-             'Remaining Capacity: %s' %
-             (str(running_nodes), str(task_capacity),
-              str(running_impact), str(remaining_volume)))
+              'Remaining Capacity: %s' %
+              (str(running_nodes), str(task_capacity),
+               str(running_impact), str(remaining_volume)))
     print_log("Ready Nodes: %s" % str(ready_nodes))
     for task_node in ready_nodes:
         node_obj = task_node['node_object']

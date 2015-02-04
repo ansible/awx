@@ -141,7 +141,7 @@ class BaseModel(models.Model):
                 except ValidationError, e:
                     errors[f.name] = e.messages
         if errors:
-             raise ValidationError(errors)
+            raise ValidationError(errors)
 
     def update_fields(self, **kwargs):
         save = kwargs.pop('save', True)

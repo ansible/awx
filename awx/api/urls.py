@@ -1,6 +1,8 @@
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# noqa
+
 from django.conf.urls import include, patterns, url as original_url
 
 def url(regex, view, kwargs=None, name=None, prefix=''):

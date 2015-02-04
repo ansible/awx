@@ -1592,7 +1592,7 @@ class ScheduleSerializer(BaseSerializer):
             raise serializers.ValidationError('RRULE require in rrule')
         if len(match_multiple_rrule) > 1:
             raise serializers.ValidationError('Multiple RRULE is not supported')
-        if not 'interval' in rrule_value.lower():
+        if 'interval' not in rrule_value.lower():
             raise serializers.ValidationError('INTERVAL required in rrule')
         if 'tzid' in rrule_value.lower():
             raise serializers.ValidationError('TZID is not supported')

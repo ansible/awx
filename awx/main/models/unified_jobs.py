@@ -569,7 +569,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         # out the time that elapsed, do so.
         if self.started and self.finished and not self.elapsed:
             td = self.finished - self.started
-            elapsed = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / (10**6 * 1.0)
+            elapsed = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0)
         else:
             elapsed = 0.0
         if self.elapsed != elapsed:

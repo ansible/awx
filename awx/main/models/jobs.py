@@ -266,7 +266,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) not in (float, int):
                         errors.append("Value %s for %s expected to be a numeric type" % (data[survey_element['variable']],
-                                                                                  survey_element['variable']))
+                                                                                         survey_element['variable']))
             elif survey_element['type'] == 'multiselect':
                 if survey_element['variable'] in data:
                     if type(data[survey_element['variable']]) != list:
@@ -446,7 +446,7 @@ class Job(UnifiedJob, JobOptions):
             dependencies.append(self.project.create_project_update(launch_type='dependency'))
         if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
             for source in inventory_sources:
-                if not source in inventory_sources_found and source.needs_update_on_launch:
+                if source not in inventory_sources_found and source.needs_update_on_launch:
                     dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
 
@@ -491,12 +491,11 @@ class JobHostSummary(CreatedModifiedModel):
         editable=False,
     )
     host = models.ForeignKey('Host',
-        related_name='job_host_summaries',
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-        editable=False,
-    )
+                             related_name='job_host_summaries',
+                             null=True,
+                             default=None,
+                             on_delete=models.SET_NULL,
+                             editable=False)
 
     host_name = models.CharField(
         max_length=1024,

@@ -357,8 +357,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
             qs = qs.exclude(pk=model_class_pk)
         if qs.exists():
             key = NON_FIELD_ERRORS
-            errors.setdefault(key, []).append( \
-                self.unique_error_message(model_class, unique_check))
+            errors.setdefault(key, []).append(self.unique_error_message(model_class, unique_check))
         if errors:
             raise ValidationError(errors)
 

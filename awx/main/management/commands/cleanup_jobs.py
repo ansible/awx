@@ -48,8 +48,8 @@ class Command(NoArgsCommand):
         #jobs_qs = jobs_qs.filter(created__lte=self.cutoff)
         for job in Job.objects.all():
             job_display = '"%s" (started %s, %d host summaries, %d events)' % \
-                (unicode(job), unicode(job.created),
-                job.job_host_summaries.count(), job.job_events.count())
+                          (unicode(job), unicode(job.created),
+                           job.job_host_summaries.count(), job.job_events.count())
             if job.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s job %s', action_text, job.status, job_display)
