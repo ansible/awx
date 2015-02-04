@@ -222,7 +222,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 }]
             },
             scm_update_cache_timeout: {
-                label: 'Cache Timeout',
+                label: 'Cache Timeout<span class=\"small-text\"> (seconds)</span>',
                 id: 'scm-cache-timeout',
                 type: 'number',
                 integer: true,
