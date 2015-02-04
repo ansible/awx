@@ -46,7 +46,9 @@ function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Aler
         var i;
         if ($scope.teams) {
             for (i = 0; i < $scope.teams.length; i++) {
-                $scope.teams[i].organization_name = $scope.teams[i].summary_fields.organization.name;
+                if ($scope.teams[i].summary_fields.organization) {
+                    $scope.teams[i].organization_name = $scope.teams[i].summary_fields.organization.name;
+                }
             }
         }
     });
