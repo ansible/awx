@@ -70,11 +70,11 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         require: 'ngModel',
         scope: { ngModel: '=ngModel' },
         template: '<div class="survey_taker_input" ng-repeat="option in ngModel.options">' +
-            '<input type="checkbox" ng-model="cbModel[option.value]" ' +
+            '<label><input type="checkbox" ng-model="cbModel[option.value]" ' +
             'value="{{option.value}}" class="mc" ng-change="update(this.value)" />' +
             '<span>'+
             '{{option.value}}'+
-            '</span>'+
+            '</span></label>'+
             '</div>',
         link: function(scope, element, attrs, ctrl){
             scope.cbModel= {};
