@@ -450,11 +450,9 @@ function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, Lo
             });
             html += "</tbody>\n";
             html += "</table>\n";
-            html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
         }
         else {
-            html = "<p>No recent job data available for this inventory.</p>\n" +
-                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+            html = "<p>No recent job data available for this inventory.</p>\n";
         }
         attachElem(event, html, title);
     });
@@ -486,7 +484,6 @@ function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, Lo
         });
         html += "</tbody>\n";
         html += "</table>\n";
-        html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
         title = "Sync Status";
         attachElem(event, html, title);
     });

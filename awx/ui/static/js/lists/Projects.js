@@ -17,8 +17,7 @@ angular.module('ProjectsListDefinition', [])
         selectTitle: 'Add Project',
         editTitle: 'Projects',
         selectInstructions: '<p>Select existing projects by clicking each project or checking the related checkbox. When finished, click the blue ' +
-            '<em>Select</em> button, located bottom right.</p><p>Create a new project by clicking the <i class=\"fa fa-plus\"></i> button.</p>'+
-            '<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>',
+            '<em>Select</em> button, located bottom right.</p><p>Create a new project by clicking the <i class=\"fa fa-plus\"></i> button.</p>',
         index: false,
         hover: true,
 
@@ -66,34 +65,12 @@ angular.module('ProjectsListDefinition', [])
                 ngClick: 'addProject()',
                 awToolTip: 'Create a new project'
             },
-            /*help: {
-                awPopOver: "<dl>\n<dt>Updating</dt><dd>A source control update is in progress.</dd>\n" +
-                    "<dt>Never Updated</dt><dd>This project has not yet been updated from source control.</dd>\n" +
-                    "<dt>Failed</dt><dd>An error occurred during the most recent source control update, click the status " +
-                    "text for more information.</dd>\n" +
-                    "<dt>Successful</dt><dd>TThe latest source control update completed successfully.</dd>\n" +
-                    "<dt>Missing</dt><dd>The previously configured local project directory is missing.</dd>\n" +
-                    "<dt>N/A</dt><dd>The project is not linked to source control, so updates are not applicable.</dd>\n" +
-                    "</dl>\n",
-                dataPlacement: 'left',
-                dataContainer: 'body',
-                mode: 'edit',
-                awToolTip: 'Click for help',
-                awTipPlacement: 'top'
-            },*/
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
                 ngShow: "socketStatus == 'error'"
             },
-            /*socket: {
-                mode: 'all',
-                iconClass: "{{ 'fa fa-power-off fa-lg socket-' + socketStatus }}",
-                awToolTip: "{{ socketTip }}",
-                dataTipWatch: "socketTip",
-                ngClick: "socketToggle()",
-            },*/
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",

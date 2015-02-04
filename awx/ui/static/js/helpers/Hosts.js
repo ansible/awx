@@ -77,8 +77,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         function noRecentJobs() {
             title = 'No job data';
-            html = "<p>No recent job data available for this host.</p>\n" +
-                "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
+            html = "<p>No recent job data available for this host.</p>\n";
         }
 
         function setMsg(host) {
@@ -129,7 +128,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     }
                     html += "</tbody>\n";
                     html += "</table>\n";
-                    html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
                 }
                 else {
                     noRecentJobs();

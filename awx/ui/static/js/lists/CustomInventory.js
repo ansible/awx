@@ -16,9 +16,6 @@ angular.module('CustomInventoryListDefinition', [])
         iterator: 'source_script',  //'custom_inventory',
         selectTitle: 'Add custom inventory',
         editTitle: 'Custom Inventories',
-        // selectInstructions: "<p>Select existing credentials by clicking each credential or checking the related checkbox. When " +
-        //     "finished, click the blue <em>Select</em> button, located bottom right.</p> <p>Create a brand new credential by clicking " +
-        //     "the <i class=\"fa fa-plus\"></i> button.</p><div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>",
         index: false,
         hover: false,
 

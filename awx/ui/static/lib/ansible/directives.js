@@ -489,7 +489,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 title = (attrs.title) ? attrs.title : (attrs.popoverTitle) ? attrs.popoverTitle : 'Help',
                 container = (attrs.container !== undefined) ? attrs.container : false,
                 trigger = (attrs.trigger !== undefined) ? attrs.trigger : 'manual',
-                template = '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>';
+                template = '<div class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
+                id_to_close = "";
 
             if (element[0].id) {
                 template = '<div id="' + element[0].id + '_popover_container" class="popover" role="tooltip"><div class="arrow"></div><h3 id="' + element[0].id + '_popover_title" class="popover-title"></h3><div id="' + element[0].id + '_popover_content" class="popover-content"></div></div>';
@@ -521,17 +522,47 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 });
             }
             $(element).attr('tabindex',-1);
-            $(element).click(function() {
+
+            $(element).one('click', showPopover);
+
+            $(element).on('shown.bs.popover', function() {
+                $('body').one('click.popover' + id_to_close, function(e) {
+                    if ($(e.target).parents(id_to_close).length === 0) {
+                        $(element).popover('hide');
+                    }
+                });
+
+                $(document).on('keydown.popover', dismissOnEsc);
+
+            });
+
+            $(element).on('hidden.bs.popover', function() {
+                $(element).off('click', dismissPopover);
+                $(element).off('click', showPopover);
+                $('body').off('click.popover.' + id_to_close);
+                $(element).one('click', showPopover);
+                $(document).off('keydown.popover', dismissOnEsc);
+            });
+
+            function showPopover(e) {
+                console.log(element);
+                e.stopPropagation();
+
                 var self = $(this);
+
+                // remove tool-tip
                 try {
-                    self.tooltip('hide');
+                    element.tooltip('hide');
                 }
                 catch(e) {
                     // ignore
                 }
+
+                // this is called on the help-link (over and over again)
                 $('.help-link, .help-link-white').each( function() {
                     if (self.attr('id') !== $(this).attr('id')) {
                         try {
+                            // not sure what this does different than the method above
                             $(this).popover('hide');
                         }
                         catch(e) {
@@ -539,32 +570,43 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         }
                     }
                 });
+
                 $('.popover').each(function() {
                     // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                     $(this).remove();
                 });
                 $('.tooltip').each( function() {
-                    // close any lingering tool tipss
+                    // close any lingering tool tips
                     $(this).hide();
                 });
+
+                // set id_to_close of the actual open element
+                id_to_close = "#" + $(element).attr('id') + "_popover_container";
+
+                // $(element).one('click', dismissPopover);
+
                 $(this).popover('toggle');
+
                 $('.popover').each(function() {
                     $compile($(this))(scope);  //make nested directives work!
                 });
-                $('.popover-content, .popover-title').click(function() {
-                    $(self).popover('hide');
-                });
-            });
+            }
 
-            $(document).bind('keydown', function(e) {
+            function dismissPopover(e) {
+                e.stopPropagation();
+                $(element).popover('hide');
+            }
+
+            function dismissOnEsc(e) {
                 if (e.keyCode === 27) {
                     $(element).popover('hide');
                     $('.popover').each(function() {
                         // remove lingering popover <div>. Seems to be a bug in TB3 RC1
-                        $(this).remove();
+                        // $(this).remove();
                     });
                 }
-            });
+            }
+
         };
     }])
 
