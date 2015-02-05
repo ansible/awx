@@ -14,9 +14,7 @@ https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/
 from awx import prepare_env
 prepare_env()
 
-import os
 import logging
-from django.conf import settings
 from awx import __version__ as tower_version
 logger = logging.getLogger('awx.main.models.jobs')
 try:

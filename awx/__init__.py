@@ -12,7 +12,7 @@ __all__ = ['__version__']
 # Check for the presence/absence of "devonly" module to determine if running
 # from a source code checkout or release packaage.
 try:
-    import awx.devonly
+    import awx.devonly # noqa
     MODE = 'development'
 except ImportError: # pragma: no cover
     MODE = 'production'
@@ -57,7 +57,7 @@ def prepare_env():
         import six
         sys.modules['django.utils.six'] = sys.modules['six']
         django.utils.six = sys.modules['django.utils.six']
-        from django.utils import six
+        from django.utils import six # noqa
     # Use the AWX_TEST_DATABASE_* environment variables to specify the test
     # database settings to use when management command is run as an external
     # program via unit tests.

@@ -3,10 +3,12 @@
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-import os, datetime, glob, sys, shutil
-from distutils import log
-from setuptools import setup, find_packages
-from setuptools.command.sdist import sdist as _sdist
+import os
+import datetime
+import glob
+import sys
+import shutil
+from setuptools import setup
 
 from awx import __version__
 
@@ -113,26 +115,22 @@ setup(
         ],
     },
     data_files = proc_data_files([
-            ("%s" % homedir,        ["config/wsgi.py",
-                                     "awx/static/favicon.ico",
-                                    ]),
-            ("%s" % webconfig,      ["config/awx-httpd-80.conf",
-                                     "config/awx-httpd-443.conf",
-                                     "config/awx-munin.conf",
-                                    ]),
-            ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh",]),
-            ("%s" % munin_plugin_path, ["tools/munin_monitors/tower_jobs",
-                                        "tools/munin_monitors/callbackr_alive",
-                                        "tools/munin_monitors/celery_alive",
-                                        "tools/munin_monitors/postgres_alive",
-                                        "tools/munin_monitors/redis_alive",
-                                        "tools/munin_monitors/socketio_alive",
-                                        "tools/munin_monitors/taskmanager_alive"]),
-            ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
-            ("%s" % sysinit, ["tools/scripts/ansible-tower"]),
-            ("%s" % sosconfig, ["tools/sosreport/tower.py"]),
-        ]
-    ),
+        ("%s" % homedir,        ["config/wsgi.py",
+                                 "awx/static/favicon.ico"]),
+        ("%s" % webconfig,      ["config/awx-httpd-80.conf",
+                                 "config/awx-httpd-443.conf",
+                                 "config/awx-munin.conf"]),
+        ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh",]),
+        ("%s" % munin_plugin_path, ["tools/munin_monitors/tower_jobs",
+                                    "tools/munin_monitors/callbackr_alive",
+                                    "tools/munin_monitors/celery_alive",
+                                    "tools/munin_monitors/postgres_alive",
+                                    "tools/munin_monitors/redis_alive",
+                                    "tools/munin_monitors/socketio_alive",
+                                    "tools/munin_monitors/taskmanager_alive"]),
+        ("%s" % munin_plugin_conf_path, ["config/awx_munin_tower_jobs"]),
+        ("%s" % sysinit, ["tools/scripts/ansible-tower"]),
+        ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     options = {
         'egg_info': {
             'tag_build': build_timestamp,

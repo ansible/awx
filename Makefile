@@ -228,6 +228,9 @@ pep8:
 pyflakes:
 	pyflakes awx/
 
+check:
+	flake8
+
 # Run all API unit tests.
 test:
 	$(PYTHON) manage.py test -v2 awx.main.tests

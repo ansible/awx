@@ -4,18 +4,15 @@
 # Python
 import inspect
 import logging
-import json
 import time
 
 # Django
 from django.http import Http404
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import connection
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
-from django.utils.timezone import now
 
 # Django REST Framework
 from rest_framework.authentication import get_authorization_header
@@ -27,8 +24,8 @@ from rest_framework import status
 from rest_framework import views
 
 # AWX
-from awx.main.models import *
-from awx.main.utils import *
+from awx.main.models import *  # noqa
+from awx.main.utils import * # noqa
 
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
