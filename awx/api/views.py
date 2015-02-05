@@ -5,9 +5,7 @@
 # Python
 import datetime
 import dateutil
-import functools
 import time
-import re
 import socket
 import sys
 
@@ -16,7 +14,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.exceptions import FieldError
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, Count
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.utils.datastructures import SortedDict
@@ -26,9 +24,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 
 # Django REST Framework
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.exceptions import PermissionDenied, ParseError
-from rest_framework.pagination import BasePaginationSerializer
 from rest_framework.parsers import YAMLParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.renderers import YAMLRenderer
@@ -46,19 +42,18 @@ import qsstats
 
 # AWX
 from awx.main.task_engine import TaskSerializer, TASK_FILE
-from awx.main.models import *
-from awx.main.utils import *
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.main.redact import UriCleaner
 from awx.api.authentication import JobTaskAuthentication
-from awx.api.permissions import *
-from awx.api.renderers import *
-from awx.api.serializers import *
 from awx.api.utils.decorators import paginated
-from awx.api.generics import *
 from awx.api.generics import get_view_name
-
+from awx.api.generics import * # noqa
+from awx.main.models import * # noqa
+from awx.main.utils import * # noqa
+from awx.api.permissions import * # noqa
+from awx.api.renderers import * # noqa
+from awx.api.serializers import * # noqa
 
 def api_exception_handler(exc):
     '''
@@ -214,7 +209,7 @@ class ApiV1ConfigView(APIView):
             return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             eula_accepted = to_python_boolean(request.DATA["eula_accepted"])
-        except ValueError, e:
+        except ValueError:
             return Response({"error": "'eula_accepted' value is invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not eula_accepted:
@@ -222,12 +217,14 @@ class ApiV1ConfigView(APIView):
         request.DATA.pop("eula_accepted")
         try:
             data_actual = json.dumps(request.DATA)
-        except Exception, e:
+        except Exception:
+            # FIX: Log
             return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
         license_reader = TaskSerializer()
         try:
             license_data = license_reader.from_string(data_actual)
-        except Exception, e:
+        except Exception:
+            # FIX: Log
             return Response({"error": "Invalid License"}, status=status.HTTP_400_BAD_REQUEST)
         if license_data['valid_key']:
             fh = open(TASK_FILE, "w")
@@ -741,7 +738,7 @@ class ProjectUpdateCancel(RetrieveAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_cancel:
-            result = obj.cancel()
+            obj.cancel()
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
@@ -1025,7 +1022,8 @@ class GroupChildrenList(SubListCreateAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         parent = self.get_parent_object()
-        parent_key = getattr(self, 'parent_key', None)
+        # TODO: flake8 warns, pending removal if unneeded
+        # parent_key = getattr(self, 'parent_key', None)
         relationship = getattr(parent, self.relationship)
         sub = get_object_or_400(self.model, pk=sub_id)
 
@@ -1415,7 +1413,7 @@ class InventoryUpdateCancel(RetrieveAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_cancel:
-            result = obj.cancel()
+            obj.cancel()
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
@@ -1515,7 +1513,8 @@ class JobTemplateSurveySpec(GenericAPIView):
             raise PermissionDenied()
         try:
             obj.survey_spec = json.dumps(request.DATA)
-        except ValueError, e:
+        except ValueError:
+            # TODO: Log
             return Response(dict(error="Invalid JSON when parsing survey spec"), status=status.HTTP_400_BAD_REQUEST)
         if "name" not in obj.survey_spec:
             return Response(dict(error="'name' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
@@ -1751,7 +1750,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
             raise PermissionDenied()
             
         new_job = obj.create_unified_job(**request.DATA)
-        result = new_job.signal_start(**request.DATA)
+        new_job.signal_start(**request.DATA)
         data = dict(system_job=new_job.id)
         return Response(data, status=status.HTTP_202_ACCEPTED)
 
@@ -1843,7 +1842,7 @@ class JobCancel(RetrieveAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_cancel:
-            result = obj.cancel()
+            obj.cancel()
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
