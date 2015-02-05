@@ -29,6 +29,7 @@ tar-build
 
 # JavaScript
 /Gruntfile.js
+/Brocfile.js
 /bower.json
 /package.json
 node_modules/**

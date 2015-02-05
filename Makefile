@@ -85,7 +85,7 @@ clean-deb:
 
 # Remove grunt build files
 clean-grunt:
-	rm -f package.json Gruntfile.js bower.json
+	rm -f package.json Gruntfile.js Brocfile.js bower.json
 	rm -rf node_modules
 
 # Remove UI build files
@@ -262,6 +262,9 @@ test_jenkins:
 Gruntfile.js:
 	cp packaging/grunt/$@ $@
 
+Brocfile.js:
+	cp packaging/grunt/$@ $@
+
 bower.json:
 	cp packaging/grunt/$@ $@
 
@@ -269,7 +272,7 @@ package.json:
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' packaging/grunt/package.template > $@
 
 # Update local npm install
-node_modules: Gruntfile.js bower.json package.json
+node_modules: Gruntfile.js Brocfile.js bower.json package.json
 	npm install
 
 devjs: node_modules clean-ui
