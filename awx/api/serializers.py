@@ -4,11 +4,7 @@
 # Python
 import json
 import re
-import socket
-import urlparse
 import logging
-import os.path
-import datetime
 from dateutil import rrule
 
 # PyYAML
@@ -22,9 +18,8 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.datastructures import SortedDict
-from django.utils.translation import ugettext_lazy as _
+# from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
-from django.core.cache import cache
 
 # Django REST Framework
 from rest_framework.compat import get_concrete_model
@@ -36,8 +31,8 @@ from polymorphic import PolymorphicModel
 
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
-from awx.main.models import *
-from awx.main.utils import update_scm_url, get_type_for_model, get_model_for_type
+from awx.main.models import * # noqa
+from awx.main.utils import get_type_for_model, get_model_for_type
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -828,19 +823,6 @@ class HostSerializer(BaseSerializerWithVariables):
         name = unicode(attrs.get(source, ''))
         # Validate here only, update in main validate method.
         host, port = self._get_host_port_from_name(name)
-        #for family in (socket.AF_INET, socket.AF_INET6):
-        #    try:
-        #        socket.inet_pton(family, name)
-        #        return attrs
-        #    except socket.error:
-        #        pass
-        # Hostname should match the following regular expression and have at
-        # last one letter in the name (to catch invalid IPv4 addresses from
-        # above).
-        #valid_host_re = r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
-        #if re.match(valid_host_re, name) and re.match(r'^.*?[a-zA-Z].*?$', name):
-        #    return attrs
-        #raise serializers.ValidationError('Invalid host name or IP')
         return attrs
 
     def validate(self, attrs):
@@ -1018,9 +1000,9 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         return res
 
     def validate_source(self, attrs, source):
-        src = attrs.get(source, '')
-        obj = self.object
-        # FIXME
+        # TODO: Validate
+        # src = attrs.get(source, '')
+        # obj = self.object
         return attrs
 
     def validate_source_script(self, attrs, source):
@@ -1031,7 +1013,8 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             try:
                 if src.organization != self.object.inventory.organization:
                     raise serializers.ValidationError("source_script does not belong to the same organization as the inventory")
-            except Exception, e:
+            except Exception:
+                # TODO: Log
                 raise serializers.ValidationError("source_script doesn't exist")
         return attrs
 
@@ -1613,8 +1596,9 @@ class ScheduleSerializer(BaseSerializer):
             if int(count_val[1]) > 999:
                 raise serializers.ValidationError("COUNT > 999 is unsupported")
         try:
-            sched_rule = rrule.rrulestr(rrule_value)
-        except Exception, e:
+            rrule.rrulestr(rrule_value)
+        except Exception:
+            # TODO: Log
             raise serializers.ValidationError("rrule parsing failed validation")
         return attrs
 
@@ -1645,7 +1629,8 @@ class ActivityStreamSerializer(BaseSerializer):
             return {}
         try:
             return json.loads(obj.changes)
-        except Exception, e:
+        except Exception:
+            # TODO: Log
             logger.warn("Error deserializing activity stream json changes")
         return {}
 
