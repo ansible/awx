@@ -20,6 +20,7 @@ var args = parseArgs(allArgs['--']);
 var shouldCompress = isUndefined(args.compress) ? false : args.compress;
 var debugMode = isUndefined(args.debug) ? false : args.debug;
 var silentMode = isUndefined(args.silent) ? false : args.silent;
+var includeTests = isUndefined(args.tests) ? true : args.tests;
 
 var appName = 'tower';
 
@@ -65,6 +66,11 @@ var vendorFiles =
       'select2/select2.js',
       'sizzle/dist/sizzle.js',
       'ansible/*.js'
+    ];
+
+var testFiles =
+    [   'tests/helpers.js',
+        'tests/unit/**/*.js'
     ];
 
 function log() {
@@ -132,6 +138,18 @@ app = doDebug('concat', app);
 var styles = compileLess(appStyles, 'less/ansible-ui.less', 'tower.min.css');
 
 app = mergeTrees([app, styles]);
+
+if (includeTests) {
+    var tests = new Funnel('awx/ui',
+                            {   include: ['tests/unit/**/*.js']
+
+                            });
+
+    tests = doDebug('tests-funnel', tests);
+    tests = new ES6(tests);
+    app = mergeTrees([app, tests]);
+    app = doDebug('merge-tests', app);
+}
 
 if (shouldCompress) {
     app = uglifyFiles(app);
