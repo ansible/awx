@@ -4,9 +4,10 @@ angular.module('DataServices')
              "GetBasePath",
              "ProcessErrors",
              "$rootScope",
+             "$q",
              JobStatusGraphData]);
 
-function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope) {
+function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
 
     function pluck(property, promise) {
         return promise.then(function(value) {
@@ -28,7 +29,7 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope) {
                     hdr: 'Error!',
                     msg: errorMessage
                 });
-            throw response;
+            return $q.reject(response);
         });
 
         return pluck('data', result);

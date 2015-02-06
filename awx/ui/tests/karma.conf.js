@@ -51,11 +51,10 @@ module.exports = function(config) {
       '../static/lib/lrInfiniteScroll/lrInfiniteScroll.js',
       '../static/lib/ansible/*.js',
       '../static/js/config.js',
-      '../static/js/directives/dashboard-graphs.js',
+      '../static/js/directives/_dashboard-graphs.js',
       '../static/js/*/*.js',
       '../static/js/app.js',
       '../static/lib/angular-mocks/angular-mocks.js',
-      '../../../node_modules/ng-midway-tester/src/ngMidwayTester.js',
       './unit/*',
       './unit/**/*'
     ],

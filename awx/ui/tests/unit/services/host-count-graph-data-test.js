@@ -14,7 +14,7 @@ describe('Host Count Graph Data Service', function() {
     window.setTimeout(function() {
       inject(function($rootScope) {
         $rootScope.$apply();
-      });
+      }, 1000);
     });
   }
 
@@ -74,6 +74,7 @@ describe('Host Count Graph Data Service', function() {
 
     $provide.value("$cookieStore", { get: angular.noop });
 
+    $provide.value('ProcessErrors', processErrors);
     $provide.value('Rest', restStub);
     $provide.value('GetBasePath', getBasePath);
   }));
