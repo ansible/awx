@@ -3,7 +3,7 @@ SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; pr
 OFFICIAL ?= no
 PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
-BROCCOLI ?= broccoli
+BROCCOLI ?= ./node_modules/.bin/broccoli
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
