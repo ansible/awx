@@ -3,6 +3,13 @@
 
 ansible
 redis
+pyzmq
 python-memcached
 python-ldap
 pycrypto
+coverage
+django-jenkins
+pyflakes
+pep8
+pylint
+flake8

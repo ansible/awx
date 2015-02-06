@@ -142,10 +142,10 @@ requirements_jenkins:
 	fi
 	$(MAKE) requirements
 	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    (cd requirements && pip install -U -r jenkins.txt); \
+	    (cd requirements && pip install -r jenkins.txt); \
 	    $(PYTHON) fix_virtualenv_setuptools.py; \
 	else \
-	    (cd requirements && sudo pip install -U -r jenkins.txt); \
+	    (cd requirements && sudo pip install -r jenkins.txt); \
 	fi
 	npm install -g csslint jshint
 
