@@ -35,11 +35,12 @@ angular.module('VariablesHelper', ['Utilities'])
 
                     }
                     catch (e) {
-                        $log.info('Attempt to parse extra_vars as JSON failed. Attempting to parse as YAML');
+                        $log.info('Attempt to parse extra_vars as JSON failed. Send the yaml from the backend');
                         try {
+                            // do safeLoad, which well error if not valid yaml
                             json_obj = jsyaml.safeLoad(variables);
-                            json_obj = SortVariables(json_obj);
-                            result = jsyaml.safeDump(json_obj);
+                            // but just send the variables
+                            result = variables;
                         }
                         catch(e2) {
                             ProcessErrors(null, variables, e2.message, null, { hdr: 'Error!',
@@ -114,12 +115,7 @@ angular.module('VariablesHelper', ['Utilities'])
                     }
                     json_data = jsyaml.safeLoad(variables);
                     if(json_data!==null){
-                        // $.each( json_data, function( key, value ) {
-                        //     if(value.toString() === "[object Object]"){
-                        //         json_data = undefined;
-                        //         throw 'Failed to parse YAML string. Parser returned ' + key + ' : ' + value + '.';
-                        //     }
-                        // });
+                        // unparsing just to make sure no weird characters are included.
                         tmp = jsyaml.dump(json_data);
                         if(tmp.indexOf('[object Object]')!==-1){
                             throw "Failed to parse YAML string. Parser returned' + key + ' : ' +value + '.' ";
@@ -149,7 +145,9 @@ angular.module('VariablesHelper', ['Utilities'])
                 else if ($.isEmptyObject(json_data)) {
                     result = "";
                 } else {
-                    result = JSON.stringify(json_data, undefined, '\t');
+                    // utilize the parsing to get here
+                    // but send the raw variable string
+                    result = variables;
                 }
             }
             return result;
@@ -178,31 +176,3 @@ angular.module('VariablesHelper', ['Utilities'])
             return newObj;
         };
     }]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
