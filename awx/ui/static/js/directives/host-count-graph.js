@@ -28,14 +28,7 @@ angular.module('DashboardGraphs').
             adjustGraphSize(license_graph, element);
         }
 
-        angular.element($window).on('resize', function() {
-
-            if(!license_graph) {
-                return;
-            }
-
-            adjustGraphSize(license_graph, element);
-        });
+        angular.element($window).on('resize', onResize);
 
         element.on('$destroy', function() {
             angular.element($window).off('resize', onResize);
