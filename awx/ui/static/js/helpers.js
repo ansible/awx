@@ -79,4 +79,4 @@ export
         RelatedSearch,
         Search,
         Teams
-    }
+    };

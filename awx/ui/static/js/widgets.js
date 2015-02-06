@@ -22,4 +22,4 @@ export
         PortalJobs,
         SCMSyncStatus,
         Stream
-    }
+    };

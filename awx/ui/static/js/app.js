@@ -17,11 +17,11 @@ if ($basePath) {
     urlPrefix = $basePath;
 }
 
-import * as Helpers from 'tower/helpers';
-import * as Forms from 'tower/forms';
-import * as Lists from 'tower/lists';
-import * as Widgets from 'tower/widgets';
-import * as Help from 'tower/help';
+import 'tower/helpers';
+import 'tower/forms';
+import 'tower/lists';
+import 'tower/widgets';
+import 'tower/help';
 import {Home, HomeGroups, HomeHosts} from 'tower/controllers/Home';
 import {SocketsController} from 'tower/controllers/Sockets';
 import {Authenticate} from 'tower/controllers/Authentication';
@@ -56,7 +56,7 @@ var tower = angular.module('Tower', [
     dashboardGraphs.name,
     'AuthService',
     'Utilities',
-    Helpers.License.name,
+    'License',
     'OrganizationFormDefinition',
     'UserFormDefinition',
     'FormGenerator',

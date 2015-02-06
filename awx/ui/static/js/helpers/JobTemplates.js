@@ -7,10 +7,10 @@
  *
  */
 /**
-* @ngdoc function
-* @name helpers.function:JobTemplatesHelper
-* @description  Routines shared by job related controllers
-*/
+ * @ngdoc function
+ * @name helpers.function:JobTemplatesHelper
+ * @description  Routines shared by job related controllers
+ */
 
 export default
 angular.module('JobTemplatesHelper', ['Utilities'])

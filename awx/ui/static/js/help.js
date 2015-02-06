@@ -8,4 +8,4 @@ export
         FirefoxSocketHelp,
         InventoryGroups,
         SafariSocketHelp
-    }
+    };
