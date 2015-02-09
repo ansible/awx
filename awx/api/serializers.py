@@ -1351,6 +1351,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         else:
             d['can_copy'] = False
             d['can_edit'] = False
+        d['recent_jobs'] = [{'id': x.id, 'status': x.status} for x in obj.jobs.all().order_by('-started')[:10]]
         return d
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):

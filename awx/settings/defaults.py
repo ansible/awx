@@ -328,6 +328,9 @@ AWX_PROOT_HIDE_PATHS = []
 # Additional paths to show for jobs using proot.
 AWX_PROOT_SHOW_PATHS = []
 
+# Number of jobs to show as part of the job template history
+AWX_JOB_TEMPLATE_HISTORY = 10
+
 # Not possible to get list of regions without authenticating, so use this list
 # instead (based on docs from:
 # http://docs.rackspace.com/loadbalancers/api/v1.0/clb-devguide/content/Service_Access_Endpoints-d1e517.html)
