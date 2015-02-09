@@ -71,7 +71,7 @@ MOCK_CFG ?=
 	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm \
 	deb deb-src debian reprepro setup_tarball \
-	node_modules
+	node_modules package.json
 
 # Remove setup build files
 clean-tar:
