@@ -201,15 +201,16 @@ export default
 
                 form.well = false;
 
-                generator.inject(form, {
-                    mode: 'edit',
-                    showButtons: false,
-                    showActions: false,
-                    id: 'inventory-edit-modal-dialog',
-                    breadCrumbs: false,
-                    related: false,
-                    scope: scope
-                });
+                var form_scope =
+                    generator.inject(form, {
+                        mode: 'edit',
+                        showButtons: false,
+                        showActions: false,
+                        id: 'inventory-edit-modal-dialog',
+                        breadCrumbs: false,
+                        related: false,
+                        scope: scope
+                    });
 
                 /* Reset form properties. Otherwise it screws up future requests of the Inventories detail page */
                 form.well = true;
@@ -241,6 +242,7 @@ export default
                     title: 'Inventory Properties',
                     id: 'inventory-edit-modal-dialog',
                     clonseOnEscape: false,
+                    form: form_scope.inventory_form,
                     onClose: function() {
                         Wait('stop');
                         scope.codeMirror.destroy();

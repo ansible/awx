@@ -503,6 +503,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                               title: 'Host Properties',
                               id: 'host-modal-dialog',
                               clonseOnEscape: false,
+                              form: form_scope.host_form,
                               onClose: function() {
                                   Wait('stop');
                                   scope.codeMirror.destroy();

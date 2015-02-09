@@ -57,9 +57,14 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 beforeDestroy = params.beforeDestroy,
                 closeOnEscape = (params.closeOnEscape === undefined) ? false : params.closeOnEscape,
                 resizable = (params.resizable === undefined) ? true : params.resizable,
+                forms = _.chain([params.form]).flatten().compact().value(),
                 buttons,
                 id = params.id,
                 x, y, wh, ww;
+
+            function updateButtonStatus(isValid) {
+                $('.ui-dialog[aria-describedby="' + id + '"]').find('.btn-primary').prop('disabled', !isValid);
+            }
 
             if (Empty(buttonSet)) {
                 // Default button object
@@ -114,6 +119,12 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                             });
                         });
                     }, 300);
+
+                    if (forms.length > 0) {
+                        forms.map(function(form_ctrl) {
+                            scope.$watch(form_ctrl.$name + '.$valid', updateButtonStatus);
+                        });
+                    }
 
                     setTimeout(function() {
                         scope.$apply(function() {
