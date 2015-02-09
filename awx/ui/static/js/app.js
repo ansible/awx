@@ -56,7 +56,7 @@ var tower = angular.module('Tower', [
     dashboardGraphs.name,
     'AuthService',
     'Utilities',
-    'License',
+    'LicenseHelper',
     'OrganizationFormDefinition',
     'UserFormDefinition',
     'FormGenerator',
