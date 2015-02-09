@@ -248,7 +248,7 @@ ui_analysis_report: node_modules
 	$(GRUNT) plato:report
 
 # Run UI unit tests
-test_ui: node_modules
+test_ui: node_modules minjs_ci
 	$(GRUNT) karma:ci
 
 # Run API unit tests across multiple Python/Django versions with Tox.
@@ -280,6 +280,9 @@ devjs: node_modules clean-ui
 # Build minified JS/CSS.
 minjs: node_modules clean-ui
 	$(BROCCOLI) build awx/ui/static/dist -- --silent --no-debug --no-tests --compress
+
+minjs_ci: node_modules clean-ui
+	$(BROCCOLI) build awx/ui/static/dist -- --no-debug --compress
 
 # Check .js files for errors and lint
 jshint: node_modules
