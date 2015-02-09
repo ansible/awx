@@ -1,5 +1,9 @@
-angular.module('DashboardGraphs')
-.directive('autoSizeModule', ['$window', function($window) {
+export default
+    [   '$window',
+        AutoSizeModule
+    ];
+
+function AutoSizeModule($window) {
 
     // Adjusts the size of the module so that all modules
     // fit into a single a page; assumes there are 2 rows
@@ -32,4 +36,4 @@ angular.module('DashboardGraphs')
 
     };
 
-}]);
+}

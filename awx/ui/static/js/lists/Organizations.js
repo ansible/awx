@@ -7,9 +7,10 @@
  *
  */
 
-'use strict';
 
-angular.module('OrganizationListDefinition', [])
+
+export default
+    angular.module('OrganizationListDefinition', [])
     .value('OrganizationList', {
 
         name: 'organizations',

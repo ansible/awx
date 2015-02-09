@@ -96,7 +96,7 @@
  * The real difference is that an &lt;a&gt element is used to generate fieldAction items while a &lt;button&gt; element is used for action items.
  */
 
-'use strict';
+
 
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',

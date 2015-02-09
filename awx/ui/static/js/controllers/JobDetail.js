@@ -9,9 +9,9 @@
  * @name controllers.function:JobDetail
  * @description This controller's for the Job Detail Page
 */
-'use strict';
 
-function JobDetailController ($location, $rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
+
+export function JobDetailController ($location, $rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
     UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString) {
 

@@ -6,9 +6,10 @@
  *
  */
 
-'use strict';
 
-angular.module('UserListDefinition', [])
+
+export default
+    angular.module('UserListDefinition', [])
     .value('UserList', {
 
         name: 'users',

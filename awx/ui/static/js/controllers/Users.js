@@ -11,9 +11,9 @@
  * @name controllers.function:Users
  * @description This controller's the Users page
 */
-'use strict';
 
-function UsersList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, UserList, GenerateList, LoadBreadCrumbs,
+
+export function UsersList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, UserList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {
 
     ClearScope();
@@ -105,7 +105,7 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams'
 ];
 
 
-function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
+export function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
     LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList, ResetForm, Wait) {
 
     ClearScope();
@@ -208,7 +208,7 @@ UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 ];
 
 
-function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert,
+export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
     Prompt, CheckAccess, ResetForm, Wait, Stream) {
 

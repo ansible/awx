@@ -6,9 +6,10 @@
  *
  */
 
-'use strict';
 
-angular.module('SchedulesListDefinition', [])
+
+export default
+    angular.module('SchedulesListDefinition', [])
     .value('SchedulesList', {
 
         name: 'schedules',

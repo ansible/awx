@@ -11,9 +11,9 @@
  * @description This controller's for controlling websockets
  * discuss
 */
-'use strict';
 
-function SocketsController ($scope, $compile, ClearScope, Socket) {
+
+export function SocketsController ($scope, $compile, ClearScope, Socket) {
 
     ClearScope();
 

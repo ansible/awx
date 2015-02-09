@@ -1,10 +1,10 @@
-angular.module('DataServices')
-.service('hostCountGraphData',
-         ["Rest",
-             "GetBasePath",
-             "ProcessErrors",
-             "$q",
-             HostCountGraphData]);
+export default
+    [   "Rest",
+        "GetBasePath",
+        "ProcessErrors",
+        "$q",
+        HostCountGraphData
+    ];
 
 function HostCountGraphData(Rest, getBasePath, processErrors, $q) {
 

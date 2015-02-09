@@ -11,7 +11,7 @@
  * @name help.function:SafariSocketHelp
  * @description This help modal gives instructions on what the user should do if not connected to the web sockets while using Safari. Safari does not support websockets.
 */
-'use strict';
+
 
 angular.module('SafariSocketHelpDefinition', [])
     .value('SafariSocketHelp', {

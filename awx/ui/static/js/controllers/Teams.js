@@ -12,9 +12,9 @@
  * @name controllers.function:Teams
  * @description This controller's for teams
 */
-'use strict';
 
-function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, TeamList, GenerateList, LoadBreadCrumbs,
+
+export function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, TeamList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit, Wait,
     Stream) {
 
@@ -116,7 +116,7 @@ TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams'
 ];
 
 
-function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm,
+export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm,
     Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList,
     OrganizationList, SearchInit, PaginateInit, GetBasePath, LookUpInit, Wait) {
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -177,7 +177,7 @@ TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 ];
 
 
-function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
+export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
     LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
     OrganizationList, Wait, Stream) {
 

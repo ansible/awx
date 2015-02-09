@@ -8,7 +8,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
 .factory('PortalJobsWidget', ['$rootScope', '$compile', 'LoadSchedulesScope', 'LoadJobsScope', 'PortalJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'PortalJobTemplateList' ,

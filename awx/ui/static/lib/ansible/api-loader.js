@@ -17,7 +17,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('ApiLoader', ['Utilities'])
 

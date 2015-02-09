@@ -1,3 +1,5 @@
+import Tower from 'tower/app';
+
 describe('Job Status Graph Directive', function() {
   var element, scope, httpBackend;
 

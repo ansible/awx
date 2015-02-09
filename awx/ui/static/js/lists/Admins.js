@@ -7,9 +7,10 @@
  *  @dict
  */
 
-'use strict';
 
-angular.module('AdminListDefinition', [])
+
+export default
+    angular.module('AdminListDefinition', [])
     .value('AdminList', {
 
         name: 'admins',

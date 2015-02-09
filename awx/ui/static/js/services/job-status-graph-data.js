@@ -1,11 +1,10 @@
-angular.module('DataServices')
-.service('jobStatusGraphData',
-         ["Rest",
-             "GetBasePath",
-             "ProcessErrors",
-             "$rootScope",
-             "$q",
-             JobStatusGraphData]);
+export default
+["Rest",
+    "GetBasePath",
+    "ProcessErrors",
+    "$rootScope",
+    "$q",
+    JobStatusGraphData];
 
 function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
 
@@ -23,12 +22,12 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
             var errorMessage = 'Failed to get: ' + response.url + ' GET returned: ' + response.status;
 
             processErrors(null,
-                response.data,
-                response.status,
-                null, {
-                    hdr: 'Error!',
-                    msg: errorMessage
-                });
+                          response.data,
+                          response.status,
+                          null, {
+                hdr: 'Error!',
+                msg: errorMessage
+            });
             return $q.reject(response);
         });
 

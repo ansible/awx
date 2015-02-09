@@ -14,8 +14,9 @@
 
 /*jshint evil:true */
 
-'use strict';
 
+
+export default
 angular.module('LoadConfigHelper', ['Utilities'])
 
 .factory('LoadConfig', ['$log', '$rootScope', '$http', 'ProcessErrors', 'Store', function($log, $rootScope, $http, ProcessErrors, Store) {

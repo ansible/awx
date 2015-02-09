@@ -12,6 +12,8 @@
  * @name forms.function:Projects
  * @description This form is for adding/editing projects
 */
+
+export default
 angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
     .value('ProjectsFormObject', {
 

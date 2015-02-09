@@ -7,9 +7,10 @@
  *  @dict
  */
 
-'use strict';
 
-angular.module('CredentialsListDefinition', [])
+
+export default
+    angular.module('CredentialsListDefinition', [])
     .value('CredentialList', {
 
         name: 'credentials',

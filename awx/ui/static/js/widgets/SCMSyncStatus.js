@@ -10,7 +10,7 @@
  * Dashboard widget showing object counts and license availability.
  *
  */
-'use strict';
+
 
 angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
     .factory('SCMSyncStatus', ['$rootScope', '$compile',

@@ -13,7 +13,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('DashboardCountsWidget', ['RestServices', 'Utilities'])
     .factory('DashboardCounts', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',

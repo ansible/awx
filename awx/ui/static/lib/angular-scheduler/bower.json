@@ -30,7 +30,7 @@
     "angular-tz-extensions": "*"
   },
   "homepage": "https://github.com/chouseknecht/angular-scheduler",
-  "main": "git@github.com:chouseknecht/angular-scheduler.git",
+  "main": "./lib/angular-scheduler.js",
   "keywords": [
     "schedule",
     "rrule",

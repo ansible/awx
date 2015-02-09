@@ -11,7 +11,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginationHelpers',
     'RefreshHelper', 'ListGenerator', 'StreamWidget', 'AuthService',

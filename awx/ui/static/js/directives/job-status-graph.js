@@ -1,6 +1,15 @@
-angular.module('DashboardGraphs')
-  .directive('jobStatusGraph', ['$rootScope', '$compile', '$location' , '$window', 'Wait', 'adjustGraphSize', 'jobStatusGraphData',
-        function ($rootScope, $compile , $location, $window, Wait, adjustGraphSize) {
+export default
+    [   '$rootScope',
+        '$compile',
+        '$location' ,
+        '$window',
+        'Wait',
+        'adjustGraphSize',
+        'jobStatusGraphData',
+        JobStatusGraph
+    ];
+
+function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustGraphSize) {
             return {
                 restrict: 'E',
                 templateUrl: '/static/partials/job_status_graph.html',
@@ -117,4 +126,4 @@ angular.module('DashboardGraphs')
                 }
 
             }
-        }]);
+        }

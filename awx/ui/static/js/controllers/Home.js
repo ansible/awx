@@ -14,7 +14,7 @@
  * @name controllers.function:Home
  * @description This controller's for the dashboard
 */
-'use strict';
+
 
 /**
  * @ngdoc method
@@ -25,7 +25,8 @@
  *                  Host count graph should only be loaded if the user is a super user
  *
 */
-function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, DashboardJobs,
+
+export function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, DashboardJobs,
     ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button, $window, graphData){
 
     ClearScope('home');
@@ -136,7 +137,7 @@ Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location',
  * @description This controls the 'home/groups' page that is loaded from the dashboard
  *
 */
-function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+export function HomeGroups($log, $scope, $filter, $compile, $location, $routeParams, LogViewer, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
     Alert, Rest, Empty, InventoryUpdate, Find, GroupsCancelUpdate, Store, Socket) {
 
@@ -572,7 +573,8 @@ HomeGroups.$inject = ['$log', '$scope', '$filter', '$compile', '$location', '$ro
  * @description This loads the page for 'home/hosts'
  *
 */
-function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+
+export function HomeHosts($scope, $location, $routeParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
     GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Stream, Find, ShowJobSummary, ViewJob) {
 
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior

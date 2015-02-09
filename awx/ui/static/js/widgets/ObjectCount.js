@@ -11,7 +11,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
     .factory('ObjectCount', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',

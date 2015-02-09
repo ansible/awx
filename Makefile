@@ -3,6 +3,7 @@ SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; pr
 OFFICIAL ?= no
 PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
+BROCCOLI ?= ./node_modules/.bin/broccoli
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -84,12 +85,12 @@ clean-deb:
 
 # Remove grunt build files
 clean-grunt:
-	rm -f package.json Gruntfile.js bower.json
+	rm -f package.json Gruntfile.js Brocfile.js bower.json
 	rm -rf node_modules
 
 # Remove UI build files
 clean-ui:
-	rm -f awx/ui/static/{js,css}/awx*.{js,css}
+	rm -rf awx/ui/static/dist
 	rm -rf awx/ui/static/docs
 
 # Remove temporary build files, compiled Python files.
@@ -261,6 +262,9 @@ test_jenkins:
 Gruntfile.js:
 	cp packaging/grunt/$@ $@
 
+Brocfile.js:
+	cp packaging/grunt/$@ $@
+
 bower.json:
 	cp packaging/grunt/$@ $@
 
@@ -268,12 +272,14 @@ package.json:
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' packaging/grunt/package.template > $@
 
 # Update local npm install
-node_modules: Gruntfile.js bower.json package.json
+node_modules: Gruntfile.js Brocfile.js bower.json package.json
 	npm install
 
+devjs: node_modules clean-ui
+	$(BROCCOLI) build awx/ui/static/dist -- --debug
 # Build minified JS/CSS.
-minjs: node_modules
-	$(GRUNT)
+minjs: node_modules clean-ui
+	$(BROCCOLI) build awx/ui/static/dist -- --silent --no-debug --no-tests --compress
 
 # Check .js files for errors and lint
 jshint: node_modules

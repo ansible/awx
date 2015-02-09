@@ -12,9 +12,9 @@
  * @name controllers.function:Permissions
  * @description This controller's for permissions
 */
-'use strict';
 
-function PermissionsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, PermissionList,
+
+export function PermissionsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, PermissionList,
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
     GetBasePath, CheckAccess, Wait) {
 
@@ -102,7 +102,7 @@ PermissionsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeP
 ];
 
 
-function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm,
+export function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope,
     GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess,
     Wait, PermissionCategoryChange) {
@@ -199,7 +199,7 @@ PermissionsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 ];
 
 
-function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm,
+export function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt, GetBasePath,
     InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, PermissionCategoryChange) {
 

@@ -197,4 +197,4 @@
     };
     return md5;
   } ]);
-})(this, this.angular, void 0);
+})(window, window.angular, void 0);

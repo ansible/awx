@@ -18,7 +18,7 @@
  * @name help.function:ChromeSocketHelp
  * @description This help modal gives instructions on what the user should do if not connected to the web sockets while using Chrome.
 */
-'use strict';
+
 
 angular.module('ChromeSocketHelpDefinition', [])
     .value('ChromeSocketHelp', {

@@ -13,7 +13,7 @@
  *
  */
 
-'use strict';
+
 
 angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
 

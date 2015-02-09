@@ -6,9 +6,10 @@
  *
  */
 
-'use strict';
 
-angular.module('InventoriesListDefinition', [])
+
+export default
+    angular.module('InventoriesListDefinition', [])
     .value('InventoryList', {
 
         name: 'inventories',

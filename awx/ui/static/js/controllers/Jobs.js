@@ -12,9 +12,9 @@
  * @name controllers.function:Jobs
  * @description This controller's for the jobs page
 */
-'use strict';
 
-function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope,
+
+export function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope,
     LoadJobsScope, RunningJobsList, CompletedJobsList, QueuedJobsList, ScheduledJobsList, GetChoices, GetBasePath, Wait, Socket) {
 
     ClearScope();
