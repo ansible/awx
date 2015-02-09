@@ -4,6 +4,7 @@ OFFICIAL ?= no
 PACKER ?= packer
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 BROCCOLI ?= ./node_modules/.bin/broccoli
+NODE ?= node
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -273,7 +274,7 @@ package.json:
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' packaging/grunt/package.template > $@
 
 sync_ui: node_modules
-	./node_modules/.bin/broccoli-timepiece awx/ui/static/dist
+	$(NODE) tools/ui/timepiece.js awx/ui/static/dist
 
 # Update local npm install
 node_modules: Gruntfile.js Brocfile.js bower.json package.json
