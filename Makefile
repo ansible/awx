@@ -202,6 +202,7 @@ server_noattach:
 	tmux select-pane -U
 	tmux split-window -v 'exec make receiver'
 	tmux split-window -h 'exec make taskmanager'
+	tmux select-pane -U
 	tmux split-window -h 'exec make sync_ui'
 
 server: server_noattach
