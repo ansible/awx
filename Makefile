@@ -201,6 +201,7 @@ server_noattach:
 	tmux select-pane -U
 	tmux split-window -v 'exec make receiver'
 	tmux split-window -h 'exec make taskmanager'
+	tmux split-window -h 'exec make sync_ui'
 
 server: server_noattach
 	tmux -2 attach-session -t tower
@@ -270,6 +271,9 @@ bower.json:
 
 package.json:
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' packaging/grunt/package.template > $@
+
+sync_ui: node_modules
+	./node_modules/.bin/broccoli-timepiece awx/ui/static/dist
 
 # Update local npm install
 node_modules: Gruntfile.js Brocfile.js bower.json package.json
