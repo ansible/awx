@@ -34,6 +34,7 @@ tar-build
 /package.json
 node_modules/**
 /tmp
+npm-debug.log
 
 # UI build debugging
 /DEBUG-*
@@ -68,4 +69,3 @@ setup/inventory
 env/*
 nohup.out
 reports
-
