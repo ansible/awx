@@ -12,9 +12,9 @@ describe('Host Count Graph Data Service', function() {
 
   function flushPromises() {
     window.setTimeout(function() {
-      inject(function($rootScope) {
+      inject(['$rootScope', function($rootScope) {
         $rootScope.$apply();
-      }, 1000);
+      }], 1000);
     });
   }
 
@@ -70,20 +70,20 @@ describe('Host Count Graph Data Service', function() {
 
   beforeEach(module("Tower"));
 
-  beforeEach(module(function($provide) {
+  beforeEach(module(['$provide', function($provide) {
 
     $provide.value("$cookieStore", { get: angular.noop });
 
     $provide.value('ProcessErrors', processErrors);
     $provide.value('Rest', restStub);
     $provide.value('GetBasePath', getBasePath);
-  }));
+  }]));
 
   afterEach(function() {
     restStub.reset();
   });
 
-  beforeEach(inject(function(_hostCountGraphData_, $httpBackend, $q, $rootScope, $timeout) {
+  beforeEach(inject(['hostCountGraphData', '$httpBackend', '$q', '$rootScope', '$timeout', function(_hostCountGraphData_, $httpBackend, $q, $rootScope, $timeout) {
     hostCountGraphData = _hostCountGraphData_;
     httpBackend = $httpBackend;
     rootScope = $rootScope;
@@ -91,7 +91,7 @@ describe('Host Count Graph Data Service', function() {
     $httpBackend.expectGET('/static/js/local_config.js').respond({
     });
     q = $q;
-  }));
+  }]));
 
   it('returns a promise to be fulfilled when data comes in', function() {
     var license = "license";

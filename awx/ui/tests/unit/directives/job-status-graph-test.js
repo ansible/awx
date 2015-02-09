@@ -7,12 +7,12 @@ describe('Job Status Graph Directive', function() {
 
   beforeEach(module('Tower'));
 
-  beforeEach(module(function($provide) {
+  beforeEach(module(['$provide', function($provide) {
     $provide.value('LoadBasePaths', angular.noop);
     $provide.value('adjustGraphSize', resizeHandler);
-  }));
+  }]));
 
-  beforeEach(inject(function($rootScope, $compile, $httpBackend) {
+  beforeEach(inject(['$rootScope', '$compile', '$httpBackend', function($rootScope, $compile, $httpBackend) {
     httpBackend = $httpBackend;
     $httpBackend.expectGET('/static/js/local_config.js').respond({
     });
@@ -38,7 +38,7 @@ describe('Job Status Graph Directive', function() {
 
     $httpBackend.flush();
 
-  }));
+  }]));
 
   afterEach(function() {
     element.trigger('$destroy');

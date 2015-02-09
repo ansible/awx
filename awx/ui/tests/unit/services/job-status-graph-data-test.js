@@ -16,9 +16,9 @@ describe('Job Status Graph Data Service', function() {
 
   function flushPromises() {
     window.setTimeout(function() {
-      inject(function($rootScope) {
+      inject(['$rootScope', function($rootScope) {
         $rootScope.$apply();
-      });
+      }]);
     });
   }
 
@@ -44,20 +44,20 @@ describe('Job Status Graph Data Service', function() {
 
   beforeEach(module("Tower"));
 
-  beforeEach(module(function($provide) {
+  beforeEach(module(['$provide', function($provide) {
 
     $provide.value("$cookieStore", { get: angular.noop });
 
     $provide.value('ProcessErrors', processErrors);
     $provide.value('Rest', restStub);
     $provide.value('GetBasePath', getBasePath);
-  }));
+  }]));
 
   afterEach(function() {
     restStub.reset();
   });
 
-  beforeEach(inject(function(_jobStatusGraphData_, $httpBackend, $q, $rootScope, $timeout) {
+  beforeEach(inject(['jobStatusGraphData', '$httpBackend', '$q', '$rootScope', '$timeout', function(_jobStatusGraphData_, $httpBackend, $q, $rootScope, $timeout) {
     jobStatusGraphData = _jobStatusGraphData_;
     httpBackend = $httpBackend;
     rootScope = $rootScope;
@@ -65,7 +65,7 @@ describe('Job Status Graph Data Service', function() {
     $httpBackend.expectGET('/static/js/local_config.js').respond({
     });
     q = $q;
-  }));
+  }]));
 
   it('returns a promise to be fulfilled when data comes in', function() {
     var firstResult = "result";
@@ -101,14 +101,14 @@ describe('Job Status Graph Data Service', function() {
     var result = q.defer();
     jobStatusGraphData.setupWatcher();
 
-    inject(function($rootScope) {
+    inject(['$rootScope', function($rootScope) {
       $rootScope.$on('DataReceived:JobStatusGraph', function(e, data) {
         result.resolve(data);
       });
       $rootScope.$emit('JobStatusChange');
       restStub.succeed({ data: expected });
       flushPromises();
-    });
+    }]);
 
     return expect(result.promise).to.eventually.equal(expected);
   });
