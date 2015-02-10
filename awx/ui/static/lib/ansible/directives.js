@@ -169,7 +169,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     var max = (attr.awMax) ? scope.$eval(attr.awMax)  :  Infinity;
                     if (!Empty(max) && !Empty(viewValue) && Number(viewValue) >  max) {
                         ctrl.$setValidity('awMax', false);
-                        return undefined;
+                        return viewValue;
                     } else {
                         ctrl.$setValidity('awMax', true);
                         return viewValue;
