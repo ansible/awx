@@ -471,8 +471,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                           scope = parent_scope.$new(),
                           master = {},
                           relatedSets = {},
-                          buttons, url;
+                          buttons, url, form_scope;
 
+                          var form_scope =
                           generator.inject(HostForm, { mode: 'edit', id: 'host-modal-dialog', breadCrumbs: false, related: false, scope: scope });
                           generator.reset();
 
