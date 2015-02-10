@@ -738,7 +738,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            elem = document.getElementById('group-modal-dialog');
                            $compile(elem)(modal_scope);
 
+                           var form_scope =
                            generator.inject(GroupForm, { mode: 'edit', id: 'properties-tab', breadCrumbs: false, related: false, scope: properties_scope });
+                           var source_form_scope =
                            generator.inject(SourceForm, { mode: 'edit', id: 'sources-tab', breadCrumbs: false, related: false, scope: sources_scope });
 
                            //generator.reset();
@@ -881,6 +883,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                    modal_scope.cancelModal();
                                },
                                open: function () {
+                                   function updateButtonStatus(isValid) {
+                               $('.ui-dialog[aria-describedby="group-modal-dialog"]').find('.btn-primary').prop('disabled', !isValid);
+                                   }
+                           form_scope.$watch('group_form.$valid', updateButtonStatus);
+                           source_form_scope.$watch('source_form.$valid', updateButtonStatus);
                                    $('#group_name').focus();
                                    Wait('stop');
                                }
