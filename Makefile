@@ -209,6 +209,9 @@ server_noattach:
 server: server_noattach
 	tmux -2 attach-session -t tower
 
+servercc: server_noattach
+	tmux -2 -CC attach-session -t tower
+
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
 	$(PYTHON) manage.py runserver
