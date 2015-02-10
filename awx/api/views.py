@@ -396,58 +396,40 @@ class DashboardInventoryGraphView(APIView):
     def get(self, request, format=None):
         period = request.QUERY_PARAMS.get('period', 'month')
 
-        start_date = datetime.datetime.now()
+        end_date = now()
         if period == 'month':
-            end_date = start_date - dateutil.relativedelta.relativedelta(months=1)
-            interval = 'days'
+            start_date = end_date - dateutil.relativedelta.relativedelta(months=1)
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            delta = dateutil.relativedelta.relativedelta(days=1)
         elif period == 'week':
-            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=1)
-            interval = 'days'
+            start_date = end_date - dateutil.relativedelta.relativedelta(weeks=1)
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            delta = dateutil.relativedelta.relativedelta(days=1)
         elif period == 'day':
-            end_date = start_date - dateutil.relativedelta.relativedelta(days=1)
-            interval = 'hours'
+            start_date = end_date - dateutil.relativedelta.relativedelta(days=1)
+            start_date = start_date.replace(minute=0, second=0, microsecond=0)
+            delta = dateutil.relativedelta.relativedelta(hours=1)
         else:
-            return Response({'error': 'Unknown period "%s"' % str(period)}, status=status.HTTP_400_BAD_REQUEST)
+            raise ParseError(u'Unknown period "%s"' % unicode(period))
 
-        user_hosts = get_user_queryset(request.user, Host)
-        created_hosts = qsstats.QuerySetStats(user_hosts, 'created')
-        count_hosts = user_hosts.all().count()
+        host_stats = []
+        date = start_date
+        while date < end_date:
+            next_date = date + delta
+            # Find all hosts that existed at end of intevral that are still
+            # active or were deleted after the end of interval.  Slow but
+            # accurate; haven't yet found a better way to do it.
+            hosts_qs = Host.objects.filter(created__lt=next_date)
+            hosts_qs = hosts_qs.filter(Q(active=True) | Q(active=False, modified__gte=next_date))
+            hostnames = set()
+            for name, active in hosts_qs.values_list('name', 'active').iterator():
+                if not active:
+                    name = re.sub(r'^_deleted_.*?_', '', name)
+                hostnames.add(name)
+            host_stats.append((time.mktime(date.timetuple()), len(hostnames)))
+            date = next_date
 
-        dashboard_data = {'hosts': [], 'inventory': []}
-        last_delta = 0
-        host_data = []
-        for element in created_hosts.time_series(end_date, start_date, interval=interval)[::-1]:
-            host_data.append([time.mktime(element[0].timetuple()),
-                              count_hosts - last_delta])
-            count_hosts -= last_delta
-            last_delta = element[1]
-
-        dashboard_data['hosts'] = host_data[::-1]
-
-        hosts_by_inventory = user_hosts.all().values('inventory__id', 'inventory__name', 'has_active_failures', 'inventory_sources__id').annotate(Count("id"))
-        inventories = {}
-        for aggreg in hosts_by_inventory:
-            if (aggreg['inventory__id'], aggreg['inventory__name']) not in inventories:
-                inventories[(aggreg['inventory__id'], aggreg['inventory__name'])] = {}
-            if aggreg['inventory_sources__id'] not in inventories[(aggreg['inventory__id'], aggreg['inventory__name'])]:
-                inventories[(aggreg['inventory__id'], aggreg['inventory__name'])][aggreg['inventory_sources__id']] = {'successful': 0, 'failed': 0}
-            if aggreg['has_active_failures']:
-                inventories[(aggreg['inventory__id'], aggreg['inventory__name'])][aggreg['inventory_sources__id']]['failed'] = aggreg['id__count']
-            else:
-                inventories[(aggreg['inventory__id'], aggreg['inventory__name'])][aggreg['inventory_sources__id']]['successful'] = aggreg['id__count']
-        for inventory_id, inventory_name in inventories:
-            this_inventory = {'id': inventory_id, 'name': inventory_name, 'sources': []}
-            for source_id in inventories[(inventory_id, inventory_name)]:
-                if source_id is None:
-                    continue
-                i = InventorySource.objects.get(id=source_id)
-                this_source = {'name': i.name, 'source': i.source,
-                               'successful': inventories[(inventory_id, inventory_name)][source_id]['successful'],
-                               'failed': inventories[(inventory_id, inventory_name)][source_id]['failed']}
-                this_inventory['sources'].append(this_source)
-            dashboard_data['inventory'].append(this_inventory)
-
-        return Response(dashboard_data)
+        return Response({'hosts': host_stats})
 
 
 class ScheduleList(ListAPIView):
