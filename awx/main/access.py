@@ -667,15 +667,29 @@ class ProjectAccess(BaseAccess):
         qs = qs.select_related('created_by', 'modified_by', 'credential', 'current_update', 'last_update')
         if self.user.is_superuser:
             return qs
+        team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
+        qs = qs.filter(Q(created_by=self.user) |
+                       Q(organizations__admins__in=[self.user], organizations__active=True) |
+                       Q(organizations__users__in=[self.user], organizations__active=True) |
+                       Q(teams__in=team_ids))
         allowed = [PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
-        return qs.filter(
-            Q(created_by=self.user) |
-            Q(organizations__admins__in=[self.user], organizations__active=True) |
-            Q(organizations__users__in=[self.user], organizations__active=True) |
-            Q(teams__users__in=[self.user], teams__active=True) |
-            Q(permissions__user=self.user, permissions__permission_type__in=allowed, permissions__active=True) |
-            Q(permissions__team__users__in=[self.user], permissions__permission_type__in=allowed, permissions__active=True)
-        )
+        allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
+        allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
+
+        deploy_permissions_ids = set(Permission.objects.filter(
+            Q(user=self.user) | Q(team_id__in=team_ids),
+            active=True,
+            permission_type__in=allowed_deploy,
+        ).values_list('id', flat=True))
+        check_permissions_ids = set(Permission.objects.filter(
+            Q(user=self.user) | Q(team_id__in=team_ids),
+            active=True,
+            permission_type__in=allowed_check,
+        ).values_list('id', flat=True))
+
+        perm_deploy_qs = qs.filter(permissions__in=deploy_permissions_ids)
+        perm_check_qs = qs.filter(permissions__in=check_permissions_ids)
+        return qs | perm_deploy_qs | perm_check_qs
 
     def can_add(self, data):
         if self.user.is_superuser:
