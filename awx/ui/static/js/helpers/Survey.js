@@ -256,18 +256,18 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
         return function(params) {
 
             var scope = params.scope,
-                // id = params.id,
                 question = params.question,
                 index = params.index,
                 required,
-                element, choices, i, checked,
-                max, min, defaultValue,
-
-            html = "";
-
-            // if(scope.survey_questions.length>0){
-            //     $('#survey-save-button').removeAttr('disabled')
-            // }
+                element,
+                choices,
+                i,
+                checked,
+                max,
+                min,
+                defaultValue,
+                answers,
+                html = "";
 
             question.index = index;
             question.question_name = question.question_name.replace(/</g, "&lt;");
@@ -286,7 +286,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             if(!Empty(question.question_description)){
                 html += '<div class="col-xs-12 description"><i>'+question.question_description+'</i></div>\n';
             }
-            // defaultValue = (question.default) ? question.default : "";
 
             if(question.type === 'text' ){
                 defaultValue = (question.default) ? question.default : "";
@@ -312,9 +311,10 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 choices = question.choices.split(/\n/);
                 element = (question.type==="multiselect") ? "checkbox" : 'radio';
                 question.default = (question.default) ? question.default : (question.default_multiselect) ? question.default_multiselect : "" ;
+                answers = question.default.split(/\n/);
                 html += '<div class="input_area">';
                 for( i = 0; i<choices.length; i++){
-                    checked = (!Empty(question.default) && question.default.indexOf(choices[i])!==-1) ? "checked" : "";
+                    checked = (!Empty(question.default) && $.inArray(choices[i], answers) !== -1) ? "checked" : "";
                     choices[i] = choices[i] .replace(/</g, "&lt;");
                     choices[i]  = choices[i] .replace(/>/g, "&gt;");
                     choices[i] = scope.serialize(choices[i]);
@@ -364,17 +364,42 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             $('#add_question_btn').focus();
             $('#survey_maker_save_btn').removeAttr('disabled');
 
+            // Sometimes the $event.target returns the anchor element that wraps the icon, and sometimes the icon itself
+            // is returned. So for each icon click event we check to see which target the user clicked, and depending no which one
+            // they clicked, we move up the dom hierarchy to get the index on the question. Ultimatley the object that is passed to
+            // each one of these functions should be the index of the question that the user is trying to perform an action on.
             $('#delete-question_'+question.index+'').on('click', function($event){
-                scope.deleteQuestion($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+                if($event.target.nodeName==="A"){
+                    scope.deleteQuestion($event.target.parentElement.parentElement.id.split('_')[1]);
+                }
+                else if($event.target.nodeName === "I"){
+                    scope.deleteQuestion($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+                }
             });
             $('#edit-question_'+question.index+'').on('click', function($event){
-                scope.editQuestion($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+                if($event.target.nodeName==="A"){
+                    scope.editQuestion($event.target.parentElement.parentElement.id.split('_')[1]);
+                }
+                else if($event.target.nodeName === "I"){
+                    scope.editQuestion($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+                }
             });
             $('#question-up_'+question.index+'').on('click', function($event){
-                scope.questionUp($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+                if($event.target.nodeName==="A"){
+                    scope.questionUp($event.target.parentElement.parentElement.id.split('_')[1]);
+                }
+                else if($event.target.nodeName === "I"){
+                    scope.questionUp($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+                }
             });
             $('#question-down_'+question.index+'').on('click', function($event){
-                scope.questionDown($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+                if($event.target.nodeName==="A"){
+                    scope.questionDown($event.target.parentElement.parentElement.id.split('_')[1]);
+                }
+                else if($event.target.nodeName === "I"){
+                    scope.questionDown($event.target.parentElement.parentElement.parentElement.id.split('_')[1]);
+                }
+
             });
         };
     }])
@@ -701,6 +726,8 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
             };
 
             scope.typeChange = function() {
+                scope.minTextError = false;
+                scope.maxTextError = false;
                 scope.default = "";
                 scope.default_multiselect = "";
                 scope.default_float = "";
@@ -721,13 +748,63 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.survey_question_form.default_int.$setPristine();
                 scope.survey_question_form.default_textarea.$setPristine();
                 scope.survey_question_form.choices.$setPristine();
+                scope.survey_question_form.int_min.$setPristine();
+                scope.survey_question_form.int_max.$setPristine();
             };
 
             scope.submitQuestion = function(event){
                 var data = {},
-                fld,
+                fld, i,
+                choiceArray,
+                answerArray,
                 key, elementID;
-                Wait('start');
+                // Wait('start');
+                scope.invalidChoice = false;
+                scope.duplicate = false;
+                scope.minTextError = false;
+                scope.maxTextError = false;
+
+                if(scope.type.type==="text"){
+                    if(scope.default.trim() !== ""){
+                        if(scope.default.trim().length < scope.text_min && scope.text_min !== "" ){
+                            scope.minTextError = true;
+                        }
+                        if(scope.text_max <  scope.default.trim().length && scope.text_max !== "" ){
+                            scope.maxTextError = true;
+                        }
+                    }
+                }
+
+                if(scope.type.type==="textarea"){
+                    if(scope.default_textarea.trim() !== ""){
+                        if(scope.default_textarea.trim().length < scope.textarea_min && scope.textarea_min !== "" ){
+                            scope.minTextError = true;
+                        }
+                        if(scope.textarea_max <  scope.default_textarea.trim().length && scope.textarea_max !== "" ){
+                            scope.maxTextError = true;
+                        }
+                    }
+                }
+
+                if(scope.type.type==="multiselect" && scope.default_multiselect.trim() !== ""){
+                    choiceArray = scope.choices.split(/\n/);
+                    answerArray = scope.default_multiselect.split(/\n/);
+
+                    if(answerArray.length>0){
+                        for(i=0; i<answerArray.length; i++){
+                            if($.inArray(answerArray[i], choiceArray)===-1){
+                                scope.invalidChoice = true;
+                            }
+                        }
+                    }
+                }
+
+                if(scope.type.type==="multiplechoice" && scope.default.trim() !== ""){
+                    choiceArray = scope.choices.split(/\n/);
+                    if($.inArray(scope.default, choiceArray)===-1){
+                        scope.invalidChoice = true;
+                    }
+                }
 
                 // validate that there aren't any questions using this var name.
                 if(GenerateForm.mode === 'add'){
@@ -735,8 +812,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         for(fld in questions){
                             if(questions[fld].variable === scope.variable){
                                 scope.duplicate = true;
-                                Wait('stop');
-                                return;
                             }
                         }
                     }
@@ -744,8 +819,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         for(fld in scope.survey_questions){
                             if(scope.survey_questions[fld].variable === scope.variable){
                                 scope.duplicate = true;
-                                Wait('stop');
-                                return;
                             }
                         }
                     }
@@ -757,9 +830,6 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         for(fld in questions){
                             if(questions[fld].variable === scope.variable && fld!==key){
                                 scope.duplicate = true;
-
-                                Wait('stop');
-                                return;
                             }
                         }
                     }
@@ -767,14 +837,16 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         for(fld in scope.survey_questions){
                             if(scope.survey_questions[fld].variable === scope.variable && fld!==key){
                                 scope.duplicate = true;
-                                Wait('stop');
-                                return;
                             }
                         }
                     }
 
                 }
 
+                if(scope.duplicate===true || scope.invalidChoice===true || scope.minTextError === true || scope.maxTextError === true){
+                    // Wait('stop');
+                    return;
+                }
 
                 try {
                     //create data object for each submitted question
@@ -875,4 +947,3 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
 
         };
     }]);
-

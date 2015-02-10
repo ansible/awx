@@ -72,11 +72,17 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                                         }
 
                                     }
+
                                     if(scope.survey_enabled===true){
-                                        for (var fld in scope.job_launch_form){
-                                            //grab only survey question fields, including those that are zero or a blank answer (for optional questions)
-                                            if((scope[fld] || scope[fld] === 0 || scope[fld]==="") && scope.passwords_needed_to_start.indexOf(fld) === -1 && fld !== 'extra_vars'){
+                                        for (var i=0; i < scope.survey_questions.length; i++){
+                                            var fld = scope.survey_questions[i].variable;
+                                            // grab all survey questions that have answers
+                                            if(scope[fld]) {
                                                 job_launch_data.extra_vars[fld] = scope[fld];
+                                            }
+                                            // for optional text and text-areas, submit a blank string if min length is 0
+                                            if(scope.survey_questions[i].required === false && (scope.survey_questions[i].type === "text" || scope.survey_questions[i].type === "textarea") && scope.survey_questions[i].min === 0 && scope[fld] ===""){
+                                                job_launch_data.extra_vars[fld] = "";
                                             }
                                         }
                                     }
