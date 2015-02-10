@@ -17,8 +17,8 @@ from crum import get_current_request
 from crum.signals import current_user_getter
 
 # AWX
-from awx.main.models import *
-from awx.api.serializers import *
+from awx.main.models import * # noqa
+from awx.api.serializers import * # noqa
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, emit_websocket_notification
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
@@ -35,14 +35,6 @@ def emit_job_event_detail(sender, **kwargs):
     instance = kwargs['instance']
     created = kwargs['created']
     if created:
-        if instance.host is not None:
-            host_id = instance.host.id
-        else:
-            host_id = None
-        if instance.parent is not None:
-            parent_id = instance.parent.id
-        else:
-            parent_id = None
         event_serialized = JobEventSerializer(instance).data
         event_serialized['id'] = instance.id
         event_serialized["created"] = event_serialized["created"].isoformat()

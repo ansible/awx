@@ -10,6 +10,7 @@ try:
 except ImportError:
     from django.utils.html import conditional_escape
     from django.utils.safestring import mark_safe
+
     def format_html(format_string, *args, **kwargs):
         args_safe = map(conditional_escape, args)
         kwargs_safe = dict([(k, conditional_escape(v)) for (k, v) in
@@ -21,11 +22,12 @@ try:
 except ImportError:
     import logging
     from django.conf import settings
+
     class RequireDebugTrue(logging.Filter):
         def filter(self, record):
             return settings.DEBUG
 
 try:
-    from django.utils.text import slugify
+    from django.utils.text import slugify # noqa
 except ImportError:
-    from django.template.defaultfilters import slugify
+    from django.template.defaultfilters import slugify # noqa

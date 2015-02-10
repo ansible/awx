@@ -14,7 +14,6 @@ import pipes
 import re
 import shutil
 import stat
-import subprocess
 import tempfile
 import time
 import traceback
@@ -28,7 +27,6 @@ import pexpect
 
 # Celery
 from celery import Task, task
-from djcelery.models import PeriodicTask
 
 # Django
 from django.conf import settings
@@ -38,7 +36,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.queue import FifoQueue
 from awx.main.utils import (get_ansible_version, decrypt_field, update_scm_url,
                             ignore_inventory_computed_fields, emit_websocket_notification,
@@ -71,7 +69,8 @@ def tower_periodic_scheduler(self):
         try:
             last_run = dateutil.parser.parse(fd.read())
             return last_run
-        except Exception, e:
+        except Exception:
+            #TODO: LOG
             return None
 
     def write_last_run(last_run):

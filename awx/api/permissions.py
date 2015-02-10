@@ -12,8 +12,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework import permissions
 
 # AWX
-from awx.main.access import *
-from awx.main.models import *
+from awx.main.access import * # noqa
+from awx.main.models import * # noqa
 from awx.main.utils import get_object_or_400
 
 logger = logging.getLogger('awx.api.permissions')
@@ -45,7 +45,7 @@ class ModelAccessPermission(permissions.BasePermission):
 
     def check_post_permissions(self, request, view, obj=None):
         if hasattr(view, 'parent_model'):
-            parent_obj = get_object_or_400(view.parent_model, pk=view.kwargs['pk'])
+            get_object_or_400(view.parent_model, pk=view.kwargs['pk'])
             return True
         elif getattr(view, 'is_job_start', False):
             if not obj:

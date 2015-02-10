@@ -276,15 +276,6 @@ def model_instance_diff(old, new, serializer_mapping=None):
 
     diff = {}
 
-    if old is not None and new is not None:
-        fields = set(old._meta.fields + new._meta.fields)
-    elif old is not None:
-        fields = set(old._meta.fields)
-    elif new is not None:
-        fields = set(new._meta.fields)
-    else:
-        fields = set()
-
     if serializer_mapping is not None and new.__class__ in serializer_mapping:
         serializer_actual = serializer_mapping[new.__class__]()
         allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
@@ -421,7 +412,7 @@ def check_proot_installed():
     try:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
-        result = proc.communicate()
+        proc.communicate()
         return bool(proc.returncode == 0)
     except (OSError, ValueError):
         return False

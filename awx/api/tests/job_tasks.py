@@ -1,20 +1,10 @@
 # Copyright (c) 2014 Ansible, Inc.
 # All Rights Reserved.
 
-from datetime import datetime
-
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase
 from django.test.utils import override_settings
 
-from rest_framework.test import APIClient
-
-import mock
-
-from awx.api.views import JobJobTasksList
-from awx.main.models import Job, JobTemplate, JobEvent
 from awx.main.tests.jobs import BaseJobTestMixin
 
 

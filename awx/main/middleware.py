@@ -1,22 +1,19 @@
 # Copyright (c) 2014 Ansible, Inc.
 # All Rights Reserved.
 
-import json
 import logging
 import threading
 import uuid
-import urllib2
 
-from django.conf import settings
-from django.contrib.auth.models import User, AnonymousUser
-from django.db.models.signals import pre_save, post_save
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.utils.functional import curry
 
 from awx import __version__ as version
-from awx.main.models import ActivityStream, AuthToken, Instance
+from awx.main.models import ActivityStream, Instance
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -50,7 +47,7 @@ class ActivityStreamMiddleware(threading.local):
                 instance.actor = drf_user
                 try:
                     instance.save(update_fields=['actor'])
-                except IntegrityError, e:
+                except IntegrityError:
                     logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance.id))
             # else:
             #     obj1_type_actual = instance.object1_type.split(".")[-1]

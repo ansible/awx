@@ -2,9 +2,7 @@
 # All Rights Reserved.
 
 # Django
-from django.conf import settings
 from django.shortcuts import render
-from django.template import RequestContext
 from django.utils.safestring import mark_safe
 
 def handle_error(request, status=404, **kwargs):

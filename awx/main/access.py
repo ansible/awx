@@ -14,8 +14,8 @@ from django.contrib.auth.models import User
 from rest_framework.exceptions import ParseError, PermissionDenied
 
 # AWX
-from awx.main.utils import *
-from awx.main.models import *
+from awx.main.utils import * # noqa
+from awx.main.models import * # noqa
 from awx.main.task_engine import TaskSerializer
 
 __all__ = ['get_user_queryset', 'check_user_access']
@@ -672,7 +672,6 @@ class ProjectAccess(BaseAccess):
                        Q(organizations__admins__in=[self.user], organizations__active=True) |
                        Q(organizations__users__in=[self.user], organizations__active=True) |
                        Q(teams__in=team_ids))
-        allowed = [PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
 
@@ -854,7 +853,6 @@ class JobTemplateAccess(BaseAccess):
         org_admin_qs = base_qs.filter(
             project__organizations__admins__in=[self.user]
         )
-        allowed = [PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY]
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
 
@@ -1052,21 +1050,8 @@ class JobAccess(BaseAccess):
         org_admin_qs = base_qs.filter(
             project__organizations__admins__in=[self.user]
         )
-        allowed = [PERM_INVENTORY_CHECK, PERM_INVENTORY_DEPLOY]
-
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
-
-        # perm_qs = base_qs.filter(
-        #     Q(inventory__permissions__user=self.user) | Q(inventory__permissions__team__users__in=[self.user]),
-        #     Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
-        #     inventory__permissions__permission_type__in=allowed,
-        #     project__permissions__permission_type__in=allowed,
-        #     inventory__permissions__active=True,
-        #     project__permissions__active=True,
-        #     inventory__permissions__pk=F('project__permissions__pk'),
-        # )
-
         team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
 
         deploy_permissions_ids = set(Permission.objects.filter(

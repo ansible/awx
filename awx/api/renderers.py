@@ -1,9 +1,6 @@
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-# Django
-from django.utils.datastructures import SortedDict
-
 # Django REST Framework
 from rest_framework import renderers
 
@@ -36,11 +33,6 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
 
     def get_context(self, data, accepted_media_type, renderer_context):
         context = super(BrowsableAPIRenderer, self).get_context(data, accepted_media_type, renderer_context)
-        # FIXME: Sort headers / preserve sorting?
-        #response_headers = SortedDict(context['response'].items())
-        #if 'Content-Type' in context['response_headers']:
-        #    response_headers['Content-Type'] = context['response_headers']['Content-Type']
-        #context['response_headers'] = response_headers
         return context
 
 class PlainTextRenderer(renderers.BaseRenderer):

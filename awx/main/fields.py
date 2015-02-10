@@ -4,8 +4,6 @@
 # Django
 from django.db import models
 from django.db.models.fields.related import SingleRelatedObjectDescriptor
-from django.utils.translation import ugettext_lazy as _
-
 
 # South
 from south.modelsinspector import add_introspection_rules

@@ -2,12 +2,10 @@
 # All Rights Reserved.
 
 import base64
-import os
 from cStringIO import StringIO
 
 from django.core import files
 from django.core.files.storage import Storage
-from django.core.urlresolvers import reverse
 
 
 class DatabaseStorage(Storage):
