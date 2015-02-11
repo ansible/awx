@@ -1669,7 +1669,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.assertTrue('security_groups' in child_names)
         self.assertTrue('tags' in child_names)
         self.assertTrue('images' in child_names)
-        self.assertTrue('tag_none' in child_names)
+        self.assertFalse('tag_none' in child_names)
+        self.assertTrue('tag_none' in self.group.children.get(name='tags').children.values_list('name', flat=True))
         self.assertFalse('instances' in child_names)
         # Make sure we clean up the cache path when finished (when one is not
         # provided explicitly via source_vars).
@@ -1708,7 +1709,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # Skip vpcs as selected inventory may or may not have any.
         child_names = self.group.children.filter(active=True).values_list('name', flat=True)
         self.assertTrue('ec2' in child_names)
-        self.assertTrue('tag_none' in child_names)
+        self.assertFalse('tag_none' in child_names)
         self.assertTrue('regions' in child_names)
         self.assertTrue(self.group.children.get(name='regions').children.filter(active=True).count())
         self.assertTrue('types' in child_names)
@@ -1719,6 +1720,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.assertTrue(self.group.children.get(name='security_groups').children.filter(active=True).count())
         self.assertTrue('tags' in child_names)
         self.assertTrue(self.group.children.get(name='tags').children.filter(active=True).count())
+        self.assertTrue('tag_none' in self.group.children.get(name='tags').children.values_list('name', flat=True))
         self.assertTrue('images' in child_names)
         self.assertTrue(self.group.children.get(name='images').children.filter(active=True).count())
         self.assertTrue('instances' in child_names)

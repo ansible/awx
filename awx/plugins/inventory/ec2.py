@@ -412,9 +412,13 @@ class Ec2Inventory(object):
 
         # Select the best destination address
         if instance.subnet_id:
-            dest = getattr(instance, self.vpc_destination_variable)
+            dest = getattr(instance, self.vpc_destination_variable, None)
+            if dest is None:
+                dest = getattr(instance, 'tags').get(self.vpc_destination_variable, None)
         else:
-            dest =  getattr(instance, self.destination_variable)
+            dest = getattr(instance, self.destination_variable, None)
+            if dest is None:
+                dest = getattr(instance, 'tags').get(self.destination_variable, None)
 
         if not dest:
             # Skip instances we cannot address (e.g. private VPC subnet)
@@ -474,7 +478,7 @@ class Ec2Inventory(object):
 
         # Inventory: Group by VPC
         if self.group_by_vpc_id and instance.vpc_id:
-            vpc_id_name = self.to_safe(instance.vpc_id)
+            vpc_id_name = self.to_safe('vpc_id_' + instance.vpc_id)
             self.push(self.inventory, vpc_id_name, dest)
             if self.nested_groups:
                 self.push_group(self.inventory, 'vpcs', vpc_id_name)
@@ -512,6 +516,8 @@ class Ec2Inventory(object):
         # Global Tag: instances without tags
         if self.group_by_tag_none and len(instance.tags) == 0:
             self.push(self.inventory, 'tag_none', dest)
+            if self.nested_groups:
+                self.push_group(self.inventory, 'tags', 'tag_none')
 
         # Global Tag: tag all EC2 instances
         self.push(self.inventory, 'ec2', dest)
@@ -566,7 +572,7 @@ class Ec2Inventory(object):
 
         # Inventory: Group by VPC
         if self.group_by_vpc_id and instance.subnet_group and instance.subnet_group.vpc_id:
-            vpc_id_name = self.to_safe(instance.subnet_group.vpc_id)
+            vpc_id_name = self.to_safe('vpc_id_' + instance.subnet_group.vpc_id)
             self.push(self.inventory, vpc_id_name, dest)
             if self.nested_groups:
                 self.push_group(self.inventory, 'vpcs', vpc_id_name)
@@ -707,7 +713,7 @@ class Ec2Inventory(object):
             # try updating the cache
             self.do_api_calls_update_cache()
             if not self.args.host in self.index:
-                # host migh not exist anymore
+                # host might not exist anymore
                 return self.json_format_dict({}, True)
 
         (region, instance_id) = self.index[self.args.host]
