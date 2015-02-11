@@ -1832,6 +1832,7 @@ class JobCancel(RetrieveAPIView):
 class JobRelaunch(GenericAPIView):
 
     model = Job
+    is_job_start = True
     # FIXME: Add serializer class to define fields in OPTIONS request!
 
     @csrf_exempt
