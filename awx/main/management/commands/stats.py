@@ -4,16 +4,10 @@
 from optparse import make_option
 
 # Django
-from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction, DatabaseError
-from django.contrib.auth.models import User
-from django.utils.dateparse import parse_datetime
-from django.utils.timezone import now, is_aware, make_aware
-from django.utils.tzinfo import FixedOffset
+from django.core.management.base import BaseCommand
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 
 class Command(BaseCommand):
     '''

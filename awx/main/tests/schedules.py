@@ -3,20 +3,14 @@
 
 # Python
 import datetime
-import json
-import os
-import re
 
 # Django
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.test.utils import override_settings
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import *
-from awx.main.tests.base import BaseTest, BaseTransactionTest
+from awx.main.models import * # noqa
+from awx.main.tests.base import BaseTest
 
 __all__ = ['ScheduleTest']
 
@@ -76,7 +70,7 @@ class ScheduleTest(BaseTest):
         self.first_inventory_source.source = 'ec2'
         self.first_inventory_source.save()
 
-        inv_read = Permission.objects.create(
+        Permission.objects.create(
             inventory       = self.first_inventory,
             user            = self.other_django_user,
             permission_type = 'read'
@@ -123,7 +117,7 @@ class ScheduleTest(BaseTest):
 
     def test_post_new_schedule(self):
         first_url = reverse('api:inventory_source_schedules_list', args=(self.first_inventory_source.pk,))
-        second_url = reverse('api:inventory_source_schedules_list', args=(self.second_inventory_source.pk,))
+        reverse('api:inventory_source_schedules_list', args=(self.second_inventory_source.pk,))
 
         new_schedule = dict(name='newsched_1', description='newsched', enabled=True, rrule=GOOD_SCHEDULES[0])
 
@@ -132,31 +126,31 @@ class ScheduleTest(BaseTest):
 
         # Super user can post a new schedule
         with self.current_user(self.super_django_user):
-            data = self.post(first_url, data=new_schedule, expect=201)
+            self.post(first_url, data=new_schedule, expect=201)
 
-        # #admin can post 
+        # #admin can post
         admin_schedule = dict(name='newsched_2', description='newsched', enabled=True, rrule=GOOD_SCHEDULES[0])
-        data = self.post(first_url, data=admin_schedule, expect=201, auth=self.get_normal_credentials())
+        self.post(first_url, data=admin_schedule, expect=201, auth=self.get_normal_credentials())
 
         #normal user without write access can't post
         unauth_schedule = dict(name='newsched_3', description='newsched', enabled=True, rrule=GOOD_SCHEDULES[0])
         with self.current_user(self.other_django_user):
-            data = self.post(first_url, data=unauth_schedule, expect=403)
+            self.post(first_url, data=unauth_schedule, expect=403)
 
         #give normal user write access and then they can post
-        inv_write = Permission.objects.create(
+        Permission.objects.create(
             user = self.other_django_user,
             inventory = self.first_inventory,
             permission_type = PERM_INVENTORY_WRITE
         )
         auth_schedule = unauth_schedule
         with self.current_user(self.other_django_user):
-            data = self.post(first_url, data=auth_schedule, expect=201)
+            self.post(first_url, data=auth_schedule, expect=201)
 
         # another org user shouldn't be able to post a schedule to this org's schedule
         diff_user_schedule = dict(name='newsched_4', description='newsched', enabled=True, rrule=GOOD_SCHEDULES[0])
         with self.current_user(self.diff_org_user):
-            data = self.post(first_url, data=diff_user_schedule, expect=403)
+            self.post(first_url, data=diff_user_schedule, expect=403)
 
     def test_post_schedule_to_non_cloud_source(self):
         invalid_inv_url = reverse('api:inventory_source_schedules_list', args=(self.without_valid_source_inventory_source.pk,))
@@ -190,9 +184,9 @@ class ScheduleTest(BaseTest):
 
         long_schedule = dict(name='long_schedule', description='going for a long time', enabled=True, rrule=UNTIL_SCHEDULE)
         with self.current_user(self.normal_django_user):
-            data = self.post(first_url, long_schedule, expect=201)
+            self.post(first_url, long_schedule, expect=201)
         self.assertNotEquals(data['dtend'], None)
-        
+
     def test_schedule_filtering(self):
         first_url = reverse('api:inventory_source_schedules_list', args=(self.first_inventory_source.pk,))
 
@@ -200,14 +194,14 @@ class ScheduleTest(BaseTest):
         dtstart_str = start_time.strftime("%Y%m%dT%H%M%SZ")
         new_schedule = dict(name="filter_schedule_1", enabled=True, rrule="DTSTART:%s RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5" % dtstart_str)
         with self.current_user(self.normal_django_user):
-            data = self.post(first_url, new_schedule, expect=201)
+            self.post(first_url, new_schedule, expect=201)
         self.assertTrue(Schedule.objects.enabled().between(now(), now() + datetime.timedelta(minutes=10)).count(), 1)
 
         start_time = now()
         dtstart_str = start_time.strftime("%Y%m%dT%H%M%SZ")
         new_schedule_middle = dict(name="runnable_schedule", enabled=True, rrule="DTSTART:%s RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5" % dtstart_str)
         with self.current_user(self.normal_django_user):
-            data = self.post(first_url, new_schedule_middle, expect=201)
+            self.post(first_url, new_schedule_middle, expect=201)
         self.assertTrue(Schedule.objects.enabled().between(now() - datetime.timedelta(minutes=10), now() + datetime.timedelta(minutes=10)).count(), 1)
 
     def test_rrule_validation(self):

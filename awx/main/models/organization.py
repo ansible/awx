@@ -10,14 +10,13 @@ import uuid
 # Django
 from django.conf import settings
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 
 # AWX
 from awx.main.fields import AutoOneToOneField
-from awx.main.models.base import *
+from awx.main.models.base import * # noqa
 
 __all__ = ['Organization', 'Team', 'Permission', 'Profile', 'AuthToken']
 

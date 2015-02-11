@@ -3,37 +3,27 @@
 
 # Python
 import datetime
-import hashlib
-import hmac
-import json
 import logging
-import os
 import re
-import shlex
-import uuid
 import copy
-import random
 
 # Django
 from django.conf import settings
-from django.db import models, connection
-from django.db.models import Q
+from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.db import transaction
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
-from django.utils.timezone import now, make_aware, get_default_timezone
-from django.core.cache import cache
+from django.utils.timezone import now
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.fields import AutoOneToOneField
 from awx.main.managers import HostManager
-from awx.main.models.base import *
+from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
-from awx.main.models.unified_jobs import *
-from awx.main.utils import encrypt_field, ignore_inventory_computed_fields, _inventory_updates
+from awx.main.models.unified_jobs import * # noqa
+from awx.main.utils import ignore_inventory_computed_fields, _inventory_updates
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript']
 
@@ -220,7 +210,7 @@ class Inventory(CommonModel):
         group_hosts_map = self.get_group_hosts_map(active=True)
         active_host_pks = set(self.hosts.filter(active=True).values_list('pk', flat=True))
         failed_host_pks = set(self.hosts.filter(active=True, last_job_host_summary__job__active=True, last_job_host_summary__failed=True).values_list('pk', flat=True))
-        active_group_pks = set(self.groups.filter(active=True).values_list('pk', flat=True))
+        # active_group_pks = set(self.groups.filter(active=True).values_list('pk', flat=True))
         failed_group_pks = set() # Update below as we check each group.
         groups_with_cloud_pks = set(self.groups.filter(active=True, inventory_sources__active=True, inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True))
         groups_to_update = {}
@@ -539,7 +529,7 @@ class Group(CommonModelNameNotUnique):
 
     @transaction.atomic
     def mark_inactive_recursive(self):
-        from awx.main.tasks import update_inventory_computed_fields, bulk_inventory_element_delete
+        from awx.main.tasks import bulk_inventory_element_delete
         from awx.main.utils import ignore_inventory_computed_fields
         from awx.main.signals import disable_activity_stream
 

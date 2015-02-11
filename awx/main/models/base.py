@@ -9,24 +9,13 @@ import shlex
 import yaml
 
 # Django
-from django.conf import settings
 from django.db import models
-from django.db.models import signals
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
-# Django-JSONField
-from jsonfield import JSONField
-
-# Django-Polymorphic
-from polymorphic import PolymorphicModel
-
 # Django-Taggit
 from taggit.managers import TaggableManager
-
-# Django-Celery
-from djcelery.models import TaskMeta
 
 # Django-CRUM
 from crum import get_current_user

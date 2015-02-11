@@ -2,19 +2,19 @@
 # All Rights Reserved.
 
 # Django
-from django.conf import settings
+from django.conf import settings # noqa
 
 # AWX
-from awx.main.models.base import *
-from awx.main.models.unified_jobs import *
-from awx.main.models.organization import *
-from awx.main.models.credential import *
-from awx.main.models.projects import *
-from awx.main.models.inventory import *
-from awx.main.models.jobs import *
-from awx.main.models.schedules import *
-from awx.main.models.activity_stream import *
-from awx.main.models.ha import *
+from awx.main.models.base import * # noqa
+from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.organization import * # noqa
+from awx.main.models.credential import * # noqa
+from awx.main.models.projects import * # noqa
+from awx.main.models.inventory import * # noqa
+from awx.main.models.jobs import * # noqa
+from awx.main.models.schedules import * # noqa
+from awx.main.models.activity_stream import * # noqa
+from awx.main.models.ha import * # noqa
 
 # Monkeypatch Django serializer to ignore django-taggit fields (which break
 # the dumpdata command; see https://github.com/alex/django-taggit/issues/155).
@@ -29,15 +29,15 @@ def _new_handle_m2m_field(self, obj, field):
 _PythonSerializer.handle_m2m_field = _new_handle_m2m_field
 
 # Add custom methods to User model for permissions checks.
-from django.contrib.auth.models import User
-from awx.main.access import *
+from django.contrib.auth.models import User # noqa
+from awx.main.access import * # noqa
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 
 # Import signal handlers only after models have been defined.
-import awx.main.signals
+import awx.main.signals # noqa
 
-from awx.main.registrar import activity_stream_registrar
+from awx.main.registrar import activity_stream_registrar # noqa
 activity_stream_registrar.connect(Organization)
 activity_stream_registrar.connect(Inventory)
 activity_stream_registrar.connect(Host)

@@ -1,7 +1,6 @@
 # Copyright (c) 2014 Ansible, Inc.
 # All Rights Reserved
 
-import sys
 
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError

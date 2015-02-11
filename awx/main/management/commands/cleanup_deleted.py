@@ -7,14 +7,14 @@ import logging
 from optparse import make_option
 
 # Django
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.contrib.auth.models import User
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now, is_aware, make_aware
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 
 class Command(BaseCommand):
     '''

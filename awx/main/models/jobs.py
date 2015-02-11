@@ -2,42 +2,27 @@
 # All Rights Reserved.
 
 # Python
-import datetime
-import hashlib
 import hmac
 import json
 import logging
-import os
-import re
-import shlex
-import uuid
 
 # Django
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
-from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
-from django.utils.timezone import now, make_aware, get_default_timezone
 
 # Django-JSONField
 from jsonfield import JSONField
 
-# Django-Polymorphic
-from polymorphic import PolymorphicModel
-
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
-from awx.main.models.base import *
-from awx.main.models.unified_jobs import *
-from awx.main.utils import encrypt_field, decrypt_field, ignore_inventory_computed_fields
+from awx.main.models.base import * # noqa
+from awx.main.models.unified_jobs import * # noqa
+from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
-
-# Celery
-from celery import chain
 
 logger = logging.getLogger('awx.main.models.jobs')
 
@@ -434,7 +419,7 @@ class Job(UnifiedJob, JobOptions):
         # running this job (via callback inventory refresh).
         try:
             start_args = json.loads(decrypt_field(self, 'start_args'))
-        except Exception, e:
+        except Exception:
             start_args = None
         start_args = start_args or {}
         inventory_sources_already_updated = start_args.get('inventory_sources_already_updated', [])

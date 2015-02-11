@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-import datetime
 import getpass
 import json
 import os
@@ -15,15 +14,13 @@ import urlparse
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
-import django.test
-from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import *
-from awx.main.tests.base import BaseTest, BaseTransactionTest
+from awx.main.models import * # noqa
+from awx.main.tests.base import BaseTransactionTest
 from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
 from awx.main.utils import decrypt_field, update_scm_url
 
@@ -187,11 +184,11 @@ class ProjectsTest(BaseTransactionTest):
     def test_dashboard(self):
         url = reverse('api:dashboard_view')
         # superuser can read dashboard.
-        response = self.get(url, expect=200, auth=self.get_super_credentials())
+        self.get(url, expect=200, auth=self.get_super_credentials())
         # org admin can read dashboard.
-        response = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.get(url, expect=200, auth=self.get_normal_credentials())
         # regular user can read dashboard.
-        response = self.get(url, expect=200, auth=self.get_nobody_credentials())
+        self.get(url, expect=200, auth=self.get_nobody_credentials())
         # anonymous/invalid user can't access dashboard.
         self.get(url, expect=401)
         self.get(url, expect=401, auth=self.get_invalid_credentials())
@@ -330,16 +327,16 @@ class ProjectsTest(BaseTransactionTest):
 
         # can add teams
         posted1 = self.post(all_teams, data=new_team, expect=201, auth=self.get_super_credentials())
-        posted2 = self.post(all_teams, data=new_team, expect=400, auth=self.get_super_credentials())
+        self.post(all_teams, data=new_team, expect=400, auth=self.get_super_credentials())
         # normal user is not an admin of organizations[0], but is for [1].
         posted3 = self.post(all_teams, data=new_team2, expect=403, auth=self.get_normal_credentials())
         new_team2['organization'] = self.organizations[1].pk
         posted3 = self.post(all_teams, data=new_team2, expect=201, auth=self.get_normal_credentials())
-        posted4 = self.post(all_teams, data=new_team2, expect=400, auth=self.get_normal_credentials())
-        posted5 = self.post(all_teams, data=new_team3, expect=403, auth=self.get_other_credentials())
-        url1 = posted1['url']
+        self.post(all_teams, data=new_team2, expect=400, auth=self.get_normal_credentials())
+        self.post(all_teams, data=new_team3, expect=403, auth=self.get_other_credentials())
+        posted1['url']
         url3 = posted3['url']
-        url5 = posted1['url']
+        posted1['url']
 
         new_team = Team.objects.create(name='newTeam4', organization=self.organizations[1])
         url = reverse('api:team_detail', args=(new_team.pk,))
@@ -356,11 +353,11 @@ class ProjectsTest(BaseTransactionTest):
 
         # can list organization teams (filtered by user) -- this is an org admin function
         org_teams = reverse('api:organization_teams_list', args=(self.organizations[1].pk,))
-        data1 = self.get(org_teams, expect=401)
+        self.get(org_teams, expect=401)
         data2 = self.get(org_teams, expect=403, auth=self.get_nobody_credentials())
-        data3 = self.get(org_teams, expect=403, auth=self.get_other_credentials())
-        data4 = self.get(org_teams, expect=200, auth=self.get_normal_credentials())
-        data5 = self.get(org_teams, expect=200, auth=self.get_super_credentials())
+        self.get(org_teams, expect=403, auth=self.get_other_credentials())
+        self.get(org_teams, expect=200, auth=self.get_normal_credentials())
+        self.get(org_teams, expect=200, auth=self.get_super_credentials())
 
         # can add teams to organizations
         new_team1 = dict(name='super new team A')
@@ -368,16 +365,16 @@ class ProjectsTest(BaseTransactionTest):
         new_team2 = dict(name='super new team B', organization=34567)
         new_team3 = dict(name='super new team C')
 
-        data1 = self.post(org_teams, new_team1, expect=401)
-        data1 = self.post(org_teams, new_team1, expect=403, auth=self.get_nobody_credentials())
-        data1 = self.post(org_teams, new_team1, expect=403, auth=self.get_other_credentials())
+        self.post(org_teams, new_team1, expect=401)
+        self.post(org_teams, new_team1, expect=403, auth=self.get_nobody_credentials())
+        self.post(org_teams, new_team1, expect=403, auth=self.get_other_credentials())
         data2 = self.post(org_teams, new_team2, expect=201, auth=self.get_normal_credentials())
-        data3 = self.post(org_teams, new_team3, expect=201, auth=self.get_super_credentials())
+        self.post(org_teams, new_team3, expect=201, auth=self.get_super_credentials())
 
         # can remove teams from organizations
         data2['disassociate'] = 1
         url = data2['url']
-        deleted = self.post(org_teams, data2, expect=204, auth=self.get_normal_credentials())
+        self.post(org_teams, data2, expect=204, auth=self.get_normal_credentials())
         got = self.get(url, expect=404, auth=self.get_normal_credentials())
 
 
@@ -1320,7 +1317,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_username=scm_username,
             scm_password=scm_password,
         )
-        should_error = bool('github.com' in scm_url and scm_username != 'git')
+        bool('github.com' in scm_url and scm_username != 'git')
         self.check_project_update(project2, should_fail=None) # , should_error=should_error)
 
     def test_scm_key_unlock_on_project_update(self):

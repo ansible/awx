@@ -6,7 +6,6 @@ import codecs
 import json
 import logging
 import re
-import shlex
 import os
 import os.path
 from StringIO import StringIO
@@ -14,9 +13,7 @@ from StringIO import StringIO
 # Django
 from django.conf import settings
 from django.db import models
-from django.db import transaction
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
-from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
@@ -31,9 +28,9 @@ from polymorphic import PolymorphicModel
 from djcelery.models import TaskMeta
 
 # AWX
-from awx.main.models.base import *
+from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
-from awx.main.utils import decrypt_field, get_type_for_model, emit_websocket_notification, _inventory_updates
+from awx.main.utils import decrypt_field, emit_websocket_notification, _inventory_updates
 from awx.main.redact import UriCleaner
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
@@ -597,7 +594,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if self.result_stdout_file != "":
             try:
                 os.remove(self.result_stdout_file)
-            except Exception, e:
+            except Exception:
                 pass
         super(UnifiedJob, self).delete()
 
@@ -713,7 +710,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         needed = self.get_passwords_needed_to_start()
         try:
             start_args = json.loads(decrypt_field(self, 'start_args'))
-        except Exception, e:
+        except Exception:
             start_args = None
         if start_args in (None, ''):
             start_args = kwargs
@@ -756,10 +753,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         # Each type of unified job has a different Task class; get the
         # appropirate one.
-        task_type = get_type_for_model(self)
+        # task_type = get_type_for_model(self)
 
         # Actually tell the task runner to run this task.
-        # NOTE: This will deadlock the task runner
+        # FIXME: This will deadlock the task runner
         #from awx.main.tasks import notify_task_runner
         #notify_task_runner.delay({'id': self.id, 'metadata': kwargs,
         #                          'task_type': task_type})

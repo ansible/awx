@@ -3,34 +3,25 @@
 
 # Python
 import datetime
-import hashlib
-import hmac
-import json
-import logging
 import os
 import re
-import shlex
 import urlparse
-import uuid
 
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
 from django.utils.timezone import now, make_aware, get_default_timezone
 
 # AWX
 from awx.lib.compat import slugify
-from awx.main.models.base import *
+from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
-from awx.main.models.unified_jobs import *
+from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import update_scm_url
-from awx.main.utils import encrypt_field
 
 __all__ = ['Project', 'ProjectUpdate']
 

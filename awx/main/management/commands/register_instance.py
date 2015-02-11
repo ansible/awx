@@ -1,14 +1,12 @@
 # Copyright (c) 2014 Ansible, Inc.
 # All Rights Reserved
 
-from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import CommandError
 
 from awx.main.management.commands._base_instance import BaseCommandInstance
-instance_str = BaseCommandInstance.instance_str
-
 from awx.main.models import Instance
 
+instance_str = BaseCommandInstance.instance_str
 
 class Command(BaseCommandInstance):
     """Internal tower command.

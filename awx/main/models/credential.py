@@ -6,17 +6,15 @@ import base64
 import re
 
 # Django
-from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
 
 # AWX
-from awx.main import storage
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.utils import decrypt_field
-from awx.main.models.base import *
+from awx.main.models.base import * # noqa
 
 __all__ = ['Credential']
 

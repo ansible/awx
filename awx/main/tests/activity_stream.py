@@ -2,21 +2,10 @@
 # All Rights Reserved.
 
 # Python
-import contextlib
-import datetime
-import json
-import os
-import shutil
-import tempfile
-
-
-from django.contrib.auth.models import User
-import django.test
-from django.test.client import Client
 from django.core.urlresolvers import reverse
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest
 
 class ActivityStreamTest(BaseTest):

@@ -4,18 +4,12 @@
 # Python
 import json
 import os
-import StringIO
 import subprocess
 import sys
-import tempfile
 import urlparse
 
-# Django
-from django.conf import settings
-from django.utils.timezone import now
-
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.tests.base import BaseLiveServerTest
 
 __all__ = ['InventoryScriptTest']

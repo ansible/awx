@@ -4,7 +4,6 @@
 # Python
 import base64
 import contextlib
-import datetime
 import json
 import os
 import random
@@ -23,10 +22,9 @@ from django.conf import settings, UserSettingsHolder
 from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
-from django.test.utils import override_settings
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.backend import LDAPSettings
 from awx.main.management.commands.run_callback_receiver import CallbackReceiver
 from awx.main.management.commands.run_task_system import run_taskmanager

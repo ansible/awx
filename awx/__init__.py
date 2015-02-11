@@ -1,11 +1,11 @@
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-__version__ = '2.2.0'
-
 import os
 import sys
 import warnings
+
+__version__ = '2.2.0'
 
 __all__ = ['__version__']
 

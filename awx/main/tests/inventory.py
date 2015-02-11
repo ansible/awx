@@ -11,13 +11,12 @@ import tempfile
 
 # Django
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest, BaseTransactionTest
 
 __all__ = ['InventoryTest', 'InventoryUpdatesTest']
@@ -239,12 +238,12 @@ class InventoryTest(BaseTest):
         # a user who is on a team who has read permissions on an inventory can
         # see inventory records, but not delete.
         with self.current_user(self.other_django_user):
-            data = self.get(url_b, expect=200)
+            self.get(url_b, expect=200)
             self.delete(url_b, expect=403)
 
         # an org admin can delete inventory records for his orgs only.
         with self.current_user(self.normal_django_user):
-            data = self.get(url_a, expect=200)
+            self.get(url_a, expect=200)
             self.delete(url_a, expect=204)
             self.delete(url_b, expect=403)
 
@@ -273,7 +272,7 @@ class InventoryTest(BaseTest):
         temp_org.users.add(self.other_django_user)
         temp_org.users.add(self.normal_django_user)
         temp_inv = temp_org.inventories.create(name='Delete Org Inventory')
-        temp_group1 = temp_inv.groups.create(name='Delete Org Inventory Group')
+        temp_inv.groups.create(name='Delete Org Inventory Group')
 
         temp_perm_read = Permission.objects.create(
             inventory       = temp_inv,
@@ -281,7 +280,7 @@ class InventoryTest(BaseTest):
             permission_type = 'read'
         )
 
-        org_detail = reverse('api:organization_detail', args=(temp_org.pk,))
+        reverse('api:organization_detail', args=(temp_org.pk,))
         inventory_detail = reverse('api:inventory_detail', args=(temp_inv.pk,))
         permission_detail = reverse('api:permission_detail', args=(temp_perm_read.pk,))
 
@@ -292,7 +291,7 @@ class InventoryTest(BaseTest):
     def test_create_inventory_script(self):
         inventory_scripts = reverse('api:inventory_script_list')
         new_script = dict(name="Test", description="Test Script", script=TEST_SIMPLE_INVENTORY_SCRIPT, organization=self.organizations[0].id)
-        script_data = self.post(inventory_scripts, data=new_script, expect=201, auth=self.get_super_credentials())
+        self.post(inventory_scripts, data=new_script, expect=201, auth=self.get_super_credentials())
 
         got = self.get(inventory_scripts, expect=200, auth=self.get_super_credentials())
         self.assertEquals(got['count'], 1)
@@ -305,11 +304,10 @@ class InventoryTest(BaseTest):
         self.post(inventory_scripts, data=failed_no_shebang, expect=400, auth=self.get_super_credentials())
 
     def test_main_line(self):
-       
-        # some basic URLs... 
-        inventories   = reverse('api:inventory_list')
-        inventories_1 = reverse('api:inventory_detail', args=(self.inventory_a.pk,))
-        inventories_2 = reverse('api:inventory_detail', args=(self.inventory_b.pk,))
+        # some basic URLs...
+        reverse('api:inventory_list')
+        reverse('api:inventory_detail', args=(self.inventory_a.pk,))
+        reverse('api:inventory_detail', args=(self.inventory_b.pk,))
         hosts         = reverse('api:host_list')
         groups        = reverse('api:group_list')
         self.create_test_license_file()
@@ -328,22 +326,21 @@ class InventoryTest(BaseTest):
         new_host_e   = dict(name=u'asdf4.example.com:\u0162', inventory=inv.pk)
         host_data0 = self.post(hosts, data=invalid, expect=400, auth=self.get_super_credentials())
         host_data0 = self.post(hosts, data=new_host_a, expect=201, auth=self.get_super_credentials())
-    
         # Port should be split out into host variables.
         host_a = Host.objects.get(pk=host_data0['id'])
         self.assertEqual(host_a.name, u'asdf\u0162.example.com')
         self.assertEqual(host_a.variables_dict, {'ansible_ssh_port': 1022})
- 
+
         # an org admin can add hosts (try first with invalid port #).
-        host_data1 = self.post(hosts, data=new_host_e, expect=400, auth=self.get_normal_credentials())
+        self.post(hosts, data=new_host_e, expect=400, auth=self.get_normal_credentials())
         new_host_e['name'] = u'asdf4.example.com'
-        host_data1 = self.post(hosts, data=new_host_e, expect=201, auth=self.get_normal_credentials())
+        self.post(hosts, data=new_host_e, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot add hosts
-        host_data2 = self.post(hosts, data=new_host_b, expect=403, auth=self.get_nobody_credentials())
+        self.post(hosts, data=new_host_b, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with inventory edit permissions (on any inventory) can create hosts
-        edit_perm = Permission.objects.create(
+        Permission.objects.create(
             user            = self.other_django_user,
             inventory       = Inventory.objects.get(pk=inv.pk),
             permission_type = PERM_INVENTORY_WRITE)
@@ -355,7 +352,7 @@ class InventoryTest(BaseTest):
         self.assertEqual(host_c.variables_dict, {'ansible_ssh_port': 2022, 'who': 'what?'})
 
         # hostnames must be unique inside an organization
-        host_data4 = self.post(hosts, data=new_host_c, expect=400, auth=self.get_other_credentials())
+        self.post(hosts, data=new_host_c, expect=400, auth=self.get_other_credentials())
 
         # Verify we can update host via PUT.
         host_url3 = host_data3['url']
@@ -363,7 +360,7 @@ class InventoryTest(BaseTest):
         host_data3 = self.put(host_url3, data=host_data3, expect=200, auth=self.get_other_credentials())
         self.assertEqual(Host.objects.get(id=host_data3['id']).variables, '')
         self.assertEqual(Host.objects.get(id=host_data3['id']).variables_dict, {})
-        
+
         # Should reject invalid data.
         host_data3['variables'] = 'foo: [bar'
         self.put(host_url3, data=host_data3, expect=400, auth=self.get_other_credentials())
@@ -373,7 +370,7 @@ class InventoryTest(BaseTest):
         self.put(host_url3, data=host_data3, expect=200, auth=self.get_other_credentials())
         self.assertEqual(Host.objects.get(id=host_data3['id']).variables, host_data3['variables'])
         self.assertEqual(Host.objects.get(id=host_data3['id']).variables_dict, {'bad': 'monkey'})
-        
+
         host_data3['variables'] = '{"angry": "penguin"}'
         self.put(host_url3, data=host_data3, expect=200, auth=self.get_other_credentials())
         self.assertEqual(Host.objects.get(id=host_data3['id']).variables, host_data3['variables'])
@@ -390,14 +387,14 @@ class InventoryTest(BaseTest):
         new_group_e   = dict(name='web6', inventory=inv.pk)
         groups = reverse('api:group_list')
 
-        data0 = self.post(groups, data=invalid, expect=400, auth=self.get_super_credentials())
-        data0 = self.post(groups, data=new_group_a, expect=201, auth=self.get_super_credentials())
+        self.post(groups, data=invalid, expect=400, auth=self.get_super_credentials())
+        self.post(groups, data=new_group_a, expect=201, auth=self.get_super_credentials())
 
         # an org admin can add groups
-        group_data1 = self.post(groups, data=new_group_e, expect=201, auth=self.get_normal_credentials())
+        self.post(groups, data=new_group_e, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot add groups
-        group_data2 = self.post(groups, data=new_group_b, expect=403, auth=self.get_nobody_credentials())
+        self.post(groups, data=new_group_b, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with inventory edit permissions (on any inventory) can create groups
         # already done!
@@ -405,23 +402,23 @@ class InventoryTest(BaseTest):
         #     user            = self.other_django_user,
         #     inventory       = Inventory.objects.get(pk=inv.pk),
         #     permission_type = PERM_INVENTORY_WRITE
-        #)       
-        group_data3 = self.post(groups, data=new_group_c, expect=201, auth=self.get_other_credentials())
- 
+        #)
+        self.post(groups, data=new_group_c, expect=201, auth=self.get_other_credentials())
+
         # hostnames must be unique inside an organization
-        group_data4 = self.post(groups, data=new_group_c, expect=400, auth=self.get_other_credentials())
+        self.post(groups, data=new_group_c, expect=400, auth=self.get_other_credentials())
 
         # Check that we don't allow creating reserved group names.
         data = dict(name='all', inventory=inv.pk)
         with self.current_user(self.super_django_user):
-            response = self.post(groups, data=data, expect=400)
+            self.post(groups, data=data, expect=400)
         data = dict(name='_meta', inventory=inv.pk)
         with self.current_user(self.super_django_user):
-            response = self.post(groups, data=data, expect=400)
+            self.post(groups, data=data, expect=400)
 
         # A new group should not be able to be added a removed group
         del_group = inv.groups.create(name='del')
-        undel_group = inv.groups.create(name='nondel')
+        inv.groups.create(name='nondel')
         del_children_url = reverse('api:group_children_list', args=(del_group.pk,))
         nondel_url         = reverse('api:group_detail',
                                      args=(Group.objects.get(name='nondel').pk,))
@@ -432,7 +429,6 @@ class InventoryTest(BaseTest):
 
         #################################################
         # HOSTS->inventories POST via subcollection
-       
         url = reverse('api:inventory_hosts_list', args=(self.inventory_a.pk,))
         new_host_a = dict(name='web100.example.com')
         new_host_b = dict(name='web101.example.com')
@@ -444,10 +440,10 @@ class InventoryTest(BaseTest):
         added_by_collection_a = self.post(url, data=new_host_a, expect=201, auth=self.get_super_credentials())
 
         # an org admin can associate hosts with inventories
-        added_by_collection_b = self.post(url, data=new_host_b, expect=201, auth=self.get_normal_credentials())
+        self.post(url, data=new_host_b, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot associate hosts with inventories
-        added_by_collection_c = self.post(url, data=new_host_c, expect=403, auth=self.get_nobody_credentials())
+        self.post(url, data=new_host_c, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with edit permission on the inventory can associate hosts with inventories
         url5 = reverse('api:inventory_hosts_list', args=(inv.pk,))
@@ -455,7 +451,7 @@ class InventoryTest(BaseTest):
         got = self.get(url5, expect=200, auth=self.get_other_credentials())
         self.assertEquals(got['count'], 4)
 
-        # now remove the host from inventory (still keeps the record) 
+        # now remove the host from inventory (still keeps the record)
         added_by_collection_d['disassociate'] = 1
         self.post(url5, data=added_by_collection_d, expect=204, auth=self.get_other_credentials())
         got = self.get(url5, expect=200, auth=self.get_other_credentials())
@@ -464,7 +460,7 @@ class InventoryTest(BaseTest):
 
         ##################################################
         # GROUPS->inventories POST via subcollection
-        
+
         root_groups = reverse('api:inventory_root_groups_list', args=(self.inventory_a.pk,))
 
         url = reverse('api:inventory_groups_list', args=(self.inventory_a.pk,))
@@ -575,14 +571,14 @@ class InventoryTest(BaseTest):
 
         # an org admin can associate variable objects with inventory
         put = self.put(vdata_url, data=vars_b, expect=200, auth=self.get_normal_credentials())
- 
+
         # a normal user cannot associate variable objects with inventory
         put = self.put(vdata_url, data=vars_b, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with inventory edit permissions can associate variable objects with inventory
         put = self.put(vdata_url, data=vars_c, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(put, vars_c)
-        
+
         # repeat but request variables in yaml
         got = self.get(vdata_url, expect=200,
                        auth=self.get_normal_credentials(),
@@ -604,10 +600,10 @@ class InventoryTest(BaseTest):
         host2 = hosts[1]
         host3 = hosts[2]
         groups[0].hosts.add(host1)
-        groups[0].hosts.add(host3) 
+        groups[0].hosts.add(host3)
         groups[0].save()
 
-        # access        
+        # access
         url1 = reverse('api:group_hosts_list', args=(groups[0].pk,))
         alt_group_hosts = reverse('api:group_hosts_list', args=(groups[1].pk,))
         other_alt_group_hosts = reverse('api:group_hosts_list', args=(groups[2].pk,))
@@ -621,15 +617,15 @@ class InventoryTest(BaseTest):
         url = reverse('api:host_detail', args=(host2.pk,))
         got = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(got['id'], host2.pk)
-        posted = self.post(url1, data=got, expect=204, auth=self.get_normal_credentials())
+        self.post(url1, data=got, expect=204, auth=self.get_normal_credentials())
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 3)
         self.assertTrue(host2.pk in [x['id'] for x in data['results']])
 
         # now add one new completely new host, to test creation+association in one go
         new_host = dict(inventory=got['inventory'], name='completelynewhost.example.com', description='...')
-        posted = self.post(url1, data=new_host, expect=201, auth=self.get_normal_credentials())
-        
+        self.post(url1, data=new_host, expect=201, auth=self.get_normal_credentials())
+
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 4)
 
@@ -643,7 +639,7 @@ class InventoryTest(BaseTest):
 
         # removal
         got['disassociate'] = 1
-        posted = self.post(url1, data=got, expect=204, auth=self.get_normal_credentials())
+        self.post(url1, data=got, expect=204, auth=self.get_normal_credentials())
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 3)
         self.assertFalse(host2.pk in [x['id'] for x in data['results']])
@@ -687,8 +683,8 @@ class InventoryTest(BaseTest):
                                     args=(Group.objects.get(name='web6').pk,))
         subgroups_url3    = reverse('api:group_children_list',
                                     args=(Group.objects.get(name='web100').pk,))
-        subgroups_url4    = reverse('api:group_children_list',
-                                    args=(Group.objects.get(name='web101').pk,))
+        reverse('api:group_children_list',
+                args=(Group.objects.get(name='web101').pk,))
         got = self.get(child_url, expect=200, auth=self.get_super_credentials())
         self.post(subgroups_url, data=got, expect=204, auth=self.get_super_credentials())
         kids = Group.objects.get(name='web2').children.all()
@@ -697,7 +693,7 @@ class InventoryTest(BaseTest):
         self.assertEquals(checked['count'], 1)
 
         # an org admin can set subgroups
-        posted = self.post(subgroups_url2, data=got, expect=204, auth=self.get_normal_credentials())
+        self.post(subgroups_url2, data=got, expect=204, auth=self.get_normal_credentials())
 
         # see if we can post a completely new subgroup
         new_data = dict(inventory=inv.pk, name='completely new', description='blarg?')
@@ -767,7 +763,7 @@ class InventoryTest(BaseTest):
             'disassociate': 1,
         }
         with self.current_user(self.super_django_user):
-            response = self.post(url, data, expect=204)
+            self.post(url, data, expect=204)
         gx3 = Group.objects.get(pk=gx3.pk)
         #self.assertFalse(gx3.active) # FIXME: Disabled for now....
         self.assertFalse(gx3 in gx2.children.all())
@@ -778,13 +774,13 @@ class InventoryTest(BaseTest):
         invalid_expect = 400 # hostname validation is disabled for now.
         data = dict(name='', inventory=inv.pk)
         with self.current_user(self.super_django_user):
-            response = self.post(hosts, data=data, expect=400)
+            self.post(hosts, data=data, expect=400)
         #data = dict(name='not a valid host name', inventory=inv.pk)
         #with self.current_user(self.super_django_user):
         #    response = self.post(hosts, data=data, expect=invalid_expect)
         data = dict(name='validhost:99999', inventory=inv.pk)
         with self.current_user(self.super_django_user):
-            response = self.post(hosts, data=data, expect=invalid_expect)
+            self.post(hosts, data=data, expect=invalid_expect)
         #data = dict(name='123.234.345.456', inventory=inv.pk)
         #with self.current_user(self.super_django_user):
         #    response = self.post(hosts, data=data, expect=invalid_expect)
@@ -834,7 +830,7 @@ class InventoryTest(BaseTest):
         h_d = i_a.hosts.create(name='d', variables=json.dumps({'d-vars': 'ddd'}))
         h_d.groups.add(g_d)
         # Add another host not in any groups.
-        h_z = i_a.hosts.create(name='z', variables=json.dumps({'z-vars': 'zzz'}))
+        i_a.hosts.create(name='z', variables=json.dumps({'z-vars': 'zzz'}))
 
         # Old, slow 1.2 way.
         url = reverse('api:inventory_script_view', args=(i_a.pk,))
@@ -858,7 +854,7 @@ class InventoryTest(BaseTest):
             self.assertEqual(response, h.variables_dict)
 
         # Now add localhost to the inventory.
-        h_l = i_a.hosts.create(name='localhost', variables=json.dumps({'ansible_connection': 'local'}))
+        i_a.hosts.create(name='localhost', variables=json.dumps({'ansible_connection': 'local'}))
 
         # New 1.3 way.
         url = reverse('api:inventory_script_view', args=(i_a.pk,))
@@ -1857,16 +1853,16 @@ class InventoryUpdatesTest(BaseTransactionTest):
         custom_group = custom_inv.groups.create(name="Custom Script Group")
         custom_inv_src = reverse('api:inventory_source_detail',
                                  args=(custom_group.inventory_source.pk,))
-        custom_inv_update = reverse('api:inventory_source_update_view',
-                                    args=(custom_group.inventory_source.pk,))
+        reverse('api:inventory_source_update_view',
+                args=(custom_group.inventory_source.pk,))
         inv_src_opts = {'source': 'custom',
                         'source_script': script_data["id"],
                         'source_vars': json.dumps({'HOME': 'no-place-like', 'USER': 'notme', '_': 'nope', 'INVENTORY_SOURCE_ID': -1})
                         }
         with self.current_user(self.super_django_user):
-            response = self.put(custom_inv_src, inv_src_opts, expect=200)
+            self.put(custom_inv_src, inv_src_opts, expect=200)
         self.check_inventory_source(custom_group.inventory_source)
-        
+
         # Delete script, verify that update fails.
         inventory_source = InventorySource.objects.get(pk=custom_group.inventory_source.pk)
         self.assertTrue(inventory_source.can_update)
@@ -1883,11 +1879,11 @@ class InventoryUpdatesTest(BaseTransactionTest):
         custom_group = custom_inv.groups.create(name="Unicode Script Group")
         custom_inv_src = reverse('api:inventory_source_detail',
                                  args=(custom_group.inventory_source.pk,))
-        custom_inv_update = reverse('api:inventory_source_update_view',
-                                    args=(custom_group.inventory_source.pk,))
+        reverse('api:inventory_source_update_view',
+                args=(custom_group.inventory_source.pk,))
         inv_src_opts = {'source': 'custom', 'source_script': script_data["id"]}
         with self.current_user(self.super_django_user):
-            response = self.put(custom_inv_src, inv_src_opts, expect=200)
+            self.put(custom_inv_src, inv_src_opts, expect=200)
         self.check_inventory_source(custom_group.inventory_source)
 
         # This shouldn't work because we are trying to use a custom script from one organization with
@@ -1897,8 +1893,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
         other_group = other_inv.groups.create(name='A Different Org Group')
         other_inv_src = reverse('api:inventory_source_detail',
                                 args=(other_group.inventory_source.pk,))
-        other_inv_update = reverse('api:inventory_source_update_view',
-                                   args=(other_group.inventory_source.pk,))
+        reverse('api:inventory_source_update_view',
+                args=(other_group.inventory_source.pk,))
         other_inv_src_opts = {'source': 'custom', 'source_script': script_data['id']}
         with self.current_user(self.super_django_user):
             self.put(other_inv_src, other_inv_src_opts, expect=400)

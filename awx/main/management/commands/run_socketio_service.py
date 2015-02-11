@@ -3,31 +3,22 @@
 
 # Python
 import os
-import datetime
 import logging
-import json
-import signal
-import time
 import urllib
 from optparse import make_option
 from threading import Thread
 
 # Django
 from django.conf import settings
-from django.core.management.base import NoArgsCommand, CommandError
-from django.db import transaction, DatabaseError
-from django.contrib.auth.models import User
-from django.utils.dateparse import parse_datetime
-from django.utils.timezone import now, is_aware, make_aware
-from django.utils.tzinfo import FixedOffset
+from django.core.management.base import NoArgsCommand
+from django.utils.timezone import now
 
 # AWX
 import awx
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.socket import Socket
 
-# gevent & socketio
-import gevent
+# socketio
 from socketio import socketio_manage
 from socketio.server import SocketIOServer
 from socketio.namespace import BaseNamespace
@@ -164,7 +155,6 @@ class Command(NoArgsCommand):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
         socketio_listen_port = settings.SOCKETIO_LISTEN_PORT
-        socketio_notification_port = settings.SOCKETIO_NOTIFICATION_PORT
 
         try:
             if os.path.exists('/etc/tower/tower.cert') and os.path.exists('/etc/tower/tower.key'):
@@ -175,7 +165,6 @@ class Command(NoArgsCommand):
                 print 'Listening on port http://0.0.0.0:' + str(socketio_listen_port)
                 server = SocketIOServer(('0.0.0.0', socketio_listen_port), TowerSocket(), resource='socket.io')
 
-            #gevent.spawn(notification_handler, socketio_notification_port, server)
             handler_thread = Thread(target=notification_handler, args=(server,))
             handler_thread.daemon = True
             handler_thread.start()

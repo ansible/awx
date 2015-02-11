@@ -22,12 +22,10 @@ import yaml
 from django.conf import settings
 from django.core.management.base import NoArgsCommand, CommandError
 from django.db import connection, transaction
-from django.db.models import Q
-from django.contrib.auth.models import User
 
 # AWX
-from awx.main.models import *
-from awx.main.utils import ignore_inventory_computed_fields, check_proot_installed, build_proot_temp_dir, wrap_args_with_proot
+from awx.main.models import * # noqa
+from awx.main.utils import ignore_inventory_computed_fields, check_proot_installed, wrap_args_with_proot
 from awx.main.signals import disable_activity_stream
 from awx.main.task_engine import TaskSerializer as LicenseReader
 

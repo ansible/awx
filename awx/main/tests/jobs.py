@@ -13,12 +13,9 @@ import uuid
 
 # Django
 import django.test
-from django.contrib.auth.models import User as DjangoUser
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.db.models import Q
-from django.test.client import Client
 from django.test.utils import override_settings
 from django.utils.encoding import smart_str
 
@@ -26,7 +23,7 @@ from django.utils.encoding import smart_str
 import requests
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTestMixin
 
 __all__ = ['JobTemplateTest', 'JobTest', 'JobStartCancelTest',
@@ -721,27 +718,27 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
         # Sue's credentials (superuser) == 200, full list
         self.check_get_list(url, self.user_sue, qs, fields)
-        
+
         # Alex's credentials (admin of all orgs) == 200, full list
         self.check_get_list(url, self.user_alex, qs, fields)
 
         # Bob's credentials (admin of eng, user of ops) == 200, all from
         # engineering and operations.
-        bob_qs = qs.filter(
+        qs.filter(
             Q(project__organizations__admins__in=[self.user_bob]) |
             Q(project__teams__users__in=[self.user_bob]),
         )
         #self.check_get_list(url, self.user_bob, bob_qs, fields)
 
         # Chuck's credentials (admin of eng) == 200, all from engineering.
-        chuck_qs = qs.filter(
+        qs.filter(
             Q(project__organizations__admins__in=[self.user_chuck]) |
             Q(project__teams__users__in=[self.user_chuck]),
         )
         #self.check_get_list(url, self.user_chuck, chuck_qs, fields)
 
         # Doug's credentials (user of eng) == 200, none?.
-        doug_qs = qs.filter(
+        qs.filter(
             Q(project__organizations__admins__in=[self.user_doug]) |
             Q(project__teams__users__in=[self.user_doug]),
         )
@@ -898,9 +895,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         with self.current_user(self.user_sue):
             data = self.get(url)
             data['name'] = '%s-updated' % data['name']
-            response = self.put(url, data)
-            #patch_data = dict(name='%s-changed' % data['name'])
-            #response = self.patch(url, patch_data)
+            self.put(url, data)
 
         # FIXME: Check other credentials and optional fields.
 
@@ -934,7 +929,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
         # sue can create a new job from the template.
         with self.current_user(self.user_sue):
-            response = self.post(url, data, expect=201)
+            self.post(url, data, expect=201)
 
         # FIXME: Check other credentials and optional fields.
 
@@ -1155,11 +1150,11 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
 
         # sue can create a new job without a template.
         with self.current_user(self.user_sue):
-            response = self.post(url, data, expect=201)
+            self.post(url, data, expect=201)
 
         # alex can't create a job without a template, only super users can do that
         with self.current_user(self.user_alex):
-            response = self.post(url, data, expect=403)
+            self.post(url, data, expect=403)
 
         # sue can also create a job here from a template.
         jt = self.jt_ops_east_run
@@ -1168,7 +1163,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
             job_template=jt.pk,
         )
         with self.current_user(self.user_sue):
-            response = self.post(url, data, expect=201)
+            self.post(url, data, expect=201)
 
         # sue can't create a job when it is hidden due to inactive team
 
@@ -1207,9 +1202,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         with self.current_user(self.user_sue):
             data = self.get(url)
             data['limit'] = '%s-updated' % data['limit']
-            response = self.put(url, data)
-            #patch_data = dict(limit='%s-changed' % data['limit'])
-            #response = self.patch(url, patch_data)
+            self.put(url, data)
 
         # sue cannot update the job detail if it is in any other state.
         for status in ('pending', 'running', 'successful', 'failed', 'error',

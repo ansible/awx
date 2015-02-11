@@ -20,9 +20,8 @@ from django.utils.timezone import now
 from crum import impersonate
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.tests.base import BaseLiveServerTest
-from awx.main.tasks import RunJob
 
 TEST_PLAYBOOK = u'''
 - name: test success
@@ -724,7 +723,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_update_has_active_failures_when_inventory_changes(self):
-        job = self.test_run_job_that_fails()
+        self.test_run_job_that_fails()
         # Add host to new group (should set has_active_failures)
         new_group = self.inventory.groups.create(name='new group')
         self.assertFalse(new_group.has_active_failures)
@@ -1363,7 +1362,7 @@ class RunJobTest(BaseCeleryTest):
         try:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
-            result = proc.communicate()
+            proc.communicate()
             has_proot = bool(proc.returncode == 0)
         except (OSError, ValueError):
             has_proot = False

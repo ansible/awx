@@ -3,19 +3,16 @@
 
 # Python
 import datetime
-import json
 import urllib
 
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.db.models import Q
-import django.test
-from django.test.client import Client
 from django.core.urlresolvers import reverse
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest
 
 __all__ = ['AuthTokenProxyTest', 'UsersTest', 'LdapTest']
@@ -95,7 +92,7 @@ class AuthTokenProxyTest(BaseTest):
 
         # Verify we can access our own user information, from the remote address specified via HTTP_X_FORWARDED_FOR
         client_kwargs = {'HTTP_X_FORWARDED_FOR': remote_addr_diff}
-        response = self._get_me(expect=401, auth=auth_token, remote_addr=remote_addr, client_kwargs=client_kwargs)
+        self._get_me(expect=401, auth=auth_token, remote_addr=remote_addr, client_kwargs=client_kwargs)
         self._get_me(expect=401, auth=auth_token, remote_addr=remote_addr_diff)
 
     # should use ip address from other headers when HTTP_X_FORARDED_FOR is blank
@@ -142,7 +139,6 @@ class UsersTest(BaseTest):
     def test_only_super_user_can_use_superuser_flag(self):
         url = reverse('api:user_list')
         new_super_user = dict(username='nommy', is_superuser=True)
-        patch_new_super_user = dict(is_superuser=True)
         self.post(url, expect=401, data=new_super_user, auth=self.get_invalid_credentials())
         self.post(url, expect=403, data=new_super_user, auth=self.get_other_credentials())
         self.post(url, expect=403, data=new_super_user, auth=self.get_normal_credentials())
@@ -274,7 +270,7 @@ class UsersTest(BaseTest):
 
         # if superuser, CAN change lastname and username and such
         self.put(detail_url, data, expect=200, auth=self.get_super_credentials())
-        
+
         # and user can still login
         creds = self.get_other_credentials()
         creds = ('newUsername', creds[1])
@@ -284,18 +280,18 @@ class UsersTest(BaseTest):
         # and password is not stored as plaintext
 
         data['password'] = 'newPassWord1234Changed'
-        changed = self.put(detail_url, data, expect=200, auth=creds)
+        self.put(detail_url, data, expect=200, auth=creds)
         creds = (creds[0], data['password'])
         self.get(detail_url, expect=200, auth=creds)
-       
+
         # make another nobody user, and make sure they can't send any edits
         obj = User.objects.create(username='new_user')
         obj.set_password('new_user')
         obj.save()
         hacked = dict(password='asdf')
-        changed = self.put(detail_url, hacked, expect=403, auth=('new_user', 'new_user'))
+        self.put(detail_url, hacked, expect=403, auth=('new_user', 'new_user'))
         hacked = dict(username='asdf')
-        changed = self.put(detail_url, hacked, expect=403, auth=('new_user', 'new_user'))
+        self.put(detail_url, hacked, expect=403, auth=('new_user', 'new_user'))
 
         # password is not stored in plaintext
         self.assertTrue(User.objects.get(pk=self.normal_django_user.pk).password != data['password'])
@@ -311,10 +307,10 @@ class UsersTest(BaseTest):
         # verify that the login works...
         self.get(url, expect=200, auth=('username', 'password'))
 
-        # but a regular user cannot        
+        # but a regular user cannot
         data = self.post(url, expect=403, data=data2, auth=self.get_other_credentials())
-        
-        # a super user can also create new users   
+
+        # a super user can also create new users
         data = self.post(url, expect=201, data=data2, auth=self.get_super_credentials())
 
         # verify that the login works
@@ -325,7 +321,7 @@ class UsersTest(BaseTest):
         data = self.post(url, expect=201, data=mod, auth=self.get_super_credentials())
         orig = User.objects.get(pk=self.super_django_user.pk)
         self.assertTrue(orig.username != 'change')
- 
+
     def test_password_not_shown_in_get_operations_for_list_or_detail(self):
         url = reverse('api:user_detail', args=(self.super_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_super_credentials())
@@ -360,8 +356,8 @@ class UsersTest(BaseTest):
     def test_super_user_can_delete_a_user_but_only_marked_inactive(self):
         user_pk = self.normal_django_user.pk
         url = reverse('api:user_detail', args=(user_pk,))
-        data = self.delete(url, expect=204, auth=self.get_super_credentials())
-        data = self.get(url, expect=404, auth=self.get_super_credentials())
+        self.delete(url, expect=204, auth=self.get_super_credentials())
+        self.get(url, expect=404, auth=self.get_super_credentials())
         obj = User.objects.get(pk=user_pk)
         self.assertEquals(obj.is_active, False)
  
@@ -369,9 +365,9 @@ class UsersTest(BaseTest):
         url1 = reverse('api:user_detail', args=(self.super_django_user.pk,))
         url2 = reverse('api:user_detail', args=(self.normal_django_user.pk,))
         url3 = reverse('api:user_detail', args=(self.other_django_user.pk,))
-        data = self.delete(url1, expect=403, auth=self.get_other_credentials())
-        data = self.delete(url2, expect=403, auth=self.get_other_credentials())
-        data = self.delete(url3, expect=403, auth=self.get_other_credentials())
+        self.delete(url1, expect=403, auth=self.get_other_credentials())
+        self.delete(url2, expect=403, auth=self.get_other_credentials())
+        self.delete(url3, expect=403, auth=self.get_other_credentials())
 
     def test_there_exists_an_obvious_url_where_a_user_may_find_his_user_record(self):
         url = reverse('api:user_me_list')
@@ -393,8 +389,8 @@ class UsersTest(BaseTest):
         data['username'] += '2'
         data['first_name'] += ' Awesome'
         data['last_name'] += ', Jr.'
-        response = self.put(url, data, expect=200,
-                            auth=self.get_super_credentials())
+        self.put(url, data, expect=200,
+                 auth=self.get_super_credentials())
         # FIXME: Test if super user mark himself as no longer a super user, or
         # delete himself.
 

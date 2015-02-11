@@ -12,8 +12,6 @@ import tempfile
 import time
 import urlparse
 import unittest
-if not hasattr(unittest, 'skipIf'):
-    import unittest2 as unittest
 
 # Django
 import django
@@ -25,8 +23,11 @@ from django.utils.timezone import now
 from django.test.utils import override_settings
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest, BaseLiveServerTest
+
+if not hasattr(unittest, 'skipIf'):
+    import unittest2 as unittest
 
 __all__ = ['DumpDataTest', 'CleanupDeletedTest', 'CleanupJobsTest',
            'InventoryImportTest']
@@ -186,7 +187,7 @@ class DumpDataTest(BaseCommandMixin, BaseTest):
     def test_dumpdata(self):
         result, stdout, stderr = self.run_command('dumpdata')
         self.assertEqual(result, None)
-        data = json.loads(stdout)
+        json.loads(stdout)
 
 class CleanupDeletedTest(BaseCommandMixin, BaseTest):
     '''

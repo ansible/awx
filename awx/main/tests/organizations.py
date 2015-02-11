@@ -1,14 +1,8 @@
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-import datetime
-import json
-
-from django.contrib.auth.models import User as DjangoUser
 from django.core.urlresolvers import reverse
-import django.test
-from django.test.client import Client
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTest
 
 class OrganizationsTest(BaseTest):
@@ -129,31 +123,31 @@ class OrganizationsTest(BaseTest):
 
         # first get all the orgs
         orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
-        
+
         # find projects attached to the first org
         projects0_url = orgs['results'][0]['related']['projects']
         projects1_url = orgs['results'][1]['related']['projects']
         projects9_url = orgs['results'][9]['related']['projects']
-       
+
         self.get(projects0_url, expect=401, auth=None)
         self.get(projects0_url, expect=401, auth=self.get_invalid_credentials())
-   
+
         # normal user is just a member of the first org, so can see all projects under the org
-        projects0a = self.get(projects0_url, expect=200, auth=self.get_normal_credentials())
+        self.get(projects0_url, expect=200, auth=self.get_normal_credentials())
 
         # however in the second org, he's an admin and should see all of them
         projects1a = self.get(projects1_url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(projects1a['count'], 5)
 
         # but the non-admin cannot access the list of projects in the org.  He should use /projects/ instead!
-        projects1b = self.get(projects1_url, expect=200, auth=self.get_other_credentials())
- 
+        self.get(projects1_url, expect=200, auth=self.get_other_credentials())
+
         # superuser should be able to read anything
         projects9a = self.get(projects9_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(projects9a['count'], 1)
 
         # nobody user is not a member of any org, so can't see projects...
-        projects0a = self.get(projects0_url, expect=403, auth=self.get_nobody_credentials())
+        self.get(projects0_url, expect=403, auth=self.get_nobody_credentials())
         projects1a = self.get(projects1_url, expect=403, auth=self.get_nobody_credentials())
 
     def test_get_item_subobjects_users(self):
@@ -220,7 +214,7 @@ class OrganizationsTest(BaseTest):
         data1 = self.post(self.collection(), new_org, expect=201, auth=self.get_super_credentials())
 
         # duplicate post results in 400
-        data2 = self.post(self.collection(), new_org, expect=400, auth=self.get_super_credentials())
+        self.post(self.collection(), new_org, expect=400, auth=self.get_super_credentials())
 
         # look at what we got back from the post, make sure we added an org
         last_org = Organization.objects.order_by('-pk')[0]
@@ -295,7 +289,7 @@ class OrganizationsTest(BaseTest):
         new_user = dict(username='NewUser9000')
         which_org = self.normal_django_user.admin_of_organizations.all()[0]
         url = reverse('api:organization_users_list', args=(which_org.pk,))
-        posted = self.post(url, new_user, expect=201, auth=self.get_normal_credentials())
+        self.post(url, new_user, expect=201, auth=self.get_normal_credentials())
 
         all_users = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(all_users['count'], 3)
@@ -337,7 +331,7 @@ class OrganizationsTest(BaseTest):
 
         # first get some urls and data to put back to them
         urls = self.get_urls(self.collection(), auth=self.get_super_credentials())
-        data0 = self.get(urls[0], expect=200, auth=self.get_super_credentials())
+        self.get(urls[0], expect=200, auth=self.get_super_credentials())
         data1 = self.get(urls[1], expect=200, auth=self.get_super_credentials())
 
         # test that an unauthenticated user cannot do a put
@@ -346,9 +340,9 @@ class OrganizationsTest(BaseTest):
         self.put(urls[0], new_data1, expect=401, auth=None)
         self.put(urls[0], new_data1, expect=401, auth=self.get_invalid_credentials())
 
-        # user normal is an admin of org 0 and a member of org 1 so should be able to put only org 1        
+        # user normal is an admin of org 0 and a member of org 1 so should be able to put only org 1
         self.put(urls[0], new_data1, expect=403, auth=self.get_normal_credentials())
-        put_result = self.put(urls[1], new_data1, expect=200, auth=self.get_normal_credentials())
+        self.put(urls[1], new_data1, expect=200, auth=self.get_normal_credentials())
 
         # get back org 1 and see if it changed
         get_result = self.get(urls[1], expect=200, auth=self.get_normal_credentials())

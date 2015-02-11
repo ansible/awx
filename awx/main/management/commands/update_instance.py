@@ -1,16 +1,14 @@
 # Copyright (c) 2014 Ansible, Inc.
 # All Rights Reserved
 
-from optparse import make_option
-
-from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import CommandError
 from django.db import transaction
 
 from awx.main.management.commands._base_instance import BaseCommandInstance
-instance_str = BaseCommandInstance.instance_str
 
 from awx.main.models import Instance
+
+instance_str = BaseCommandInstance.instance_str
 
 class Command(BaseCommandInstance):
     """Set an already registered instance to primary or secondary for HA 
@@ -38,7 +36,6 @@ class Command(BaseCommandInstance):
         # Is there an existing record for this machine? If so, retrieve that record and look for issues.
         try:
             instance = Instance.objects.get(**self.get_unique_fields())
-            existing = True
         except Instance.DoesNotExist:
             raise CommandError('No matching instance found to update.')
 

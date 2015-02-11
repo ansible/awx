@@ -5,26 +5,19 @@
 import os
 import datetime
 import logging
-import json
 import signal
 import time
-from optparse import make_option
-from multiprocessing import Process
 
 # Django
 from django.conf import settings
-from django.core.management.base import NoArgsCommand, CommandError
-from django.db import transaction, DatabaseError
-from django.contrib.auth.models import User
-from django.utils.dateparse import parse_datetime
-from django.utils.timezone import now, is_aware, make_aware
-from django.utils.tzinfo import FixedOffset
+from django.core.management.base import NoArgsCommand
+from django.utils.timezone import now
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.queue import FifoQueue
 from awx.main.tasks import handle_work_error
-from awx.main.utils import get_system_task_capacity, decrypt_field
+from awx.main.utils import get_system_task_capacity
 
 # Celery
 from celery.task.control import inspect
@@ -260,9 +253,9 @@ def process_graph(graph, task_capacity):
     print_log("Ready Nodes: %s" % str(ready_nodes))
     for task_node in ready_nodes:
         node_obj = task_node['node_object']
-        node_args = task_node['metadata']
+        # NOTE: This could be used to pass metadata through the task system
+        # node_args = task_node['metadata']
         impact = node_obj.task_impact
-        node_is_job = graph.get_node_type(node_obj) == 'job'
         if impact <= remaining_volume or running_impact == 0:
             node_dependencies = graph.get_dependents(node_obj)
             # Allow other tasks to continue if a job fails, even if they are

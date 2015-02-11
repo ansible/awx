@@ -9,9 +9,7 @@ from optparse import make_option
 # Django
 from django.core.management.base import NoArgsCommand, CommandError
 from django.db import transaction
-from django.contrib.auth.models import User
-from django.utils.dateparse import parse_datetime
-from django.utils.timezone import now, is_aware, make_aware
+from django.utils.timezone import now
 
 # AWX
 from awx.main.models import Job, ProjectUpdate, InventoryUpdate, SystemJob
@@ -131,7 +129,7 @@ class Command(NoArgsCommand):
         self.dry_run = bool(options.get('dry_run', False))
         try:
             self.cutoff = now() - datetime.timedelta(days=self.days)
-        except OverflowError as e:
+        except OverflowError:
             raise CommandError('--days specified is too large. Try something less than 99999 (about 270 years).')
         self.only_jobs = bool(options.get('only_jobs', False))
         self.only_project_updates = bool(options.get('only_project_updates', False))

@@ -6,25 +6,21 @@ import os
 import sys
 import datetime
 import logging
-import json
 import signal
 import time
-from contextlib import closing
-from optparse import make_option
 from multiprocessing import Process, Queue
 
 # Django
 from django.conf import settings
-from django.core.management.base import NoArgsCommand, CommandError
+from django.core.management.base import NoArgsCommand
 from django.db import transaction, DatabaseError
-from django.contrib.auth.models import User
 from django.utils.dateparse import parse_datetime
-from django.utils.timezone import now, is_aware, make_aware
+from django.utils.timezone import now
 from django.utils.tzinfo import FixedOffset
 from django.db import connection 
 
 # AWX
-from awx.main.models import *
+from awx.main.models import * # noqa
 from awx.main.socket import Socket
 
 MAX_REQUESTS = 10000
@@ -46,7 +42,8 @@ class CallbackReceiver(object):
                         active_worker.terminate()
                     signal.signal(signum, signal.SIG_DFL)
                     os.kill(os.getpid(), signum) # Rethrow signal, this time without catching it
-                except Exception, e:
+                except Exception:
+                    # TODO: LOG
                     pass
             return _handler
 
@@ -99,7 +96,6 @@ class CallbackReceiver(object):
             time.sleep(0.1)
 
     def callback_handler(self, use_workers, worker_queues):
-        message_number = 0
         total_messages = 0
         last_parent_events = {}
 

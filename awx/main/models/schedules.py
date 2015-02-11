@@ -15,7 +15,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from jsonfield import JSONField
 
 # AWX
-from awx.main.models.base import *
+from awx.main.models.base import * # noqa
 from awx.main.utils import ignore_inventory_computed_fields, emit_websocket_notification
 from django.core.urlresolvers import reverse
 

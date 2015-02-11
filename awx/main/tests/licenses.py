@@ -1,17 +1,11 @@
 # Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-import datetime
 import json
 
-from django.conf import settings
-from django.contrib.auth.models import User as DjangoUser
-import django.test
-from django.test.client import Client
-from django.core.urlresolvers import reverse
 from awx.main.models import Host, Inventory, Organization
 from awx.main.tests.base import BaseTest
-from awx.main.task_engine import *
+from awx.main.task_engine import * # noqa
 
 class LicenseTests(BaseTest):
 
@@ -23,18 +17,18 @@ class LicenseTests(BaseTest):
         u = self.super_django_user
         org = Organization.objects.create(name='o1', created_by=u)
         inventory = Inventory.objects.create(name='hi', organization=org, created_by=u)
-        host = Host.objects.create(name='a1', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a2', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a3', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a4', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a5', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a6', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a7', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a8', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a9', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a10', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a11', inventory=inventory, created_by=u)
-        host = Host.objects.create(name='a12', inventory=inventory, created_by=u)
+        Host.objects.create(name='a1', inventory=inventory, created_by=u)
+        Host.objects.create(name='a2', inventory=inventory, created_by=u)
+        Host.objects.create(name='a3', inventory=inventory, created_by=u)
+        Host.objects.create(name='a4', inventory=inventory, created_by=u)
+        Host.objects.create(name='a5', inventory=inventory, created_by=u)
+        Host.objects.create(name='a6', inventory=inventory, created_by=u)
+        Host.objects.create(name='a7', inventory=inventory, created_by=u)
+        Host.objects.create(name='a8', inventory=inventory, created_by=u)
+        Host.objects.create(name='a9', inventory=inventory, created_by=u)
+        Host.objects.create(name='a10', inventory=inventory, created_by=u)
+        Host.objects.create(name='a11', inventory=inventory, created_by=u)
+        Host.objects.create(name='a12', inventory=inventory, created_by=u)
 
     def tearDown(self):
         super(LicenseTests, self).tearDown()
@@ -62,7 +56,7 @@ class LicenseTests(BaseTest):
         assert strdata_loaded == data
 
         reader = TaskSerializer()
-        
+
         vdata = reader.from_string(strdata)
 
         assert vdata['available_instances'] == 500
