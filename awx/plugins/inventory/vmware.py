@@ -192,7 +192,6 @@ class VMwareInventory(object):
         '''
         host_info = {
             'name': host.name,
-            'tag': host.tag,
         }
         for attr in ('datastore', 'network', 'vm'):
             try:
@@ -221,7 +220,6 @@ class VMwareInventory(object):
         '''
         vm_info = {
             'name': vm.name,
-            'tag': vm.tag,
         }
         for attr in ('datastore', 'network'):
             try:
@@ -313,10 +311,6 @@ class VMwareInventory(object):
             if not self.guests_only:
                 self._add_host(inv, 'all', host.name)
                 self._add_host(inv, hw_group, host.name)
-                if host.tag: # FIXME: Is this always a string?
-                    host_tag = 'vmware_%s' % host.tag
-                    self._add_host(inv, host_tag, host.name)
-
                 host_info = self._get_host_info(host)
                 if meta_hostvars:
                     inv['_meta']['hostvars'][host.name] = host_info
@@ -326,9 +320,6 @@ class VMwareInventory(object):
             for vm in host.vm:
                 self._add_host(inv, 'all', vm.name)
                 self._add_host(inv, vm_group, vm.name)
-                if vm.tag: # FIXME: Is this always a string?
-                    vm_tag = 'vmware_%s' % vm.tag
-                    self._add_host(inv, vm_tag, vm.name)
                 vm_info = self._get_vm_info(vm)
                 if meta_hostvars:
                     inv['_meta']['hostvars'][vm.name] = vm_info
@@ -359,6 +350,12 @@ class VMwareInventory(object):
                     self._add_child(inv, vm_group, 'guests')
                     self._add_child(inv, 'guests', vm_guestId)
                     self._add_host(inv, vm_guestId, vm.name)
+
+                # Group all VM templates.
+                vm_template = vm_info.get('vmware_template', False)
+                if vm_template:
+                    self._add_child(inv, vm_group, 'templates')
+                    self._add_host(inv, 'templates', vm.name)
 
         self._put_cache(cache_name, inv)
         return inv

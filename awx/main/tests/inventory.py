@@ -1811,7 +1811,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
         # in host variables.
         for host in self.inventory.hosts.all():
             self.assertFalse(host.instance_id, host.instance_id)
-            if host.enabled:
+            if host.enabled and host.variables_dict.get('vmware_ipAddress', ''):
                 self.assertTrue(host.variables_dict.get('ansible_ssh_host', ''))
             # Test a field that should be present for host systems, not VMs.
             self.assertFalse(host.variables_dict.get('vmware_product_name', ''))
