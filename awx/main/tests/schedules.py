@@ -184,7 +184,7 @@ class ScheduleTest(BaseTest):
 
         long_schedule = dict(name='long_schedule', description='going for a long time', enabled=True, rrule=UNTIL_SCHEDULE)
         with self.current_user(self.normal_django_user):
-            self.post(first_url, long_schedule, expect=201)
+            data = self.post(first_url, long_schedule, expect=201)
         self.assertNotEquals(data['dtend'], None)
 
     def test_schedule_filtering(self):
