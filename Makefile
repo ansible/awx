@@ -70,8 +70,7 @@ MOCK_CFG ?=
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm \
-	deb deb-src debian reprepro setup_tarball \
-	node_modules package.json
+	deb deb-src debian reprepro setup_tarball sync_ui
 
 # Remove setup build files
 clean-tar:
@@ -251,11 +250,11 @@ test_coverage:
 coverage_html:
 	coverage html
 
-ui_analysis_report: node_modules
+ui_analysis_report: node_modules Gruntfile.js
 	$(GRUNT) plato:report
 
 # Run UI unit tests
-test_ui: node_modules minjs_ci
+test_ui: node_modules minjs_ci Gruntfile.js
 	$(GRUNT) karma:ci
 
 # Run API unit tests across multiple Python/Django versions with Tox.
@@ -266,39 +265,41 @@ test_tox:
 test_jenkins:
 	$(PYTHON) manage.py jenkins -v2 --enable-coverage --project-apps-tests
 
-Gruntfile.js:
-	cp packaging/grunt/$@ $@
+Gruntfile.js: packaging/grunt/Gruntfile.js
+	cp $< $@
 
-Brocfile.js:
-	cp packaging/grunt/$@ $@
+Brocfile.js: packaging/grunt/Brocfile.js
+	cp $< $@
 
-bower.json:
-	cp packaging/grunt/$@ $@
+bower.json: packaging/grunt/bower.json
+	cp $< $@
 
-package.json:
-	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' packaging/grunt/package.template > $@
+package.json: packaging/grunt/package.template
+	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
 
-sync_ui: node_modules
+sync_ui: node_modules Brocfile.js
 	$(NODE) tools/ui/timepiece.js awx/ui/static/dist
 
 # Update local npm install
-node_modules: Gruntfile.js Brocfile.js bower.json package.json
+node_modules: package.json
 	npm install
+	touch $@
 
-devjs: node_modules clean-ui
+devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 	$(BROCCOLI) build awx/ui/static/dist -- --debug
+
 # Build minified JS/CSS.
-minjs: node_modules clean-ui
+minjs: node_modules clean-ui Brocfile.js
 	$(BROCCOLI) build awx/ui/static/dist -- --silent --no-debug --no-tests --compress
 
-minjs_ci: node_modules clean-ui
+minjs_ci: node_modules clean-ui Brocfile.js
 	$(BROCCOLI) build awx/ui/static/dist -- --no-debug --compress
 
 # Check .js files for errors and lint
-jshint: node_modules
+jshint: node_modules Gruntfile.js
 	$(GRUNT) $@
 
-ngdocs: node_modules
+ngdocs: node_modules Gruntfile.js
 	$(GRUNT) $@
 
 # Build a pip-installable package into dist/ with a timestamped version number.
