@@ -1,0 +1,12 @@
+{
+  "restartable": "rs",
+  "ignore": [
+    ".git",
+    "node_modules/**/node_modules",
+    "awx/ui/static/dist"
+  ],
+  "watch": [
+    "awx/ui/static"
+  ],
+  "ext": "js json less html"
+}
