@@ -312,7 +312,8 @@ export default
                     associated: 'ssh_key_unlock'
                 },
                 "login_method": {
-                    label: "Login Method", // FIXME: Confirm this label is ok?
+                    label: "Privilege Escalation Credentials",
+                    hintText: "If your playbooks use privilege escalation (\"sudo: true\", \"su: true\", etc), you can specify the username to become, and the password to use here.",
                     type: 'radio_group',
                     ngShow: "kind.value == 'ssh'",
                     ngChange: "loginMethodChange()",
@@ -327,7 +328,7 @@ export default
                         label: 'Su',
                         value: 'su'
                     }],
-                    awPopOver: "<p>A credential may optionally provide a sudo username and password or su username and password to use when running a playbook.</p>",
+                    awPopOver: "<p><b>Sudo:</b> Optionally specify a username for sudo operations.  This is equivalent to specifying the <code>ansible-playbook --sudo-user</code> parameter.<br /><b>Su:</b> Optionally specify a username for su operations.  This is equivalent to specifying the <code>ansible-playbook --su-user</code> parameter.",
                     dataPlacement: 'right',
                     dataContainer: "body"
                 },
