@@ -556,7 +556,32 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                                                                                                                     'job_launch_form.'+question.variable+'.$error.maxlength\">Please enter an answer between {{'+minlength+'}} to {{'+maxlength+'}} characters long.</div>'+
                                                                                                                     '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
                                                                                                             }
+                                                                                                            if(question.type === 'password' ){
+                                                                                                                minlength = (!Empty(question.min)) ? Number(question.min) : "";
+                                                                                                                maxlength =(!Empty(question.max)) ? Number(question.max) : "" ;
+                                                                                                                html+='<input type="password" id="'+question.variable+'_password" ng-model="'+question.variable+'" '+
+                                                                                                                    'name=" '+question.variable+' " ' +
+                                                                                                                    'ng-hide="'+question.variable+'_pwcheckbox" ' +
+                                                                                                                    'ng-minlength="'+minlength+'" ng-maxlength="'+maxlength+'" '+
+                                                                                                                    'class="form-control" ng-required='+question.required+'>'+
+                                                                                                                    '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
+                                                                                                                    'job_launch_form.'+question.variable+'.$error.required\">Please enter an answer.</div>'+
+                                                                                                                    '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$error.minlength || ' +
+                                                                                                                    'job_launch_form.'+question.variable+'.$error.maxlength\">Please enter an answer between {{'+minlength+'}} to {{'+maxlength+'}} characters long.</div>'+
+                                                                                                                    '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
+                                                                                                                html+='<input type="text" id="'+question.variable+'_text" ng-model="'+question.variable+'" '+
+                                                                                                                    'name=" '+question.variable+' " ' +
+                                                                                                                    'ng-show="'+question.variable+'_pwcheckbox"'+
+                                                                                                                    'ng-minlength="'+minlength+'" ng-maxlength="'+maxlength+'" '+
+                                                                                                                    'class="form-control" ng-required='+question.required+'>'+
+                                                                                                                    '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$dirty && ' +
+                                                                                                                    'job_launch_form.'+question.variable+'.$error.required\">Please enter an answer.</div>'+
+                                                                                                                    '<div class="error survey_error" ng-show="job_launch_form.'+ question.variable + '.$error.minlength || ' +
+                                                                                                                    'job_launch_form.'+question.variable+'.$error.maxlength\">Please enter an answer between {{'+minlength+'}} to {{'+maxlength+'}} characters long.</div>'+
+                                                                                                                    '<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>';
+                                                                                                                html+= '<label style="font-weight:normal"><input type="checkbox" ng-model="'+question.variable+'_pwcheckbox" name="pwcheckbox" id="'+question.variable+'_pwcheckbox" ng-checked="false"> <span>Show Password</span></label>';
 
+                                                                                                            }
                                                                                                             if(question.type === 'multiplechoice'){
                                                                                                                 choices = question.choices.split(/\n/);
                                                                                                                 element = (question.type==="multiselect") ? "checkbox" : 'radio';
