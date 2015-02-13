@@ -887,9 +887,50 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     data.required = scope.required;
                     data.type = scope.type.type;
                     data.variable = scope.variable;
-                    data.min = (scope.type.type === 'text') ? scope.text_min : (scope.type.type === 'textarea') ? scope.textarea_min : (scope.type.type === 'password') ? scope.password_min : (scope.type.type === "float") ? scope.float_min : (scope.type.type==="integer") ? scope.int_min  : "" ;
-                    data.max = (scope.type.type === 'text') ? scope.text_max : (scope.type.type === 'textarea') ? scope.textarea_max : (scope.type.type === 'password') ? scope.password_max : (scope.type.type === "float") ? scope.float_max : (scope.type.type==="integer") ? scope.int_max : "" ;
-                    data.default = (scope.type.type === 'textarea') ? scope.default_textarea : (scope.type.type === "float") ? scope.default_float : (scope.type.type==="integer") ? scope.default_int : (scope.type.type === "multiselect") ? scope.default_multiselect : (scope.type.type === "password") ? scope.default_password : (scope.default) ? scope.default : "" ;
+                    //set the data.min depending on which type of question
+                    if (scope.type.type === 'text') {
+                        data.min = scope.text_min;
+                    } else if (scope.type.type === 'textarea') {
+                        data.min = scope.textarea_min;
+                    } else if (scopt.type.type === 'password') {
+                        data.min = scope.password_min;
+                    } else if (scope.type.type === 'float') {
+                        data.min = scope.float_min;
+                    } else if (scope.type.type === 'integer') {
+                        data.min = scope.int_min;
+                    } else {
+                        data.min = "";
+                    }
+                    // set hte data max depending on which type
+                    if (scope.type.type === 'text') {
+                        data.max = scope.text_max;
+                    } else if (scope.type.type === 'textarea') {
+                        data.max = scope.textarea_max;
+                    } else if (scopt.type.type === 'password') {
+                        data.max = scope.password_max;
+                    } else if (scope.type.type === 'float') {
+                        data.max = scope.float_max;
+                    } else if (scope.type.type === 'integer') {
+                        data.max = scope.int_max;
+                    } else {
+                        data.max = "";
+                    }
+
+                    //set the data.default depending on which type
+                    if (scope.type.type === 'default') {
+                        data.default = scope.default;
+                    } else if (scope.type.type === 'textarea') {
+                        data.default = scope.default_textarea;
+                    } else if (scopt.type.type === 'password') {
+                        data.default = scope.default_password;
+                    } else if (scopt.type.type === 'multiselect') {
+                          data.default = scope.default_multiselect;
+                    } else if (scope.type.type === 'float') {
+                        data.default = scope.default_float;
+                    } else if (scope.type.type === 'integer') {
+                        data.default = scope.default_int;
+                    } else {
+                        data.default = "";
                     data.choices = (scope.type.type === "multiplechoice") ? scope.choices : (scope.type.type === 'multiselect') ? scope.choices : "" ;
 
                     Wait('stop');
