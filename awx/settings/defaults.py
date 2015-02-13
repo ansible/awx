@@ -554,11 +554,38 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
         },
-        'rotating_file': {
+        'tower_warnings': {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(BASE_DIR, 'tower_warnings.log'),
+            'maxBytes': 1024*1024*5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
+        'callback_receiver': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(BASE_DIR, 'callback_receiver.log'),
+            'maxBytes': 1024*1024*5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
+        'socketio_service': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(BASE_DIR, 'socketio_service.log'),
+            'maxBytes': 1024*1024*5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
+        'task_system': {
+            'level': 'INFO',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(BASE_DIR, 'task_system.log'),
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
@@ -569,12 +596,12 @@ LOGGING = {
             'handlers': ['console'],
         },
         'django.request': {
-            'handlers': ['mail_admins', 'console', 'file', 'syslog', 'rotating_file'],
+            'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
             'level': 'WARNING',
             'propagate': False,
         },
         'rest_framework.request': {
-            'handlers': ['mail_admins', 'console', 'file', 'syslog', 'rotating_file'],
+            'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
             'level': 'WARNING',
             'propagate': False,
         },
@@ -582,8 +609,20 @@ LOGGING = {
             'handlers': ['console'],
         },
         'awx': {
-            'handlers': ['console', 'file', 'syslog', 'rotating_file'],
+            'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'DEBUG',
+        },
+        'awx.main.commands.run_callback_receiver': {
+            'handlers': ['console', 'file', 'callback_receiver'],
+            'propagate': False
+        },
+        'awx.main.commands.run_socketio_service': {
+            'handlers': ['console', 'file', 'socketio_service'],
+            'propagate': False
+        },
+        'awx.main.commands.run_task_system': {
+            'handlers': ['console', 'file', 'task_system'],
+            'propagate': False
         },
         'awx.main.access': {
             'handlers': ['null'],

@@ -11,7 +11,7 @@ awx/ui/static/js/awx.min.js
 awx/ui/static/js/local_config.js
 awx/ui/static/css/awx.min.css
 awx/main/fixtures
-awx/tower_warnings.log
+awx/*.log
 tower/tower_warnings.log
 celerybeat-schedule
 awx/ui/static/docs

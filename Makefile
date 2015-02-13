@@ -208,6 +208,7 @@ server_noattach:
 server: server_noattach
 	tmux -2 attach-session -t tower
 
+# Use with iterm2's native tmux protocol support
 servercc: server_noattach
 	tmux -2 -CC attach-session -t tower
 
