@@ -142,6 +142,27 @@ export default
                 editRequired: true,
                 column: 2
             },
+            password_options: {
+                realName: 'answer_options',
+                type: 'custom',
+                control:'<div class="row">'+
+                                '<div class="col-xs-6">'+
+                                    '<label for="password_min"><span class="label-text">Minimum Length</span></label><input id="password_min" type="number" name="password_min" ng-model="password_min" min=0 aw-min="0" aw-max="password_max" class="form-control" integer />'+
+                                    '<div class="error" ng-show="survey_question_form.password_min.$error.number">The minimum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.password_min.$error.awMax">The minimium length is too high.  Please enter a lower number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.password_min.$error.awMin">The minimum length is too low.  Please enter a positive number.</div>'+
+                                '</div>'+
+                                '<div class="col-xs-6">'+
+                                    '<label for="password_max"><span class="label-text">Maximum Length</span></label><input id="password_max" type="number" name="password_max" ng-model="password_max" aw-min="password_min || 0" min=0 class="form-control" integer >'+
+                                    '<div class="error" ng-show="survey_question_form.password_max.$error.number">The maximum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.password_max.$error.awMin">The maximum length is too low.  Please enter a number larger than the minimum length you set.</div>'+
+                                '</div>'+
+                            '</div>',
+                ngShow: 'type.type==="password" ',
+                addRequired: true,
+                editRequired: true,
+                column: 2
+            },
             int_options: {
                 realName: 'answer_options',
                 type: 'custom',
@@ -189,7 +210,7 @@ export default
                 control: '<div class="form-group" >'+
                     '<label for="default"><span class="label-text">Default Answer</span></label>'+
                     '<div>'+
-                    '<input type="text" ng-model="default" name="default" id="default" class="form-control ng-valid ng-dirty">'+
+                    '<input type="text" ng-model="default" name="default" id="default" class="form-control">'+
                     '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="invalidChoice">Please enter an answer for the choices listed.</div>' +
                     '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
                     '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
@@ -197,7 +218,7 @@ export default
                     '</div>'+
                     '</div>',
                 column: 2,
-                ngHide: 'type.type === "textarea" || type.type === "multiselect" || type.type === "integer" || type.type === "float" '
+                ngShow: 'type.type === "text" || type.type === "multiplechoice" '
             },
             default_multiselect: {
                 realName: 'default_answer' ,
@@ -243,7 +264,7 @@ export default
                 control: '<div class="form-group">'+
                     '<label for="default_textarea"><span class="label-text">Default Answer</span></label>'+
                     '<div>'+
-                    '<textarea rows="3" ng-model="default_textarea" name="default_textarea" class="form-control ng-valid ng-dirty" id="default_textarea" aw-watch=""></textarea>'+
+                    '<textarea rows="3" ng-model="default_textarea" name="default_textarea" class="form-control ng-valid ng-dirty" id="default_textarea"></textarea>'+
                     '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
                     '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
                     '<div class="error api-error ng-binding" id="survey_question-default_textarea-api-error" ng-bind="default_textarea_api_error"></div>'+
@@ -251,6 +272,23 @@ export default
                     '</div>',
                     column : 2,
                     ngShow: 'type.type === "textarea" '
+            },
+            default_password: {
+                realName: 'default_answer' ,
+                type: 'custom' ,
+                control: '<div class="form-group" >'+
+                    '<label for="default"><span class="label-text">Default Password</span></label>'+
+                    '<div>'+
+                    '<input type="password" ng-model="default_password" name="default_password" id="default_password" class="form-control" ng-hide="pwcheckbox">'+
+                    '<input type="text" ng-model="default_password" name="default_password" id="default_password" class="form-control" ng-show="pwcheckbox">'+
+                    '<label style="font-weight:normal"><input type="checkbox" ng-model="pwcheckbox" name="pwcheckbox" id="survey_question_pwcheckbox" ng-checked="false"> <span>Show Password</span></label>'+
+                    '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
+                    '<div class="error ng-hide" id=survey_question-default-password-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
+                    '<div class="error api-error ng-binding" id="survey_question-default-password-api-error" ng-bind="default_api_error"></div>'+
+                    '</div>'+
+                    '</div>',
+                column: 2,
+                ngShow: 'type.type === "password" '
             },
             required: {
                 realName: 'required_answer',

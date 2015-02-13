@@ -473,7 +473,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                           relatedSets = {},
                           buttons, url, form_scope;
 
-                          var form_scope =
+                          form_scope =
                           generator.inject(HostForm, { mode: 'edit', id: 'host-modal-dialog', breadCrumbs: false, related: false, scope: scope });
                           generator.reset();
 
@@ -1307,4 +1307,3 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                                                                                                                                       }
                                                                                                                                   };
                                                                                                                               }]);
-
