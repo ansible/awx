@@ -93,6 +93,9 @@ PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
 # directory should not be web-accessible
 JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_output')
 
+# Absolute filesystem path to the directory to store logs
+LOG_ROOT = os.path.join(BASE_DIR)
+
 # The heartbeat file for the tower scheduler
 SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
 
@@ -558,7 +561,7 @@ LOGGING = {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
-            'filename': os.path.join(BASE_DIR, 'tower_warnings.log'),
+            'filename': os.path.join(LOG_ROOT, 'tower_warnings.log'),
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
@@ -567,7 +570,7 @@ LOGGING = {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
-            'filename': os.path.join(BASE_DIR, 'callback_receiver.log'),
+            'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
@@ -576,7 +579,7 @@ LOGGING = {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
-            'filename': os.path.join(BASE_DIR, 'socketio_service.log'),
+            'filename': os.path.join(LOG_ROOT, 'socketio_service.log'),
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
@@ -585,7 +588,7 @@ LOGGING = {
             'level': 'INFO',
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
-            'filename': os.path.join(BASE_DIR, 'task_system.log'),
+            'filename': os.path.join(LOG_ROOT, 'task_system.log'),
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',

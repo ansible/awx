@@ -44,11 +44,42 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 # The heartbeat file for the tower scheduler
 SCHEDULE_METADATA_LOCATION = '/var/lib/awx/.tower_cycle'
 
-LOGGING['handlers']['rotating_file'] = {
+LOGGING['handlers']['tower_warnings'] = {
     'level': 'WARNING',
     'class':'logging.handlers.RotatingFileHandler',
     'filters': ['require_debug_false'],
     'filename': '/var/log/tower/tower_warnings.log',
+    'maxBytes': 1024*1024*5, # 5 MB
+    'backupCount': 5,
+    'formatter':'simple',
+}
+
+
+LOGGING['handlers']['callback_receiver'] = {
+    'level': 'WARNING',
+    'class':'logging.handlers.RotatingFileHandler',
+    'filters': ['require_debug_false'],
+    'filename': '/var/log/tower/callback_receiver.log',
+    'maxBytes': 1024*1024*5, # 5 MB
+    'backupCount': 5,
+    'formatter':'simple',
+}
+
+LOGGING['handlers']['socketio_service'] = {
+    'level': 'WARNING',
+    'class':'logging.handlers.RotatingFileHandler',
+    'filters': ['require_debug_false'],
+    'filename': '/var/log/tower/socketio_service.log',
+    'maxBytes': 1024*1024*5, # 5 MB
+    'backupCount': 5,
+    'formatter':'simple',
+}
+
+LOGGING['handlers']['task_system'] = {
+    'level': 'INFO',
+    'class':'logging.handlers.RotatingFileHandler',
+    'filters': ['require_debug_false'],
+    'filename': '/var/log/tower/task_system.log',
     'maxBytes': 1024*1024*5, # 5 MB
     'backupCount': 5,
     'formatter':'simple',
