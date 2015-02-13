@@ -887,6 +887,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                     data.required = scope.required;
                     data.type = scope.type.type;
                     data.variable = scope.variable;
+
                     //set the data.min depending on which type of question
                     if (scope.type.type === 'text') {
                         data.min = scope.text_min;
@@ -931,6 +932,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         data.default = scope.default_int;
                     } else {
                         data.default = "";
+                    }
                     data.choices = (scope.type.type === "multiplechoice") ? scope.choices : (scope.type.type === 'multiselect') ? scope.choices : "" ;
 
                     Wait('stop');
