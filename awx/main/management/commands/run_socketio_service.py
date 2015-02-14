@@ -23,8 +23,7 @@ from socketio import socketio_manage
 from socketio.server import SocketIOServer
 from socketio.namespace import BaseNamespace
 
-def print_log(message):
-    print("[%s] %s" % (now().isoformat(), message))
+logger = logging.getLogger('awx.main.commands.run_socketio_service')
 
 valid_sockets = []
 
@@ -45,6 +44,7 @@ class TowerBaseNamespace(BaseNamespace):
                     valid_sockets = valid_sockets[1:]
             return set(['recv_connect'] + self.get_allowed_methods())
         else:
+            logger.warn("Authentication Failure validating user")
             self.emit("connect_failed", "Authentication failed")
         return set(['recv_connect'])
 
@@ -67,6 +67,7 @@ class TowerBaseNamespace(BaseNamespace):
                         else:
                             return False
             except Exception, e:
+                logger.error("Exception validating user: " + str(e))
                 return False
 
     def recv_connect(self):
@@ -76,20 +77,20 @@ class TowerBaseNamespace(BaseNamespace):
 class TestNamespace(TowerBaseNamespace):
 
     def recv_connect(self):
-        print_log("Received client connect for test namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        logger.info("Received client connect for test namespace from %s" % str(self.environ['REMOTE_ADDR']))
         self.emit('test', "If you see this then you attempted to connect to the test socket endpoint")
         super(TestNamespace, self).recv_connect()
 
 class JobNamespace(TowerBaseNamespace):
 
     def recv_connect(self):
-        print_log("Received client connect for job namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        logger.info("Received client connect for job namespace from %s" % str(self.environ['REMOTE_ADDR']))
         super(JobNamespace, self).recv_connect()
 
 class JobEventNamespace(TowerBaseNamespace):
 
     def recv_connect(self):
-        print_log("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        logger.info("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
         super(JobEventNamespace, self).recv_connect()
 
 class ScheduleNamespace(TowerBaseNamespace):
@@ -98,7 +99,7 @@ class ScheduleNamespace(TowerBaseNamespace):
         return ["schedule_changed"]
 
     def recv_connect(self):
-        print_log("Received client connect for schedule namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        logger.info("Received client connect for schedule namespace from %s" % str(self.environ['REMOTE_ADDR']))
         super(ScheduleNamespace, self).recv_connect()
 
 class TowerSocket(object):
@@ -111,6 +112,7 @@ class TowerSocket(object):
                                       '/socket.io/job_events': JobEventNamespace,
                                       '/socket.io/schedules': ScheduleNamespace})
         else:
+            logger.warn("Invalid connect path received: " + path)
             start_response('404 Not Found', [])
             return ['Tower version %s' % awx.__version__]
 
@@ -141,28 +143,16 @@ class Command(NoArgsCommand):
         make_option('--socketio_port', dest='socketio_port', type='int', default=8080,
                     help='Port to accept socketio requests from clients'),)
 
-    def init_logging(self):
-        log_levels = dict(enumerate([logging.ERROR, logging.INFO,
-                                     logging.DEBUG, 0]))
-        self.logger = logging.getLogger('awx.main.commands.run_socketio_service')
-        self.logger.setLevel(log_levels.get(self.verbosity, 0))
-        handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter('%(message)s'))
-        self.logger.addHandler(handler)
-        self.logger.propagate = False
-
     def handle_noargs(self, **options):
-        self.verbosity = int(options.get('verbosity', 1))
-        self.init_logging()
         socketio_listen_port = settings.SOCKETIO_LISTEN_PORT
 
         try:
             if os.path.exists('/etc/tower/tower.cert') and os.path.exists('/etc/tower/tower.key'):
-                print 'Listening on port https://0.0.0.0:' + str(socketio_listen_port)
+                logger.info('Listening on port https://0.0.0.0:' + str(socketio_listen_port))
                 server = SocketIOServer(('0.0.0.0', socketio_listen_port), TowerSocket(), resource='socket.io',
                                         keyfile='/etc/tower/tower.key', certfile='/etc/tower/tower.cert')
             else:
-                print 'Listening on port http://0.0.0.0:' + str(socketio_listen_port)
+                logger.info('Listening on port http://0.0.0.0:' + str(socketio_listen_port))
                 server = SocketIOServer(('0.0.0.0', socketio_listen_port), TowerSocket(), resource='socket.io')
 
             handler_thread = Thread(target=notification_handler, args=(server,))

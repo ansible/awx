@@ -23,6 +23,8 @@ from django.db import connection
 from awx.main.models import * # noqa
 from awx.main.socket import Socket
 
+logger = logging.getLogger('awx.main.commands.run_callback_receiver')
+
 MAX_REQUESTS = 10000
 WORKERS = 4
 
@@ -30,9 +32,6 @@ WORKERS = 4
 class CallbackReceiver(object):
     def __init__(self):
         self.parent_mappings = {}
-
-    def print_log(self, message):
-        print("[%s] %s" % (now().isoformat(), message))
 
     def run_subscriber(self, use_workers=True):
         def shutdown_handler(active_workers):
@@ -62,10 +61,10 @@ class CallbackReceiver(object):
                 w = Process(target=self.callback_worker, args=(queue_actual,))
                 w.start()
                 if settings.DEBUG:
-                    self.print_log('Started worker %s' % str(idx))
+                    logger.info('Started worker %s' % str(idx))
                 worker_queues.append([0, queue_actual, w])
         elif settings.DEBUG:
-            self.print_log('Started callback receiver (no workers)')
+            logger.warn('Started callback receiver (no workers)')
 
         main_process = Process(
             target=self.callback_handler,
@@ -216,12 +215,12 @@ class CallbackReceiver(object):
                     return job_event
             except DatabaseError as e:
                 # Log the error and try again.
-                self.print_log('Database error saving job event, retrying in '
-                               '1 second (retry #%d): %s', retry_count + 1, e)
+                logger.error('Database error saving job event, retrying in '
+                             '1 second (retry #%d): %s', retry_count + 1, e)
                 time.sleep(1)
 
         # We failed too many times, and are giving up.
-        self.print_log('Failed to save job event after %d retries.', retry_count)
+        logger.error('Failed to save job event after %d retries.', retry_count)
         return None
 
     def callback_worker(self, queue_actual):
@@ -234,7 +233,7 @@ class CallbackReceiver(object):
             self.process_job_event(message)
             messages_processed += 1
             if messages_processed >= MAX_REQUESTS:
-                self.print_log("Shutting down message receiver")
+                logger.info("Shutting down message receiver")
                 break
 
 class Command(NoArgsCommand):
@@ -245,19 +244,7 @@ class Command(NoArgsCommand):
     '''    
     help = 'Launch the job callback receiver'
 
-    def init_logging(self):
-        log_levels = dict(enumerate([logging.ERROR, logging.INFO,
-                                     logging.DEBUG, 0]))
-        self.logger = logging.getLogger('awx.main.commands.run_callback_receiver')
-        self.logger.setLevel(log_levels.get(self.verbosity, 0))
-        handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter('%(message)s'))
-        self.logger.addHandler(handler)
-        self.logger.propagate = False
-
     def handle_noargs(self, **options):
-        self.verbosity = int(options.get('verbosity', 1))
-        self.init_logging()
         cr = CallbackReceiver()
         try:
             cr.run_subscriber()
