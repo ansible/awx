@@ -34,7 +34,7 @@ angular.module('VariablesHelper', ['Utilities'])
 
                     }
                     catch (e) {
-                        $log.info('Attempt to parse extra_vars as JSON failed. Check that the variables parse as yaml.  Set the raw string as the result.');
+                        $log.debug('Attempt to parse extra_vars as JSON failed. Check that the variables parse as yaml.  Set the raw string as the result.');
                         try {
                             // do safeLoad, which well error if not valid yaml
                             json_obj = jsyaml.safeLoad(variables);
