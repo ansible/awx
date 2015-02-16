@@ -211,7 +211,7 @@ export default
                     '<label for="default"><span class="label-text">Default Answer</span></label>'+
                     '<div>'+
                     '<input type="text" ng-model="default" name="default" id="default" class="form-control">'+
-                    '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="invalidChoice">Please enter an answer for the choices listed.</div>' +
+                    '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="invalidChoice">Please enter an answer from the choices listed.</div>' +
                     '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="minTextError">The answer is shorter than the minimium length. Please make the answer longer. </div>' +
                     '<div class="error ng-hide" id=survey_question-default-duplicate-error" ng-show="maxTextError">The answer is longer than the maximum length. Please make the answer shorter.  </div>' +
                     '<div class="error api-error ng-binding" id="survey_question-default-api-error" ng-bind="default_api_error"></div>'+
@@ -227,7 +227,7 @@ export default
                     '<label for="default_multiselect"><span class="label-text">Default Answer</span></label>'+
                     '<div>'+
                     '<textarea rows="3" ng-model="default_multiselect" name="default_multiselect" class="form-control ng-pristine ng-valid" id="default_multiselect" aw-watch=""></textarea>'+
-                    '<div class="error ng-hide" id=survey_question-default_multiselect-duplicate-error" ng-show="invalidChoice">Please enter an answer/answers for the choices listed.</div>' +
+                    '<div class="error ng-hide" id=survey_question-default_multiselect-duplicate-error" ng-show="invalidChoice">Please enter an answer/answers from the choices listed.</div>' +
                     '<div class="error api-error ng-binding" id="survey_question-default_multiselect-api-error" ng-bind="default_multiselect_api_error"></div>'+
                     '</div>'+
                     '</div>',
