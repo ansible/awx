@@ -893,7 +893,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         data.min = scope.text_min;
                     } else if (scope.type.type === 'textarea') {
                         data.min = scope.textarea_min;
-                    } else if (scopt.type.type === 'password') {
+                    } else if (scope.type.type === 'password') {
                         data.min = scope.password_min;
                     } else if (scope.type.type === 'float') {
                         data.min = scope.float_min;
@@ -907,7 +907,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         data.max = scope.text_max;
                     } else if (scope.type.type === 'textarea') {
                         data.max = scope.textarea_max;
-                    } else if (scopt.type.type === 'password') {
+                    } else if (scope.type.type === 'password') {
                         data.max = scope.password_max;
                     } else if (scope.type.type === 'float') {
                         data.max = scope.float_max;
@@ -922,9 +922,9 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                         data.default = scope.default;
                     } else if (scope.type.type === 'textarea') {
                         data.default = scope.default_textarea;
-                    } else if (scopt.type.type === 'password') {
+                    } else if (scope.type.type === 'password') {
                         data.default = scope.default_password;
-                    } else if (scopt.type.type === 'multiselect') {
+                    } else if (scope.type.type === 'multiselect') {
                           data.default = scope.default_multiselect;
                     } else if (scope.type.type === 'float') {
                         data.default = scope.default_float;
