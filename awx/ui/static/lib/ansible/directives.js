@@ -70,7 +70,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         require: 'ngModel',
         scope: { ngModel: '=ngModel' },
         template: '<div class="survey_taker_input" ng-repeat="option in ngModel.options">' +
-            '<label><input type="checkbox" ng-model="cbModel[option.value]" ' +
+            '<label style="font-weight:normal"><input type="checkbox" ng-model="cbModel[option.value]" ' +
             'value="{{option.value}}" class="mc" ng-change="update(this.value)" />' +
             '<span>'+
             '{{option.value}}'+
@@ -150,7 +150,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     var min = (attr.awMin) ? scope.$eval(attr.awMin)  :  -Infinity;
                     if (!Empty(min) && !Empty(viewValue) && Number(viewValue) < min) {
                         ctrl.$setValidity('awMin', false);
-                        return undefined;
+                        return viewValue;
                     } else {
                         ctrl.$setValidity('awMin', true);
                         return viewValue;
@@ -217,17 +217,17 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         if ( elm.attr('min') &&
                             ( viewValue === '' || viewValue === null || parseInt(viewValue,10) < parseInt(elm.attr('min'),10) ) ) {
                             ctrl.$setValidity('min', false);
-                            return undefined;
+                            return viewValue;
                         }
                         if ( elm.attr('max') && ( parseInt(viewValue,10) > parseInt(elm.attr('max'),10) ) ) {
                             ctrl.$setValidity('max', false);
-                            return undefined;
+                            return viewValue;
                         }
                         return viewValue;
                     }
                     // Invalid, return undefined (no model update)
                     ctrl.$setValidity('integer', false);
-                    return undefined;
+                    return viewValue;
                 });
             }
         };
@@ -238,16 +238,25 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     .directive('awSurveyVariableName', function() {
         var FLOAT_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
         return {
+            restrict: 'A',
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
+                ctrl.$setValidity('required', true); // we only want the error message for incorrect characters to be displayed
                 ctrl.$parsers.unshift(function(viewValue) {
-                    if (FLOAT_REGEXP.test(viewValue) && viewValue.indexOf(' ') === -1) { //check for a spaces
-                        ctrl.$setValidity('variable', true);
+                    if(viewValue.length !== 0){
+                      if (FLOAT_REGEXP.test(viewValue) && viewValue.indexOf(' ') === -1) { //check for a spaces
+                          ctrl.$setValidity('variable', true);
+                          return viewValue;
+                        }
+                        else{
+                          ctrl.$setValidity('variable', false); // spaces found, therefore throw error.
+                          return viewValue;
+                        }
+                      }
+                      else{
+                        ctrl.$setValidity('variable', true); // spaces found, therefore throw error.
                         return viewValue;
-                    } else {
-                        ctrl.$setValidity('variable', false); // spaces found, therefore throw error
-                        return undefined;
-                    }
+                      }
                 });
             }
         };
