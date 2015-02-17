@@ -577,11 +577,14 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.int_max = null;
                 scope.float_min = null;
                 scope.float_max = null;
+                scope.duplicate = false;
+                scope.invalidChoice = false;
+                scope.minTextError = false;
+                scope.maxTextError = false;
             };
 
             scope.addNewQuestion = function(){
                 // $('#add_question_btn').on("click" , function(){
-                scope.duplicate = false;
                 scope.addQuestion();
                 $('#survey_question_question_name').focus();
                 $('#add_question_btn').attr('disabled', 'disabled');
