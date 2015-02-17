@@ -17,6 +17,7 @@ recursive-exclude awx/main/tests *
 recursive-exclude awx/ui/static/lib/ansible *
 recursive-exclude awx/settings local_settings.py*
 include awx/ui/static/dist/tower.concat.js
+include awx/ui/static/dist/tower.concat.map
 include awx/ui/static/dist/tower.concat.js.gz
 include awx/ui/static/js/config.js
 include tools/scripts/request_tower_configuration.sh
