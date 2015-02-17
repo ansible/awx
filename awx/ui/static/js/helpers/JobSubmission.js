@@ -81,7 +81,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                                                 job_launch_data.extra_vars[fld] = scope[fld];
                                             }
                                             // for optional text and text-areas, submit a blank string if min length is 0
-                                            if(scope.survey_questions[i].required === false && (scope.survey_questions[i].type === "text" || scope.survey_questions[i].type === "textarea") && scope.survey_questions[i].min === 0 && scope[fld] ===""){
+                                            if(scope.survey_questions[i].required === false && (scope.survey_questions[i].type === "text" || scope.survey_questions[i].type === "textarea") && scope.survey_questions[i].min === 0 && (scope[fld] === "" || scope[fld] === undefined)){
                                                 job_launch_data.extra_vars[fld] = "";
                                             }
                                         }
