@@ -2,7 +2,6 @@
 import json
 
 # Django
-import django.test
 from django.core.urlresolvers import reverse
 
 # AWX
@@ -91,32 +90,32 @@ TEST_SINGLE_PASSWORDS = [
     { 
         'description': 'Single instance with a . after',
         'text' : 'See spot. See spot run. See spot run %s. That is a fast run.' % PASSWORD,
-        'passwords': [ PASSWORD ],
+        'passwords': [PASSWORD],
         'occurances': 1,
     },
     {
         'description': 'Single instance with , after',
         'text': 'Spot goes %s, at a fast pace' % PASSWORD,
-        'passwords': [ PASSWORD ],
+        'passwords': [PASSWORD],
         'occurances': 1,
     },
     {
         'description': 'Single instance with a space after',
         'text': 'Is %s very fast?' % PASSWORD,
-        'passwords': [ PASSWORD ],
+        'passwords': [PASSWORD],
         'occurances': 1,
     },
     {
         'description': 'Many instances, also with newline',
         'text': 'I think %s is very very fast. If I ran %s for 4 hours how many hours would I run?.\nTrick question. %s for 4 hours would result in running for 4 hours' % (PASSWORD, PASSWORD, PASSWORD),
-        'passwords': [ PASSWORD ],
+        'passwords': [PASSWORD],
         'occurances': 3,
     },
 ]
 passwd = 'my!@#$%^pass&*()_+'
 TEST_SINGLE_PASSWORDS.append({
     'description': 'password includes characters not in a-z 0-9 range',
-    'passwords': [ passwd ],
+    'passwords': [passwd],
     'text': 'Text is fun yeah with passwords %s.' % passwd,
     'occurances': 1
 })

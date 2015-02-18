@@ -1,3 +1,3 @@
-from jobs_monolithic import *
-from survey_password import *
-from base import *
+from awx.main.tests.jobs.jobs_monolithic import * # noqa
+from survey_password import * # noqa
+from base import * # noqa
