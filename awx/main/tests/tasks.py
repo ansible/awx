@@ -13,7 +13,6 @@ import unittest
 
 # Django
 from django.conf import settings
-from django.test.utils import override_settings
 from django.utils.timezone import now
 
 # Django-CRUM

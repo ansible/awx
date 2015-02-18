@@ -5,7 +5,6 @@
 import hmac
 import json
 import logging
-import re
 
 # Django
 from django.conf import settings
