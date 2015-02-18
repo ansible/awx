@@ -49,23 +49,21 @@ class TowerBaseNamespace(BaseNamespace):
         return set(['recv_connect'])
 
     def valid_user(self):
-        if 'HTTP_COOKIE' not in self.environ:
+        if 'QUERY_STRING' not in self.environ:
             return False
         else:
             try:
-                all_keys = [e.strip() for e in self.environ['HTTP_COOKIE'].split(";")]
-                for each_key in all_keys:
-                    k, v = each_key.split("=")
-                    if k == "token":
-                        token_actual = urllib.unquote_plus(v).decode().replace("\"","")
-                        auth_token = AuthToken.objects.filter(key=token_actual)
-                        if not auth_token.exists():
-                            return False
-                        auth_token = auth_token[0]
-                        if not auth_token.expired:
-                            return auth_token.user
-                        else:
-                            return False
+                k, v = self.environ['QUERY_STRING'].split("=")
+                if k == "Token":
+                    token_actual = urllib.unquote_plus(v).decode().replace("\"","")
+                    auth_token = AuthToken.objects.filter(key=token_actual)
+                    if not auth_token.exists():
+                        return False
+                    auth_token = auth_token[0]
+                    if not auth_token.expired:
+                        return auth_token.user
+                    else:
+                        return False
             except Exception, e:
                 logger.error("Exception validating user: " + str(e))
                 return False
