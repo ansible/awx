@@ -27,7 +27,7 @@ from awx.main.models import * # noqa
 from awx.main.tests.base import BaseTestMixin
 
 __all__ = ['JobTemplateTest', 'JobTest', 'JobStartCancelTest',
-           'JobTemplateCallbackTest', 'JobTransactionTest']
+           'JobTemplateCallbackTest', 'JobTransactionTest', 'JobTemplateSurveyTest']
 
 TEST_PLAYBOOK = '''- hosts: all
   gather_facts: false
@@ -932,112 +932,6 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             self.post(url, data, expect=201)
 
         # FIXME: Check other credentials and optional fields.
-
-    def test_post_job_template_survey(self):
-        url = reverse('api:job_template_list')
-        data = dict(
-            name         = 'launched job template',
-            job_type     = PERM_INVENTORY_DEPLOY,
-            inventory    = self.inv_eng.pk,
-            project      = self.proj_dev.pk,
-            playbook     = self.proj_dev.playbooks[0],
-            credential   = self.cred_sue.pk,
-            survey_enabled = True,
-        )
-        with self.current_user(self.user_sue):
-            response = self.post(url, data, expect=201)
-            new_jt_id = response['id']
-            detail_url = reverse('api:job_template_detail',
-                                 args=(new_jt_id,))
-            self.assertEquals(response['url'], detail_url)
-        url = reverse('api:job_template_survey_spec', args=(new_jt_id,))
-        with self.current_user(self.user_sue):
-            response = self.post(url, json.loads(TEST_SIMPLE_REQUIRED_SURVEY), expect=200)
-            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
-            response = self.get(launch_url)
-            self.assertTrue('favorite_color' in response['variables_needed_to_start'])
-            response = self.post(launch_url, dict(extra_vars=dict(favorite_color="green")), expect=202)
-            job = Job.objects.get(pk=response["job"])
-            job_extra = json.loads(job.extra_vars)
-            self.assertTrue("favorite_color" in job_extra)
-
-        with self.current_user(self.user_sue):
-            response = self.post(url, json.loads(TEST_SIMPLE_NONREQUIRED_SURVEY), expect=200)
-            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
-            response = self.get(launch_url)
-            self.assertTrue(len(response['variables_needed_to_start']) == 0)
-
-        with self.current_user(self.user_sue):
-            response = self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
-            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
-            # Just the required answer should work
-            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo")), expect=202)
-            # Short answer but requires a long answer
-            self.post(launch_url, dict(extra_vars=dict(long_answer='a', reqd_answer="foo")), expect=400)
-            # Long answer but requires a short answer
-            self.post(launch_url, dict(extra_vars=dict(short_answer='thisissomelongtext', reqd_answer="foo")), expect=400)
-            # Long answer but missing required answer
-            self.post(launch_url, dict(extra_vars=dict(long_answer='thisissomelongtext')), expect=400)
-            # Integer that's not big enough
-            self.post(launch_url, dict(extra_vars=dict(int_answer=0, reqd_answer="foo")), expect=400)
-            # Integer that's too big
-            self.post(launch_url, dict(extra_vars=dict(int_answer=10, reqd_answer="foo")), expect=400)
-            # Integer that's just riiiiight
-            self.post(launch_url, dict(extra_vars=dict(int_answer=3, reqd_answer="foo")), expect=202)
-            # Integer bigger than min with no max defined
-            self.post(launch_url, dict(extra_vars=dict(int_answer_no_max=3, reqd_answer="foo")), expect=202)
-            # Integer answer that's the wrong type
-            self.post(launch_url, dict(extra_vars=dict(int_answer="test", reqd_answer="foo")), expect=400)
-            # Float that's too big
-            self.post(launch_url, dict(extra_vars=dict(float_answer=10.5, reqd_answer="foo")), expect=400)
-            # Float that's too small
-            self.post(launch_url, dict(extra_vars=dict(float_answer=1.995, reqd_answer="foo")), expect=400)
-            # float that's just riiiiight
-            self.post(launch_url, dict(extra_vars=dict(float_answer=2.01, reqd_answer="foo")), expect=202)
-            # float answer that's the wrong type
-            self.post(launch_url, dict(extra_vars=dict(float_answer="test", reqd_answer="foo")), expect=400)
-            # Wrong choice in single choice
-            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", single_choice="three")), expect=400)
-            # Wrong choice in multi choice
-            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", multi_choice=["four"])), expect=400)
-            # Wrong type for multi choicen
-            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", multi_choice="two")), expect=400)
-            # Right choice in single choice
-            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", single_choice="two")), expect=202)
-            # Right choices in multi choice
-            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", multi_choice=["one", "two"])), expect=202)
-            # Nested json
-            self.post(launch_url, dict(extra_vars=dict(json_answer=dict(test="val", num=1), reqd_answer="foo")), expect=202)
-
-        # Bob can access and update the survey because he's an org-admin
-        with self.current_user(self.user_bob):
-            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
-
-        # Chuck is the lead engineer and has the right permissions to edit it also
-        with self.current_user(self.user_chuck):
-            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
-
-        # Doug shouldn't be able to access this playbook
-        with self.current_user(self.user_doug):
-            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=403)
-
-        # Neither can juan because he doesn't have the job template create permission
-        with self.current_user(self.user_juan):
-            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=403)
-
-        # Bob and chuck can read the template
-        with self.current_user(self.user_bob):
-            self.get(url, expect=200)
-
-        with self.current_user(self.user_chuck):
-            self.get(url, expect=200)    
-
-        # Doug and Juan can't
-        with self.current_user(self.user_doug):
-            self.get(url, expect=403)
-            
-        with self.current_user(self.user_juan):
-            self.get(url, expect=403)    
 
     def test_launch_job_template(self):
         url = reverse('api:job_template_list')
@@ -1945,3 +1839,115 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 self.assertEqual(job.status, 'successful', job.result_stdout)
         self.assertFalse(errors)
 
+class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TestCase):
+    def setUp(self):
+        super(JobTemplateSurveyTest, self).setUp()
+
+    def tearDown(self):
+        super(JobTemplateSurveyTest, self).tearDown()
+
+    def test_post_job_template_survey(self):
+        url = reverse('api:job_template_list')
+        data = dict(
+            name         = 'launched job template',
+            job_type     = PERM_INVENTORY_DEPLOY,
+            inventory    = self.inv_eng.pk,
+            project      = self.proj_dev.pk,
+            playbook     = self.proj_dev.playbooks[0],
+            credential   = self.cred_sue.pk,
+            survey_enabled = True,
+        )
+        with self.current_user(self.user_sue):
+            response = self.post(url, data, expect=201)
+            new_jt_id = response['id']
+            detail_url = reverse('api:job_template_detail',
+                                 args=(new_jt_id,))
+            self.assertEquals(response['url'], detail_url)
+        url = reverse('api:job_template_survey_spec', args=(new_jt_id,))
+        with self.current_user(self.user_sue):
+            response = self.post(url, json.loads(TEST_SIMPLE_REQUIRED_SURVEY), expect=200)
+            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
+            response = self.get(launch_url)
+            self.assertTrue('favorite_color' in response['variables_needed_to_start'])
+            response = self.post(launch_url, dict(extra_vars=dict(favorite_color="green")), expect=202)
+            job = Job.objects.get(pk=response["job"])
+            job_extra = json.loads(job.extra_vars)
+            self.assertTrue("favorite_color" in job_extra)
+
+        with self.current_user(self.user_sue):
+            response = self.post(url, json.loads(TEST_SIMPLE_NONREQUIRED_SURVEY), expect=200)
+            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
+            response = self.get(launch_url)
+            self.assertTrue(len(response['variables_needed_to_start']) == 0)
+
+        with self.current_user(self.user_sue):
+            response = self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
+            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
+            # Just the required answer should work
+            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo")), expect=202)
+            # Short answer but requires a long answer
+            self.post(launch_url, dict(extra_vars=dict(long_answer='a', reqd_answer="foo")), expect=400)
+            # Long answer but requires a short answer
+            self.post(launch_url, dict(extra_vars=dict(short_answer='thisissomelongtext', reqd_answer="foo")), expect=400)
+            # Long answer but missing required answer
+            self.post(launch_url, dict(extra_vars=dict(long_answer='thisissomelongtext')), expect=400)
+            # Integer that's not big enough
+            self.post(launch_url, dict(extra_vars=dict(int_answer=0, reqd_answer="foo")), expect=400)
+            # Integer that's too big
+            self.post(launch_url, dict(extra_vars=dict(int_answer=10, reqd_answer="foo")), expect=400)
+            # Integer that's just riiiiight
+            self.post(launch_url, dict(extra_vars=dict(int_answer=3, reqd_answer="foo")), expect=202)
+            # Integer bigger than min with no max defined
+            self.post(launch_url, dict(extra_vars=dict(int_answer_no_max=3, reqd_answer="foo")), expect=202)
+            # Integer answer that's the wrong type
+            self.post(launch_url, dict(extra_vars=dict(int_answer="test", reqd_answer="foo")), expect=400)
+            # Float that's too big
+            self.post(launch_url, dict(extra_vars=dict(float_answer=10.5, reqd_answer="foo")), expect=400)
+            # Float that's too small
+            self.post(launch_url, dict(extra_vars=dict(float_answer=1.995, reqd_answer="foo")), expect=400)
+            # float that's just riiiiight
+            self.post(launch_url, dict(extra_vars=dict(float_answer=2.01, reqd_answer="foo")), expect=202)
+            # float answer that's the wrong type
+            self.post(launch_url, dict(extra_vars=dict(float_answer="test", reqd_answer="foo")), expect=400)
+            # Wrong choice in single choice
+            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", single_choice="three")), expect=400)
+            # Wrong choice in multi choice
+            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", multi_choice=["four"])), expect=400)
+            # Wrong type for multi choicen
+            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", multi_choice="two")), expect=400)
+            # Right choice in single choice
+            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", single_choice="two")), expect=202)
+            # Right choices in multi choice
+            self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo", multi_choice=["one", "two"])), expect=202)
+            # Nested json
+            self.post(launch_url, dict(extra_vars=dict(json_answer=dict(test="val", num=1), reqd_answer="foo")), expect=202)
+
+        # Bob can access and update the survey because he's an org-admin
+        with self.current_user(self.user_bob):
+            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
+
+        # Chuck is the lead engineer and has the right permissions to edit it also
+        with self.current_user(self.user_chuck):
+            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
+
+        # Doug shouldn't be able to access this playbook
+        with self.current_user(self.user_doug):
+            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=403)
+
+        # Neither can juan because he doesn't have the job template create permission
+        with self.current_user(self.user_juan):
+            self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=403)
+
+        # Bob and chuck can read the template
+        with self.current_user(self.user_bob):
+            self.get(url, expect=200)
+
+        with self.current_user(self.user_chuck):
+            self.get(url, expect=200)    
+
+        # Doug and Juan can't
+        with self.current_user(self.user_doug):
+            self.get(url, expect=403)
+            
+        with self.current_user(self.user_juan):
+            self.get(url, expect=403)    

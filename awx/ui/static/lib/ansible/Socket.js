@@ -71,6 +71,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                         $log.debug('Socket connecting to: ' + url);
                         self.scope.socket_url = url;
                         self.socket = io.connect(url, {
+                            query: "Token="+token, 
                             headers:
                             {
                                 'Authorization': 'Token ' + token,      // i don't think these are actually inserted into the header--jt
@@ -78,7 +79,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             },
                             'connect timeout': 3000,
                             'try multiple transports': false,
-                            'max reconneciton attemps': 3,
+                            'max reconnection attempts': 3,
                             'reconnection limit': 3000
                         });
 

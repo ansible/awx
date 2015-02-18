@@ -45,7 +45,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
                 PortalJobsList.fields.type.searchOptions = scope.type_choices;
             }
             user = scope.$parent.current_user.id;
-            url = (filter === "Team" ) ? GetBasePath('jobs') : GetBasePath('jobs')+'?created_by='+user ;
+            url = (filter === "All Jobs" ) ? GetBasePath('jobs') : GetBasePath('jobs')+'?created_by='+user ;
             LoadJobsScope({
                 parent_scope: scope,
                 scope: jobs_scope,
@@ -77,7 +77,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             $("#active-jobs").empty();
             $("#active-jobs-search-container").empty();
             user = scope.$parent.current_user.id;
-            url = (filter === "Team" ) ? GetBasePath('jobs') : GetBasePath('jobs')+'?created_by='+user ;
+            url = (filter === "All Jobs" ) ? GetBasePath('jobs') : GetBasePath('jobs')+'?created_by='+user ;
             LoadJobsScope({
                 parent_scope: scope,
                 scope: jobs_scope,
@@ -96,8 +96,8 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
         html += "<div class=\"col-lg-6 col-md-6\" id=\"active-jobs-search-container\"></div>\n";
         html += "<div class=\"form-group\">" ;
         html += "<div class=\"btn-group\" aw-toggle-button data-after-toggle=\"filterPortalJobs\">" ;
-        html += " <button class=\"btn btn-xs btn-primary active\">User</button>" ;
-        html += "<button class=\"btn btn-xs btn-default\">Team</button>" ;
+        html += "<button id='portal-toggle-user' class=\"btn btn-xs btn-primary active\">My Jobs</button>" ;
+        html += "<button id='portal-toggle-all' class=\"btn btn-xs btn-default\">All Jobs</button>" ;
         html += "</div>" ;
         html += "</div>" ;
         html += "</div>\n"; //row

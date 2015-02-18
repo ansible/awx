@@ -15,9 +15,8 @@ from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.db import transaction, DatabaseError
 from django.utils.dateparse import parse_datetime
-from django.utils.timezone import now
 from django.utils.tzinfo import FixedOffset
-from django.db import connection 
+from django.db import connection
 
 # AWX
 from awx.main.models import * # noqa
@@ -27,7 +26,6 @@ logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 MAX_REQUESTS = 10000
 WORKERS = 4
-
 
 class CallbackReceiver(object):
     def __init__(self):

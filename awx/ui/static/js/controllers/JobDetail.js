@@ -200,7 +200,7 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
         scope.removeLoadHostSummaries();
     }
     scope.removeHostSummaries = scope.$on('LoadHostSummaries', function() {
-        if(scope.job.related){
+        if(scope.job){
             var url = scope.job.related.job_host_summaries + '?';
             url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
 
@@ -247,9 +247,11 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
         if (scope.activeTask) {
 
             var play = scope.jobData.plays[scope.activePlay],
-                task = play.tasks[scope.activeTask],
+                task, // = play.tasks[scope.activeTask],
                 url;
-
+            if(play){
+              task = play.tasks[scope.activeTask];
+            }
             if (play && task) {
                 url = scope.job.related.job_events + '?parent=' + task.id + '&';
                 url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name,counter';

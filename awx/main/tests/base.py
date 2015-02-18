@@ -13,15 +13,17 @@ import tempfile
 import time
 from multiprocessing import Process
 from subprocess import Popen
+import re
 
 # PyYAML
 import yaml
 
 # Django
+import django.test
 from django.conf import settings, UserSettingsHolder
 from django.contrib.auth.models import User
-import django.test
 from django.test.client import Client
+from django.test.utils import override_settings
 
 # AWX
 from awx.main.models import * # noqa
@@ -211,17 +213,20 @@ class BaseTestMixin(QueueTestMixin):
     def make_organizations(self, created_by, count=1):
         results = []
         for x in range(0, count):
-            self.object_ctr = self.object_ctr + 1
-            results.append(Organization.objects.create(
-                name="org%s-%s" % (x, self.object_ctr), description="org%s" % x, created_by=created_by
-            ))
+            results.append(self.make_organization(created_by=created_by, count=x))
         return results
 
-    def make_organization(self, created_by):
-        return self.make_organizations(created_by, 1)[0]
+    def make_organization(self, created_by, count=1):
+        self.object_ctr = self.object_ctr + 1
+        return Organization.objects.create(
+            name="org%s-%s" % (count, self.object_ctr), description="org%s" % count, created_by=created_by
+        )
 
-    def make_project(self, name, description='', created_by=None,
+    def make_project(self, name=None, description='', created_by=None,
                      playbook_content='', role_playbooks=None, unicode_prefix=True):
+        if not name:
+            name = self.unique_name('Project')
+
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.makedirs(settings.PROJECTS_ROOT)
         # Create temp project directory.
@@ -283,7 +288,7 @@ class BaseTestMixin(QueueTestMixin):
 
         return Inventory.objects.create(name=name or self.unique_name('Inventory'), organization=organization, created_by=created_by)
 
-    def make_job_template(self, name=None, created_by=None, organization=None, inventory=None, project=None, playbook=None):
+    def make_job_template(self, name=None, created_by=None, organization=None, inventory=None, project=None, playbook=None, **kwargs):
         created_by = self.decide_created_by(created_by)
         if not inventory:
             inventory = self.make_inventory(organization=organization, created_by=created_by)
@@ -300,24 +305,47 @@ class BaseTestMixin(QueueTestMixin):
         if project not in organization.projects.all():
             organization.projects.add(project)
 
-        return JobTemplate.objects.create(
-            name=name or self.unique_name('JobTemplate'),
-            job_type='check',
-            inventory=inventory,
-            project=project,
-            playbook=project.playbooks[0],
-            host_config_key=settings.SYSTEM_UUID,
-            created_by=created_by,
-        )
+        opts = {
+            'name' : name or self.unique_name('JobTemplate'),
+            'job_type': 'check',
+            'inventory': inventory,
+            'project': project,
+            'host_config_key': settings.SYSTEM_UUID,
+            'created_by': created_by,
+            'playbook': playbook,
+        }
+        opts.update(kwargs)
+        return JobTemplate.objects.create(**opts)
 
-    def make_job(self, job_template=None, created_by=None, inital_state='new'):
+    def make_job(self, job_template=None, created_by=None, inital_state='new', **kwargs):
         created_by = self.decide_created_by(created_by)
         if not job_template:
             job_template = self.make_job_template(created_by=created_by)
 
-        job = job_template.create_job(created_by=created_by)
-        job.status = inital_state
-        return job
+        opts = {
+          'created_by': created_by,
+          'status': inital_state,
+        }
+        opts.update(kwargs)
+        return job_template.create_job(**opts)
+
+    def make_credential(self, **kwargs):
+        opts = {
+            'name': self.unique_name('Credential'),
+            'kind': 'ssh',
+            'user': self.super_django_user,
+            'username': '',
+            'ssh_key_data': '',
+            'ssh_key_unlock': '',
+            'password': '',
+            'sudo_username': '',
+            'sudo_password': '',
+            'su_username': '',
+            'su_password': '',
+            'vault_password': '',
+        }
+        opts.update(kwargs)
+        return Credential.objects.create(**opts)
 
     def setup_instances(self):
         instance = Instance(uuid=settings.SYSTEM_UUID, primary=True, hostname='127.0.0.1')
@@ -419,6 +447,10 @@ class BaseTestMixin(QueueTestMixin):
                 obj = json.loads(response.content)
             elif response['Content-Type'].startswith('application/yaml'):
                 obj = yaml.safe_load(response.content)
+            elif response['Content-Type'].startswith('text/plain'):
+                obj = { 'content': response.content }
+            elif response['Content-Type'].startswith('text/html'):
+                obj = { 'content': response.content }
             else:
                 self.fail('Unsupport response content type %s' % response['Content-Type'])
         else:
@@ -556,12 +588,58 @@ class BaseTestMixin(QueueTestMixin):
                     msg += 'fields %s not returned ' % ', '.join(not_returned)
                 self.assertTrue(set(obj.keys()) <= set(fields), msg)
 
-    def check_not_found(self, string, substr):
-        self.assertEqual(string.find(substr), -1, "'%s' found in:\n%s" % (substr, string))
+    def check_not_found(self, string, substr, description=None, word_boundary=False):
+        if word_boundary:
+            count = len(re.findall(r'\b%s\b' % re.escape(substr), string))
+        else:
+            count = string.find(substr)
+            if count == -1:
+                count = 0
 
-    def check_found(self, string, substr, count=1):
-        count_actual = string.count(substr)
-        self.assertEqual(count_actual, count, "Found %d occurances of '%s' instead of %d in:\n%s" % (count_actual, substr, count, string))
+        msg = ''
+        if description:
+            msg = 'Test "%s".\n' % description
+        msg += '"%s" found in: "%s"' % (substr, string)
+        self.assertEqual(count, 0, msg)
+
+    def check_found(self, string, substr, count, description=None, word_boundary=False):
+        if word_boundary:
+            count_actual = len(re.findall(r'\b%s\b' % re.escape(substr), string))
+        else:
+            count_actual = string.count(substr)
+
+        msg = ''
+        if description:
+            msg = 'Test "%s".\n' % description
+        msg += 'Found %d occurances of "%s" instead of %d in: "%s"' % (count_actual, substr, count, string)
+        self.assertEqual(count_actual, count, msg)
+        
+    def check_job_result(self, job, expected='successful', expect_stdout=True,
+                         expect_traceback=False):
+        msg = u'job status is %s, expected %s' % (job.status, expected)
+        msg = u'%s\nargs:\n%s' % (msg, job.job_args)
+        msg = u'%s\nenv:\n%s' % (msg, job.job_env)
+        if job.result_traceback:
+            msg = u'%s\ngot traceback:\n%s' % (msg, job.result_traceback)
+        if job.result_stdout:
+            msg = u'%s\ngot stdout:\n%s' % (msg, job.result_stdout)
+        if isinstance(expected, (list, tuple)):
+            self.assertTrue(job.status in expected)
+        else:
+            self.assertEqual(job.status, expected, msg)
+        if expect_stdout:
+            self.assertTrue(job.result_stdout)
+        else:
+            self.assertTrue(job.result_stdout in ('', 'stdout capture is missing'),
+                            u'expected no stdout, got:\n%s' %
+                            job.result_stdout)
+        if expect_traceback:
+            self.assertTrue(job.result_traceback)
+        else:
+            self.assertFalse(job.result_traceback,
+                             u'expected no traceback, got:\n%s' %
+                             job.result_traceback)
+
 
     def start_taskmanager(self, command_port):
         self.start_redis()
@@ -588,6 +666,17 @@ class BaseTransactionTest(BaseTestMixin, django.test.TransactionTestCase):
 class BaseLiveServerTest(BaseTestMixin, django.test.LiveServerTestCase):
     '''
     Base class for tests requiring a live test server.
+    '''
+    def setUp(self):
+        super(BaseLiveServerTest, self).setUp()
+        settings.INTERNAL_API_URL = self.live_server_url
+
+@override_settings(CELERY_ALWAYS_EAGER=True,
+                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   ANSIBLE_TRANSPORT='local')
+class BaseJobExecutionTest(QueueStartStopTestMixin, BaseLiveServerTest):
+    '''
+    Base class for celery task tests.
     '''
 
 # Helps with test cases.
