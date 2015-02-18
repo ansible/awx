@@ -534,15 +534,23 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
 
             $(element).one('click', showPopover);
 
-            $(element).on('shown.bs.popover', function() {
+            function bindPopoverDismiss() {
                 $('body').one('click.popover' + id_to_close, function(e) {
                     if ($(e.target).parents(id_to_close).length === 0) {
+                        // case: you clicked to open the popover and then you
+                        //  clicked outside of it...hide it.
                         $(element).popover('hide');
+                    } else {
+                      // case: you clicked to open the popover and then you
+                      // clicked inside the popover
+                      bindPopoverDismiss();
                     }
                 });
+            }
 
+            $(element).on('shown.bs.popover', function() {
+                bindPopoverDismiss();
                 $(document).on('keydown.popover', dismissOnEsc);
-
             });
 
             $(element).on('hidden.bs.popover', function() {
