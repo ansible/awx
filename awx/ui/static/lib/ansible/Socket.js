@@ -79,7 +79,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             },
                             'connect timeout': 3000,
                             'try multiple transports': false,
-                            'max reconneciton attemps': 3,
+                            'max reconnection attempts': 3,
                             'reconnection limit': 3000
                         });
 
