@@ -11,7 +11,6 @@ from threading import Thread
 # Django
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
-from django.utils.timezone import now
 
 # AWX
 import awx
