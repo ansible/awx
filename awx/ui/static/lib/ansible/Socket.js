@@ -71,6 +71,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                         $log.debug('Socket connecting to: ' + url);
                         self.scope.socket_url = url;
                         self.socket = io.connect(url, {
+                            query: "Token="+token, 
                             headers:
                             {
                                 'Authorization': 'Token ' + token,      // i don't think these are actually inserted into the header--jt
