@@ -106,13 +106,13 @@ export default
                 control:'<div class="row">'+
                                 '<div class="col-xs-6">'+
                                     '<label for="text_min"><span class="label-text">Minimum Length</span></label><input id="text_min" type="number" name="text_min" ng-model="text_min" min=0 aw-min="0" aw-max="text_max" class="form-control" integer />'+
-                                    '<div class="error" ng-show="survey_question_form.text_min.$error.integer || survey_question_form.text_min.$error.number">The minimum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.text_min.$error.integer || survey_question_form.text_min.$error.number">The minimum length you entered is not a valid number.  Please enter a whole number.</div>'+
                                     '<div class="error" ng-show="survey_question_form.text_min.$error.awMax">The minimium length is too high.  Please enter a lower number.</div>'+
                                     '<div class="error" ng-show="survey_question_form.text_min.$error.awMin">The minimum length is too low.  Please enter a positive number.</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6">'+
                                     '<label for="text_max"><span class="label-text">Maximum Length</span></label><input id="text_max" type="number" name="text_max" ng-model="text_max" aw-min="text_min || 0" min=0 class="form-control" integer >'+
-                                    '<div class="error" ng-show="survey_question_form.text_max.$error.integer || survey_question_form.text_max.$error.number">The maximum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.text_max.$error.integer || survey_question_form.text_max.$error.number">The maximum length you entered is not a valid number.  Please enter a whole nnumber.</div>'+
                                     '<div class="error" ng-show="survey_question_form.text_max.$error.awMin">The maximum length is too low.  Please enter a number larger than the minimum length you set.</div>'+
                                 '</div>'+
                             '</div>',
@@ -127,13 +127,13 @@ export default
                 control:'<div class="row">'+
                                 '<div class="col-xs-6">'+
                                     '<label for="textarea_min"><span class="label-text">Minimum Length</span></label><input id="textarea_min" type="number" name="textarea_min" ng-model="textarea_min"  min=0 aw-min="0" aw-max="textarea_max" class="form-control" integer />'+
-                                    '<div class="error" ng-show="survey_question_form.textarea_min.$error.integer || survey_question_form.textarea_min.$error.number">The minimum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_min.$error.integer || survey_question_form.textarea_min.$error.number">The minimum length you entered is not a valid number.  Please enter a whole number.</div>'+
                                     '<div class="error" ng-show="survey_question_form.textarea_min.$error.awMax">The minimium length is too high.  Please enter a lower number.</div>'+
                                     '<div class="error" ng-show="survey_question_form.textarea_min.$error.awMin">The minimum length is too low.  Please enter a positive number.</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6">'+
                                     '<label for="textarea_max"><span class="label-text">Maximum Length</span></label><input id="textarea_max" type="number" name="textarea_max" ng-model="textarea_max" aw-min="textarea_min || 0" min=0 class="form-control" integer >'+
-                                    '<div class="error" ng-show="survey_question_form.textarea_max.$error.integer || survey_question_form.textarea_max.$error.number">The maximum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.textarea_max.$error.integer || survey_question_form.textarea_max.$error.number">The maximum length you entered is not a valid number.  Please enter a whole number.</div>'+
                                     '<div class="error" ng-show="survey_question_form.textarea_max.$error.awMin">The maximum length is too low.  Please enter a number larger than the minimum length you set.</div>'+
                                 '</div>'+
                             '</div>',
@@ -148,13 +148,13 @@ export default
                 control:'<div class="row">'+
                                 '<div class="col-xs-6">'+
                                     '<label for="password_min"><span class="label-text">Minimum Length</span></label><input id="password_min" type="number" name="password_min" ng-model="password_min" min=0 aw-min="0" aw-max="password_max" class="form-control" integer />'+
-                                    '<div class="error" ng-show="survey_question_form.password_min.$error.integer || survey_question_form.password_min.$error.number">The minimum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.password_min.$error.integer || survey_question_form.password_min.$error.number">The minimum length you entered is not a valid number.  Please enter a whole number.</div>'+
                                     '<div class="error" ng-show="survey_question_form.password_min.$error.awMax">The minimium length is too high.  Please enter a lower number.</div>'+
                                     '<div class="error" ng-show="survey_question_form.password_min.$error.awMin">The minimum length is too low.  Please enter a positive number.</div>'+
                                 '</div>'+
                                 '<div class="col-xs-6">'+
                                     '<label for="password_max"><span class="label-text">Maximum Length</span></label><input id="password_max" type="number" name="password_max" ng-model="password_max" aw-min="password_min || 0" min=0 class="form-control" integer >'+
-                                    '<div class="error" ng-show="survey_question_form.password_max.$error.integer || survey_question_form.password_max.$error.number">The maximum length you entered is not a number.  Please enter a number.</div>'+
+                                    '<div class="error" ng-show="survey_question_form.password_max.$error.integer || survey_question_form.password_max.$error.number">The maximum length you entered is not a valid number.  Please enter a whole number.</div>'+
                                     '<div class="error" ng-show="survey_question_form.password_max.$error.awMin">The maximum length is too low.  Please enter a number larger than the minimum length you set.</div>'+
                                 '</div>'+
                             '</div>',
