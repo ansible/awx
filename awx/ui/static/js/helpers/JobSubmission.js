@@ -39,7 +39,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                                     Rest.get()
                                     .success(function (data) {
                                         if(!Empty(data.extra_vars)){
-                                            data.extra_vars = ToJSON('json',  data.extra_vars, false);
+                                            data.extra_vars = ToJSON('yaml',  data.extra_vars, false);
                                             $.each(data.extra_vars, function(key,value){
                                                 job_launch_data.extra_vars[key] = value;
                                             });
