@@ -209,6 +209,15 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                     vars.append(survey_element['variable'])
         return vars
 
+    def survey_password_variables(self):
+        vars = []
+        if self.survey_enabled and 'spec' in self.survey_spec:
+            # Get variables that are type password
+            for survey_element in self.survey_spec['spec']:
+                if survey_element['type'] == 'password':
+                    vars.append(survey_element['variable'])
+        return vars
+
     def survey_variable_validation(self, data):
         errors = []
         if not self.survey_enabled:
@@ -458,14 +467,8 @@ class Job(UnifiedJob, JobOptions):
         # Then lookup password fields in extra_vars and save the values
         jt = self.job_template
         if jt and jt.survey_enabled and 'spec' in jt.survey_spec:
-            vars = []
-            # Get variables that are type password
-            for survey_element in jt.survey_spec['spec']:
-                if survey_element['type'] == 'password':
-                    vars.append(survey_element['variable'])
-
             # Use password vars to find in extra_vars
-            for key in vars:
+            for key in jt.survey_password_variables():
                 if key in self.extra_vars_dict:
                     content = PlainTextCleaner.remove_sensitive(content, self.extra_vars_dict[key])
         return content
