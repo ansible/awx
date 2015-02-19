@@ -33,6 +33,7 @@ from polymorphic import PolymorphicModel
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.utils import get_type_for_model, get_model_for_type
+from awx.main.redact import REPLACE_STR
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -1419,6 +1420,13 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             return ret
         if 'job_template' in ret and (not obj.job_template or not obj.job_template.active):
             ret['job_template'] = None
+
+        if obj.job_template and obj.job_template.survey_enabled:
+            extra_vars = json.loads(ret['extra_vars'])
+            for key in obj.job_template.survey_password_variables():
+                if key in extra_vars:
+                    extra_vars[key] = REPLACE_STR
+            ret['extra_vars'] = json.dumps(extra_vars)
         return ret
 
 
