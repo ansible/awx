@@ -550,6 +550,10 @@ class RunJob(BaseTask):
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
+        # TODO: env['ANSIBLE_LIBRARY'] # plugins/library
+        # TODO: env['ANSIBLE_CACHE_PLUGINS'] # plugins/fact_caching
+        # TODD: env['ANSIBLE_CACHE_PLUGIN'] # tower
+        # TODO: env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] # connection to tower service
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
