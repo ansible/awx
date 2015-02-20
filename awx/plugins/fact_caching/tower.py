@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+import datetime
 from ansible import constants as C
 from ansible.cache.base import BaseCacheModule
 
@@ -45,6 +46,7 @@ class CacheModule(BaseCacheModule):
 
         # This is the local tower zmq connection
         self._tower_connection = C.CACHE_PLUGIN_CONNECTION
+        self.date_key = datetime.datetime.utcnow()
         try:
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.REQ)
@@ -57,7 +59,7 @@ class CacheModule(BaseCacheModule):
         return {} # Temporary until we have some tower retrieval endpoints
 
     def set(self, key, value):
-        self.socket.send_json(dict(host=key, facts=value))
+        self.socket.send_json(dict(host=key, facts=value, date_key=self.date_key))
         self.socket.recv()
 
     def keys(self):

@@ -4,7 +4,6 @@
 import logging
 
 from django.core.management.base import NoArgsCommand
-from django.utils.timezone import now
 
 from awx.main.models import * # noqa
 from awx.main.socket import Socket
@@ -21,16 +20,23 @@ class FactCacheReceiver(object):
     def process_fact_message(self, message):
         host = message['host']
         facts = message['facts']
+        date_key = message['date_key']
         host_db = self.client.host_facts
         host_collection = host_db[host]
-        facts.update(dict(tower_host=host, datetime=now()))
-        host_collection.insert(facts)
+        facts.update(dict(tower_host=host, datetime=date_key))
+        rec = host_collection.find({"datetime": date_key})
+        if rec.count():
+            this_fact = rec.next()
+            this_fact.update(facts)
+            host_collection.save(this_fact)
+        else:
+            host_collection.insert(facts)
 
     def run_receiver(self):
         with Socket('fact_cache', 'r') as facts:
             for message in facts.listen():
                 print("Message received: " + str(message))
-                if 'host' not in message or 'facts' not in message:
+                if 'host' not in message or 'facts' not in message or 'date_key' not in message:
                     continue
                 self.process_fact_message(message)
 
