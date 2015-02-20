@@ -151,9 +151,22 @@ export default
                             e = angular.element(document.getElementById('prompt_for_days_form'));
                             scope.prompt_for_days_form.days_to_keep.$setViewValue(30);
                             $compile(e)(scope);
-                            $('#prompt-for-days-launch').attr("ng-disabled", 'prompt_for_days_form.$invalid');
-                            e = angular.element(document.getElementById('prompt-for-days-launch'));
-                            $compile(e)(scope);
+
+                            // this is a work-around for getting awMax to work (without
+                            // clearing out the form)
+                            scope.$watch('days_to_keep', function(newVal, oldVal, scope) {
+                                if (!newVal) {
+                                  $('#prompt-for-days-launch').prop("disabled", true);
+                                } else if (isNaN(newVal)) {
+                                  $('#prompt-for-days-launch').prop("disabled", true);
+                                } else if (newVal <= 0) {
+                                  $('#prompt-for-days-launch').prop("disabled", true);
+                                } else if (newVal > 9999) {
+                                    $('#prompt-for-days-launch').prop("disabled", true);
+                                } else {
+                                    $('#prompt-for-days-launch').prop("disabled", false);
+                                }
+                            });
                         },
                         buttons: [{
                             "label": "Cancel",
