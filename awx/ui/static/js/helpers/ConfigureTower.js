@@ -154,7 +154,7 @@ export default
 
                             // this is a work-around for getting awMax to work (without
                             // clearing out the form)
-                            scope.$watch('days_to_keep', function(newVal, oldVal, scope) {
+                            scope.$watch('days_to_keep', function(newVal) {   // oldVal, scope) { // unused params get caught by jshint
                                 if (!newVal) {
                                   $('#prompt-for-days-launch').prop("disabled", true);
                                 } else if (isNaN(newVal)) {
