@@ -275,7 +275,7 @@ export default
                             '<button style="display:none;" type="button" class="btn btn-sm btn-primary" id="job_templates_edit_survey_btn" ng-show="survey_enabled" ng-click="editSurvey()"><i class="fa fa-pencil"></i>   Edit Survey</button>'+
                             '<button style="display:none;margin-left:5px" type="button" class="btn btn-sm btn-primary" id="job_templates_delete_survey_btn" ng-show="survey_enabled" ng-click="deleteSurvey()"><i class="fa fa-trash-o"></i>   Delete Survey</button>'+
                             // '<div class="error ng-hide" id="job-template-survey-error" ng-show="survey_enabled === true && survey_exists!==true">A survey is enabled but it does not exist. Create a survey or disable the survey. </div>'
-                            '<div class="error ng-hide" id="job-template-survey-error" ng-show="invalid_survey">A survey is enabled but it does not exist. Create a survey or disable the survey. </div>'
+                            '<div class="error ng-hide" id="job-template-survey-error" ng-show="invalid_survey">A survey is enabled but it does not exist. Create a survey or uncheck the Enable Survey box to disable the survey. </div>'
                 },
                 allow_callbacks: {
                     label: 'Allow Provisioning Callbacks',
