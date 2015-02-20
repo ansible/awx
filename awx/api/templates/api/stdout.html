@@ -1,0 +1,50 @@
+{% if content_only %}<div class="nocode ansi_fore ansi_back{% if dark %} ansi_dark{% endif %}">{% else %}
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>{{ title }}</title>
+{% endif %}<style type="text/css">
+.ansi_fore { color: #000000; }
+.ansi_back { background-color: #F5F5F5; }
+.ansi_fore.ansi_dark { color: #AAAAAA; }
+.ansi_back.ansi_dark { background-color: #000000; }
+.ansi1 { font-weight: bold; }
+.ansi3 { font-weight: italic; }
+.ansi4 { text-decoration: underline; }
+.ansi9 { text-decoration: line-through; }
+.ansi30 { color: #000316; }
+.ansi31 { color: #AA0000; }
+.ansi32 { color: #00AA00; }
+.ansi33 { color: #AA5500; }
+.ansi34 { color: #0000AA; }
+.ansi35 { color: #E850A8; }
+.ansi36 { color: #00AAAA; }
+.ansi37 { color: #F5F1DE; }
+.ansi40 { background-color: #000000; }
+.ansi41 { background-color: #AA0000; }
+.ansi42 { background-color: #00AA00; }
+.ansi43 { background-color: #AA5500; }
+.ansi44 { background-color: #0000AA; }
+.ansi45 { background-color: #E850A8; }
+.ansi46 { background-color: #00AAAA; }
+.ansi47 { background-color: #F5F1DE; }
+body.ansi_back pre {
+  font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+  font-size: 12px;
+}
+div.ansi_back.ansi_dark {
+  padding: 0 8px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+</style>{% if content_only %}{{ body }}
+</div>
+{% else %}
+  </head>
+  <body class="ansi_fore ansi_back{% if dark %} ansi_dark{% endif %}">
+    <pre>{{ body }}</pre>
+  </body>
+</html>
+{% endif %}
