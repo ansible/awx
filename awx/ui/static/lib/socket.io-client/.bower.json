@@ -1,14 +1,14 @@
 {
   "name": "socket.io-client",
   "homepage": "https://github.com/LearnBoost/socket.io-client",
-  "version": "0.9.17",
-  "_release": "0.9.17",
+  "version": "1.0.6",
+  "_release": "1.0.6",
   "_resolution": {
     "type": "version",
-    "tag": "0.9.17",
-    "commit": "0d082ba45116f5b1cfebe68fb797325d761b6093"
+    "tag": "1.0.6",
+    "commit": "109e3c5b498dc873455e69efd8882b97923cef91"
   },
   "_source": "git://github.com/LearnBoost/socket.io-client.git",
-  "_target": "~0.9.16",
+  "_target": "~1.0.6",
   "_originalSource": "socket.io-client"
 }
