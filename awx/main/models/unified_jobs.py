@@ -231,7 +231,15 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
                 if field not in update_fields:
                     update_fields.append(field)
         # Do the actual save.
-        super(UnifiedJobTemplate, self).save(*args, **kwargs)
+        try:
+            super(UnifiedJobTemplate, self).save(*args, **kwargs)
+        except ValueError:
+            # A fix for https://trello.com/c/S4rU1F21
+            # Does not resolve the root cause. Tis merely a bandaid.
+            if 'scm_delete_on_next_update' in update_fields:
+                update_fields.remove('scm_delete_on_next_update')
+                super(UnifiedJobTemplate, self).save(*args, **kwargs)
+
 
     def _get_current_status(self):
         # Override in subclasses as needed.
