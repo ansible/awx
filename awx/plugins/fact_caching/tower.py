@@ -30,13 +30,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+import time
 import datetime
 from ansible import constants as C
 from ansible.cache.base import BaseCacheModule
 
 try:
     import zmq
-except Import:
+except ImportError:
     print("pyzmq is required")
     sys.exit(1)
 
@@ -46,7 +47,7 @@ class CacheModule(BaseCacheModule):
 
         # This is the local tower zmq connection
         self._tower_connection = C.CACHE_PLUGIN_CONNECTION
-        self.date_key = datetime.datetime.utcnow()
+        self.date_key = time.mktime(datetime.datetime.utcnow().timetuple())
         try:
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.REQ)
