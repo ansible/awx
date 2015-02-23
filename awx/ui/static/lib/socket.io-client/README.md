@@ -1,163 +1,246 @@
+socket.io
+=========
 
-# socket.io-client
+#### Sockets for the rest of us
 
-[![Build Status](https://secure.travis-ci.org/Automattic/socket.io-client.png)](http://travis-ci.org/Automattic/socket.io-client)
-[![NPM version](https://badge.fury.io/js/socket.io-client.png)](http://badge.fury.io/js/socket.io-client)
+The `socket.io` client is basically a simple HTTP Socket interface implementation.
+It looks similar to WebSocket while providing additional features and
+leveraging other transports when WebSocket is not supported by the user's
+browser.
 
-## How to use
-
-A standalone build of `socket.io-client` is exposed automatically by the
-socket.io server as `/socket.io/socket.io.js`. Alternatively you can
-serve the file `socket.io.js` found at the root of this repository.
-
-```html
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io('http://localhost');
-  socket.on('connect', function(){
-    socket.on('event', function(data){});
-    socket.on('disconnect', function(){});
-  });
-</script>
+```js
+var socket = io.connect('http://domain.com');
+socket.on('connect', function () {
+  // socket connected
+});
+socket.on('custom event', function () {
+  // server emitted a custom event
+});
+socket.on('disconnect', function () {
+  // socket disconnected
+});
+socket.send('hi there');
 ```
 
-Socket.IO is compatible with [browserify](http://browserify.org/).
+### Recipes
 
-### Node.JS (server-side usage)
+#### Utilizing namespaces (ie: multiple sockets)
 
-  Add `socket.io-client` to your `package.json` and then:
+If you want to namespace all the messages and events emitted to a particular
+endpoint, simply specify it as part of the `connect` uri:
 
-  ```js
-  var socket = require('socket.io-client')('http://localhost');
-  socket.on('connect', function(){
-    socket.on('event', function(data){});
-    socket.on('disconnect', function(){});
-  });
-  ```
+```js
+var chat = io.connect('http://localhost/chat');
+chat.on('connect', function () {
+  // chat socket connected
+});
 
-## API
+var news = io.connect('/news'); // io.connect auto-detects host
+news.on('connect', function () {
+  // news socket connected
+});
+```
 
-### IO(url:String, opts:Object):Socket
+#### Emitting custom events
 
-  Exposed as the `io` namespace in the standalone build, or the result
-  of calling `require('socket.io-client')`.
+To ease with the creation of applications, you can emit custom events outside
+of the global `message` event.
 
-  When called, it creates a new `Manager` for the given URL, and attempts
-  to reuse an existing `Manager` for subsequent calls, unless the
-  `multiplex` option is passed with `false`.
+```js
+var socket = io.connect();
+socket.emit('server custom event', { my: 'data' });
+```
 
-  The rest of the options are passed to the `Manager` constructor (see below
-  for details).
+#### Forcing disconnection
 
-  A `Socket` instance is returned for the namespace specified by the
-  pathname in the URL, defaulting to `/`. For example, if the `url` is
-  `http://localhost/users`, a transport connection will be established to
-  `http://localhost` and a Socket.IO connection will be established to
-  `/users`.
+```js
+var socket = io.connect();
+socket.on('connect', function () {
+  socket.disconnect();
+});
+```
 
-### IO#protocol
+### Documentation 
 
-  Socket.io protocol revision number this client works with.
+#### io#connect
 
-### IO#Socket
+```js
+io.connect(uri, [options]);
+```
 
-  Reference to the `Socket` constructor.
+##### Options:
 
-### IO#Manager
+- *resource*
 
-  Reference to the `Manager` constructor.
+    socket.io
 
-### IO#Emitter
+  The resource is what allows the `socket.io` server to identify incoming connections by `socket.io` clients. In other words, any HTTP server can implement socket.io and still serve other normal, non-realtime HTTP requests.
 
-  Reference to the `Emitter` constructor.
+- *transports*
 
-### Manager(url:String, opts:Object)
+```js
+['websocket', 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling']
+```
 
-  A `Manager` represents a connection to a given Socket.IO server. One or
-  more `Socket` instances are associated with the manager. The manager
-  can be accessed through the `io` property of each `Socket` instance.
+  A list of the transports to attempt to utilize (in order of preference).
 
-  The `opts` are also passed to `engine.io` upon initialization of the
-  underlying `Socket`.
+- *'connect timeout'*
 
-  Options:
-  - `reconnection` whether to reconnect automatically (`true`)
-  - `reconnectionDelay` how long to wait before attempting a new
-    reconnection (`1000`)
-  - `reconnectionDelayMax` maximum amount of time to wait between
-    reconnections (`5000`). Each attempt increases the reconnection by
-    the amount specified by `reconnectionDelay`.
-  - `timeout` connection timeout before a `connect_error`
-    and `connect_timeout` events are emitted (`20000`)
+```js
+5000
+```
 
-#### Events
+  The amount of milliseconds a transport has to create a connection before we consider it timed out.
+  
+- *'try multiple transports'*
 
-  - `connect`. Fired upon a successful connection.
-  - `connect_error`. Fired upon a connection error.
-    Parameters:
-      - `Object` error object
-  - `connect_timeout`. Fired upon a connection timeout.
-  - `reconnect`. Fired upon a successful reconnection.
-    Parameters:
-      - `Number` reconnection attempt number
-  - `reconnect_attempt`. Fired upon an attempt to reconnect.
-  - `reconnecting`. Fired upon an attempt to reconnect.
-    Parameters:
-      - `Number` reconnection attempt number
-  - `reconnect_error`. Fired upon a reconnection attempt error.
-    Parameters:
-      - `Object` error object
-  - `reconnect_failed`. Fired when couldn't reconnect within `reconnectionAttempts`
+```js
+true
+```
 
-The events above are also emitted on the individual sockets that
-reconnect that depend on this `Manager`.
+  A boolean indicating if we should try other transports when the  connectTimeout occurs.
+  
+- *reconnect*
 
-### Manager#reconnection(v:Boolean):Manager
+```js
+true
+```
 
-  Sets the `reconnection` option, or returns it if no parameters
-  are passed.
+  A boolean indicating if we should automatically reconnect if a connection is disconnected. 
+  
+- *'reconnection delay'*
 
-### Manager#reconnectionAttempts(v:Boolean):Manager
+```js
+500
+```
 
-  Sets the `reconnectionAttempts` option, or returns it if no parameters
-  are passed.
+  The amount of milliseconds before we try to connect to the server again. We are using a exponential back off algorithm for the following reconnections, on each reconnect attempt this value will get multiplied (500 > 1000 > 2000 > 4000 > 8000).
+  
 
-### Manager#reconnectionDelay(v:Boolean):Manager
+- *'max reconnection attempts'*
 
-  Sets the `reconectionDelay` option, or returns it if no parameters
-  are passed.
+```js
+10
+```
 
-### Manager#reconnectionDelayMax(v:Boolean):Manager
+  The amount of attempts should we make using the current transport to connect to the server? After this we will do one final attempt, and re-try with all enabled transport methods before we give up.
 
-  Sets the `reconectionDelayMax` option, or returns it if no parameters
-  are passed.
+##### Properties:
 
-### Manager#timeout(v:Boolean):Manager
+- *options*
 
-  Sets the `timeout` option, or returns it if no parameters
-  are passed.
+  The passed in options combined with the defaults.
 
-### Socket
+- *connected*
 
-#### Events
+  Whether the socket is connected or not.
+  
+- *connecting*
 
-  - `connect`. Fired upon connecting.
-  - `error`. Fired upon a connection error
-    Parameters:
-      - `Object` error data
-  - `disconnect`. Fired upon a disconnection.
-  - `reconnect`. Fired upon a successful reconnection.
-    Parameters:
-      - `Number` reconnection attempt number
-  - `reconnect_attempt`. Fired upon an attempt to reconnect.
-  - `reconnecting`. Fired upon an attempt to reconnect.
-    Parameters:
-      - `Number` reconnection attempt number
-  - `reconnect_error`. Fired upon a reconnection attempt error.
-    Parameters:
-      - `Object` error object
-  - `reconnect_failed`. Fired when couldn't reconnect within `reconnectionAttempts`
+  Whether the socket is connecting or not.
 
-## License
+- *reconnecting*
 
-MIT
+  Whether we are reconnecting or not.
+  
+- *transport*  
+
+  The transport instance.
+
+##### Methods:
+  
+- *connect(λ)*
+
+  Establishes a connection. If λ is supplied as argument, it will be called once the connection is established.
+  
+- *send(message)*
+  
+  A string of data to send.
+  
+- *disconnect*
+
+  Closes the connection.
+  
+- *on(event, λ)*
+
+  Adds a listener for the event *event*.
+
+- *once(event, λ)*
+
+  Adds a one time listener for the event *event*. The listener is removed after the first time the event is fired.
+  
+- *removeListener(event, λ)*
+
+  Removes the listener λ for the event *event*.
+  
+##### Events:
+
+- *connect*
+
+  Fired when the connection is established and the handshake successful.
+  
+- *connecting(transport_type)*
+
+    Fired when a connection is attempted, passing the transport name.
+  
+- *connect_failed*
+
+    Fired when the connection timeout occurs after the last connection attempt.
+  This only fires if the `connectTimeout` option is set.
+  If the `tryTransportsOnConnectTimeout` option is set, this only fires once all
+  possible transports have been tried.
+  
+- *message(message)*
+  
+  Fired when a message arrives from the server
+
+- *close*
+
+  Fired when the connection is closed. Be careful with using this event, as some transports will fire it even under temporary, expected disconnections (such as XHR-Polling).
+  
+- *disconnect*
+
+  Fired when the connection is considered disconnected.
+  
+- *reconnect(transport_type,reconnectionAttempts)*
+
+  Fired when the connection has been re-established. This only fires if the `reconnect` option is set.
+
+- *reconnecting(reconnectionDelay,reconnectionAttempts)*
+
+  Fired when a reconnection is attempted, passing the next delay for the next reconnection.
+
+- *reconnect_failed*
+
+  Fired when all reconnection attempts have failed and we where unsuccessful in reconnecting to the server.  
+
+### Contributors
+
+Guillermo Rauch &lt;guillermo@learnboost.com&gt;
+
+Arnout Kazemier &lt;info@3rd-eden.com&gt;
+
+### License 
+
+(The MIT License)
+
+Copyright (c) 2010 LearnBoost &lt;dev@learnboost.com&gt;
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
