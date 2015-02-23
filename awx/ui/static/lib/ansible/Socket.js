@@ -153,10 +153,10 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 checkStatus: function() {
                     // Check connection status
                     var self = this;
-                    if (self.socket.socket.connected) {
+                    if (self.socket.connected) {
                         self.scope.socketStatus = 'ok';
                     }
-                    else if (self.socket.socket.connecting || self.socket.socket.reconnecting) {
+                    else if (self.socket.connecting || self.socket.reconnecting) {
                         self.scope.socketStatus = 'connecting';
                     }
                     else {
