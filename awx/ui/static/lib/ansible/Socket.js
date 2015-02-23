@@ -115,6 +115,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                         });
                         self.socket.on('error', function(reason) {
                             var r = reason || 'connection refused by host';
+                            console.error(reason)
                             $log.debug('Socket error: ' + r);
                             $log.error('Socket error: ' + r);
                             self.scope.$apply(function() {
@@ -153,10 +154,10 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 checkStatus: function() {
                     // Check connection status
                     var self = this;
-                    if (self.socket.connected) {
+                    if (self.socket.socket.connected) {
                         self.scope.socketStatus = 'ok';
                     }
-                    else if (self.socket.connecting || self.socket.reconnecting) {
+                    else if (self.socket.socket.connecting || self.socket.reconnecting) {
                         self.scope.socketStatus = 'connecting';
                     }
                     else {
