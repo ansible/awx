@@ -63,6 +63,7 @@ class Socket(object):
                                         settings.CALLBACK_CONSUMER_PORT),
             'task_commands': settings.TASK_COMMAND_PORT,
             'websocket': settings.SOCKETIO_NOTIFICATION_PORT,
+            'fact_cache': settings.FACT_CACHE_PORT,
         }[self._bucket]
 
     def connect(self):
