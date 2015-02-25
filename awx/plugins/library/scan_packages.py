@@ -29,7 +29,8 @@ def deb_package_list():
         ac_pkg = apt_cache[package].installed
         package_details = dict(name=package,
                                version=ac_pkg.version,
-                               architecture=ac_pkg.architecture)
+                               architecture=ac_pkg.architecture,
+                               source='apt')
         installed_packages[package] = [package_details]
     return installed_packages
 
