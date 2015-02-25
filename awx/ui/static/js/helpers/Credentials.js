@@ -35,7 +35,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.aws_required = false;
                  scope.email_required = false;
                  scope.rackspace_required = false;
-                 scope.sshKeyDataLabel = 'SSH Private Key';
+                 scope.sshKeyDataLabel = 'Private Key';
                  scope.username_required = false;                        // JT-- added username_required b/c mutliple 'kinds' need username to be required (GCE)
                  scope.key_required = false;                             // JT -- doing the same for key and project
                  scope.project_required = false;
@@ -59,7 +59,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.aws_required = false;
                  scope.email_required = false;
                  scope.rackspace_required = false;
-                 scope.sshKeyDataLabel = 'SSH Private Key';
+                 scope.sshKeyDataLabel = 'Private Key';
                  scope.username_required = false;                        // JT-- added username_required b/c mutliple 'kinds' need username to be required (GCE)
                  scope.key_required = false;                             // JT -- doing the same for key and project
                  scope.project_required = false;

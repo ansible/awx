@@ -94,7 +94,7 @@
  * | spinner | true or false. If true, adds aw-spinner directive. Optionally add min and max attributes to control the range of allowed values. |
  * | type | String containing one of the following types defined in buildField: alertblock, hidden, text, password, email, textarea, select, number, checkbox, checkbox_group, radio, radio_group, lookup, custom. |
  * | trueValue | For radio buttons and checkboxes. Value to set the model to when the checkbox or radio button is selected. |
- *
+ * | hasShowInputButton (sensitive type only) | This creates a button next to the input that toggles the input as text and password types. |
  * The form object contains a buttons object for defining any buttons to be included in the generated HTML. Generally all forms will have a Reset and a Submit button. If no buttons should be generated define buttons as an empty object, or set the showButtons option to false.
  *
  * The icon used for the button is determined by SelectIcon() found in lib/ansible/generator-helpers.js.
@@ -195,6 +195,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', ListGenerat
                     this.scope = options.scope;
                 } else {
                     this.scope = element.scope();
+                }
+
+                for (fld in form.fields) {
+                    this.scope[fld + '_field'] = form.fields[fld];
+                    this.scope[fld + '_field'].name = fld;
                 }
 
                 $compile(element)(this.scope);
@@ -662,16 +667,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', ListGenerat
                             html += "\" ";
                         }
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
-                        html += "for=\"" + fld + '">';
+                        html += "for=\"" + fld + '">\n';
                         html += (field.icon) ? Icon(field.icon) : "";
                         if (field.labelBind) {
-                            html += "<span class=\"label-text\" ng-bind=\"" + field.labelBind + "\"></span>";
+                            html += "\t\t<span class=\"label-text\" ng-bind=\"" + field.labelBind + "\">\n\t\t</span>";
                         } else {
-                            html += "<span class=\"label-text\">" + field.label + "</span>";
+                            html += "\t\t<span class=\"label-text\">\n\t\t\t" + field.label + "\n\t\t</span>";
                         }
                         html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
-                        html += (field.hintText) ? " <span class=\"label-hint-text\"><i class=\"fa fa-info-circle\"></i> Hint: " + field.hintText + "</span>" : "";
-                        html += "</label>\n";
+                        html += (field.hintText) ? "\n\t\t<span class=\"label-hint-text\">\n\t\t\t<i class=\"fa fa-info-circle\">\n\t\t\t</i>\n\t\t\tHint: " + field.hintText + "\n\t\t</span>" : "";
+                        html += "\n\t</label>\n";
                     }
                     return html;
                 }
@@ -704,7 +709,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', ListGenerat
                 }
 
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
-                    html += "<div class=\"form-group\" ";
+                    html += "<div class='form-group' ";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
                     html += (field.ngHide) ? this.attr(field, 'ngHide') : "";
                     html += ">\n";
@@ -830,6 +835,166 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', ListGenerat
                         html += (field.helpCollapse) ? this.buildHelpCollapse(field.helpCollapse) : '';
 
                         html += "</div>\n";
+                    }
+
+                    //fields with sensitive data that needs to be obfuscated from view
+                    if (field.type === 'sensitive') {
+                        field.showInputInnerHTML = "ABC";
+                        field.inputType = "password";
+
+                        html += "\t" + label();
+                        if (field.hasShowInputButton) {
+                            field.toggleInput = function(id) {
+                                var buttonId = id + "_show_input_button",
+                                    inputId = id + "_input",
+                                    buttonInnerHTML = $(buttonId).html();
+                                if (buttonInnerHTML.indexOf("ABC") > -1) {
+                                    $(buttonId).html("<i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i><i class=\"fa fa-asterisk\"></i>");
+                                    $(inputId).attr("type", "text");
+                                } else {
+                                    $(buttonId).html("ABC");
+                                    $(inputId).attr("type", "password");
+                                }
+                            }
+                            html += "\<div class='input-group";
+                            html += (horizontal) ? " " + getFieldWidth() : "";
+                            html += "'>\n";
+                            // TODO: make it so that the button won't show up if the mode is edit, hasShowInputButton !== true, and there are no contents in the field.
+                            html += "<span class='input-group-btn'>\n";
+                            html += "<button class='btn btn-default' ";
+                            html += buildId(field, fld + "_show_input_button", this.form);
+                            html += "aw-tool-tip='Toggle the display of plaintext.' aw-tip-placement='top' ";
+                            html += "ng-click='" + fld + "_field.toggleInput(\"#" + this.form.name + "_" + fld + "\")'";
+                            html += (field.ask) ? " ng-disabled='" + fld + "_ask'" : "";
+                            html += ">\n" + field.showInputInnerHTML;
+                            html += "\n</button>\n";
+                            html += "</span>\n";
+                        } else {
+                            html += "<div";
+                            html += (horizontal) ? " class='" + getFieldWidth() + "'" : "";
+                            html += ">\n";
+                        }
+
+                        if (field.control === null || field.control === undefined || field.control) {
+                            html += "<input ";
+                            html += buildId(field, fld + "_input", this.form);
+                            html += "type='password' ";
+                            html += "ng-model=\"" + fld + '" ';
+                            html += 'name="' + fld + '" ';
+
+                            html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
+                            html += (field.chkPass) ? "chk-pass " : "";
+                            html += buildId(field, fld, this.form);
+
+                            html += (field.controlNGClass) ? "ng-class='" + field.controlNGClass + "' " : "";
+                            html += "class='form-control";
+                            html += (field['class']) ? " " + this.attr(field, 'class') : "";
+                            html += "' ";
+
+                            html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
+                            html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
+                            html += (options.mode === 'add' && field.addRequired) ? "required " : "";
+
+                            html += (field.readonly || field.showonly) ? "readonly " : "";
+
+                            html += (field.awPassMatch) ? "awpassmatch='" + field.associated + "' " : "";
+                            html += (field.capitalize) ? "capitalize " : "";
+                            html += (field.awSurveyQuestion) ? "aw-survey-question" : "";
+                            html += (field.ask) ? "ng-disabled='" + fld + "_ask' " : "";
+                            html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
+                            html += (field.awRequiredWhen) ? "data-awrequired-init='" + field.awRequiredWhen.init + "' aw-required-when='" +
+                                field.awRequiredWhen.variable + "' " : "";
+                            html += (field.awValidUrl) ? "aw-valid-url " : "";
+                            html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled='" + field.associated + "_ask' " : "";
+                            html += (field.awMultiselect) ? "aw-multiselect='" + field.awMultiselect + "' " : "";
+                            html += ">\n";
+                        }
+
+                        html += "</div>\n";
+
+                        // if (field.clear) {
+                        //     html += "<span class=\"input-group-btn\"><button type=\"button\" ";
+                        //     html += "id=\"" + this.form.name + "_" + fld + "_clear_btn\" ";
+                        //     html += "class=\"btn btn-default\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " +
+                        //         "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\" ";
+                        //     html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
+                        //     html += " ><i class=\"fa fa-undo\"></i></button>\n";
+                        //     html += "</span>\n</div>\n";
+                        //
+                        // }
+
+                        if (field.ask) {
+                            html += "<label class=\"checkbox-inline ask-checkbox\" ";
+                            html += (field.askShow) ? "ng-show=\"" + field.askShow + "\" " : "";
+                            html += ">";
+                            html += "<input type=\"checkbox\" ng-model=\"" +
+                                fld + "_ask\" ng-change=\"ask('" + fld + "','" + field.associated + "')\" ";
+                            html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
+                            html += "> Ask at runtime?</label>";
+                        }
+
+                        // if (field.genMD5) {
+                        //     html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"genMD5('" + fld + "')\" " +
+                        //         "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
+                        //         "<i class=\"fa fa-magic\"></i></button></span>\n</div>\n";
+                        // }
+
+                        // Add error messages
+                        if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
+                            field.awRequiredWhen) {
+                            html += "<div class='error' id='" + this.form.name + "-" + fld + "-required-error' ng-show='" + this.form.name + "_form." + fld + ".$dirty && " +
+                                this.form.name + "_form." + fld + ".$error.required'>\nPlease enter a value.\n</div>\n";
+                        }
+                        if (field.type === "email") {
+                            html += "<div class='error' id='" + this.form.name + "-" + fld + "-email-error' ng-show='" + this.form.name + "_form." + fld + ".$dirty && " +
+                                this.form.name + "_form." + fld + ".$error.email'>\nPlease enter a valid email address.\n</div>\n";
+                        }
+                        if (field.awPassMatch) {
+                            html += "<div class='error' id='" + this.form.name + "-" + fld + "-passmatch-error' ng-show='" + this.form.name + "_form." + fld +
+                                ".$error.awpassmatch'>\nThis value does not match the password you entered previously.  Please confirm that password.\n</div>\n";
+                        }
+                        if (field.awValidUrl) {
+                            html += "<div class='error' id='" + this.form.name + "-" + fld + "-url-error' ng-show='" + this.form.name + "_form." + fld +
+                                ".$error.awvalidurl'>\nPlease enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character.\n</div>\n";
+                        }
+
+                        html += "<div class='error api-error' id='" + this.form.name + "-" + fld + "-api-error' ng-bind='" + fld + "_api_error'>\n</div>\n";
+
+                        if (field.chkPass) {
+                            // complexity error
+                            html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
+                                ".$error.complexity\">Please enter a stronger password (see strength bar below).</div>\n";
+
+                            // progress bar
+                            html += "<div class=\"pw-progress\">\n";
+                            html += "<div class=\"progress progress-striped\">\n";
+                            html += "<div id=\"progbar\" class=\"progress-bar\" role=\"progress\"></div>\n";
+                            html += "</div>\n";
+
+                            // help panel
+                            html += HelpCollapse({
+                                hdr: 'Password Complexity',
+                                content: "<p>A password with reasonable strength is required. As you type the password " +
+                                    "a progress bar will measure the strength. Sufficient strength is reached when the bar turns green.</p>" +
+                                    "<p>Password strength is judged using the following:</p>" +
+                                    "<ul class=\"pwddetails\">" +
+                                    "<li>Minimum 8 characters in length</li>\n" +
+                                    "<li>Contains a sufficient combination of the following items:\n" +
+                                    "<ul>\n" +
+                                    "<li>UPPERCASE letters</li>\n" +
+                                    "<li>Numbers</li>\n" +
+                                    "<li>Symbols _!@#$%^&*()</li>\n" +
+                                    "</ul>\n" +
+                                    "</li>\n" +
+                                    "</ul>\n",
+                                idx: this.accordion_count++,
+                                show: null
+                            });
+                            html += "</div><!-- pw-progress -->\n";
+                        }
+
+                        // Add help panel(s)
+                        html += (field.helpCollapse) ? this.buildHelpCollapse(field.helpCollapse) : '';
                     }
 
                     //textarea fields
@@ -1523,8 +1688,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', ListGenerat
                 if (!options.collapseAlreadyStarted) {
                     html += "</div>\n"; // accordion body
                 }
-
-                //console.log(html);
 
                 return html;
             },

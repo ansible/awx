@@ -259,14 +259,23 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
 
     // Respond to 'Ask at runtime?' checkbox
     $scope.ask = function (fld, associated) {
-        if ($scope[fld + '_ask']) {
+        console.log("got here");
+        debugger;
+        if ($scope[fld] === 'ASK') {
+            $scope[fld + "_ask"] = true;
+        }
+        else if ($scope[fld + '_ask']) {
             $scope[fld] = 'ASK';
-            $scope[associated] = '';
-            $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+            if (associated !== "undefined") {
+                $scope[associated] = '';
+                $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+            }
         } else {
             $scope[fld] = '';
-            $scope[associated] = '';
-            $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+            if (associated !== "undefined") {
+                $scope[associated] = '';
+                $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+            }
         }
     };
 
@@ -306,7 +315,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
     function setAskCheckboxes() {
         var fld, i;
         for (fld in form.fields) {
-            if (form.fields[fld].type === 'password' && $scope[fld] === 'ASK') {
+            if (form.fields[fld].type === 'sensitive' && $scope[fld] === 'ASK') {
                 // turn on 'ask' checkbox for password fields with value of 'ASK'
                 $("#" + fld + "-clear-btn").attr("disabled", "disabled");
                 $scope[fld + '_ask'] = true;
@@ -546,15 +555,17 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
     // Respond to 'Ask at runtime?' checkbox
     $scope.ask = function (fld, associated) {
         if ($scope[fld + '_ask']) {
-            $("#" + fld + "-clear-btn").attr("disabled", "disabled");
-            $scope[fld] = 'ASK';
-            $scope[associated] = '';
-            $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+            $scope[fld] = 'ASK'
+            if (associated !== "undefined") {
+                $scope[associated] = '';
+                $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+            }
         } else {
-            $("#" + fld + "-clear-btn").removeAttr("disabled");
             $scope[fld] = '';
-            $scope[associated] = '';
-            $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+            if (associated !== "undefined") {
+                $scope[associated] = 'ASK';
+                $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+            }
         }
     };
 
