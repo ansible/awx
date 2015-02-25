@@ -14,7 +14,7 @@
  */
 
 
-
+export default
 angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
 
     /**

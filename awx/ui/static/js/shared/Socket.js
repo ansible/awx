@@ -19,6 +19,7 @@
  * @methodOf lib.ansible.function:Socket
  * @description
  */
+export default
 angular.module('SocketIO', ['AuthService', 'Utilities'])
 
     .factory('Socket', ['$rootScope', '$location', '$log', 'Authorization', 'Store', function ($rootScope, $location, $log, Authorization, Store) {

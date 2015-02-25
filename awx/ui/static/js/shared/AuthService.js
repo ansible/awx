@@ -10,9 +10,10 @@
  *
  */
 
+import Utilities from './Utilities';
 
-
-angular.module('AuthService', ['ngCookies', 'Utilities'])
+export default
+angular.module('AuthService', ['ngCookies', Utilities.name])
 
 .factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath', 'Store',
     function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store) {

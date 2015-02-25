@@ -132,9 +132,11 @@
  * Applying CodeMirror to the text area is handled by ParseTypeChange() found in helpers/Parse.js. Within the controller will be a call to ParseTypeChange that creates the CodeMirror object and sets up the required $scope methods for handles getting, settting and type conversion.
  */
 
+import GeneratorHelpers from './generator-helpers';
+import ListGenerator from './list-generator';
 
-
-angular.module('FormGenerator', ['GeneratorHelpers', 'Utilities', 'ListGenerator'])
+export default
+angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', ListGenerator.name])
 
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'GenerateList', 'SearchWidget', 'PaginateWidget', 'Attr',
     'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty', 'SelectIcon', 'Store',

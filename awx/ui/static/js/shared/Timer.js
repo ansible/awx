@@ -18,6 +18,7 @@
  * @methodOf lib.ansible.function:Timer
  * @description
  */
+export default
 angular.module('TimerService', ['ngCookies', 'Utilities'])
     .factory('Timer', ['$rootScope', '$cookieStore', '$location', 'GetBasePath', 'Empty',
         function ($rootScope, $cookieStore) {

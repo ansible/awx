@@ -13,6 +13,9 @@
 
 /* global chkPass:false */
 
+import {chkPass} from './pwdmeter';
+
+export default
 angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'JobsHelper'])
 
     // awpassmatch:  Add to password_confirm field. Will test if value

@@ -13,7 +13,7 @@
  */
 
 
-
+export default
 angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'PromptDialog'])
 
 .factory('SortNodes', [

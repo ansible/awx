@@ -97,7 +97,7 @@
  */
 
 
-
+export default
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
         'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon', 'Breadcrumbs',

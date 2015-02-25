@@ -19,6 +19,7 @@
 
 
 
+export default
 angular.module('ApiLoader', ['Utilities'])
 
 .factory('LoadBasePaths', ['$http', '$rootScope', 'Store', 'ProcessErrors',

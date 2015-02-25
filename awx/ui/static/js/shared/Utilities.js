@@ -14,6 +14,7 @@
 
 
 
+export default
 angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**

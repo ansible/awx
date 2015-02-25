@@ -25,6 +25,8 @@
 * @methodOf lib.ansible.function:prompt-dialog
 * @description discuss difference b/t this and other modals
 */
+
+export default
 angular.module('PromptDialog', ['Utilities'])
     .factory('Prompt', ['$sce',
         function ($sce) {

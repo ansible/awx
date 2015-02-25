@@ -12,7 +12,7 @@
  */
 
 
-
+export default
 angular.module('GeneratorHelpers', [])
 
 .factory('Attr', function () {

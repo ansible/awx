@@ -42,7 +42,7 @@ String.prototype.strReverse = function () {
 
 var nScore = 0;
 
-function chkPass(pwd) {
+export function chkPass(pwd) {
     // Simultaneous variable declaration and value assignment aren't supported in IE apparently
     // so I'm forced to assign the same value individually per var to support a crappy browser *sigh*
     var nLength = 0,
