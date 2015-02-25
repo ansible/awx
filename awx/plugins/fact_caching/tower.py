@@ -53,7 +53,8 @@ class CacheModule(BaseCacheModule):
             self.socket = self.context.socket(zmq.REQ)
             self.socket.connect(self._tower_connection)
         except Exception, e:
-            print("Connection to zeromq failed at %s" % str(self._tower_connection))
+            print("Connection to zeromq failed at %s with error: %s" % (str(self._tower_connection),
+                                                                        str(e)))
             sys.exit(1)
 
     def get(self, key):
