@@ -323,8 +323,8 @@ class BaseTestMixin(QueueTestMixin):
             job_template = self.make_job_template(created_by=created_by)
 
         opts = {
-          'created_by': created_by,
-          'status': inital_state,
+            'created_by': created_by,
+            'status': inital_state,
         }
         opts.update(kwargs)
         return job_template.create_job(**opts)
@@ -448,9 +448,13 @@ class BaseTestMixin(QueueTestMixin):
             elif response['Content-Type'].startswith('application/yaml'):
                 obj = yaml.safe_load(response.content)
             elif response['Content-Type'].startswith('text/plain'):
-                obj = { 'content': response.content }
+                obj = {
+                    'content': response.content
+                }
             elif response['Content-Type'].startswith('text/html'):
-                obj = { 'content': response.content }
+                obj = {
+                    'content': response.content
+                }
             else:
                 self.fail('Unsupport response content type %s' % response['Content-Type'])
         else:

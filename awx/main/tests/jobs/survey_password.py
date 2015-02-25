@@ -2,14 +2,13 @@
 import json
 
 # Django
-import django.test
 from django.core.urlresolvers import reverse
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseTest
+from awx.main.tests.base import BaseTest, QueueStartStopTestMixin
 
-__all__ = ['SurveyPasswordTest']
+__all__ = ['SurveyPasswordRedactedTest']
 
 PASSWORD="5m/h"
 ENCRYPTED_STR='$encrypted$'
@@ -91,32 +90,32 @@ TEST_SINGLE_PASSWORDS = [
     { 
         'description': 'Single instance with a . after',
         'text' : 'See spot. See spot run. See spot run %s. That is a fast run.' % PASSWORD,
-        'passwords': [ PASSWORD ],
+        'passwords': [PASSWORD],
         'occurances': 1,
     },
     {
         'description': 'Single instance with , after',
         'text': 'Spot goes %s, at a fast pace' % PASSWORD,
-        'passwords': [ PASSWORD ],
+        'passwords': [PASSWORD],
         'occurances': 1,
     },
     {
         'description': 'Single instance with a space after',
         'text': 'Is %s very fast?' % PASSWORD,
-        'passwords': [ PASSWORD ],
+        'passwords': [PASSWORD],
         'occurances': 1,
     },
     {
         'description': 'Many instances, also with newline',
         'text': 'I think %s is very very fast. If I ran %s for 4 hours how many hours would I run?.\nTrick question. %s for 4 hours would result in running for 4 hours' % (PASSWORD, PASSWORD, PASSWORD),
-        'passwords': [ PASSWORD ],
+        'passwords': [PASSWORD],
         'occurances': 3,
     },
 ]
 passwd = 'my!@#$%^pass&*()_+'
 TEST_SINGLE_PASSWORDS.append({
     'description': 'password includes characters not in a-z 0-9 range',
-    'passwords': [ passwd ],
+    'passwords': [passwd],
     'text': 'Text is fun yeah with passwords %s.' % passwd,
     'occurances': 1
 })
@@ -142,7 +141,7 @@ TESTS = {
     }
 }
 
-class SurveyPasswordBaseTest(BaseTest):
+class SurveyPasswordBaseTest(BaseTest, QueueStartStopTestMixin):
     def setUp(self):
         super(SurveyPasswordBaseTest, self).setUp()
         self.setup_instances()
@@ -155,11 +154,41 @@ class SurveyPasswordBaseTest(BaseTest):
 
         self.check_found(response['content'], ENCRYPTED_STR, test['occurances'], test['description'])
 
-    def _get_url_job_stdout(self, job):
-        job_stdout_url = reverse('api:job_stdout', args=(job.pk,))
-        return self.get(job_stdout_url, expect=200, auth=self.get_super_credentials(), accept='application/json')
+    # TODO: A more complete test would ensure that the variable value isn't found
+    def check_extra_vars_redacted(self, test, response):
+        self.assertIsNotNone(response)
+        # Ensure that all extra_vars of type password have the value '$encrypted$'
+        vars = []
+        for question in test['survey']['spec']:
+            if question['type'] == 'password':
+                vars.append(question['variable'])
 
-class SurveyPasswordTest(SurveyPasswordBaseTest):
+        extra_vars = json.loads(response['extra_vars'])
+        for var in vars:
+            self.assertIn(var, extra_vars, 'Variable "%s" should exist in "%s"' % (var, extra_vars))
+            self.assertEqual(extra_vars[var], ENCRYPTED_STR)
+
+    def _get_url_job_stdout(self, job):
+        url = reverse('api:job_stdout', args=(job.pk,))
+        return self.get(url, expect=200, auth=self.get_super_credentials(), accept='application/json')
+
+    def _get_url_job_details(self, job):
+        url = reverse('api:job_detail', args=(job.pk,))
+        return self.get(url, expect=200, auth=self.get_super_credentials(), accept='application/json')
+
+class SurveyPasswordRedactedTest(SurveyPasswordBaseTest):
+    '''
+    Transpose TEST[]['tests'] to the below format. A more flat format."
+    [
+      {
+        'text': '...',
+        'description': '...',
+        ...,
+        'job': '...',
+        'survey': '...'
+      },
+    ]
+    '''
     def setup_test(self, test_name):
         blueprint = TESTS[test_name]
         self.tests[test_name] = []
@@ -179,25 +208,30 @@ class SurveyPasswordTest(SurveyPasswordBaseTest):
             job.result_stdout_text = test['text']
             job.save()
             test['job'] = job
+            test['survey'] = blueprint['survey']
             self.tests[test_name].append(test)
 
     def setUp(self):
-        super(SurveyPasswordTest, self).setUp()
+        super(SurveyPasswordRedactedTest, self).setUp()
 
         self.tests = {}
         self.setup_test('simple')
         self.setup_test('complex')
 
     # should redact single variable survey
-    def test_survey_password_redact_simple_survey(self):
+    def test_redact_stdout_simple_survey(self):
         for test in self.tests['simple']:
             response = self._get_url_job_stdout(test['job'])
             self.check_passwords_redacted(test, response)
 
     # should redact multiple variables survey
-    def test_survey_password_redact_complex_survey(self):
+    def test_redact_stdout_complex_survey(self):
         for test in self.tests['complex']:
             response = self._get_url_job_stdout(test['job'])
             self.check_passwords_redacted(test, response)
 
-   
+    # should redact values in extra_vars
+    def test_redact_job_extra_vars(self):
+        for test in self.tests['simple']:
+            response = self._get_url_job_details(test['job']) 
+            self.check_extra_vars_redacted(test, response)

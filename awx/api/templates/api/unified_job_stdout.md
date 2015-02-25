@@ -17,16 +17,6 @@ Use the `format` query string parameter to specify the output format.
 formats, the `start_line` and `end_line` query string parameters can be used
 to specify a range of line numbers to retrieve.
 
-When using the HTML or API formats, use the `scheme` query string parameter to
-change the output colors.  The value must be one of the following (default is
-`ansi2html`):
-
-* `ansi2html`
-* `osx`
-* `xterm`
-* `xterm-bright`
-* `solarized`
-
 Use `dark=1` or `dark=0` as a query string parameter to force or disable a
 dark background.
 

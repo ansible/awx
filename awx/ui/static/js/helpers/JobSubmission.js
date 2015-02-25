@@ -39,7 +39,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                                     Rest.get()
                                     .success(function (data) {
                                         if(!Empty(data.extra_vars)){
-                                            data.extra_vars = ToJSON('json',  data.extra_vars, false);
+                                            data.extra_vars = ToJSON('yaml',  data.extra_vars, false);
                                             $.each(data.extra_vars, function(key,value){
                                                 job_launch_data.extra_vars[key] = value;
                                             });
@@ -77,7 +77,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                                         for (var i=0; i < scope.survey_questions.length; i++){
                                             var fld = scope.survey_questions[i].variable;
                                             // grab all survey questions that have answers
-                                            if(scope[fld]) {
+                                            if(scope.survey_questions[i].required || (scope.survey_questions[i].required === false && scope[fld].toString()!=="")) {
                                                 job_launch_data.extra_vars[fld] = scope[fld];
                                             }
                                             // for optional text and text-areas, submit a blank string if min length is 0
@@ -544,7 +544,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                                                                                                             }
 
                                                                                                             if(question.type === "textarea"){
-                                                                                                                scope[question.variable] = question.default || question.default_textarea;
+                                                                                                                scope[question.variable] = (question.default_textarea) ? question.default_textarea : (question.default) ? question.default : ""; 
                                                                                                                 minlength = (!Empty(question.min)) ? Number(question.min) : "";
                                                                                                                 maxlength =(!Empty(question.max)) ? Number(question.max) : "" ;
                                                                                                                 html+='<textarea id="'+question.variable+'" name="'+question.variable+'" ng-model="'+question.variable+'" '+
