@@ -816,9 +816,15 @@ class ProjectUpdatesTest(BaseTransactionTest):
             # - rsync://host.xz/path/to/repo.git/
             ('git', 'rsync://host.xz/path/to/repo.git/', ValueError, ValueError, ValueError),
             # - [user@]host.xz:path/to/repo.git/ (SCP style)
-            ('git', 'host.xz:path/to/repo.git/', 'ssh://host.xz/path/to/repo.git/', 'ssh://testuser@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'user@host.xz:path/to/repo.git/', 'ssh://user@host.xz/path/to/repo.git/', 'ssh://testuser@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
-            ('git', 'user:pass@host.xz:path/to/repo.git/', 'ssh://user:pass@host.xz/path/to/repo.git/', 'ssh://testuser:pass@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'host.xz:path/to/repo.git/', 'git+ssh://host.xz/path/to/repo.git/', 'git+ssh://testuser@host.xz/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'user@host.xz:path/to/repo.git/', 'git+ssh://user@host.xz/path/to/repo.git/', 'git+ssh://testuser@host.xz/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'user:pass@host.xz:path/to/repo.git/', 'git+ssh://user:pass@host.xz/path/to/repo.git/', 'git+ssh://testuser:pass@host.xz/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'host.xz:~/path/to/repo.git/', 'git+ssh://host.xz/~/path/to/repo.git/', 'git+ssh://testuser@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/~/path/to/repo.git/'),
+            ('git', 'user@host.xz:~/path/to/repo.git/', 'git+ssh://user@host.xz/~/path/to/repo.git/', 'git+ssh://testuser@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/~/path/to/repo.git/'),
+            ('git', 'user:pass@host.xz:~/path/to/repo.git/', 'git+ssh://user:pass@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:pass@host.xz/~/path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz/~/path/to/repo.git/'),
+            ('git', 'host.xz:/path/to/repo.git/', 'git+ssh://host.xz//path/to/repo.git/', 'git+ssh://testuser@host.xz//path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz//path/to/repo.git/'),
+            ('git', 'user@host.xz:/path/to/repo.git/', 'git+ssh://user@host.xz//path/to/repo.git/', 'git+ssh://testuser@host.xz//path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz//path/to/repo.git/'),
+            ('git', 'user:pass@host.xz:/path/to/repo.git/', 'git+ssh://user:pass@host.xz//path/to/repo.git/', 'git+ssh://testuser:pass@host.xz//path/to/repo.git/', 'git+ssh://testuser:testpass@host.xz//path/to/repo.git/'),
             # - /path/to/repo.git/ (local file)
             ('git', '/path/to/repo.git', ValueError, ValueError, ValueError),
             ('git', 'path/to/repo.git', ValueError,  ValueError, ValueError),
@@ -829,7 +835,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             ('git', 'ssh:github.com:ansible/ansible-examples.git', ValueError, ValueError, ValueError),
             ('git', 'ssh://github.com:ansible/ansible-examples.git', ValueError, ValueError, ValueError),
             # Special case for github URLs:
-            ('git', 'git@github.com:ansible/ansible-examples.git', 'ssh://git@github.com/ansible/ansible-examples.git', ValueError, ValueError),
+            ('git', 'git@github.com:ansible/ansible-examples.git', 'git+ssh://git@github.com/ansible/ansible-examples.git', ValueError, ValueError),
             ('git', 'bob@github.com:ansible/ansible-examples.git', ValueError, ValueError, ValueError),
             # Special case for bitbucket URLs:
             ('git', 'ssh://git@bitbucket.org/foo/bar.git', None, ValueError, ValueError),
@@ -926,39 +932,56 @@ class ProjectUpdatesTest(BaseTransactionTest):
             ('svn', 'svn+ssh://user@host.xz:1022/path/to/repo', None, 'svn+ssh://testuser@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
             ('svn', 'svn+ssh://user:pass@host.xz/path/to/repo/', None, 'svn+ssh://testuser:pass@host.xz/path/to/repo/', 'svn+ssh://testuser:testpass@host.xz/path/to/repo/'),
             ('svn', 'svn+ssh://user:pass@host.xz:1022/path/to/repo', None, 'svn+ssh://testuser:pass@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
-
-            # FIXME: Add some invalid URLs.
         ]
 
+        # Some invalid URLs.
+        for scm_type in ('git', 'svn', 'hg'):
+            urls_to_test.append((scm_type, 'host', ValueError, ValueError, ValueError))
+            urls_to_test.append((scm_type, '/path', ValueError, ValueError, ValueError))
+            urls_to_test.append((scm_type, 'mailto:joe@example.com', ValueError, ValueError, ValueError))
+            urls_to_test.append((scm_type, 'telnet://host.xz/path/to/repo', ValueError, ValueError, ValueError))
+
         def is_exception(e):
-            return bool(isinstance(e, Exception) or
-                        (isinstance(e, type) and issubclass(e, Exception)))
+            return bool(isinstance(e, Exception) or (isinstance(e, type) and issubclass(e, Exception)))
+
         for url_opts in urls_to_test:
             scm_type, url, new_url, new_url_u, new_url_up = url_opts
-            #print scm_type, url
             new_url = new_url or url
             new_url_u = new_url_u or url
             new_url_up = new_url_up or url
+            
+            # Check existing URL as-is.
             if is_exception(new_url):
                 self.assertRaises(new_url, update_scm_url, scm_type, url)
             else:
                 updated_url = update_scm_url(scm_type, url)
                 self.assertEqual(new_url, updated_url)
+                if updated_url.startswith('git+ssh://'):
+                    new_url2 = new_url.replace('git+ssh://', '', 1).replace('/', ':', 1)
+                    updated_url2 = update_scm_url(scm_type, url, scp_format=True)
+                    self.assertEqual(new_url2, updated_url2)
+
+            # Check URL with username replaced.
             if is_exception(new_url_u):
-                self.assertRaises(new_url_u, update_scm_url, scm_type,
-                                  url, username='testuser')
+                self.assertRaises(new_url_u, update_scm_url, scm_type, url, username='testuser')
             else:
-                updated_url = update_scm_url(scm_type, url,
-                                             username='testuser')
+                updated_url = update_scm_url(scm_type, url, username='testuser')
                 self.assertEqual(new_url_u, updated_url)
+                if updated_url.startswith('git+ssh://'):
+                    new_url2 = new_url_u.replace('git+ssh://', '', 1).replace('/', ':', 1)
+                    updated_url2 = update_scm_url(scm_type, url, username='testuser', scp_format=True)
+                    self.assertEqual(new_url2, updated_url2)
+
+            # Check URL with username and password replaced.
             if is_exception(new_url_up):
-                self.assertRaises(new_url_up, update_scm_url, scm_type,
-                                  url, username='testuser', password='testpass')
+                self.assertRaises(new_url_up, update_scm_url, scm_type, url, username='testuser', password='testpass')
             else:
-                updated_url = update_scm_url(scm_type, url,
-                                             username='testuser',
-                                             password='testpass')
+                updated_url = update_scm_url(scm_type, url, username='testuser', password='testpass')
                 self.assertEqual(new_url_up, updated_url)
+                if updated_url.startswith('git+ssh://'):
+                    new_url2 = new_url_up.replace('git+ssh://', '', 1).replace('/', ':', 1)
+                    updated_url2 = update_scm_url(scm_type, url, username='testuser', password='testpass', scp_format=True)
+                    self.assertEqual(new_url2, updated_url2)
 
     def is_public_key_in_authorized_keys(self):
         auth_keys = set()

@@ -791,14 +791,16 @@ class RunProjectUpdate(BaseTask):
                 scm_password = False
                 if scm_url_parts.scheme != 'svn+ssh':
                     scm_username = False
-            elif scm_url_parts.scheme == 'ssh':
+            elif scm_url_parts.scheme.endswith('ssh'):
                 scm_password = False
             scm_url = update_scm_url(scm_type, scm_url, scm_username,
-                                     scm_password)
+                                     scm_password, scp_format=True)
+        else:
+            scm_url = update_scm_url(scm_type, scm_url, scp_format=True)
 
         # When using Ansible >= 1.5, pass the extra accept_hostkey parameter to
         # the git module.
-        if scm_type == 'git' and scm_url_parts.scheme == 'ssh':
+        if scm_type == 'git' and scm_url_parts.scheme.endswith('ssh'):
             try:
                 if Version(kwargs['ansible_version']) >= Version('1.5'):
                     extra_vars['scm_accept_hostkey'] = 'true'
