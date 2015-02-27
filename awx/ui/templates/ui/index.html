@@ -16,14 +16,14 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/novus-nvd3/nv.d3.css"  type="text/css">
 
-  <link rel="stylesheet" href="{{ STATIC_URL }}dist/tower.min.css"  type="text/css">
+  <link rel="stylesheet" href="{{ STATIC_URL }}tower.min.css"  type="text/css">
 
   <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" />
   <script>
       var $basePath = "{{ STATIC_URL }}";
   </script>
 
-  <script src="{{ STATIC_URL }}dist/tower.concat.js"></script>
+  <script src="{{ STATIC_URL }}tower.concat.js"></script>
 
 </head>
 <body>
@@ -239,7 +239,7 @@
     <div id="login-modal-dialog" style="display: none;"></div>
     <div id="help-modal-dialog" style="display: none;"></div>
     <div id="license-modal-dialog" style="display: none;"></div>
-    <div id="about-modal-dialog" style="display: none;" ng-include=" 'static/partials/cowsay-about.html ' "></div>
+    <div id="about-modal-dialog" style="display: none;" ng-include=" '{{ STATIC_URL }}partials/cowsay-about.html ' "></div>
     <div id="custom-script-dialog" style="display:none;" > </div>
     <div id='configure-tower-dialog' style="display:none" >
       <div id="configure-jobs" ></div>
