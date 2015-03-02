@@ -15,7 +15,7 @@ awx/*.log
 tower/tower_warnings.log
 celerybeat-schedule
 awx/ui/static/docs
-awx/ui/static/dist
+awx/ui/dist
 
 # Python & setuptools
 __pycache__

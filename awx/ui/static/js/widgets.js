@@ -1,25 +1,12 @@
-import DashboardCounts from "tower/widgets/DashboardCounts";
-import DashboardJobs from "tower/widgets/DashboardJobs";
-import HostGraph from "tower/widgets/HostGraph";
-import HostPieChart from "tower/widgets/HostPieChart";
-import InventorySyncStatus from "tower/widgets/InventorySyncStatus";
-import JobStatus from "tower/widgets/JobStatus";
-import JobStatusGraph from "tower/widgets/JobStatusGraph";
-import ObjectCount from "tower/widgets/ObjectCount";
-import PortalJobs from "tower/widgets/PortalJobs";
-import SCMSyncStatus from "tower/widgets/SCMSyncStatus";
-import Stream from "tower/widgets/Stream";
+import "tower/widgets/DashboardCounts";
+import "tower/widgets/DashboardJobs";
+import "tower/widgets/HostGraph";
+import "tower/widgets/HostPieChart";
+import "tower/widgets/InventorySyncStatus";
+import "tower/widgets/JobStatus";
+import "tower/widgets/JobStatusGraph";
+import "tower/widgets/ObjectCount";
+import "tower/widgets/PortalJobs";
+import "tower/widgets/SCMSyncStatus";
+import "tower/widgets/Stream";
 
-export
-    {   DashboardCounts,
-        DashboardJobs,
-        HostGraph,
-        HostPieChart,
-        InventorySyncStatus,
-        JobStatus,
-        JobStatusGraph,
-        ObjectCount,
-        PortalJobs,
-        SCMSyncStatus,
-        Stream
-    };
