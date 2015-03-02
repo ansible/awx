@@ -2,6 +2,7 @@ recursive-include awx *.py
 recursive-include awx/static *.ico
 recursive-include awx/templates *.html
 recursive-include awx/api/templates *.md
+recursive-include awx/ui/templates *.html
 recursive-include awx/ui/dist *
 recursive-include awx/playbooks *.yml
 recursive-include awx/lib/site-packages *
