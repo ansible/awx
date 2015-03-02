@@ -23,14 +23,30 @@ export default
         hover: true,
 
         fields: {
+          smart_status: {
+              label: 'Status',
+              columnClass: 'col-md-2 col-sm-2 col-xs-2',
+              searchable: false,
+              nosort: true,
+              ngClick: "null",
+              iconOnly: true,
+              excludeModal: true,
+              smartStatus: [{
+                  icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
+                  awToolTip: "{{ inventory.syncTip }}",
+                  awTipPlacement: "top",
+                  ngClick: "showGroupSummary($event, inventory.id)",
+                  ngClass: "inventory.launch_class"
+              }]
+            },
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8'
+                // columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8'
             },
             description: {
                 label: 'Description',
-                columnClass: 'col-lg-4 col-md-4 hidden-sm hidden-xs'
+                // columnClass: 'col-lg-4 col-md-3 hidden-sm hidden-xs'
             }
         },
 
