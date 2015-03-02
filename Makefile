@@ -91,6 +91,7 @@ clean-grunt:
 
 # Remove UI build files
 clean-ui:
+	rm -rf awx/ui/static/dist
 	rm -rf awx/ui/dist
 	rm -rf awx/ui/static/docs
 
