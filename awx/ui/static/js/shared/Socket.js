@@ -81,7 +81,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             'connect timeout': 3000,
                             'try multiple transports': false,
                             'max reconnection attempts': 3,
-                            'reconnection limit': 3000,
+                            'reconnection limit': 10000,
                             'force new connection': true
                         });
 
