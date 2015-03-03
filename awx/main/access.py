@@ -851,8 +851,10 @@ class JobTemplateAccess(BaseAccess):
         )
         # FIXME: Check active status on related objects!
         org_admin_qs = base_qs.filter(
-            project__organizations__admins__in=[self.user]
+            Q(project__organizations__admins__in=[self.user]) |
+            (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
         )
+
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
 
@@ -1048,8 +1050,10 @@ class JobAccess(BaseAccess):
             credential_id__in=credential_ids,
         )
         org_admin_qs = base_qs.filter(
-            project__organizations__admins__in=[self.user]
+            Q(project__organizations__admins__in=[self.user]) |
+            (Q(project__isnull=True) & Q(job_type=PERM_INVENTORY_SCAN) & Q(inventory__organization__admins__in=[self.user]))
         )
+
         allowed_deploy = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY]
         allowed_check = [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
         team_ids = set(Team.objects.filter(users__in=[self.user]).values_list('id', flat=True))
