@@ -550,10 +550,6 @@ class RunJob(BaseTask):
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
-        # TODO: env['ANSIBLE_LIBRARY'] # plugins/library
-        # TODO: env['ANSIBLE_CACHE_PLUGINS'] # plugins/fact_caching
-        # TODD: env['ANSIBLE_CACHE_PLUGIN'] # tower
-        # TODO: env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] # connection to tower service
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
@@ -598,6 +594,12 @@ class RunJob(BaseTask):
             env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
             env['VMWARE_HOST'] = cloud_cred.host
 
+        # Set environment variables related to scan jobs
+        if job.job_type == PERM_INVENTORY_SCAN:
+            env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
+            env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
+            env['ANSIBLE_CACHE_PLUGIN'] = "tower"
+            env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = "tcp://127.0.0.1:%s" % str(settings.FACT_CACHE_PORT)
         return env
 
     def build_args(self, job, **kwargs):
@@ -678,11 +680,16 @@ class RunJob(BaseTask):
         args.extend(['-e', json.dumps(extra_vars)])
 
         # Add path to playbook (relative to project.local_path).
-        args.append(job.playbook)
+        if job.project is None and job.job_type == PERM_INVENTORY_SCAN:
+            args.append("scan_facts.yml")
+        else:
+            args.append(job.playbook)
 
         return args
 
     def build_cwd(self, job, **kwargs):
+        if job.project is None and job.job_type == PERM_INVENTORY_SCAN:
+            return self.get_path_to('..', 'playbooks')
         cwd = job.project.get_project_path()
         if not cwd:
             root = settings.PROJECTS_ROOT

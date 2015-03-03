@@ -1304,11 +1304,19 @@ class JobOptionsSerializer(BaseSerializer):
             ret['cloud_credential'] = None
         return ret
 
+    def validate_project(self, attrs, source):
+        project = attrs.get('project', None)
+        if not project and attrs.get('job_type') != PERM_INVENTORY_SCAN:
+            raise serializers.ValidationError("This field is required")
+        return attrs
+
     def validate_playbook(self, attrs, source):
         project = attrs.get('project', None)
         playbook = attrs.get('playbook', '')
         if project and playbook and smart_str(playbook) not in project.playbooks:
             raise serializers.ValidationError('Playbook not found for project')
+        if project and not playbook:
+            raise serializers.ValidationError('Must select playbook for project')
         return attrs
 
 
@@ -1470,13 +1478,11 @@ class SystemJobSerializer(UnifiedJobSerializer):
                                                  args=(obj.system_job_template.pk,))
         return res
 
-
 class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
     pass
 
 class SystemJobListSerializer(SystemJobSerializer, UnifiedJobListSerializer):
     pass
-
 
 class JobHostSummarySerializer(BaseSerializer):
 

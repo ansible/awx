@@ -45,6 +45,9 @@ class CacheModule(BaseCacheModule):
 
     def __init__(self, *args, **kwargs):
 
+        # Basic in-memory caching for typical runs
+        self._cache = {}
+
         # This is the local tower zmq connection
         self._tower_connection = C.CACHE_PLUGIN_CONNECTION
         self.date_key = time.mktime(datetime.datetime.utcnow().timetuple())
@@ -58,23 +61,26 @@ class CacheModule(BaseCacheModule):
             sys.exit(1)
 
     def get(self, key):
-        return {} # Temporary until we have some tower retrieval endpoints
+        return self._cache.get(key)
 
     def set(self, key, value):
+        self._cache[key] = value
+
+        # Emit fact data to tower for processing
         self.socket.send_json(dict(host=key, facts=value, date_key=self.date_key))
         self.socket.recv()
 
     def keys(self):
-        return []
+        return self._cache.keys()
 
     def contains(self, key):
-        return False
+        return key in self._cache
 
     def delete(self, key):
-        pass
+        del self._cache[key]
 
     def flush(self):
-        pass
+        self._cache = {}
 
     def copy(self):
-        return dict()
+        return self._cache.copy()
