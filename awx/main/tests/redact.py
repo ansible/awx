@@ -87,9 +87,9 @@ class UriCleanTests(BaseTest):
         for uri in TEST_URIS:
             redacted_str = UriCleaner.remove_sensitive(str(uri))
             if uri.username:
-                self.check_not_found(redacted_str, uri.username)
+                self.check_not_found(redacted_str, uri.username, uri.description)
             if uri.password:
-                self.check_not_found(redacted_str, uri.password)
+                self.check_not_found(redacted_str, uri.password, uri.description)
 
     # should replace secret data with safe string, UriCleaner.REPLACE_STR
     def test_uri_scm_simple_replaced(self):
@@ -107,9 +107,9 @@ class UriCleanTests(BaseTest):
 
         redacted_str = UriCleaner.remove_sensitive(str(uri))
         if uri.username:
-            self.check_not_found(redacted_str, uri.username)
+            self.check_not_found(redacted_str, uri.username, uri.description)
         if uri.password:
-            self.check_not_found(redacted_str, uri.password)
+            self.check_not_found(redacted_str, uri.password, uri.description)
 
     # should replace multiple secret data with safe string
     def test_uri_scm_multiple_replaced(self):
@@ -131,8 +131,8 @@ class UriCleanTests(BaseTest):
         for test_data in TEST_CLEARTEXT:
             uri = test_data['uri']
             redacted_str = UriCleaner.remove_sensitive(test_data['text'])
-            self.check_not_found(redacted_str, uri.username)
-            self.check_not_found(redacted_str, uri.password)
+            self.check_not_found(redacted_str, uri.username, uri.description)
+            self.check_not_found(redacted_str, uri.password, uri.description)
             # Ensure the host didn't get redacted
-            self.check_found(redacted_str, uri.host, count=test_data['host_occurrences'])
+            self.check_found(redacted_str, uri.host, test_data['host_occurrences'], uri.description)
 

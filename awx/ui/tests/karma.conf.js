@@ -12,10 +12,10 @@ module.exports = function(config) {
     frameworks: ['mocha', 'chai', 'sinon-chai', 'chai-as-promised'],
     // list of files / patterns to load in the browser
     files: [
-        '../static/dist/tower.concat.js',
+        '../dist/tower.concat.js',
         '../static/lib/angular-mocks/angular-mocks.js',
         '../static/lib/ember-cli-test-loader/test-loader.js',
-        '../static/dist/tests/**/*.js',
+        '../dist/tests/**/*.js',
         '../tests/unit.js'
     ],
 

@@ -163,7 +163,7 @@ def decrypt_field(instance, field_name):
 
 
 def update_scm_url(scm_type, url, username=True, password=True,
-                   check_special_cases=True):
+                   check_special_cases=True, scp_format=False):
     '''
     Update the given SCM URL to add/replace/remove the username/password. When
     username/password is True, preserve existing username/password, when
@@ -183,20 +183,28 @@ def update_scm_url(scm_type, url, username=True, password=True,
         parts.port
     except ValueError:
         raise ValueError('Invalid %s URL' % scm_type)
-    #print parts
+    if parts.scheme == 'git+ssh' and not scp_format:
+        raise ValueError('Unsupported %s URL' % scm_type)
+
     if '://' not in url:
         # Handle SCP-style URLs for git (e.g. [user@]host.xz:path/to/repo.git/).
-        if scm_type == 'git' and '@' in url:
-            userpass, hostpath = url.split('@', 1)
-            hostpath = '/'.join(hostpath.split(':', 1))
-            modified_url = '@'.join([userpass, hostpath])
-            parts = urlparse.urlsplit('ssh://%s' % modified_url)
-        elif scm_type == 'git' and ':' in url:
-            if url.count(':') > 1:
+        if scm_type == 'git' and ':' in url:
+            if '@' in url:
+                userpass, hostpath = url.split('@', 1)
+            else:
+                userpass, hostpath = '', url
+            if hostpath.count(':') > 1:
                 raise ValueError('Invalid %s URL' % scm_type)
-
-            modified_url = '/'.join(url.split(':', 1))
-            parts = urlparse.urlsplit('ssh://%s' % modified_url)
+            host, path = hostpath.split(':', 1)
+            #if not path.startswith('/') and not path.startswith('~/'):
+            #    path = '~/%s' % path
+            #if path.startswith('/'):
+            #    path = path.lstrip('/')
+            hostpath = '/'.join([host, path])
+            modified_url = '@'.join(filter(None, [userpass, hostpath]))
+            # git+ssh scheme identifies URLs that should be converted back to
+            # SCP style before passed to git module.
+            parts = urlparse.urlsplit('git+ssh://%s' % modified_url)
         # Handle local paths specified without file scheme (e.g. /path/to/foo).
         # Only supported by git and hg. (not currently allowed)
         elif scm_type in ('git', 'hg'):
@@ -206,10 +214,10 @@ def update_scm_url(scm_type, url, username=True, password=True,
                 parts = urlparse.urlsplit('file://%s' % url)
         else:
             raise ValueError('Invalid %s URL' % scm_type)
-        #print parts
+
     # Validate that scheme is valid for given scm_type.
     scm_type_schemes = {
-        'git': ('ssh', 'git', 'http', 'https', 'ftp', 'ftps'),
+        'git': ('ssh', 'git', 'git+ssh', 'http', 'https', 'ftp', 'ftps'),
         'hg': ('http', 'https', 'ssh'),
         'svn': ('http', 'https', 'svn', 'svn+ssh'),
     }
@@ -235,9 +243,9 @@ def update_scm_url(scm_type, url, username=True, password=True,
     # Special handling for github/bitbucket SSH URLs.
     if check_special_cases:
         special_git_hosts = ('github.com', 'bitbucket.org', 'altssh.bitbucket.org')
-        if scm_type == 'git' and parts.scheme == 'ssh' and parts.hostname in special_git_hosts and netloc_username != 'git':
+        if scm_type == 'git' and parts.scheme.endswith('ssh') and parts.hostname in special_git_hosts and netloc_username != 'git':
             raise ValueError('Username must be "git" for SSH access to %s.' % parts.hostname)
-        if scm_type == 'git' and parts.scheme == 'ssh' and parts.hostname in special_git_hosts and netloc_password:
+        if scm_type == 'git' and parts.scheme.endswith('ssh') and parts.hostname in special_git_hosts and netloc_password:
             #raise ValueError('Password not allowed for SSH access to %s.' % parts.hostname)
             netloc_password = ''
         special_hg_hosts = ('bitbucket.org', 'altssh.bitbucket.org')
@@ -256,6 +264,8 @@ def update_scm_url(scm_type, url, username=True, password=True,
         netloc = u':'.join([netloc, unicode(parts.port)])
     new_url = urlparse.urlunsplit([parts.scheme, netloc, parts.path,
                                    parts.query, parts.fragment])
+    if scp_format and parts.scheme == 'git+ssh':
+        new_url = new_url.replace('git+ssh://', '', 1).replace('/', ':', 1)
     return new_url
 
 

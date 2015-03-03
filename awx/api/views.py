@@ -3,6 +3,7 @@
 # All Rights Reserved.
 
 # Python
+import cgi
 import datetime
 import dateutil
 import time
@@ -33,18 +34,16 @@ from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
 from rest_framework import status
 
-# Ansi2HTML
-from ansi2html import Ansi2HTMLConverter
-from ansi2html.style import SCHEME
-
 # QSStats
 import qsstats
+
+# ANSIConv
+import ansiconv
 
 # AWX
 from awx.main.task_engine import TaskSerializer, TASK_FILE
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
-from awx.main.redact import UriCleaner
 from awx.api.authentication import JobTaskAuthentication
 from awx.api.utils.decorators import paginated
 from awx.api.generics import get_view_name
@@ -2202,36 +2201,30 @@ class UnifiedJobStdout(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
         if request.accepted_renderer.format in ('html', 'api', 'json'):
-            scheme = request.QUERY_PARAMS.get('scheme', None)
             start_line = request.QUERY_PARAMS.get('start_line', 0)
             end_line = request.QUERY_PARAMS.get('end_line', None)
-            if scheme not in SCHEME:
-                scheme = 'ansi2html'
             dark_val = request.QUERY_PARAMS.get('dark', '')
             dark = bool(dark_val and dark_val[0].lower() in ('1', 't', 'y'))
             content_only = bool(request.accepted_renderer.format in ('api', 'json'))
             dark_bg = (content_only and dark) or (not content_only and (dark or not dark_val))
-            conv = Ansi2HTMLConverter(scheme=scheme, dark_bg=dark_bg,
-                                      title=get_view_name(self.__class__))
             content, start, end, absolute_end = unified_job.result_stdout_raw_limited(start_line, end_line)
-            content = UriCleaner.remove_sensitive(content)
-            if content_only:
-                headers = conv.produce_headers()
-                body = conv.convert(content, full=False) # Escapes any HTML that may be in content.
-                data = '\n'.join([headers, body])
-                data = '<div class="nocode body_foreground body_background">%s</div>' % data
-            else:
-                data = conv.convert(content)
-            # Fix ugly grey background used by default.
-            data = data.replace('.body_background { background-color: #AAAAAA; }',
-                                '.body_background { background-color: #f5f5f5; }')
+
+            body = ansiconv.to_html(cgi.escape(content))
+            context = {
+                'title': get_view_name(self.__class__),
+                'body': mark_safe(body),
+                'dark': dark_bg, 
+                'content_only': content_only,
+            }
+            data = render_to_string('api/stdout.html', context).strip()
+
             if request.accepted_renderer.format == 'api':
                 return Response(mark_safe(data))
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
             return Response(data)
         elif request.accepted_renderer.format == 'ansi':
-            return Response(UriCleaner.remove_sensitive(unified_job.result_stdout_raw))
+            return Response(unified_job.result_stdout_raw)
         else:
             return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
 

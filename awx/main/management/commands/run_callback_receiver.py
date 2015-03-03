@@ -15,9 +15,8 @@ from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.db import transaction, DatabaseError
 from django.utils.dateparse import parse_datetime
-from django.utils.timezone import now
 from django.utils.tzinfo import FixedOffset
-from django.db import connection 
+from django.db import connection
 
 # AWX
 from awx.main.models import * # noqa
@@ -27,7 +26,6 @@ logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 MAX_REQUESTS = 10000
 WORKERS = 4
-
 
 class CallbackReceiver(object):
     def __init__(self):
@@ -89,7 +87,7 @@ class CallbackReceiver(object):
                     queue_worker[2] = w
             if workers_changed:
                 signal.signal(signal.SIGINT, shutdown_handler([p[2] for p in worker_queues] + [main_process]))
-                signal.signal(signal.SIGTERM, shutdown_handler([p[2] for p in worker_queues] + [main_process]))        
+                signal.signal(signal.SIGTERM, shutdown_handler([p[2] for p in worker_queues] + [main_process]))
             if not main_process.is_alive():
                 sys.exit(1)
             time.sleep(0.1)
@@ -241,7 +239,7 @@ class Command(NoArgsCommand):
     Save Job Callback receiver (see awx.plugins.callbacks.job_event_callback)
     Runs as a management command and receives job save events.  It then hands
     them off to worker processors (see Worker) which writes them to the database
-    '''    
+    '''
     help = 'Launch the job callback receiver'
 
     def handle_noargs(self, **options):

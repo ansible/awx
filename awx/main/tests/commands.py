@@ -310,7 +310,6 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         self.group.hosts.add(self.host)
         self.project = None
         self.credential = None
-        settings.INTERNAL_API_URL = self.live_server_url
         self.start_queue()
 
     def tearDown(self):
@@ -320,18 +319,7 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
             shutil.rmtree(self.test_project_path, True)
 
     def create_test_credential(self, **kwargs):
-        opts = {
-            'name': 'test-creds',
-            'user': self.super_django_user,
-            'ssh_username': '',
-            'ssh_key_data': '',
-            'ssh_key_unlock': '',
-            'ssh_password': '',
-            'sudo_username': '',
-            'sudo_password': '',
-        }
-        opts.update(kwargs)
-        self.credential = Credential.objects.create(**opts)
+        self.credential = self.make_credential(kwargs)
         return self.credential
 
     def create_test_project(self, playbook_content):

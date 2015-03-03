@@ -64,6 +64,7 @@ USE_L10N = True
 USE_TZ = True
 
 STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'ui', 'dist'),
     os.path.join(BASE_DIR, 'static'),
 )
 
@@ -509,6 +510,8 @@ TASK_COMMAND_PORT = 6559
 
 SOCKETIO_NOTIFICATION_PORT = 6557
 SOCKETIO_LISTEN_PORT = 8080
+
+FACT_CACHE_PORT = 6564
 
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 

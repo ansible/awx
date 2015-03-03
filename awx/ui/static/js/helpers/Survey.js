@@ -577,11 +577,14 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.int_max = null;
                 scope.float_min = null;
                 scope.float_max = null;
+                scope.duplicate = false;
+                scope.invalidChoice = false;
+                scope.minTextError = false;
+                scope.maxTextError = false;
             };
 
             scope.addNewQuestion = function(){
                 // $('#add_question_btn').on("click" , function(){
-                scope.duplicate = false;
                 scope.addQuestion();
                 $('#survey_question_question_name').focus();
                 $('#add_question_btn').attr('disabled', 'disabled');
@@ -753,6 +756,7 @@ angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper',
                 scope.default_float = "";
                 scope.default_int = "";
                 scope.default_textarea = "";
+                scope.default_password = "" ; 
                 scope.choices = "";
                 scope.text_min = "";
                 scope.text_max = "" ;

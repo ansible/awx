@@ -45,6 +45,17 @@ import {UsersList, UsersAdd, UsersEdit} from 'tower/controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from 'tower/controllers/Teams';
 import {PermissionsAdd, PermissionsList, PermissionsEdit} from 'tower/controllers/Permissions';
 
+import 'tower/shared/RestServices';
+import 'tower/shared/api-loader';
+import 'tower/shared/form-generator';
+import 'tower/shared/Modal';
+import 'tower/shared/prompt-dialog';
+import 'tower/shared/directives';
+import 'tower/shared/filters';
+import 'tower/shared/InventoryTree';
+import 'tower/shared/Timer';
+import 'tower/shared/Socket';
+
 
 
 var tower = angular.module('Tower', [

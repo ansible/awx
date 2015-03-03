@@ -23,6 +23,7 @@ from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
+from awx.main.redact import PlainTextCleaner
 
 logger = logging.getLogger('awx.main.models.jobs')
 
@@ -208,6 +209,15 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                     vars.append(survey_element['variable'])
         return vars
 
+    def survey_password_variables(self):
+        vars = []
+        if self.survey_enabled and 'spec' in self.survey_spec:
+            # Get variables that are type password
+            for survey_element in self.survey_spec['spec']:
+                if survey_element['type'] == 'password':
+                    vars.append(survey_element['variable'])
+        return vars
+
     def survey_variable_validation(self, data):
         errors = []
         if not self.survey_enabled:
@@ -220,7 +230,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
             if survey_element['variable'] not in data and \
                survey_element['required']:
                 errors.append("'%s' value missing" % survey_element['variable'])
-            elif survey_element['type'] in ["textarea", "text"]:
+            elif survey_element['type'] in ["textarea", "text", "password"]:
                 if survey_element['variable'] in data:
                     if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < survey_element['min']:
                         errors.append("'%s' value %s is too small (must be at least %s)" %
@@ -451,6 +461,25 @@ class Job(UnifiedJob, JobOptions):
         evars = self.extra_vars_dict
         evars.update(extra_vars)
         self.update_fields(extra_vars=json.dumps(evars))
+
+    def _survey_search_and_replace(self, content):
+        # Use job template survey spec to identify password fields.
+        # Then lookup password fields in extra_vars and save the values
+        jt = self.job_template
+        if jt and jt.survey_enabled and 'spec' in jt.survey_spec:
+            # Use password vars to find in extra_vars
+            for key in jt.survey_password_variables():
+                if key in self.extra_vars_dict:
+                    content = PlainTextCleaner.remove_sensitive(content, self.extra_vars_dict[key])
+        return content
+
+    def _result_stdout_raw_limited(self, *args, **kwargs):
+        buff, start, end, abs_end = super(Job, self)._result_stdout_raw_limited(*args, **kwargs)
+        return self._survey_search_and_replace(buff), start, end, abs_end
+
+    def _result_stdout_raw(self, *args, **kwargs):
+        content = super(Job, self)._result_stdout_raw(*args, **kwargs)
+        return self._survey_search_and_replace(content)
 
     def copy(self):
         presets = {}

@@ -231,7 +231,15 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
                 if field not in update_fields:
                     update_fields.append(field)
         # Do the actual save.
-        super(UnifiedJobTemplate, self).save(*args, **kwargs)
+        try:
+            super(UnifiedJobTemplate, self).save(*args, **kwargs)
+        except ValueError:
+            # A fix for https://trello.com/c/S4rU1F21
+            # Does not resolve the root cause. Tis merely a bandaid.
+            if 'scm_delete_on_next_update' in update_fields:
+                update_fields.remove('scm_delete_on_next_update')
+                super(UnifiedJobTemplate, self).save(*args, **kwargs)
+
 
     def _get_current_status(self):
         # Override in subclasses as needed.
@@ -625,16 +633,27 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 else:
                     return StringIO("stdout capture is missing")
 
+    def _escape_ascii(self, content):
+        ansi_escape = re.compile(r'\x1b[^m]*m')
+        return ansi_escape.sub('', content)
+
+    def _result_stdout_raw(self, redact_sensitive=True, escape_ascii=False):
+        content = self.result_stdout_raw_handle().read()
+        if redact_sensitive:
+            content = UriCleaner.remove_sensitive(content)
+        if escape_ascii:
+            content = self._escape_ascii(content)
+        return content
+
     @property
     def result_stdout_raw(self):
-        return self.result_stdout_raw_handle().read()
+        return self._result_stdout_raw()
 
     @property
     def result_stdout(self):
-        ansi_escape = re.compile(r'\x1b[^m]*m')
-        return ansi_escape.sub('', UriCleaner.remove_sensitive(self.result_stdout_raw))
+        return self._result_stdout_raw(escape_ascii=True)
 
-    def result_stdout_raw_limited(self, start_line=0, end_line=None):
+    def _result_stdout_raw_limited(self, start_line=0, end_line=None, redact_sensitive=True, escape_ascii=False):
         return_buffer = u""
         if end_line is not None:
             end_line = int(end_line)
@@ -651,12 +670,19 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 end_actual = min(int(end_line), len(stdout_lines))
             else:
                 end_actual = len(stdout_lines)
+
+        if redact_sensitive:
+            return_buffer = UriCleaner.remove_sensitive(return_buffer)
+        if escape_ascii:
+            return_buffer = self._escape_ascii(return_buffer)
+
         return return_buffer, start_actual, end_actual, absolute_end
 
+    def result_stdout_raw_limited(self, start_line=0, end_line=None):
+        return self._result_stdout_raw_limited(start_line, end_line)
+
     def result_stdout_limited(self, start_line=0, end_line=None):
-        ansi_escape = re.compile(r'\x1b[^m]*m')
-        content, start, end, absolute_end = UriCleaner.remove_sensitive(self.result_stdout_raw_limited(start_line, end_line))
-        return ansi_escape.sub('', content), start, end, absolute_end
+        return self._result_stdout_raw_limited(start_line, end_line, escape_ascii=True)
 
     @property
     def celery_task(self):
@@ -729,9 +755,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def signal_start(self, **kwargs):
         """Notify the task runner system to begin work on this task."""
-        # Sanity check: If we are running unit tests, then run synchronously.
-        if getattr(settings, 'CELERY_UNIT_TEST', False):
-            return self.start(None, **kwargs)
 
         # Sanity check: Are we able to start the job? If not, do not attempt
         # to do so.
@@ -746,6 +769,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             return False
         if 'extra_vars' in kwargs:
             self.handle_extra_data(kwargs['extra_vars'])
+
+        # Sanity check: If we are running unit tests, then run synchronously.
+        if getattr(settings, 'CELERY_UNIT_TEST', False):
+            return self.start(None, **kwargs)
 
         # Save the pending status, and inform the SocketIO listener.
         self.update_fields(start_args=json.dumps(kwargs), status='pending')

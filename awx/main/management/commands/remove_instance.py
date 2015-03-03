@@ -24,6 +24,8 @@ class Command(BaseCommandInstance):
         self.include_option_hostname_uuid_find()
 
     def handle(self, *args, **options):
+        super(Command, self).handle(*args, **options)
+
         # Is there an existing record for this machine? If so, retrieve that record and look for issues.
         try:
             # Get the instance.

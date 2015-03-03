@@ -422,6 +422,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     $scope.removeSurveySaved = $scope.$on('SurveySaved', function() {
         Wait('stop');
         $scope.survey_exists = true;
+        $scope.invalid_survey = false;
         $('#job_templates_survey_enabled_chbox').attr('checked', true);
         $('#job_templates_delete_survey_btn').show();
         $('#job_templates_edit_survey_btn').show();
@@ -451,6 +452,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
 
     // Save
     $scope.formSave = function () {
+        $scope.invalid_survey = false;
         if ($scope.removeGatherFormFields) {
             $scope.removeGatherFormFields();
         }
@@ -525,7 +527,14 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         });
 
         if($scope.survey_enabled === true && $scope.survey_exists!==true){
-            $scope.$emit("PromptForSurvey");
+            // $scope.$emit("PromptForSurvey");
+
+            // The original design for this was a pop up that would prompt the user if they wanted to create a
+            // survey, because they had enabled one but not created it yet. We switched this for now so that
+            // an error message would be displayed by the survey buttons that tells the user to add a survey or disabled
+            // surveys.
+            $scope.invalid_survey = true;
+            return;
         } else {
             $scope.$emit("GatherFormFields");
         }
@@ -837,6 +846,7 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     $scope.removeSurveySaved = $scope.$on('SurveySaved', function() {
         Wait('stop');
         $scope.survey_exists = true;
+        $scope.invalid_survey = false;
         $('#job_templates_survey_enabled_chbox').attr('checked', true);
         $('#job_templates_delete_survey_btn').show();
         $('#job_templates_edit_survey_btn').show();
@@ -905,7 +915,7 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
 
     // Save changes to the parent
     $scope.formSave = function () {
-
+        $scope.invalid_survey = false;
         if ($scope.removeGatherFormFields) {
             $scope.removeGatherFormFields();
         }
@@ -965,7 +975,14 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
         });
 
         if($scope.survey_enabled === true && $scope.survey_exists!==true){
-            $scope.$emit("PromptForSurvey");
+            // $scope.$emit("PromptForSurvey");
+
+            // The original design for this was a pop up that would prompt the user if they wanted to create a 
+            // survey, because they had enabled one but not created it yet. We switched this for now so that
+            // an error message would be displayed by the survey buttons that tells the user to add a survey or disabled
+            // surveys.
+            $scope.invalid_survey = true;
+            return;
         } else {
             $scope.$emit("GatherFormFields");
         }

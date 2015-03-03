@@ -92,6 +92,7 @@ clean-grunt:
 # Remove UI build files
 clean-ui:
 	rm -rf awx/ui/static/dist
+	rm -rf awx/ui/dist
 	rm -rf awx/ui/static/docs
 
 # Remove temporary build files, compiled Python files.
@@ -202,8 +203,6 @@ server_noattach:
 	tmux select-pane -U
 	tmux split-window -v 'exec make receiver'
 	tmux split-window -h 'exec make taskmanager'
-	tmux select-pane -U
-	tmux split-window -h 'exec make sync_ui'
 
 server: server_noattach
 	tmux -2 attach-session -t tower
@@ -279,7 +278,7 @@ package.json: packaging/grunt/package.template
 	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
 
 sync_ui: node_modules Brocfile.js
-	$(NODE) tools/ui/timepiece.js awx/ui/static/dist
+	$(NODE) tools/ui/timepiece.js awx/ui/dist
 
 # Update local npm install
 node_modules: package.json
@@ -287,14 +286,14 @@ node_modules: package.json
 	touch $@
 
 devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
-	$(BROCCOLI) build awx/ui/static/dist -- --debug
+	$(BROCCOLI) build awx/ui/dist -- --debug
 
 # Build minified JS/CSS.
 minjs: node_modules clean-ui Brocfile.js
-	$(BROCCOLI) build awx/ui/static/dist -- --silent --no-debug --no-tests --compress
+	$(BROCCOLI) build awx/ui/dist -- --silent --no-debug --no-tests --compress
 
 minjs_ci: node_modules clean-ui Brocfile.js
-	$(BROCCOLI) build awx/ui/static/dist -- --no-debug --compress
+	$(BROCCOLI) build awx/ui/dist -- --no-debug --compress
 
 # Check .js files for errors and lint
 jshint: node_modules Gruntfile.js

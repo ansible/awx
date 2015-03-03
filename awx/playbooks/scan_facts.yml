@@ -1,0 +1,4 @@
+- hosts: all
+  tasks:
+    - scan_packages:
+

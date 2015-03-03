@@ -550,6 +550,10 @@ class RunJob(BaseTask):
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
+        # TODO: env['ANSIBLE_LIBRARY'] # plugins/library
+        # TODO: env['ANSIBLE_CACHE_PLUGINS'] # plugins/fact_caching
+        # TODD: env['ANSIBLE_CACHE_PLUGIN'] # tower
+        # TODO: env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] # connection to tower service
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
@@ -787,14 +791,16 @@ class RunProjectUpdate(BaseTask):
                 scm_password = False
                 if scm_url_parts.scheme != 'svn+ssh':
                     scm_username = False
-            elif scm_url_parts.scheme == 'ssh':
+            elif scm_url_parts.scheme.endswith('ssh'):
                 scm_password = False
             scm_url = update_scm_url(scm_type, scm_url, scm_username,
-                                     scm_password)
+                                     scm_password, scp_format=True)
+        else:
+            scm_url = update_scm_url(scm_type, scm_url, scp_format=True)
 
         # When using Ansible >= 1.5, pass the extra accept_hostkey parameter to
         # the git module.
-        if scm_type == 'git' and scm_url_parts.scheme == 'ssh':
+        if scm_type == 'git' and scm_url_parts.scheme.endswith('ssh'):
             try:
                 if Version(kwargs['ansible_version']) >= Version('1.5'):
                     extra_vars['scm_accept_hostkey'] = 'true'

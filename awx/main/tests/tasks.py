@@ -13,7 +13,6 @@ import unittest
 
 # Django
 from django.conf import settings
-from django.test.utils import override_settings
 from django.utils.timezone import now
 
 # Django-CRUM
@@ -21,7 +20,7 @@ from crum import impersonate
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseLiveServerTest
+from awx.main.tests.base import BaseJobExecutionTest
 
 TEST_PLAYBOOK = u'''
 - name: test success
@@ -341,15 +340,7 @@ L5Hj+B02+FAiz8zVGumbVykvPtzgTb0E+0rJKNO0/EgGqWsk/oC0
 
 TEST_SSH_KEY_DATA_UNLOCK = 'unlockme'
 
-@override_settings(CELERY_ALWAYS_EAGER=True,
-                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
-class BaseCeleryTest(BaseLiveServerTest):
-    '''
-    Base class for celery task tests.
-    '''
-
-@override_settings(ANSIBLE_TRANSPORT='local')
-class RunJobTest(BaseCeleryTest):
+class RunJobTest(BaseJobExecutionTest):
     '''
     Test cases for RunJob celery task.
     '''
@@ -371,31 +362,14 @@ class RunJobTest(BaseCeleryTest):
         self.credential = None
         self.cloud_credential = None
         settings.INTERNAL_API_URL = self.live_server_url
-        self.start_queue()
 
     def tearDown(self):
         super(RunJobTest, self).tearDown()
         if self.test_project_path:
             shutil.rmtree(self.test_project_path, True)
-        self.terminate_queue()
 
     def create_test_credential(self, **kwargs):
-        opts = {
-            'name': 'test-creds',
-            'kind': 'ssh',
-            'user': self.super_django_user,
-            'username': '',
-            'ssh_key_data': '',
-            'ssh_key_unlock': '',
-            'password': '',
-            'sudo_username': '',
-            'sudo_password': '',
-            'su_username': '',
-            'su_password': '',
-            'vault_password': '',
-        }
-        opts.update(kwargs)
-        self.credential = Credential.objects.create(**opts)
+        self.credential = self.make_credential(**kwargs)
         return self.credential
 
     def create_test_cloud_credential(self, **kwargs):
@@ -429,7 +403,7 @@ class RunJobTest(BaseCeleryTest):
         except (AttributeError, IndexError):
             pass
         opts.update(kwargs)
-        self.job_template = JobTemplate.objects.create(**opts)
+        self.job_template = self.make_job_template(**opts)
         return self.job_template
 
     def create_test_job(self, **kwargs):
@@ -452,32 +426,6 @@ class RunJobTest(BaseCeleryTest):
                 opts.update(kwargs)
                 self.job = Job.objects.create(**opts)
         return self.job
-
-    def check_job_result(self, job, expected='successful', expect_stdout=True,
-                         expect_traceback=False):
-        msg = u'job status is %s, expected %s' % (job.status, expected)
-        msg = u'%s\nargs:\n%s' % (msg, job.job_args)
-        msg = u'%s\nenv:\n%s' % (msg, job.job_env)
-        if job.result_traceback:
-            msg = u'%s\ngot traceback:\n%s' % (msg, job.result_traceback)
-        if job.result_stdout:
-            msg = u'%s\ngot stdout:\n%s' % (msg, job.result_stdout)
-        if isinstance(expected, (list, tuple)):
-            self.assertTrue(job.status in expected)
-        else:
-            self.assertEqual(job.status, expected, msg)
-        if expect_stdout:
-            self.assertTrue(job.result_stdout)
-        else:
-            self.assertTrue(job.result_stdout in ('', 'stdout capture is missing'),
-                            u'expected no stdout, got:\n%s' %
-                            job.result_stdout)
-        if expect_traceback:
-            self.assertTrue(job.result_traceback)
-        else:
-            self.assertFalse(job.result_traceback,
-                             u'expected no traceback, got:\n%s' %
-                             job.result_traceback)
 
     def check_job_events(self, job, runner_status='ok', plays=1, tasks=1,
                          async=False, async_timeout=False, async_nowait=False,
