@@ -598,7 +598,7 @@ var tower = angular.module('Tower', [
 
                     // monitor socket status
                     checkCount = 0;
-                    setInterval(function() {
+                    $rootScope.dashboardInterval = setInterval(function() {
                         if (sock.checkStatus() === 'error' || checkCount > 5) {
                             // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
                             $log.debug('socket status: ' + sock.checkStatus());
@@ -646,8 +646,13 @@ var tower = angular.module('Tower', [
                             $location.path('/login');
                         }
                     } else if ($rootScope.sessionTimer.isExpired()) {
+                      // gets here on timeout
                         if (next.templateUrl !== (urlPrefix + 'partials/login.html')) {
                             $rootScope.sessionTimer.expireSession();
+                            if($rootScope.dashboardInterval){
+                              window.clearInterval($rootScope.dashboardInterval);
+                            }
+                            sock.socket.socket.disconnect();
                             $location.path('/login');
                         }
                     } else {
@@ -797,4 +802,3 @@ var tower = angular.module('Tower', [
     ]);
 
 export default tower;
-
