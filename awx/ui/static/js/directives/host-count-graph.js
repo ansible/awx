@@ -82,7 +82,7 @@ function HostCountGraph(adjustGraphSize, $window) {
             .margin({top: 15, right: 75, bottom: 40, left: 85})
             .x(function(d,i) { return i ;})
             .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
-            .transitionDuration(350)  //how fast do you want the lines to transition?
+            .duration(350)  //how fast do you want the lines to transition?
             .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
             .showYAxis(true)        //Show the y-axis
             .showXAxis(true)        //Show the x-axis
