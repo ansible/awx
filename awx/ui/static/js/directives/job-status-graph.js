@@ -12,6 +12,9 @@ export default
 function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustGraphSize) {
             return {
                 restrict: 'E',
+                scope: {
+                    data: '='
+                },
                 templateUrl: '/static/partials/job_status_graph.html',
                 link: link
             };
@@ -22,11 +25,12 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                 scope.period="month";
                 scope.jobType="all";
 
-                scope.$watch(attr.data, function(value) {
+                scope.$watch('data', function(value) {
                     if (value) {
                         createGraph(value, scope.period, scope.jobType);
                     }
-                });
+                }, true);
+
 
                 function createGraph(data, period, jobtype){
 

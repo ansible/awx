@@ -94,6 +94,17 @@ export function Home($scope, $compile, $routeParams, $rootScope, $location, $log
 
         $scope.graphData = graphData;
 
+        var cleanupJobListener =
+            $rootScope.$on('DataReceived:JobStatusGraph', function(e, data) {
+                $scope.refresh();
+                $scope.graphData.jobStatus = data;
+            });
+
+        $scope.$on('$destroy', function() {
+            cleanupJobListener();
+        });
+
+
         DashboardJobs({
             scope: $scope,
             target: 'dash-jobs-list',
