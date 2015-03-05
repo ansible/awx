@@ -100,8 +100,15 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             });
                         });
                         self.socket.on('connect_failed', function(reason) {
-                            var r = reason || 'connection refused by host';
-                            $log.error('Socket connection failed: ' + r);
+                            var r = reason || 'connection refused by host',
+                                token_actual = Authorization.getToken();
+
+                            $log.debug('Socket connection failed: ' + r);
+
+                            if (token_actual === token) {
+                                self.socket.socket.disconnect();
+                            }
+
                             self.scope.$apply(function () {
                                 self.scope.socketStatus = 'error';
                                 self.scope.socketTip = getSocketTip(self.scope.socketStatus);

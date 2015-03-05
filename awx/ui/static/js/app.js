@@ -652,7 +652,9 @@ var tower = angular.module('Tower', [
                             if($rootScope.dashboardInterval){
                               window.clearInterval($rootScope.dashboardInterval);
                             }
-                            sock.socket.socket.disconnect();
+                            if (sock) {
+                                sock.socket.socket.disconnect();
+                            }
                             $location.path('/login');
                         }
                     } else {
