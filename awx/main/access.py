@@ -824,7 +824,7 @@ class PermissionAccess(BaseAccess):
         return self.can_change(obj, None)
 
 class JobTemplateAccess(BaseAccess):
-    ''' 
+    '''
     I can see job templates when:
      - I am a superuser.
      - I can read the inventory, project and credential (which means I am an
@@ -925,10 +925,15 @@ class JobTemplateAccess(BaseAccess):
         inventory = Inventory.objects.filter(id=inventory_pk)
         if not inventory.exists():
             return False # Does this make sense?  Maybe should check read access
-        
+
+        project_pk = get_pk_from_dict(data, 'project')
+        if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
+            if not project_pk and self.user.can_access(Organization, 'change', inventory.organization, None):
+                return True
+            elif not self.user.can_access(Organization, "change", inventory.organization, None):
+                return False
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
-        project_pk = get_pk_from_dict(data, 'project')
         project = get_object_or_400(Project, pk=project_pk)
         if self.user.can_access(Project, 'admin', project, None):
             return True
@@ -946,9 +951,9 @@ class JobTemplateAccess(BaseAccess):
         if permission_qs.exists():
             return True
         return False
-            
+
         # job_type = data.get('job_type', None)
-        
+
         # for perm in permission_qs:
         #     # if you have run permissions, you can also create check jobs
         #     if job_type == PERM_INVENTORY_CHECK:
@@ -987,7 +992,14 @@ class JobTemplateAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         # Check to make sure both the inventory and project exist
-        if obj.inventory is None or obj.project is None:
+        if obj.inventory is None:
+            return False
+        if obj.job_type == PERM_INVENTORY_SCAN:
+            if obj.project is None and self.user.can_access(Organization, 'change', obj.inventory.organization, None):
+                return True
+            if not self.user.can_access(Organization, 'change', obj.inventory.organization, None):
+                return False
+        if obj.project is None:
             return False
         # If the user has admin access to the project they can start a job
         if self.user.can_access(Project, 'admin', obj.project, None):
@@ -1013,7 +1025,7 @@ class JobTemplateAccess(BaseAccess):
             if perm.permission_type in [PERM_JOBTEMPLATE_CREATE, PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK] and \
                obj.job_type == PERM_INVENTORY_CHECK:
                 has_perm = True
-                
+
         dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and self.user.can_access(Project, 'read', obj.project)
         return dep_access and has_perm
 
@@ -1031,7 +1043,8 @@ class JobTemplateAccess(BaseAccess):
         add_obj = dict(credential=obj.credential.id if obj.credential is not None else None,
                        cloud_credential=obj.cloud_credential.id if obj.cloud_credential is not None else None,
                        inventory=obj.inventory.id if obj.inventory is not None else None,
-                       project=obj.project.id if obj.project is not None else None)
+                       project=obj.project.id if obj.project is not None else None,
+                       job_type=obj.job_type)
         return self.can_add(add_obj)
 
 class JobAccess(BaseAccess):
@@ -1152,8 +1165,9 @@ class JobAccess(BaseAccess):
         has_perm = False
         if obj.job_template is not None and self.user.can_access(JobTemplate, 'start', obj.job_template):
             has_perm = True
-        dep_access = self.user.can_access(Inventory, 'read', obj.inventory) and self.user.can_access(Project, 'read', obj.project)
-        return self.can_read(obj) and dep_access and has_perm
+        dep_access_inventory = self.user.can_access(Inventory, 'read', obj.inventory)
+        dep_access_project = obj.project is None or self.user.can_access(Project, 'read', obj.project)
+        return self.can_read(obj) and dep_access_inventory and dep_access_project and has_perm
 
     def can_cancel(self, obj):
         return self.can_read(obj) and obj.can_cancel
