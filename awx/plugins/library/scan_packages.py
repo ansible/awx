@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from ansible.module_utils.basic import *
+from ansible.module_utils.basic import * # noqa
 
 def rpm_package_list():
     import rpm
