@@ -50,6 +50,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
 
         $rootScope.$on('JobStatusChange', function() {
             jobs_scope.refreshJobs();
+            scheduled_scope.refreshSchedules();
         });
 
         if (scope.removeListLoaded) {
