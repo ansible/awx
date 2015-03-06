@@ -928,9 +928,9 @@ class JobTemplateAccess(BaseAccess):
 
         project_pk = get_pk_from_dict(data, 'project')
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
-            if not project_pk and self.user.can_access(Organization, 'change', inventory.organization, None):
+            if not project_pk and self.user.can_access(Organization, 'change', inventory[0].organization, None):
                 return True
-            elif not self.user.can_access(Organization, "change", inventory.organization, None):
+            elif not self.user.can_access(Organization, "change", inventory[0].organization, None):
                 return False
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
