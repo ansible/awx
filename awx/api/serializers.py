@@ -745,6 +745,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             tree          = reverse('api:inventory_tree_view',         args=(obj.pk,)),
             inventory_sources = reverse('api:inventory_inventory_sources_list', args=(obj.pk,)),
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
+            scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
         ))
         if obj.organization and obj.organization.active:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))

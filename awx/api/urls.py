@@ -73,6 +73,7 @@ inventory_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/tree/$',                      'inventory_tree_view'),
     url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'inventory_inventory_sources_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'inventory_activity_stream_list'),
+    url(r'^(?P<pk>[0-9]+)/scan_job_templates/$',        'inventory_scan_job_template_list'),
 )
 
 host_urls = patterns('awx.api.views',
