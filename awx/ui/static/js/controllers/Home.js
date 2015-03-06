@@ -96,7 +96,6 @@ export function Home($scope, $compile, $routeParams, $rootScope, $location, $log
 
         var cleanupJobListener =
             $rootScope.$on('DataReceived:JobStatusGraph', function(e, data) {
-                $scope.refresh();
                 $scope.graphData.jobStatus = data;
             });
 
