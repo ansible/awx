@@ -4,7 +4,8 @@ export default ['$scope', function ($scope) {
     recentJobs = $scope.job_template.summary_fields.recent_jobs;
     $scope[str] = {
         id: $scope.job_template.id,
-        sparkArray: []
+        sparkArray: [],
+        jobIds: {}
     };
     for(var i=0; i<recentJobs.length; i++){
         if(recentJobs[i].status==='successful'){
@@ -16,6 +17,7 @@ export default ['$scope', function ($scope) {
         if(recentJobs[i].status==='queued'){
             $scope[str].sparkArray[i] = 0;
         }
+        $scope[str].jobIds[i] = recentJobs[i].id;
     }
 }];
 

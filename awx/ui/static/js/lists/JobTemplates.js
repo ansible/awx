@@ -29,15 +29,7 @@ export default
               searchable: false,
               nosort: true,
               ngClick: "null",
-              iconOnly: true,
-              excludeModal: true,
-              smartStatus: [{
-                  icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
-                  awToolTip: "{{ inventory.syncTip }}",
-                  awTipPlacement: "top",
-                  ngClick: "showGroupSummary($event, inventory.id)",
-                  ngClass: "inventory.launch_class"
-              }]
+              smartStatus: true
             },
             name: {
                 key: true,

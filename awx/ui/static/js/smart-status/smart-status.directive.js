@@ -4,24 +4,27 @@ export default [ function() {
         restrict: 'E',
         link: function (scope){ //}, element ){ //}, attr) {
             var str = scope.job_template.id+'_spark';
-            // formatter: function(sparklines, options, point, recentJobs){
-            //   if(point.x <= options.mergedOptions.CurrentTimeGroup)
-            //     return "<div class=\"\"><span style=\"color: " + point.color + "\">&#9679;</span>" + options.get("tooltipValueLookups").names[point.x] + " - " + point.y + options.get("tooltipSuffix") + "</div>";
-            //   else
-            //     return "<div class=\"\"><span style=\"color: " + point.color + "\">&#9679;</span>" + options.get("tooltipValueLookups").names[point.x] + "</div>";
-            // };
+            scope[str].formatter = function(sparklines, options, point){
+                return "<div class=\"smart-status-tooltip\"><span style=\"color: " + point.color + "\">&#9679;</span>" +
+                  options.userOptions.tooltipValueLookups.jobs[point.offset] + "</div>";
+            };
 
             $('aw-smart-status:eq('+scope.$index+')').sparkline(scope[str].sparkArray, {
                 type: 'tristate',
-                // tooltipFormatter: scope[str].formatter,
-                tooltipFormat: '{{value:levels}}',
+                width: '4em',
+                height: '2em',
+                barWidth: 5,
+                barSpacing: 2,
+                tooltipFormatter: scope[str].formatter,
+                tooltipFormat: '{{value:jobs}}',
                 tooltipValueLookups: {
-                    levels: $.range_map({
-                        '1': 'Success',
-                        '-1': 'Failed',
-                        '0' : 'Queued'
-                        // '7:': 'High'
-                    })
+                    jobs: scope[str].jobIds
+                    // $.range_map({
+                    //     '1': 'Success',
+                    //     '-1': 'Failed',
+                    //     '0' : 'Queued'
+                    //     // '7:': 'High'
+                    // })
                 }
             });
         },
