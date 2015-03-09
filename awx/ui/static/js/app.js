@@ -56,7 +56,10 @@ import 'tower/shared/InventoryTree';
 import 'tower/shared/Timer';
 import 'tower/shared/Socket';
 
-
+/*#if DEBUG#*/
+import {__deferLoadIfEnabled} from 'tower/debug';
+__deferLoadIfEnabled();
+/*#endif#*/
 
 var tower = angular.module('Tower', [
     'ngRoute',
