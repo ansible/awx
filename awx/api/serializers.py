@@ -745,6 +745,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             tree          = reverse('api:inventory_tree_view',         args=(obj.pk,)),
             inventory_sources = reverse('api:inventory_inventory_sources_list', args=(obj.pk,)),
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
+            scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
         ))
         if obj.organization and obj.organization.active:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
@@ -1304,11 +1305,19 @@ class JobOptionsSerializer(BaseSerializer):
             ret['cloud_credential'] = None
         return ret
 
+    def validate_project(self, attrs, source):
+        project = attrs.get('project', None)
+        if not project and attrs.get('job_type') != PERM_INVENTORY_SCAN:
+            raise serializers.ValidationError("This field is required")
+        return attrs
+
     def validate_playbook(self, attrs, source):
         project = attrs.get('project', None)
         playbook = attrs.get('playbook', '')
         if project and playbook and smart_str(playbook) not in project.playbooks:
             raise serializers.ValidationError('Playbook not found for project')
+        if project and not playbook:
+            raise serializers.ValidationError('Must select playbook for project')
         return attrs
 
 
@@ -1470,13 +1479,11 @@ class SystemJobSerializer(UnifiedJobSerializer):
                                                  args=(obj.system_job_template.pk,))
         return res
 
-
 class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
     pass
 
 class SystemJobListSerializer(SystemJobSerializer, UnifiedJobListSerializer):
     pass
-
 
 class JobHostSummarySerializer(BaseSerializer):
 

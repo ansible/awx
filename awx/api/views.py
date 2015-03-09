@@ -907,6 +907,20 @@ class InventoryActivityStreamList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(inventory=parent) | Q(host__in=parent.hosts.all()) | Q(group__in=parent.groups.all()))
 
+class InventoryScanJobTemplateList(SubListAPIView):
+
+    model = JobTemplate
+    serializer_class = JobTemplateSerializer
+    parent_model = Inventory
+    relationship = 'jobtemplates'
+    new_in_220 = True
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(job_type=PERM_INVENTORY_SCAN, inventory=parent)
+
 
 class HostList(ListCreateAPIView):
 
@@ -1451,7 +1465,7 @@ class JobTemplateLaunch(GenericAPIView):
                                 status=status.HTTP_400_BAD_REQUEST)
         if obj.credential is None and ('credential' not in request.DATA and 'credential_id' not in request.DATA):
             return Response(dict(errors="Credential not provided"), status=status.HTTP_400_BAD_REQUEST)
-        if obj.project is None or not obj.project.active:
+        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
             return Response(dict(errors="Job Template Project is missing or undefined"), status=status.HTTP_400_BAD_REQUEST)
         if obj.inventory is None or not obj.inventory.active:
             return Response(dict(errors="Job Template Inventory is missing or undefined"), status=status.HTTP_400_BAD_REQUEST)

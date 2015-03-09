@@ -52,11 +52,14 @@ class JobOptions(BaseModel):
         'Project',
         related_name='%(class)ss',
         null=True,
+        default=None,
+        blank=True,
         on_delete=models.SET_NULL,
     )
     playbook = models.CharField(
         max_length=1024,
         default='',
+        blank=True,
     )
     credential = models.ForeignKey(
         'Credential',
@@ -141,7 +144,6 @@ class JobOptions(BaseModel):
                 else:
                     needed.append(pw)
         return needed
-
 
 class JobTemplate(UnifiedJobTemplate, JobOptions):
     '''
@@ -1016,7 +1018,6 @@ class SystemJob(UnifiedJob, SystemJobOptions):
     def is_blocked_by(self, obj):
         return True
 
-    
     def handle_extra_data(self, extra_data):
         extra_vars = {}
         if type(extra_data) == dict:
@@ -1037,3 +1038,4 @@ class SystemJob(UnifiedJob, SystemJobOptions):
     @property
     def task_impact(self):
         return 150
+

@@ -423,6 +423,27 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
         # FIXME: Check other credentials and optional fields.
 
+    def test_post_scan_job_template(self):
+        url = reverse('api:job_template_list')
+        data = dict(
+            name = 'scan job template 1',
+            job_type = PERM_INVENTORY_SCAN,
+            inventory = self.inv_eng.pk,
+        )
+        # Regular users, even those who have access to the inv and cred can't create scan jobs templates
+        with self.current_user(self.user_doug):
+            data['credential'] = self.cred_doug.pk
+            response = self.post(url, data, expect=403)
+        # Org admins can create scan job templates in their org
+        with self.current_user(self.user_chuck):
+            data['credential'] = self.cred_chuck.pk
+            response = self.post(url, data, expect=201)
+            detail_url = reverse('api:job_template_detail',
+                                 args=(response['id'],))
+        # Non Org Admins don't have permission to access it though
+        with self.current_user(self.user_doug):
+            self.get(detail_url, expect=403)
+
     def test_launch_job_template(self):
         url = reverse('api:job_template_list')
         data = dict(
