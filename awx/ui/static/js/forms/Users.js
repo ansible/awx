@@ -83,7 +83,7 @@ export default
                 },
                 password: {
                     label: 'Password',
-                    type: 'password',
+                    type: 'sensitive',
                     ngShow: 'ldap_user == false',
                     addRequired: true,
                     editRequired: false,
@@ -93,7 +93,7 @@ export default
                 },
                 password_confirm: {
                     label: 'Confirm Password',
-                    type: 'password',
+                    type: 'sensitive',
                     ngShow: 'ldap_user == false',
                     addRequired: false,
                     editRequired: false,

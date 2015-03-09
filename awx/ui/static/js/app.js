@@ -44,7 +44,6 @@ import {AdminsList} from 'tower/controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from 'tower/controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from 'tower/controllers/Teams';
 import {PermissionsAdd, PermissionsList, PermissionsEdit} from 'tower/controllers/Permissions';
-
 import 'tower/shared/RestServices';
 import 'tower/shared/api-loader';
 import 'tower/shared/form-generator';

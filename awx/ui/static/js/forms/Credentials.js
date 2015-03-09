@@ -141,7 +141,7 @@ export default
                 },
                 secret_key: {
                     label: 'Secret Key',
-                    type: 'password',
+                    type: 'sensitive',
                     ngShow: "kind.value == 'aws'",
                     awRequiredWhen: {
                         variable: "aws_required",
@@ -150,6 +150,7 @@ export default
                     autocomplete: false,
                     ask: false,
                     clear: false,
+                    hasShowInputButton: true,
                     apiField: 'passwowrd'
                 },
                 "host": {
@@ -206,7 +207,7 @@ export default
                 },
                 "api_key": {
                     label: 'API Key',
-                    type: 'password',
+                    type: 'sensitive',
                     ngShow: "kind.value == 'rax'",
                     awRequiredWhen: {
                         variable: "rackspace_required",
@@ -214,34 +215,19 @@ export default
                     },
                     autocomplete: false,
                     ask: false,
+                    hasShowInputButton: true,
                     clear: false,
-                    // apiField: 'passwowrd'
                 },
                 "password": {
                     label: 'Password',
-                    type: 'password',
+                    type: 'sensitive',
                     ngShow: "kind.value == 'scm' || kind.value == 'vmware'",
                     addRequired: false,
                     editRequired: false,
-                    ngChange: "clearPWConfirm('password_confirm')",
                     ask: false,
                     clear: false,
-                    associated: 'password_confirm',
                     autocomplete: false,
-                    awRequiredWhen: {
-                        variable: "password_required",
-                        init: false
-                    }
-                },
-                "password_confirm": {
-                    label: 'Confirm Password',
-                    type: 'password',
-                    ngShow: "kind.value == 'scm' || kind.value == 'vmware'",
-                    addRequired: false,
-                    editRequired: false,
-                    awPassMatch: true,
-                    associated: 'password',
-                    autocomplete: false,
+                    hasShowInputButton: true,
                     awRequiredWhen: {
                         variable: "password_required",
                         init: false
@@ -249,24 +235,12 @@ export default
                 },
                 "ssh_password": {
                     label: 'Password', // formally 'SSH Password'
-                    type: 'password',
+                    type: 'sensitive',
                     ngShow: "kind.value == 'ssh'",
-                    ngChange: "clearPWConfirm('ssh_password_confirm')",
                     addRequired: false,
                     editRequired: false,
                     ask: true,
-                    clear: true,
-                    associated: 'ssh_password_confirm',
-                    autocomplete: false
-                },
-                "ssh_password_confirm": {
-                    label: 'Confirm Password', // formally 'Confirm SSH password'
-                    type: 'password',
-                    ngShow: "kind.value == 'ssh'",
-                    addRequired: false,
-                    editRequired: false,
-                    awPassMatch: true,
-                    associated: 'ssh_password',
+                    hasShowInputButton: true,
                     autocomplete: false
                 },
                 "ssh_key_data": {
@@ -291,25 +265,14 @@ export default
                     dataContainer: "body"
                 },
                 "ssh_key_unlock": {
-                    label: 'Key Password',
-                    type: 'password',
+                    label: 'Private Key Passphrase',
+                    type: 'sensitive',
                     ngShow: "kind.value == 'ssh' || kind.value == 'scm'",
                     addRequired: false,
                     editRequired: false,
-                    ngChange: "clearPWConfirm('ssh_key_unlock_confirm')",
-                    associated: 'ssh_key_unlock_confirm',
                     ask: true,
+                    hasShowInputButton: true,
                     askShow: "kind.value == 'ssh'",  // Only allow ask for machine credentials
-                    clear: true
-                },
-                "ssh_key_unlock_confirm": {
-                    label: 'Confirm Key Password',
-                    type: 'password',
-                    ngShow: "kind.value == 'ssh'  || kind.value == 'scm'",
-                    addRequired: false,
-                    editRequired: false,
-                    awPassMatch: true,
-                    associated: 'ssh_key_unlock'
                 },
                 "login_method": {
                     label: "Privilege Escalation Credentials",
@@ -342,24 +305,12 @@ export default
                 },
                 "sudo_password": {
                     label: 'Sudo Password',
-                    type: 'password',
+                    type: 'sensitive',
                     ngShow: "kind.value == 'ssh' && login_method == 'sudo'",
                     addRequired: false,
                     editRequired: false,
-                    ngChange: "clearPWConfirm('sudo_password_confirm')",
                     ask: true,
-                    clear: true,
-                    associated: 'sudo_password_confirm',
-                    autocomplete: false
-                },
-                "sudo_password_confirm": {
-                    label: 'Confirm Sudo Password',
-                    type: 'password',
-                    ngShow: "kind.value == 'ssh' && login_method == 'sudo'",
-                    addRequired: false,
-                    editRequired: false,
-                    awPassMatch: true,
-                    associated: 'sudo_password',
+                    hasShowInputButton: true,
                     autocomplete: false
                 },
                 "su_username": {
@@ -372,24 +323,12 @@ export default
                 },
                 "su_password": {
                     label: 'Su Password',
-                    type: 'password',
+                    type: 'sensitive',
                     ngShow: "kind.value == 'ssh' && login_method == 'su'",
                     addRequired: false,
                     editRequired: false,
-                    ngChange: "clearPWConfirm('su_password_confirm')",
                     ask: true,
-                    clear: true,
-                    associated: 'su_password_confirm',
-                    autocomplete: false
-                },
-                "su_password_confirm": {
-                    label: 'Confirm Su Password',
-                    type: 'password',
-                    ngShow: "kind.value == 'ssh' && login_method == 'su'",
-                    addRequired: false,
-                    editRequired: false,
-                    awPassMatch: true,
-                    associated: 'su_password',
+                    hasShowInputButton: true,
                     autocomplete: false
                 },
                 "project": {
@@ -408,27 +347,14 @@ export default
                     editRequired: false,
                     autocomplete: false
                 },
-
                 "vault_password": {
                     label: "Vault Password",
-                    type: 'password',
+                    type: 'sensitive',
                     ngShow: "kind.value == 'ssh'",
                     addRequired: false,
                     editRequired: false,
-                    ngChange: "clearPWConfirm('vault_password_confirm')",
                     ask: true,
-                    clear: true,
-                    associated: 'vault_password_confirm',
-                    autocomplete: false
-                },
-                "vault_password_confirm": {
-                    label: "Confirm Vault Password",
-                    type: 'password',
-                    ngShow: "kind.value == 'ssh'",
-                    addRequired: false,
-                    editRequired: false,
-                    awPassMatch: true,
-                    associated: 'vault_password',
+                    hasShowInputButton: true,
                     autocomplete: false
                 }
             },
