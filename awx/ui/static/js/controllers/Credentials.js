@@ -259,12 +259,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
 
     // Respond to 'Ask at runtime?' checkbox
     $scope.ask = function (fld, associated) {
-        console.log("got here");
-        debugger;
-        if ($scope[fld] === 'ASK') {
-            $scope[fld + "_ask"] = true;
-        }
-        else if ($scope[fld + '_ask']) {
+        if ($scope[fld + '_ask']) {
             $scope[fld] = 'ASK';
             if (associated !== "undefined") {
                 $scope[associated] = '';
@@ -555,7 +550,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
     // Respond to 'Ask at runtime?' checkbox
     $scope.ask = function (fld, associated) {
         if ($scope[fld + '_ask']) {
-            $scope[fld] = 'ASK'
+            $scope[fld] = 'ASK';
             if (associated !== "undefined") {
                 $scope[associated] = '';
                 $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
@@ -563,7 +558,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
         } else {
             $scope[fld] = '';
             if (associated !== "undefined") {
-                $scope[associated] = 'ASK';
+                $scope[associated] = '';
                 $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
             }
         }

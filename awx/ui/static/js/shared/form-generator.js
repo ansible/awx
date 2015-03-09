@@ -855,7 +855,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', ListGenerat
                                     $(buttonId).html("ABC");
                                     $(inputId).attr("type", "password");
                                 }
-                            }
+                            };
                             html += "\<div class='input-group";
                             html += (horizontal) ? " " + getFieldWidth() : "";
                             html += "'>\n";
