@@ -58,28 +58,28 @@ function HostStatusGraph($compile, $window) {
                     ];
 
                     host_pie_chart = nv.models.pieChart()
-                    .margin({top: 5, right: 75, bottom: 25, left: 85})
-                    .x(function(d) { return d.label; })
-                    .y(function(d) { return d.value; })
-                    .showLabels(true)
-                    .labelThreshold(0.01)
-                    .tooltipContent(function(x, y) {
-                        return '<b>'+x+'</b>'+ '<p>' +  Math.floor(y.replace(',','')) + ' Hosts ' +  '</p>';
-                    })
-                    .color(['#00aa00', '#aa0000']);
-
-                    host_pie_chart.pie.pieLabelsOutside(true).labelType("percent");
+                        .margin({top: 5, right: 75, bottom: 25, left: 85})
+                        .x(function(d) { return d.label; })
+                        .y(function(d) { return d.value; })
+                        .showLabels(true)
+                        .growOnHover(false)
+                        .labelThreshold(0.01)
+                        .tooltipContent(function(x, y) {
+                            return '<b>'+x+'</b>'+ '<p>' +  Math.floor(y.replace(',','')) + ' Hosts ' +  '</p>';
+                        })
+                        .labelType("percent")
+                        .color(['#00aa00', '#aa0000']);
 
                     d3.select(element.find('svg')[0])
-                    .datum(data)
-                    .transition().duration(350)
-                    .call(host_pie_chart)
-                    .style({
-                        "font-family": 'Open Sans',
-                        "font-style": "normal",
-                        "font-weight":400,
-                        "src": "url(/static/fonts/OpenSans-Regular.ttf)"
-                    });
+                        .datum(data)
+                        .transition().duration(350)
+                        .call(host_pie_chart)
+                        .style({
+                            "font-family": 'Open Sans',
+                            "font-style": "normal",
+                            "font-weight":400,
+                            "src": "url(/static/fonts/OpenSans-Regular.ttf)"
+                        });
 
                     adjustGraphSize();
                     return host_pie_chart;

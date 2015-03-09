@@ -9,9 +9,12 @@ export default
         JobStatusGraph
     ];
 
-function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustGraphSize) {
+function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustGraphSize, graphDataService) {
             return {
                 restrict: 'E',
+                scope: {
+                    data: '='
+                },
                 templateUrl: '/static/partials/job_status_graph.html',
                 link: link
             };
@@ -22,13 +25,22 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                 scope.period="month";
                 scope.jobType="all";
 
-                scope.$watch(attr.data, function(value) {
+                scope.$watch('data', function(value) {
                     if (value) {
-                        createGraph(value, scope.period, scope.jobType);
+                        createGraph(scope.period, scope.jobType, value);
                     }
-                });
+                }, true);
 
-                function createGraph(data, period, jobtype){
+                function recreateGraph(period, jobType) {
+                    graphDataService.get(period, jobType)
+                        .then(function(data) {
+                            scope.data = data;
+                            scope.period = period;
+                            scope.jobType = jobType;
+                        });
+                }
+
+                function createGraph(period, jobtype, data){
 
                     scope.period = period;
                     scope.jobType = jobtype;
@@ -96,7 +108,7 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                         period = this.getAttribute("id");
                         $('#period-dropdown').replaceWith("<a id=\"period-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+"<span class=\"caret\"><span>\n");
 
-                        createGraph(data, period, job_type);
+                        recreateGraph(period, job_type);
                     });
 
                     //On click, update with new data
@@ -105,7 +117,7 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                         job_type = this.getAttribute("id");
                         $('#type-dropdown').replaceWith("<a id=\"type-dropdown\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+this.text+"<span class=\"caret\"><span>\n");
 
-                        createGraph(data, period, job_type);
+                        recreateGraph(period, job_type);
                     });
 
                     adjustGraphSize(job_status_chart, element);
