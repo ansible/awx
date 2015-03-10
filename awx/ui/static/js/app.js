@@ -561,7 +561,7 @@ var tower = angular.module('Tower', [
                     $rootScope.removeOpenSocket();
                 }
                 $rootScope.removeOpenSocket = $rootScope.$on('OpenSocket', function() {
-                    html = "<a href=\"\" ng-click=\"socketHelp()\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
+                    html = "<a href=\"\" ng-hide=\"socketStatus === 'ok'\" ng-click=\"socketHelp()\" aw-pop-over=\"{{ socketTip }}\" aw-pop-over-watch=\"socketTip\" data-placement=\"bottom\" data-trigger=\"hover\" " +
                     "data-popover-title=\"Live Events\" data-container=\"body\" style=\"font-size: 10px;\"><i class=\"fa icon-socket-{{ socketStatus }}\"></i></a>";
                     e = angular.element(document.getElementById('socket-beacon-div'));
                     e.empty().append(html);
