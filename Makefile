@@ -150,7 +150,7 @@ requirements_jenkins:
 	else \
 	    (cd requirements && sudo pip install -r jenkins.txt); \
 	fi
-	npm install -g csslint jshint
+	npm install csslint jshint
 
 # "Install" ansible-tower package in development mode.  Creates link to working
 # copy in site-packages and installs awx-manage command.
