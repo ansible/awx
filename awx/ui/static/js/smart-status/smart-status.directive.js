@@ -3,7 +3,8 @@ export default [  function() {
     return {
         restrict: 'E',
         link: function (scope){
-            var str = scope.job_template.id+'_spark';
+            var str = scope.job_template.id+'_smart';
+
             scope[str].formatter = function(sparklines, options, point){
                 var status;
                 if(point.value === 1){
@@ -12,9 +13,9 @@ export default [  function() {
                 else if(point.value === -1){
                   status = "Failed";
                 }
-                // else if(isNaN(point.value)){
-                //   status = "Running";
-                // }
+                else if(isNaN(point.value)){
+                  status = "Running";
+                }
                 return "<div class=\"smart-status-tooltip\">Job ID: " +
                   options.userOptions.tooltipValueLookups.jobs[point.offset] +
                   "<br>Status: <span style=\"color: " + point.color + "\">&#9679;</span>"+status+"</div>" ;
@@ -27,18 +28,12 @@ export default [  function() {
                 barWidth: 7,
                 barSpacing: 2,
                 zeroBarColor: 'grey',
-                posBarColor: '#00aa00', //@green on ansible-ui
-                negBarColor: '#aa0000', //@red
+                posBarColor: '#00aa00',
+                negBarColor: '#aa0000',
                 tooltipFormatter: scope[str].formatter,
                 tooltipFormat: '{{value:jobs}}',
                 tooltipValueLookups: {
                     jobs: scope[str].jobIds
-                    // $.range_map({
-                    //     '1': 'Success',
-                    //     '-1': 'Failed',
-                    //     '0' : 'Queued'
-                    //     // '7:': 'High'
-                    // })
                 }
             });
 

@@ -1,6 +1,6 @@
 export default ['$scope', function ($scope) {
 
-    var str = $scope.job_template.id+'_spark',
+    var str = $scope.job_template.id+'_smart',
     recentJobs = $scope.job_template.summary_fields.recent_jobs;
     $scope[str] = {
         id: $scope.job_template.id,
