@@ -1,0 +1,24 @@
+{
+  "name": "kapusta-jquery.sparkline",
+  "version": "2.1.3",
+  "main": "dist/jquery.sparkline.min.js",
+  "ignore": [
+    "Changelog.txt",
+    "Gruntfile.js",
+    "package.json",
+    ".gitignore",
+    "bower.json",
+    "package.json",
+    "src"
+  ],
+  "homepage": "https://github.com/kapusta/jquery.sparkline",
+  "_release": "2.1.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "2.1.3",
+    "commit": "1d1d6a7db64b36e342141a4a5db73390fc8baf2f"
+  },
+  "_source": "git://github.com/kapusta/jquery.sparkline.git",
+  "_target": "^2.1.3",
+  "_originalSource": "kapusta-jquery.sparkline"
+}
