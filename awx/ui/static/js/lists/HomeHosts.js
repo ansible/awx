@@ -41,6 +41,7 @@ export default
                 key: true,
                 label: 'Name',
                 columnClass: 'col-lg-4 col-md3 col-sm-3 col-xs-7 ellipsis',
+                ngClass: "{ 'host-disabled-label': !host.enabled }",
                 ngClick: "editHost(host.id)"
             },
             inventory_name: {
@@ -78,14 +79,6 @@ export default
         },
 
         fieldActions: {
-            enabled_flag: {
-                //label: 'Enabled',
-                iconClass: "{{ 'fa icon-enabled-' + host.enabled }}",
-                dataPlacement: 'top',
-                awToolTip: "{{ host.enabledToolTip }}",
-                dataTipWatch: "host.enabledToolTip",
-                ngClick: "toggleHostEnabled(host.id, host.has_inventory_sources)"
-            },
             /*active_failures: {
                 //label: 'Job Status',
                 //ngHref: "\{\{'/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + inventory_id \}\}",

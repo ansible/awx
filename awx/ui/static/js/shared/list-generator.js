@@ -548,10 +548,6 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                             html += " " + list.fields[fld].columnClass;
                         }
 
-                        if (list.fields[fld].columnNgClass) {
-                            html += "\" ng-class=\"" + list.fields[fld].columnNgClass
-                        }
-
                         html += "\" id=\"" + list.iterator + "-" + fld + "-header\"";
                         html += (list.fields[fld].columnShow) ? " ng-show=\"" + list.fields[fld].columnShow + "\" " : "";
                         html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? " ng-click=\"sort('" + list.iterator + "','" + fld + "')\"" : "";
