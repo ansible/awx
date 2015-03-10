@@ -11,10 +11,10 @@ export default ['$scope', function ($scope) {
         if(recentJobs[i].status==='successful'){
             $scope[str].sparkArray[i] = 1;
         }
-        if(recentJobs[i].status==='failed'){
+        if(recentJobs[i].status==='failed' || recentJobs[i].status==='error' || recentJobs[i].status==='canceled'){
             $scope[str].sparkArray[i] = -1;
         }
-        if(recentJobs[i].status==='queued'){
+        if(recentJobs[i].status==='queued' || recentJobs[i].status==='new' || recentJobs[i].status==='pending' || recentJobs[i].status==='waiting' || recentJobs[i].status==='running'){
             $scope[str].sparkArray[i] = 0;
         }
         $scope[str].jobIds[i] = recentJobs[i].id;
