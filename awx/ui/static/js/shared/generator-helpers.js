@@ -10,10 +10,11 @@
  * Functions shared between FormGenerator and ListGenerator
  *
  */
+ import systemStatus from 'tower/smart-status/main';
 
 
 export default
-angular.module('GeneratorHelpers', [])
+angular.module('GeneratorHelpers', [systemStatus.name])
 
 .factory('Attr', function () {
     return function (obj, key, fld) {
@@ -629,6 +630,9 @@ angular.module('GeneratorHelpers', [])
                                 base: base
                             }) + ' ';
                         });
+                    }
+                    else if(field.smartStatus){
+                      html += '<aw-smart-status></aw-smart-status>';
                     }
                     else {
                         html += BuildLink({

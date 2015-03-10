@@ -1,0 +1,6 @@
+{
+  "name": "kapusta-jquery.sparkline",
+  "version": "2.1.3",
+  "main": "dist/jquery.sparkline.min.js",
+  "ignore": ["Changelog.txt", "Gruntfile.js", "package.json", ".gitignore", "bower.json", "package.json", "src"]
+}
