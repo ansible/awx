@@ -28,8 +28,8 @@ export default
               columnClass: 'col-md-2 col-sm-2 col-xs-2',
               searchable: false,
               nosort: true,
-              ngClick: "null",
-              smartStatus: true
+              ngInclude: "'/static/partials/job-template-smart-status.html'",
+              type: 'template'
             },
             name: {
                 key: true,

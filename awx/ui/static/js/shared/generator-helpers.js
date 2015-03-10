@@ -66,6 +66,11 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 result += (value) ? 'true' : 'false';
                 result += "\" ";
                 break;
+            case 'columnClass':
+                result = 'class="';
+                result += value;
+                result += '"';
+                break;
             default:
                 result = key + "=\"" + value + "\" ";
             }
@@ -551,8 +556,19 @@ angular.module('GeneratorHelpers', [systemStatus.name])
     };
 }])
 
-.factory('Column', ['Attr', 'Icon', 'DropDown', 'Badge', 'BadgeCount', 'BuildLink',
-    function (Attr, Icon, DropDown, Badge, BadgeCount, BuildLink) {
+.factory('Template', ['Attr', function(Attr) {
+    return function(field) {
+        var ngClass = (field.ngClass) ? Attr(field, 'ngClass') : null;
+        var classList = (field.columnClass) ? Attr(field, 'columnClass') : null;
+        var ngInclude = (field.ngInclude) ? Attr(field, 'ngInclude') : null;
+        var attrs = _.compact([ngClass, classList, ngInclude]);
+
+        return '<td ' + attrs.join(' ') + '></td>';
+    };
+}])
+
+.factory('Column', ['Attr', 'Icon', 'DropDown', 'Badge', 'BadgeCount', 'BuildLink', 'Template',
+    function (Attr, Icon, DropDown, Badge, BadgeCount, BuildLink, Template) {
         return function (params) {
             var list = params.list,
                 fld = params.fld,
@@ -567,6 +583,8 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html = BadgeCount(params);
             } else if (field.type === 'badgeOnly') {
                 html = Badge(field);
+            } else if (field.type === 'template') {
+                html = Template(field);
             } else {
                 html += "<td class=\"" + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";

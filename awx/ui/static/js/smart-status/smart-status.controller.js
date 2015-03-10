@@ -1,13 +1,6 @@
 export default ['$scope', function ($scope) {
 
-    var str = $scope.job_template.id+'_smart',
-    recentJobs = $scope.job_template.summary_fields.recent_jobs;
-    $scope[str] = {
-        id: $scope.job_template.id,
-        sparkArray: [],
-        jobIds: {},
-        smartStatus: []
-    };
+    var recentJobs = $scope.jobs;
 
     function isFailureState(status) {
         return status === 'failed' || status === 'error' || status === 'canceled';
@@ -32,9 +25,9 @@ export default ['$scope', function ($scope) {
             return data;
         });
 
-    $scope[str].sparkArray = _.pluck(sparkData, 'value');
-    $scope[str].jobIds = _.pluck(sparkData, 'jobId');
-    $scope[str].smartStatus = _.pluck(sparkData, 'smartStatus');
+    $scope.sparkArray = _.pluck(sparkData, 'value');
+    $scope.jobIds = _.pluck(sparkData, 'jobId');
+    $scope.smartStatus = _.pluck(sparkData, 'smartStatus');
 
 }];
 

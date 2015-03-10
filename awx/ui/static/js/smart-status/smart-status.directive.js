@@ -1,11 +1,13 @@
 import smartStatusController from 'tower/smart-status/smart-status.controller.js';
 export default [  function() {
     return {
+        scope: {
+            jobs: '='
+        },
         restrict: 'E',
-        link: function (scope){
-            var str = scope.job_template.id+'_smart';
+        link: function (scope, element){
 
-            scope[str].formatter = function(sparklines, options, point){
+            scope.formatter = function(sparklines, options, point){
                 var status = options.userOptions.tooltipValueLookups.status[point.offset];
                 //capitalize first letter
                 status = status.charAt(0).toUpperCase() + status.slice(1);
@@ -14,7 +16,7 @@ export default [  function() {
                   "<br>Status: <span style=\"color: " + point.color + "\">&#9679;</span>"+status+"</div>" ;
             };
 
-            $('aw-smart-status:eq('+scope.$index+')').sparkline(scope[str].sparkArray, {
+            element.sparkline(scope.sparkArray, {
                 type: 'tristate',
                 width: '4em',
                 height: '2em',
@@ -23,11 +25,11 @@ export default [  function() {
                 zeroBarColor: 'grey',
                 posBarColor: '#00aa00',
                 negBarColor: '#aa0000',
-                tooltipFormatter: scope[str].formatter,
+                tooltipFormatter: scope.formatter,
                 tooltipFormat: '{{value:jobs}}',
                 tooltipValueLookups: {
-                    jobs: scope[str].jobIds,
-                    status: scope[str].smartStatus
+                    jobs: scope.jobIds,
+                    status: scope.smartStatus
                 }
             });
 
