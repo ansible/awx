@@ -6,16 +6,9 @@ export default [  function() {
             var str = scope.job_template.id+'_smart';
 
             scope[str].formatter = function(sparklines, options, point){
-                var status;
-                if(point.value === 1){
-                  status = "Successful";
-                }
-                else if(point.value === -1){
-                  status = "Failed";
-                }
-                else if(isNaN(point.value)){
-                  status = "Running";
-                }
+                var status = options.userOptions.tooltipValueLookups.status[point.offset];
+                //capitalize first letter
+                status = status.charAt(0).toUpperCase() + status.slice(1);
                 return "<div class=\"smart-status-tooltip\">Job ID: " +
                   options.userOptions.tooltipValueLookups.jobs[point.offset] +
                   "<br>Status: <span style=\"color: " + point.color + "\">&#9679;</span>"+status+"</div>" ;
@@ -33,7 +26,8 @@ export default [  function() {
                 tooltipFormatter: scope[str].formatter,
                 tooltipFormat: '{{value:jobs}}',
                 tooltipValueLookups: {
-                    jobs: scope[str].jobIds
+                    jobs: scope[str].jobIds,
+                    status: scope[str].smartStatus
                 }
             });
 

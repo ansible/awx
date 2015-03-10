@@ -5,7 +5,8 @@ export default ['$scope', function ($scope) {
     $scope[str] = {
         id: $scope.job_template.id,
         sparkArray: [],
-        jobIds: {}
+        jobIds: {},
+        smartStatus: []
     };
     for(var i=0; i<recentJobs.length; i++){
         if(recentJobs[i].status==='successful'){
@@ -18,6 +19,7 @@ export default ['$scope', function ($scope) {
             $scope[str].sparkArray[i] = 0;
         }
         $scope[str].jobIds[i] = recentJobs[i].id;
+        $scope[str].smartStatus[i] = recentJobs[i].status;
     }
 }];
 
