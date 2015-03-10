@@ -8,19 +8,34 @@ export default ['$scope', function ($scope) {
         jobIds: {},
         smartStatus: []
     };
-    for(var i=0; i<recentJobs.length; i++){
-        if(recentJobs[i].status==='successful'){
-            $scope[str].sparkArray[i] = 1;
-        }
-        if(recentJobs[i].status==='failed' || recentJobs[i].status==='error' || recentJobs[i].status==='canceled'){
-            $scope[str].sparkArray[i] = -1;
-        }
-        if(recentJobs[i].status==='queued' || recentJobs[i].status==='new' || recentJobs[i].status==='pending' || recentJobs[i].status==='waiting' || recentJobs[i].status==='running'){
-            $scope[str].sparkArray[i] = 0;
-        }
-        $scope[str].jobIds[i] = recentJobs[i].id;
-        $scope[str].smartStatus[i] = recentJobs[i].status;
+
+    function isFailureState(status) {
+        return status === 'failed' || status === 'error' || status === 'canceled';
     }
+
+    var sparkData =
+        recentJobs.map(function(job) {
+
+            var data = {};
+
+            if (job.status === 'successful') {
+                data.value = 1;
+            } else if (isFailureState(job.status)) {
+                data.value = -1;
+            } else {
+                data.value = 0;
+            }
+
+            data.jobId = job.id;
+            data.smartStatus = job.status;
+
+            return data;
+        });
+
+    $scope[str].sparkArray = _.pluck(sparkData, 'value');
+    $scope[str].jobIds = _.pluck(sparkData, 'jobId');
+    $scope[str].smartStatus = _.pluck(sparkData, 'smartStatus');
+
 }];
 
 //
