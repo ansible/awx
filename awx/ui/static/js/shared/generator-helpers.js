@@ -330,6 +330,7 @@ angular.module('GeneratorHelpers', [])
 
             html = "<td class=\"" + fld + "-column";
             html += (field.columnClass) ? " " + field.columnClass : "";
+            html += (field.columnNgClass) ? "\" ng-class=\"" + field.columnNgClass : "";
             html += "\">\n";
             html += "<a ng-href=\"" + field.ngHref + "\" aw-tool-tip=\"" + field.awToolTip + "\"";
             html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
@@ -576,7 +577,7 @@ angular.module('GeneratorHelpers', [])
                     html += " " + field.columnClass;
                 }
                 html += "\" ";
-                html += (field.ngClass) ? Attr(field, 'ngClass') : "";
+                html += field.columnNgClass ? " ng-class=\"" + field.columnNgClass + "\"": "";
                 html += (options.mode === 'lookup' || options.mode === 'select') ? " ng-click=\"toggle_" + list.iterator +
                     "(" + list.iterator + ".id)\"" : "";
                 html += (field.columnShow) ? Attr(field, 'columnShow') : "";
