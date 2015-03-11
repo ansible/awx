@@ -97,7 +97,7 @@ export function PermissionsList($scope, $rootScope, $location, $log, $routeParam
 }
 
 PermissionsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'PermissionList',
-    'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller',
+    'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller',
     'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait'
 ];
 

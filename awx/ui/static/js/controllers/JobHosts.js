@@ -125,6 +125,6 @@ export function JobHostSummaryList($scope, $rootScope, $location, $log, $routePa
 }
 
 JobHostSummaryList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobHostList',
-    'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'Refresh', 'JobStatusToolTip', 'Wait'
 ];

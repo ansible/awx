@@ -11,9 +11,10 @@
  *
  */
 
+import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-    angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
+    angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog',
         'GeneratorHelpers'])
 
         .factory('ShowSchedulerModal', ['Wait', 'CreateDialog', function(Wait, CreateDialog) {
@@ -560,7 +561,7 @@ export default
          *  Called from a controller to setup the scope for a schedules list
          *
          */
-        .factory('LoadSchedulesScope', ['$compile', '$location', '$routeParams','SearchInit', 'PaginateInit', 'GenerateList', 'SchedulesControllerInit',
+        .factory('LoadSchedulesScope', ['$compile', '$location', '$routeParams','SearchInit', 'PaginateInit', 'generateList', 'SchedulesControllerInit',
             'SchedulesListInit', 'SearchWidget',
             function($compile, $location, $routeParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit, SearchWidget) {
             return function(params) {

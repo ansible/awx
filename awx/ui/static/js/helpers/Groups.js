@@ -14,9 +14,11 @@
  * @description    inventory tree widget add/edit/delete
 */
 
+import listGenerator from 'tower/shared/list-generator/main';
+
 export default
-angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition', 'SearchHelper',
-               'PaginationHelpers', 'ListGenerator', 'AuthService', 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
+angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'GroupListDefinition', 'SearchHelper',
+               'PaginationHelpers', listGenerator.name, 'AuthService', 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
                'JobSubmissionHelper', 'RefreshHelper', 'PromptDialog', 'CredentialsListDefinition', 'InventoryTree',
                'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'SourceFormDefinition', 'LogViewerHelper',
                'SchedulesHelper'
@@ -419,7 +421,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
  * Add the list of schedules to the Group Edit modal
  *
  */
-.factory('GroupsScheduleListInit', ['GroupsScheduleEdit', 'SchedulesList', 'GenerateList', 'SearchInit', 'PaginateInit', 'Rest',
+.factory('GroupsScheduleListInit', ['GroupsScheduleEdit', 'SchedulesList', 'generateList', 'SearchInit', 'PaginateInit', 'Rest',
          'PageRangeSetup', 'Wait', 'ProcessErrors', 'Find', 'ToggleSchedule', 'DeleteSchedule', 'GetBasePath', 'SchedulesListInit',
          function(GroupsScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Rest, PageRangeSetup, Wait, ProcessErrors, Find,
                   ToggleSchedule, DeleteSchedule, GetBasePath, SchedulesListInit) {
@@ -1695,7 +1697,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
  * TODO: Document
  *
  */
-.factory('GroupsCopy', ['$compile', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'GenerateList', 'GroupList', 'SearchInit',
+.factory('GroupsCopy', ['$compile', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'generateList', 'GroupList', 'SearchInit',
          'PaginateInit', 'GetRootGroups',
          function($compile, Rest, ProcessErrors, CreateDialog, GetBasePath, Wait, GenerateList, GroupList, SearchInit, PaginateInit, GetRootGroups) {
              return function(params) {

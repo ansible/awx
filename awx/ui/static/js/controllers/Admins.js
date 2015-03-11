@@ -41,6 +41,6 @@ export function AdminsList($scope, $rootScope, $location, $log, $routeParams, Re
     LoadBreadCrumbs();
 }
 
-AdminsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'AdminList', 'GenerateList',
+AdminsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'AdminList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'GetBasePath', 'SelectionInit'
 ];

@@ -110,7 +110,7 @@ export function TeamsList($scope, $rootScope, $location, $log, $routeParams, Res
     };
 }
 
-TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'TeamList', 'GenerateList',
+TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'TeamList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait', 'Stream'
 ];
@@ -172,7 +172,7 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routePa
 }
 
 TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
+    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList',
     'OrganizationList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'LookUpInit', 'Wait'
 ];
 

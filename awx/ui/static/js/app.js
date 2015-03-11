@@ -76,7 +76,6 @@ var tower = angular.module('Tower', [
     'OrganizationListDefinition',
     'UserListDefinition',
     'UserHelper',
-    'ListGenerator',
     'PromptDialog',
     'ApiLoader',
     'RelatedSearchHelper',

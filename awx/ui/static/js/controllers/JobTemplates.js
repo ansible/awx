@@ -241,7 +241,7 @@ export function JobTemplatesList($scope, $rootScope, $location, $log, $routePara
 }
 
 JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobTemplateList',
-    'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
+    'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList', 'LookUpInit',
     'PlaybookRun', 'Wait', 'Stream', 'CreateDialog' , '$compile'
 ];

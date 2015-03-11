@@ -133,12 +133,12 @@
  */
 
 import GeneratorHelpers from './generator-helpers';
-import ListGenerator from './list-generator';
+import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', ListGenerator.name])
+angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerator.name])
 
-.factory('GenerateForm', ['$rootScope', '$location', '$compile', 'GenerateList', 'SearchWidget', 'PaginateWidget', 'Attr',
+.factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList', 'SearchWidget', 'PaginateWidget', 'Attr',
     'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty', 'SelectIcon', 'Store',
     function ($rootScope, $location, $compile, GenerateList, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink,
         HelpCollapse, Button, DropDown, Empty, SelectIcon, Store) {

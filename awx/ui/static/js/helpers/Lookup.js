@@ -22,11 +22,12 @@
  *  })
  */
 
+import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-    angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ApiLoader', 'ModalDialog'])
+    angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ApiLoader', 'ModalDialog'])
 
-        .factory('LookUpInit', ['Alert', 'Rest', 'GenerateList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'FormatDate', 'Empty', 'CreateDialog',
+        .factory('LookUpInit', ['Alert', 'Rest', 'generateList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'FormatDate', 'Empty', 'CreateDialog',
         function (Alert, Rest, GenerateList, SearchInit, PaginateInit, GetBasePath, FormatDate, Empty, CreateDialog) {
             return function (params) {
 

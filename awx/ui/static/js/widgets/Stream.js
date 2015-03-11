@@ -11,10 +11,11 @@
  *
  */
 
+import listGenerator from 'tower/shared/list-generator/main';
 
 
 angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginationHelpers',
-    'RefreshHelper', 'ListGenerator', 'StreamWidget', 'AuthService',
+    'RefreshHelper', listGenerator.name, 'StreamWidget', 'AuthService',
 ])
 
 .factory('setStreamHeight', [
@@ -331,7 +332,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 ])
 
 .factory('Stream', ['$rootScope', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit',
-    'PaginateInit', 'GenerateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'BuildUrl',
+    'PaginateInit', 'generateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'BuildUrl',
     'ShowDetail', 'StreamBreadCrumbs', 'setStreamHeight', 'Find', 'Store',
     function ($rootScope, $location, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
         FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, StreamBreadCrumbs, setStreamHeight,

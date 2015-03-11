@@ -11,12 +11,13 @@
  *
  */
 
+import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-    angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
+    angular.module('ConfigureTowerHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog',
         'GeneratorHelpers'])
 
-        .factory('ConfigureTower', ['Wait', '$location' , '$compile',  'CreateDialog', 'ConfigureTowerJobsList', 'GenerateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'LoadSchedulesScope',
+        .factory('ConfigureTower', ['Wait', '$location' , '$compile',  'CreateDialog', 'ConfigureTowerJobsList', 'generateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'LoadSchedulesScope',
             'SchedulesList', 'SchedulesControllerInit' , 'ConfigureTowerSchedule', 'Rest' , 'ProcessErrors',
             function(Wait, $location, $compile, CreateDialog, ConfigureTowerJobsList, GenerateList, GetBasePath, SearchInit, PaginateInit, PlaybookRun, LoadSchedulesScope,
                 SchedulesList, SchedulesControllerInit, ConfigureTowerSchedule, Rest, ProcessErrors) {

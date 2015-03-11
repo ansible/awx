@@ -12,9 +12,11 @@
  * @description    routines shared by job related controllers
 */
 
+import listGenerator from 'tower/shared/list-generator/main';
+
 export default
     angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers',
-        'JobSubmissionHelper', 'LogViewerHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator'])
+        'JobSubmissionHelper', 'LogViewerHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name])
 
     /**
      *  JobsControllerInit({ scope: $scope });
@@ -356,7 +358,7 @@ export default
      *  Called from JobsList controller to load each section or list on the page
      *
      */
-    .factory('LoadJobsScope', ['$routeParams', '$location', '$compile', 'SearchInit', 'PaginateInit', 'GenerateList', 'JobsControllerInit', 'JobsListUpdate', 'SearchWidget',
+    .factory('LoadJobsScope', ['$routeParams', '$location', '$compile', 'SearchInit', 'PaginateInit', 'generateList', 'JobsControllerInit', 'JobsListUpdate', 'SearchWidget',
         function($routeParams, $location, $compile, SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate, SearchWidget) {
         return function(params) {
             var parent_scope = params.parent_scope,

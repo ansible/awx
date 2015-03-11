@@ -11,8 +11,10 @@
  *  (controllers/Inventories.js)
 */
 
+import listGenerator from 'tower/shared/list-generator/main';
+
 export default
-    angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', 'ListGenerator', 'AuthService',
+    angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', listGenerator.name, 'AuthService',
         'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper', 'VariablesHelper',
     ])
 

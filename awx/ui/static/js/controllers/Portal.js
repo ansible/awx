@@ -176,5 +176,5 @@ export function PortalController($scope, $compile, $routeParams, $rootScope, $lo
     }
 
 PortalController.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors',
-    'Button', 'PortalJobsWidget', 'GenerateList' , 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'
+    'Button', 'PortalJobsWidget', 'generateList' , 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'
 ];

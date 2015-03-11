@@ -571,7 +571,7 @@ export function HomeGroups($log, $scope, $filter, $compile, $location, $routePar
 
 }
 
-HomeGroups.$inject = ['$log', '$scope', '$filter', '$compile', '$location', '$routeParams', 'LogViewer', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
+HomeGroups.$inject = ['$log', '$scope', '$filter', '$compile', '$location', '$routeParams', 'LogViewer', 'HomeGroupList', 'generateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
     'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find', 'GroupsCancelUpdate', 'Store', 'Socket'
 ];
@@ -700,7 +700,7 @@ export function HomeHosts($scope, $location, $routeParams, HomeHostList, Generat
 
 }
 
-HomeHosts.$inject = ['$scope', '$location', '$routeParams', 'HomeHostList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
+HomeHosts.$inject = ['$scope', '$location', '$routeParams', 'HomeHostList', 'generateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller',
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream',
     'Find', 'ShowJobSummary', 'ViewJob'
 ];

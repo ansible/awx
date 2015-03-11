@@ -16,9 +16,11 @@
 
 'use strict';
 
+import listGenerator from 'tower/shared/list-generator/main';
+
 export default
-angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
-               'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'AuthService', 'HostsHelper',
+angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'HostListDefinition',
+               'SearchHelper', 'PaginationHelpers', listGenerator.name, 'AuthService', 'HostsHelper',
                'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
                'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'LogViewerHelper',
                'GroupListDefinition'
@@ -231,7 +233,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                       };
                   }])
 
-.factory('InjectHosts', ['GenerateList', 'InventoryHosts', 'HostsReload',
+.factory('InjectHosts', ['generateList', 'InventoryHosts', 'HostsReload',
        function(GenerateList, InventoryHosts, HostsReload) {
            return function(params) {
 
@@ -291,7 +293,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             };
         }])
 
-.factory('HostsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostList', 'GenerateList',
+.factory('HostsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostList', 'generateList',
          'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'HostsAdd', 'HostsReload', 'SelectionInit',
          function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, GenerateList, Prompt, SearchInit,
                   PaginateInit, ProcessErrors, GetBasePath, HostsAdd, HostsReload, SelectionInit) {
@@ -771,7 +773,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            };
        }])
 
-                                                                                                   .factory('HostsCopy', ['$compile', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'GenerateList', 'GroupList', 'SearchInit',
+                                                                                                   .factory('HostsCopy', ['$compile', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'generateList', 'GroupList', 'SearchInit',
                                                                                                             'PaginateInit',
                                                                                                             function($compile, Rest, ProcessErrors, CreateDialog, GetBasePath, Wait, GenerateList, GroupList, SearchInit, PaginateInit) {
                                                                                                                 return function(params) {
