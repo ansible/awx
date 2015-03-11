@@ -28,6 +28,7 @@ export default
                 key: true,
                 label: 'Hosts',
                 ngClick: "editHost(host.id)",
+                ngClass: "{ 'host-disabled-label': !host.enabled }",
                 columnClass: 'col-lg-8 col-md-9 col-sm-9 col-xs-7',
                 dataHostId: "{{ host.id }}",
                 dataType: "host"
@@ -53,13 +54,6 @@ export default
             columnClass: 'col-lg-4 col-md-3 col-sm-3 col-xs-5 text-right',
             label: false,
 
-            enabled_flag: {
-                iconClass: "{{ 'fa icon-enabled-' + host.enabled }}",
-                dataPlacement: 'top',
-                awToolTip: "{{ host.enabledToolTip }}",
-                dataTipWatch: "host.enabledToolTip",
-                ngClick: "toggleHostEnabled(host.id, host.has_inventory_sources)"
-            },
             active_failures: {
                 awPopOver: "{{ host.job_status_html }}",
                 dataTitle: "{{ host.job_status_title }}",
