@@ -11,12 +11,13 @@
  *
  */
 
+import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-    angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog',
+    angular.module('CreateCustomInventoryHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog',
         'GeneratorHelpers', 'CustomInventoryFormDefinition'])
 
-        .factory('CreateCustomInventory', ['Wait', 'CreateDialog', 'CustomInventoryList', 'GenerateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'CustomInventoryAdd',
+        .factory('CreateCustomInventory', ['Wait', 'CreateDialog', 'CustomInventoryList', 'generateList', 'GetBasePath' , 'SearchInit' , 'PaginateInit', 'PlaybookRun', 'CustomInventoryAdd',
             'SchedulesList', 'CustomInventoryEdit', 'Rest' , 'ProcessErrors', 'CustomInventoryForm', 'GenerateForm', 'Prompt',
             function(Wait, CreateDialog, CustomInventoryList, GenerateList, GetBasePath, SearchInit, PaginateInit, PlaybookRun, CustomInventoryAdd,
                 SchedulesList, CustomInventoryEdit, Rest, ProcessErrors, CustomInventoryForm, GenerateForm, Prompt) {
@@ -177,7 +178,7 @@ export default
 
 
     .factory('CustomInventoryAdd', ['$compile','SchedulerInit', 'Rest', 'Wait', 'CustomInventoryList', 'CustomInventoryForm', 'ProcessErrors', 'GetBasePath', 'Empty', 'GenerateForm',
-        'SearchInit' , 'PaginateInit', 'GenerateList', 'LookUpInit', 'OrganizationList',
+        'SearchInit' , 'PaginateInit', 'generateList', 'LookUpInit', 'OrganizationList',
     function($compile, SchedulerInit, Rest, Wait, CustomInventoryList, CustomInventoryForm, ProcessErrors, GetBasePath, Empty, GenerateForm,
         SearchInit, PaginateInit, GenerateList, LookUpInit, OrganizationList) {
         return function(params) {
@@ -247,7 +248,7 @@ export default
         };
     }])
 
-    .factory('CustomInventoryEdit', ['$compile','CustomInventoryList', 'Rest', 'Wait', 'GenerateList', 'CustomInventoryForm', 'ProcessErrors', 'GetBasePath', 'Empty', 'GenerateForm',
+    .factory('CustomInventoryEdit', ['$compile','CustomInventoryList', 'Rest', 'Wait', 'generateList', 'CustomInventoryForm', 'ProcessErrors', 'GetBasePath', 'Empty', 'GenerateForm',
         'SearchInit', 'PaginateInit', '$routeParams', 'OrganizationList', 'LookUpInit',
     function($compile, CustomInventoryList, Rest, Wait, GenerateList, CustomInventoryForm, ProcessErrors, GetBasePath, Empty, GenerateForm,
         SearchInit, PaginateInit, $routeParams, OrganizationList, LookUpInit) {

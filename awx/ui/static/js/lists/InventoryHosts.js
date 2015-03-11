@@ -22,6 +22,7 @@ export default
         hover: true,
         hasChildren: true,
         'class': 'table-no-border',
+        multiSelect: true,
 
         fields: {
             name: {

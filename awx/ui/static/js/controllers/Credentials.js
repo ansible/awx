@@ -128,7 +128,7 @@ export function CredentialsList($scope, $rootScope, $location, $log, $routeParam
     };
 }
 
-CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'CredentialList', 'GenerateList',
+CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'CredentialList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'SelectionInit', 'GetChoices', 'Wait', 'Stream'
 ];
@@ -293,7 +293,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
 }
 
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList', 'SearchInit', 'PaginateInit',
+    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'SearchInit', 'PaginateInit',
     'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange', 'LoginMethodChange', 'FormSave'
 ];
 

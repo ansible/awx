@@ -362,7 +362,7 @@ export function InventoriesList($scope, $rootScope, $location, $log, $routeParam
     };
 }
 
-InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', '$compile', '$filter', 'Rest', 'Alert', 'InventoryList', 'GenerateList',
+InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', '$compile', '$filter', 'Rest', 'Alert', 'InventoryList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties', 'Find', 'Empty', 'LogViewer'
 ];
@@ -472,7 +472,7 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $r
 }
 
 InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList', 'OrganizationList', 'SearchInit',
+    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
     'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON'
 ];
 
@@ -503,8 +503,6 @@ export function InventoriesEdit ($log, $scope, $location, $routeParams, $compile
         active_class: 'active',
         show_failures: false
     }];
-
-    /**/
 
     $scope.refreshHostsOnGroupRefresh = false;
     $scope.selected_group_id = null;
@@ -1021,7 +1019,7 @@ export function InventoriesEdit ($log, $scope, $location, $routeParams, $compile
     });
 }
 
-InventoriesEdit.$inject = ['$log', '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'Empty', 'Wait', 'Rest', 'Alert', 'LoadBreadCrumbs',
+InventoriesEdit.$inject = ['$log', '$scope', '$location', '$routeParams', '$compile', 'generateList', 'ClearScope', 'Empty', 'Wait', 'Rest', 'Alert', 'LoadBreadCrumbs',
     'GetBasePath', 'ProcessErrors', 'Breadcrumbs', 'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg',
     'GetHostsStatusMsg', 'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary', 'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'WatchInventoryWindowResize',

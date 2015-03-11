@@ -11,8 +11,10 @@
  *
  */
 
+import listGenerator from 'tower/shared/list-generator/main';
+
 export default
-angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ModalDialog' ,
+angular.module('SurveyHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog' ,
     'GeneratorHelpers'])
 
     .factory('ShowSurveyModal', ['Wait', 'CreateDialog', 'Empty', '$compile' ,

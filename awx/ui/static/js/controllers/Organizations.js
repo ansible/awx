@@ -96,7 +96,7 @@ export function OrganizationsList($routeParams, $scope, $rootScope, $location, $
 }
 
 OrganizationsList.$inject = ['$routeParams', '$scope', '$rootScope', '$location', '$log', 'Rest', 'Alert', 'LoadBreadCrumbs', 'Prompt',
-    'GenerateList', 'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait',
+    'generateList', 'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait',
     'Stream'
 ];
 

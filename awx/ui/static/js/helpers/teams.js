@@ -9,10 +9,11 @@
  *  Routines shared amongst the team controllers
  */
 
+import listGenerator from 'tower/shared/list-generator/main';
 
 export default
     angular.module('TeamHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', 'SearchHelper',
-        'PaginationHelpers', 'ListGenerator'
+        'PaginationHelpers', listGenerator.name
     ])
         .factory('SetTeamListeners', ['Alert', 'Rest',
             function (Alert, Rest) {
@@ -70,7 +71,7 @@ export default
             }
         ])
 
-    .factory('TeamLookUpOrganizationInit', ['Alert', 'Rest', 'OrganizationList', 'GenerateList', 'SearchInit', 'PaginateInit',
+    .factory('TeamLookUpOrganizationInit', ['Alert', 'Rest', 'OrganizationList', 'generateList', 'SearchInit', 'PaginateInit',
         function (Alert, Rest, OrganizationList, GenerateList, SearchInit, PaginateInit) {
             return function (params) {
 
