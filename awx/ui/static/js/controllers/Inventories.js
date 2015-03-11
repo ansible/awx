@@ -476,9 +476,117 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
     'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON'
 ];
 
+export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
+    Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, OrganizationList, SearchInit, PaginateInit,
+    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON) {
+
+    ClearScope();
+
+    // Inject dynamic view
+    var defaultUrl = GetBasePath('inventory'),
+        form = InventoryForm,
+        generator = GenerateForm;
+
+    form.well = true;
+    form.formLabelSize = null;
+    form.formFieldSize = null;
+
+    generator.inject(form, { mode: 'add', related: false, scope: $scope });
+
+    generator.reset();
+    LoadBreadCrumbs();
+
+    $scope.parseType = 'yaml';
+    ParseTypeChange({
+        scope: $scope,
+        variable: 'variables',
+        parse_variable: 'parseType',
+        field_id: 'inventory_variables'
+    });
+
+    LookUpInit({
+        scope:  $scope,
+        form: form,
+        current_item: ($routeParams.organization_id) ? $routeParams.organization_id : null,
+        list: OrganizationList,
+        field: 'organization',
+        input_type: 'radio'
+    });
+
+    // Save
+    $scope.formSave = function () {
+        generator.clearApiErrors();
+        Wait('start');
+        try {
+            var fld, json_data, data;
+
+            json_data = ToJSON($scope.parseType, $scope.variables, true);
+
+            data = {};
+            for (fld in form.fields) {
+                if (fld !== 'variables') {
+                    if (form.fields[fld].realName) {
+                        data[form.fields[fld].realName] =  $scope[fld];
+                    } else {
+                        data[fld] =  $scope[fld];
+                    }
+                }
+            }
+
+            if ($scope.removeUpdateInventoryVariables) {
+                $scope.removeUpdateInventoryVariables();
+            }
+            $scope.removeUpdateInventoryVariables = $scope.$on('UpdateInventoryVariables', function(e, data) {
+                var inventory_id = data.id;
+                Rest.setUrl(data.related.variable_data);
+                Rest.put(json_data)
+                    .success(function () {
+                        Wait('stop');
+                        $location.path('/inventories/' + inventory_id + '/');
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
+                        });
+                    });
+            });
+
+            Rest.setUrl(defaultUrl);
+            Rest.post(data)
+                .success(function (data) {
+                    var inventory_id = data.id;
+                    if ($scope.variables) {
+                        $scope.$emit('UpdateInventoryVariables', data);
+                    } else {
+                        Wait('stop');
+                        $location.path('/inventories/' + inventory_id + '/');
+                    }
+                })
+                .error(function (data, status) {
+                    ProcessErrors( $scope, data, status, form, { hdr: 'Error!',
+                        msg: 'Failed to add new inventory. Post returned status: ' + status });
+                });
+        } catch (err) {
+            Wait('stop');
+            Alert("Error", "Error parsing inventory variables. Parser returned: " + err);
+        }
+
+    };
+
+    // Reset
+    $scope.formReset = function () {
+        generator.reset();
+    };
+}
+
+InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
+    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList', 'OrganizationList', 'SearchInit',
+    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON'
+];
 
 
-export function InventoriesEdit ($log, $scope, $location, $routeParams, $compile, GenerateList, ClearScope, Empty, Wait, Rest, Alert, LoadBreadCrumbs, GetBasePath, ProcessErrors,
+
+export function InventoriesManage ($log, $scope, $location, $routeParams, $compile, GenerateList, ClearScope, Empty, Wait, Rest, Alert, LoadBreadCrumbs, GetBasePath, ProcessErrors,
     Breadcrumbs, InventoryGroups, InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, GroupsEdit, InventoryUpdate,
     GroupsCancelUpdate, ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete, EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
     InventoryGroupsHelp, HelpDialog, ViewJob, WatchInventoryWindowResize, GetHostContainerRows, GetGroupContainerRows, GetGroupContainerHeight,
@@ -1021,7 +1129,7 @@ export function InventoriesEdit ($log, $scope, $location, $routeParams, $compile
     });
 }
 
-InventoriesEdit.$inject = ['$log', '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'Empty', 'Wait', 'Rest', 'Alert', 'LoadBreadCrumbs',
+InventoriesManage.$inject = ['$log', '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'Empty', 'Wait', 'Rest', 'Alert', 'LoadBreadCrumbs',
     'GetBasePath', 'ProcessErrors', 'Breadcrumbs', 'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg',
     'GetHostsStatusMsg', 'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary', 'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'WatchInventoryWindowResize',

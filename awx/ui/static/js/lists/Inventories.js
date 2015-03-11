@@ -48,7 +48,8 @@ export default
                 key: true,
                 label: 'Name',
                 columnClass: 'col-md-4 col-sm-6 col-xs-6',
-                modalColumnClass: 'col-md-8'
+                modalColumnClass: 'col-md-8',
+                linkTo: '/#/inventories/{{inventory.id}}/manage'
             },
             organization: {
                 label: 'Organization',
@@ -105,7 +106,7 @@ export default
             },
             edit: {
                 label: 'Edit',
-                ngClick: 'editInventoryProperties(inventory.id)',
+                ngClick: 'editInventory(inventory.id)', //'editInventoryProperties(inventory.id)',
                 awToolTip: 'Edit inventory',
                 dataPlacement: 'top'
             },
