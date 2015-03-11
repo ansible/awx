@@ -188,9 +188,12 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 
             if (toolbar) {
                 //if this is a toolbar button, set some defaults
+                console.log('toolbar button');
                 btn.class = 'btn-xs btn-primary';
                 btn.iconSize = 'fa-lg';
                 delete btn.label;
+            } else {
+                console.log('NOT A TOOLBAR BUTTON');
             }
 
             html += "<button type=\"button\" ";
@@ -202,6 +205,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html += " btn-sm";
             }
 
+            console.log('btn:', btn);
             html += (btn.awPopOver) ? " help-link-white" : "";
             html += "\" ";
             html += (btn.ngClick) ? Attr(btn, 'ngClick') : "";

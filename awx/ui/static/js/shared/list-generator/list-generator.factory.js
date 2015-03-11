@@ -71,6 +71,40 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     }
 
                     this.scope.list = list;
+                    this.scope.mode = options.mode;
+
+                    this.scope.performAction = function(action) {
+                        console.log('performing:', action);
+                        this.scope.$eval(action);
+                    }.bind(this);
+
+                    this.scope.shouldHideAction = function(options) {
+                        return _.tap(this.scope.$eval(options.ngHide), function(value) { console.log('shouldHide:', value, this.scope.selected_group_id, options); }.bind(this));
+                    }.bind(this);
+                    this.scope.canShowAction = function(action) {
+                        var base = $location.path().replace(/^\//, '').split('/')[0];
+                        var inActionMode = options.mode === action.mode || action.mode === 'all';
+                        var onScreenForAction =
+                            (!options.basePaths) ||
+                                (options.basePaths.indexOf(base) > -1);
+                        var scopeShow = action.ngShow ? this.scope.$eval(action.ngShow) : true;
+
+                        if (this.scope.shouldHideAction(action)) {
+                            return false;
+                        } else if (!scopeShow) {
+                            console.log('scopeShow false', action.ngShow);
+                            return false;
+                        } else {
+                            return _.tap(inActionMode && onScreenForAction, function(value) {
+                                console.log('mode ', value, action);
+                            });
+                        }
+
+                        // return _.tap(scopeShow || , function(value) {
+                        //     console.log('canShow:', value, options.mode, action.mode, scopeShow);
+                        // });
+                    }.bind(this);
+
 
                     $compile(element)(this.scope);
 
@@ -203,7 +237,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                         if (options.mode !== 'lookup') {
                             //actions
-                            base = $location.path().replace(/^\//, '').split('/')[0];
                             html += "<div class=\"";
                             if (options.searchSize && !options.listSize) {
                                 // User supplied searchSize, calc the remaining
@@ -221,42 +254,34 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                             }
                             html += "\">\n";
 
-                            html += "<div class=\"list-actions\">\n";
+            html += "<div class=\"list-actions\">\n";
+            html += '<span ng-repeat="(name, options) in list.actions">';
+            html += '<toolbar-button name="name" options="options"  on-selected="performAction(action)" ng-show="canShowAction(options)"></toolbar-button>';
+            html += '</span>';
 
-                            // Add toolbar buttons or 'actions'
-                            for (action in list.actions) {
-                                if (list.actions[action].mode === 'all' || list.actions[action].mode === options.mode) {
-                                    if ((list.actions[action].basePaths === undefined) ||
-                                        (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1)) {
-                                        html += this.button({
-                                            btn: list.actions[action],
-                                            action: action,
-                                            toolbar: true
-                                        });
-                                    }
-                                }
-                            }
+            //select instructions
+            if (options.mode === 'select' && list.selectInstructions) {
+                btn = {
+                    awPopOver: list.selectInstructions,
+                    dataPlacement: 'left',
+                    dataContainer: 'body',
+                    'class': 'btn-xs btn-help',
+                    awToolTip: 'Click for help',
+                    dataTitle: 'Help',
+                    iconSize: 'fa-lg'
+                };
+                //html += this.button(btn, 'select');
+                html += this.button({
+                    btn: btn,
+                    action: 'help',
+                    toolbar: true
+                });
+            }
 
-                            //select instructions
-                            if (options.mode === 'select' && list.selectInstructions) {
-                                btn = {
-                                    awPopOver: list.selectInstructions,
-                                    dataPlacement: 'left',
-                                    dataContainer: 'body',
-                                    'class': 'btn-xs btn-help',
-                                    awToolTip: 'Click for help',
-                                    dataTitle: 'Help',
-                                    iconSize: 'fa-lg'
-                                };
-                                //html += this.button(btn, 'select');
-                                html += this.button({
-                                    btn: btn,
-                                    action: 'help',
-                                    toolbar: true
-                                });
-                            }
 
-                            html += "</div><!-- list-acitons -->\n";
+
+            html += "</div><!-- list-acitons -->\n";
+
                             html += "</div><!-- list-actions-column -->\n";
                         } else {
                             //lookup
