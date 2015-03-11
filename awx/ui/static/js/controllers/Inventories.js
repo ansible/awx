@@ -478,110 +478,164 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 
 export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, OrganizationList, SearchInit, PaginateInit,
-    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON) {
+    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream) {
 
     ClearScope();
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
         form = InventoryForm,
-        generator = GenerateForm;
+        generator = GenerateForm,
+        inventory_id = $routeParams.inventory_id,
+        master = {},
+        fld, json_data, data;
 
     form.well = true;
     form.formLabelSize = null;
     form.formFieldSize = null;
 
-    generator.inject(form, { mode: 'add', related: false, scope: $scope });
+    generator.inject(form, { mode: 'edit', related: false, scope: $scope });
 
     generator.reset();
     LoadBreadCrumbs();
 
-    $scope.parseType = 'yaml';
-    ParseTypeChange({
-        scope: $scope,
-        variable: 'variables',
-        parse_variable: 'parseType',
-        field_id: 'inventory_variables'
-    });
+    // $scope.parseType = 'yaml';
+    // ParseTypeChange({
+    //     scope: $scope,
+    //     variable: 'variables',
+    //     parse_variable: 'parseType',
+    //     field_id: 'inventory_variables'
+    // });
 
-    LookUpInit({
-        scope:  $scope,
-        form: form,
-        current_item: ($routeParams.organization_id) ? $routeParams.organization_id : null,
-        list: OrganizationList,
-        field: 'organization',
-        input_type: 'radio'
-    });
-
-    // Save
-    $scope.formSave = function () {
-        generator.clearApiErrors();
-        Wait('start');
-        try {
-            var fld, json_data, data;
-
-            json_data = ToJSON($scope.parseType, $scope.variables, true);
-
-            data = {};
+    // LookUpInit({
+    //     scope:  $scope,
+    //     form: form,
+    //     current_item: ($routeParams.organization_id) ? $routeParams.organization_id : null,
+    //     list: OrganizationList,
+    //     field: 'organization',
+    //     input_type: 'radio'
+    // });
+    Wait('start');
+    Rest.setUrl(GetBasePath('inventory') + inventory_id + '/');
+    Rest.get()
+        .success(function (data) {
+            var fld;
             for (fld in form.fields) {
-                if (fld !== 'variables') {
-                    if (form.fields[fld].realName) {
-                        data[form.fields[fld].realName] =  $scope[fld];
-                    } else {
-                        data[fld] =  $scope[fld];
-                    }
+                if (fld === 'variables') {
+                    $scope.variables = ParseVariableString(data.variables);
+                    master.variables = $scope.variables;
+                } else if (fld === 'inventory_name') {
+                  $scope[fld] = data.name;
+                    master[fld] = $scope[fld];
+                } else if (fld === 'inventory_description') {
+                  $scope[fld] = data.description;
+                    master[fld] = $scope[fld];
+                } else if (data[fld]) {
+                  $scope[fld] = data[fld];
+                    master[fld] = $scope[fld];
+                }
+                if (form.fields[fld].sourceModel && data.summary_fields &&
+                    data.summary_fields[form.fields[fld].sourceModel]) {
+                      $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                    master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                 }
             }
-
-            if ($scope.removeUpdateInventoryVariables) {
-                $scope.removeUpdateInventoryVariables();
-            }
-            $scope.removeUpdateInventoryVariables = $scope.$on('UpdateInventoryVariables', function(e, data) {
-                var inventory_id = data.id;
-                Rest.setUrl(data.related.variable_data);
-                Rest.put(json_data)
-                    .success(function () {
-                        Wait('stop');
-                        $location.path('/inventories/' + inventory_id + '/');
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
-                        });
-                    });
-            });
-
-            Rest.setUrl(defaultUrl);
-            Rest.post(data)
-                .success(function (data) {
-                    var inventory_id = data.id;
-                    if ($scope.variables) {
-                        $scope.$emit('UpdateInventoryVariables', data);
-                    } else {
-                        Wait('stop');
-                        $location.path('/inventories/' + inventory_id + '/');
-                    }
-                })
-                .error(function (data, status) {
-                    ProcessErrors( $scope, data, status, form, { hdr: 'Error!',
-                        msg: 'Failed to add new inventory. Post returned status: ' + status });
-                });
-        } catch (err) {
             Wait('stop');
-            Alert("Error", "Error parsing inventory variables. Parser returned: " + err);
-        }
+            $scope.parseType = 'yaml';
+            ParseTypeChange({
+                scope: $scope,
+                variable: 'variables',
+                parse_variable: 'parseType',
+                field_id: 'inventory_variables'
+            });
+            LookUpInit({
+                scope: $scope,
+                form: form,
+                current_item: $scope.organization,
+                list: OrganizationList,
+                field: 'organization',
+                input_type: 'radio'
+            });
+        })
+        .error(function (data, status) {
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                msg: 'Failed to get inventory: ' + inventory_id + '. GET returned: ' + status });
+        });
+    // Save
+    $scope.formSave = function () {
+      Wait('start');
 
+      // Make sure we have valid variable data
+      json_data = ToJSON($scope.parseType, $scope.variables);
+
+      data = {};
+      for (fld in form.fields) {
+          if (fld !== 'variables') {
+              if (form.fields[fld].realName) {
+                  data[form.fields[fld].realName] = $scope[fld];
+              } else {
+                  data[fld] = $scope[fld];
+              }
+          }
+      }
+
+      if ($scope.removeUpdateInventoryVariables) {
+        $scope.removeUpdateInventoryVariables();
+      }
+      $scope.removeUpdateInventoryVariables = $scope.$on('UpdateInventoryVariables', function(e, data) {
+          Rest.setUrl(data.related.variable_data);
+          Rest.put(json_data)
+              .success(function () {
+                  Wait('stop');
+                  $location.path('/inventories/');
+              })
+              .error(function (data, status) {
+                  ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                      msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
+                  });
+              });
+      });
+
+      Rest.setUrl(defaultUrl + inventory_id + '/');
+      Rest.put(data)
+          .success(function (data) {
+              if ($scope.variables) {
+                $scope.$emit('UpdateInventoryVariables', data);
+              } else {
+                $location.path('/inventories/');
+              }
+          })
+          .error(function (data, status) {
+              ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                  msg: 'Failed to update inventory. PUT returned status: ' + status });
+          });
+    };
+
+    $scope.showActivity = function () {
+        Stream({ scope:  $scope });
     };
 
     // Reset
     $scope.formReset = function () {
         generator.reset();
+        for (var fld in master) {
+            $scope[fld] = master[fld];
+        }
+        $scope.parseType = 'yaml';
+        ParseTypeChange({
+            scope: $scope,
+            variable: 'variables',
+            parse_variable: 'parseType',
+            field_id: 'inventory_variables'
+        });
     };
 }
 
 InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList', 'OrganizationList', 'SearchInit',
-    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON'
+    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream'
 ];
 
 
@@ -970,7 +1024,8 @@ export function InventoriesManage ($log, $scope, $location, $routeParams, $compi
     };
 
     $scope.editInventoryProperties = function () {
-        EditInventoryProperties({ scope: $scope, inventory_id: $scope.inventory.id });
+        // EditInventoryProperties({ scope: $scope, inventory_id: $scope.inventory.id });
+        $location.path('/inventories/' + $scope.inventory.id + '/');
     };
 
     hostScope.createHost = function () {
