@@ -23,7 +23,7 @@ export default
                 key: true,
                 ngClick: "groupSelect(group.id)",
                 columnClick: "groupSelect(group.id)",
-                columnClass: 'col-lg-8 col-md-8 col-sm-8 col-xs-6'
+                columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'
             },
             source: {
                 label: 'Source',
@@ -109,7 +109,7 @@ export default
 
         fieldActions: {
 
-            columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6 text-right',
+            columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right',
             label: false,
 
             sync_status: {

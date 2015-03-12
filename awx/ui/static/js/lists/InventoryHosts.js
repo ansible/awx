@@ -29,8 +29,7 @@ export default
                 key: true,
                 label: 'Hosts',
                 ngClick: "editHost(host.id)",
-                ngClass: "{ 'host-disabled-label': !host.enabled }",
-                columnClass: 'col-lg-8 col-md-9 col-sm-9 col-xs-7',
+                columnClass: 'col-lg-6 col-md-9 col-sm-9 col-xs-7',git
                 dataHostId: "{{ host.id }}",
                 dataType: "host"
             },
@@ -52,7 +51,7 @@ export default
 
         fieldActions: {
 
-            columnClass: 'col-lg-4 col-md-3 col-sm-3 col-xs-5 text-right',
+            columnClass: 'col-lg-6 col-md-3 col-sm-3 col-xs-5 text-right',
             label: false,
 
             active_failures: {

@@ -39,7 +39,7 @@ import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from 'tower/control
 import {ScheduleEditController} from 'tower/controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from 'tower/controllers/Projects';
 import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from 'tower/controllers/Organizations';
-import {InventoriesList, InventoriesAdd, InventoriesEdit} from 'tower/controllers/Inventories';
+import {InventoriesList, InventoriesAdd, InventoriesEdit, InventoriesManage} from 'tower/controllers/Inventories';
 import {AdminsList} from 'tower/controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from 'tower/controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from 'tower/controllers/Teams';
@@ -257,8 +257,13 @@ var tower = angular.module('Tower', [
             }).
 
             when('/inventories/:inventory_id', {
-                templateUrl: urlPrefix + 'partials/inventory-edit.html',
+                templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesEdit
+            }).
+
+            when('/inventories/:inventory_id/manage', {
+                templateUrl: urlPrefix + 'partials/inventory-manage.html',
+                controller: InventoriesManage
             }).
 
             when('/organizations', {
