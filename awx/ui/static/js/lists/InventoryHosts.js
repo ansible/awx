@@ -29,7 +29,7 @@ export default
                 key: true,
                 label: 'Hosts',
                 ngClick: "editHost(host.id)",
-                columnClass: 'col-lg-6 col-md-9 col-sm-9 col-xs-7',git
+                columnClass: 'col-lg-6 col-md-9 col-sm-9 col-xs-7',
                 dataHostId: "{{ host.id }}",
                 dataType: "host"
             },

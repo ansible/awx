@@ -320,7 +320,7 @@ export function InventoriesList($scope, $rootScope, $location, $log, $routeParam
 
     $scope.manageInventory = function(id){
       $location.path($location.path() + '/' + id + '/manage');
-    }
+    };
 
     $scope.deleteInventory = function (id, name) {
 
@@ -619,7 +619,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
 
     $scope.manageInventory = function(){
       $location.path($location.path() + '/manage');
-    }
+    };
 
     $scope.showActivity = function () {
         Stream({ scope:  $scope });
