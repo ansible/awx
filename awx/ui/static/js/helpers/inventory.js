@@ -44,8 +44,8 @@ export default
         return function() {
             var height, rows;
             height = $('#hosts-container .list-well').height() - $('#hosts-constainer .list-well .row').height() - $('#hosts_table thead').height();
-            rows = Math.floor(height / 30) - 2;
-            rows = (rows < 20) ? 20 : rows;
+            rows = Math.floor(height / 44) - 2;
+            // rows = (rows < 20) ? 20 : rows;
             return rows;
         };
     }])
@@ -54,8 +54,8 @@ export default
         return function() {
             var height, rows;
             height = $('#groups-container .list-table-container').height();
-            rows = Math.floor(height / 31) - 2;
-            rows = (rows < 20) ? 20 : rows;
+            rows = Math.floor(height / 44) - 2;
+            // rows = (rows < 20) ? 20 : rows;
             return rows;
         };
     }])
