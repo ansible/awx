@@ -162,6 +162,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'copy':
                 icon = "fa-copy";
                 break;
+            case 'manage':
+                icon = "fa-sitemap";
+                break;
             }
             icon += (size) ? " " + size : "";
             return Icon(icon);

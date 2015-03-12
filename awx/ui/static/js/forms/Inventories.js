@@ -22,6 +22,15 @@ export default
             well: true,
 
             actions: {
+                manage: {
+                    'class': "btn-primary btn-xs activity-btn",
+                    ngClick: "manageInventory()",
+                    awToolTip: "Manage Inventory",
+                    dataPlacement: "top",
+                    icon: "icon-sitemap",
+                    mode: 'edit',
+                    iconSize: 'large'
+                },
                 stream: {
                     'class': "btn-primary btn-xs activity-btn",
                     ngClick: "showActivity()",

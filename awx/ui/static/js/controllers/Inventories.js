@@ -318,6 +318,10 @@ export function InventoriesList($scope, $rootScope, $location, $log, $routeParam
         $location.path($location.path() + '/' + id);
     };
 
+    $scope.manageInventory = function(id){
+      $location.path($location.path() + '/' + id + '/manage');
+    }
+
     $scope.deleteInventory = function (id, name) {
 
         var action = function () {
@@ -612,6 +616,10 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
                   msg: 'Failed to update inventory. PUT returned status: ' + status });
           });
     };
+
+    $scope.manageInventory = function(){
+      $location.path($location.path() + '/manage');
+    }
 
     $scope.showActivity = function () {
         Stream({ scope:  $scope });

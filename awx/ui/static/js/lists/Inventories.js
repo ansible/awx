@@ -49,7 +49,7 @@ export default
                 label: 'Name',
                 columnClass: 'col-md-4 col-sm-6 col-xs-6',
                 modalColumnClass: 'col-md-8',
-                linkTo: '/#/inventories/{{inventory.id}}/manage'
+                linkTo: '/#/inventories/{{inventory.id}}'
             },
             organization: {
                 label: 'Organization',
@@ -97,12 +97,18 @@ export default
         },
 
         fieldActions: {
-            failed_hosts: {
-                //label: 'Failures',
-                ngHref: "{{ inventory.failed_hosts_link }}",
-                iconClass: "{{ 'fa icon-failures-' + inventory.failed_hosts_class }}",
-                awToolTip: "{{ inventory.failed_hosts_tip }}",
-                dataPlacement: "top"
+            // failed_hosts: {
+            //     //label: 'Failures',
+            //     ngHref: "{{ inventory.failed_hosts_link }}",
+            //     iconClass: "{{ 'fa icon-failures-' + inventory.failed_hosts_class }}",
+            //     awToolTip: "{{ inventory.failed_hosts_tip }}",
+            //     dataPlacement: "top"
+            // },
+            manage: {
+              label: 'Manage',
+              ngClick: 'manageInventory(inventory.id)',
+              awToolTip: 'Manage Inventory',
+              dataPlacement: 'top'
             },
             edit: {
                 label: 'Edit',
