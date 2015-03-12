@@ -730,11 +730,11 @@ export function InventoriesManage ($log, $scope, $location, $routeParams, $compi
     $scope.removeInventoryLoaded = $scope.$on('InventoryLoaded', function() {
         var e, rows;
 
-        LoadBreadCrumbs();
-        //     path: $location.path(),
-        //     title: 'All Groups'//'{{ inventory.name }}'
-        // });
-        $scope.group_breadcrumbs[0].name = "All Groups"; // $scope.inventory.name;
+        LoadBreadCrumbs({
+            path: $location.path(),
+            title: '{{ inventory.name }}'
+        });
+        $scope.group_breadcrumbs[0].name = $scope.inventory.name;
 
         // Build page breadcrumbs
         e = angular.element(document.getElementById('breadcrumbs'));

@@ -136,7 +136,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 icon = 'fa-check-square-o';
                 break;
             case 'properties':
-                icon = "fa-wrench";
+                icon = "fa-pencil";
                 break;
             case 'reset':
                 icon = "fa-undo";
@@ -161,9 +161,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 break;
             case 'copy':
                 icon = "fa-copy";
-                break;
-            case 'manage':
-                icon = "fa-sitemap";
                 break;
             }
             icon += (size) ? " " + size : "";

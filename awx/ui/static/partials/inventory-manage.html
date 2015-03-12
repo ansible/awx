@@ -3,7 +3,7 @@
 
         <ul class="ansible-breadcrumb" id="#breadcrumbs">
             <li><a href="#/inventories">Inventories</a></li>
-            <li><a href = "#/inventories/{{inventory.id}}">{{inventory.name}}</a><li>
+            <!-- <li><a href = "#/inventories/{{inventory.id}}">{{inventory.name}}</a><li> -->
             <li ng-repeat="group_breadcrumb in group_breadcrumbs" ng-class="group_breadcrumb.active_class"><a href="" ng-click="breadcrumbGroupSelect(group_breadcrumb.id)">{{ group_breadcrumb.name }}</a></li>
         </ul>
 

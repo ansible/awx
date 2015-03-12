@@ -83,11 +83,11 @@ export default
                 ngClick: "createGroup()",
                 awToolTip: "Create a new group"
             },
-            // properties: {
-            //     mode: 'all',
-            //     awToolTip: "Edit inventory properties",
-            //     ngClick: 'editInventoryProperties()'
-            // },
+            properties: {
+                mode: 'all',
+                awToolTip: "Edit inventory properties",
+                ngClick: 'editInventoryProperties()'
+            },
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
