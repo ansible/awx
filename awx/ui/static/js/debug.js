@@ -30,7 +30,9 @@ export function __deferLoadIfEnabled() {
     var deferPattern = /aw\.suspend=true/;
 
     if (deferPattern.test(window.location.search) || deferPattern.test(window.location.hash)) {
-        // console.log('Deferred load due to "aw.suspend=true" in URL. Please execute `angular.resumeBootstrap()` to continue.');
+        /* jshint ignore:start */
+        console.info('Deferred load due to "aw.suspend=true" in URL. Please execute `angular.resumeBootstrap()` to continue.');
+        /* jshint ignore:end */
         window.name = 'NG_DEFER_BOOTSTRAP!' + (window.name || '');
     }
 
