@@ -55,6 +55,12 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'columnShow':
                 result = "ng-show=\"" + value + "\" ";
                 break;
+            case 'iconName':
+                result = "icon-name=\"" + value + "\" ";
+                break;
+            case 'iconSize':
+                result = "icon-size=\"" + value + "\" ";
+                break;
             case 'icon':
                 // new method of constructing <i> icon tag. Replaces Icon method.
                 result = "<i class=\"fa fa-" + value;
@@ -170,85 +176,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             }
             icon += (size) ? " " + size : "";
             return Icon(icon);
-        };
-    }
-])
-
-
-.factory('Button', ['Attr', 'SelectIcon',
-    function (Attr, SelectIcon) {
-        return function (params) {
-
-            // pass in button object, get back html
-
-            var btn = params.btn,
-                action = params.action, // label used to select the icon
-                toolbar = params.toolbar,
-                html = '';
-
-            if (toolbar) {
-                //if this is a toolbar button, set some defaults
-                console.log('toolbar button');
-                btn.class = 'btn-xs btn-primary';
-                btn.iconSize = 'fa-lg';
-                delete btn.label;
-            } else {
-                console.log('NOT A TOOLBAR BUTTON');
-            }
-
-            html += "<button type=\"button\" ";
-            html += "class=\"btn";
-
-            if (btn['class']) {
-                html += ' ' + btn['class'];
-            } else {
-                html += " btn-sm";
-            }
-
-            console.log('btn:', btn);
-            html += (btn.awPopOver) ? " help-link-white" : "";
-            html += "\" ";
-            html += (btn.ngClick) ? Attr(btn, 'ngClick') : "";
-
-            if (btn.id) {
-                html += "id=\"" + btn.id + "\" ";
-            } else {
-                if (action) {
-                    html += "id=\"" + action + "_btn\" ";
-                }
-            }
-
-            html += (btn.ngHide) ? Attr(btn, 'ngHide') : "";
-            html += (btn.awToolTip) ? Attr(btn, 'awToolTip') : "";
-            html += (btn.awToolTip && btn.dataPlacement === undefined) ? "data-placement=\"top\" " : "";
-            html += (btn.dataTipWatch) ? "data-tip-watch=\"" + btn.dataTipWatch + "\" " : "";
-            html += (btn.awPopOver) ? "aw-pop-over=\"" +
-                btn.awPopOver.replace(/[\'\"]/g, '&quot;') + "\" " : "";
-            html += (btn.dataPlacement) ? Attr(btn, 'dataPlacement') : "";
-            html += (btn.dataContainer) ? Attr(btn, 'dataContainer') : "";
-            html += (btn.dataTitle) ? Attr(btn, 'dataTitle') : "";
-            html += (btn.ngShow) ? Attr(btn, 'ngShow') : "";
-            html += (btn.ngHide) ? Attr(btn, 'ngHide') : "";
-            html += (btn.ngDisabled) ? Attr(btn, 'ngDisabled') : "";
-            html += (btn.ngClass) ? Attr(btn, 'ngClass') : "";
-            html += (btn.awTipPlacement) ? Attr(btn, 'awTipPlacement') : "";
-            html += " >";
-            html += (btn.img) ? "<img src=\"" + $basePath + "img/" + btn.img + "\" style=\"width: 12px; height: 12px;\" >" : "";
-
-            if (btn.iconClass) {
-                html += "<i class=\"" + btn.iconClass + "\"></i>";
-            }
-            else {
-                html += SelectIcon({
-                    action: action,
-                    size: btn.iconSize
-                });
-            }
-
-            html += (btn.label) ? " " + btn.label : "";
-            html += "</button> ";
-
-            return html;
         };
     }
 ])

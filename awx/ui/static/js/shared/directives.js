@@ -404,6 +404,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
      */
     .directive('awToolTip', ['$sce', function($sce) {
         return {
+            priority: 1000,
             link: function(scope, element, attrs) {
                 var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : ($AnsibleConfig) ? $AnsibleConfig.tooltip_delay : {show: 500, hide: 100},
                     placement;

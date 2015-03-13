@@ -1,39 +1,60 @@
-export default ['$compile', 'Button', function($compile, Button) {
+export default ['$compile', 'Attr', 'SelectIcon', function($compile, Attr, SelectIcon) {
     return {
-        restrict: 'E',
-        scope: {
-            name: '=',
-            options: '=',
-            onSelected: '&'
-        },
+        restrict: 'A',
+        scope: {},
         link: function(scope, element, attrs) {
-            var html = '';
 
-            // Save the ngClick property from
-            // legacy list actions
-            scope.action = scope.options.ngClick;
+            var toolbar = attrs.toolbar;
 
+            if (toolbar) {
+                //if this is a toolbar button, set some defaults
+                attrs.class = 'btn-xs btn-primary';
+                attrs.iconSize = 'fa-lg';
+            }
 
-            var btnOptions = _.clone(scope.options);
-            btnOptions.ngClick = "onSelected({ action: action })";
+            element.addClass('btn');
 
-            // These should be taken care of by
-            // using ng-show & ng-hide on this
-            // directive
-            delete btnOptions.ngHide;
-            delete btnOptions.ngShow;
+            // If no class specified, default
+            // to btn-sm
+            if (_.isEmpty(attrs.class)) {
+                element.addClass("btn-sm");
+            } else {
+                element.addClass(attrs.class);
+            }
 
-            // console.log('options:', scope.options);
+            if (attrs.awPopOver) {
+                element.addClass("help-link-white");
+            }
 
-            html += Button({
-                btn: btnOptions,
-                action: scope.name,
-                toolbar: true
-            });
+            if (attrs.iconName && _.isEmpty(attrs.id)) {
+                element.attr("id",attrs.iconName + "_btn");
+            }
 
-            element.html(html);
+            if (!_.isEmpty(attrs.img)) {
+                $("<img>")
+                    .attr("src", $basePath + "img/" + attrs.img)
+                    .css({ width: "12px", height: "12px" })
+                    .appendTo(element);
+            }
 
-            $compile(element.contents())(scope);
+            if (!_.isEmpty(attrs.iconClass)) {
+                $("<i>")
+                    .addClass(attrs.iconClass)
+                    .appendTo(element);
+            }
+            else {
+                var icon = SelectIcon({
+                    action: attrs.iconName,
+                    size: attrs.iconSize
+                });
+
+                $(icon).appendTo(element);
+            }
+
+            if (!toolbar && !_.isEmpty(attrs.label)) {
+                element.text(attrs.label);
+            }
+
         }
     };
 }];

@@ -3,6 +3,14 @@
                 <div id="refresh-row" class="row">
                         <div class="col-lg-12">
                                 <div id="portal-list-actions" class="list-actions pull-right">
+                                    <button
+                                        toolbar-button
+                                        icon-name="refresh"
+                                        ng-click="refresh()"
+                                        ng-show="socketStatus == 'error'"
+                                        aw-tool-tip="Refresh the page"
+                                        toolbar="true">
+                                    </button>
                                 </div>
                         </div>
                 </div>

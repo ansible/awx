@@ -139,9 +139,9 @@ export default
 angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerator.name])
 
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList', 'SearchWidget', 'PaginateWidget', 'Attr',
-    'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty', 'SelectIcon', 'Store',
+    'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon', 'Store',
     function ($rootScope, $location, $compile, GenerateList, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink,
-        HelpCollapse, Button, DropDown, Empty, SelectIcon, Store) {
+        HelpCollapse, DropDown, Empty, SelectIcon, Store) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -553,7 +553,50 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
             },
 
-            button: Button,
+            button: function(params) {
+                var tagName = "button";
+                var options = params.btn;
+                var tagParts =
+                    [   tagName,
+                        "toolbar-button"
+                    ];
+
+                var attrNames = _.keys(options);
+
+                function isSupportedKey(keyName) {
+                    if (keyName === 'icon') {
+                        //TODO: Let's add a depecrated logger to our logging helper to output the below message
+                        //
+                        // The form action key "icon" is deprecated in favor of using the name of the field as the icon name or the iconClass option.
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                var attrs = attrNames
+                .filter(function(name) {
+
+                    return isSupportedKey(name) &&
+                        !_.isEmpty(options[name]);
+
+                }).map(function(name) {
+                    return Attr(options, name);
+                });
+
+                tagParts =
+                    tagParts
+                        .concat(attrs)
+                        .concat(
+                            Attr(params, 'iconName'),
+                            Attr(params, 'toolbar')
+                        );
+
+                var html = "<" + tagParts.join(" ") + "></" + tagName + ">";
+
+                return html;
+
+            },
 
             navigationLink: NavigationLink,
 
@@ -1346,7 +1389,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 var html = "<div class=\"list-actions\">\n", action;
                 for (action in this.form.actions) {
                     if (this.form.actions[action].mode === 'all' || this.form.actions[action].mode === options.mode) {
-                        html += this.button({ btn: this.form.actions[action], action: action, toolbar: true });
+                        html += this.button({ btn: this.form.actions[action], iconName: action, toolbar: true });
                     }
                 }
                 html += "</div>\n";
@@ -1722,7 +1765,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     action = collection.actions[act];
                     html += this.button({
                         btn: action,
-                        action: act,
+                        iconName: act,
                         toolbar: true
                     });
                 }

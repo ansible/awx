@@ -25,47 +25,15 @@
  *
 */
 export function PortalController($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, ClearScope, Stream, Rest, GetBasePath, ProcessErrors,
-    Button, PortalJobsWidget, GenerateList, PortalJobTemplateList, SearchInit, PaginateInit, PlaybookRun){
+    PortalJobsWidget, GenerateList, PortalJobTemplateList, SearchInit, PaginateInit, PlaybookRun){
 
         ClearScope('portal');
 
-        var html,
-        e,
-        jobs_scope,
+        var jobs_scope,
         list = PortalJobTemplateList,
         view= GenerateList,
         defaultUrl = GetBasePath('job_templates'),
-        max_rows,
-        buttons = {
-            refresh: {
-                mode: 'all',
-                awToolTip: "Refresh the page",
-                ngClick: "refresh()",
-                ngShow:"socketStatus == 'error'"
-            }
-            // ,
-            // stream: {
-            //     ngClick: "showActivity()",
-            //     awToolTip: "View Activity Stream",
-            //     mode: 'all'
-            // }
-        };
-
-        html = Button({
-            btn: buttons.refresh,
-            action: 'refresh',
-            toolbar: true
-        });
-
-        // html += Button({
-        //     btn: buttons.stream,
-        //     action: 'stream',
-        //     toolbar: true
-        // });
-
-        e = angular.element(document.getElementById('portal-list-actions'));
-        e.html(html);
-        $compile(e)($scope);
+        max_rows;
 
         if ($scope.removeLoadPortal) {
             $scope.removeLoadPortal();
@@ -176,5 +144,5 @@ export function PortalController($scope, $compile, $routeParams, $rootScope, $lo
     }
 
 PortalController.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors',
-    'Button', 'PortalJobsWidget', 'generateList' , 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'
+    'PortalJobsWidget', 'generateList' , 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'PlaybookRun'
 ];

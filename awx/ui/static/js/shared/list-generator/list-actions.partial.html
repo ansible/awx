@@ -1,0 +1,29 @@
+<span ng-repeat="(name, options) in list.actions">
+    <button
+        toolbar-button
+        mode="options.mode"
+        icon-name="{{name}}"
+        aw-tool-tip="{{options.awToolTip}}"
+        data-placement="{{options.dataPlacement}}"
+        data-container="{{options.dataContainer}}"
+        class="options.class"
+        data-title="{{options.dataTitle}}"
+        icon-size="{{options.iconSize}}"
+        ng-click="performAction(options.ngClick)"
+        ng-show="canShowAction(options)"
+        toolbar="true">
+    </button>
+</span>
+<button
+    toolbar-button
+    icon-name="help"
+    aw-pop-over="{{list.selectInstructions}}"
+    data-placement="left"
+    data-container="body"
+    class="btn-xs btn-help"
+    aw-tool-tip="Click for help"
+    data-title="Help"
+    icon-size="fa-lg"
+    toolbar="true"
+    ng-if="mode === 'select' && list.selectInstructions">
+</button>

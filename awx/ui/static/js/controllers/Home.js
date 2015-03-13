@@ -27,43 +27,11 @@
 */
 
 export function Home($scope, $compile, $routeParams, $rootScope, $location, $log, Wait, DashboardCounts, DashboardJobs,
-    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button, $window, graphData){
+    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, $window, graphData){
 
     ClearScope('home');
 
-    var buttons, html, e, borderStyles;
-
-    // Add buttons to the top of the Home page. We're using lib/ansible/generator_helpers.js-> Buttons()
-    // to build buttons dynamically and insure all styling and icons match the rest of the application.
-    buttons = {
-        refresh: {
-            mode: 'all',
-            awToolTip: "Refresh the page",
-            ngClick: "refresh()",
-            ngShow:"socketStatus == 'error'"
-        },
-        stream: {
-            ngClick: "showActivity()",
-            awToolTip: "View Activity Stream",
-            mode: 'all'
-        }
-    };
-
-    html = Button({
-        btn: buttons.refresh,
-        action: 'refresh',
-        toolbar: true
-    });
-
-    html += Button({
-        btn: buttons.stream,
-        action: 'stream',
-        toolbar: true
-    });
-
-    e = angular.element(document.getElementById('home-list-actions'));
-    e.html(html);
-    $compile(e)($scope);
+    var borderStyles;
 
     if (!$routeParams.login) {
         // If we're not logging in, start the Wait widget. Otherwise, it's already running.
@@ -136,7 +104,7 @@ export function Home($scope, $compile, $routeParams, $rootScope, $location, $log
 }
 
 Home.$inject = ['$scope', '$compile', '$routeParams', '$rootScope', '$location', '$log','Wait', 'DashboardCounts', 'DashboardJobs',
-    'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button', '$window', 'graphData'
+    'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', '$window', 'graphData'
 ];
 
 

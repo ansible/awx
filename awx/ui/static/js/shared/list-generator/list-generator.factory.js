@@ -1,7 +1,7 @@
 export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
-        'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon', 'Breadcrumbs',
+        'Column', 'DropDown', 'NavigationLink', 'SelectIcon', 'Breadcrumbs',
     function ($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink,
-        Button, SelectIcon, Breadcrumbs) {
+        SelectIcon, Breadcrumbs) {
             return {
 
                 setList: function (list) {
@@ -23,8 +23,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                 hide: function () {
                     $('#lookup-modal').modal('hide');
                 },
-
-                button: Button,
 
                 buildHTML: function(list, options) {
                     this.setList(list);
@@ -74,12 +72,11 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     this.scope.mode = options.mode;
 
                     this.scope.performAction = function(action) {
-                        console.log('performing:', action);
                         this.scope.$eval(action);
                     }.bind(this);
 
                     this.scope.shouldHideAction = function(options) {
-                        return _.tap(this.scope.$eval(options.ngHide), function(value) { console.log('shouldHide:', value, this.scope.selected_group_id, options); }.bind(this));
+                        return this.scope.$eval(options.ngHide);
                     }.bind(this);
                     this.scope.canShowAction = function(action) {
                         var base = $location.path().replace(/^\//, '').split('/')[0];
@@ -92,12 +89,9 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         if (this.scope.shouldHideAction(action)) {
                             return false;
                         } else if (!scopeShow) {
-                            console.log('scopeShow false', action.ngShow);
                             return false;
                         } else {
-                            return _.tap(inActionMode && onScreenForAction, function(value) {
-                                console.log('mode ', value, action);
-                            });
+                            return inActionMode && onScreenForAction;
                         }
 
                         // return _.tap(scopeShow || , function(value) {
@@ -154,7 +148,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     //
                     var html = '',
                         list = this.list,
-                        base, size, action, btn, fld, cnt, field_action, fAction, itm;
+                        base, size, action, fld, cnt, field_action, fAction, itm;
 
                     if (options.activityStream) {
                         // Breadcrumbs for activity stream widget
@@ -254,31 +248,15 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                             }
                             html += "\">\n";
 
-            html += "<div class=\"list-actions\">\n";
-            html += '<span ng-repeat="(name, options) in list.actions">';
-            html += '<toolbar-button name="name" options="options"  on-selected="performAction(action)" ng-show="canShowAction(options)"></toolbar-button>';
-            html += '</span>';
 
-            //select instructions
-            if (options.mode === 'select' && list.selectInstructions) {
-                btn = {
-                    awPopOver: list.selectInstructions,
-                    dataPlacement: 'left',
-                    dataContainer: 'body',
-                    'class': 'btn-xs btn-help',
-                    awToolTip: 'Click for help',
-                    dataTitle: 'Help',
-                    iconSize: 'fa-lg'
-                };
-                //html += this.button(btn, 'select');
-                html += this.button({
-                    btn: btn,
-                    action: 'help',
-                    toolbar: true
-                });
+            html += "<div class=\"list-actions\" ng-include=\"'/static/js/shared/list-generator/list-actions.partial.html'\">\n";
+
+            for (action in list.actions) {
+                list.actions[action] =
+                    _.defaults(list.actions[action],
+                               {    dataPlacement: "top"
+                               });
             }
-
-
 
             html += "</div><!-- list-acitons -->\n";
 
