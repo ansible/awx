@@ -1308,7 +1308,7 @@ class JobOptionsSerializer(BaseSerializer):
     def validate_project(self, attrs, source):
         project = attrs.get('project', None)
         if not project and attrs.get('job_type') != PERM_INVENTORY_SCAN:
-            raise serializers.ValidationError("This field is required")
+            raise serializers.ValidationError("This field is required.")
         return attrs
 
     def validate_playbook(self, attrs, source):
