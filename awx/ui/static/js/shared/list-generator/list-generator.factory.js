@@ -71,34 +71,50 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     this.scope.list = list;
                     this.scope.mode = options.mode;
 
-                    this.scope.performAction = function(action) {
-                        this.scope.$eval(action);
-                    }.bind(this);
+                    this.scope.isHiddenByOptions = function(options) {
+                        var hiddenByNgHide = false, shownByNgShow = false;
 
-                    this.scope.shouldHideAction = function(options) {
-                        return this.scope.$eval(options.ngHide);
-                    }.bind(this);
-                    this.scope.canShowAction = function(action) {
-                        var base = $location.path().replace(/^\//, '').split('/')[0];
-                        var inActionMode = options.mode === action.mode || action.mode === 'all';
-                        var onScreenForAction =
-                            (!options.basePaths) ||
-                                (options.basePaths.indexOf(base) > -1);
-                        var scopeShow = action.ngShow ? this.scope.$eval(action.ngShow) : true;
-
-                        if (this.scope.shouldHideAction(action)) {
+                        // If neither ngHide nor ngShow are specified we
+                        // know it.s not hidden by options
+                        //
+                        if (!options.ngHide && !options.ngShow) {
                             return false;
-                        } else if (!scopeShow) {
-                            return false;
-                        } else {
-                            return inActionMode && onScreenForAction;
                         }
 
-                        // return _.tap(scopeShow || , function(value) {
-                        //     console.log('canShow:', value, options.mode, action.mode, scopeShow);
-                        // });
+                        // If ngHide option is passed && evals to true
+                        // it's hidden
+                        if (options.ngHide && this.scope.$eval(options.ngHide)) {
+                            return true;
+                        }
+
+                        // If ngShow option is passed && evals to false
+                        // it's hidden
+                        if (options.ngShow && !this.scope.$eval(options.ngShow)) {
+                            return true;
+                        }
+
+                        // Otherwise, it's not hidden
+                        return false;
                     }.bind(this);
 
+                    this.scope.hiddenOnCurrentPage = function(actionPages) {
+                        var base = $location.path().replace(/^\//, '').split('/')[0];
+
+                        if (!actionPages) {
+                            return false;
+                        } else if (actionPages.indexOf(base) > -1) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+
+                    };
+
+                    this.scope.hiddenInCurrentMode = function(actionMode) {
+                        if (options.mode === actionMode || actionMode === 'all') {
+                            return false;
+                        }
+                    };
 
                     $compile(element)(this.scope);
 

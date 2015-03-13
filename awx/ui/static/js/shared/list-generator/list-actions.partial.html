@@ -9,8 +9,10 @@
         class="options.class"
         data-title="{{options.dataTitle}}"
         icon-size="{{options.iconSize}}"
-        ng-click="performAction(options.ngClick)"
-        ng-show="canShowAction(options)"
+        ng-click="$eval(options.ngClick)"
+        ng-hide="isHiddenByOptions(options) ||
+                    hiddenOnCurrentPage(options.basePaths) ||
+                    hiddenInCurrentMode(options.mode)"
         toolbar="true">
     </button>
 </span>
