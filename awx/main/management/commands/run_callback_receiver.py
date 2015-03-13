@@ -103,10 +103,10 @@ class CallbackReceiver(object):
         for queue_actual in queue_order:
             try:
                 worker_actual = worker_queues[queue_actual]
-                worker_queues[queue_actual][1].put(message, block=True, timeout=2)
-                worker_queues[queue_actual][0] += 1
+                worker_actual[1].put(message, block=True, timeout=2)
+                worker_actual[0] += 1
                 return queue_actual
-            except Exception, e:
+            except Exception:
                 logger.warn("Could not write to queue %s" % preferred_queue)
                 continue
         return None
