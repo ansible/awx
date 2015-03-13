@@ -92,6 +92,7 @@ var tower = angular.module('Tower', [
     'InventoryHostsDefinition',
     'HostsHelper',
     'AWFilters',
+    'ScanJobsListDefinition',
     'HostFormDefinition',
     'HostListDefinition',
     'GroupFormDefinition',
@@ -259,6 +260,11 @@ var tower = angular.module('Tower', [
             when('/inventories/:inventory_id', {
                 templateUrl: urlPrefix + 'partials/inventories.html',
                 controller: InventoriesEdit
+            }).
+
+            when('/inventories/:inventory_id/job_templates/add', {
+                templateUrl: urlPrefix + 'partials/job_templates.html',
+                controller: JobTemplatesAdd
             }).
 
             when('/inventories/:inventory_id/manage', {

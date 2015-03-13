@@ -977,7 +977,7 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
         if($scope.survey_enabled === true && $scope.survey_exists!==true){
             // $scope.$emit("PromptForSurvey");
 
-            // The original design for this was a pop up that would prompt the user if they wanted to create a 
+            // The original design for this was a pop up that would prompt the user if they wanted to create a
             // survey, because they had enabled one but not created it yet. We switched this for now so that
             // an error message would be displayed by the survey buttons that tells the user to add a survey or disabled
             // surveys.
