@@ -121,6 +121,8 @@ class CallbackModule(object):
     def _start_connection(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
+        self.socket.setsockopt(zmq.RCVTIMEO, 4000)
+        self.socket.setsockopt(zmq.LINGER, 2000)
         self.socket.connect(self.callback_consumer_port)
 
     def _post_job_event_queue_msg(self, event, event_data):
@@ -146,16 +148,15 @@ class CallbackModule(object):
                     self._init_connection()
                 if self.context is None:
                     self._start_connection()
-
                 self.socket.send_json(msg)
                 self.socket.recv()
                 return
             except Exception, e:
-                self.logger.info('Publish Exception: %r, retry=%d', e,
+                self.logger.info('Publish Job Event Exception: %r, retry=%d', e,
                                  retry_count, exc_info=True)
-                # TODO: Maybe recycle connection here?
+                retry_count += 1
                 if retry_count >= 3:
-                    raise
+                    break
 
     def _post_rest_api_event(self, event, event_data):
         data = json.dumps({

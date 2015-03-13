@@ -317,6 +317,14 @@ ANSIBLE_FORCE_COLOR = True
 # the celery task.
 AWX_TASK_ENV = {}
 
+# Maximum number of job events processed by the callback receiver worker process
+# before it recycles
+JOB_EVENT_RECYCLE_THRESHOLD = 3000
+
+# Maximum number of job events that can be waiting on a single worker queue before
+# it can be skipped as too busy
+JOB_EVENT_MAX_QUEUE_SIZE = 100
+
 # Flag to enable/disable updating hosts M2M when saving job events.
 CAPTURE_JOB_EVENT_HOSTS = False
 
