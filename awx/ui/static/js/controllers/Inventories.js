@@ -482,15 +482,13 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 
 export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
-    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream, ScanJobsList) {
+    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream) {
 
     ClearScope();
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
         form = InventoryForm(),
-        list = ScanJobsList,
-        view = generateList,
         generator = GenerateForm,
         inventory_id = $routeParams.inventory_id,
         master = {},
@@ -501,7 +499,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     form.formFieldSize = null;
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-    // view.inject(list, { scope: $scope, id: 'scan-jobs-list' });
+
     generator.reset();
     LoadBreadCrumbs();
 
@@ -627,13 +625,13 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     };
 
     $scope.addScanJob = function(){
-        $location.path($location.path()+'/job_templates/add'); 
+        $location.path($location.path()+'/job_templates/add');
     };
 }
 
 InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
-    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream', 'ScanJobsList'
+    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream'
 ];
 
 
