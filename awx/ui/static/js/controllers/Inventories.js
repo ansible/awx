@@ -642,7 +642,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
 }
 
 InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList', 'OrganizationList', 'SearchInit',
+    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
     'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream'
 ];
 
@@ -1191,7 +1191,7 @@ export function InventoriesManage ($log, $scope, $location, $routeParams, $compi
 }
 
 
-InventoriesManage.$inject = ['$log', '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'Empty', 'Wait', 'Rest', 'Alert', 'LoadBreadCrumbs',
+InventoriesManage.$inject = ['$log', '$scope', '$location', '$routeParams', '$compile', 'generateList', 'ClearScope', 'Empty', 'Wait', 'Rest', 'Alert', 'LoadBreadCrumbs',
     'GetBasePath', 'ProcessErrors', 'Breadcrumbs', 'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg',
     'GetHostsStatusMsg', 'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
     'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary', 'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'WatchInventoryWindowResize',
