@@ -13,13 +13,17 @@
 */
 
 export default
-    angular.module('InventoryFormDefinition', [])
-        .value('InventoryForm', {
+    angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
+        .value('InventoryFormObject', {
 
             addTitle: 'Create Inventory',
             editTitle: '{{ inventory_name }}',
             name: 'inventory',
             well: true,
+            collapse: true,
+            collapseTitle: "Properties",
+            collapseMode: 'edit',
+            collapseOpen: true,
 
             actions: {
                 stream: {
@@ -93,7 +97,75 @@ export default
             },
 
             related: {
+                scan_jobs: {
+                    type: 'collection',
+                    title: 'Scan Jobs',
+                    iterator: 'scan_job',
+                    index: false,
+                    open: false,
 
+                    actions: {
+                        add: {
+                            ngClick: "addScanJob(inventory_id)",
+                            icon: 'icon-plus',
+                            label: 'Add',
+                            awToolTip: 'Add a scan job'
+                        }
+                    },
+
+                    fields: {
+                        name: {
+                            key: true,
+                            label: 'Name'
+                        },
+                        description: {
+                            label: 'Description'
+                        }
+                    },
+
+                    fieldActions: {
+                        edit: {
+                            label: 'Edit',
+                            ngClick: "edit('organizations', organization.id, organization.name)",
+                            icon: 'icon-edit',
+                            awToolTip: 'Edit the organization',
+                            'class': 'btn btn-default'
+                        },
+                        "delete": {
+                            label: 'Delete',
+                            ngClick: "delete('organizations', organization.id, organization.name, 'organizations')",
+                            icon: 'icon-trash',
+                            "class": 'btn-danger',
+                            awToolTip: 'Delete the organization'
+                        }
+                    }
+                }
+            },
+
+            relatedSets: function(urls) {
+                return {
+                    scan_jobs: {
+                        iterator: 'scan_job',
+                        url: urls.organizations
+                    },
+                    // schedules: {
+                    //     iterator: 'schedule',
+                    //     url: urls.schedules
+                    // }
+                };
             }
 
-        });
+        })
+        .factory('InventoryForm', ['InventoryFormObject', 'ScanJobsList',
+        function(InventoryFormObject, ScanJobsList) {
+            return function() {
+                var itm;
+                for (itm in InventoryFormObject.related) {
+                    if (InventoryFormObject.related[itm].include === "ScanJobsList") {
+                      InventoryFormObject.related[itm] = ScanJobsList;
+                      InventoryFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
+                    }
+                }
+                return InventoryFormObject;
+            };
+        }]);

@@ -14,7 +14,7 @@
 */
 
 
-export function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $compile, $filter, Rest, Alert, InventoryList, GenerateList,
+export function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $compile, $filter, Rest, Alert, InventoryList, generateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
     EditInventoryProperties, Find, Empty, LogViewer) {
 
@@ -22,7 +22,7 @@ export function InventoriesList($scope, $rootScope, $location, $log, $routeParam
 
     var list = InventoryList,
         defaultUrl = GetBasePath('inventory'),
-        view = GenerateList,
+        view = generateList,
         paths = $location.path().replace(/^\//, '').split('/'),
         mode = (paths[0] === 'inventories') ? 'edit' : 'select';
 
@@ -373,7 +373,7 @@ InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeP
 
 
 export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
-    Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, OrganizationList, SearchInit, PaginateInit,
+    Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
     LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON) {
 
     ClearScope();
@@ -481,14 +481,14 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 ];
 
 export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
-    Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, OrganizationList, SearchInit, PaginateInit,
+    Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
     LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream) {
 
     ClearScope();
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
-        form = InventoryForm,
+        form = InventoryForm(),
         generator = GenerateForm,
         inventory_id = $routeParams.inventory_id,
         master = {},
@@ -498,27 +498,11 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     form.formLabelSize = null;
     form.formFieldSize = null;
 
-    generator.inject(form, { mode: 'edit', related: false, scope: $scope });
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
 
     generator.reset();
     LoadBreadCrumbs();
 
-    // $scope.parseType = 'yaml';
-    // ParseTypeChange({
-    //     scope: $scope,
-    //     variable: 'variables',
-    //     parse_variable: 'parseType',
-    //     field_id: 'inventory_variables'
-    // });
-
-    // LookUpInit({
-    //     scope:  $scope,
-    //     form: form,
-    //     current_item: ($routeParams.organization_id) ? $routeParams.organization_id : null,
-    //     list: OrganizationList,
-    //     field: 'organization',
-    //     input_type: 'radio'
-    // });
     Wait('start');
     Rest.setUrl(GetBasePath('inventory') + inventory_id + '/');
     Rest.get()
@@ -639,6 +623,10 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
             field_id: 'inventory_variables'
         });
     };
+
+    $scope.addScanJob = function(){
+        $location.path($location.path()+'/job_templates/add');
+    };
 }
 
 InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
@@ -648,7 +636,7 @@ InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$lo
 
 
 
-export function InventoriesManage ($log, $scope, $location, $routeParams, $compile, GenerateList, ClearScope, Empty, Wait, Rest, Alert, LoadBreadCrumbs, GetBasePath, ProcessErrors,
+export function InventoriesManage ($log, $scope, $location, $routeParams, $compile, generateList, ClearScope, Empty, Wait, Rest, Alert, LoadBreadCrumbs, GetBasePath, ProcessErrors,
     Breadcrumbs, InventoryGroups, InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, GroupsEdit, InventoryUpdate,
     GroupsCancelUpdate, ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete, EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
     InventoryGroupsHelp, HelpDialog, ViewJob, WatchInventoryWindowResize, GetHostContainerRows, GetGroupContainerRows, GetGroupContainerHeight,
@@ -740,7 +728,7 @@ export function InventoriesManage ($log, $scope, $location, $routeParams, $compi
         $compile(e)($scope);
 
         // Add groups view
-        GenerateList.inject(InventoryGroups, {
+        generateList.inject(InventoryGroups, {
             mode: 'edit',
             id: 'group-list-container',
             breadCrumbs: false,
