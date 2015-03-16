@@ -162,26 +162,38 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                 checkStatus: function() {
                     // Check connection status
                     var self = this;
-                    if (self.socket.socket.connected) {
-                        self.scope.socketStatus = 'ok';
+                    if(self){
+                      if(self.socket){
+                        if(self.socket.socket){
+                          if (self.socket.socket.connected) {
+                              self.scope.socketStatus = 'ok';
+                          }
+                          else if (self.socket.socket.connecting || self.socket.reconnecting) {
+                              self.scope.socketStatus = 'connecting';
+                          }
+                          else {
+                              self.scope.socketStatus = 'error';
+                          }
+                          self.scope.socketTip = getSocketTip(self.scope.socketStatus);
+                          return self.scope.socketStatus;
+                        }
+                      }
                     }
-                    else if (self.socket.socket.connecting || self.socket.reconnecting) {
-                        self.scope.socketStatus = 'connecting';
-                    }
-                    else {
-                        self.scope.socketStatus = 'error';
-                    }
-                    self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                    return self.scope.socketStatus;
+
                 },
                 on: function (eventName, callback) {
                     var self = this;
-                    self.socket.on(eventName, function () {
-                        var args = arguments;
-                        self.scope.$apply(function () {
-                            callback.apply(self.socket, args);
+                    if(self){
+                      if(self.socket){
+                        self.socket.on(eventName, function () {
+                            var args = arguments;
+                            self.scope.$apply(function () {
+                                callback.apply(self.socket, args);
+                            });
                         });
-                    });
+                      }
+                    }
+
                 },
                 emit: function (eventName, data, callback) {
                     var self = this;
