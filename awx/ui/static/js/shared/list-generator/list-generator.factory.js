@@ -1,7 +1,7 @@
 export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
-        'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon', 'Breadcrumbs',
+        'Column', 'DropDown', 'NavigationLink', 'SelectIcon', 'Breadcrumbs',
     function ($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink,
-        Button, SelectIcon, Breadcrumbs) {
+        SelectIcon, Breadcrumbs) {
             return {
 
                 setList: function (list) {
@@ -23,8 +23,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                 hide: function () {
                     $('#lookup-modal').modal('hide');
                 },
-
-                button: Button,
 
                 buildHTML: function(list, options) {
                     this.setList(list);
@@ -71,6 +69,52 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     }
 
                     this.scope.list = list;
+                    this.scope.mode = options.mode;
+
+                    this.scope.isHiddenByOptions = function(options) {
+                        var hiddenByNgHide = false, shownByNgShow = false;
+
+                        // If neither ngHide nor ngShow are specified we
+                        // know it.s not hidden by options
+                        //
+                        if (!options.ngHide && !options.ngShow) {
+                            return false;
+                        }
+
+                        // If ngHide option is passed && evals to true
+                        // it's hidden
+                        if (options.ngHide && this.scope.$eval(options.ngHide)) {
+                            return true;
+                        }
+
+                        // If ngShow option is passed && evals to false
+                        // it's hidden
+                        if (options.ngShow && !this.scope.$eval(options.ngShow)) {
+                            return true;
+                        }
+
+                        // Otherwise, it's not hidden
+                        return false;
+                    }.bind(this);
+
+                    this.scope.hiddenOnCurrentPage = function(actionPages) {
+                        var base = $location.path().replace(/^\//, '').split('/')[0];
+
+                        if (!actionPages) {
+                            return false;
+                        } else if (actionPages.indexOf(base) > -1) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+
+                    };
+
+                    this.scope.hiddenInCurrentMode = function(actionMode) {
+                        if (options.mode === actionMode || actionMode === 'all') {
+                            return false;
+                        }
+                    };
 
                     $compile(element)(this.scope);
 
@@ -120,7 +164,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     //
                     var html = '',
                         list = this.list,
-                        base, size, action, btn, fld, cnt, field_action, fAction, itm;
+                        base, size, action, fld, cnt, field_action, fAction, itm;
 
                     if (options.activityStream) {
                         // Breadcrumbs for activity stream widget
@@ -203,7 +247,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                         if (options.mode !== 'lookup') {
                             //actions
-                            base = $location.path().replace(/^\//, '').split('/')[0];
                             html += "<div class=\"";
                             if (options.searchSize && !options.listSize) {
                                 // User supplied searchSize, calc the remaining
@@ -221,42 +264,18 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                             }
                             html += "\">\n";
 
-                            html += "<div class=\"list-actions\">\n";
 
-                            // Add toolbar buttons or 'actions'
-                            for (action in list.actions) {
-                                if (list.actions[action].mode === 'all' || list.actions[action].mode === options.mode) {
-                                    if ((list.actions[action].basePaths === undefined) ||
-                                        (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1)) {
-                                        html += this.button({
-                                            btn: list.actions[action],
-                                            action: action,
-                                            toolbar: true
-                                        });
-                                    }
-                                }
-                            }
+            html += "<div class=\"list-actions\" ng-include=\"'/static/js/shared/list-generator/list-actions.partial.html'\">\n";
 
-                            //select instructions
-                            if (options.mode === 'select' && list.selectInstructions) {
-                                btn = {
-                                    awPopOver: list.selectInstructions,
-                                    dataPlacement: 'left',
-                                    dataContainer: 'body',
-                                    'class': 'btn-xs btn-help',
-                                    awToolTip: 'Click for help',
-                                    dataTitle: 'Help',
-                                    iconSize: 'fa-lg'
-                                };
-                                //html += this.button(btn, 'select');
-                                html += this.button({
-                                    btn: btn,
-                                    action: 'help',
-                                    toolbar: true
-                                });
-                            }
+            for (action in list.actions) {
+                list.actions[action] =
+                    _.defaults(list.actions[action],
+                               {    dataPlacement: "top"
+                               });
+            }
 
-                            html += "</div><!-- list-acitons -->\n";
+            html += "</div><!-- list-acitons -->\n";
+
                             html += "</div><!-- list-actions-column -->\n";
                         } else {
                             //lookup
