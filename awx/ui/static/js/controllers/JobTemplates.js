@@ -276,7 +276,8 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
 
     $scope.job_type_options = [
         { value: 'run', label: 'Run' },
-        { value: 'check', label: 'Check' }
+        { value: 'check', label: 'Check' },
+        { value: 'scan' , label: 'Scan'}
     ];
 
     $scope.verbosity_options = [
@@ -339,6 +340,10 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         scope: $scope,
         parent_scope: $scope
     });
+
+    // $scope.jobTypeChange = function(){
+    //
+    // };
 
     // Update playbook select whenever project value changes
     selectPlaybook = function (oldValue, newValue) {
@@ -591,7 +596,8 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     // Our job type options
     $scope.job_type_options = [
         { value: 'run', label: 'Run' },
-        { value: 'check', label: 'Check' }
+        { value: 'check', label: 'Check' },
+        { value: 'scan', label: 'Scan'}
     ];
 
     $scope.verbosity_options = [

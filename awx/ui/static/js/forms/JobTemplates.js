@@ -66,6 +66,7 @@ export default
                     label: 'Job Type',
                     type: 'select',
                     ngOptions: 'type.label for type in job_type_options track by type.value',
+                    ngChange: 'jobTypeChange()',
                     "default": 0,
                     addRequired: true,
                     editRequired: true,
