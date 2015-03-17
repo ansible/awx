@@ -72,7 +72,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     this.scope.mode = options.mode;
 
                     this.scope.isHiddenByOptions = function(options) {
-                        var hiddenByNgHide = false, shownByNgShow = false;
 
                         // If neither ngHide nor ngShow are specified we
                         // know it.s not hidden by options
