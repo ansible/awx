@@ -380,7 +380,7 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $r
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
-        form = InventoryForm,
+        form = InventoryForm(),
         generator = GenerateForm;
 
     form.well = true;
