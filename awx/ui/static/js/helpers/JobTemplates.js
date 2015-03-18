@@ -171,6 +171,12 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                       input_type: "radio"
                                   });
 
+
+                                  if(scope.project === "" && scope.playbook === ""){
+                                    scope.default_scan = true;
+                                    scope.toggleScanInfo();
+                                  }
+
                                   RelatedSearchInit({
                                       scope: scope,
                                       form: form,
@@ -193,7 +199,4 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                           };
 
                       };
-
-
-
                   }]);

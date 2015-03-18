@@ -267,6 +267,11 @@ var tower = angular.module('Tower', [
                 controller: JobTemplatesAdd
             }).
 
+            when('/inventories/:inventory_id/job_templates/:template_id', {
+                templateUrl: urlPrefix + 'partials/job_templates.html',
+                controller: JobTemplatesEdit
+            }).
+
             when('/inventories/:inventory_id/manage', {
                 templateUrl: urlPrefix + 'partials/inventory-manage.html',
                 controller: InventoriesManage

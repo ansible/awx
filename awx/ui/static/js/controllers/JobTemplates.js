@@ -302,11 +302,12 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     LookUpInit({
         scope: $scope,
         form: form,
-        current_item: null,
+        current_item: ($routeParams.inventory_id !== undefined) ? $routeParams.inventory_id : null,
         list: InventoryList,
         field: 'inventory',
         input_type: "radio"
     });
+
 
     // Clone the CredentialList object for use with cloud_credential. Cloning
     // and changing properties to avoid collision.
@@ -341,14 +342,62 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         parent_scope: $scope
     });
 
-    // $scope.jobTypeChange = function(){
-    //
-    // };
+
+    $scope.jobTypeChange = function(){
+      if($scope.job_type){
+        if($scope.job_type.value === 'scan'){
+            $scope.default_scan = true;
+            $scope.project_name = 'Default';
+            $scope.project = null;
+          }
+          else{
+            $scope.default_scan = false;
+            $scope.project_name = null;
+            $scope.project = null;
+            $scope.playbook_options = [];
+            $scope.playbook = 'null';
+          }
+      }
+    };
+
+    $scope.toggleScanInfo = function() {
+      if($scope.default_scan){
+          $scope.project_name = 'Default';
+          $scope.project = null;
+      }
+      if(!$scope.default_scan){
+          $scope.project_name = null;
+          $scope.playbook_options = [];
+          $scope.playbook = 'null';
+      }
+    };
+
+    if ($routeParams.inventory_id) {
+        // This means that the job template form was accessed via inventory prop's
+        // This also means the job is a scan job.
+        $scope.job_type.value = 'scan';
+        $scope.jobTypeChange();
+        $scope.inventory = $routeParams.inventory_id;
+        Rest.setUrl(GetBasePath('inventory') + $routeParams.inventory_id + '/');
+        Rest.get()
+            .success(function (data) {
+                $scope.inventory_name = data.name;
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                    msg: 'Failed to lookup inventory: ' + data.id + '. GET returned status: ' + status });
+            });
+    }
 
     // Update playbook select whenever project value changes
     selectPlaybook = function (oldValue, newValue) {
         var url;
-        if (oldValue !== newValue) {
+        if($scope.job_type.value === 'scan' && $scope.default_scan === true){
+          $scope.playbook_options = ['Default'];
+          $scope.playbook = 'Default';
+          Wait('stop');
+        }
+        else if (oldValue !== newValue) {
             if ($scope.project) {
                 Wait('start');
                 url = GetBasePath('projects') + $scope.project + '/playbooks/';
@@ -477,7 +526,10 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
                     }
                 }
                 data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
-
+                if(data.job_type === 'scan' && $scope.default_scan === true){
+                  data.project = "";
+                  data.playbook = "";
+                }
                 Rest.setUrl(defaultUrl);
                 Rest.post(data)
                     .success(function(data) {
@@ -621,9 +673,42 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     $scope.playbook = null;
     generator.reset();
 
+    $scope.jobTypeChange = function(){
+      if($scope.job_type){
+        if($scope.job_type.value === 'scan'){
+            $scope.default_scan = true;
+            $scope.project_name = 'Default';
+            $scope.project = null;
+          }
+          else{
+            $scope.default_scan = false;
+            $scope.project_name = null;
+            $scope.playbook_options = [];
+            $scope.playbook = 'null';
+          }
+      }
+    };
+
+    $scope.toggleScanInfo = function() {
+      if($scope.default_scan){
+          $scope.project_name = 'Default';
+          $scope.project = null;
+      }
+      if(!$scope.default_scan){
+          $scope.project_name = null;
+          $scope.playbook_options = [];
+          $scope.playbook = 'null';
+      }
+    };
+
     getPlaybooks = function (project) {
         var url;
-        if (!Empty(project)) {
+        if($scope.job_type.value === 'scan' && $scope.default_scan === true){
+          $scope.playbook_options = ['Default'];
+          $scope.playbook = 'Default';
+          Wait('stop');
+        }
+        else if (!Empty(project)) {
             url = GetBasePath('projects') + project + '/playbooks/';
             Wait('start');
             Rest.setUrl(url);

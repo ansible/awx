@@ -97,10 +97,10 @@ export default
             },
 
             related: {
-                scan_jobs: {
+                scan_job_templates: {
                     type: 'collection',
                     title: 'Scan Jobs',
-                    iterator: 'scan_job',
+                    iterator: 'scan_job_template',
                     index: false,
                     open: false,
 
@@ -109,14 +109,15 @@ export default
                             ngClick: "addScanJob(inventory_id)",
                             icon: 'icon-plus',
                             label: 'Add',
-                            awToolTip: 'Add a scan job'
+                            awToolTip: 'Add a scan job template'
                         }
                     },
 
                     fields: {
                         name: {
                             key: true,
-                            label: 'Name'
+                            label: 'Name',
+                            linkTo: '/#/inventories/{{inventory_id}}/job_templates/{{scan_job_template.id}}'
                         },
                         description: {
                             label: 'Description'
@@ -126,17 +127,17 @@ export default
                     fieldActions: {
                         edit: {
                             label: 'Edit',
-                            ngClick: "edit('organizations', organization.id, organization.name)",
+                            ngClick: "editScanJob(inventory_id)",
                             icon: 'icon-edit',
-                            awToolTip: 'Edit the organization',
+                            awToolTip: 'Edit the scan job template',
                             'class': 'btn btn-default'
                         },
                         "delete": {
                             label: 'Delete',
-                            ngClick: "delete('organizations', organization.id, organization.name, 'organizations')",
+                            ngClick: "deleteScanJob(inventory_id)",
                             icon: 'icon-trash',
                             "class": 'btn-danger',
-                            awToolTip: 'Delete the organization'
+                            awToolTip: 'Delete the scan job template'
                         }
                     }
                 }
@@ -144,14 +145,10 @@ export default
 
             relatedSets: function(urls) {
                 return {
-                    scan_jobs: {
-                        iterator: 'scan_job',
-                        url: urls.organizations
-                    },
-                    // schedules: {
-                    //     iterator: 'schedule',
-                    //     url: urls.schedules
-                    // }
+                    scan_job_templates: {
+                        iterator: 'scan_job_template',
+                        url: urls.scan_job_templates
+                    }
                 };
             }
 

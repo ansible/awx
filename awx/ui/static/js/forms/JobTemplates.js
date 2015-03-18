@@ -102,7 +102,9 @@ export default
                     awPopOver: "<p>Select the project containing the playbook you want this job to execute.</p>",
                     dataTitle: 'Project',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    ngDisabled: 'default_scan === true',
+                    ngRequired: 'default_scan === false'
                 },
                 playbook: {
                     label: 'Playbook',
@@ -114,7 +116,20 @@ export default
                     awPopOver: "<p>Select the playbook to be executed by this job.</p>",
                     dataTitle: 'Playbook',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    ngDisabled: 'default_scan === true',
+                    ngRequired: 'default_scan === false'
+                },
+                default_scan: {
+                  label: "Use default scan job project and playbook",
+                  type: 'checkbox',
+                  ngChange: 'toggleScanInfo()',
+                  ngShow: 'job_type.value === "scan"',
+                  column: 1,
+                  awPopOver: "<p>Scan jobs templates use a default project and default playbook. Uncheck this box to override these defaults.</p>",
+                  dataTitle: 'Scan jobs',
+                  dataPlacement: 'right',
+                  dataContainer: "body"
                 },
                 credential: {
                     label: 'Machine Credential',

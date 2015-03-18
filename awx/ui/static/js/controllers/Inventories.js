@@ -482,7 +482,7 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 
 export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
-    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream) {
+    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit) {
 
     ClearScope();
 
@@ -492,16 +492,29 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
         generator = GenerateForm,
         inventory_id = $routeParams.inventory_id,
         master = {},
-        fld, json_data, data;
+        fld, json_data, data,
+        relatedSets = {};
 
     form.well = true;
     form.formLabelSize = null;
     form.formFieldSize = null;
-
+    $scope.inventory_id = inventory_id; 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
 
     generator.reset();
     LoadBreadCrumbs();
+
+    // After the project is loaded, retrieve each related set
+    if ($scope.inventoryLoadedRemove) {
+        $scope.inventoryLoadedRemove();
+    }
+    $scope.projectLoadedRemove = $scope.$on('inventoryLoaded', function () {
+        var set, opts=[];
+
+        for (set in relatedSets) {
+            $scope.search(relatedSets[set].iterator);
+        }
+    });
 
     Wait('start');
     Rest.setUrl(GetBasePath('inventory') + inventory_id + '/');
@@ -530,6 +543,19 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
                         data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                 }
             }
+            relatedSets = form.relatedSets(data.related);
+
+            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
+            RelatedSearchInit({
+                scope: $scope,
+                form: form,
+                relatedSets: relatedSets
+            });
+            RelatedPaginateInit({
+                scope: $scope,
+                relatedSets: relatedSets
+            });
+
             Wait('stop');
             $scope.parseType = 'yaml';
             ParseTypeChange({
@@ -546,6 +572,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
                 field: 'organization',
                 input_type: 'radio'
             });
+            $scope.$emit('inventoryLoaded');
         })
         .error(function (data, status) {
             ProcessErrors($scope, data, status, null, { hdr: 'Error!',
@@ -627,11 +654,19 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     $scope.addScanJob = function(){
         $location.path($location.path()+'/job_templates/add');
     };
+
+    $scope.editScanJob = function(){
+        $location.path($location.path()+'/job_templates/'+this.scan_job_template.id);
+    };
+
+    $scope.deleteScanJob = function(){
+        $location.path($location.path()+'/job_templates/add');
+    };
 }
 
 InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
-    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream'
+    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream', 'RelatedSearchInit', 'RelatedPaginateInit'
 ];
 
 

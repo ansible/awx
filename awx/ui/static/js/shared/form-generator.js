@@ -1107,6 +1107,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "\" ";
                         html += this.attr(field, 'ngOptions');
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
+                        html += (field.ngDisabled) ? this.attr(field, 'ngDisabled'): "";
+                        html += (field.ngRequired) ? this.attr(field, 'ngRequired') : ""; 
                         html += buildId(field, fld, this.form);
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (options.mode === 'add' && field.addRequired) ? "required " : "";
@@ -1331,6 +1333,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "<span class=\"input-group-btn\">\n";
                         html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field, 'ngClick');
                         html += (field.readonly || field.showonly) ? " disabled " : "";
+                        html += (field.ngDisabled) ? this.attr(field, "ngDisabled"): "";
                         html += "id=\"" + fld + "-lookup-btn\"><i class=\"fa fa-search\"></i></button>\n";
                         html += "</span>\n";
                         html += "<input type=\"text\" class=\"form-control input-medium lookup\" ";
@@ -1338,6 +1341,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "name=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
                         html += "class=\"form-control\" ";
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
+                        html += (field.ngDisabled) ? this.attr(field, 'ngDisabled') : "" ;
+                        html += (field.ngRequired) ? this.attr(field, 'ngRequired') : "";
                         html += (field.id) ? this.attr(field, 'id') : "";
                         html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
