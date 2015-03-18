@@ -3,7 +3,7 @@
  */
     /**
  * @ngdoc function
- * @name widgets.function:DashboardJobs
+ * @name widgets.function:PortalJobs
  * @description
  *
  */

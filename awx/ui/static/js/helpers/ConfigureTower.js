@@ -3,7 +3,7 @@
  */
     /**
  * @ngdoc function
- * @name helpers.function:Schedules
+ * @name helpers.function:ConfigureTower
  * @description
  *  Schedules Helper
  *
