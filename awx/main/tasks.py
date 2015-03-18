@@ -705,6 +705,7 @@ class RunJob(BaseTask):
         d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
         d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
         d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'sudo_password'
+        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'sudo_password'
         d[re.compile(r'^su password.*:\s*?$', re.M)] = 'su_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
