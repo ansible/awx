@@ -482,7 +482,7 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 
 export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
-    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit) {
+    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit, Prompt) {
 
     ClearScope();
 
@@ -490,6 +490,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     var defaultUrl = GetBasePath('inventory'),
         form = InventoryForm(),
         generator = GenerateForm,
+        jobtemplateUrl = GetBasePath('job_templates'),
         inventory_id = $routeParams.inventory_id,
         master = {},
         fld, json_data, data,
@@ -498,7 +499,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     form.well = true;
     form.formLabelSize = null;
     form.formFieldSize = null;
-    $scope.inventory_id = inventory_id; 
+    $scope.inventory_id = inventory_id;
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
 
     generator.reset();
@@ -509,8 +510,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
         $scope.inventoryLoadedRemove();
     }
     $scope.projectLoadedRemove = $scope.$on('inventoryLoaded', function () {
-        var set, opts=[];
-
+        var set;
         for (set in relatedSets) {
             $scope.search(relatedSets[set].iterator);
         }
@@ -659,14 +659,37 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
         $location.path($location.path()+'/job_templates/'+this.scan_job_template.id);
     };
 
-    $scope.deleteScanJob = function(){
-        $location.path($location.path()+'/job_templates/add');
-    };
+    $scope.deleteScanJob = function () {
+        var id = this.scan_job_template.id ,
+          action = function () {
+            $('#prompt-modal').modal('hide');
+            Wait('start');
+            var url = jobtemplateUrl+id;
+            Rest.setUrl(url);
+            Rest.destroy()
+                .success(function () {
+                  $('#prompt-modal').modal('hide');
+                  $scope.search(form.related.scan_job_templates.iterator);
+                })
+                .error(function (data) {
+                    Wait('stop');
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                });
+        };
+
+        Prompt({
+            hdr: 'Delete',
+            body: '<div class=\"alert alert-info\">Delete job template ' + this.scan_job_template.name + '?</div>',
+            action: action
+        });
+      };
+
 }
 
 InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
-    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream', 'RelatedSearchInit', 'RelatedPaginateInit'
+    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt'
 ];
 
 

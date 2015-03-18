@@ -99,14 +99,14 @@ export default
             related: {
                 scan_job_templates: {
                     type: 'collection',
-                    title: 'Scan Jobs',
+                    title: 'Scan Job Templates',
                     iterator: 'scan_job_template',
                     index: false,
                     open: false,
 
                     actions: {
                         add: {
-                            ngClick: "addScanJob(inventory_id)",
+                            ngClick: "addScanJob()",
                             icon: 'icon-plus',
                             label: 'Add',
                             awToolTip: 'Add a scan job template'
@@ -127,14 +127,14 @@ export default
                     fieldActions: {
                         edit: {
                             label: 'Edit',
-                            ngClick: "editScanJob(inventory_id)",
+                            ngClick: "editScanJob()",
                             icon: 'icon-edit',
                             awToolTip: 'Edit the scan job template',
                             'class': 'btn btn-default'
                         },
                         "delete": {
                             label: 'Delete',
-                            ngClick: "deleteScanJob(inventory_id)",
+                            ngClick: "deleteScanJob()",
                             icon: 'icon-trash',
                             "class": 'btn-danger',
                             awToolTip: 'Delete the scan job template'

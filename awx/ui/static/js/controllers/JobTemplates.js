@@ -486,7 +486,17 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
 
 
     function saveCompleted() {
-        setTimeout(function() { $scope.$apply(function() { $location.path('/job_templates'); }); }, 500);
+        setTimeout(function() {
+          $scope.$apply(function() {
+            var base = $location.path().replace(/^\//, '').split('/')[0];
+            if (base === 'job_templates') {
+                ReturnToCaller();
+            }
+            else {
+                ReturnToCaller(1);
+            }
+          });
+        }, 500);
     }
 
     if ($scope.removeTemplateSaveSuccess) {
@@ -979,7 +989,17 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     });
 
     function saveCompleted() {
-        setTimeout(function() { $scope.$apply(function() { $location.path('/job_templates'); }); }, 500);
+        setTimeout(function() {
+          $scope.$apply(function() {
+            var base = $location.path().replace(/^\//, '').split('/')[0];
+            if (base === 'job_templates') {
+                ReturnToCaller();
+            }
+            else {
+                ReturnToCaller(1);
+            }
+          });
+        }, 500);
     }
 
     if ($scope.removeTemplateSaveSuccess) {
