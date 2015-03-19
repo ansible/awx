@@ -26,7 +26,7 @@ window.getService = function getService(serviceName) {
  
 Object.defineProperty(window, '$scope', {
     get: function () {
-        var elem = angular.element(__commandLineAPI.$0);
+        var elem = angular.element(window.__commandLineAPI.$0);
         return elem.isolateScope() || elem.scope();
     },
 });
