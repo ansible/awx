@@ -21,9 +21,9 @@ angular.module('JobTemplatesHelper', ['Utilities'])
  */
 
 .factory('CallbackHelpInit', ['$location', 'GetBasePath', 'Rest', 'JobTemplateForm', 'GenerateForm', '$routeParams', 'LoadBreadCrumbs', 'ProcessErrors', 'ParseTypeChange',
-         'ParseVariableString', 'Empty', 'LookUpInit', 'InventoryList', 'CredentialList','ProjectList', 'RelatedSearchInit', 'RelatedPaginateInit',
+         'ParseVariableString', 'Empty', 'LookUpInit', 'InventoryList', 'CredentialList','ProjectList', 'RelatedSearchInit', 'RelatedPaginateInit', 'Wait',
          function($location, GetBasePath, Rest, JobTemplateForm, GenerateForm, $routeParams, LoadBreadCrumbs, ProcessErrors,ParseTypeChange,
-                  ParseVariableString, Empty, LookUpInit, InventoryList, CredentialList, ProjectList, RelatedSearchInit, RelatedPaginateInit) {
+                  ParseVariableString, Empty, LookUpInit, InventoryList, CredentialList, ProjectList, RelatedSearchInit, RelatedPaginateInit, Wait) {
                       return function(params) {
 
                           var scope = params.scope,
@@ -122,7 +122,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                               scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
                                       }
                                   }
-
+                                  Wait('stop');
                                   scope.url = data.url;
 
                                   scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? 'true' : 'false';
@@ -197,4 +197,3 @@ angular.module('JobTemplatesHelper', ['Utilities'])
 
 
                   }]);
-
