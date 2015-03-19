@@ -39,6 +39,8 @@ def main():
         argument_spec = dict())
 
     packages = []
+    # TODO: module_utils/basic.py in ansible contains get_distribution() and get_distribution_version()
+    # which can be used here and is accessible by this script instead of this basic detector.
     if os.path.exists("/etc/redhat-release"):
         packages = rpm_package_list()
     elif os.path.exists("/etc/os-release"):
