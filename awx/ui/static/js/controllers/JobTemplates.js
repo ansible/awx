@@ -349,6 +349,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
             $scope.default_scan = true;
             $scope.project_name = 'Default';
             $scope.project = null;
+            $scope.toggleScanInfo();
           }
           else{
             $scope.default_scan = false;
@@ -683,34 +684,6 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     $scope.playbook = null;
     generator.reset();
 
-    $scope.jobTypeChange = function(){
-      if($scope.job_type){
-        if($scope.job_type.value === 'scan'){
-            $scope.default_scan = true;
-            $scope.project_name = 'Default';
-            $scope.project = null;
-          }
-          else{
-            $scope.default_scan = false;
-            $scope.project_name = null;
-            $scope.playbook_options = [];
-            $scope.playbook = 'null';
-          }
-      }
-    };
-
-    $scope.toggleScanInfo = function() {
-      if($scope.default_scan){
-          $scope.project_name = 'Default';
-          $scope.project = null;
-      }
-      if(!$scope.default_scan){
-          $scope.project_name = null;
-          $scope.playbook_options = [];
-          $scope.playbook = 'null';
-      }
-    };
-
     getPlaybooks = function (project) {
         var url;
         if($scope.job_type.value === 'scan' && $scope.default_scan === true){
@@ -747,6 +720,36 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
         else {
             Wait('stop');
         }
+    };
+
+    $scope.jobTypeChange = function(){
+      if($scope.job_type){
+        if($scope.job_type.value === 'scan'){
+            $scope.default_scan = true;
+            $scope.project_name = 'Default';
+            $scope.project = null;
+            $scope.toggleScanInfo();
+          }
+          else{
+            $scope.default_scan = false;
+            $scope.project_name = null;
+            $scope.playbook_options = [];
+            $scope.playbook = 'null';
+          }
+      }
+    };
+
+    $scope.toggleScanInfo = function() {
+      if($scope.default_scan){
+          $scope.project_name = 'Default';
+          $scope.project = null;
+          getPlaybooks();
+      }
+      if(!$scope.default_scan){
+          $scope.project_name = null;
+          $scope.playbook_options = [];
+          $scope.playbook = 'null';
+      }
     };
 
     // Detect and alert user to potential SCM status issues
