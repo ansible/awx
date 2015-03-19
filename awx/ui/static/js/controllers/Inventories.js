@@ -482,7 +482,7 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 
 export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
-    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit, Prompt) {
+    LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit, Prompt, PlaybookRun) {
 
     ClearScope();
 
@@ -660,6 +660,10 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
         $location.path($location.path()+'/job_templates/add');
     };
 
+    $scope.launchScanJob = function(){
+        PlaybookRun({ scope: $scope, id: this.scan_job_template.id });
+    };
+
     $scope.editScanJob = function(){
         $location.path($location.path()+'/job_templates/'+this.scan_job_template.id);
     };
@@ -694,7 +698,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
 
 InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
-    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt'
+    'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream', 'RelatedSearchInit', 'RelatedPaginateInit', 'Prompt', 'PlaybookRun'
 ];
 
 

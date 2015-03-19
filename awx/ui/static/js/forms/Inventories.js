@@ -125,6 +125,12 @@ export default
                     },
 
                     fieldActions: {
+                        submit: {
+                          label: 'Launch',
+                          ngClick: "launchScanJob()",
+                          awToolTip: 'Launch the scan job template',
+                          'class': 'btn btn-default'
+                        },
                         edit: {
                             label: 'Edit',
                             ngClick: "editScanJob()",
