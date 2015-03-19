@@ -33,7 +33,7 @@ export default [  function() {
                 }
             });
 
-            $('aw-smart-status:eq('+scope.$index+')').bind('sparklineClick', function(ev) {
+            element.bind('sparklineClick', function(ev) {
                 var sparkline = ev.sparklines[0],
                     job = sparkline.getCurrentRegionFields(),
                     id;
