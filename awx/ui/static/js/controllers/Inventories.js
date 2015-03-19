@@ -503,7 +503,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
 
     generator.reset();
-    LoadBreadCrumbs();
+
 
     // After the project is loaded, retrieve each related set
     if ($scope.inventoryLoadedRemove) {
@@ -554,6 +554,11 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
             RelatedPaginateInit({
                 scope: $scope,
                 relatedSets: relatedSets
+            });
+
+            LoadBreadCrumbs({
+              path: $location.path(),
+              title: $scope.inventory_name
             });
 
             Wait('stop');
