@@ -1,23 +1,47 @@
 // Karma configuration
 // Generated on Mon Aug 04 2014 21:17:04 GMT-0400 (EDT)
 
+var path = require('path');
+
 module.exports = function(config) {
     config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 
+    autoWatchBatchDelay: 2000,
+
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'chai', 'sinon-chai', 'chai-as-promised'],
+
+    frameworks:
+        [   'mocha',
+            'chai',
+            'sinon-chai',
+            'chai-as-promised'
+        ],
+
+    preprocessors:
+        {   '../dist/**/*.html': ['ng-html2js']
+        },
+
     // list of files / patterns to load in the browser
     files: [
+        '../tests/phantomjs-polyfill.js',
         '../dist/tower.concat.js',
         '../static/lib/angular-mocks/angular-mocks.js',
         '../static/lib/ember-cli-test-loader/test-loader.js',
         '../dist/tests/**/*.js',
-        '../tests/unit.js'
+        '../tests/unit.js',
+        '../dist/partials/**/*.html',
+        '../dist/js/**/*.html'
     ],
+
+    ngHtml2JsPreprocessor: {
+        stripPrefix: path.join(process.cwd(), 'awx/ui/dist'),
+        prependPrefix: '/static',
+        moduleName: 'templates'
+    },
 
 
     // list of files to exclude
