@@ -131,6 +131,7 @@ function TestDirective(name, deps) {
             afterCompile: function(fn) {
 
                 var self = this;
+                var $outerScope;
 
                 // Make sure compile step gets setup first
                 if (!this._compileRegistered) {
@@ -140,7 +141,7 @@ function TestDirective(name, deps) {
                 // Then pre-apply the function with the outer scope
                 self.withScope(function($scope) {
                     // `this` refers to mocha test suite
-                    fn = fn.bind(this, $scope);
+                    $outerScope = $scope;
                 });
 
                 // Finally, have it called by the isolate scope
@@ -150,7 +151,7 @@ function TestDirective(name, deps) {
                 //
                 self.withIsolateScope(function($scope) {
                     // `this` refers to mocha test suite
-                    fn.apply(this, [$scope]);
+                    fn.apply(this, [$outerScope, $scope]);
                 });
 
             },
@@ -164,7 +165,11 @@ function TestDirective(name, deps) {
                 }
 
                 beforeEach("compile directive element",
-                           inject(['$compile', '$httpBackend', function($compile, $httpBackend) {
+                           inject(['$compile', '$httpBackend', '$rootScope', function($compile, $httpBackend, $rootScope) {
+
+                    if (!self.$scope) {
+                        self.$scope = $rootScope.$new();
+                    }
 
                     self.$element = $compile(self.element)(self.$scope);
                     $(self.$element).appendTo('body');
@@ -200,6 +205,11 @@ function TestDirective(name, deps) {
                         .whenGET(url)
                         .respond(template);
                 }]));
+            },
+            _ensureCompiled: function() {
+                if (typeof this.$element === 'undefined') {
+                    throw "Can only call withController after registerPostHooks on directive test";
+                }
             }
         };
 }

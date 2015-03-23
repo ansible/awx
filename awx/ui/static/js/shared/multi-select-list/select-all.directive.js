@@ -146,7 +146,7 @@ export default
                 scope.selectExtendedLabel = scope.extendedLabel() || 'Select all ' + scope.extendedItemsLength + ' items';
                 scope.deselectExtendedLabel = scope.deselectExtendedLabel || 'Deselect extra items';
 
-                scope.doSelectAll = function(e) {
+                scope.doSelectAll = function() {
                     if (scope.isSelected) {
                         controller.selectAll();
 

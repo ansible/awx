@@ -140,7 +140,7 @@ export default ['$scope',
          * Disables extended selection.
          * Triggers {@link multiSelectList.selectionChanged `multiSelectList.selectionChanged`}
          */
-        this.deselectAllExtended = function(extendedLength) {
+        this.deselectAllExtended = function() {
             $scope.selection.isExtended = false;
             rebuildSelections();
         };
@@ -154,7 +154,7 @@ export default ['$scope',
          * Enables extended selection.
          * Triggers {@link multiSelectList.selectionChanged `multiSelectList.selectionChanged`}
          */
-        this.selectAllExtended = function(extendedLength) {
+        this.selectAllExtended = function() {
             $scope.selection.isExtended = true;
             rebuildSelections();
         };
