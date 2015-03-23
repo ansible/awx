@@ -84,6 +84,7 @@ export default
                 password: {
                     label: 'Password',
                     type: 'sensitive',
+                    hasShowInputButton: true,
                     ngShow: 'ldap_user == false',
                     addRequired: true,
                     editRequired: false,
@@ -94,6 +95,7 @@ export default
                 password_confirm: {
                     label: 'Confirm Password',
                     type: 'sensitive',
+                    hasShowInputButton: true,
                     ngShow: 'ldap_user == false',
                     addRequired: false,
                     editRequired: false,
