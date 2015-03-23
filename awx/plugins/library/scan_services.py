@@ -100,7 +100,9 @@ class SystemctlScanService(BaseService):
             line_data = line.split()
             if len(line_data) != 2:
                 continue
-            services[line_data[0]] = {"name": line_data[0], "state": "running" if line_data[1] == "enabled" else "stopped"}
+            services[line_data[0]] = {"name": line_data[0],
+                                      "state": "running" if line_data[1] == "enabled" else "stopped",
+                                      "source": "systemd"}
         return services
 
 def main():
