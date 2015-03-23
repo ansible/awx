@@ -47,20 +47,31 @@ class TokenAuthentication(authentication.TokenAuthentication):
         return self.authenticate_credentials(auth[1])
 
     def authenticate_credentials(self, key):
+        # Retrieve the request hash and token.
         try:
             request_hash = self.model.get_request_hash(self.request)
-            token = self.model.objects.get(key=key, request_hash=request_hash)
+            token = self.model.objects.select_related('user').get(
+                key=key,
+                request_hash=request_hash,
+            )
         except self.model.DoesNotExist:
             raise exceptions.AuthenticationFailed('Invalid token')
 
+        # Sanity check: Ensure that the token is still valid.
+        # Tokens expire if they are not used for 30 minutes.
         if token.expired:
             raise exceptions.AuthenticationFailed('Token is expired')
 
+        # Sanity check: If the user is inactive, then return an error.
         if not token.user.is_active:
             raise exceptions.AuthenticationFailed('User inactive or deleted')
 
+        # Refresh the token.
+        # This updates the time that the token was last used, meaning that
+        # now the token is valid for 30 minutes from "right now".
         token.refresh()
 
+        # Return the user object and the token.
         return (token.user, token)
 
 class JobTaskAuthentication(authentication.BaseAuthentication):
