@@ -8,7 +8,7 @@ RUN apt-get update
 RUN apt-get install -y software-properties-common python-software-properties
 RUN add-apt-repository -y ppa:chris-lea/redis-server; add-apt-repository -y ppa:chris-lea/zeromq; add-apt-repository -y ppa:chris-lea/node.js
 RUN apt-get update
-RUN apt-get install -y tmux git mercurial subversion python-dev python-pip libyaml-dev python-yaml python-paramiko python-jinja2 make postgresql python-psycopg2 python-ldap nodejs redis-server python-gevent libzmq3 python-zmq
+RUN apt-get install -y tmux git mercurial subversion python-dev python-pip libyaml-dev python-yaml python-paramiko python-jinja2 make postgresql python-psycopg2 python-ldap nodejs redis-server python-gevent libzmq3 python-zmq && rm -rf /var/lib/apt/lists/*
 RUN git clone http://d7f73f8614295715a4777bf15f46d0d486ad0e21:x-oauth-basic@github.com/ansible/ansible-commander.git tower
 RUN pip install Django==1.6.7 django-devserver django-debug-toolbar django-jenkins ipython ansible
 RUN cd /tower ; make develop
