@@ -14,3 +14,22 @@
         font-weight: normal;
     }
  }
+
+.is-selected-row, .is-selected-row td {
+    background-color: #E4F1FF !important;
+}
+
+.select-column {
+    text-align: center;
+}
+
+th.select-column {
+    label {
+        // overrides the default style of
+        // display: inline-block, which allowed
+        // margins to push down the label,
+        // thus breaking the vertical-alignment
+        // of the cell
+        display: inline;
+    }
+}

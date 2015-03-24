@@ -1,0 +1,18 @@
+<label>
+<input
+  type="checkbox"
+  ng-disabled="itemsLength === 0"
+  ng-model="isSelected"
+  ng-change="doSelectAll()">
+  {{label}}
+</label>
+<button
+  ng-click="selectAllExtended()"
+  ng-if="!isSelectionExtended && showExtendedMessage">
+  {{selectExtendedLabel}}
+</button>
+<button
+  ng-click="deselectAllExtended()"
+  ng-if="isSelectionExtended">
+  {{deselectExtendedLabel}}
+</button>
