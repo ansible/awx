@@ -114,14 +114,14 @@ export default
                     },
 
                     fields: {
-                      // smart_status: {
-                      //     label: 'Status',
-                      //     // columnClass: 'col-md-2 col-sm-2 col-xs-2',
-                      //     searchable: false,
-                      //     nosort: true,
-                      //     ngInclude: "'/static/partials/job-template-smart-status.html'",
-                      //     type: 'template'
-                      //   },
+                      smart_status: {
+                          label: 'Status',
+                          // columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                          searchable: false,
+                          nosort: true,
+                          ngInclude: "'/static/partials/scan-job-template-smart-status.html'",
+                          type: 'template'
+                        },
                         name: {
                             key: true,
                             label: 'Name',

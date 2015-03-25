@@ -791,7 +791,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
                   .success(function () {
                       $('#copy-job-modal').dialog('close');
                       Wait('stop');
-                      $location.path($location.path() + '/' + new_data.id);
+                      $location.path($location.path() + '/job_templates/' + new_data.id);
                   })
                   .error(function (data) {
                       Wait('stop');
