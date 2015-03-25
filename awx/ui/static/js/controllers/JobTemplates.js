@@ -342,37 +342,6 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         parent_scope: $scope
     });
 
-
-    $scope.jobTypeChange = function(){
-      if($scope.job_type){
-        if($scope.job_type.value === 'scan'){
-            $scope.default_scan = true;
-            $scope.project_name = 'Default';
-            $scope.project = null;
-            $scope.toggleScanInfo();
-          }
-          else{
-            $scope.default_scan = false;
-            $scope.project_name = null;
-            $scope.project = null;
-            $scope.playbook_options = [];
-            $scope.playbook = 'null';
-          }
-      }
-    };
-
-    $scope.toggleScanInfo = function() {
-      if($scope.default_scan){
-          $scope.project_name = 'Default';
-          $scope.project = null;
-      }
-      if(!$scope.default_scan){
-          $scope.project_name = null;
-          $scope.playbook_options = [];
-          $scope.playbook = 'null';
-      }
-    };
-
     if ($routeParams.inventory_id) {
         // This means that the job template form was accessed via inventory prop's
         // This also means the job is a scan job.
@@ -393,10 +362,10 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     // Update playbook select whenever project value changes
     selectPlaybook = function (oldValue, newValue) {
         var url;
-        if($scope.job_type.value === 'scan' && $scope.default_scan === true){
-          $scope.playbook_options = ['Default'];
-          $scope.playbook = 'Default';
-          Wait('stop');
+        if($scope.job_type.value === 'scan' && $scope.project_name === "Default"){
+            $scope.playbook_options = ['Default'];
+            $scope.playbook = 'Default';
+            Wait('stop');
         }
         else if (oldValue !== newValue) {
             if ($scope.project) {
@@ -417,6 +386,32 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
                             msg: 'Failed to get playbook list for ' + url + '. GET returned status: ' + status });
                     });
             }
+        }
+    };
+
+    $scope.jobTypeChange = function(){
+      if($scope.job_type){
+        if($scope.job_type.value === 'scan'){
+            // $scope.project_name = 'Default';
+            // $scope.project = null;
+            $scope.toggleScanInfo();
+          }
+          else if($scope.project_name === "Default"){
+            $scope.project_name = null;
+            $scope.playbook_options = [];
+            // $scope.playbook = 'null';
+            $scope.job_templates_form.playbook.$setPristine();
+          }
+      }
+    };
+
+    $scope.toggleScanInfo = function() {
+        $scope.project_name = 'Default';
+        if($scope.project === null){
+          selectPlaybook();
+        }
+        else {
+          $scope.project = null;
         }
     };
 
@@ -686,10 +681,10 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
 
     getPlaybooks = function (project) {
         var url;
-        if($scope.job_type.value === 'scan' && $scope.default_scan === true){
-          $scope.playbook_options = ['Default'];
-          $scope.playbook = 'Default';
-          Wait('stop');
+        if($scope.job_type.value === 'scan' && $scope.project_name === "Default"){
+            $scope.playbook_options = ['Default'];
+            $scope.playbook = 'Default';
+            Wait('stop');
         }
         else if (!Empty(project)) {
             url = GetBasePath('projects') + project + '/playbooks/';
@@ -725,31 +720,27 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     $scope.jobTypeChange = function(){
       if($scope.job_type){
         if($scope.job_type.value === 'scan'){
-            $scope.default_scan = true;
-            $scope.project_name = 'Default';
-            $scope.project = null;
+            // $scope.project_name = 'Default';
+            // $scope.project = null;
             $scope.toggleScanInfo();
           }
-          else{
-            $scope.default_scan = false;
+          else if($scope.project_name === "Default"){
             $scope.project_name = null;
             $scope.playbook_options = [];
-            $scope.playbook = 'null';
+            // $scope.playbook = 'null';
+            $scope.job_templates_form.playbook.$setPristine();
           }
       }
     };
 
     $scope.toggleScanInfo = function() {
-      if($scope.default_scan){
-          $scope.project_name = 'Default';
-          $scope.project = null;
+        $scope.project_name = 'Default';
+        if($scope.project === null){
           getPlaybooks();
-      }
-      if(!$scope.default_scan){
-          $scope.project_name = null;
-          $scope.playbook_options = [];
-          $scope.playbook = 'null';
-      }
+        }
+        else {
+          $scope.project = null;
+        }
     };
 
     // Detect and alert user to potential SCM status issues

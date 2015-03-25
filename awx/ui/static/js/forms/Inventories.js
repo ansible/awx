@@ -114,6 +114,14 @@ export default
                     },
 
                     fields: {
+                      // smart_status: {
+                      //     label: 'Status',
+                      //     // columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                      //     searchable: false,
+                      //     nosort: true,
+                      //     ngInclude: "'/static/partials/job-template-smart-status.html'",
+                      //     type: 'template'
+                      //   },
                         name: {
                             key: true,
                             label: 'Name',
@@ -131,6 +139,12 @@ export default
                           awToolTip: 'Launch the scan job template',
                           'class': 'btn btn-default'
                         },
+                        schedule: {
+                            label: 'Schedule',
+                            ngClick: 'scheduleScanJob()',
+                            awToolTip: 'Schedule future job template runs',
+                            dataPlacement: 'top',
+                        },
                         edit: {
                             label: 'Edit',
                             ngClick: "editScanJob()",
@@ -144,6 +158,14 @@ export default
                             icon: 'icon-trash',
                             "class": 'btn-danger',
                             awToolTip: 'Delete the scan job template'
+                        },
+                        copy: {
+                            label: 'Copy',
+                            ngClick: "copyScanJobTemplate()",
+                            "class": 'btn-danger btn-xs',
+                            awToolTip: 'Copy template',
+                            dataPlacement: 'top',
+                            ngHide: 'job_template.summary_fields.can_copy === false'
                         }
                     }
                 }

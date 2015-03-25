@@ -103,8 +103,6 @@ export default
                     dataTitle: 'Project',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: 'default_scan === true',
-                    ngRequired: 'default_scan === false'
                 },
                 playbook: {
                     label: 'Playbook',
@@ -117,19 +115,23 @@ export default
                     dataTitle: 'Playbook',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: 'default_scan === true',
-                    ngRequired: 'default_scan === false'
                 },
+                // default_scan: {
+                //   label: "Use default scan job project and playbook",
+                //   type: 'checkbox',
+                //   ngChange: 'toggleScanInfo()',
+                //   ngShow: 'job_type.value === "scan" && project_name !== "Default"',
+                //   column: 1,
+                //   awPopOver: "<p>Scan jobs templates use a default project and default playbook. Uncheck this box to override these defaults.</p>",
+                //   dataTitle: 'Scan jobs',
+                //   dataPlacement: 'right',
+                //   dataContainer: "body"
+                // },
                 default_scan: {
-                  label: "Use default scan job project and playbook",
-                  type: 'checkbox',
-                  ngChange: 'toggleScanInfo()',
-                  ngShow: 'job_type.value === "scan"',
+                  type: 'custom',
                   column: 1,
-                  awPopOver: "<p>Scan jobs templates use a default project and default playbook. Uncheck this box to override these defaults.</p>",
-                  dataTitle: 'Scan jobs',
-                  dataPlacement: 'right',
-                  dataContainer: "body"
+                  ngShow: 'job_type.value === "scan" && project_name !== "Default"',
+                  control: '<a href="" ng-click="toggleScanInfo()">Reset to default project and playbook</a>'
                 },
                 credential: {
                     label: 'Machine Credential',
