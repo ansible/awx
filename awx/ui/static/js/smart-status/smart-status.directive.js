@@ -1,4 +1,4 @@
-import smartStatusController from 'tower/smart-status/smart-status.controller.js';
+import smartStatusController from 'tower/smart-status/smart-status.controller';
 export default [  function() {
     return {
         scope: {

@@ -290,16 +290,16 @@ devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 
 # Build minified JS/CSS.
 minjs: node_modules clean-ui Brocfile.js
-	$(BROCCOLI) build awx/ui/dist -- --silent --no-debug --no-tests --compress
+	$(BROCCOLI) build awx/ui/dist -- --silent --no-debug --no-tests --compress --no-docs
 
 minjs_ci: node_modules clean-ui Brocfile.js
-	$(BROCCOLI) build awx/ui/dist -- --no-debug --compress
+	$(BROCCOLI) build awx/ui/dist -- --no-debug --compress --no-docs
 
 # Check .js files for errors and lint
 jshint: node_modules Gruntfile.js
 	$(GRUNT) $@
 
-ngdocs: node_modules Gruntfile.js
+ngdocs: devjs Gruntfile.js
 	$(GRUNT) $@
 
 # Build a pip-installable package into dist/ with a timestamped version number.

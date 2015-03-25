@@ -3,7 +3,7 @@
   "ignore": [
     ".git",
     "node_modules/**/node_modules",
-    "awx/ui/static/dist"
+    "awx/ui/static/docs/**/*"
   ],
   "watch": [
     "awx/ui/static"
