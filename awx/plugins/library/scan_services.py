@@ -11,7 +11,7 @@ class BaseService(object):
 class ServiceScanService(BaseService):
 
     def gather_services(self):
-        services = {}
+        services = []
         service_path = self.module.get_bin_path("service")
         if service_path is None:
             return None
@@ -26,7 +26,7 @@ class ServiceScanService(BaseService):
                     continue # Skipping because we expected more data
                 service_name = " ".join(line_data[3:])
                 service_state = "running" if line_data[1] == "+" else "stopped"
-                services[service_name] = {"name": service_name, "state": service_state, "source": "sysv"}
+                services.append({"name": service_name, "state": service_state, "source": "sysv"})
             rc, stdout, stderr = self.module.run_command("%s list" % initctl_path)
             real_stdout = stdout.replace("\r","")
             for line in real_stdout.split("\n"):
@@ -46,7 +46,7 @@ class ServiceScanService(BaseService):
                 else:
                     pid = None
                 payload = {"name": service_name, "state": service_state, "goal": service_goal, "source": "upstart"}
-                services[service_name] = payload
+                services.append(payload)
 
         # RH sysvinit
         elif chkconfig_path is not None:
@@ -69,7 +69,7 @@ class ServiceScanService(BaseService):
                 else:
                     continue
                 service_data = {"name": service_name, "state": service_state, "source": "sysv"}
-                services[service_name] = service_data
+                services.append(service_data)
             # rc, stdout, stderr = self.module.run_command("%s --list" % chkconfig_path)
             # Do something with chkconfig status
         return services
@@ -89,7 +89,7 @@ class SystemctlScanService(BaseService):
         return False
 
     def gather_services(self):
-        services = {}
+        services = []
         if not self.systemd_enabled():
             return None
         systemctl_path = self.module.get_bin_path("systemctl", opt_dirs=["/usr/bin", "/usr/local/bin"])
@@ -100,20 +100,20 @@ class SystemctlScanService(BaseService):
             line_data = line.split()
             if len(line_data) != 2:
                 continue
-            services[line_data[0]] = {"name": line_data[0],
-                                      "state": "running" if line_data[1] == "enabled" else "stopped",
-                                      "source": "systemd"}
+            services.append({"name": line_data[0],
+                             "state": "running" if line_data[1] == "enabled" else "stopped",
+                             "source": "systemd"})
         return services
 
 def main():
     module = AnsibleModule(argument_spec = dict())
     service_modules = (ServiceScanService, SystemctlScanService)
-    all_services = {}
+    all_services = []
     for svc_module in service_modules:
         svcmod = svc_module(module)
         svc = svcmod.gather_services()
         if svc is not None:
-            all_services.update(svc)
+            all_services += svc
     results = dict(ansible_facts=dict(services=all_services))
     module.exit_json(**results)
 
