@@ -1,124 +1,76 @@
-describe('Job Status Graph Data Service', function() {
+import {describeModule} from 'tests/unit/describe-module';
 
-  var q;
+var processErrors = sinon.spy();
 
-  var jobStatusGraphData, httpBackend, rootScope, timeout;
+describeModule('DashboardGraphs')
+    .mockProvider('ProcessErrors', processErrors)
+    .testService('jobStatusGraphData', function(test, restStub) {
+        var q;
+        var service;
 
-  var jobStatusChange = {
-    $on: sinon.spy(),
-  };
+        var jobStatusChange = {
+            $on: sinon.spy(),
+        };
 
-  var processErrors = sinon.spy();
+        beforeEach(inject(['$q', function($q) {
+            q = $q;
+        }]));
 
-  var getBasePath = function(path) {
-    return '/' + path + '/';
-  }
+        test.withService(function(_service) {
+            service = _service;
+        });
 
-  function flushPromises() {
-    window.setTimeout(function() {
-      inject(['$rootScope', function($rootScope) {
-        $rootScope.$apply();
-      }]);
-    });
-  }
+        it('returns a promise to be fulfilled when data comes in', function() {
+            var firstResult = "result";
 
-  var restStub = {
-    setUrl: angular.noop,
-    reset: function() {
-      delete restStub.deferred;
-    },
-    get: function() {
-      if (angular.isUndefined(restStub.deferred)) {
-        restStub.deferred = q.defer();
-      }
+            var result = service.get('', '');
 
-      return restStub.deferred.promise;
-    },
-    succeed: function(value) {
-        restStub.deferred.resolve(value);
-    },
-    fail: function(value) {
-      restStub.deferred.reject(value);
-    }
-  };
+            restStub.succeed({ data: firstResult });
 
-  beforeEach(module("Tower"));
+            restStub.flush();
 
-  beforeEach(module(['$provide', function($provide) {
+            return expect(result).to.eventually.equal(firstResult);;
+        });
 
-    $provide.value("$cookieStore", { get: angular.noop });
+        it('processes errors through error handler', function() {
+            var expected = { data: "blah", status: "bad" };
+            var actual = service.get().catch(function() {
+                return processErrors;
+            });
 
-    $provide.value('ProcessErrors', processErrors);
-    $provide.value('Rest', restStub);
-    $provide.value('GetBasePath', getBasePath);
-  }]));
+            restStub.fail(expected);
 
-  afterEach(function() {
-    restStub.reset();
-  });
+            restStub.flush();
 
-  beforeEach(inject(['jobStatusGraphData', '$httpBackend', '$q', '$rootScope', '$timeout', function(_jobStatusGraphData_, $httpBackend, $q, $rootScope, $timeout) {
-    jobStatusGraphData = _jobStatusGraphData_;
-    httpBackend = $httpBackend;
-    rootScope = $rootScope;
-    timeout = $timeout;
-    $httpBackend.expectGET('/static/js/local_config.js').respond({
-    });
-    q = $q;
-  }]));
+            return actual.catch(function() {
+                expect(processErrors).to
+                .have.been.calledWith(null, expected.data, expected.status);
+            });
 
-  it('returns a promise to be fulfilled when data comes in', function() {
-    var firstResult = "result";
+        });
 
-    var result = jobStatusGraphData.get('', '');
+        it('broadcasts event when data is received', function() {
+            var expected = "value";
+            var result = q.defer();
+            service.setupWatcher();
 
-    restStub.succeed({ data: firstResult });
+            inject(['$rootScope', function($rootScope) {
+                $rootScope.$on('DataReceived:JobStatusGraph', function(e, data) {
+                    result.resolve(data);
+                });
+                $rootScope.$emit('JobStatusChange');
+                restStub.succeed({ data: expected });
+                restStub.flush();
+            }]);
 
-    flushPromises();
+            return expect(result.promise).to.eventually.equal(expected);
+        });
 
-    return expect(result).to.eventually.equal(firstResult);;
-  });
+        it('requests data with given period and jobType', function() {
+            restStub.setUrl = sinon.spy();
 
-  it('processes errors through error handler', function() {
-    var expected = { data: "blah", status: "bad" };
-    var actual = jobStatusGraphData.get().catch(function() {
-      return processErrors;
-    });
+            service.get('1', '2');
 
-    restStub.fail(expected);
-
-    flushPromises();
-
-    return actual.catch(function() {
-      expect(processErrors).to
-        .have.been.calledWith(null, expected.data, expected.status);
-    });
-
-  });
-
-  it('broadcasts event when data is received', function() {
-    var expected = "value";
-    var result = q.defer();
-    jobStatusGraphData.setupWatcher();
-
-    inject(['$rootScope', function($rootScope) {
-      $rootScope.$on('DataReceived:JobStatusGraph', function(e, data) {
-        result.resolve(data);
-      });
-      $rootScope.$emit('JobStatusChange');
-      restStub.succeed({ data: expected });
-      flushPromises();
-    }]);
-
-    return expect(result.promise).to.eventually.equal(expected);
-  });
-
-  it('requests data with given period and jobType', function() {
-    restStub.setUrl = sinon.spy();
-
-    jobStatusGraphData.get('1', '2');
-
-    expect(restStub.setUrl).to.have.been.calledWith('/dashboard/graphs/jobs/?period=1&job_type=2');
-  });
-
+            expect(restStub.setUrl).to.have.been.calledWith('/dashboard/graphs/jobs/?period=1&job_type=2');
+        });
 });
