@@ -342,22 +342,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         parent_scope: $scope
     });
 
-    if ($routeParams.inventory_id) {
-        // This means that the job template form was accessed via inventory prop's
-        // This also means the job is a scan job.
-        $scope.job_type.value = 'scan';
-        $scope.jobTypeChange();
-        $scope.inventory = $routeParams.inventory_id;
-        Rest.setUrl(GetBasePath('inventory') + $routeParams.inventory_id + '/');
-        Rest.get()
-            .success(function (data) {
-                $scope.inventory_name = data.name;
-            })
-            .error(function (data, status) {
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to lookup inventory: ' + data.id + '. GET returned status: ' + status });
-            });
-    }
+
 
     // Update playbook select whenever project value changes
     selectPlaybook = function (oldValue, newValue) {
@@ -414,6 +399,23 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
           $scope.project = null;
         }
     };
+
+    if ($routeParams.inventory_id) {
+        // This means that the job template form was accessed via inventory prop's
+        // This also means the job is a scan job.
+        $scope.job_type.value = 'scan';
+        $scope.jobTypeChange();
+        $scope.inventory = $routeParams.inventory_id;
+        Rest.setUrl(GetBasePath('inventory') + $routeParams.inventory_id + '/');
+        Rest.get()
+            .success(function (data) {
+                $scope.inventory_name = data.name;
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                    msg: 'Failed to lookup inventory: ' + data.id + '. GET returned status: ' + status });
+            });
+    }
 
     // Detect and alert user to potential SCM status issues
     checkSCMStatus = function (oldValue, newValue) {
