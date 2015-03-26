@@ -5,7 +5,6 @@
 import codecs
 import ConfigParser
 import cStringIO
-from distutils.version import StrictVersion as Version
 import json
 import logging
 import os
@@ -565,13 +564,8 @@ class RunJob(BaseTask):
             os.mkdir(cp_dir, 0700)
         env['ANSIBLE_SSH_CONTROL_PATH'] = os.path.join(cp_dir, 'ansible-ssh-%%h-%%p-%%r')
 
-        # When using Ansible >= 1.3, allow the inventory script to include host
-        # variables inline via ['_meta']['hostvars'].
-        try:
-            if Version(kwargs['ansible_version']) >= Version('1.3'):
-                env['INVENTORY_HOSTVARS'] = str(True)
-        except ValueError:
-            pass
+        # Allow the inventory script to include host variables inline via ['_meta']['hostvars'].
+        env['INVENTORY_HOSTVARS'] = str(True)
 
         # Set environment variables for cloud credentials.
         cloud_cred = job.cloud_credential
@@ -637,13 +631,9 @@ class RunJob(BaseTask):
         if 'sudo_password' in kwargs.get('passwords', {}):
             args.append('--ask-sudo-pass')
 
-        # When using Ansible >= 1.5, support prompting for a vault password.
-        try:
-            if Version(kwargs['ansible_version']) >= Version('1.5'):
-                if 'vault_password' in kwargs.get('passwords', {}):
-                    args.append('--ask-vault-pass')
-        except ValueError:
-            pass
+        # Support prompting for a vault password.
+        if 'vault_password' in kwargs.get('passwords', {}):
+            args.append('--ask-vault-pass')
 
         if job.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % job.forks)
@@ -807,14 +797,9 @@ class RunProjectUpdate(BaseTask):
         else:
             scm_url = update_scm_url(scm_type, scm_url, scp_format=True)
 
-        # When using Ansible >= 1.5, pass the extra accept_hostkey parameter to
-        # the git module.
+        # Pass the extra accept_hostkey parameter to the git module.
         if scm_type == 'git' and scm_url_parts.scheme.endswith('ssh'):
-            try:
-                if Version(kwargs['ansible_version']) >= Version('1.5'):
-                    extra_vars['scm_accept_hostkey'] = 'true'
-            except ValueError:
-                pass
+            extra_vars['scm_accept_hostkey'] = 'true'
 
         return scm_url, extra_vars
 
