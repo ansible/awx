@@ -4,6 +4,97 @@ import os
 import stat
 from ansible.module_utils.basic import * # noqa
 
+DOCUMENTATION = '''
+---
+module: scan_files
+short_description: Return file state information as fact data for a directory tree
+description:
+     - Return file state information recursively for a directory tree on the filesystem
+version_added: "1.9"
+options:
+  path:
+    description: The path containing files to be analyzed
+    required: true
+    default: null
+  get_checksum:
+    description: Checksum files that you can access
+    required: false
+    default: false
+requirements: [ ]
+author: Matthew Jones
+'''
+
+EXAMPLES = '''
+# Example fact output:
+# host | success >> {
+#     "ansible_facts": {
+#         "files": [
+#             {
+#                 "atime": 1427313854.0755742,
+#                 "checksum": "cf7566e6149ad9af91e7589e0ea096a08de9c1e5",
+#                 "ctime": 1427129299.22948,
+#                 "dev": 51713,
+#                 "gid": 0,
+#                 "inode": 149601,
+#                 "isblk": false,
+#                 "ischr": false,
+#                 "isdir": false,
+#                 "isfifo": false,
+#                 "isgid": false,
+#                 "islnk": false,
+#                 "isreg": true,
+#                 "issock": false,
+#                 "isuid": false,
+#                 "mode": "0644",
+#                 "mtime": 1427112663.0321455,
+#                 "nlink": 1,
+#                 "path": "/var/log/dmesg.1.gz",
+#                 "rgrp": true,
+#                 "roth": true,
+#                 "rusr": true,
+#                 "size": 28,
+#                 "uid": 0,
+#                 "wgrp": false,
+#                 "woth": false,
+#                 "wusr": true,
+#                 "xgrp": false,
+#                 "xoth": false,
+#                 "xusr": false
+#             },
+#             {
+#                 "atime": 1427314385.1155744,
+#                 "checksum": "16fac7be61a6e4591a33ef4b729c5c3302307523",
+#                 "ctime": 1427384148.5755742,
+#                 "dev": 51713,
+#                 "gid": 43,
+#                 "inode": 149564,
+#                 "isblk": false,
+#                 "ischr": false,
+#                 "isdir": false,
+#                 "isfifo": false,
+#                 "isgid": false,
+#                 "islnk": false,
+#                 "isreg": true,
+#                 "issock": false,
+#                 "isuid": false,
+#                 "mode": "0664",
+#                 "mtime": 1427384148.5755742,
+#                 "nlink": 1,
+#                 "path": "/var/log/wtmp",
+#                 "rgrp": true,
+#                 "roth": true,
+#                 "rusr": true,
+#                 "size": 48768,
+#                 "uid": 0,
+#                 "wgrp": true,
+#                 "woth": false,
+#                 "wusr": true,
+#                 "xgrp": false,
+#                 "xoth": false,
+#                 "xusr": false
+#             },
+'''
+
 def main():
     module = AnsibleModule(
         argument_spec = dict(path=dict(required=True),
