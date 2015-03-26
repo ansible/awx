@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-from distutils.version import StrictVersion as Version
 import glob
 import json
 import os
@@ -1087,12 +1086,8 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertFalse(job.passwords_needed_to_start)
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
-        if Version(self.ansible_version) >= Version('1.5'):
-            self.check_job_result(job, 'successful')
-            self.assertTrue('"--ask-vault-pass"' in job.job_args)
-        else:
-            self.check_job_result(job, 'failed')
-            self.assertFalse('"--ask-vault-pass"' in job.job_args)
+        self.check_job_result(job, 'successful')
+        self.assertTrue('"--ask-vault-pass"' in job.job_args)
 
     def test_vault_ask_password(self):
         self.create_test_credential(vault_password='ASK')
@@ -1106,12 +1101,8 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertEqual(job.status, 'new')
         self.assertTrue(job.signal_start(vault_password=TEST_VAULT_PASSWORD))
         job = Job.objects.get(pk=job.pk)
-        if Version(self.ansible_version) >= Version('1.5'):
-            self.check_job_result(job, 'successful')
-            self.assertTrue('"--ask-vault-pass"' in job.job_args)
-        else:
-            self.check_job_result(job, 'failed')
-            self.assertFalse('"--ask-vault-pass"' in job.job_args)
+        self.check_job_result(job, 'successful')
+        self.assertTrue('"--ask-vault-pass"' in job.job_args)
 
     def test_vault_bad_password(self):
         self.create_test_credential(vault_password='not it')
@@ -1123,10 +1114,7 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'failed')
-        if Version(self.ansible_version) >= Version('1.5'):
-            self.assertTrue('"--ask-vault-pass"' in job.job_args)
-        else:
-            self.assertFalse('"--ask-vault-pass"' in job.job_args)
+        self.assertTrue('"--ask-vault-pass"' in job.job_args)
 
     def _test_cloud_credential_environment_variables(self, kind):
         if kind == 'aws':
