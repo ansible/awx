@@ -707,6 +707,7 @@ class RunJob(BaseTask):
         d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'sudo_password'
         d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'sudo_password'
         d[re.compile(r'^su password.*:\s*?$', re.M)] = 'su_password'
+        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'su_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
