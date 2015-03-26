@@ -3,6 +3,46 @@
 import re
 from ansible.module_utils.basic import * # noqa
 
+DOCUMENTATION = '''
+---
+module: scan_services
+short_description: Return service state information as fact data
+description:
+     - Return service state information as fact data for various service management utilities
+version_added: "1.9"
+options:
+requirements: [ ]
+author: Matthew Jones
+'''
+
+EXAMPLES = '''
+- monit: scan_services
+# Example fact output:
+# host | success >> {
+#    "ansible_facts": {
+#        "services": [
+#            {
+#                "name": "acpid",
+#                "source": "sysv",
+#                "state": "running"
+#            },
+#            {
+#                "name": "apparmor",
+#                "source": "sysv",
+#                "state": "stopped"
+#            },
+#            {
+#                "name": "atd",
+#                "source": "sysv",
+#                "state": "running"
+#            },
+#            {
+#                "name": "cron",
+#                "source": "sysv",
+#                "state": "running"
+#            }, .... ] } }
+'''
+
 class BaseService(object):
 
     def __init__(self, module):
