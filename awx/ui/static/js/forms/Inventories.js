@@ -97,26 +97,35 @@ export default
             },
 
             related: {
-                scan_jobs: {
+                scan_job_templates: {
                     type: 'collection',
-                    title: 'Scan Jobs',
-                    iterator: 'scan_job',
+                    title: 'Scan Job Templates',
+                    iterator: 'scan_job_template',
                     index: false,
                     open: false,
 
                     actions: {
                         add: {
-                            ngClick: "addScanJob(inventory_id)",
+                            ngClick: "addScanJob()",
                             icon: 'icon-plus',
                             label: 'Add',
-                            awToolTip: 'Add a scan job'
+                            awToolTip: 'Add a scan job template'
                         }
                     },
 
                     fields: {
+                      smart_status: {
+                          label: 'Status',
+                          // columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                          searchable: false,
+                          nosort: true,
+                          ngInclude: "'/static/partials/scan-job-template-smart-status.html'",
+                          type: 'template'
+                        },
                         name: {
                             key: true,
-                            label: 'Name'
+                            label: 'Name',
+                            linkTo: '/#/inventories/{{inventory_id}}/job_templates/{{scan_job_template.id}}'
                         },
                         description: {
                             label: 'Description'
@@ -124,19 +133,39 @@ export default
                     },
 
                     fieldActions: {
+                        submit: {
+                          label: 'Launch',
+                          ngClick: "launchScanJob()",
+                          awToolTip: 'Launch the scan job template',
+                          'class': 'btn btn-default'
+                        },
+                        schedule: {
+                            label: 'Schedule',
+                            ngClick: 'scheduleScanJob()',
+                            awToolTip: 'Schedule future job template runs',
+                            dataPlacement: 'top',
+                        },
                         edit: {
                             label: 'Edit',
-                            ngClick: "edit('organizations', organization.id, organization.name)",
+                            ngClick: "editScanJob()",
                             icon: 'icon-edit',
-                            awToolTip: 'Edit the organization',
+                            awToolTip: 'Edit the scan job template',
                             'class': 'btn btn-default'
                         },
                         "delete": {
                             label: 'Delete',
-                            ngClick: "delete('organizations', organization.id, organization.name, 'organizations')",
+                            ngClick: "deleteScanJob()",
                             icon: 'icon-trash',
                             "class": 'btn-danger',
-                            awToolTip: 'Delete the organization'
+                            awToolTip: 'Delete the scan job template'
+                        },
+                        copy: {
+                            label: 'Copy',
+                            ngClick: "copyScanJobTemplate()",
+                            "class": 'btn-danger btn-xs',
+                            awToolTip: 'Copy template',
+                            dataPlacement: 'top',
+                            ngHide: 'job_template.summary_fields.can_copy === false'
                         }
                     }
                 }
@@ -144,14 +173,10 @@ export default
 
             relatedSets: function(urls) {
                 return {
-                    scan_jobs: {
-                        iterator: 'scan_job',
-                        url: urls.organizations
-                    },
-                    // schedules: {
-                    //     iterator: 'schedule',
-                    //     url: urls.schedules
-                    // }
+                    scan_job_templates: {
+                        iterator: 'scan_job_template',
+                        url: urls.scan_job_templates
+                    }
                 };
             }
 

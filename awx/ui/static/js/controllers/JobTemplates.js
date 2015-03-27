@@ -276,7 +276,8 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
 
     $scope.job_type_options = [
         { value: 'run', label: 'Run' },
-        { value: 'check', label: 'Check' }
+        { value: 'check', label: 'Check' },
+        { value: 'scan' , label: 'Scan'}
     ];
 
     $scope.verbosity_options = [
@@ -301,11 +302,12 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     LookUpInit({
         scope: $scope,
         form: form,
-        current_item: null,
+        current_item: ($routeParams.inventory_id !== undefined) ? $routeParams.inventory_id : null,
         list: InventoryList,
         field: 'inventory',
         input_type: "radio"
     });
+
 
     // Clone the CredentialList object for use with cloud_credential. Cloning
     // and changing properties to avoid collision.
@@ -340,10 +342,17 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         parent_scope: $scope
     });
 
+
+
     // Update playbook select whenever project value changes
     selectPlaybook = function (oldValue, newValue) {
         var url;
-        if (oldValue !== newValue) {
+        if($scope.job_type.value === 'scan' && $scope.project_name === "Default"){
+            $scope.playbook_options = ['Default'];
+            $scope.playbook = 'Default';
+            Wait('stop');
+        }
+        else if (oldValue !== newValue) {
             if ($scope.project) {
                 Wait('start');
                 url = GetBasePath('projects') + $scope.project + '/playbooks/';
@@ -364,6 +373,49 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
             }
         }
     };
+
+    $scope.jobTypeChange = function(){
+      if($scope.job_type){
+        if($scope.job_type.value === 'scan'){
+            // $scope.project_name = 'Default';
+            // $scope.project = null;
+            $scope.toggleScanInfo();
+          }
+          else if($scope.project_name === "Default"){
+            $scope.project_name = null;
+            $scope.playbook_options = [];
+            // $scope.playbook = 'null';
+            $scope.job_templates_form.playbook.$setPristine();
+          }
+      }
+    };
+
+    $scope.toggleScanInfo = function() {
+        $scope.project_name = 'Default';
+        if($scope.project === null){
+          selectPlaybook();
+        }
+        else {
+          $scope.project = null;
+        }
+    };
+
+    if ($routeParams.inventory_id) {
+        // This means that the job template form was accessed via inventory prop's
+        // This also means the job is a scan job.
+        $scope.job_type.value = 'scan';
+        $scope.jobTypeChange();
+        $scope.inventory = $routeParams.inventory_id;
+        Rest.setUrl(GetBasePath('inventory') + $routeParams.inventory_id + '/');
+        Rest.get()
+            .success(function (data) {
+                $scope.inventory_name = data.name;
+            })
+            .error(function (data, status) {
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                    msg: 'Failed to lookup inventory: ' + data.id + '. GET returned status: ' + status });
+            });
+    }
 
     // Detect and alert user to potential SCM status issues
     checkSCMStatus = function (oldValue, newValue) {
@@ -432,7 +484,17 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
 
 
     function saveCompleted() {
-        setTimeout(function() { $scope.$apply(function() { $location.path('/job_templates'); }); }, 500);
+        setTimeout(function() {
+          $scope.$apply(function() {
+            var base = $location.path().replace(/^\//, '').split('/')[0];
+            if (base === 'job_templates') {
+                ReturnToCaller();
+            }
+            else {
+                ReturnToCaller(1);
+            }
+          });
+        }, 500);
     }
 
     if ($scope.removeTemplateSaveSuccess) {
@@ -472,7 +534,10 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
                     }
                 }
                 data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
-
+                if(data.job_type === 'scan' && $scope.default_scan === true){
+                  data.project = "";
+                  data.playbook = "";
+                }
                 Rest.setUrl(defaultUrl);
                 Rest.post(data)
                     .success(function(data) {
@@ -591,7 +656,8 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     // Our job type options
     $scope.job_type_options = [
         { value: 'run', label: 'Run' },
-        { value: 'check', label: 'Check' }
+        { value: 'check', label: 'Check' },
+        { value: 'scan', label: 'Scan'}
     ];
 
     $scope.verbosity_options = [
@@ -617,7 +683,12 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
 
     getPlaybooks = function (project) {
         var url;
-        if (!Empty(project)) {
+        if($scope.job_type.value === 'scan' && $scope.project_name === "Default"){
+            $scope.playbook_options = ['Default'];
+            $scope.playbook = 'Default';
+            Wait('stop');
+        }
+        else if (!Empty(project)) {
             url = GetBasePath('projects') + project + '/playbooks/';
             Wait('start');
             Rest.setUrl(url);
@@ -645,6 +716,32 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
         }
         else {
             Wait('stop');
+        }
+    };
+
+    $scope.jobTypeChange = function(){
+      if($scope.job_type){
+        if($scope.job_type.value === 'scan'){
+            // $scope.project_name = 'Default';
+            // $scope.project = null;
+            $scope.toggleScanInfo();
+          }
+          else if($scope.project_name === "Default"){
+            $scope.project_name = null;
+            $scope.playbook_options = [];
+            // $scope.playbook = 'null';
+            $scope.job_templates_form.playbook.$setPristine();
+          }
+      }
+    };
+
+    $scope.toggleScanInfo = function() {
+        $scope.project_name = 'Default';
+        if($scope.project === null){
+          getPlaybooks();
+        }
+        else {
+          $scope.project = null;
         }
     };
 
@@ -888,7 +985,17 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     });
 
     function saveCompleted() {
-        setTimeout(function() { $scope.$apply(function() { $location.path('/job_templates'); }); }, 500);
+        setTimeout(function() {
+          $scope.$apply(function() {
+            var base = $location.path().replace(/^\//, '').split('/')[0];
+            if (base === 'job_templates') {
+                ReturnToCaller();
+            }
+            else {
+                ReturnToCaller(1);
+            }
+          });
+        }, 500);
     }
 
     if ($scope.removeTemplateSaveSuccess) {

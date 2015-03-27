@@ -55,6 +55,8 @@ import 'tower/shared/InventoryTree';
 import 'tower/shared/Timer';
 import 'tower/shared/Socket';
 
+import 'tower/job-templates/main';
+
 /*#if DEBUG#*/
 import {__deferLoadIfEnabled} from 'tower/debug';
 __deferLoadIfEnabled();
@@ -74,6 +76,7 @@ var tower = angular.module('Tower', [
     'UserFormDefinition',
     'FormGenerator',
     'OrganizationListDefinition',
+    'jobTemplates', 
     'UserListDefinition',
     'UserHelper',
     'PromptDialog',
@@ -265,6 +268,11 @@ var tower = angular.module('Tower', [
             when('/inventories/:inventory_id/job_templates/add', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
                 controller: JobTemplatesAdd
+            }).
+
+            when('/inventories/:inventory_id/job_templates/:template_id', {
+                templateUrl: urlPrefix + 'partials/job_templates.html',
+                controller: JobTemplatesEdit
             }).
 
             when('/inventories/:inventory_id/manage', {

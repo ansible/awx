@@ -15,8 +15,8 @@ export default
     angular.module('ScanJobsListDefinition', [])
     .value( 'ScanJobsList', {
 
-        name: 'scan_jobs',
-        iterator: 'scan_job',
+        name: 'scan_job_templates',
+        iterator: 'scan_job_template',
         editTitle: 'Scan Jobs',
         'class': 'table-condensed',
         index: false,

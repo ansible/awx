@@ -95,7 +95,6 @@ export default
                 awToolTip: 'Copy template',
                 dataPlacement: 'top',
                 ngHide: 'job_template.summary_fields.can_copy===false'
-
             }
         }
     });
