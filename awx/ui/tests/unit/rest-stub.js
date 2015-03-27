@@ -62,8 +62,8 @@ RestStub.prototype =
             window.setTimeout(function() {
                 inject(['$rootScope', function($rootScope) {
                     $rootScope.$apply();
-                }], 1000);
-            });
+                }]);
+            }, 1000);
         }
     };
 
