@@ -683,6 +683,7 @@ class Command(NoArgsCommand):
         del_host_pks = set(hosts_qs.values_list('pk', flat=True))
         if self.instance_id_var:
             all_instance_ids = self.mem_instance_id_map.keys()
+            instance_ids = []
             for offset in xrange(0, len(all_instance_ids), self._batch_size):
                 instance_ids = all_instance_ids[offset:(offset + self._batch_size)]
                 for host_pk in hosts_qs.filter(instance_id__in=instance_ids).values_list('pk', flat=True):
