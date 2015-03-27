@@ -63,6 +63,68 @@
            </file>
 
       </example>
+
+    # Making other elements respond to the state of the selction
+
+    In this example, we'll see how to make a button that enables/disables
+    itself based on some property of the selection.
+
+    <example module="stateTrackingExample">
+       <file name="controller.js">
+            angular.module('stateTrackingExample', ['multiSelectList'])
+                .controller('namesController', ['$scope', function($scope) {
+                        $scope.names =
+                          [ { name: 'John'
+                            },
+                            { name: 'Jared'
+                            },
+                            { name: 'Joe'
+                            },
+                            { name: 'James'
+                            },
+                            { name: 'Matt'
+                            },
+                            { name: 'Luke'
+                            },
+                            { name: 'Chris'
+                            }
+                          ];
+
+                        // Initial logic for buttons
+                        $scope.noSelections = true;
+                        $scope.atLeastOneSelection = false;
+                        $scope.exactlyTwoSelections = false;
+
+                        var cleanup = $scope.$on('multiSelectList.selectionChanged', function(e, selection) {
+                            // Recalculate logic for buttons whenever selections change
+                            $scope.noSelections = selection.length == 0;
+                            $scope.atLeastOneSelection = selection.length >= 1;
+                            $scope.exactlyTwoSelections = selection.length == 2;
+                        });
+                }]);
+       </file>
+       <file name="index.html">
+           <div ng-controller="namesController">
+               <button ng-if="noSelections">
+                    Create
+               </button>
+               <button ng-if="atLeastOneSelection">
+                    Delete
+               </button>
+               <button ng-if="exactlyTwoSelections">
+                    Compare
+               </button>
+               <ul multi-select-list>
+                 <li ng-repeat="item in names">
+                   <select-list-item item="item"></select-list-item>
+                   {{item.name}}
+                 </li>
+               </ul>
+           </div>
+       </file>
+
+    </example>
+
  *
 */
 import controller from './multi-select-list.controller';
