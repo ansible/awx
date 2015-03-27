@@ -19,7 +19,11 @@
       "_":false,
       "d3":false,
       "Donut3D":false,
-      "nv":false
+      "nv":false,
+      "it": false,
+      "expect": false,
+      "context": false,
+      "describe": false
     },
     "strict": false,
     "quotmark": false,
