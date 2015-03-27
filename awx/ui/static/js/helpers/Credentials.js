@@ -124,10 +124,10 @@ angular.module('CredentialsHelper', ['Utilities'])
                      scope.ssh_key_unlock_confirm = null;
                      scope.sudo_username = null;
                      scope.sudo_password = null;
-                     scope.sudo_password_confirm = null;
                      scope.su_username = null;
                      scope.su_password = null;
-                     scope.su_password_confirm = null;
+                     scope.pbrun_username = null;
+                     scope.pbrun_password = null;
                  }
 
                  // Collapse or open help widget based on whether scm value is selected
@@ -181,6 +181,10 @@ angular.module('CredentialsHelper', ['Utilities'])
         if (login_method !== 'su') {
             scope.su_username = null;
             scope.su_password = null;
+        }
+        if (login_method !== 'pbrun') {
+            scope.pbrun_username = null;
+            scope.pbrun_password = null;
         }
     };
 }

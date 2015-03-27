@@ -290,6 +290,9 @@ export default
                     }, {
                         label: 'Su',
                         value: 'su'
+                    },{
+                        label: 'Pbrun',
+                        value: 'pbrun'
                     }],
                     awPopOver: "<p><b>Sudo:</b> Optionally specify a username for sudo operations.  This is equivalent to specifying the <code>ansible-playbook --sudo-user</code> parameter.<br /><b>Su:</b> Optionally specify a username for su operations.  This is equivalent to specifying the <code>ansible-playbook --su-user</code> parameter.",
                     dataPlacement: 'right',
@@ -325,6 +328,24 @@ export default
                     label: 'Su Password',
                     type: 'sensitive',
                     ngShow: "kind.value == 'ssh' && login_method == 'su'",
+                    addRequired: false,
+                    editRequired: false,
+                    ask: true,
+                    hasShowInputButton: true,
+                    autocomplete: false
+                },
+                "pbrun_username": {
+                    label: 'Pbrun Username',
+                    type: 'text',
+                    ngShow: "kind.value == 'ssh' && login_method == 'pbrun'",
+                    addRequired: false,
+                    editRequired: false,
+                    autocomplete: false
+                },
+                "pbrun_password": {
+                    label: 'Pbrun Password',
+                    type: 'sensitive',
+                    ngShow: "kind.value == 'ssh' && login_method == 'pbrun'",
                     addRequired: false,
                     editRequired: false,
                     ask: true,

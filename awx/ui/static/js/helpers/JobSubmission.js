@@ -850,6 +850,9 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
                     if(data.su_password === "ASK"){
                       passwords.push("su_password");
                     }
+                    if(data.pbrun_password === "ASK"){
+                      passwords.push("pbrun_password");
+                    }
                     if(data.vault_password === "ASK"){
                       passwords.push("vault_password");
                     }
