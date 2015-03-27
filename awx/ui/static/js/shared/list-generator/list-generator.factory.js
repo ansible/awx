@@ -40,8 +40,8 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     //     hdr: <lookup dialog header>
                     //
                     // Inject into a custom element using options.id: <element id attribute value>
-                    // Control breadcrumb creation with options.breadCrumbs: <true | false>
                     //
+                    // Control breadcrumb creation with options.breadCrumbs: <true | false>
                     var element;
 
                     if (options.id) {
@@ -114,6 +114,31 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                             return false;
                         }
                     };
+
+                    if (list.multiSelect) {
+                        var cleanupSelectionChanged =
+                            this.scope.$on('multiSelectList.selectionChanged', function(e, selection) {
+                                this.scope.selectedItems = selection.selectedItems;
+
+                                // Track the selected state of each item
+                                // for changing the row class based on the
+                                // selection
+                                //
+                                selection.selectedItems.forEach(function(item) {
+                                    item.isSelected = true;
+                                });
+
+                                selection.deselectedItems.forEach(function(item) {
+                                    item.isSelected = false;
+                                });
+
+                            }.bind(this));
+
+                        this.scope.$on('$destroy', function() {
+                            cleanupSelectionChanged();
+                        });
+
+                    }
 
                     $compile(element)(this.scope);
 
@@ -294,34 +319,62 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     html += "<div class=\"list-table-container\"";
                     html += (list.awCustomScroll) ? " aw-custom-scroll " : "";
                     html += ">\n";
-                    html += "<table id=\"" + list.name + "_table\" ";
-                    html += "class=\"table table-condensed";
-                    html += (list['class']) ? " " + list['class'] : "";
-                    html += (options.mode !== 'summary' && options.mode !== 'edit' && (options.mode === 'lookup' || options.id)) ?
-                        ' table-hover-inverse' : '';
-                    html += (list.hover) ? ' table-hover' : '';
-                    html += (options.mode === 'summary') ? ' table-summary' : '';
-                    html += "\" ";
-                    html += ">\n";
+
+                    function buildTable() {
+                        var extraClasses = list['class'];
+                        var multiSelect = list.multiSelect ? 'multi-select-list' : null;
+
+                        if (options.mode !== 'summary' && options.mode !== 'edit' && (options.mode === 'lookup' || options.id)) {
+                            extraClasses += ' table-hover-inverse';
+                        }
+
+                        if (list.hover) {
+                            extraClasses += ' table-hover';
+                        }
+
+                        if (options.mode === 'summary') {
+                            extraClasses += ' table-summary';
+                        }
+
+                        return $('<table>')
+                                    .attr('id', list.name + '_table')
+                                    .addClass('table table-condensed')
+                                    .addClass(extraClasses)
+                                    .attr('multi-select-list', multiSelect);
+
+                    }
+
+                    var table = buildTable();
+                    var innerTable = '';
 
                     if (!options.skipTableHead) {
-                        html += this.buildHeader(options);
+                        innerTable += this.buildHeader(options);
                     }
 
                     // table body
-                    html += "<tbody>\n";
-                    html += "<tr ng-class=\"" + list.iterator;
-                    html += (options.mode === 'lookup' || options.mode === 'select') ? ".success_class" : ".active_class";
-                    html += "\" ";
-                    html += "id=\"{{ " + list.iterator + ".id }}\" ";
-                    html += "class=\"" + list.iterator + "_class\" ";
-                    html += "ng-repeat=\"" + list.iterator + " in " + list.name;
-                    html += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
-                    html += (list.filterBy) ? " | filter: " + list.filterBy : "";
-                    html += "\">\n";
-                    if (list.index) {
-                        html += "<td class=\"index-column hidden-xs\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</td>\n";
+                    innerTable += "<tbody>\n";
+                    innerTable += "<tr ng-class=\"[" + list.iterator;
+                    innerTable += (options.mode === 'lookup' || options.mode === 'select') ? ".success_class" : ".active_class";
+
+                    if (list.multiSelect) {
+                        innerTable += ", " + list.iterator + ".isSelected ? 'is-selected-row' : ''";
                     }
+                    innerTable += "]\" ";
+                    innerTable += "id=\"{{ " + list.iterator + ".id }}\" ";
+                    innerTable += "class=\"" + list.iterator + "_class\" ";
+                    innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
+                    innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
+                    innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
+                    innerTable += "\">\n";
+
+                    if (list.index) {
+                        innerTable += "<td class=\"index-column hidden-xs\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</td>\n";
+                    }
+
+                    if (list.multiSelect) {
+                        innerTable += '<td class="col-xs-1 select-column"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
+                    }
+
                     cnt = 2;
                     base = (list.base) ? list.base : list.name;
                     base = base.replace(/^\//, '');
@@ -329,7 +382,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         cnt++;
                         if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&
                             !(options.mode === 'lookup' && list.fields[fld].excludeModal === true)) {
-                            html += Column({
+                            innerTable += Column({
                                 list: list,
                                 fld: fld,
                                 options: options,
@@ -340,12 +393,12 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                     if (options.mode === 'select' || options.mode === 'lookup') {
                         if(options.input_type==="radio"){ //added by JT so that lookup forms can be either radio inputs or check box inputs
-                            html += "<td><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                            innerTable += "<td><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                             list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-value=\"1\" " +
                             "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
                         }
                         else { // its assumed that options.input_type = checkbox
-                            html += "<td><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                            innerTable += "<td><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                             list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
                             "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
                         }
@@ -353,12 +406,12 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                         // Row level actions
 
-                        html += "<td class=\"actions\">";
+                        innerTable += "<td class=\"actions\">";
 
                         for (field_action in list.fieldActions) {
                             if (field_action !== 'columnClass') {
                                 if (list.fieldActions[field_action].type && list.fieldActions[field_action].type === 'DropDown') {
-                                    html += DropDown({
+                                    innerTable += DropDown({
                                         list: list,
                                         fld: field_action,
                                         options: options,
@@ -368,53 +421,56 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                     });
                                 } else {
                                     fAction = list.fieldActions[field_action];
-                                    html += "<a id=\"";
-                                    html += (fAction.id) ? fAction.id : field_action + "-action";
-                                    html += "\" ";
-                                    html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
-                                    html += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
-                                    html += (field_action === 'cancel') ? "class=\"cancel red-txt\" " : "";
-                                    html += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
-                                    html += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : "";
-                                    html += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : "";
+                                    innerTable += "<a id=\"";
+                                    innerTable += (fAction.id) ? fAction.id : field_action + "-action";
+                                    innerTable += "\" ";
+                                    innerTable += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
+                                    innerTable += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
+                                    innerTable += (field_action === 'cancel') ? "class=\"cancel red-txt\" " : "";
+                                    innerTable += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
+                                    innerTable += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : "";
+                                    innerTable += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : "";
                                     for (itm in fAction) {
                                         if (itm !== 'ngHref' && itm !== 'href' && itm !== 'label' && itm !== 'icon' && itm !== 'class' &&
                                             itm !== 'iconClass' && itm !== "dataPlacement" && itm !== "awPopOver" &&
                                             itm !== "dataTitle") {
-                                            html += Attr(fAction, itm);
+                                            innerTable += Attr(fAction, itm);
                                         }
                                     }
-                                    html += ">";
+                                    innerTable += ">";
                                     if (fAction.iconClass) {
-                                        html += "<i class=\"" + fAction.iconClass + "\"></i>";
+                                        innerTable += "<i class=\"" + fAction.iconClass + "\"></i>";
                                     } else {
-                                        html += SelectIcon({
+                                        innerTable += SelectIcon({
                                             action: field_action
                                         });
                                     }
                                     //html += (fAction.label) ? "<span class=\"list-action-label\"> " + list.fieldActions[field_action].label +
                                     //    "</span>" : "";
-                                    html += "</a>";
+                                    innerTable += "</a>";
                                 }
                             }
                         }
-                        html += "</td>\n";
+                        innerTable += "</td>\n";
                     }
-                    html += "</tr>\n";
+                    innerTable += "</tr>\n";
 
                     // Message for when a collection is empty
-                    html += "<tr class=\"loading-info\" ng-show=\"" + list.iterator + "Loading == false && " + list.name + ".length == 0\">\n";
-                    html += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">No records matched your search.</div></td>\n";
-                    html += "</tr>\n";
+                    innerTable += "<tr class=\"loading-info\" ng-show=\"" + list.iterator + "Loading == false && " + list.name + ".length == 0\">\n";
+                    innerTable += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">No records matched your search.</div></td>\n";
+                    innerTable += "</tr>\n";
 
                     // Message for loading
-                    html += "<tr class=\"loading-info\" ng-show=\"" + list.iterator + "Loading == true\">\n";
-                    html += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">Loading...</div></td>\n";
-                    html += "</tr>\n";
+                    innerTable += "<tr class=\"loading-info\" ng-show=\"" + list.iterator + "Loading == true\">\n";
+                    innerTable += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">Loading...</div></td>\n";
+                    innerTable += "</tr>\n";
 
                     // End List
-                    html += "</tbody>\n";
-                    html += "</table>\n";
+                    innerTable += "</tbody>\n";
+
+                    table.html(innerTable);
+                    html += table.prop('outerHTML');
+
                     html += "</div><!-- table container -->\n";
 
                     if (options.mode === 'select' && (options.selectButton === undefined || options.selectButton)) {
@@ -447,6 +503,15 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     var list = this.list,
                         fld, html;
 
+                    function buildSelectAll() {
+                        return $('<th>')
+                                .addClass('col-xs-1 select-column')
+                                .append(
+                                    $('<select-all>')
+                                        .attr('selections-empty', 'selectedItems.length === 0')
+                                        .attr('items-length', list.name + '.length'));
+                    }
+
                     if (options === undefined) {
                         options = this.options;
                     }
@@ -456,6 +521,11 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     if (list.index) {
                         html += "<th class=\"col-lg-1 col-md-1 col-sm-2 hidden-xs\">#</th>\n";
                     }
+
+                    if (list.multiSelect) {
+                        html += buildSelectAll().prop('outerHTML');
+                    }
+
                     for (fld in list.fields) {
                         if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&
                             !(options.mode === 'lookup' && list.fields[fld].excludeModal === true)) {

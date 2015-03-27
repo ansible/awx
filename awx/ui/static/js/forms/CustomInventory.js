@@ -8,7 +8,7 @@
  */
  /**
  * @ngdoc function
- * @name forms.function:Organizations
+ * @name forms.function:CustomInventory
  * @description This form is for adding/editing an organization
 */
 

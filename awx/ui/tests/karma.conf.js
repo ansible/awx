@@ -18,7 +18,8 @@ module.exports = function(config) {
         [   'mocha',
             'chai',
             'sinon-chai',
-            'chai-as-promised'
+            'chai-as-promised',
+            'chai-things'
         ],
 
     preprocessors:

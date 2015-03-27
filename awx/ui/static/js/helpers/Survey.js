@@ -3,7 +3,7 @@
  */
     /**
  * @ngdoc function
- * @name helpers.function:Schedules
+ * @name helpers.function:Survey
  * @description
  *  Schedules Helper
  *
