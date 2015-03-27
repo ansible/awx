@@ -16,6 +16,10 @@ options:
     description: The path containing files to be analyzed
     required: true
     default: null
+  recursive:
+    description: scan this directory and all subdirectories
+    required: false
+    default: no
   get_checksum:
     description: Checksum files that you can access
     required: false
@@ -98,6 +102,7 @@ EXAMPLES = '''
 def main():
     module = AnsibleModule(
         argument_spec = dict(path=dict(required=True),
+                             recursive=dict(required=False, default='no', type='bool'),
                              get_checksum=dict(required=False, default='no', type='bool')))
     files = []
     path = module.params.get('path')
@@ -106,10 +111,15 @@ def main():
         module.fail_json(msg = "Given path must exist and be a directory")
 
     get_checksum = module.params.get('get_checksum')
-    for filepath in [os.path.join(w_path, f) for w_path, w_names, w_file in os.walk(path) for f in w_file]:
+    should_recurse = module.params.get('recursive')
+    if not should_recurse:
+        path_list = [os.path.join(path, subpath) for subpath in os.listdir(path)]
+    else:
+        path_list = [os.path.join(w_path, f) for w_path, w_names, w_file in os.walk(path) for f in w_file]
+    for filepath in path_list:
         try:
             st = os.stat(filepath)
-        except OSError, e:
+        except OSError:
             continue
 
         mode = st.st_mode
