@@ -13,6 +13,7 @@
  * @description This controller's for the Inventory page
 */
 
+import 'tower/job-templates/main';
 
 export function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $compile, $filter, Rest, Alert, InventoryList, generateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
@@ -483,7 +484,7 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, generateList, OrganizationList, SearchInit, PaginateInit,
     LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON, ParseVariableString, Stream, RelatedSearchInit, RelatedPaginateInit,
-    Prompt, PlaybookRun, CreateDialog) {
+    Prompt, PlaybookRun, CreateDialog, deleteJobTemplate) {
 
     ClearScope();
 
@@ -491,7 +492,6 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
     var defaultUrl = GetBasePath('inventory'),
         form = InventoryForm(),
         generator = GenerateForm,
-        jobtemplateUrl = GetBasePath('job_templates'),
         inventory_id = $routeParams.inventory_id,
         master = {},
         fld, json_data, data,
@@ -689,15 +689,6 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
               "label": "Copy",
               "onClick": function() {
                   copyAction();
-                  // setTimeout(function(){
-                  //     scope.$apply(function(){
-                  //         if(mode==='survey-taker'){
-                  //             scope.$emit('SurveyTakerCompleted');
-                  //         } else{
-                  //             scope.saveSurvey();
-                  //         }
-                  //     });
-                  // });
               },
               "icon":  "fa-copy",
               "class": "btn btn-primary",
@@ -816,9 +807,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
           action = function () {
             $('#prompt-modal').modal('hide');
             Wait('start');
-            var url = jobtemplateUrl+id;
-            Rest.setUrl(url);
-            Rest.destroy()
+            deleteJobTemplate(id)
                 .success(function () {
                   $('#prompt-modal').modal('hide');
                   $scope.search(form.related.scan_job_templates.iterator);
@@ -826,7 +815,7 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
                 .error(function (data) {
                     Wait('stop');
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                        msg: 'DELETE returned status: ' + status });
                 });
         };
 
@@ -835,14 +824,15 @@ export function InventoriesEdit($scope, $rootScope, $compile, $location, $log, $
             body: '<div class=\"alert alert-info\">Delete job template ' + this.scan_job_template.name + '?</div>',
             action: action
         });
-      };
+
+    };
 
 }
 
 InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'OrganizationList', 'SearchInit',
     'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON', 'ParseVariableString', 'Stream', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'Prompt', 'PlaybookRun', 'CreateDialog'
+    'Prompt', 'PlaybookRun', 'CreateDialog', 'deleteJobTemplate'
 ];
 
 

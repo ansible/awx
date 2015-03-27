@@ -55,6 +55,8 @@ import 'tower/shared/InventoryTree';
 import 'tower/shared/Timer';
 import 'tower/shared/Socket';
 
+import 'tower/job-templates/main';
+
 /*#if DEBUG#*/
 import {__deferLoadIfEnabled} from 'tower/debug';
 __deferLoadIfEnabled();
@@ -74,6 +76,7 @@ var tower = angular.module('Tower', [
     'UserFormDefinition',
     'FormGenerator',
     'OrganizationListDefinition',
+    'jobTemplates', 
     'UserListDefinition',
     'UserHelper',
     'PromptDialog',

@@ -35,9 +35,18 @@ RestStub.prototype =
 
             return this.deferred.promise;
         },
+        destroy: function() {
+            this.deferred = this.deferred || {};
+            this.deferred.destroy = this[this.currentUrl];
+
+            return this.deferred.destroy.promise;
+        },
         succeedAt: function(url, value) {
             assertUrlDeferred(url, this);
             this[url].resolve(value);
+        },
+        succeedOn: function(method, value) {
+            this.deferred[method] = value;
         },
         succeed: function(value) {
             this.deferred.resolve(value);
