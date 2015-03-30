@@ -50,6 +50,7 @@ class ActivityStream(models.Model):
     job = models.ManyToManyField("Job", blank=True)
     unified_job_template = models.ManyToManyField("UnifiedJobTemplate", blank=True, related_name='activity_stream_as_unified_job_template+')
     unified_job = models.ManyToManyField("UnifiedJob", blank=True, related_name='activity_stream_as_unified_job+')
+    ad_hoc_command = models.ManyToManyField("AdHocCommand", blank=True)
     schedule = models.ManyToManyField("Schedule", blank=True)
     custom_inventory_script = models.ManyToManyField("CustomInventoryScript", blank=True)
 

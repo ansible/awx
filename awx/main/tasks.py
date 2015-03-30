@@ -42,7 +42,7 @@ from awx.main.utils import (get_ansible_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'handle_work_error', 'update_inventory_computed_fields']
+           'RunAdHocCommand', 'handle_work_error', 'update_inventory_computed_fields']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -137,6 +137,9 @@ def handle_work_error(self, task_id, subtasks=None):
             elif each_task['type'] == 'job':
                 instance = Job.objects.get(id=each_task['id'])
                 instance_name = instance.job_template.name
+            elif each_task['type'] == 'ad_hoc_command':
+                instance = AdHocCommand.objects.get(id=each_task['id'])
+                instance_name = instance.module_name
             else:
                 # Unknown task type
                 break
@@ -1129,6 +1132,164 @@ class RunInventoryUpdate(BaseTask):
 
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
+
+
+class RunAdHocCommand(BaseTask):
+    '''
+    Celery task to run an ad hoc command using ansible.
+    '''
+
+    name = 'awx.main.tasks.run_ad_hoc_command'
+    model = AdHocCommand
+
+    def build_private_data(self, ad_hoc_command, **kwargs):
+        '''
+        Return SSH private key data needed for this ad hoc command (only if
+        stored in DB as ssh_key_data).
+        '''
+        # If we were sent SSH credentials, decrypt them and send them
+        # back (they will be written to a temporary file).
+        creds = ad_hoc_command.credential
+        if creds:
+            return decrypt_field(creds, 'ssh_key_data') or None
+
+    def build_passwords(self, ad_hoc_command, **kwargs):
+        '''
+        Build a dictionary of passwords for SSH private key, SSH user and
+        sudo/su.
+        '''
+        passwords = super(RunAdHocCommand, self).build_passwords(ad_hoc_command, **kwargs)
+        creds = ad_hoc_command.credential
+        if creds:
+            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password', 'su_password'):
+                if field == 'ssh_password':
+                    value = kwargs.get(field, decrypt_field(creds, 'password'))
+                else:
+                    value = kwargs.get(field, decrypt_field(creds, field))
+                if value not in ('', 'ASK'):
+                    passwords[field] = value
+        return passwords
+
+    def build_env(self, ad_hoc_command, **kwargs):
+        '''
+        Build environment dictionary for ansible.
+        '''
+        plugin_dir = self.get_path_to('..', 'plugins', 'callback')
+        env = super(RunAdHocCommand, self).build_env(ad_hoc_command, **kwargs)
+        # Set environment variables needed for inventory and ad hoc event
+        # callbacks to work.
+        env['AD_HOC_COMMAND_ID'] = str(ad_hoc_command.pk)
+        env['INVENTORY_ID'] = str(ad_hoc_command.inventory.pk)
+        env['INVENTORY_HOSTVARS'] = str(True)
+        env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
+        env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
+        env['REST_API_URL'] = settings.INTERNAL_API_URL
+        env['REST_API_TOKEN'] = ad_hoc_command.task_auth_token or ''
+        env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
+        if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
+            env['JOB_CALLBACK_DEBUG'] = '2'
+        elif settings.DEBUG:
+            env['JOB_CALLBACK_DEBUG'] = '1'
+
+        # Create a directory for ControlPath sockets that is unique to each
+        # ad hoc command and visible inside the proot environment (when enabled).
+        cp_dir = os.path.join(kwargs['private_data_dir'], 'cp')
+        if not os.path.exists(cp_dir):
+            os.mkdir(cp_dir, 0700)
+        env['ANSIBLE_SSH_CONTROL_PATH'] = os.path.join(cp_dir, 'ansible-ssh-%%h-%%p-%%r')
+
+        return env
+
+    def build_args(self, ad_hoc_command, **kwargs):
+        '''
+        Build command line argument list for running ansible, optionally using
+        ssh-agent for public/private key authentication.
+        '''
+        creds = ad_hoc_command.credential
+        ssh_username, sudo_username, su_username = '', '', ''
+        if creds:
+            ssh_username = kwargs.get('username', creds.username)
+            sudo_username = kwargs.get('sudo_username', creds.sudo_username)
+            su_username = kwargs.get('su_username', creds.su_username)
+        # Always specify the normal SSH user as root by default.  Since this
+        # task is normally running in the background under a service account,
+        # it doesn't make sense to rely on ansible's default of using the
+        # current user.
+        ssh_username = ssh_username or 'root'
+        inventory_script = self.get_path_to('..', 'plugins', 'inventory',
+                                            'awxrest.py')
+        args = ['ansible', '-i', inventory_script]
+        if ad_hoc_command.job_type == 'check':
+            args.append('--check')
+        args.extend(['-u', ssh_username])
+        if 'ssh_password' in kwargs.get('passwords', {}):
+            args.append('--ask-pass')
+        # We only specify sudo/su user and password if explicitly given by the
+        # credential.  Credential should never specify both sudo and su.
+        if su_username:
+            args.extend(['-R', su_username])
+        if 'su_password' in kwargs.get('passwords', {}):
+            args.append('--ask-su-pass')
+        if sudo_username:
+            args.extend(['-U', sudo_username])
+        if 'sudo_password' in kwargs.get('passwords', {}):
+            args.append('--ask-sudo-pass')
+        if ad_hoc_command.privilege_escalation == 'sudo':
+            args.append('--sudo')
+        elif ad_hoc_command.privilege_escalation == 'su':
+            args.append('--su')
+
+        if ad_hoc_command.forks:  # FIXME: Max limit?
+            args.append('--forks=%d' % ad_hoc_command.forks)
+        if ad_hoc_command.verbosity:
+            args.append('-%s' % ('v' * min(3, ad_hoc_command.verbosity)))
+
+        args.extend(['-m', ad_hoc_command.module_name])
+        args.extend(['-a', ad_hoc_command.module_args])
+
+        if ad_hoc_command.limit:
+            args.append(ad_hoc_command.limit)
+        else:
+            args.append('all')
+
+        return args
+
+    def build_cwd(self, ad_hoc_command, **kwargs):
+        return kwargs['private_data_dir']
+
+    def get_idle_timeout(self):
+        return getattr(settings, 'JOB_RUN_IDLE_TIMEOUT', None)
+
+    def get_password_prompts(self):
+        d = super(RunAdHocCommand, self).get_password_prompts()
+        d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
+        d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
+        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'sudo_password'
+        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'sudo_password'
+        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'su_password'
+        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'su_password'
+        d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
+        return d
+
+    def get_ssh_key_path(self, instance, **kwargs):
+        '''
+        If using an SSH key, return the path for use by ssh-agent.
+        '''
+        return kwargs.get('private_data_file', '')
+
+    def should_use_proot(self, instance, **kwargs):
+        '''
+        Return whether this task should use proot.
+        '''
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
+
+    def post_run_hook(self, ad_hoc_command, **kwargs):
+        '''
+        Hook for actions to run after ad hoc command has completed.
+        '''
+        super(RunAdHocCommand, self).post_run_hook(ad_hoc_command, **kwargs)
+
 
 class RunSystemJob(BaseTask):
 

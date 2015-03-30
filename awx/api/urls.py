@@ -74,6 +74,7 @@ inventory_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'inventory_inventory_sources_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'inventory_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/scan_job_templates/$',        'inventory_scan_job_template_list'),
+    url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$',           'inventory_ad_hoc_commands_list'),
 )
 
 host_urls = patterns('awx.api.views',
@@ -86,6 +87,8 @@ host_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'host_job_host_summaries_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'host_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'host_inventory_sources_list'),
+    url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$',           'host_ad_hoc_commands_list'),
+    url(r'^(?P<pk>[0-9]+)/ad_hoc_command_events/$',     'host_ad_hoc_command_events_list'),
 )
 
 group_urls = patterns('awx.api.views',
@@ -100,6 +103,7 @@ group_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/potential_children/$',        'group_potential_children_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'group_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'group_inventory_sources_list'),
+    url(r'^(?P<pk>[0-9]+)/ad_hoc_commands/$',           'group_ad_hoc_commands_list'),
 )
 
 inventory_source_urls = patterns('awx.api.views',
@@ -171,6 +175,21 @@ job_event_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/hosts/$',                     'job_event_hosts_list'),
 )
 
+ad_hoc_command_urls = patterns('awx.api.views',
+    url(r'^$',                                          'ad_hoc_command_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'ad_hoc_command_detail'),
+    url(r'^(?P<pk>[0-9]+)/cancel/$',                    'ad_hoc_command_cancel'),
+    url(r'^(?P<pk>[0-9]+)/relaunch/$',                  'ad_hoc_command_relaunch'),
+    url(r'^(?P<pk>[0-9]+)/events/$',                    'ad_hoc_command_ad_hoc_command_events_list'),
+    url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'ad_hoc_command_activity_stream_list'),
+    url(r'^(?P<pk>[0-9]+)/stdout/$',                    'ad_hoc_command_stdout'),
+)
+
+ad_hoc_command_event_urls = patterns('awx.api.views',
+    url(r'^$',                                          'ad_hoc_command_event_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'ad_hoc_command_event_detail'),
+)
+
 system_job_template_urls = patterns('awx.api.views',
     url(r'^$',                                          'system_job_template_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'system_job_template_detail'),
@@ -222,6 +241,8 @@ v1_urls = patterns('awx.api.views',
     url(r'^jobs/',                  include(job_urls)),
     url(r'^job_host_summaries/',    include(job_host_summary_urls)),
     url(r'^job_events/',            include(job_event_urls)),
+    url(r'^ad_hoc_commands/',       include(ad_hoc_command_urls)),
+    url(r'^ad_hoc_command_events/', include(ad_hoc_command_event_urls)),
     url(r'^system_job_templates/',  include(system_job_template_urls)),
     url(r'^system_jobs/',           include(system_job_urls)),
     url(r'^unified_job_templates/$', 'unified_job_template_list'),

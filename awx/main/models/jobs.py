@@ -935,6 +935,7 @@ class JobEvent(CreatedModifiedModel):
             job.inventory.update_computed_fields()
             emit_websocket_notification('/socket.io/jobs', 'summary_complete', dict(unified_job_id=job.id))
 
+
 class SystemJobOptions(BaseModel):
     '''
     Common fields for SystemJobTemplate and SystemJob.

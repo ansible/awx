@@ -8,6 +8,7 @@ from awx.main.tests.projects import ProjectsTest, ProjectUpdatesTest # noqa
 from awx.main.tests.commands import * # noqa
 from awx.main.tests.scripts import * # noqa
 from awx.main.tests.tasks import RunJobTest # noqa
+from awx.main.tests.ad_hoc import * # noqa
 from awx.main.tests.licenses import LicenseTests # noqa
 from awx.main.tests.jobs import * # noqa
 from awx.main.tests.activity_stream import * # noqa

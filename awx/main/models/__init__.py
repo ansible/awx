@@ -12,6 +12,7 @@ from awx.main.models.credential import * # noqa
 from awx.main.models.projects import * # noqa
 from awx.main.models.inventory import * # noqa
 from awx.main.models.jobs import * # noqa
+from awx.main.models.ad_hoc_commands import * # noqa
 from awx.main.models.schedules import * # noqa
 from awx.main.models.activity_stream import * # noqa
 from awx.main.models.ha import * # noqa
@@ -51,6 +52,7 @@ activity_stream_registrar.connect(Project)
 activity_stream_registrar.connect(Permission)
 activity_stream_registrar.connect(JobTemplate)
 activity_stream_registrar.connect(Job)
+activity_stream_registrar.connect(AdHocCommand)
 # activity_stream_registrar.connect(JobHostSummary)
 # activity_stream_registrar.connect(JobEvent)
 #activity_stream_registrar.connect(Profile)

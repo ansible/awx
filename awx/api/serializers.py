@@ -132,16 +132,17 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
         for attr in dir(other):
             if attr.startswith('_'):
                 continue
-            val = getattr(other, attr)
+            meta_val = getattr(meta, attr, [])
+            val = getattr(other, attr, [])
             # Special handling for lists of strings (field names).
             if isinstance(val, (list, tuple)) and all([isinstance(x, basestring) for x in val]):
                 new_vals = []
                 except_vals = []
                 if base: # Merge values from all bases.
-                    new_vals.extend([x for x in getattr(meta, attr, [])])
+                    new_vals.extend([x for x in meta_val])
                 for v in val:
                     if not base and v == '*': # Inherit all values from previous base(es).
-                        new_vals.extend([x for x in getattr(meta, attr, [])])
+                        new_vals.extend([x for x in meta_val])
                     elif not base and v.startswith('-'): # Except these values.
                         except_vals.append(v[1:])
                     else:
@@ -226,6 +227,7 @@ class BaseSerializer(serializers.ModelSerializer):
     def get_type_choices(self):
         type_name_map = {
             'job': 'Playbook Run',
+            'ad_hoc_command': 'Ad Hoc Command',
             'project_update': 'SCM Update',
             'inventory_update': 'Inventory Sync',
             'system_job': 'Management Job',
@@ -347,6 +349,23 @@ class BaseSerializer(serializers.ModelSerializer):
             exclusions.remove(field_name)
         return exclusions
 
+    def to_native(self, obj):
+        # When rendering the raw data form, create an instance of the model so
+        # that the model defaults will be filled in.
+        view = self.context.get('view', None)
+        parent_key = getattr(view, 'parent_key', None)
+        if not obj and hasattr(view, '_raw_data_form_marker'):
+            obj = self.opts.model()
+            # FIXME: Would be nice to include any posted data for the raw data
+            # form, so that a submission with errors can be modified in place
+            # and resubmitted.
+        ret = super(BaseSerializer, self).to_native(obj)
+        # Remove parent key from raw form data, since it will be automatically
+        # set by the sub list create view.
+        if parent_key and hasattr(view, '_raw_data_form_marker'):
+            ret.pop(parent_key, None)
+        return ret
+
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
 
@@ -390,6 +409,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 class UnifiedJobSerializer(BaseSerializer):
 
     result_stdout = serializers.Field(source='result_stdout')
+    unified_job_template = serializers.Field(source='unified_job_template')
 
     class Meta:
         model = UnifiedJob
@@ -400,7 +420,7 @@ class UnifiedJobSerializer(BaseSerializer):
 
     def get_types(self):
         if type(self) is UnifiedJobSerializer:
-            return ['project_update', 'inventory_update', 'job', 'system_job']
+            return ['project_update', 'inventory_update', 'job', 'ad_hoc_command', 'system_job']
         else:
             return super(UnifiedJobSerializer, self).get_types()
 
@@ -416,6 +436,8 @@ class UnifiedJobSerializer(BaseSerializer):
             res['stdout'] = reverse('api:inventory_update_stdout', args=(obj.pk,))
         elif isinstance(obj, Job):
             res['stdout'] = reverse('api:job_stdout', args=(obj.pk,))
+        elif isinstance(obj, AdHocCommand):
+            res['stdout'] = reverse('api:ad_hoc_command_stdout', args=(obj.pk,))
         return res
 
     def to_native(self, obj):
@@ -427,6 +449,8 @@ class UnifiedJobSerializer(BaseSerializer):
                 serializer_class = InventoryUpdateSerializer
             elif isinstance(obj, Job):
                 serializer_class = JobSerializer
+            elif isinstance(obj, AdHocCommand):
+                serializer_class = AdHocCommandSerializer
             elif isinstance(obj, SystemJob):
                 serializer_class = SystemJobSerializer
         if serializer_class:
@@ -447,7 +471,7 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
 
     def get_types(self):
         if type(self) is UnifiedJobListSerializer:
-            return ['project_update', 'inventory_update', 'job', 'system_job']
+            return ['project_update', 'inventory_update', 'job', 'ad_hoc_command', 'system_job']
         else:
             return super(UnifiedJobListSerializer, self).get_types()
 
@@ -460,6 +484,8 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
                 serializer_class = InventoryUpdateListSerializer
             elif isinstance(obj, Job):
                 serializer_class = JobListSerializer
+            elif isinstance(obj, AdHocCommand):
+                serializer_class = AdHocCommandListSerializer
             elif isinstance(obj, SystemJob):
                 serializer_class = SystemJobListSerializer
         if serializer_class:
@@ -479,7 +505,7 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
     def get_types(self):
         if type(self) is UnifiedJobStdoutSerializer:
-            return ['project_update', 'inventory_update', 'job', 'system_job']
+            return ['project_update', 'inventory_update', 'job', 'ad_hoc_command', 'system_job']
         else:
             return super(UnifiedJobStdoutSerializer, self).get_types()
 
@@ -746,6 +772,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             inventory_sources = reverse('api:inventory_inventory_sources_list', args=(obj.pk,)),
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
             scan_job_templates = reverse('api:inventory_scan_job_template_list', args=(obj.pk,)),
+            ad_hoc_commands = reverse('api:inventory_ad_hoc_commands_list', args=(obj.pk,)),
         ))
         if obj.organization and obj.organization.active:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
@@ -784,6 +811,8 @@ class HostSerializer(BaseSerializerWithVariables):
             job_host_summaries = reverse('api:host_job_host_summaries_list', args=(obj.pk,)),
             activity_stream = reverse('api:host_activity_stream_list', args=(obj.pk,)),
             inventory_sources = reverse('api:host_inventory_sources_list', args=(obj.pk,)),
+            ad_hoc_commands = reverse('api:host_ad_hoc_commands_list', args=(obj.pk,)),
+            ad_hoc_command_events = reverse('api:host_ad_hoc_command_events_list', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -884,6 +913,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             job_host_summaries = reverse('api:group_job_host_summaries_list', args=(obj.pk,)),
             activity_stream = reverse('api:group_activity_stream_list', args=(obj.pk,)),
             inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
+            ad_hoc_commands = reverse('api:group_ad_hoc_commands_list', args=(obj.pk,)),
         ))
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
@@ -1174,7 +1204,7 @@ class PermissionSerializer(BaseSerializer):
     class Meta:
         model = Permission
         fields = ('*', 'user', 'team', 'project', 'inventory',
-                  'permission_type')
+                  'permission_type', 'run_ad_hoc_commands')
 
     def get_related(self, obj):
         res = super(PermissionSerializer, self).get_related(obj)
@@ -1190,15 +1220,15 @@ class PermissionSerializer(BaseSerializer):
 
     def validate(self, attrs):
         # Can only set either user or team.
-        if attrs['user'] and attrs['team']:
+        if attrs.get('user', None) and attrs.get('team', None):
             raise serializers.ValidationError('permission can only be assigned'
                                               ' to a user OR a team, not both')
         # Cannot assign admit/read/write permissions for a project.
-        if attrs['permission_type'] in ('admin', 'read', 'write') and attrs['project']:
+        if attrs.get('permission_type', None) in ('admin', 'read', 'write') and attrs.get('project', None):
             raise serializers.ValidationError('project cannot be assigned for '
                                               'inventory-only permissions')
         # Project is required when setting deployment permissions.
-        if attrs['permission_type'] in ('run', 'check') and not attrs['project']:
+        if attrs.get('permission_type', None) in ('run', 'check') and not attrs.get('project', None):
             raise serializers.ValidationError('project is required when '
                                               'assigning deployment permissions')
         return attrs
@@ -1451,6 +1481,56 @@ class JobCancelSerializer(JobSerializer):
         fields = ('can_cancel',)
 
 
+class AdHocCommandSerializer(UnifiedJobSerializer):
+
+    class Meta:
+        model = AdHocCommand
+        fields = ('*', 'job_type', 'inventory', 'limit', 'credential',
+                  'module_name', 'module_args', 'forks', 'verbosity',
+                  'privilege_escalation')
+        exclude = ('unified_job_template', 'name', 'description')
+
+    def get_related(self, obj):
+        res = super(AdHocCommandSerializer, self).get_related(obj)
+        if obj.inventory and obj.inventory.active:
+            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
+        if obj.credential and obj.credential.active:
+            res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
+        res.update(dict(
+            events  = reverse('api:ad_hoc_command_ad_hoc_command_events_list', args=(obj.pk,)),
+            activity_stream = reverse('api:ad_hoc_command_activity_stream_list', args=(obj.pk,)),
+        ))
+        res['cancel'] = reverse('api:ad_hoc_command_cancel', args=(obj.pk,))
+        res['relaunch'] = reverse('api:ad_hoc_command_relaunch', args=(obj.pk,))
+        return res
+
+    def to_native(self, obj):
+        # In raw data form, populate limit field from host/group name.
+        view = self.context.get('view', None)
+        parent_model = getattr(view, 'parent_model', None)
+        if not (obj and obj.pk) and view and hasattr(view, '_raw_data_form_marker'):
+            if not obj:
+                obj = self.opts.model()
+            if parent_model in (Host, Group):
+                parent_obj = parent_model.objects.get(pk=view.kwargs['pk'])
+                obj.limit = parent_obj.name
+        ret = super(AdHocCommandSerializer, self).to_native(obj)
+        # Hide inventory field from raw data, since it will be set automatically
+        # by sub list create view.
+        if not (obj and obj.pk) and view and hasattr(view, '_raw_data_form_marker'):
+            if parent_model in (Host, Group):
+                ret.pop('inventory', None)
+        return ret
+
+
+class AdHocCommandCancelSerializer(AdHocCommandSerializer):
+
+    can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
+
+    class Meta:
+        fields = ('can_cancel',)
+
+
 class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
 
     class Meta:
@@ -1480,6 +1560,9 @@ class SystemJobSerializer(UnifiedJobSerializer):
         return res
 
 class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
+    pass
+
+class AdHocCommandListSerializer(AdHocCommandSerializer, UnifiedJobListSerializer):
     pass
 
 class SystemJobListSerializer(SystemJobSerializer, UnifiedJobListSerializer):
@@ -1547,6 +1630,27 @@ class JobEventSerializer(BaseSerializer):
         except (KeyError, AttributeError):
             pass
         return d
+
+
+class AdHocCommandEventSerializer(BaseSerializer):
+
+    event_display = serializers.Field(source='get_event_display')
+
+    class Meta:
+        model = AdHocCommandEvent
+        fields = ('*', '-name', '-description', 'ad_hoc_command', 'event',
+                  'counter', 'event_display', 'event_data', 'failed',
+                  'changed', 'host', 'host_name')
+
+    def get_related(self, obj):
+        res = super(AdHocCommandEventSerializer, self).get_related(obj)
+        res.update(dict(
+            ad_hoc_command = reverse('api:ad_hoc_command_detail', args=(obj.ad_hoc_command_id,)),
+        ))
+        if obj.host:
+            res['host'] = reverse('api:host_detail', args=(obj.host.pk,))
+        return res
+
 
 class ScheduleSerializer(BaseSerializer):
 

@@ -90,6 +90,12 @@ class JobEventNamespace(TowerBaseNamespace):
         logger.info("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
         super(JobEventNamespace, self).recv_connect()
 
+class AdHocCommandEventNamespace(TowerBaseNamespace):
+
+    def recv_connect(self):
+        logger.info("Received client connect for ad hoc command event namespace from %s" % str(self.environ['REMOTE_ADDR']))
+        super(AdHocCommandEventNamespace, self).recv_connect()
+
 class ScheduleNamespace(TowerBaseNamespace):
 
     def get_allowed_methods(self):
@@ -107,6 +113,7 @@ class TowerSocket(object):
             socketio_manage(environ, {'/socket.io/test': TestNamespace,
                                       '/socket.io/jobs': JobNamespace,
                                       '/socket.io/job_events': JobEventNamespace,
+                                      '/socket.io/ad_hoc_command_events': AdHocCommandEventNamespace,
                                       '/socket.io/schedules': ScheduleNamespace})
         else:
             logger.warn("Invalid connect path received: " + path)

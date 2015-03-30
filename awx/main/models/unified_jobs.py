@@ -481,7 +481,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return u'%s-%s-%s' % (self.created, self.id, self.status)
 
     def _get_parent_instance(self):
-        return getattr(self, self._get_parent_field_name())
+        return getattr(self, self._get_parent_field_name(), None)
 
     def _update_parent_instance_no_save(self, parent_instance, update_fields=[]):
         def parent_instance_set(key, val):

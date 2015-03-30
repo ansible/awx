@@ -29,8 +29,9 @@ from awx.main.utils import * # noqa
 
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'ListCreateAPIView', 'SubListAPIView', 'SubListCreateAPIView',
-           'RetrieveAPIView', 'RetrieveUpdateAPIView',
-           'RetrieveDestroyAPIView', 'RetrieveUpdateDestroyAPIView', 'DestroyAPIView']
+           'SubListCreateAttachDetachAPIView', 'RetrieveAPIView',
+           'RetrieveUpdateAPIView', 'RetrieveDestroyAPIView',
+           'RetrieveUpdateDestroyAPIView', 'DestroyAPIView']
 
 logger = logging.getLogger('awx.api.generics')
 
@@ -131,12 +132,15 @@ class APIView(views.APIView):
 
     def get_description_context(self):
         return {
+            'view': self,
             'docstring': type(self).__doc__ or '',
             'new_in_13': getattr(self, 'new_in_13', False),
             'new_in_14': getattr(self, 'new_in_14', False),
             'new_in_145': getattr(self, 'new_in_145', False),
             'new_in_148': getattr(self, 'new_in_148', False),
             'new_in_200': getattr(self, 'new_in_200', False),
+            'new_in_210': getattr(self, 'new_in_210', False),
+            'new_in_220': getattr(self, 'new_in_220', False),
         }
 
     def get_description(self, html=False):
@@ -153,7 +157,7 @@ class APIView(views.APIView):
         '''
         ret = super(APIView, self).metadata(request)
         added_in_version = '1.2'
-        for version in ('2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
+        for version in ('2.2.0', '2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
             if getattr(self, 'new_in_%s' % version.replace('.', ''), False):
                 added_in_version = version
                 break
@@ -328,8 +332,8 @@ class SubListAPIView(ListAPIView):
         return qs & sublist_qs
 
 class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
-    # Base class for a sublist view that allows for creating subobjects and
-    # attaching/detaching them from the parent.
+    # Base class for a sublist view that allows for creating subobjects
+    # associated with the parent object.
 
     # In addition to SubListAPIView properties, subclasses may define (if the
     # sub_obj requires a foreign key to the parent):
@@ -374,8 +378,13 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
         # object deserialized
         obj = serializer.save()
         serializer = self.serializer_class(obj)
+    
+        headers = {'Location': obj.get_absolute_url()}
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
+    # Base class for a sublist view that allows for creating subobjects and
+    # attaching/detaching them from the parent.
 
     def attach(self, request, *args, **kwargs):
         created = False

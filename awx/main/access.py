@@ -152,6 +152,22 @@ class BaseAccess(object):
     def can_unattach(self, obj, sub_obj, relationship):
         return self.can_change(obj, None)
 
+    def check_license(self):
+        reader = TaskSerializer()
+        validation_info = reader.from_file()
+        if 'test' in sys.argv or 'jenkins' in sys.argv:
+            validation_info['free_instances'] = 99999999
+            validation_info['time_remaining'] = 99999999
+            validation_info['grace_period_remaining'] = 99999999
+
+        if validation_info.get('time_remaining', None) is None:
+            raise PermissionDenied("license is missing")
+        if validation_info.get("grace_period_remaining") <= 0:
+            raise PermissionDenied("license has expired")
+        if validation_info.get('free_instances', 0) < 0:
+            #raise PermissionDenied("Host Count exceeds available instances")
+            raise PermissionDenied("license range of %s instances has been exceeded" % validation_info.get('available_instances', 0))
+
 class UserAccess(BaseAccess):
     '''
     I can see user records when:
@@ -255,6 +271,10 @@ class InventoryAccess(BaseAccess):
      - I'm a superuser.
      - I'm an org admin of the inventory's org.
      - I have admin permissions on it.
+    I can run ad hoc commands when:
+     - I'm a superuser.
+     - I'm an org admin of the inventory's org.
+     - I have read/write/admin permission on an inventory with the run_ad_hoc_commands flag set.
     '''
 
     model = Inventory
@@ -327,6 +347,18 @@ class InventoryAccess(BaseAccess):
     def can_delete(self, obj):
         return self.can_admin(obj, None)
 
+    def can_run_ad_hoc_commands(self, obj):
+        qs = self.get_queryset(PERMISSION_TYPES_ALLOWING_INVENTORY_READ)
+        if not obj or not qs.filter(pk=obj.pk).exists():
+            return False
+        if self.user.is_superuser:
+            return True
+        if self.user in obj.organization.admins.all():
+            return True
+        if qs.filter(pk=obj.pk, permissions__permission_type__in=PERMISSION_TYPES_ALLOWING_INVENTORY_READ, permissions__run_ad_hoc_commands=True).exists():
+            return True
+        return False
+
 class HostAccess(BaseAccess):
     '''
     I can see hosts whenever I can see their inventory.
@@ -358,25 +390,8 @@ class HostAccess(BaseAccess):
             return False
 
         # Check to see if we have enough licenses
-        reader = TaskSerializer()
-        validation_info = reader.from_file()
-
-        if 'test' in sys.argv or 'jenkins' in sys.argv:
-            # this hack is in here so the test code can function
-            # but still go down *most* of the license code path.
-            validation_info['free_instances'] = 99999999
-            validation_info['time_remaining'] = 99999999
-            validation_info['grace_period_remaining'] = 99999999
-
-        if validation_info.get('time_remaining', None) is None:
-            raise PermissionDenied("license is missing")
-        if validation_info.get('grace_period_remaining') <= 0:
-            raise PermissionDenied("license has expired")
-
-        if validation_info.get('free_instances', 0) > 0:
-            return True
-        instances = validation_info.get('available_instances', 0)
-        raise PermissionDenied("license range of %s instances has been exceeded" % instances)
+        self.check_license()
+        return True
 
     def can_change(self, obj, data):
         # Prevent moving a host to a different inventory.
@@ -972,21 +987,9 @@ class JobTemplateAccess(BaseAccess):
         #    return False
 
     def can_start(self, obj, validate_license=True):
-        reader = TaskSerializer()
-        validation_info = reader.from_file()
-
+        # Check license.
         if validate_license:
-            if 'test' in sys.argv or 'jenkins' in sys.argv:
-                validation_info['free_instances'] = 99999999
-                validation_info['time_remaining'] = 99999999
-                validation_info['grace_period_remaining'] = 99999999
-
-            if validation_info.get('time_remaining', None) is None:
-                raise PermissionDenied("license is missing")
-            if validation_info.get("grace_period_remaining") <= 0:
-                raise PermissionDenied("license has expired")
-            if validation_info.get('free_instances', 0) < 0:
-                raise PermissionDenied("Host Count exceeds available instances")
+            self.check_license()
 
         # Super users can start any job
         if self.user.is_superuser:
@@ -1105,19 +1108,6 @@ class JobAccess(BaseAccess):
         if not self.user.is_superuser:
             return False
 
-        reader = TaskSerializer()
-        validation_info = reader.from_file()
-        if 'test' in sys.argv or 'jenkins' in sys.argv:
-            validation_info['free_instances'] = 99999999
-            validation_info['time_remaining'] = 99999999
-            validation_info['grace_period_remaining'] = 99999999
-
-        if validation_info.get('time_remaining', None) is None:
-            raise PermissionDenied("license is missing")
-        if validation_info.get("grace_period_remaining") <= 0:
-            raise PermissionDenied("license has expired")
-        if validation_info.get('free_instances', 0) < 0:
-            raise PermissionDenied("Host Count exceeds available instances")
 
         add_data = dict(data.items())
 
@@ -1142,20 +1132,7 @@ class JobAccess(BaseAccess):
         return self.can_read(obj)
 
     def can_start(self, obj):
-        reader = TaskSerializer()
-        validation_info = reader.from_file()
-
-        if 'test' in sys.argv or 'jenkins' in sys.argv:
-            validation_info['free_instances'] = 99999999
-            validation_info['time_remaining'] = 99999999
-            validation_info['grace_period_remaining'] = 99999999
-
-        if validation_info.get('time_remaining', None) is None:
-            raise PermissionDenied("license is missing")
-        if validation_info.get("grace_period_remaining") <= 0:
-            raise PermissionDenied("license has expired")
-        if validation_info.get('free_instances', 0) < 0:
-            raise PermissionDenied("Host Count exceeds available instances")
+        self.check_license()
 
         # A super user can relaunch a job
         if self.user.is_superuser:
@@ -1187,6 +1164,102 @@ class SystemJobAccess(BaseAccess):
     I can only see manage System Jobs if I'm a super user
     '''
     model = SystemJob
+
+class AdHocCommandAccess(BaseAccess):
+    '''
+    I can only see/run ad hoc commands when:
+    - I am a superuser.
+    - I am an org admin and have permission to read the credential.
+    - I am a normal user with a user/team permission that has at least read
+      permission on the inventory and the run_ad_hoc_commands flag set, and I
+      can read the credential.
+    '''
+    model = AdHocCommand
+
+    def get_queryset(self):
+        qs = self.model.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'modified_by', 'inventory',
+                               'credential')
+        if self.user.is_superuser:
+            return qs
+
+        credential_ids = set(self.user.get_queryset(Credential).values_list('id', flat=True))
+        team_ids = set(Team.objects.filter(active=True, users__in=[self.user]).values_list('id', flat=True))
+
+        permission_ids = set(Permission.objects.filter(
+            Q(user=self.user) | Q(team__in=team_ids),
+            active=True,
+            permission_type__in=PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+            run_ad_hoc_commands=True,
+        ).values_list('id', flat=True))
+
+        inventory_qs = self.user.get_queryset(Inventory)
+        inventory_qs = inventory_qs.filter(Q(permissions__in=permission_ids) | Q(organization__admins__in=[self.user]))
+        inventory_ids = set(inventory_qs.values_list('id', flat=True))
+
+        qs = qs.filter(
+            credential_id__in=credential_ids,
+            inventory_id__in=inventory_ids,
+        )
+        return qs
+
+    def can_add(self, data):
+        if not data or '_method' in data:  # So the browseable API will work?
+            return True
+
+        self.check_license()
+
+        # If a credential is provided, the user should have read access to it.
+        credential_pk = get_pk_from_dict(data, 'credential')
+        if credential_pk:
+            credential = get_object_or_400(Credential, pk=credential_pk)
+            if not self.user.can_access(Credential, 'read', credential):
+                return False
+
+        # Check that the user has the run ad hoc command permission on the
+        # given inventory.
+        inventory_pk = get_pk_from_dict(data, 'inventory')
+        if inventory_pk:
+            inventory = get_object_or_400(Inventory, pk=inventory_pk)
+            if not self.user.can_access(Inventory, 'run_ad_hoc_commands', inventory):
+                return False
+
+        return True
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return False
+
+class AdHocCommandEventAccess(BaseAccess):
+    '''
+    I can see ad hoc command event records whenever I can read both ad hoc
+    command and host.
+    '''
+
+    model = AdHocCommandEvent
+
+    def get_queryset(self):
+        qs = self.model.objects.distinct()
+        qs = qs.select_related('created_by', 'modified_by', 'ad_hoc_command', 'host')
+
+        if self.user.is_superuser:
+            return qs
+        ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
+        host_qs = self.user.get_queryset(Host)
+        qs = qs.filter(Q(host__isnull=True) | Q(host__in=host_qs),
+                       ad_hoc_command__in=ad_hoc_command_qs)
+        return qs
+
+    def can_add(self, data):
+        return False
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return False
 
 class JobHostSummaryAccess(BaseAccess):
     '''
@@ -1293,10 +1366,12 @@ class UnifiedJobAccess(BaseAccess):
         project_update_qs = self.user.get_queryset(ProjectUpdate)
         inventory_update_qs = self.user.get_queryset(InventoryUpdate).filter(source__in=CLOUD_INVENTORY_SOURCES)
         job_qs = self.user.get_queryset(Job)
+        ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
         system_job_qs = self.user.get_queryset(SystemJob)
         qs = qs.filter(Q(ProjectUpdate___in=project_update_qs) |
                        Q(InventoryUpdate___in=inventory_update_qs) |
                        Q(Job___in=job_qs) |
+                       Q(AdHocCommand___in=ad_hoc_command_qs) |
                        Q(SystemJob___in=system_job_qs))
         qs = qs.select_related(
             'created_by',
@@ -1537,6 +1612,8 @@ register_access(JobHostSummary, JobHostSummaryAccess)
 register_access(JobEvent, JobEventAccess)
 register_access(SystemJobTemplate, SystemJobTemplateAccess)
 register_access(SystemJob, SystemJobAccess)
+register_access(AdHocCommand, AdHocCommandAccess)
+register_access(AdHocCommandEvent, AdHocCommandEventAccess)
 register_access(Schedule, ScheduleAccess)
 register_access(UnifiedJobTemplate, UnifiedJobTemplateAccess)
 register_access(UnifiedJob, UnifiedJobAccess)

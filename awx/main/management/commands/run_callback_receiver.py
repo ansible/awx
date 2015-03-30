@@ -117,7 +117,9 @@ class CallbackReceiver(object):
         with Socket('callbacks', 'r') as callbacks:
             for message in callbacks.listen():
                 total_messages += 1
-                if not use_workers:
+                if 'ad_hoc_command_id' in message:
+                    self.process_ad_hoc_event(message)
+                elif not use_workers:
                     self.process_job_event(message)
                 else:
                     job_parent_events = last_parent_events.get(message['job_id'], {})
@@ -216,8 +218,66 @@ class CallbackReceiver(object):
             # Retrun the job event object.
             return job_event
         except DatabaseError as e:
-            # Log the error and try again.
+            # Log the error and bail out.
             logger.error('Database error saving job event: %s', e)
+        return None
+
+    @transaction.atomic
+    def process_ad_hoc_event(self, data):
+        # Sanity check: Do we need to do anything at all?
+        event = data.get('event', '')
+        if not event or 'ad_hoc_command_id' not in data:
+            return
+
+        # Get the correct "verbose" value from the job.
+        # If for any reason there's a problem, just use 0.
+        try:
+            verbose = AdHocCommand.objects.get(id=data['ad_hoc_command_id']).verbosity
+        except Exception, e:
+            verbose = 0
+
+        # Convert the datetime for the job event's creation appropriately,
+        # and include a time zone for it.
+        #
+        # In the event of any issue, throw it out, and Django will just save
+        # the current time.
+        try:
+            if not isinstance(data['created'], datetime.datetime):
+                data['created'] = parse_datetime(data['created'])
+            if not data['created'].tzinfo:
+                data['created'] = data['created'].replace(tzinfo=FixedOffset(0))
+        except (KeyError, ValueError):
+            data.pop('created', None)
+
+        # Print the data to stdout if we're in DEBUG mode.
+        if settings.DEBUG:
+            print data
+
+        # Sanity check: Don't honor keys that we don't recognize.
+        for key in data.keys():
+            if key not in ('ad_hoc_command_id', 'event', 'event_data',
+                           'created', 'counter'):
+                data.pop(key)
+
+        # Save any modifications to the ad hoc command event to the database.
+        # If we get a database error of some kind, bail out.
+        try:
+            # If we're not in verbose mode, wipe out any module
+            # arguments. FIXME: Needed for adhoc?
+            res = data['event_data'].get('res', {})
+            if isinstance(res, dict):
+                i = res.get('invocation', {})
+                if verbose == 0 and 'module_args' in i:
+                    i['module_args'] = ''
+
+            # Create a new AdHocCommandEvent object.
+            ad_hoc_command_event = AdHocCommandEvent.objects.create(**data)
+
+            # Retrun the ad hoc comamnd event object.
+            return ad_hoc_command_event
+        except DatabaseError as e:
+            # Log the error and bail out.
+            logger.error('Database error saving ad hoc command event: %s', e)
         return None
 
     def callback_worker(self, queue_actual, idx):

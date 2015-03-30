@@ -12,6 +12,7 @@ fields to create a new {{ model_verbose_name }} associated with this
 
 {% block post_create %}{% endblock %}
 
+{% if view.attach %}
 {% if parent_key %}
 # Remove {{ parent_model_verbose_name|title }} {{ model_verbose_name_plural|title }}:
 
@@ -34,6 +35,7 @@ existing {{ model_verbose_name }} with this {{ parent_model_verbose_name }}.
 Make a POST request to this resource with `id` and `disassociate` fields to
 remove the {{ model_verbose_name }} from this {{ parent_model_verbose_name }}
 without deleting the {{ model_verbose_name }}.
+{% endif %}
 {% endif %}
 
 {% include "api/_new_in_awx.md" %}
