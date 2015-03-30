@@ -3,7 +3,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:list-generator
+ *  @name shared.function:list-generator
  *  @description
  * #ListGenerator
  *
@@ -84,7 +84,7 @@
  * | 'class' | Set to a string containing any CSS classes to add to the &lt;a&gt; element. |
  * | dataPlacement | Set to the Bootstrip tooltip placement - right, left, top, bottom, etc. |
  * | dataTipWatch | Set to the $scope variable that contains the text and HTML to display in the tooltip. A $scope.$watch will be added to the variable so that anytime its value changes the tooltip will change. |
- * | iconClass | By default the CSS icon class is set by the SelectIcon() method in lib/ansible/generator-helpers.js. The icon is based on the action name. Use iconClass to override the default value. |
+ * | iconClass | By default the CSS icon class is set by the SelectIcon() method in js/shared/generator-helpers.js. The icon is based on the action name. Use iconClass to override the default value. |
  * | mode | One of 'all' or 'edit'. Will generally be 'all'. Note that field actions are not displayed when the list is in 'lookup' mode. |
  * | ngClass | Adds the ng-class directive. Set to the JS expressino that ng-class will evaluate. |
  * | ngShow | Adds the ng-show directive. Set to the JS expression that ng-show will evaluate. |
@@ -92,7 +92,7 @@
  * ##Actions
  *
  * A list can contain an actions object. The actions object contains an object for each action button displayed in the top-right corner of the list container. An action can have the same
- * attributes as an action defined in fieldAction. Both are actions. Clicking on an action evaluates the JS found in the ngClick attribute. In both cases icon is generated automatically by the SelectIcon() method in lib/ansible/generator-helpers.js.
+ * attributes as an action defined in fieldAction. Both are actions. Clicking on an action evaluates the JS found in the ngClick attribute. In both cases icon is generated automatically by the SelectIcon() method in js/shared/generator-helpers.js.
  * The real difference is that an &lt;a&gt element is used to generate fieldAction items while a &lt;button&gt; element is used for action items.
  */
 

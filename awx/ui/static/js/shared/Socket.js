@@ -3,7 +3,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:Socket
+ *  @name shared.function:Socket
  *  @description
  *  Socket.js
  *
@@ -15,8 +15,8 @@
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Socket#SocketIO
- * @methodOf lib.ansible.function:Socket
+ * @name shared.function:Socket#SocketIO
+ * @methodOf shared.function:Socket
  * @description
  */
 export default

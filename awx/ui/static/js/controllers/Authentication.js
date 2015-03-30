@@ -17,7 +17,7 @@
  * Tower (app.js) verifies the user is authenticated and that the user session is not expired. If either condition is not true,
  * the user is redirected to /#/login and the Authentication controller.
  *
- * Methods for checking the session state are found in [lib/ansible/AuthService.js](/static/docs/api/lib.ansible.function:AuthService), which is referenced here as Authorization.
+ * Methods for checking the session state are found in [js/shared/AuthService.js](/static/docs/api/shared.function:AuthService), which is referenced here as Authorization.
  *
  * #Login Modal Dialog
  *
@@ -44,7 +44,7 @@
  *
  * - Call Authorization.retrieveToken(username, password) - sends a POST request to /api/v1/authtoken to get a new token value.
  * - Call Authorization.setToken(token, expires) to store the token and exipration time in a session cookie.
- * - Start the expiration timer by calling the init() method of [lib/ansible/Timer.js](/static/docs/api/lib.ansible.function:Timer)
+ * - Start the expiration timer by calling the init() method of [js/shared/Timer.js](/static/docs/api/shared.function:Timer)
  * - Get user informaton by calling Authorization.getUser() - sends a GET request to /api/v1/me
  * - Store user information in the session cookie by calling Authorization.setUser().
  * - Get the Tower license by calling Authorization.getLicense() - sends a GET request to /api/vi/config

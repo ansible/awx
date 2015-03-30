@@ -3,7 +3,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:AuthService
+ *  @name shared.function:AuthService
  *  @description  AuthService.js
  *
  *  User authentication functions

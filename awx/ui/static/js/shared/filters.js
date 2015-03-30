@@ -3,7 +3,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:filters
+ *  @name shared.function:filters
  *  @description
  * Custom filters
  *

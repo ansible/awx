@@ -3,7 +3,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:generator-helpers
+ *  @name shared.function:generator-helpers
  *  @description
  * GeneratorHelpers
  *

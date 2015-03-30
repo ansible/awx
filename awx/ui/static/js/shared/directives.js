@@ -3,7 +3,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:directives
+ *  @name shared.function:directives
  *  @description
  * Custom directives for form validation
  *
@@ -743,7 +743,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //
     // chkPass
     //
-    // Enables use of lib/ansible/pwdmeter.js to check strengh of passwords.
+    // Enables use of js/shared/pwdmeter.js to check strengh of passwords.
     // See controllers/Users.js for example.
     //
     .directive('chkPass', [ function() {

@@ -4,7 +4,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:inventoryTree
+ *  @name shared.function:inventoryTree
  *  @description
  *  InventoryTree.js
  *

@@ -3,7 +3,7 @@
  */
 /**
  *  @ngdoc function
- *  @name lib.ansible.function:RestServices
+ *  @name shared.function:RestServices
  *  @description
  *
  * A wrapper for angular's $http service. Post user authentication API requests should go through Rest rather than directly using $http. The goal is to decouple
@@ -20,7 +20,7 @@
  *    /api/v1/credentials/?name=SSH Key&kind=ssh
  * ```
  *
- * When constructing the URL be sure to use the GetBasePath() method found in lib/ansible/Utilities.js. GetBasePath uses the response objects from /api and
+ * When constructing the URL be sure to use the GetBasePath() method found in js/shared/Utilities.js. GetBasePath uses the response objects from /api and
  * /api/<version>/to construct the base portion of the path. This way the API version number and base endpoints are not hard-coded within the application.
  *
  * #Action methods: .get(), put(<JSON data object>), .post(<JSON data object>), .destroy(<JSON data object>), options()
@@ -39,13 +39,13 @@
  *             // review the data object and take action
  *         })
  *         .error(function(status, data) {
- *             // handle the error - typically a call to ProcessErrors() found in lib/ansible/Utitlties.js
+ *             // handle the error - typically a call to ProcessErrors() found in js/shared/Utitlties.js
  *         });
  * ```
  *
  * ##Options Reqeusts
  *
- * options() requests are used by the GetChoices() method found in lib/ansible/Utilities.js. Sending an Options request to an API endpoint returns an object that includes
+ * options() requests are used by the GetChoices() method found in js/shared/Utilities.js. Sending an Options request to an API endpoint returns an object that includes
  * possible values for fields that are typically presented in the UI as dropdowns or &lt;select&gt; elements. GetChoices will inspect the response object for the request
  * field and return an array of { label: 'Choice Label', value: 'choice 1' } objects.
  *

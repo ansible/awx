@@ -24,7 +24,7 @@
 **/
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:pwdmeter
+ *  @name shared.function:pwdmeter
  *  @description
 **    CLH 09/05/13 - Set required strength in config.js
 **        02/10/14 - Applied jsHint

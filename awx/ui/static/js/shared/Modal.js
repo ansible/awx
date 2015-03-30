@@ -4,7 +4,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:Modal
+ *  @name shared.function:Modal
  *  @description
  *  Modal.js
  *
@@ -19,8 +19,8 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
 
     /**
      * @ngdoc method
-     * @name lib.ansible.function:Modal#CreateDialog
-     * @methodOf lib.ansible.function:Modal
+     * @name shared.function:Modal#CreateDialog
+     * @methodOf shared.function:Modal
      * @description
      * CreateDialog({
      *     id:          - id attribute value of the target DOM element

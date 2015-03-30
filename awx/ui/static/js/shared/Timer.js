@@ -3,7 +3,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:Timer
+ *  @name shared.function:Timer
  *  @description
  *  Timer.js
  *
@@ -14,8 +14,8 @@
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Timer#TimerService
- * @methodOf lib.ansible.function:Timer
+ * @name shared.function:Timer#TimerService
+ * @methodOf shared.function:Timer
  * @description
  */
 export default

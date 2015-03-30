@@ -3,7 +3,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:form-generator
+ *  @name shared.function:form-generator
  *  @description
  *
  * Generate form HTML from a form object. Form objects are found in /forms.
@@ -97,7 +97,7 @@
  * | hasShowInputButton (sensitive type only) | This creates a button next to the input that toggles the input as text and password types. |
  * The form object contains a buttons object for defining any buttons to be included in the generated HTML. Generally all forms will have a Reset and a Submit button. If no buttons should be generated define buttons as an empty object, or set the showButtons option to false.
  *
- * The icon used for the button is determined by SelectIcon() found in lib/ansible/generator-helpers.js.
+ * The icon used for the button is determined by SelectIcon() found in js/shared/generator-helpers.js.
  *
  * | Attribute | Description |
  * | --------- | ----------- |

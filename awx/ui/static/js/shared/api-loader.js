@@ -5,13 +5,13 @@
  */
  /**
  *  @ngdoc overview
- *  @name lib.ansible
+ *  @name shared
  *  @description lib files
  *
  */
  /**
  *  @ngdoc function
- *  @name lib.ansible.function:api-loader
+ *  @name shared.function:api-loader
  *  @description Read /api and /api/X to discover all the base paths needed
  *  to access the primary model objects.
  *

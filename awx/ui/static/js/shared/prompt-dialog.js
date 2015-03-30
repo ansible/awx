@@ -3,7 +3,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:prompt-dialog
+ *  @name shared.function:prompt-dialog
  *  @description
  * PromptDialog
  * Prompt the user with a Yes/No dialog to confirm an action such
@@ -21,8 +21,8 @@
 
 /**
 * @ngdoc method
-* @name lib.ansible.function:prompt-dialog#PromptDialog
-* @methodOf lib.ansible.function:prompt-dialog
+* @name shared.function:prompt-dialog#PromptDialog
+* @methodOf shared.function:prompt-dialog
 * @description discuss difference b/t this and other modals
 */
 

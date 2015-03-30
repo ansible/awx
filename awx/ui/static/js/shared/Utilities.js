@@ -4,7 +4,7 @@
  */
   /**
  *  @ngdoc function
- *  @name lib.ansible.function:Utilities
+ *  @name shared.function:Utilities
  *  @description
  *  Utility functions
  *
@@ -19,8 +19,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#ClearScope
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#ClearScope
+ * @methodOf shared.function:Utilities
  * @description
  *  Place to remove things that might be lingering from a prior tab or view.
  *  This used to destroy the scope, but that causes issues in angular 1.2.x
@@ -56,8 +56,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#Empty
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#Empty
+ * @methodOf shared.function:Utilities
  * @description Empty()
  *
  * Test if a value is 'empty'. Returns true if val is null | '' | undefined.
@@ -74,8 +74,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#ToggleClass
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#ToggleClass
+ * @methodOf shared.function:Utilities
  * @description
  */
 .factory('ToggleClass', function () {
@@ -92,8 +92,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#Alert
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#Alert
+ * @methodOf shared.function:Utilities
  * @description Pass in the header and message you want displayed on TB modal dialog found in index.html.
  * Assumes an #id of 'alert-modal'. Pass in an optional TB alert class (i.e. alert-danger, alert-success,
  * alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
@@ -166,8 +166,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#ProcessErrors
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#ProcessErrors
+ * @methodOf shared.function:Utilities
  * @description For handling errors that are returned from the API
 */
 .factory('ProcessErrors', ['$rootScope', '$cookieStore', '$log', '$location', 'Alert', 'Wait',
@@ -348,8 +348,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#HelpDialog
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#HelpDialog
+ * @methodOf shared.function:Utilities
  * @description Display a help dialog
  *
  * HelpDialog({ defn: <HelpDefinition> })
@@ -537,8 +537,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#ReturnToCaller
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#ReturnToCaller
+ * @methodOf shared.function:Utilities
  * @description
  * Split the current path by '/' and use the array elements from 0 up to and
  * including idx as the new path.  If no idx value supplied, use 0 to length - 1.
@@ -562,8 +562,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#FormatDate
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#FormatDate
+ * @methodOf shared.function:Utilities
  * @description
  * Wrapper for data filter- an attempt to insure all dates display in
  * the same format. Pass in date object or string. See: http://docs.angularjs.org/api/ng.filter:date
@@ -578,8 +578,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#Wait
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#Wait
+ * @methodOf shared.function:Utilities
  * @description
  * Display a spinning icon in the center of the screen to freeze the
  * UI while waiting on async things to complete (i.e. API calls).
@@ -661,8 +661,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#GetChoices
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#GetChoices
+ * @methodOf shared.function:Utilities
  * @description Make an Options call to the API and retrieve dropdown options
  * GetChoices({
  *     scope:       Parent $scope
@@ -716,8 +716,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#Find
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#Find
+ * @methodOf shared.function:Utilities
  * @description
  * Search an array of objects, returning the matchting object or null
  *
@@ -747,8 +747,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#DebugForm
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#DebugForm
+ * @methodOf shared.function:Utilities
  * @description
  * DebugForm({ form: <form object>, scope: <current scope object> });
  *
@@ -782,8 +782,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#Store
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#Store
+ * @methodOf shared.function:Utilities
  * @description Store
  *
  * Wrapper for local storage. All local storage requests flow through here so that we can
@@ -813,8 +813,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
- * @name lib.ansible.function:Utilities#ApplyEllipsis
- * @methodOf lib.ansible.function:Utilities
+ * @name shared.function:Utilities#ApplyEllipsis
+ * @methodOf shared.function:Utilities
  * @description
  * ApplyEllipsis()
  * discuss significance
