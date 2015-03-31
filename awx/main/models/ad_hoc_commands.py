@@ -9,7 +9,6 @@ import logging
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
 from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
@@ -19,11 +18,9 @@ from django.core.urlresolvers import reverse
 from jsonfield import JSONField
 
 # AWX
-from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
-from awx.main.utils import emit_websocket_notification
+from awx.main.utils import decrypt_field
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
 

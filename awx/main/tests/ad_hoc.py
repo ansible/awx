@@ -2,19 +2,14 @@
 # All Rights Reserved.
 
 # Python
-from distutils.version import StrictVersion as Version
 import glob
-import json
 import os
-import shutil
 import subprocess
 import tempfile
-import unittest
 
 # Django
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.utils.timezone import now
 
 # Django-CRUM
 from crum import impersonate
@@ -22,7 +17,7 @@ from crum import impersonate
 # AWX
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseJobExecutionTest
-from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_CERT_KEY, TEST_SSH_KEY_DATA_UNLOCK
+from awx.main.tests.tasks import TEST_SSH_KEY_DATA, TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
 
 __all__ = ['RunAdHocCommandTest', 'AdHocCommandApiTest']
 
