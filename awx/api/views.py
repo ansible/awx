@@ -1846,8 +1846,8 @@ class JobCancel(RetrieveAPIView):
 class JobRelaunch(GenericAPIView):
 
     model = Job
+    serializer_class = JobRelaunchSerializer
     is_job_start = True
-    # FIXME: Add serializer class to define fields in OPTIONS request!
 
     @csrf_exempt
     @transaction.non_atomic_requests
@@ -1858,22 +1858,31 @@ class JobRelaunch(GenericAPIView):
         obj = self.get_object()
         data = {}
         data['passwords_needed_to_start'] = obj.passwords_needed_to_start
-        #data['ask_variables_on_launch'] = obj.ask_variables_on_launch
         return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
+
+        # Check for passwords needed before copying job.
+        needed = obj.passwords_needed_to_start
+        provided = dict([(field, request.DATA.get(field, '')) for field in needed])
+        if not all(provided.values()):
+            data = dict(passwords_needed_to_start=needed)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         new_job = obj.copy()
         result = new_job.signal_start(**request.DATA)
         if not result:
-            data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
+            data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = dict(job=new_job.id)
-            return Response(data, status=status.HTTP_202_ACCEPTED)
-
+            data = JobSerializer(new_job).data
+            # Add job key to match what old relaunch returned.
+            data['job'] = new_job.id
+            headers = {'Location': new_job.get_absolute_url()}
+            return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 class BaseJobHostSummariesList(SubListAPIView):
 
@@ -2189,9 +2198,21 @@ class AdHocCommandList(ListCreateAPIView):
             parent_obj = self.get_parent_object()
             if isinstance(parent_obj, (Host, Group)):
                 data['inventory'] = parent_obj.inventory_id
+
+        # Check for passwords needed before creating ad hoc command.
+        credential_pk = get_pk_from_dict(request.DATA, 'credential')
+        if credential_pk:
+            credential = get_object_or_400(Credential, pk=credential_pk)
+            needed = credential.passwords_needed
+            provided = dict([(field, request.DATA.get(field, '')) for field in needed])
+            if not all(provided.values()):
+                data = dict(passwords_needed_to_start=needed)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         response = super(AdHocCommandList, self).create(request, *args, **kwargs)
         if response.status_code != status.HTTP_201_CREATED:
             return response
+
         # Start ad hoc command running when created.
         ad_hoc_command = get_object_or_400(self.model, pk=response.data['id'])
         result = ad_hoc_command.signal_start(**request.DATA)
@@ -2246,9 +2267,11 @@ class AdHocCommandCancel(RetrieveAPIView):
 class AdHocCommandRelaunch(GenericAPIView):
 
     model = AdHocCommand
+    serializer_class = AdHocCommandRelaunchSerializer
     is_job_start = True
     new_in_220 = True
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+
+    # FIXME: Figure out why OPTIONS request still shows all fields.
 
     @csrf_exempt
     @transaction.non_atomic_requests
@@ -2257,22 +2280,33 @@ class AdHocCommandRelaunch(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-        data = {}
-        data['passwords_needed_to_start'] = obj.passwords_needed_to_start
+        data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
         return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
+
+        # Check for passwords needed before copying ad hoc command.
+        needed = obj.passwords_needed_to_start
+        provided = dict([(field, request.DATA.get(field, '')) for field in needed])
+        if not all(provided.values()):
+            data = dict(passwords_needed_to_start=needed)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        # Copy and start the new ad hoc command.
         new_ad_hoc_command = obj.copy()
         result = new_ad_hoc_command.signal_start(**request.DATA)
         if not result:
-            data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
+            data = dict(passwords_needed_to_start=new_ad_hoc_command.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = dict(ad_hoc_command=new_ad_hoc_command.id)
-            return Response(data, status=status.HTTP_202_ACCEPTED)
+            data = AdHocCommandSerializer(new_ad_hoc_command).data
+            # Add ad_hoc_command key to match what was previously returned.
+            data['ad_hoc_command'] = new_ad_hoc_command.id
+            headers = {'Location': new_ad_hoc_command.get_absolute_url()}
+            return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class AdHocCommandEventList(ListAPIView):

@@ -29,7 +29,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
-           '_inventory_updates']
+           '_inventory_updates', 'get_pk_from_dict']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -474,3 +474,12 @@ def wrap_args_with_proot(args, cwd, **kwargs):
     new_args.extend(['-w', cwd])
     new_args.extend(args)
     return new_args
+
+def get_pk_from_dict(_dict, key):
+    '''
+    Helper for obtaining a pk from user data dict or None if not present.
+    '''
+    try:
+        return int(_dict[key])
+    except (TypeError, KeyError, ValueError):
+        return None

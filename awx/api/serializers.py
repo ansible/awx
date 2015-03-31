@@ -1481,6 +1481,18 @@ class JobCancelSerializer(JobSerializer):
         fields = ('can_cancel',)
 
 
+class JobRelaunchSerializer(JobSerializer):
+
+    class Meta:
+        fields = ()
+
+    def to_native(self, obj):
+        if obj:
+            return dict([(p, u'') for p in obj.passwords_needed_to_start])
+        else:
+            return {}
+
+
 class AdHocCommandSerializer(UnifiedJobSerializer):
 
     name = serializers.CharField(source='name', read_only=True)
@@ -1531,6 +1543,18 @@ class AdHocCommandCancelSerializer(AdHocCommandSerializer):
 
     class Meta:
         fields = ('can_cancel',)
+
+
+class AdHocCommandRelaunchSerializer(AdHocCommandSerializer):
+
+    class Meta:
+        fields = ()
+
+    def to_native(self, obj):
+        if obj:
+            return dict([(p, u'') for p in obj.passwords_needed_to_start])
+        else:
+            return {}
 
 
 class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
