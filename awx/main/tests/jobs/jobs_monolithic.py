@@ -787,7 +787,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         job = self.make_job(self.jt_ops_east_run, self.user_sue, 'success')
         url = reverse('api:job_relaunch', args=(job.pk,))
         with self.current_user(self.user_sue):
-            response = self.post(url, {}, expect=202)
+            response = self.post(url, {}, expect=201)
             j = Job.objects.get(pk=response['job'])
             self.assertTrue(j.status == 'successful')
         # Test with a job that prompts for SSH and sudo passwords.
