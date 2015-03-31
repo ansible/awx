@@ -17,6 +17,7 @@ if LooseVersion(sos.__version__) >= LooseVersion('3.0'):
                          "ansible --version",      # ansible core version
                          "awx-manage --version",   # tower version
                          "supervisorctl status",   # tower process status
+                         "pip list"		   # pip package list
                          "tree -d /var/lib/awx",   # show me the dirs
                          "ls -ll /var/lib/awx",    # check permissions
                          "ls -ll /etc/tower"
@@ -56,6 +57,7 @@ else:
                          "ansible --version",      # ansible core version
                          "awx-manage --version",   # tower version
                          "supervisorctl status",   # tower process status
+                         "pip list"		   # pip package list
                          "tree -d /var/lib/awx",   # show me the dirs
                          "ls -ll /var/lib/awx",    # check permissions
                          "ls -ll /etc/tower"
