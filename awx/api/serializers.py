@@ -1483,12 +1483,14 @@ class JobCancelSerializer(JobSerializer):
 
 class AdHocCommandSerializer(UnifiedJobSerializer):
 
+    name = serializers.CharField(source='name', read_only=True)
+
     class Meta:
         model = AdHocCommand
         fields = ('*', 'job_type', 'inventory', 'limit', 'credential',
                   'module_name', 'module_args', 'forks', 'verbosity',
                   'privilege_escalation')
-        exclude = ('unified_job_template', 'name', 'description')
+        exclude = ('unified_job_template', 'description')
 
     def get_related(self, obj):
         res = super(AdHocCommandSerializer, self).get_related(obj)

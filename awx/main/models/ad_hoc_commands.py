@@ -10,6 +10,7 @@ import logging
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -199,11 +200,20 @@ class AdHocCommand(UnifiedJob):
         return dependencies
 
     def copy(self):
-        raise NotImplementedError
-        presets = {}
-        for kw in self.job_template._get_unified_job_field_names():
-            presets[kw] = getattr(self, kw)
-        return self.job_template.create_unified_job(**presets)
+        data = {}
+        for field in ('job_type', 'inventory_id', 'limit', 'credential_id',
+                      'module_name', 'module_args', 'forks', 'verbosity',
+                      'privilege_escalation'):
+            data[field] = getattr(self, field)
+        return AdHocCommand.objects.create(**data)
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get('update_fields', [])
+        if not self.name:
+            self.name = Truncator(u'%s: %s' % (self.module_name, self.module_args)).chars(512)
+            if 'name' not in update_fields:
+                update_fields.append('name')
+        super(AdHocCommand, self).save(*args, **kwargs)
 
 
 class AdHocCommandEvent(CreatedModifiedModel):

@@ -1232,6 +1232,15 @@ class AdHocCommandAccess(BaseAccess):
     def can_delete(self, obj):
         return False
 
+    def can_start(self, obj):
+        return self.can_add({
+            'credential': obj.credential_id,
+            'inventory': obj.inventory_id,
+        })
+
+    def can_cancel(self, obj):
+        return self.can_read(obj) and obj.can_cancel
+
 class AdHocCommandEventAccess(BaseAccess):
     '''
     I can see ad hoc command event records whenever I can read both ad hoc
