@@ -275,26 +275,31 @@ export default
                     askShow: "kind.value == 'ssh'",  // Only allow ask for machine credentials
                 },
                 "login_method": {
-                    label: "Privilege Escalation Credentials",
+                    label: "Privilege Escalation Credential",
                     hintText: "If your playbooks use privilege escalation (\"sudo: true\", \"su: true\", etc), you can specify the username to become, and the password to use here.",
-                    type: 'radio_group',
+                    type: 'select',
                     ngShow: "kind.value == 'ssh'",
                     ngChange: "loginMethodChange()",
-                    options: [{
-                        label: 'None', // FIXME: Maybe 'Default' or 'SSH only' instead?
-                        value: '',
-                        selected: true
-                    }, {
-                        label: 'Sudo',
-                        value: 'sudo'
-                    }, {
-                        label: 'Su',
-                        value: 'su'
-                    },{
-                        label: 'Pbrun',
-                        value: 'pbrun'
-                    }],
-                    awPopOver: "<p><b>Sudo:</b> Optionally specify a username for sudo operations.  This is equivalent to specifying the <code>ansible-playbook --sudo-user</code> parameter.<br /><b>Su:</b> Optionally specify a username for su operations.  This is equivalent to specifying the <code>ansible-playbook --su-user</code> parameter.",
+                    ngOptions: 'kind.label for kind in credential_kind_options track by kind.value', 
+                    // options: [{
+                    //     label: 'None', // FIXME: Maybe 'Default' or 'SSH only' instead?
+                    //     value: '',
+                    //     selected: true
+                    // }, {
+                    //     label: 'Sudo',
+                    //     value: 'sudo'
+                    // }, {
+                    //     label: 'Su',
+                    //     value: 'su'
+                    // },{
+                    //     label: 'Pbrun',
+                    //     value: 'pbrun'
+                    // }],
+                    awPopOver: "<p><b>Sudo:</b> Optionally specify a username for sudo operations.  "+
+                      "This is equivalent to specifying the <code>ansible-playbook --sudo-user</code> parameter.<br />" +
+                      "<b>Su:</b> Optionally specify a username for su operations.  This is equivalent to specifying the <code>ansible-playbook --su-user</code> parameter.<br/>"+
+                      "<b>Pbrun:</b> Optionally specify a username for pbrun operations. This is equivalent to specifying the <code>ansible-playbook --become_method=pbrun</code> parameter."+
+                      "Note that this option is only available with Tower instances using Ansible v1.9 or later (Current: Ansible v.{{ansible_version}})",
                     dataPlacement: 'right',
                     dataContainer: "body"
                 },
