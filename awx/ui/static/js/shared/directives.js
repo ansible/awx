@@ -450,45 +450,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     }])
 
     /*
-     * This is a copy of awToolTip currently.
-     * TODO: only display these tool tips if the length of the anchor *as interpolated* to be larger than the table cell
-     */
-    .directive('awToolTipEllipses', [ function() {
-        return {
-            link: function(scope, element, attrs) {
-
-                var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : ($AnsibleConfig) ? $AnsibleConfig.tooltip_delay : {show: 500, hide: 100},
-                    placement;
-
-                if (attrs.awTipPlacement) {
-                    placement = attrs.awTipPlacement;
-                }
-                else {
-                    placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left';
-                }
-
-                $(element).on('hidden.bs.tooltip', function( ) {
-                    // TB3RC1 is leaving behind tooltip <div> elements. This will remove them
-                    // after a tooltip fades away. If not, they lay overtop of other elements and
-                    // honk up the page.
-                    $('.tooltip').each(function() {
-                        $(this).remove();
-                    });
-                });
-
-                $(element).tooltip({
-                    placement: placement,
-                    delay: delay,
-                    html: true,
-                    title: attrs.awToolTipEllipses,
-                    container: 'body',
-                    trigger: 'hover focus'
-                });
-            }
-        };
-    }])
-
-    /*
      *  Enable TB pop-overs. To add a pop-over to an element, include the following directive in
      *  the element's attributes:
      *

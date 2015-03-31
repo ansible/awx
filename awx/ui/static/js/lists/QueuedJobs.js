@@ -62,8 +62,7 @@ export default
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-4 col-xs-4',
                 ngClick: "viewJobLog(queued_job.id, queued_job.nameHref)",
-                defaultSearchField: true,
-                awToolTipEllipses: "{{ queued_job.name }}"
+                defaultSearchField: true
             }
         },
 

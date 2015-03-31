@@ -70,8 +70,7 @@ export default
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-4 col-xs-4',
                 ngClick: "viewJobLog(completed_job.id, completed_job.nameHref)",
-                defaultSearchField: true,
-                awToolTipEllipses: "{{ completed_job.name }}"
+                defaultSearchField: true
             },
             failed: {
                 label: 'Job failed?',
