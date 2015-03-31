@@ -250,8 +250,12 @@ test_coverage:
 coverage_html:
 	coverage html
 
-ui_analysis_report: node_modules Gruntfile.js
+ui_analysis_report: reports/ui_code node_modules Gruntfile.js
 	$(GRUNT) plato:report
+
+reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
+	rm -rf reports/ui_code
+	$(BROCCOLI) build reports/ui_code -- --no-concat --no-tests --no-styles
 
 # Run UI unit tests
 test_ui: node_modules minjs_ci Gruntfile.js
