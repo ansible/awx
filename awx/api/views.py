@@ -44,7 +44,7 @@ import ansiconv
 from awx.main.task_engine import TaskSerializer, TASK_FILE
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
-from awx.api.authentication import JobTaskAuthentication
+from awx.api.authentication import TaskAuthentication
 from awx.api.utils.decorators import paginated
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
@@ -111,6 +111,7 @@ class ApiV1RootView(APIView):
         data['hosts'] = reverse('api:host_list')
         data['job_templates'] = reverse('api:job_template_list')
         data['jobs'] = reverse('api:job_list')
+        data['ad_hoc_commands'] = reverse('api:ad_hoc_command_list')
         data['system_job_templates'] = reverse('api:system_job_template_list')
         data['system_jobs'] = reverse('api:system_job_list')
         data['schedules'] = reverse('api:schedule_list')
@@ -492,28 +493,28 @@ class OrganizationInventoriesList(SubListAPIView):
     parent_model = Organization
     relationship = 'inventories'
 
-class OrganizationUsersList(SubListCreateAPIView):
+class OrganizationUsersList(SubListCreateAttachDetachAPIView):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
     relationship = 'users'
 
-class OrganizationAdminsList(SubListCreateAPIView):
+class OrganizationAdminsList(SubListCreateAttachDetachAPIView):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
     relationship = 'admins'
 
-class OrganizationProjectsList(SubListCreateAPIView):
+class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
     parent_model = Organization
     relationship = 'projects'
 
-class OrganizationTeamsList(SubListCreateAPIView):
+class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
 
     model = Team
     serializer_class = TeamSerializer
@@ -539,14 +540,14 @@ class TeamDetail(RetrieveUpdateDestroyAPIView):
     model = Team
     serializer_class = TeamSerializer
 
-class TeamUsersList(SubListCreateAPIView):
+class TeamUsersList(SubListCreateAttachDetachAPIView):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Team
     relationship = 'users'
 
-class TeamPermissionsList(SubListCreateAPIView):
+class TeamPermissionsList(SubListCreateAttachDetachAPIView):
 
     model = Permission
     serializer_class = PermissionSerializer
@@ -565,14 +566,14 @@ class TeamPermissionsList(SubListCreateAPIView):
             return base
         raise PermissionDenied()
 
-class TeamProjectsList(SubListCreateAPIView):
+class TeamProjectsList(SubListCreateAttachDetachAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
     parent_model = Team
     relationship = 'projects'
 
-class TeamCredentialsList(SubListCreateAPIView):
+class TeamCredentialsList(SubListCreateAttachDetachAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
@@ -631,21 +632,21 @@ class ProjectPlaybooks(RetrieveAPIView):
     model = Project
     serializer_class = ProjectPlaybooksSerializer
 
-class ProjectOrganizationsList(SubListCreateAPIView):
+class ProjectOrganizationsList(SubListCreateAttachDetachAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
     parent_model = Project
     relationship = 'organizations'
 
-class ProjectTeamsList(SubListCreateAPIView):
+class ProjectTeamsList(SubListCreateAttachDetachAPIView):
 
     model = Team
     serializer_class = TeamSerializer
     parent_model = Project
     relationship = 'teams'
 
-class ProjectSchedulesList(SubListCreateAPIView):
+class ProjectSchedulesList(SubListCreateAttachDetachAPIView):
 
     view_name = "Project Schedules"
 
@@ -746,7 +747,7 @@ class UserTeamsList(SubListAPIView):
     parent_model = User
     relationship = 'teams'
 
-class UserPermissionsList(SubListCreateAPIView):
+class UserPermissionsList(SubListCreateAttachDetachAPIView):
 
     model = Permission
     serializer_class = PermissionSerializer
@@ -767,7 +768,7 @@ class UserProjectsList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(teams__in=parent.teams.distinct())
 
-class UserCredentialsList(SubListCreateAPIView):
+class UserCredentialsList(SubListCreateAttachDetachAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
@@ -932,7 +933,7 @@ class HostDetail(RetrieveUpdateDestroyAPIView):
     model = Host
     serializer_class = HostSerializer
 
-class InventoryHostsList(SubListCreateAPIView):
+class InventoryHostsList(SubListCreateAttachDetachAPIView):
 
     model = Host
     serializer_class = HostSerializer
@@ -940,7 +941,7 @@ class InventoryHostsList(SubListCreateAPIView):
     relationship = 'hosts'
     parent_key = 'inventory'
 
-class HostGroupsList(SubListCreateAPIView):
+class HostGroupsList(SubListCreateAttachDetachAPIView):
     ''' the list of groups a host is directly a member of '''
 
     model = Group
@@ -991,7 +992,7 @@ class GroupList(ListCreateAPIView):
     model = Group
     serializer_class = GroupSerializer
 
-class GroupChildrenList(SubListCreateAPIView):
+class GroupChildrenList(SubListCreateAttachDetachAPIView):
 
     model = Group
     serializer_class = GroupSerializer
@@ -1050,7 +1051,7 @@ class GroupPotentialChildrenList(SubListAPIView):
         except_pks.update(parent.all_children.values_list('pk', flat=True))
         return qs.exclude(pk__in=except_pks)
 
-class GroupHostsList(SubListCreateAPIView):
+class GroupHostsList(SubListCreateAttachDetachAPIView):
     ''' the list of hosts directly below a group '''
 
     model = Host
@@ -1124,7 +1125,7 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
             obj.mark_inactive_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class InventoryGroupsList(SubListCreateAPIView):
+class InventoryGroupsList(SubListCreateAttachDetachAPIView):
 
     model = Group
     serializer_class = GroupSerializer
@@ -1132,7 +1133,7 @@ class InventoryGroupsList(SubListCreateAPIView):
     relationship = 'groups'
     parent_key = 'inventory'
 
-class InventoryRootGroupsList(SubListCreateAPIView):
+class InventoryRootGroupsList(SubListCreateAttachDetachAPIView):
 
     model = Group
     serializer_class = GroupSerializer
@@ -1171,8 +1172,8 @@ class InventoryScriptView(RetrieveAPIView):
 
     model = Inventory
     serializer_class = InventoryScriptSerializer
-    authentication_classes = [JobTaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
-    permission_classes = (JobTaskPermission,)
+    authentication_classes = [TaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    permission_classes = (TaskPermission,)
     filter_backends = ()
 
     def retrieve(self, request, *args, **kwargs):
@@ -1330,7 +1331,7 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
             pu.cancel()
         return super(InventorySourceDetail, self).destroy(request, *args, **kwargs)
 
-class InventorySourceSchedulesList(SubListCreateAPIView):
+class InventorySourceSchedulesList(SubListCreateAttachDetachAPIView):
 
     view_name = "Inventory Source Schedules"
 
@@ -1479,7 +1480,7 @@ class JobTemplateLaunch(GenericAPIView):
             data = dict(job=new_job.id)
             return Response(data, status=status.HTTP_202_ACCEPTED)
 
-class JobTemplateSchedulesList(SubListCreateAPIView):
+class JobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
 
     view_name = "Job Template Schedules"
 
@@ -1749,7 +1750,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
         data = dict(system_job=new_job.id)
         return Response(data, status=status.HTTP_202_ACCEPTED)
 
-class SystemJobTemplateSchedulesList(SubListCreateAPIView):
+class SystemJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
 
     view_name = "System Job Template Schedules"
 
@@ -1944,8 +1945,8 @@ class GroupJobEventsList(BaseJobEventsList):
 class JobJobEventsList(BaseJobEventsList):
 
     parent_model = Job
-    authentication_classes = [JobTaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
-    permission_classes = (JobTaskPermission,)
+    authentication_classes = [TaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    permission_classes = (TaskPermission,)
 
     # Post allowed for job event callback only.
     def post(self, request, *args, **kwargs):
@@ -1966,8 +1967,6 @@ class JobJobPlaysList(BaseJobEventsList):
 
     parent_model = Job
     view_name = 'Job Plays List'
-    authentication_classes = [JobTaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
-    permission_classes = (JobTaskPermission,)
     new_in_200 = True
 
     @paginated
@@ -2042,8 +2041,6 @@ class JobJobTasksList(BaseJobEventsList):
     and their completion status.
     """
     parent_model = Job
-    authentication_classes = [JobTaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
-    permission_classes = (JobTaskPermission,)
     view_name = 'Job Play Tasks List'
     new_in_200 = True
 
@@ -2175,6 +2172,174 @@ class JobJobTasksList(BaseJobEventsList):
         # Done; return the results and count.
         return (results, count, None)
 
+
+class AdHocCommandList(ListCreateAPIView):
+
+    model = AdHocCommand
+    serializer_class = AdHocCommandListSerializer
+    new_in_220 = True
+
+    def create(self, request, *args, **kwargs):
+        # Inject inventory ID if parent objects is a host/group.
+        if hasattr(self, 'get_parent_object') and not getattr(self, 'parent_key', None):
+            data = request.DATA
+            # HACK: Make request data mutable.
+            if getattr(data, '_mutable', None) is False:
+                data._mutable = True
+            parent_obj = self.get_parent_object()
+            if isinstance(parent_obj, (Host, Group)):
+                data['inventory'] = parent_obj.inventory_id
+        response = super(AdHocCommandList, self).create(request, *args, **kwargs)
+        if response.status_code != status.HTTP_201_CREATED:
+            return response
+        # Start ad hoc command running when created.
+        ad_hoc_command = get_object_or_400(self.model, pk=response.data['id'])
+        result = ad_hoc_command.signal_start(**request.DATA)
+        if not result:
+            data = dict(passwords_needed_to_start=ad_hoc_command.passwords_needed_to_start)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return response
+
+
+class InventoryAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
+
+    parent_model = Inventory
+    relationship = 'ad_hoc_commands'
+    parent_key = 'inventory'
+
+
+class GroupAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
+
+    parent_model = Group
+    relationship = 'ad_hoc_commands'
+
+
+class HostAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
+
+    parent_model = Host
+    relationship = 'ad_hoc_commands'
+
+
+class AdHocCommandDetail(RetrieveAPIView):
+
+    model = AdHocCommand
+    serializer_class = AdHocCommandSerializer
+    new_in_220 = True
+
+
+class AdHocCommandCancel(RetrieveAPIView):
+
+    model = AdHocCommand
+    serializer_class = AdHocCommandCancelSerializer
+    is_job_cancel = True
+    new_in_220 = True
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.can_cancel:
+            obj.cancel()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+
+
+class AdHocCommandRelaunch(GenericAPIView):
+
+    model = AdHocCommand
+    is_job_start = True
+    new_in_220 = True
+    # FIXME: Add serializer class to define fields in OPTIONS request!
+
+    @csrf_exempt
+    @transaction.non_atomic_requests
+    def dispatch(self, *args, **kwargs):
+        return super(AdHocCommandRelaunch, self).dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = {}
+        data['passwords_needed_to_start'] = obj.passwords_needed_to_start
+        return Response(data)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(self.model, 'start', obj):
+            raise PermissionDenied()
+        new_ad_hoc_command = obj.copy()
+        result = new_ad_hoc_command.signal_start(**request.DATA)
+        if not result:
+            data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data = dict(ad_hoc_command=new_ad_hoc_command.id)
+            return Response(data, status=status.HTTP_202_ACCEPTED)
+
+
+class AdHocCommandEventList(ListAPIView):
+
+    model = AdHocCommandEvent
+    serializer_class = AdHocCommandEventSerializer
+    new_in_220 = True
+
+
+class AdHocCommandEventDetail(RetrieveAPIView):
+
+    model = AdHocCommandEvent
+    serializer_class = AdHocCommandEventSerializer
+    new_in_220 = True
+
+
+class BaseAdHocCommandEventsList(SubListAPIView):
+
+    model = AdHocCommandEvent
+    serializer_class = AdHocCommandEventSerializer
+    parent_model = None # Subclasses must define this attribute.
+    relationship = 'ad_hoc_command_events'
+    view_name = 'Ad Hoc Command Events List'
+    new_in_220 = True
+
+
+class HostAdHocCommandEventsList(BaseAdHocCommandEventsList):
+
+    parent_model = Host
+    new_in_220 = True
+
+#class GroupJobEventsList(BaseJobEventsList):
+#    parent_model = Group
+
+
+class AdHocCommandAdHocCommandEventsList(BaseAdHocCommandEventsList):
+
+    parent_model = AdHocCommand
+    authentication_classes = [TaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    permission_classes = (TaskPermission,)
+    new_in_220 = True
+
+    # Post allowed for ad hoc event callback only.
+    def post(self, request, *args, **kwargs):
+        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        data = request.DATA.copy()
+        data['ad_hoc_command'] = parent_obj.pk
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            self.pre_save(serializer.object)
+            self.object = serializer.save(force_insert=True)
+            self.post_save(self.object, created=True)
+            headers = {'Location': serializer.data['url']}
+            return Response(serializer.data, status=status.HTTP_201_CREATED,
+                            headers=headers)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdHocCommandActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = AdHocCommand
+    relationship = 'activitystream_set'
+    new_in_220 = True
+
+
 class SystemJobList(ListCreateAPIView):
 
     model = SystemJob
@@ -2253,6 +2418,11 @@ class InventoryUpdateStdout(UnifiedJobStdout):
 class JobStdout(UnifiedJobStdout):
 
     model = Job
+
+class AdHocCommandStdout(UnifiedJobStdout):
+
+    model = AdHocCommand
+    new_in_220 = True
 
 class ActivityStreamList(SimpleListAPIView):
 

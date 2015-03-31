@@ -1,4 +1,4 @@
-# Copyright (c) 2014 AnsibleWorks, Inc.
+# Copyright (c) 2015 Ansible, Inc.
 # This file is a utility Ansible plugin that is not part of the AWX or Ansible
 # packages.  It does not import any code from either package, nor does its
 # license apply to Ansible or AWX.
@@ -65,28 +65,12 @@ class TokenAuth(requests.auth.AuthBase):
         return request
 
 
-class CallbackModule(object):
+class BaseCallbackModule(object):
     '''
     Callback module for logging ansible-playbook job events via the REST API.
     '''
 
-    # These events should never have an associated play.
-    EVENTS_WITHOUT_PLAY = [
-        'playbook_on_start',
-        'playbook_on_stats',
-    ]
-    # These events should never have an associated task.
-    EVENTS_WITHOUT_TASK = EVENTS_WITHOUT_PLAY + [
-        'playbook_on_setup',
-        'playbook_on_notify',
-        'playbook_on_import_for_host',
-        'playbook_on_not_import_for_host',
-        'playbook_on_no_hosts_matched',
-        'playbook_on_no_hosts_remaining',
-    ]
-
     def __init__(self):
-        self.job_id = int(os.getenv('JOB_ID'))
         self.base_url = os.getenv('REST_API_URL', '')
         self.auth_token = os.getenv('REST_API_TOKEN', '')
         self.callback_consumer_port = os.getenv('CALLBACK_CONSUMER_PORT', '')
@@ -128,12 +112,15 @@ class CallbackModule(object):
     def _post_job_event_queue_msg(self, event, event_data):
         self.counter += 1
         msg = {
-            'job_id': self.job_id,
             'event': event,
             'event_data': event_data,
             'counter': self.counter,
             'created': datetime.datetime.utcnow().isoformat(),
         }
+        if getattr(self, 'job_id', None):
+            msg['job_id'] = self.job_id
+        if getattr(self, 'ad_hoc_command_id', None):
+            msg['ad_hoc_command_id'] = self.ad_hoc_command_id
 
         active_pid = os.getpid()
         if self.job_callback_debug:
@@ -148,6 +135,7 @@ class CallbackModule(object):
                     self._init_connection()
                 if self.context is None:
                     self._start_connection()
+
                 self.socket.send_json(msg)
                 self.socket.recv()
                 return
@@ -174,25 +162,12 @@ class CallbackModule(object):
         url = urlparse.urlunsplit([parts.scheme,
                                    '%s:%d' % (parts.hostname, port),
                                    parts.path, parts.query, parts.fragment])
-        url_path = '/api/v1/jobs/%d/job_events/' % self.job_id
-        url = urlparse.urljoin(url, url_path)
+        url = urlparse.urljoin(url, self.rest_api_path)
         headers = {'content-type': 'application/json'}
         response = requests.post(url, data=data, headers=headers, auth=auth)
         response.raise_for_status()
 
     def _log_event(self, event, **event_data):
-        play = getattr(self, 'play', None)
-        play_name = getattr(play, 'name', '')
-        if play_name and event not in self.EVENTS_WITHOUT_PLAY:
-            event_data['play'] = play_name
-        task = getattr(self, 'task', None)
-        task_name = getattr(task, 'name', '')
-        role_name = getattr(task, 'role_name', '')
-        if task_name and event not in self.EVENTS_WITHOUT_TASK:
-            event_data['task'] = task_name
-        if role_name and event not in self.EVENTS_WITHOUT_TASK:
-            event_data['role'] = role_name
-
         if self.callback_consumer_port:
             self._post_job_event_queue_msg(event, event_data)
         else:
@@ -233,58 +208,8 @@ class CallbackModule(object):
     def runner_on_file_diff(self, host, diff):
         self._log_event('runner_on_file_diff', host=host, diff=diff)
 
-    def playbook_on_start(self):
-        self._log_event('playbook_on_start')
-
-    def playbook_on_notify(self, host, handler):
-        self._log_event('playbook_on_notify', host=host, handler=handler)
-
-    def playbook_on_no_hosts_matched(self):
-        self._log_event('playbook_on_no_hosts_matched')
-
-    def playbook_on_no_hosts_remaining(self):
-        self._log_event('playbook_on_no_hosts_remaining')
-
-    def playbook_on_task_start(self, name, is_conditional):
-        self._log_event('playbook_on_task_start', name=name,
-                        is_conditional=is_conditional)
-
-    def playbook_on_vars_prompt(self, varname, private=True, prompt=None,
-                                encrypt=None, confirm=False, salt_size=None,
-                                salt=None, default=None):
-        self._log_event('playbook_on_vars_prompt', varname=varname,
-                        private=private, prompt=prompt, encrypt=encrypt,
-                        confirm=confirm, salt_size=salt_size, salt=salt,
-                        default=default)
-
-    def playbook_on_setup(self):
-        self._log_event('playbook_on_setup')
-
-    def playbook_on_import_for_host(self, host, imported_file):
-        # don't care about recording this one
-        # self._log_event('playbook_on_import_for_host', host=host,
-        #                imported_file=imported_file)
-        pass
-
-    def playbook_on_not_import_for_host(self, host, missing_file):
-        # don't care about recording this one
-        #self._log_event('playbook_on_not_import_for_host', host=host,
-        #                missing_file=missing_file)
-        pass
-
-    def playbook_on_play_start(self, name):
-        # Only play name is passed via callback, get host pattern from the play.
-        pattern = getattr(getattr(self, 'play', None), 'hosts', name)
-        self._log_event('playbook_on_play_start', name=name, pattern=pattern)
-
-    def playbook_on_stats(self, stats):
-        d = {}
-        for attr in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
-            d[attr] = getattr(stats, attr)
-        self._log_event('playbook_on_stats', **d)
-        self._terminate_ssh_control_masters()
-
-    def _terminate_ssh_control_masters(self):
+    @staticmethod
+    def terminate_ssh_control_masters():
         # Determine if control persist is being used and if any open sockets
         # exist after running the playbook.
         cp_path = os.environ.get('ANSIBLE_SSH_CONTROL_PATH', '')
@@ -341,3 +266,116 @@ class CallbackModule(object):
                 time.sleep(1)
         for proc in procs_alive:
             proc.kill()
+
+
+class JobCallbackModule(BaseCallbackModule):
+    '''
+    Callback module for logging ansible-playbook job events via the REST API.
+    '''
+
+    # These events should never have an associated play.
+    EVENTS_WITHOUT_PLAY = [
+        'playbook_on_start',
+        'playbook_on_stats',
+    ]
+    # These events should never have an associated task.
+    EVENTS_WITHOUT_TASK = EVENTS_WITHOUT_PLAY + [
+        'playbook_on_setup',
+        'playbook_on_notify',
+        'playbook_on_import_for_host',
+        'playbook_on_not_import_for_host',
+        'playbook_on_no_hosts_matched',
+        'playbook_on_no_hosts_remaining',
+    ]
+
+    def __init__(self):
+        self.job_id = int(os.getenv('JOB_ID', '0'))
+        self.rest_api_path = '/api/v1/jobs/%d/job_events/' % self.job_id
+        super(JobCallbackModule, self).__init__()
+
+    def _log_event(self, event, **event_data):
+        play = getattr(self, 'play', None)
+        play_name = getattr(play, 'name', '')
+        if play_name and event not in self.EVENTS_WITHOUT_PLAY:
+            event_data['play'] = play_name
+        task = getattr(self, 'task', None)
+        task_name = getattr(task, 'name', '')
+        role_name = getattr(task, 'role_name', '')
+        if task_name and event not in self.EVENTS_WITHOUT_TASK:
+            event_data['task'] = task_name
+        if role_name and event not in self.EVENTS_WITHOUT_TASK:
+            event_data['role'] = role_name
+        super(JobCallbackModule, self)._log_event(event, **event_data)
+
+    def playbook_on_start(self):
+        self._log_event('playbook_on_start')
+
+    def playbook_on_notify(self, host, handler):
+        self._log_event('playbook_on_notify', host=host, handler=handler)
+
+    def playbook_on_no_hosts_matched(self):
+        self._log_event('playbook_on_no_hosts_matched')
+
+    def playbook_on_no_hosts_remaining(self):
+        self._log_event('playbook_on_no_hosts_remaining')
+
+    def playbook_on_task_start(self, name, is_conditional):
+        self._log_event('playbook_on_task_start', name=name,
+                        is_conditional=is_conditional)
+
+    def playbook_on_vars_prompt(self, varname, private=True, prompt=None,
+                                encrypt=None, confirm=False, salt_size=None,
+                                salt=None, default=None):
+        self._log_event('playbook_on_vars_prompt', varname=varname,
+                        private=private, prompt=prompt, encrypt=encrypt,
+                        confirm=confirm, salt_size=salt_size, salt=salt,
+                        default=default)
+
+    def playbook_on_setup(self):
+        self._log_event('playbook_on_setup')
+
+    def playbook_on_import_for_host(self, host, imported_file):
+        # don't care about recording this one
+        # self._log_event('playbook_on_import_for_host', host=host,
+        #                imported_file=imported_file)
+        pass
+
+    def playbook_on_not_import_for_host(self, host, missing_file):
+        # don't care about recording this one
+        #self._log_event('playbook_on_not_import_for_host', host=host,
+        #                missing_file=missing_file)
+        pass
+
+    def playbook_on_play_start(self, name):
+        # Only play name is passed via callback, get host pattern from the play.
+        pattern = getattr(getattr(self, 'play', None), 'hosts', name)
+        self._log_event('playbook_on_play_start', name=name, pattern=pattern)
+
+    def playbook_on_stats(self, stats):
+        d = {}
+        for attr in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
+            d[attr] = getattr(stats, attr)
+        self._log_event('playbook_on_stats', **d)
+        self.terminate_ssh_control_masters()
+
+
+class AdHocCommandCallbackModule(BaseCallbackModule):
+    '''
+    Callback module for logging ansible ad hoc events via ZMQ or the REST API.
+    '''
+
+    # FIXME: Clean up lingering control persist sockets.
+
+    def __init__(self):
+        self.ad_hoc_command_id = int(os.getenv('AD_HOC_COMMAND_ID', '0'))
+        self.rest_api_path = '/api/v1/ad_hoc_commands/%d/events/' % self.ad_hoc_command_id
+        super(AdHocCommandCallbackModule, self).__init__()
+
+    def runner_on_file_diff(self, host, diff):
+        pass # Ignore file diff for ad hoc commands.
+
+
+if os.getenv('JOB_ID', ''):
+    CallbackModule = JobCallbackModule
+elif os.getenv('AD_HOC_COMMAND_ID', ''):
+    CallbackModule = AdHocCommandCallbackModule

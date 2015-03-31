@@ -19,7 +19,7 @@ from awx.main.utils import get_object_or_400
 logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
-           'JobTaskPermission']
+           'TaskPermission']
 
 class ModelAccessPermission(permissions.BasePermission):
     '''
@@ -160,31 +160,31 @@ class JobTemplateCallbackPermission(ModelAccessPermission):
         else:
             return True
 
-class JobTaskPermission(ModelAccessPermission):
+class TaskPermission(ModelAccessPermission):
     '''
     Permission checks used for API callbacks from running a task.
     '''
 
     def has_permission(self, request, view, obj=None):
-        # If another authentication method was used other than the one for job
+        # If another authentication method was used other than the one for
         # callbacks, default to the superclass permissions checking.
         if request.user or not request.auth:
-            return super(JobTaskPermission, self).has_permission(request, view, obj)
+            return super(TaskPermission, self).has_permission(request, view, obj)
 
-        # Verify that the job ID present in the auth token is for a valid,
-        # active job.
+        # Verify that the ID present in the auth token is for a valid, active
+        # unified job.
         try:
-            job = Job.objects.get(active=True, status='running',
-                                  pk=int(request.auth.split('-')[0]))
-        except (Job.DoesNotExist, TypeError):
+            unified_job = UnifiedJob.objects.get(active=True, status='running',
+                                                 pk=int(request.auth.split('-')[0]))
+        except (UnifiedJob.DoesNotExist, TypeError):
             return False
 
         # Verify that the request method is one of those allowed for the given
         # view, also that the job or inventory being accessed matches the auth
         # token.
         if view.model == Inventory and request.method.lower() in ('head', 'get'):
-            return bool(not obj or obj.pk == job.inventory.pk)
-        elif view.model == JobEvent and request.method.lower() == 'post':
-            return bool(not obj or obj.pk == job.pk)
+            return bool(not obj or obj.pk == unified_job.inventory_id)
+        elif view.model in (JobEvent, AdHocCommandEvent) and request.method.lower() == 'post':
+            return bool(not obj or obj.pk == unified_job.pk)
         else:
             return False

@@ -343,6 +343,29 @@ AWX_PROOT_SHOW_PATHS = []
 # Number of jobs to show as part of the job template history
 AWX_JOB_TEMPLATE_HISTORY = 10
 
+# Default list of modules allowed for ad hoc commands.
+AD_HOC_COMMANDS = [
+    'command',
+    'shell',
+    'yum',
+    'apt',
+    'apt_key',
+    'apt_repository',
+    'apt_rpm',
+    'service',
+    'group',
+    'user',
+    'mount',
+    'ping',
+    'selinux',
+    'setup',
+    'win_ping',
+    'win_service',
+    'win_updates',
+    'win_group',
+    'win_user',
+]
+
 # Not possible to get list of regions without authenticating, so use this list
 # instead (based on docs from:
 # http://docs.rackspace.com/loadbalancers/api/v1.0/clb-devguide/content/Service_Access_Endpoints-d1e517.html)

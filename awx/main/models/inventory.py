@@ -722,6 +722,11 @@ class Group(CommonModelNameNotUnique):
         from awx.main.models.jobs import JobEvent
         return JobEvent.objects.filter(host__in=self.all_hosts)
 
+    @property
+    def ad_hoc_commands(self):
+        from awx.main.models.ad_hoc_commands import AdHocCommand
+        return AdHocCommand.objects.filter(hosts__in=self.all_hosts)
+
 
 class InventorySourceOptions(BaseModel):
     '''

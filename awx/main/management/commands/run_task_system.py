@@ -48,6 +48,8 @@ class SimpleDAG(object):
         def short_string_obj(obj):
             if type(obj) == Job:
                 type_str = "Job"
+            if type(obj) == AdHocCommand:
+                type_str = "AdHocCommand"
             elif type(obj) == InventoryUpdate:
                 type_str = "Inventory"
             elif type(obj) == ProjectUpdate:
@@ -100,6 +102,8 @@ class SimpleDAG(object):
     def get_node_type(self, obj):
         if type(obj) == Job:
             return "job"
+        elif type(obj) == AdHocCommand:
+            return "ad_hoc_command"
         elif type(obj) == InventoryUpdate:
             return "inventory_update"
         elif type(obj) == ProjectUpdate:
@@ -136,13 +140,14 @@ def get_tasks():
     RELEVANT_JOBS = ('pending', 'waiting', 'running')
     # TODO: Replace this when we can grab all objects in a sane way.
     graph_jobs = [j for j in Job.objects.filter(status__in=RELEVANT_JOBS)]
+    graph_ad_hoc_commands = [ahc for ahc in AdHocCommand.objects.filter(status__in=RELEVANT_JOBS)]
     graph_inventory_updates = [iu for iu in
                                InventoryUpdate.objects.filter(status__in=RELEVANT_JOBS)]
     graph_project_updates = [pu for pu in
                              ProjectUpdate.objects.filter(status__in=RELEVANT_JOBS)]
     graph_system_jobs = [sj for sj in
                          SystemJob.objects.filter(status__in=RELEVANT_JOBS)]
-    all_actions = sorted(graph_jobs + graph_inventory_updates +
+    all_actions = sorted(graph_jobs + graph_ad_hoc_commands + graph_inventory_updates +
                          graph_project_updates + graph_system_jobs,
                          key=lambda task: task.created)
     return all_actions
