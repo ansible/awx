@@ -409,7 +409,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 class UnifiedJobSerializer(BaseSerializer):
 
     result_stdout = serializers.Field(source='result_stdout')
-    unified_job_template = serializers.Field(source='unified_job_template')
+    unified_job_template = serializers.Field(source='unified_job_template_id')
 
     class Meta:
         model = UnifiedJob
