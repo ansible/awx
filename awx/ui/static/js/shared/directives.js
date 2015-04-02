@@ -402,7 +402,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
      *  Include the standard TB data-XXX attributes to controll a tooltip's appearance.  We will
      *  default placement to the left and delay to the config setting.
      */
-    .directive('awToolTip', ['$sce', function($sce) {
+    .directive('awToolTip', [ function() {
         return {
             link: function(scope, element, attrs) {
                 var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : ($AnsibleConfig) ? $AnsibleConfig.tooltip_delay : {show: 500, hide: 100},
@@ -423,9 +423,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     });
                 });
 
-                attrs.awToolTip = attrs.awToolTip.replace(/</g, "&lt;");
-                attrs.awToolTip = attrs.awToolTip.replace(/>/g, "&gt;");
-                attrs.awToolTip = $sce.getTrustedHtml(attrs.awToolTip);
                 $(element).tooltip({
                     placement: placement,
                     delay: delay,

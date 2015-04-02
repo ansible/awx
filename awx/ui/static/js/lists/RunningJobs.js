@@ -9,7 +9,7 @@
 
 
 export default
-    angular.module('RunningJobsDefinition', [])
+    angular.module('RunningJobsDefinition', ['sanitizeFilter'])
     .value( 'RunningJobsList', {
 
         name: 'running_jobs',
@@ -63,7 +63,9 @@ export default
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-4 col-xs-4',
                 ngClick: "viewJobLog(running_job.id, running_job.nameHref)",
-                defaultSearchField: true
+                defaultSearchField: true,
+                awToolTip: "{{ running_job.name | sanitize }}",
+                awTipPlacement: "top"
             }
         },
 

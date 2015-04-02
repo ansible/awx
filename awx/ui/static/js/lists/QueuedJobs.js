@@ -9,7 +9,7 @@
 
 
 export default
-    angular.module('QueuedJobsDefinition', [])
+    angular.module('QueuedJobsDefinition', ['sanitizeFilter'])
     .value( 'QueuedJobsList', {
 
         name: 'queued_jobs',
@@ -62,7 +62,9 @@ export default
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-4 col-xs-4',
                 ngClick: "viewJobLog(queued_job.id, queued_job.nameHref)",
-                defaultSearchField: true
+                defaultSearchField: true,
+                awToolTip: "{{ queued_job.name | sanitize }}",
+                awTipPlacement: "top"
             }
         },
 

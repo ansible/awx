@@ -9,7 +9,7 @@
 
 
 export default
-    angular.module('CompletedJobsDefinition', [])
+    angular.module('CompletedJobsDefinition', ['sanitizeFilter'])
     .value( 'CompletedJobsList', {
 
         name: 'completed_jobs',
@@ -70,7 +70,9 @@ export default
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-4 col-xs-4',
                 ngClick: "viewJobLog(completed_job.id, completed_job.nameHref)",
-                defaultSearchField: true
+                defaultSearchField: true,
+                awToolTip: "{{ completed_job.name | sanitize }}",
+                dataPlacement: 'top'
             },
             failed: {
                 label: 'Job failed?',
