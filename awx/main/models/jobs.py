@@ -170,6 +170,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         default=False,
     )
 
+    become_enabled = models.BooleanField(
+        default=False,
+    )
+
     survey_spec = JSONField(
         blank=True,
         default={},
@@ -934,7 +938,6 @@ class JobEvent(CreatedModifiedModel):
                         host_summary.save(update_fields=update_fields)
             job.inventory.update_computed_fields()
             emit_websocket_notification('/socket.io/jobs', 'summary_complete', dict(unified_job_id=job.id))
-
 
 class SystemJobOptions(BaseModel):
     '''

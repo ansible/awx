@@ -18,7 +18,7 @@ import time
 import traceback
 import urlparse
 import uuid
-
+from distutils.version import LooseVersion as Version
 import dateutil.parser
 
 # Pexpect
@@ -605,11 +605,14 @@ class RunJob(BaseTask):
         optionally using ssh-agent for public/private key authentication.
         '''
         creds = job.credential
-        ssh_username, sudo_username, su_username = '', '', ''
+        ssh_username, become_username, become_method = '', '', ''
         if creds:
             ssh_username = kwargs.get('username', creds.username)
-            sudo_username = kwargs.get('sudo_username', creds.sudo_username)
-            su_username = kwargs.get('su_username', creds.su_username)
+            become_method = kwargs.get('become_method', creds.become_method)
+            become_username = kwargs.get('become_username', creds.become_username)
+        else:
+            become_method = None
+            become_username = ""
         # Always specify the normal SSH user as root by default.  Since this
         # task is normally running in the background under a service account,
         # it doesn't make sense to rely on ansible-playbook's default of using
@@ -623,16 +626,37 @@ class RunJob(BaseTask):
         args.extend(['-u', ssh_username])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
+        try:
+            if Version(kwargs['ansible_version']) < Version('1.9'):
+                if become_method and become_method == "sudo" and become_username != "":
+                    args.extend(['-U', become_username])
+                if become_method and become_method == "sudo" and "become_password" in kwargs.get("passwords", {}):
+                    args.append("--ask-sudo-pass")
+                if become_method and become_method == "su" and become_username != "":
+                    args.extend(['-R', become_username])
+                if become_method and become_method == "su" and "become_password" in kwargs.get("passwords", {}):
+                    args.append("--ask-su-pass")
+            else:
+                if job.job_template.become_enabled:
+                    args.append('--become')
+                if become_method:
+                    args.append('--become-method', become_method)
+                if become_username:
+                    args.append('--become-username', become_username)
+                if 'become_password' in kwargs.get('passwords', {}):
+                    args.append('--ask-become-pass')
+        except ValueError:
+            pass
         # We only specify sudo/su user and password if explicitly given by the
         # credential.  Credential should never specify both sudo and su.
-        if su_username:
-            args.extend(['-R', su_username])
-        if 'su_password' in kwargs.get('passwords', {}):
-            args.append('--ask-su-pass')
-        if sudo_username:
-            args.extend(['-U', sudo_username])
-        if 'sudo_password' in kwargs.get('passwords', {}):
-            args.append('--ask-sudo-pass')
+        # if su_username:
+        #     args.extend(['-R', su_username])
+        # if 'su_password' in kwargs.get('passwords', {}):
+        #     args.append('--ask-su-pass')
+        # if sudo_username:
+        #     args.extend(['-U', sudo_username])
+        # if 'sudo_password' in kwargs.get('passwords', {}):
+        #     args.append('--ask-sudo-pass')
 
         # Support prompting for a vault password.
         if 'vault_password' in kwargs.get('passwords', {}):

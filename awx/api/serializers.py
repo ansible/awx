@@ -1255,16 +1255,15 @@ class CredentialSerializer(BaseSerializer):
     password = serializers.WritableField(required=False, default='')
     ssh_key_data = serializers.WritableField(required=False, default='')
     ssh_key_unlock = serializers.WritableField(required=False, default='')
-    sudo_password = serializers.WritableField(required=False, default='')
-    su_password = serializers.WritableField(required=False, default='')
+    become_password = serializers.WritableField(required=False, default='')
     vault_password = serializers.WritableField(required=False, default='')
 
     class Meta:
         model = Credential
         fields = ('*', 'user', 'team', 'kind', 'cloud', 'host', 'username',
                   'password', 'project', 'ssh_key_data', 'ssh_key_unlock',
-                  'sudo_username', 'sudo_password', 'su_username',
-                  'su_password', 'vault_password')
+                  'become_method', 'become_username', 'become_password',
+                  'vault_password')
 
     def to_native(self, obj):
         ret = super(CredentialSerializer, self).to_native(obj)
@@ -1357,7 +1356,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
     class Meta:
         model = JobTemplate
-        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'survey_enabled')
+        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'survey_enabled', 'become_enabled')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)

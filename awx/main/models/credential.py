@@ -36,8 +36,17 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         ('azure',  _('Microsoft Azure')),
     ]
 
+    BECOME_METHOD_CHOICES = [
+        ('',       _('None')),
+        ('sudo',   _('Sudo')),
+        ('su',     _('Su')),
+        ('pbrun',  _('Pbrun')),
+        ('pfexec', _('Pfexec')),
+        ('runas',  _('Runas')),
+    ]
+
     PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock',
-                       'sudo_password', 'su_password', 'vault_password')
+                       'become_password', 'vault_password')
 
     class Meta:
         app_label = 'main'
@@ -112,29 +121,24 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         help_text=_('Passphrase to unlock SSH private key if encrypted (or '
                     '"ASK" to prompt the user for machine credentials).'),
     )
-    sudo_username = models.CharField(
-        max_length=1024,
+    become_method = models.CharField(
+        max_length=32,
         blank=True,
         default='',
-        help_text=_('Sudo username for a job using this credential.'),
+        choices=BECOME_METHOD_CHOICES,
+        help_text=_('Privilege escalation method.')
     )
-    sudo_password = models.CharField(
+    become_username = models.CharField(
         max_length=1024,
         blank=True,
         default='',
-        help_text=_('Sudo password (or "ASK" to prompt the user).'),
+        help_text=_('Privilege escalation username.'),
     )
-    su_username = models.CharField(
+    become_password = models.CharField(
         max_length=1024,
         blank=True,
         default='',
-        help_text=_('Su username for a job using this credential.'),
-    )
-    su_password = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        help_text=_('Su password (or "ASK" to prompt the user).'),
+        help_text=_('Password for privilege escalation method.')
     )
     vault_password = models.CharField(
         max_length=1024,
@@ -162,12 +166,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         return False
 
     @property
-    def needs_sudo_password(self):
-        return self.kind == 'ssh' and self.sudo_password == 'ASK'
-
-    @property
-    def needs_su_password(self):
-        return self.kind == 'ssh' and self.su_password == 'ASK'
+    def needs_become_password(self):
+        return self.kind == 'ssh' and self.become_password == 'ASK'
 
     @property
     def needs_vault_password(self):
@@ -176,7 +176,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     @property
     def passwords_needed(self):
         needed = []
-        for field in ('password', 'sudo_password', 'su_password', 'ssh_key_unlock', 'vault_password'):
+        for field in ('password', 'become_password', 'ssh_key_unlock', 'vault_password'):
             if getattr(self, 'needs_%s' % field):
                 needed.append(field)
         return needed
@@ -322,8 +322,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     def clean(self):
         if self.user and self.team:
             raise ValidationError('Credential cannot be assigned to both a user and team')
-        if (self.sudo_username or self.sudo_password) and (self.su_username or self.su_password):
-            raise ValidationError('Credential cannot specify both sudo username/password and su username/password')
 
     def _validate_unique_together_with_null(self, unique_check, exclude=None):
         # Based on existing Django model validation code, except it doesn't
