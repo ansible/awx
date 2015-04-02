@@ -532,7 +532,7 @@ class RunJob(BaseTask):
         passwords = super(RunJob, self).build_passwords(job, **kwargs)
         creds = job.credential
         if creds:
-            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password', 'su_password', 'vault_password'):
+            for field in ('ssh_key_unlock', 'ssh_password', 'become_password', 'vault_password'):
                 if field == 'ssh_password':
                     value = kwargs.get(field, decrypt_field(creds, 'password'))
                 else:
@@ -640,24 +640,13 @@ class RunJob(BaseTask):
                 if job.job_template.become_enabled:
                     args.append('--become')
                 if become_method:
-                    args.append('--become-method', become_method)
+                    args.extend(['--become-method', become_method])
                 if become_username:
-                    args.append('--become-username', become_username)
+                    args.extend(['--become-user', become_username])
                 if 'become_password' in kwargs.get('passwords', {}):
                     args.append('--ask-become-pass')
         except ValueError:
             pass
-        # We only specify sudo/su user and password if explicitly given by the
-        # credential.  Credential should never specify both sudo and su.
-        # if su_username:
-        #     args.extend(['-R', su_username])
-        # if 'su_password' in kwargs.get('passwords', {}):
-        #     args.append('--ask-su-pass')
-        # if sudo_username:
-        #     args.extend(['-U', sudo_username])
-        # if 'sudo_password' in kwargs.get('passwords', {}):
-        #     args.append('--ask-sudo-pass')
-
         # Support prompting for a vault password.
         if 'vault_password' in kwargs.get('passwords', {}):
             args.append('--ask-vault-pass')
@@ -701,7 +690,6 @@ class RunJob(BaseTask):
             args.append("scan_facts.yml")
         else:
             args.append(job.playbook)
-
         return args
 
     def build_cwd(self, job, **kwargs):
@@ -721,10 +709,10 @@ class RunJob(BaseTask):
         d = super(RunJob, self).get_password_prompts()
         d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
         d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
-        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'sudo_password'
-        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'sudo_password'
-        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'su_password'
-        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'su_password'
+        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'

@@ -935,9 +935,10 @@ class RunJobTest(BaseJobExecutionTest):
         self.check_job_result(job, 'successful')
         self.assertTrue('"--ask-pass"' in job.job_args)
 
-    def test_sudo_username_and_password(self):
-        self.create_test_credential(sudo_username='sudouser',
-                                    sudo_password='sudopass')
+    def test_become_username_and_password(self):
+        self.create_test_credential(become_method='sudo',
+                                    become_username='sudouser',
+                                    become_password='sudopass')
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
@@ -945,77 +946,65 @@ class RunJobTest(BaseJobExecutionTest):
         self.assertFalse(job.passwords_needed_to_start)
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
-        # Job may fail if current user doesn't have password-less sudo
+        # Job may fail if current user doesn't have password-less become
         # privileges, but we're mainly checking the command line arguments.
         self.check_job_result(job, ('successful', 'failed'))
-        self.assertTrue('"-U"' in job.job_args)
-        self.assertTrue('"--ask-sudo-pass"' in job.job_args)
-        self.assertFalse('"-s"' in job.job_args)
-        self.assertFalse('"-R"' in job.job_args)
-        self.assertFalse('"--ask-su-pass"' in job.job_args)
-        self.assertFalse('"-S"' in job.job_args)
+        self.assertTrue('"--become-user"' in job.job_args)
+        self.assertTrue('"--become-method"' in job.job_args)
+        self.assertTrue('"--ask-become-pass"' in job.job_args)
 
-    def test_sudo_ask_password(self):
-        self.create_test_credential(sudo_password='ASK')
+    def test_become_ask_password(self):
+        self.create_test_credential(become_password='ASK')
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
         self.assertTrue(job.passwords_needed_to_start)
-        self.assertTrue('sudo_password' in job.passwords_needed_to_start)
-        self.assertFalse('su_password' in job.passwords_needed_to_start)
+        self.assertTrue('become_password' in job.passwords_needed_to_start)
         self.assertFalse(job.signal_start())
-        self.assertTrue(job.signal_start(sudo_password='sudopass'))
+        self.assertTrue(job.signal_start(become_password='sudopass'))
         job = Job.objects.get(pk=job.pk)
-        # Job may fail if current user doesn't have password-less sudo
+        # Job may fail if current user doesn't have password-less become
         # privileges, but we're mainly checking the command line arguments.
         self.assertTrue(job.status in ('successful', 'failed'))
-        self.assertTrue('"--ask-sudo-pass"' in job.job_args)
-        self.assertFalse('"-s"' in job.job_args)
-        self.assertFalse('"-R"' in job.job_args)
-        self.assertFalse('"--ask-su-pass"' in job.job_args)
-        self.assertFalse('"-S"' in job.job_args)
+        self.assertTrue('"--ask-become-pass"' in job.job_args)
+        self.assertFalse('"--become-user"' in job.job_args)
+        self.assertFalse('"--become-method"' in job.job_args)
 
-    def test_su_username_and_password(self):
-        self.create_test_credential(su_username='suuser',
-                                    su_password='supass')
+    def test_job_template_become_enabled(self):
         self.create_test_project(TEST_PLAYBOOK)
-        job_template = self.create_test_job_template()
+        job_template = self.create_test_job_template(become_enabled=True)
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
         self.assertFalse(job.passwords_needed_to_start)
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
-        # Job may fail, but we're mainly checking the command line arguments.
-        self.check_job_result(job, ('successful', 'failed'))
-        self.assertTrue('"-R"' in job.job_args)
-        self.assertTrue('"--ask-su-pass"' in job.job_args)
-        self.assertFalse('"-S"' in job.job_args)
-        self.assertFalse('"-U"' in job.job_args)
-        self.assertFalse('"--ask-sudo-pass"' in job.job_args)
-        self.assertFalse('"-s"' in job.job_args)
+        # Job may fail if current user doesn't have password-less become
+        # privileges, but we're mainly checking the command line arguments.
+        self.assertTrue(job.status in ('successful', 'failed'))
+        self.assertTrue('"--become"' in job.job_args)
+        self.assertFalse('"--become-user"' in job.job_args)
+        self.assertFalse('"--become-method"' in job.job_args)
 
-    def test_su_ask_password(self):
-        self.create_test_credential(su_password='ASK')
+    def test_become_enabled_with_username_and_password(self):
+        self.create_test_credential(become_method='sudo',
+                                    become_username='sudouser',
+                                    become_password='sudopass')
         self.create_test_project(TEST_PLAYBOOK)
-        job_template = self.create_test_job_template()
+        job_template = self.create_test_job_template(become_enabled=True)
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
-        self.assertTrue(job.passwords_needed_to_start)
-        self.assertTrue('su_password' in job.passwords_needed_to_start)
-        self.assertFalse('sudo_password' in job.passwords_needed_to_start)
-        self.assertFalse(job.signal_start())
-        self.assertTrue(job.signal_start(su_password='supass'))
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
-        # Job may fail, but we're mainly checking the command line arguments.
-        self.assertTrue(job.status in ('successful', 'failed'))
-        self.assertTrue('"--ask-su-pass"' in job.job_args)
-        self.assertFalse('"-S"' in job.job_args)
-        self.assertFalse('"-R"' in job.job_args)
-        self.assertFalse('"-U"' in job.job_args)
-        self.assertFalse('"--ask-sudo-pass"' in job.job_args)
-        self.assertFalse('"-s"' in job.job_args)
-
+        # Job may fail if current user doesn't have password-less become
+        # privileges, but we're mainly checking the command line arguments.
+        self.check_job_result(job, ('successful', 'failed'))
+        self.assertTrue('"--become-user"' in job.job_args)
+        self.assertTrue('"--become-method"' in job.job_args)
+        self.assertTrue('"--ask-become-pass"' in job.job_args)
+        self.assertTrue('"--become"' in job.job_args)
+        
     def test_unlocked_ssh_key(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA)
         self.create_test_project(TEST_PLAYBOOK)
