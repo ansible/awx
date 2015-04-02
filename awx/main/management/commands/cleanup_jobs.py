@@ -12,7 +12,7 @@ from django.db import transaction
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import Job, ProjectUpdate, InventoryUpdate, SystemJob
+from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob
 
 class Command(NoArgsCommand):
     '''
@@ -30,6 +30,9 @@ class Command(NoArgsCommand):
         make_option('--jobs', dest='only_jobs', action='store_true',
                     default=False,
                     help='Only remove jobs'),
+        make_option('--ad-hoc-commands', dest='only_ad_hoc_commands',
+                    action='store_true', default=False,
+                    help='Only remove ad hoc commands'),
         make_option('--project-updates', dest='only_project_updates',
                     action='store_true', default=False,
                     help='Only remove project updates'),
@@ -59,6 +62,23 @@ class Command(NoArgsCommand):
                 self.logger.info('%s %s', action_text, job_display)
                 if not self.dry_run:
                     job.delete()
+
+    def cleanup_ad_hoc_commands(self):
+        for ad_hoc_command in AdHocCommand.objects.all():
+            ad_hoc_command_display = '"%s" (started %s, %d events)' % \
+                          (unicode(ad_hoc_command), unicode(ad_hoc_command.created),
+                           ad_hoc_command.ad_hoc_command_events.count())
+            if ad_hoc_command.status in ('pending', 'waiting', 'running'):
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s ad hoc command %s', action_text, ad_hoc_command.status, ad_hoc_command_display)
+            elif ad_hoc_command.created >= self.cutoff:
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s', action_text, ad_hoc_command_display)
+            else:
+                action_text = 'would delete' if self.dry_run else 'deleting'
+                self.logger.info('%s %s', action_text, ad_hoc_command_display)
+                if not self.dry_run:
+                    ad_hoc_command.delete()
 
     def cleanup_project_updates(self):
         for pu in ProjectUpdate.objects.all():
@@ -131,15 +151,13 @@ class Command(NoArgsCommand):
             self.cutoff = now() - datetime.timedelta(days=self.days)
         except OverflowError:
             raise CommandError('--days specified is too large. Try something less than 99999 (about 270 years).')
-        self.only_jobs = bool(options.get('only_jobs', False))
-        self.only_project_updates = bool(options.get('only_project_updates', False))
-        self.only_inventory_updates = bool(options.get('only_inventory_updates', False))
-        self.only_management_jobs = bool(options.get('only_management_jobs', False))
-        if self.only_jobs or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates and not self.only_management_jobs):
-            self.cleanup_jobs()
-        if self.only_project_updates or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates and not self.only_management_jobs):
-            self.cleanup_project_updates()
-        if self.only_inventory_updates or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates and not self.only_management_jobs):
-            self.cleanup_inventory_updates()
-        if self.only_management_jobs or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates and not self.only_management_jobs):
-            self.cleanup_management_jobs()
+        model_names = ('jobs', 'ad_hoc_commands', 'project_updates', 'inventory_updates', 'management_jobs')
+        models_to_cleanup = set()
+        for m in model_names:
+            if options.get('only_%s' % m, False):
+                models_to_cleanup.add(m)
+        if not models_to_cleanup:
+            models_to_cleanup.update(model_names)
+        for m in model_names:
+            if m in models_to_cleanup:
+                getattr(self, 'cleanup_%s' % m)()

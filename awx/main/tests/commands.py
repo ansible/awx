@@ -362,14 +362,30 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
             self.job = Job.objects.create(**opts)
         return self.job
 
+    def create_test_ad_hoc_command(self, **kwargs):
+        opts = {
+            'inventory': self.inventory,
+            'credential': self.credential,
+            'module_name': 'command',
+            'module_args': 'uptime',
+        }
+        opts.update(kwargs)
+        self.ad_hoc_command = AdHocCommand.objects.create(**opts)
+        return self.ad_hoc_command
+
     def test_cleanup_jobs(self):
         # Test with no jobs to be cleaned up.
         jobs_before = Job.objects.all().count()
         self.assertFalse(jobs_before)
+        ad_hoc_commands_before = AdHocCommand.objects.all().count()
+        self.assertFalse(ad_hoc_commands_before)
         result, stdout, stderr = self.run_command('cleanup_jobs')
         self.assertEqual(result, None)
         jobs_after = Job.objects.all().count()
         self.assertEqual(jobs_before, jobs_after)
+        ad_hoc_commands_after = AdHocCommand.objects.all().count()
+        self.assertEqual(ad_hoc_commands_before, ad_hoc_commands_after)
+
         # Create and run job.
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
@@ -379,29 +395,54 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.assertEqual(job.status, 'successful')
+
+        # Create and run ad hoc command.
+        ad_hoc_command = self.create_test_ad_hoc_command()
+        self.assertEqual(ad_hoc_command.status, 'new')
+        self.assertFalse(ad_hoc_command.passwords_needed_to_start)
+        self.assertTrue(ad_hoc_command.signal_start())
+        ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
+        self.assertEqual(ad_hoc_command.status, 'successful')
+        
         # With days=1, no jobs will be deleted.
         jobs_before = Job.objects.all().count()
         self.assertTrue(jobs_before)
+        ad_hoc_commands_before = AdHocCommand.objects.all().count()
+        self.assertTrue(ad_hoc_commands_before)
         result, stdout, stderr = self.run_command('cleanup_jobs', days=1)
         self.assertEqual(result, None)
         jobs_after = Job.objects.all().count()
         self.assertEqual(jobs_before, jobs_after)
+        ad_hoc_commands_after = AdHocCommand.objects.all().count()
+        self.assertEqual(ad_hoc_commands_before, ad_hoc_commands_after)
+
         # With days=0 and dry_run=True, no jobs will be deleted.
         jobs_before = Job.objects.all().count()
         self.assertTrue(jobs_before)
+        ad_hoc_commands_before = AdHocCommand.objects.all().count()
+        self.assertTrue(ad_hoc_commands_before)
         result, stdout, stderr = self.run_command('cleanup_jobs', days=0,
                                                   dry_run=True)
         self.assertEqual(result, None)
         jobs_after = Job.objects.all().count()
         self.assertEqual(jobs_before, jobs_after)
-        # With days=0, our job will be deleted.
+        ad_hoc_commands_after = AdHocCommand.objects.all().count()
+        self.assertEqual(ad_hoc_commands_before, ad_hoc_commands_after)
+
+        # With days=0, our job and ad hoc command will be deleted.
         jobs_before = Job.objects.all().count()
         self.assertTrue(jobs_before)
+        ad_hoc_commands_before = AdHocCommand.objects.all().count()
+        self.assertTrue(ad_hoc_commands_before)
         result, stdout, stderr = self.run_command('cleanup_jobs', days=0)
         self.assertEqual(result, None)
         jobs_after = Job.objects.all().count()
         self.assertNotEqual(jobs_before, jobs_after)
         self.assertFalse(jobs_after)
+        ad_hoc_commands_after = AdHocCommand.objects.all().count()
+        self.assertNotEqual(ad_hoc_commands_before, ad_hoc_commands_after)
+        self.assertFalse(ad_hoc_commands_after)
+
 
 class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
     '''
