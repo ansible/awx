@@ -158,6 +158,21 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
         variable: 'credential_kind_options'
     });
 
+    // GetChoices({
+    //     scope: $scope,
+    //     url: defaultUrl,
+    //     field: 'become',
+    //     variable: 'become_options'
+    // });
+
+    $scope.become_options = [
+        { value: 'sudo', label: 'Sudo' },
+        { value: 'su', label: 'Su' },
+        { value: 'pbrun', label: 'Pbrun'},
+        { value: 'pfexec', label: 'Pfexec'},
+        { value: 'runas', label: 'Runas'}
+    ];
+
     LookUpInit({
         scope: $scope,
         form: form,
@@ -314,7 +329,13 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
     $scope.id = id;
-
+    $scope.become_options = [
+        { value: 'sudo', label: 'Sudo' },
+        { value: 'su', label: 'Su' },
+        { value: 'pbrun', label: 'Pbrun'},
+        { value: 'pfexec', label: 'Pfexec'},
+        { value: 'runas', label: 'Runas'}
+    ];
     function setAskCheckboxes() {
         var fld, i;
         for (fld in form.fields) {

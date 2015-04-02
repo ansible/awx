@@ -274,27 +274,13 @@ export default
                     hasShowInputButton: true,
                     askShow: "kind.value == 'ssh'",  // Only allow ask for machine credentials
                 },
-                "login_method": {
-                    label: "Privilege Escalation Credential",
+                "become_method": {
+                    label: "Privilege Escalation",
                     hintText: "If your playbooks use privilege escalation (\"sudo: true\", \"su: true\", etc), you can specify the username to become, and the password to use here.",
                     type: 'select',
                     ngShow: "kind.value == 'ssh'",
                     ngChange: "loginMethodChange()",
-                    ngOptions: 'kind.label for kind in credential_kind_options track by kind.value', 
-                    // options: [{
-                    //     label: 'None', // FIXME: Maybe 'Default' or 'SSH only' instead?
-                    //     value: '',
-                    //     selected: true
-                    // }, {
-                    //     label: 'Sudo',
-                    //     value: 'sudo'
-                    // }, {
-                    //     label: 'Su',
-                    //     value: 'su'
-                    // },{
-                    //     label: 'Pbrun',
-                    //     value: 'pbrun'
-                    // }],
+                    ngOptions: 'become.label for become in become_options track by become.value',
                     awPopOver: "<p><b>Sudo:</b> Optionally specify a username for sudo operations.  "+
                       "This is equivalent to specifying the <code>ansible-playbook --sudo-user</code> parameter.<br />" +
                       "<b>Su:</b> Optionally specify a username for su operations.  This is equivalent to specifying the <code>ansible-playbook --su-user</code> parameter.<br/>"+
@@ -303,54 +289,18 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body"
                 },
-                "sudo_username": {
-                    label: 'Sudo Username',
+                "become_username": {
+                    label: 'Privilege Escalation Username',
                     type: 'text',
-                    ngShow: "kind.value == 'ssh' && login_method == 'sudo'",
+                    ngShow: "kind.value == 'ssh' && become_method",
                     addRequired: false,
                     editRequired: false,
                     autocomplete: false
                 },
-                "sudo_password": {
-                    label: 'Sudo Password',
+                "become_password": {
+                    label: 'Privilege Escalation Password',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'ssh' && login_method == 'sudo'",
-                    addRequired: false,
-                    editRequired: false,
-                    ask: true,
-                    hasShowInputButton: true,
-                    autocomplete: false
-                },
-                "su_username": {
-                    label: 'Su Username',
-                    type: 'text',
-                    ngShow: "kind.value == 'ssh' && login_method == 'su'",
-                    addRequired: false,
-                    editRequired: false,
-                    autocomplete: false
-                },
-                "su_password": {
-                    label: 'Su Password',
-                    type: 'sensitive',
-                    ngShow: "kind.value == 'ssh' && login_method == 'su'",
-                    addRequired: false,
-                    editRequired: false,
-                    ask: true,
-                    hasShowInputButton: true,
-                    autocomplete: false
-                },
-                "pbrun_username": {
-                    label: 'Pbrun Username',
-                    type: 'text',
-                    ngShow: "kind.value == 'ssh' && login_method == 'pbrun'",
-                    addRequired: false,
-                    editRequired: false,
-                    autocomplete: false
-                },
-                "pbrun_password": {
-                    label: 'Pbrun Password',
-                    type: 'sensitive',
-                    ngShow: "kind.value == 'ssh' && login_method == 'pbrun'",
+                    ngShow: "kind.value == 'ssh' && become_method",
                     addRequired: false,
                     editRequired: false,
                     ask: true,
