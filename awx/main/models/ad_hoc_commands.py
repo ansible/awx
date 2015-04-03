@@ -31,12 +31,6 @@ class AdHocCommand(UnifiedJob):
 
     MODULE_NAME_CHOICES = [(x,x) for x in settings.AD_HOC_COMMANDS]
 
-    PRIVILEGE_ESCALATION_CHOICES = [
-        ('', _('None')),
-        ('su', _('su')),
-        ('sudo', _('sudo')),
-    ]
-
     class Meta(object):
         app_label = 'main'
 
@@ -81,11 +75,8 @@ class AdHocCommand(UnifiedJob):
         blank=True,
         default=0,
     )
-    privilege_escalation = models.CharField(
-        max_length=64,
-        choices=PRIVILEGE_ESCALATION_CHOICES,
-        default='',
-        blank=True,
+    become_enabled = models.BooleanField(
+        default=False,
     )
     hosts = models.ManyToManyField(
         'Host',
@@ -200,7 +191,7 @@ class AdHocCommand(UnifiedJob):
         data = {}
         for field in ('job_type', 'inventory_id', 'limit', 'credential_id',
                       'module_name', 'module_args', 'forks', 'verbosity',
-                      'privilege_escalation'):
+                      'become_enabled'):
             data[field] = getattr(self, field)
         return AdHocCommand.objects.create(**data)
 

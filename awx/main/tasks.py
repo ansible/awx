@@ -1224,7 +1224,7 @@ class RunAdHocCommand(BaseTask):
         ssh-agent for public/private key authentication.
         '''
         creds = ad_hoc_command.credential
-        ssh_username, sudo_username, su_username = '', '', ''
+        ssh_username, become_username, become_method = '', '', ''
         if creds:
             ssh_username = kwargs.get('username', creds.username)
             become_method = kwargs.get('become_method', creds.become_method)
@@ -1258,6 +1258,8 @@ class RunAdHocCommand(BaseTask):
                 if become_method and become_method == "su" and "become_password" in kwargs.get("passwords", {}):
                     args.append("--ask-su-pass")
             else:
+                if ad_hoc_command.become_enabled:
+                    args.append('--become')
                 if become_method:
                     args.extend(['--become-method', become_method])
                 if become_username:
@@ -1266,10 +1268,6 @@ class RunAdHocCommand(BaseTask):
                     args.append('--ask-become-pass')
         except ValueError:
             pass
-        if ad_hoc_command.privilege_escalation == 'sudo':
-            args.append('--sudo')
-        elif ad_hoc_command.privilege_escalation == 'su':
-            args.append('--su')
 
         if ad_hoc_command.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % ad_hoc_command.forks)

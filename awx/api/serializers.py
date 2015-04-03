@@ -1500,7 +1500,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         model = AdHocCommand
         fields = ('*', 'job_type', 'inventory', 'limit', 'credential',
                   'module_name', 'module_args', 'forks', 'verbosity',
-                  'privilege_escalation')
+                  'become_enabled')
         exclude = ('unified_job_template', 'description')
 
     def get_related(self, obj):

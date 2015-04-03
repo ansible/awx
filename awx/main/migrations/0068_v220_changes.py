@@ -8,39 +8,23 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'JobTemplate.become_enabled'
-        db.add_column(u'main_jobtemplate', 'become_enabled',
+        # Deleting field 'AdHocCommand.privilege_escalation'
+        db.delete_column(u'main_adhoccommand', 'privilege_escalation')
+
+        # Adding field 'AdHocCommand.become_enabled'
+        db.add_column(u'main_adhoccommand', 'become_enabled',
                       self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-        # Adding field 'Credential.become_method'
-        db.add_column(u'main_credential', 'become_method',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=32, blank=True),
-                      keep_default=False)
-
-        # Adding field 'Credential.become_username'
-        db.add_column(u'main_credential', 'become_username',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True),
-                      keep_default=False)
-
-        # Adding field 'Credential.become_password'
-        db.add_column(u'main_credential', 'become_password',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True),
                       keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting field 'JobTemplate.become_enabled'
-        db.delete_column(u'main_jobtemplate', 'become_enabled')
+        # Adding field 'AdHocCommand.privilege_escalation'
+        db.add_column(u'main_adhoccommand', 'privilege_escalation',
+                      self.gf('django.db.models.fields.CharField')(default='', max_length=64, blank=True),
+                      keep_default=False)
 
-        # Deleting field 'Credential.become_method'
-        db.delete_column(u'main_credential', 'become_method')
-
-        # Deleting field 'Credential.become_username'
-        db.delete_column(u'main_credential', 'become_username')
-
-        # Deleting field 'Credential.become_password'
-        db.delete_column(u'main_credential', 'become_password')
+        # Deleting field 'AdHocCommand.become_enabled'
+        db.delete_column(u'main_adhoccommand', 'become_enabled')
 
 
     models = {
@@ -112,6 +96,7 @@ class Migration(SchemaMigration):
         },
         'main.adhoccommand': {
             'Meta': {'object_name': 'AdHocCommand', '_ormbases': ['main.UnifiedJob']},
+            'become_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'credential': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'ad_hoc_commands'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Credential']"}),
             'forks': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'hosts': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'ad_hoc_commands'", 'symmetrical': 'False', 'through': "orm['main.AdHocCommandEvent']", 'to': "orm['main.Host']"}),
@@ -119,8 +104,7 @@ class Migration(SchemaMigration):
             'job_type': ('django.db.models.fields.CharField', [], {'default': "'run'", 'max_length': '64'}),
             'limit': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'module_args': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
-            'module_name': ('django.db.models.fields.CharField', [], {'default': "'command'", 'max_length': '1024'}),
-            'privilege_escalation': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '64', 'blank': 'True'}),
+            'module_name': ('django.db.models.fields.CharField', [], {'default': "'command'", 'max_length': '1024', 'blank': 'True'}),
             u'unifiedjob_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['main.UnifiedJob']", 'unique': 'True', 'primary_key': 'True'}),
             'verbosity': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'})
         },
@@ -167,10 +151,6 @@ class Migration(SchemaMigration):
             'project': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
             'ssh_key_data': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'ssh_key_unlock': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
-            'su_password': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
-            'su_username': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
-            'sudo_password': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
-            'sudo_username': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'team': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'credentials'", 'null': 'True', 'blank': 'True', 'to': "orm['main.Team']"}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'credentials'", 'null': 'True', 'blank': 'True', 'to': u"orm['auth.User']"}),
             'username': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),

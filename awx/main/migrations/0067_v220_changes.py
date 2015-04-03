@@ -83,6 +83,7 @@ class Migration(SchemaMigration):
         'main.activitystream': {
             'Meta': {'object_name': 'ActivityStream'},
             'actor': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'activity_stream'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
+            'ad_hoc_command': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.AdHocCommand']", 'symmetrical': 'False', 'blank': 'True'}),
             'changes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'credential': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.Credential']", 'symmetrical': 'False', 'blank': 'True'}),
             'custom_inventory_script': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['main.CustomInventoryScript']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -108,6 +109,34 @@ class Migration(SchemaMigration):
             'unified_job': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'activity_stream_as_unified_job+'", 'blank': 'True', 'to': "orm['main.UnifiedJob']"}),
             'unified_job_template': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'activity_stream_as_unified_job_template+'", 'blank': 'True', 'to': "orm['main.UnifiedJobTemplate']"}),
             'user': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.User']", 'symmetrical': 'False', 'blank': 'True'})
+        },
+        'main.adhoccommand': {
+            'Meta': {'object_name': 'AdHocCommand', '_ormbases': ['main.UnifiedJob']},
+            'credential': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'ad_hoc_commands'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Credential']"}),
+            'forks': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
+            'hosts': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'ad_hoc_commands'", 'symmetrical': 'False', 'through': "orm['main.AdHocCommandEvent']", 'to': "orm['main.Host']"}),
+            'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'ad_hoc_commands'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Inventory']"}),
+            'job_type': ('django.db.models.fields.CharField', [], {'default': "'run'", 'max_length': '64'}),
+            'limit': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
+            'module_args': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'module_name': ('django.db.models.fields.CharField', [], {'default': "'command'", 'max_length': '1024'}),
+            'privilege_escalation': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '64', 'blank': 'True'}),
+            u'unifiedjob_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['main.UnifiedJob']", 'unique': 'True', 'primary_key': 'True'}),
+            'verbosity': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'})
+        },
+        'main.adhoccommandevent': {
+            'Meta': {'ordering': "('-pk',)", 'unique_together': "[('ad_hoc_command', 'host_name')]", 'object_name': 'AdHocCommandEvent'},
+            'ad_hoc_command': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'ad_hoc_command_events'", 'to': "orm['main.AdHocCommand']"}),
+            'changed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'counter': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
+            'event': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'event_data': ('jsonfield.fields.JSONField', [], {'default': '{}', 'blank': 'True'}),
+            'failed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'host': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'ad_hoc_command_events'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Host']"}),
+            'host_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'None'})
         },
         'main.authtoken': {
             'Meta': {'object_name': 'AuthToken'},
@@ -375,6 +404,7 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'permission_type': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'permissions'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Project']"}),
+            'run_ad_hoc_commands': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'team': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'permissions'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Team']"}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'permissions'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"})
         },
