@@ -568,17 +568,10 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         with self.current_user('admin'):
             response = self.post(url, data, expect=400)
         data.pop('forks')
-        data['privilege_escalation'] = 'telekinesis'
-        with self.current_user('admin'):
-            response = self.post(url, data, expect=400)
-        data['privilege_escalation'] = 'su'
+        data['become_enabled'] = True
         with self.current_user('admin'):
             response = self.post(url, data, expect=201)
-            self.assertEqual(response['privilege_escalation'], 'su')
-        data['privilege_escalation'] = 'sudo'
-        with self.current_user('admin'):
-            response = self.post(url, data, expect=201)
-            self.assertEqual(response['privilege_escalation'], 'sudo')
+            self.assertEqual(response['become_enabled'], True)
 
     def test_ad_hoc_command_detail(self):
         # Post to list to start a new ad hoc command.
