@@ -49,7 +49,7 @@ class MongoDBRequired(django.test.TestCase):
         try:
             self.db = get_db()
             self.db.connection.drop_database(settings.MONGO_DB)
-        except ConnectionError as e:
+        except ConnectionError:
             self.skipTest('MongoDB connection failed')
 
 class QueueTestMixin(object):

@@ -1,15 +1,15 @@
 from mongoengine import Document, DynamicDocument, DateTimeField, ReferenceField, StringField
 
 class FactHost(Document):
-   hostname =  StringField(max_length=100, required=True, unique=True)
+    hostname = StringField(max_length=100, required=True, unique=True)
 
     # TODO: Consider using hashed index on hostname. django-mongo may not support this but
     # executing raw js will
-   meta = {
+    meta = {
         'indexes': [
-           'hostname' 
+            'hostname' 
         ]
-   }
+    }
 
 class Fact(DynamicDocument):
     timestamp = DateTimeField(required=True)

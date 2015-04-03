@@ -3,17 +3,13 @@
 
 import logging
 from datetime import datetime
-import json
 
 from django.core.management.base import NoArgsCommand
 
 from awx.main.models import * # noqa
 from awx.main.socket import Socket
 
-import pymongo
-from pymongo import MongoClient
-
-_MODULES = [ 'packages', 'services', 'files' ]
+_MODULES = ['packages', 'services', 'files']
 
 logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
 class FactCacheReceiver(object):
@@ -49,10 +45,10 @@ class FactCacheReceiver(object):
 
         try:
             host = FactHost.objects.get(hostname=hostname)
-        except FactHost.DoesNotExist as e:
+        except FactHost.DoesNotExist:
             host = FactHost(hostname=hostname)
             host.save()
-        except FactHost.MultipleObjectsReturned as e:
+        except FactHost.MultipleObjectsReturned:
             query = "db['fact_host'].find(hostname=%s)" % hostname
             print('Database inconsistent. Multiple FactHost "%s" exist. Try the query %s to find the records.' % (hostname, query))
             return

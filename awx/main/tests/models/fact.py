@@ -7,7 +7,7 @@ from datetime import datetime
 # Django
 
 # AWX
-from awx.main.models.fact import *
+from awx.main.models.fact import * # noqa
 from awx.main.tests.base import BaseTest, MongoDBRequired
 
 __all__ = ['FactHostTest', 'FactTest']
@@ -20,28 +20,28 @@ TEST_FACT_DATA = {
         'module': 'packages',
         'fact': {
             "accountsservice": [
-              {
-                "architecture": "amd64",
-                "name": "accountsservice",
-                "source": "apt",
-                "version": "0.6.35-0ubuntu7.1"
-              }
+                {
+                    "architecture": "amd64",
+                    "name": "accountsservice",
+                    "source": "apt",
+                    "version": "0.6.35-0ubuntu7.1"
+                }
             ],
             "acpid": [
-              {
-                "architecture": "amd64",
-                "name": "acpid",
-                "source": "apt",
-                "version": "1:2.0.21-1ubuntu2"
-              }
+                {
+                    "architecture": "amd64",
+                    "name": "acpid",
+                    "source": "apt",
+                    "version": "1:2.0.21-1ubuntu2"
+                }
             ],
             "adduser": [
-              {
-                "architecture": "all",
-                "name": "adduser",
-                "source": "apt",
-                "version": "3.113+nmu3ubuntu3"
-              }
+                {
+                    "architecture": "all",
+                    "name": "adduser",
+                    "source": "apt",
+                    "version": "3.113+nmu3ubuntu3"
+                }
             ],
         },
     }

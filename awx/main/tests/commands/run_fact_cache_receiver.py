@@ -5,16 +5,15 @@
 import time
 from datetime import datetime
 import mock
-import json
 import unittest
 from copy import deepcopy
-from mock import Mock, MagicMock
+from mock import MagicMock
 
 # AWX
 from awx.main.tests.base import BaseTest, MongoDBRequired
 from awx.main.tests.commands.base import BaseCommandMixin
-from awx.main.management.commands.run_fact_cache_receiver import FactCacheReceiver, _MODULES
-from awx.main.models.fact import *
+from awx.main.management.commands.run_fact_cache_receiver import FactCacheReceiver
+from awx.main.models.fact import * # noqa
 
 __all__ = ['RunFactCacheReceiverUnitTest', 'RunFactCacheReceiverFunctionalTest']
 
@@ -27,28 +26,28 @@ TEST_MSG_BASE = {
 TEST_MSG_MODULES = {
     'packages': {
         "accountsservice": [
-          {
-            "architecture": "amd64",
-            "name": "accountsservice",
-            "source": "apt",
-            "version": "0.6.35-0ubuntu7.1"
-          }
+            {
+                "architecture": "amd64",
+                "name": "accountsservice",
+                "source": "apt",
+                "version": "0.6.35-0ubuntu7.1"
+            }
         ],
         "acpid": [
-          {
-            "architecture": "amd64",
-            "name": "acpid",
-            "source": "apt",
-            "version": "1:2.0.21-1ubuntu2"
-          }
+            {
+                "architecture": "amd64",
+                "name": "acpid",
+                "source": "apt",
+                "version": "1:2.0.21-1ubuntu2"
+            }
         ],
         "adduser": [
-          {
-            "architecture": "all",
-            "name": "adduser",
-            "source": "apt",
-            "version": "3.113+nmu3ubuntu3"
-          }
+            {
+                "architecture": "all",
+                "name": "adduser",
+                "source": "apt",
+                "version": "3.113+nmu3ubuntu3"
+            }
         ],
     },
     'services': [
@@ -135,7 +134,7 @@ class RunFactCacheReceiverUnitTest(BaseTest, MongoDBRequired):
     # Ensure that the message flows from the socket through to process_fact_message()
     @mock.patch('awx.main.socket.Socket.listen')
     def test_run_receiver(self, listen_mock):
-        listen_mock.return_value = [ TEST_MSG ]
+        listen_mock.return_value = [TEST_MSG]
 
         receiver = FactCacheReceiver()
         receiver.process_fact_message = MagicMock(name='process_fact_message')

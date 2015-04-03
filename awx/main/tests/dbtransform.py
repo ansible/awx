@@ -3,7 +3,6 @@
 
 # Python
 from datetime import datetime
-from mongoengine.connection import get_db
 from mongoengine import connect
 
 # Django
@@ -11,7 +10,7 @@ from django.conf import settings
 
 # AWX
 from awx.main.tests.base import BaseTest, MongoDBRequired
-from awx.main.models.fact import *
+from awx.main.models.fact import * # noqa
 
 __all__ = ['DBTransformTest']
 
