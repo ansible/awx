@@ -870,7 +870,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                                             parts.query, parts.fragment])
         os.environ.setdefault('REST_API_URL', rest_api_url)
         os.environ['INVENTORY_ID'] = str(old_inv.pk)        
-        source = os.path.join(os.path.dirname(__file__), '..', '..', 'plugins',
+        source = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'plugins',
                               'inventory', 'awxrest.py')
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
@@ -907,7 +907,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         new_inv = self.organizations[0].inventories.create(name='newec2')
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)
-        os.chdir(os.path.join(os.path.dirname(__file__), 'data'))
+        os.chdir(os.path.join(os.path.dirname(__file__), '..', 'data'))
         inv_file = 'large_ec2_inventory.py'
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
@@ -928,7 +928,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         new_inv = self.organizations[0].inventories.create(name='splunk')
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)
-        inv_file = os.path.join(os.path.dirname(__file__), 'data',
+        inv_file = os.path.join(os.path.dirname(__file__), '..', 'data',
                                 'splunk_inventory.py')
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
@@ -951,7 +951,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
 
     def _check_largeinv_import(self, new_inv, nhosts, nhosts_inactive=0):
         self._start_time = time.time()
-        inv_file = os.path.join(os.path.dirname(__file__), 'data', 'largeinv.py')
+        inv_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'largeinv.py')
         ngroups = self._get_ngroups_for_nhosts(nhosts)
         os.environ['NHOSTS'] = str(nhosts)
         result, stdout, stderr = self.run_command('inventory_import',
