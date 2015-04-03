@@ -180,20 +180,45 @@ class BaseCallbackModule(object):
         self._log_event('runner_on_failed', host=host, res=res,
                         ignore_errors=ignore_errors)
 
+    def v2_runner_on_failed(self, result, ignore_errors=False):
+        self._log_event('runner_on_failed', host=result._host.name,
+                        res=result._result, task=result._task,
+                        ignore_errors=ignore_errors)
+
     def runner_on_ok(self, host, res):
         self._log_event('runner_on_ok', host=host, res=res)
+
+    def v2_runner_on_ok(self, result):
+        self._log_event('runner_on_ok', host=result._host.name,
+                        task=result._task, res=result._result)
 
     def runner_on_error(self, host, msg):
         self._log_event('runner_on_error', host=host, msg=msg)
 
+    def v2_runner_on_error(self, result):
+        pass # Currently not implemented in v2
+
     def runner_on_skipped(self, host, item=None):
         self._log_event('runner_on_skipped', host=host, item=item)
+
+    def v2_runner_on_skipped(self, result):
+        self._log_event('runner_on_skipped', host=result._host.name,
+                        task=result._task)
 
     def runner_on_unreachable(self, host, res):
         self._log_event('runner_on_unreachable', host=host, res=res)
 
+    def v2_runner_on_unreachable(self, result):
+        self._log_event('runner_on_unreachable', host=result._host.name,
+                        task=result._task, res=result._result)
+
     def runner_on_no_hosts(self):
         self._log_event('runner_on_no_hosts')
+
+    def v2_runner_on_no_hosts(self, task):
+        self._log_event('runner_on_no_hosts', task=task)
+
+    # V2 does not use the _on_async callbacks (yet).
 
     def runner_on_async_poll(self, host, res, jid, clock):
         self._log_event('runner_on_async_poll', host=host, res=res, jid=jid,
@@ -207,6 +232,10 @@ class BaseCallbackModule(object):
 
     def runner_on_file_diff(self, host, diff):
         self._log_event('runner_on_file_diff', host=host, diff=diff)
+
+    def v2_runner_on_file_diff(self, result, diff):
+        self._log_event('runner_on_file_diff', host=result._host.name,
+                        task=result._task, diff=diff)
 
     @staticmethod
     def terminate_ssh_control_masters():
@@ -298,9 +327,22 @@ class JobCallbackModule(BaseCallbackModule):
         play_name = getattr(play, 'name', '')
         if play_name and event not in self.EVENTS_WITHOUT_PLAY:
             event_data['play'] = play_name
-        task = getattr(self, 'task', None)
-        task_name = getattr(task, 'name', '')
-        role_name = getattr(task, 'role_name', '')
+        task = event_data.pop('task', None) or getattr(self, 'task', None)
+        task_name = None
+        role_name = None
+        if task:
+            if hasattr(task, 'get_name'):
+                # in v2, the get_name() method creates the name
+                task_name = task.get_name()
+            else:
+                # v1 datastructure
+                task_name = getattr(task, 'name', '')
+            if hasattr(task, '_role') and task._role:
+                # v2 datastructure
+                role_name = task._role._role_name
+            else:
+                # v1 datastructure
+                role_name = getattr(task, 'role_name', '')
         if task_name and event not in self.EVENTS_WITHOUT_TASK:
             event_data['task'] = task_name
         if role_name and event not in self.EVENTS_WITHOUT_TASK:
@@ -310,19 +352,49 @@ class JobCallbackModule(BaseCallbackModule):
     def playbook_on_start(self):
         self._log_event('playbook_on_start')
 
+    def v2_playbook_on_start(self):
+        # since there is no task/play info, this is currently identical
+        # to the v1 callback which does the same thing
+        self.playbook_on_start()
+
     def playbook_on_notify(self, host, handler):
         self._log_event('playbook_on_notify', host=host, handler=handler)
+
+    def v2_playbook_on_notify(self, result, handler):
+        self._log_event('playbook_on_notify', host=result._host.name,
+                        task=result._task, handler=handler)
 
     def playbook_on_no_hosts_matched(self):
         self._log_event('playbook_on_no_hosts_matched')
 
+    def v2_playbook_on_no_hosts_matched(self):
+        # since there is no task/play info, this is currently identical
+        # to the v1 callback which does the same thing
+        self.playbook_on_no_hosts_matched()
+
     def playbook_on_no_hosts_remaining(self):
         self._log_event('playbook_on_no_hosts_remaining')
+
+    def v2_playbook_on_no_hosts_remaining(self):
+        # since there is no task/play info, this is currently identical
+        # to the v1 callback which does the same thing
+        self.playbook_on_no_hosts_remaining()
 
     def playbook_on_task_start(self, name, is_conditional):
         self._log_event('playbook_on_task_start', name=name,
                         is_conditional=is_conditional)
 
+    def v2_playbook_on_task_start(self, task, is_conditional):
+        self._log_event('playbook_on_task_start', task=task,
+                        name=task.get_name(), is_conditional=is_conditional)
+
+    def v2_playbook_on_cleanup_task_start(self, task):
+        # re-using playbook_on_task_start event here for this v2-specific
+        # event, though we may consider any changes necessary to distinguish
+        # this from a normal task
+        self._log_event('playbook_on_task_start', task=task,
+                        name=task.get_name())
+                        
     def playbook_on_vars_prompt(self, varname, private=True, prompt=None,
                                 encrypt=None, confirm=False, salt_size=None,
                                 salt=None, default=None):
@@ -331,8 +403,16 @@ class JobCallbackModule(BaseCallbackModule):
                         confirm=confirm, salt_size=salt_size, salt=salt,
                         default=default)
 
+    def v2_playbook_on_vars_prompt(self, varname, private=True, prompt=None,
+                                   encrypt=None, confirm=False, salt_size=None,
+                                   salt=None, default=None):
+        pass # not currently used in v2 (yet)
+
     def playbook_on_setup(self):
         self._log_event('playbook_on_setup')
+
+    def v2_playbook_on_setup(self):
+        pass # not currently used in v2 (yet)
 
     def playbook_on_import_for_host(self, host, imported_file):
         # don't care about recording this one
@@ -340,16 +420,27 @@ class JobCallbackModule(BaseCallbackModule):
         #                imported_file=imported_file)
         pass
 
+    def v2_playbook_on_import_for_host(self, result, imported_file):
+        pass # not currently used in v2 (yet)
+
     def playbook_on_not_import_for_host(self, host, missing_file):
         # don't care about recording this one
         #self._log_event('playbook_on_not_import_for_host', host=host,
         #                missing_file=missing_file)
         pass
 
+    def v2_playbook_on_not_import_for_host(self, result, missing_file):
+        pass # not currently used in v2 (yet)
+
     def playbook_on_play_start(self, name):
         # Only play name is passed via callback, get host pattern from the play.
         pattern = getattr(getattr(self, 'play', None), 'hosts', name)
         self._log_event('playbook_on_play_start', name=name, pattern=pattern)
+
+    def v2_playbook_on_play_start(self, play):
+        setattr(self, 'play', play)
+        self._log_event('playbook_on_play_start', name=play.name,
+                        pattern=play.hosts)
 
     def playbook_on_stats(self, stats):
         d = {}
@@ -357,6 +448,9 @@ class JobCallbackModule(BaseCallbackModule):
             d[attr] = getattr(stats, attr)
         self._log_event('playbook_on_stats', **d)
         self.terminate_ssh_control_masters()
+
+    def v2_playbook_on_stats(self, stats):
+        self.playbook_on_stats(stats)
 
 
 class AdHocCommandCallbackModule(BaseCallbackModule):
@@ -370,6 +464,11 @@ class AdHocCommandCallbackModule(BaseCallbackModule):
         self.ad_hoc_command_id = int(os.getenv('AD_HOC_COMMAND_ID', '0'))
         self.rest_api_path = '/api/v1/ad_hoc_commands/%d/events/' % self.ad_hoc_command_id
         super(AdHocCommandCallbackModule, self).__init__()
+
+    def _log_event(self, event, **event_data):
+        # Ignore task for ad hoc commands (with v2).
+        event_data.pop('task', None)
+        super(AdHocCommandCallbackModule, self)._log_event(event, **event_data)
 
     def runner_on_file_diff(self, host, diff):
         pass # Ignore file diff for ad hoc commands.
