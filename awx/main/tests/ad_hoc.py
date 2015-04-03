@@ -396,7 +396,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.assertEqual(response['limit'], '')
             self.assertEqual(response['forks'], 0)
             self.assertEqual(response['verbosity'], 0)
-            self.assertEqual(response['privilege_escalation'], '')
+            self.assertEqual(response['become_enabled'], False)
             self.put(url, data, expect=405)
             self.patch(url, data, expect=405)
             self.delete(url, expect=405)

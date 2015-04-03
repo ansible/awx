@@ -546,13 +546,7 @@ class ProjectsTest(BaseTransactionTest):
         # Test with null where we expect a string value.
         with self.current_user(self.super_django_user):
             data = dict(name='zyx', user=self.super_django_user.pk, kind='ssh',
-                        sudo_username=None)
-            self.post(url, data, expect=400)
-
-        # Test trying to pass both sudo_username and su_username.
-        with self.current_user(self.super_django_user):
-            data = dict(name='zyq', user=self.super_django_user.pk, kind='ssh',
-                        sudo_username='sudouser', su_username='suuser')
+                        become_username=None)
             self.post(url, data, expect=400)
 
         # Test with encrypted ssh key and no unlock password.
