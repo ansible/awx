@@ -76,7 +76,7 @@ var tower = angular.module('Tower', [
     'UserFormDefinition',
     'FormGenerator',
     'OrganizationListDefinition',
-    'jobTemplates', 
+    'jobTemplates',
     'UserListDefinition',
     'UserHelper',
     'PromptDialog',
@@ -508,7 +508,7 @@ var tower = angular.module('Tower', [
         LoadConfig, Store, ShowSocketHelp, LicenseViewer, AboutAnsibleHelp, ConfigureTower, CreateCustomInventory) {
 
 
-            var e, html, sock, checkCount = 0;
+            var e, html, sock;
 
             function detectBrowser() {
                 var ua = window.navigator.userAgent,
@@ -611,25 +611,6 @@ var tower = angular.module('Tower', [
                             $log.debug('socket status: ' + $rootScope.socketStatus);
                         });
                     },2000);
-
-                    // monitor socket status
-                    checkCount = 0;
-                    $rootScope.dashboardInterval = setInterval(function() {
-                        if (sock.checkStatus() === 'error' || checkCount > 5) {
-                            // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
-                            $log.debug('socket status: ' + sock.checkStatus());
-                            $log.debug('attempting new socket connection');
-                            sock = null;
-                            openSocket();
-                            checkCount = 0;
-                        }
-                        else if (sock.checkStatus() === 'connecting') {
-                            checkCount++;
-                        }
-                        else {
-                            checkCount = 0;
-                        }
-                    }, 5000);
                 });
 
                 $rootScope.$on("$routeChangeStart", function (event, next) {
@@ -644,10 +625,6 @@ var tower = angular.module('Tower', [
                     }
                     if ($rootScope.jobStdOutInterval) {
                         window.clearInterval($rootScope.jobStdOutInterval);
-                    }
-                    if ($rootScope.checkSocketConnectionInterval) {
-                        // use to monitor and restart socket connections
-                        window.clearInterval($rootScope.checkSocketConnectionInterval);
                     }
 
                     // On each navigation request, check that the user is logged in
@@ -665,9 +642,6 @@ var tower = angular.module('Tower', [
                       // gets here on timeout
                         if (next.templateUrl !== (urlPrefix + 'partials/login.html')) {
                             $rootScope.sessionTimer.expireSession();
-                            if($rootScope.dashboardInterval){
-                              window.clearInterval($rootScope.dashboardInterval);
-                            }
                             if (sock) {
                                 sock.socket.socket.disconnect();
                             }

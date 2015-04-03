@@ -80,8 +80,8 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                             },
                             'connect timeout': 3000,
                             'try multiple transports': false,
-                            'max reconnection attempts': 3,
-                            'reconnection limit': 10000,
+                            'max reconnection attempts': 10,
+                            'reconnection limit': 2000,
                             'force new connection': true
                         });
 
@@ -107,9 +107,6 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
 
                             if (token_actual === token) {
                                 self.socket.socket.disconnect();
-                                if($rootScope.dashboardInterval){
-                                    window.clearInterval($rootScope.dashboardInterval);
-                                }
                             }
 
                             self.scope.$apply(function () {

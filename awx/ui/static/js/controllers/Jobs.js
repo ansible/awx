@@ -25,7 +25,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
         api_complete = false,
         schedule_socket,
         job_socket,
-        max_rows, checkCount=0;
+        max_rows;
 
     function openSockets() {
         job_socket = Socket({
@@ -49,23 +49,6 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             }
         });
     }
-
-    $rootScope.checkSocketConnectionInterval = setInterval(function() {
-        if (job_socket.checkStatus() === 'error' || checkCount > 2) {
-            // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
-            $log.debug('jobs page: initializing and restarting socket connections');
-            job_socket = null;
-            schedule_socket = null;
-            openSockets();
-            checkCount = 0;
-        }
-        else if (job_socket.checkStatus() === 'connecting') {
-            checkCount++;
-        }
-        else {
-            checkCount = 0;
-        }
-    }, 3000);
 
     function processEvent(event) {
         switch(event.status) {

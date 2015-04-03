@@ -24,8 +24,7 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
         refresh_count = 0,
         lastEventId = 0,
         verbosity_options,
-        job_type_options,
-        checkCount = 0;
+        job_type_options;
 
     scope.plays = [];
     scope.hosts = [];
@@ -106,22 +105,6 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
         });
     }
     openSocket();
-
-    $rootScope.checkSocketConnectionInterval = setInterval(function() {
-        if (event_socket.checkStatus() === 'error' || checkCount > 2) {
-            // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
-            $log.debug('job detail page: initializing and restarting socket connections');
-            event_socket = null;
-            openSocket();
-            checkCount = 0;
-        }
-        else if (event_socket.checkStatus() === 'connecting') {
-            checkCount++;
-        }
-        else {
-            checkCount = 0;
-        }
-    }, 3000);
 
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();

@@ -29,8 +29,7 @@ export function JobStdoutController ($log, $rootScope, $scope, $compile, $routeP
         page_size = 500,
         lastScrollTop = 0,
         st,
-        direction,
-        checkCount = 0;
+        direction;
 
 
     function openSockets() {
@@ -71,23 +70,6 @@ export function JobStdoutController ($log, $rootScope, $scope, $compile, $routeP
         });
     }
     openSockets();
-
-    $rootScope.checkSocketConnectionInterval = setInterval(function() {
-        if (status_socket.checkStatus() === 'error' || checkCount > 2) {
-            // there's an error or we're stuck in a 'connecting' state. attempt to reconnect
-            $log.debug('stdout page: initializing and restarting socket connections');
-            status_socket = null;
-            event_socket = null;
-            openSockets();
-            checkCount = 0;
-        }
-        else if (status_socket.checkStatus() === 'connecting') {
-            checkCount++;
-        }
-        else {
-            checkCount = 0;
-        }
-    }, 3000);
 
     $rootScope.jobStdOutInterval = setInterval( function() {
         if (event_queue > 0) {
@@ -272,4 +254,3 @@ export function JobStdoutController ($log, $rootScope, $scope, $compile, $routeP
 
 JobStdoutController.$inject = [ '$log', '$rootScope', '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors',
     'Socket' ];
-
