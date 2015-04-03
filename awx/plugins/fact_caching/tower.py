@@ -32,6 +32,8 @@
 import sys
 import time
 import datetime
+import json
+from copy import deepcopy
 from ansible import constants as C
 from ansible.cache.base import BaseCacheModule
 
@@ -47,6 +49,7 @@ class CacheModule(BaseCacheModule):
 
         # Basic in-memory caching for typical runs
         self._cache = {}
+        self._cache_prev = {}
 
         # This is the local tower zmq connection
         self._tower_connection = C.CACHE_PLUGIN_CONNECTION
@@ -54,20 +57,67 @@ class CacheModule(BaseCacheModule):
         try:
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.REQ)
+            self.socket.setsockopt(zmq.RCVTIMEO, 4000)
+            self.socket.setsockopt(zmq.LINGER, 2000)
             self.socket.connect(self._tower_connection)
         except Exception, e:
             print("Connection to zeromq failed at %s with error: %s" % (str(self._tower_connection),
                                                                         str(e)))
             sys.exit(1)
 
+    def identify_ansible_facts(self, facts):
+        ansible_keys = {}
+        for k in facts.keys():
+            if k.startswith('ansible_'):
+                ansible_keys[k] = 1
+        return ansible_keys
+
+    def identify_new_module(self, key, value):
+        if key in self._cache_prev:
+            value_old = self._cache_prev[key]
+            for k,v in value.iteritems():
+                if k not in value_old:
+                    if not k.startswith('ansible_'):
+                        return k
+        return None
+
     def get(self, key):
         return self._cache.get(key)
 
+    '''
+    get() returns a reference to the fact object (usually a dict). The object is modified directly,
+    then set is called. Effectively, pre-determining the set logic.
+
+    The below logic creates a backup of the cache each set. The values are now preserved across set() calls.
+
+    For a given key. The previous value is looked at for new keys that aren't of the form 'ansible_'.
+    If found, send the value of the found key.
+    If not found, send all the key value pairs of the form 'ansible_' (we presume set() is called because
+    of an ansible fact module invocation)
+
+    More simply stated...
+    In value, if a new key is found at the top most dict then consider this a module request and only 
+    emit the facts for the found top-level key.
+
+    If a new key is not found, assume set() was called as a result of ansible facts scan. Thus, emit 
+    all facts of the form 'ansible_'.
+    '''
     def set(self, key, value):
+        module = self.identify_new_module(key, value)
+        # Assume ansible fact triggered the set if no new module found
+        facts = {}
+        if not module:
+            keys = self.identify_ansible_facts(value)
+            for k in keys:
+                facts[k] = value[k]
+        else:
+            facts[module] = value[module] 
+
+        self._cache_prev = deepcopy(self._cache)
         self._cache[key] = value
 
         # Emit fact data to tower for processing
-        self.socket.send_json(dict(host=key, facts=value, date_key=self.date_key))
+        self.socket.send_json(dict(host=key, facts=facts, date_key=self.date_key))
         self.socket.recv()
 
     def keys(self):

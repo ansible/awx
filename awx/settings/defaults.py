@@ -7,6 +7,8 @@ import glob
 from datetime import timedelta
 import tempfile
 
+MONGO_DB = 'system_tracking'
+
 # Update this module's local settings from the global settings module.
 from django.conf import global_settings
 this_module = sys.modules[__name__]

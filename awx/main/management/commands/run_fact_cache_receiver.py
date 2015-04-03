@@ -2,88 +2,71 @@
 # All Rights Reserved
 
 import logging
+from datetime import datetime
+import json
 
 from django.core.management.base import NoArgsCommand
 
 from awx.main.models import * # noqa
 from awx.main.socket import Socket
 
+import pymongo
 from pymongo import MongoClient
 
+_MODULES = [ 'packages', 'services', 'files' ]
+
 logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
-
-from pymongo.son_manipulator import SONManipulator
- 
-class KeyTransform(SONManipulator):
-    """Transforms keys going to database and restores them coming out.
-
-    This allows keys with dots in them to be used (but does break searching on
-    them unless the find command also uses the transform.
-
-    Example & test:
-        # To allow `.` (dots) in keys
-        import pymongo
-        client = pymongo.MongoClient("mongodb://localhost")
-        db = client['delete_me']
-        db.add_son_manipulator(KeyTransform(".", "_dot_"))
-        db['mycol'].remove()
-        db['mycol'].update({'_id': 1}, {'127.0.0.1': 'localhost'}, upsert=True,
-                           manipulate=True)
-        print db['mycol'].find().next()
-        print db['mycol'].find({'127_dot_0_dot_0_dot_1': 'localhost'}).next()
-
-    Note: transformation could be easily extended to be more complex.
-    """
- 
-    def __init__(self, replace, replacement):
-        self.replace = replace
-        self.replacement = replacement
- 
-    def transform_key(self, key):
-        """Transform key for saving to database."""
-        return key.replace(self.replace, self.replacement)
- 
-    def revert_key(self, key):
-        """Restore transformed key returning from database."""
-        return key.replace(self.replacement, self.replace)
- 
-    def transform_incoming(self, son, collection):
-        """Recursively replace all keys that need transforming."""
-        for (key, value) in son.items():
-            if self.replace in key:
-                if isinstance(value, dict):
-                    son[self.transform_key(key)] = self.transform_incoming(
-                        son.pop(key), collection)
-                else:
-                    son[self.transform_key(key)] = son.pop(key)
-            elif isinstance(value, dict):  # recurse into sub-docs
-                son[key] = self.transform_incoming(value, collection)
-        return son
- 
-    def transform_outgoing(self, son, collection):
-        return son
-
 class FactCacheReceiver(object):
-
     def __init__(self):
-        self.client = MongoClient('localhost', 27017)
-        
+        self.timestamp = None
+
+    def _determine_module(self, facts):
+        for x in _MODULES:
+            if x in facts:
+                return x
+        return 'ansible'
+
+    def _extract_module_facts(self, module, facts):
+        if module in facts:
+            f = facts[module]
+            return f
+        return facts
+
+    def process_facts(self, facts):
+        module = self._determine_module(facts)
+        facts = self._extract_module_facts(module, facts)
+        return (module, facts)
+
     def process_fact_message(self, message):
-        host = message['host'].replace(".", "_")
-        facts = message['facts']
+        hostname = message['host']
+        facts_data = message['facts']
         date_key = message['date_key']
-        host_db = self.client.host_facts
-        host_db.add_son_manipulator(KeyTransform(".", "_"))
-        host_db.add_son_manipulator(KeyTransform("$", "_"))
-        host_collection = host_db[host]
-        facts.update(dict(tower_host=host, datetime=date_key))
-        rec = host_collection.find({"datetime": date_key})
-        if rec.count():
-            this_fact = rec.next()
-            this_fact.update(facts)
-            host_collection.save(this_fact)
-        else:
-            host_collection.insert(facts)
+
+        # TODO: in ansible < v2 module_setup is emitted for "smart" fact caching.
+        # ansible v2 will not emit this message. Thus, this can be removed at that time.
+        if 'module_setup' in facts_data and len(facts_data) == 1:
+            return
+
+        try:
+            host = FactHost.objects.get(hostname=hostname)
+        except FactHost.DoesNotExist as e:
+            host = FactHost(hostname=hostname)
+            host.save()
+        except FactHost.MultipleObjectsReturned as e:
+            query = "db['fact_host'].find(hostname=%s)" % hostname
+            print('Database inconsistent. Multiple FactHost "%s" exist. Try the query %s to find the records.' % (hostname, query))
+            return
+
+        (module, facts) = self.process_facts(facts_data)
+        self.timestamp = datetime.fromtimestamp(date_key, None)
+
+        try:
+            # Update existing Fact entry
+            version_obj = FactVersion.objects.get(timestamp=self.timestamp, host=host, module=module)
+            Fact.objects(id=version_obj.fact.id).update_one(fact=facts)
+        except FactVersion.DoesNotExist:
+            # Create new Fact entry
+            (fact_obj, version_obj) = Fact.add_fact(self.timestamp, facts, host, module)
 
     def run_receiver(self):
         with Socket('fact_cache', 'r') as facts:

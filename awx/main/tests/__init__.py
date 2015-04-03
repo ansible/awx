@@ -15,3 +15,6 @@ from awx.main.tests.activity_stream import * # noqa
 from awx.main.tests.schedules import * # noqa
 from awx.main.tests.redact import * # noqa
 from awx.main.tests.views import * # noqa
+from awx.main.tests.models import * # noqa
+from awx.main.tests.commands import * # noqa
+from awx.main.tests.dbtransform import * # noqa

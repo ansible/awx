@@ -14,6 +14,8 @@ from split_settings.tools import optional, include
 # Load default settings.
 from defaults import *
 
+MONGO_DB = 'system_tracking_dev'
+
 # Disable capturing all SQL queries when running celeryd in development.
 if 'celeryd' in sys.argv:
     SQL_DEBUG = False

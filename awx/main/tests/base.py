@@ -25,6 +25,9 @@ from django.contrib.auth.models import User
 from django.test.client import Client
 from django.test.utils import override_settings
 
+# MongoEngine
+from mongoengine.connection import get_db
+
 # AWX
 from awx.main.models import * # noqa
 from awx.main.backend import LDAPSettings
@@ -84,6 +87,11 @@ class BaseTestMixin(QueueTestMixin):
 
     def setUp(self):
         super(BaseTestMixin, self).setUp()
+
+        # Drop mongo database
+        self.db = get_db()
+        self.db.connection.drop_database(settings.MONGO_DB)
+
         self.object_ctr = 0
         # Save sys.path before tests.
         self._sys_path = [x for x in sys.path]
