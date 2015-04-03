@@ -10,12 +10,12 @@ from mongoengine import connect
 from django.conf import settings
 
 # AWX
-from awx.main.tests.base import BaseTest
+from awx.main.tests.base import BaseTest, MongoDBRequired
 from awx.main.models.fact import *
 
 __all__ = ['DBTransformTest']
 
-class DBTransformTest(BaseTest):
+class DBTransformTest(BaseTest, MongoDBRequired):
     def setUp(self):
         super(DBTransformTest, self).setUp()
 

@@ -8,7 +8,7 @@ from datetime import datetime
 
 # AWX
 from awx.main.models.fact import *
-from awx.main.tests.base import BaseTest
+from awx.main.tests.base import BaseTest, MongoDBRequired
 
 __all__ = ['FactHostTest', 'FactTest']
 
@@ -49,7 +49,7 @@ TEST_FACT_DATA = {
 # Strip off microseconds because mongo has less precision
 TEST_FACT_DATA['add_fact_data']['timestamp'] = TEST_FACT_DATA['add_fact_data']['timestamp'].replace(microsecond=0)
 
-class FactHostTest(BaseTest):
+class FactHostTest(BaseTest, MongoDBRequired):
     def test_create_host(self):
         host = FactHost(hostname=TEST_FACT_DATA['hostname'])
         host.save()
@@ -59,7 +59,7 @@ class FactHostTest(BaseTest):
         self.assertEqual(TEST_FACT_DATA['hostname'], host.hostname, "Gotten record hostname does not match expected hostname")
 
 
-class FactTest(BaseTest):
+class FactTest(BaseTest, MongoDBRequired):
     def setUp(self):
         super(FactTest, self).setUp()
         TEST_FACT_DATA['add_fact_data']['host'] = FactHost(hostname=TEST_FACT_DATA['hostname']).save()

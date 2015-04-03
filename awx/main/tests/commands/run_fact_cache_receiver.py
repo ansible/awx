@@ -11,7 +11,7 @@ from copy import deepcopy
 from mock import Mock, MagicMock
 
 # AWX
-from awx.main.tests.base import BaseTest
+from awx.main.tests.base import BaseTest, MongoDBRequired
 from awx.main.tests.commands.base import BaseCommandMixin
 from awx.main.management.commands.run_fact_cache_receiver import FactCacheReceiver, _MODULES
 from awx.main.models.fact import *
@@ -98,7 +98,7 @@ def copy_only_module(data, module):
     return data
 
 
-class RunFactCacheReceiverFunctionalTest(BaseCommandMixin, BaseTest):
+class RunFactCacheReceiverFunctionalTest(BaseCommandMixin, BaseTest, MongoDBRequired):
     @unittest.skip('''\
 TODO: run_fact_cache_receiver enters a while True loop that never exists. \
 This differs from most other commands that we test for. More logic and work \
@@ -108,7 +108,8 @@ in terms of increase coverage and confidence.''')
         result, stdout, stderr = self.run_command('run_fact_cache_receiver')
         self.assertEqual(result, None)
 
-class RunFactCacheReceiverUnitTest(BaseTest):
+class RunFactCacheReceiverUnitTest(BaseTest, MongoDBRequired):
+
     # TODO: Check that timestamp and other attributes are as expected
     def check_process_fact_message_module(self, data, module):
         fact_found = None
