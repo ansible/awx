@@ -39,3 +39,13 @@
     - name: update project using svn with auth
       subversion: dest={{project_path|quote}} repo={{scm_url|quote}} revision={{scm_branch|quote}} force={{scm_clean}} username={{scm_username|quote}} password={{scm_password|quote}}
       when: scm_type == 'svn' and scm_username|default('')
+
+    - name: detect requirements.yml
+      stat: path={{project_path|quote}}/roles/requirements.yml
+      register: doesRequirementsExist
+
+    - name: fetch galaxy roles from requirements.yml
+      command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ --force
+      args:
+        chdir: "{{project_path|quote}}/roles"
+      when: doesRequirementsExist.stat.exists
