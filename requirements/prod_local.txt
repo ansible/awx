@@ -1,8 +1,9 @@
 # PIP requirements for AWX production environment (using only local packages).
-# Install using "pip --no-index -r prod_local.txt".
+# Install using "pip install --no-index -r prod_local.txt".
 
 # May need to install this package separately the first time:
 Django-1.5.5.tar.gz
+mongo-python-driver-2.8.tar.gz
 
 # The following packages are bundled with AWX (in awx/lib/site-packages):
   # For Python2.6 support:
@@ -72,6 +73,7 @@ Django-1.5.5.tar.gz
   #pyrax-1.7.2.tar.gz
   #redis-2.10.3.tar.gz
   #South-0.8.4.tar.gz
+  #mongoengine-0.9.0.tar.gz
 
 # You may also need to install the following extra packages using the OS
 # package manager, or pip if you're running inside a virtualenv.
