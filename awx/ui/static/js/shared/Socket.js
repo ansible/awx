@@ -107,6 +107,9 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
 
                             if (token_actual === token) {
                                 self.socket.socket.disconnect();
+                                if($rootScope.dashboardInterval){
+                                    window.clearInterval($rootScope.dashboardInterval);
+                                }
                             }
 
                             self.scope.$apply(function () {
