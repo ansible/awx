@@ -143,7 +143,7 @@ export default
                     editRequired: false,
                     column: 1,
                     awPopOver: "<p>Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
-                     " the username and SSH key or password that Ansbile will need to log into the remote hosts.</p>",
+                     " the username and SSH key or password that Ansible will need to log into the remote hosts.</p>",
                     dataTitle: 'Credential',
                     dataPlacement: 'right',
                     dataContainer: "body"
