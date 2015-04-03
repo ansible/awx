@@ -152,22 +152,14 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.check_job_result(ad_hoc_command, 'successful')
         self.assertTrue('"--forks=2"' in ad_hoc_command.job_args)
         self.assertTrue('"-vv"' in ad_hoc_command.job_args)
-        # Test with sudo privilege escalation.
-        ad_hoc_command2 = self.create_test_ad_hoc_command(privilege_escalation='sudo')
+        # Test with basic become privilege escalation
+        ad_hoc_command2 = self.create_test_ad_hoc_command(become_enabled=True)
         self.assertEqual(ad_hoc_command2.status, 'new')
         self.assertFalse(ad_hoc_command2.passwords_needed_to_start)
         self.assertTrue(ad_hoc_command2.signal_start())
         ad_hoc_command2 = AdHocCommand.objects.get(pk=ad_hoc_command2.pk)
         self.check_job_result(ad_hoc_command2, ('successful', 'failed'))
-        self.assertTrue('"--sudo"' in ad_hoc_command2.job_args)
-        # Test with su privilege escalation.
-        ad_hoc_command3 = self.create_test_ad_hoc_command(privilege_escalation='su')
-        self.assertEqual(ad_hoc_command3.status, 'new')
-        self.assertFalse(ad_hoc_command3.passwords_needed_to_start)
-        self.assertTrue(ad_hoc_command3.signal_start())
-        ad_hoc_command3 = AdHocCommand.objects.get(pk=ad_hoc_command3.pk)
-        self.check_job_result(ad_hoc_command3, ('successful', 'failed'))
-        self.assertTrue('"--su"' in ad_hoc_command3.job_args)
+        self.assertTrue('"--become"' in ad_hoc_command2.job_args)
 
     def test_limit_option(self):
         # Test limit by hostname.
@@ -221,8 +213,9 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertTrue('"--ask-pass"' in ad_hoc_command.job_args)
 
     def test_sudo_username_and_password(self):
-        self.create_test_credential(sudo_username='sudouser',
-                                    sudo_password='sudopass')
+        self.create_test_credential(become_method="sudo",
+                                    become_username='sudouser',
+                                    become_password='sudopass')
         ad_hoc_command = self.create_test_ad_hoc_command()
         self.assertEqual(ad_hoc_command.status, 'new')
         self.assertFalse(ad_hoc_command.passwords_needed_to_start)
@@ -231,61 +224,25 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         # Job may fail if current user doesn't have password-less sudo
         # privileges, but we're mainly checking the command line arguments.
         self.check_job_result(ad_hoc_command, ('successful', 'failed'))
-        self.assertTrue('"-U"' in ad_hoc_command.job_args)
-        self.assertTrue('"--ask-sudo-pass"' in ad_hoc_command.job_args)
-        self.assertFalse('"--sudo"' in ad_hoc_command.job_args)
-        self.assertFalse('"-R"' in ad_hoc_command.job_args)
-        self.assertFalse('"--ask-su-pass"' in ad_hoc_command.job_args)
-        self.assertFalse('"--su"' in ad_hoc_command.job_args)
+        self.assertTrue('"--become-method"' in ad_hoc_command.job_args)
+        self.assertTrue('"--become-user"' in ad_hoc_command.job_args)
+        self.assertTrue('"--ask-become-pass"' in ad_hoc_command.job_args)
+        self.assertFalse('"--become"' in ad_hoc_command.job_args)
 
     def test_sudo_ask_password(self):
-        self.create_test_credential(sudo_password='ASK')
+        self.create_test_credential(become_password='ASK')
         ad_hoc_command = self.create_test_ad_hoc_command()
         self.assertEqual(ad_hoc_command.status, 'new')
         self.assertTrue(ad_hoc_command.passwords_needed_to_start)
-        self.assertTrue('sudo_password' in ad_hoc_command.passwords_needed_to_start)
+        self.assertTrue('become_password' in ad_hoc_command.passwords_needed_to_start)
         self.assertFalse(ad_hoc_command.signal_start())
-        self.assertTrue(ad_hoc_command.signal_start(sudo_password='sudopass'))
+        self.assertTrue(ad_hoc_command.signal_start(become_password='sudopass'))
         ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
         # Job may fail, but we're mainly checking the command line arguments.
         self.check_job_result(ad_hoc_command, ('successful', 'failed'))
-        self.assertTrue('"--ask-sudo-pass"' in ad_hoc_command.job_args)
-        self.assertFalse('"--sudo"' in ad_hoc_command.job_args)
-        self.assertFalse('"-R"' in ad_hoc_command.job_args)
-        self.assertFalse('"--ask-su-pass"' in ad_hoc_command.job_args)
-        self.assertFalse('"--su"' in ad_hoc_command.job_args)
-
-    def test_su_username_and_password(self):
-        self.create_test_credential(su_username='suuser', su_password='supass')
-        ad_hoc_command = self.create_test_ad_hoc_command()
-        self.assertEqual(ad_hoc_command.status, 'new')
-        self.assertFalse(ad_hoc_command.passwords_needed_to_start)
-        self.assertTrue(ad_hoc_command.signal_start())
-        ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
-        # Job may fail, but we're mainly checking the command line arguments.
-        self.check_job_result(ad_hoc_command, ('successful', 'failed'))
-        self.assertTrue('"-R"' in ad_hoc_command.job_args)
-        self.assertTrue('"--ask-su-pass"' in ad_hoc_command.job_args)
-        self.assertFalse('"--su"' in ad_hoc_command.job_args)
-        self.assertFalse('"-U"' in ad_hoc_command.job_args)
-        self.assertFalse('"--ask-sudo-pass"' in ad_hoc_command.job_args)
-        self.assertFalse('"--sudo"' in ad_hoc_command.job_args)
-
-    def test_su_ask_password(self):
-        self.create_test_credential(su_password='ASK')
-        ad_hoc_command = self.create_test_ad_hoc_command()
-        self.assertEqual(ad_hoc_command.status, 'new')
-        self.assertTrue(ad_hoc_command.passwords_needed_to_start)
-        self.assertTrue('su_password' in ad_hoc_command.passwords_needed_to_start)
-        self.assertFalse(ad_hoc_command.signal_start())
-        self.assertTrue(ad_hoc_command.signal_start(su_password='sudopass'))
-        ad_hoc_command = AdHocCommand.objects.get(pk=ad_hoc_command.pk)
-        # Job may fail, but we're mainly checking the command line arguments.
-        self.check_job_result(ad_hoc_command, ('successful', 'failed'))
-        self.assertTrue('"--ask-su-pass"' in ad_hoc_command.job_args)
-        self.assertFalse('"--su"' in ad_hoc_command.job_args)
-        self.assertFalse('"--ask-sudo-pass"' in ad_hoc_command.job_args)
-        self.assertFalse('"--sudo"' in ad_hoc_command.job_args)
+        self.assertTrue('"--ask-become-pass"' in ad_hoc_command.job_args)
+        self.assertFalse('"--become-user"' in ad_hoc_command.job_args)
+        self.assertFalse('"--become"' in ad_hoc_command.job_args)
 
     def test_unlocked_ssh_key(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA)
