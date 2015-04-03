@@ -1,10 +1,11 @@
 # PIP requirements for AWX development/build environment (using only local
-# packages).  Install using "pip --no-index -r dev_local.txt".
+# packages).  Install using "pip install --no-index -r dev_local.txt".
 
 # May need to install these packages separately the first time:
 setuptools-12.0.5.tar.gz
 distribute-0.7.3.zip
 Django-1.6.7.tar.gz
+mongo-python-driver-2.8.tar.gz
 
 # The following packages are bundled with AWX (in awx/lib/site-packages):
   # For Python2.6 support:
@@ -74,6 +75,7 @@ Django-1.6.7.tar.gz
   #pyrax-1.7.2.tar.gz
   #redis-2.10.3.tar.gz
   #South-0.8.4.tar.gz
+  #mongoengine-0.9.0.tar.gz
 
 # Dev-only packages:
 # Needed by django-debug-toolbar:
@@ -102,3 +104,7 @@ ipython-1.2.1.tar.gz
 # - readline-6.2.4.1.tar.gz (for the ipython shell)
 # - python-zmq (for using the job callback receiver)
 # - python-memcached (for host details caching)
+# - pycrypto (via pip install pycrypto)
+# - pyaml (via pip install pyaml)
+# - python-ldap (via pip install python-ldap)
+# - pyzmq (via pip install pyzmq)

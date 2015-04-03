@@ -1,10 +1,11 @@
 # PIP requirements for AWX development/build environment (downloaded from
-# PyPI). Install using "pip -r dev.txt".
+# PyPI). Install using "pip install -r dev.txt".
 
 -U distribute
 
 # Packages used for both development and production:
 Django>=1.6.7,<1.7
+pymongo>=2.8
 
 # The following packages and their dependencies are bundled with AWX
 # (in awx/lib/site-packages):
@@ -25,6 +26,7 @@ Django>=1.6.7,<1.7
   #redis
   #requests
   #South>=0.8,<2.0
+  #mongoengine>=0.9.0
 
 # Development-only packages:
 django-debug-toolbar
