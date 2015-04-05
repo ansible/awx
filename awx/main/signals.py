@@ -293,17 +293,20 @@ def disable_activity_stream():
         activity_stream_enabled.enabled = previous_value
 
 
-model_serializer_mapping = {Organization: OrganizationSerializer,
-                            Inventory: InventorySerializer,
-                            Host: HostSerializer,
-                            Group: GroupSerializer,
-                            InventorySource: InventorySourceSerializer,
-                            Credential: CredentialSerializer,
-                            Team: TeamSerializer,
-                            Project: ProjectSerializer,
-                            Permission: PermissionSerializer,
-                            JobTemplate: JobTemplateSerializer,
-                            Job: JobSerializer}
+model_serializer_mapping = {
+    Organization: OrganizationSerializer,
+    Inventory: InventorySerializer,
+    Host: HostSerializer,
+    Group: GroupSerializer,
+    InventorySource: InventorySourceSerializer,
+    Credential: CredentialSerializer,
+    Team: TeamSerializer,
+    Project: ProjectSerializer,
+    Permission: PermissionSerializer,
+    JobTemplate: JobTemplateSerializer,
+    Job: JobSerializer,
+    AdHocCommand: AdHocCommandSerializer,
+}
 
 def activity_stream_create(sender, instance, created, **kwargs):
     if created and activity_stream_enabled:

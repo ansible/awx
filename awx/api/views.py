@@ -2189,7 +2189,7 @@ class AdHocCommandList(ListCreateAPIView):
     new_in_220 = True
 
     def create(self, request, *args, **kwargs):
-        # Inject inventory ID if parent objects is a host/group.
+        # Inject inventory ID and limit if parent objects is a host/group.
         if hasattr(self, 'get_parent_object') and not getattr(self, 'parent_key', None):
             data = request.DATA
             # HACK: Make request data mutable.
@@ -2198,6 +2198,7 @@ class AdHocCommandList(ListCreateAPIView):
             parent_obj = self.get_parent_object()
             if isinstance(parent_obj, (Host, Group)):
                 data['inventory'] = parent_obj.inventory_id
+                data['limit'] = parent_obj.name
 
         # Check for passwords needed before creating ad hoc command.
         credential_pk = get_pk_from_dict(request.DATA, 'credential')
@@ -2351,6 +2352,8 @@ class AdHocCommandAdHocCommandEventsList(BaseAdHocCommandEventsList):
 
     # Post allowed for ad hoc event callback only.
     def post(self, request, *args, **kwargs):
+        if request.user:
+            raise PermissionDenied()
         parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
         data = request.DATA.copy()
         data['ad_hoc_command'] = parent_obj.pk

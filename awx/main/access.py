@@ -1525,6 +1525,10 @@ class ActivityStreamAccess(BaseAccess):
         job_qs = self.user.get_queryset(Job)
         qs.filter(job__in=job_qs)
 
+        # Ad Hoc Command Filter
+        ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
+        qs.filter(ad_hoc_command__in=ad_hoc_command_qs)
+
         # organization_qs = self.user.get_queryset(Organization)
         # user_qs = self.user.get_queryset(User)
         # inventory_qs = self.user.get_queryset(Inventory)

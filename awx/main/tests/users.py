@@ -95,13 +95,13 @@ class AuthTokenProxyTest(BaseTest):
         self._get_me(expect=401, auth=auth_token, remote_addr=remote_addr, client_kwargs=client_kwargs)
         self._get_me(expect=401, auth=auth_token, remote_addr=remote_addr_diff)
 
-    # should use ip address from other headers when HTTP_X_FORARDED_FOR is blank
+    # should use ip address from other headers when HTTP_X_FORWARDED_FOR is blank
     def test_blank_header_fallback(self):
         remote_addr = '192.168.75.1'
 
         auth_token = self._request_auth_token(remote_addr)
 
-        client_kwargs = {'HTTP_X_FORARDED_FOR': ''}
+        client_kwargs = {'HTTP_X_FORWARDED_FOR': ''}
         response = self._get_me(expect=200, auth=auth_token, remote_addr=remote_addr, client_kwargs=client_kwargs)
         self.check_me_is_admin(response)
 

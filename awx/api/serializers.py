@@ -1525,15 +1525,13 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         if not (obj and obj.pk) and view and hasattr(view, '_raw_data_form_marker'):
             if not obj:
                 obj = self.opts.model()
-            if parent_model in (Host, Group):
-                parent_obj = parent_model.objects.get(pk=view.kwargs['pk'])
-                obj.limit = parent_obj.name
         ret = super(AdHocCommandSerializer, self).to_native(obj)
-        # Hide inventory field from raw data, since it will be set automatically
-        # by sub list create view.
+        # Hide inventory and limit fields from raw data, since they will be set
+        # automatically by sub list create view.
         if not (obj and obj.pk) and view and hasattr(view, '_raw_data_form_marker'):
             if parent_model in (Host, Group):
                 ret.pop('inventory', None)
+                ret.pop('limit', None)
         return ret
 
 

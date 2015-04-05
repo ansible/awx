@@ -207,7 +207,7 @@ class AdHocCommand(UnifiedJob):
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
         if not self.name:
-            self.name = Truncator(u'%s: %s' % (self.module_name, self.module_args)).chars(512)
+            self.name = Truncator(u': '.join(filter(None, (self.module_name, self.module_args)))).chars(512)
             if 'name' not in update_fields:
                 update_fields.append('name')
         super(AdHocCommand, self).save(*args, **kwargs)
