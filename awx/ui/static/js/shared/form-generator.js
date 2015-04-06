@@ -609,6 +609,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     params.content = collapse_array[i].content;
                     params.idx = this.accordion_count++;
                     params.show = (collapse_array[i].show) ? collapse_array[i].show : null;
+                    params.ngHide = (collapse_array[i].ngHide) ? collapse_array[i].ngHide : null;
                     params.bind = (collapse_array[i].ngBind) ? collapse_array[i].ngBind : null;
                     html += HelpCollapse(params);
                 }
@@ -676,6 +677,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += Attr(field, 'type');
                     html += "ng-model=\"" + fld + '" ';
                     html += "name=\"" + fld + '" ';
+                    if (form.name === "permission") {
+                        html += "ng-disabled='permission_type === \"admin\"'";
+                        html += "ng-checked='permission_type === \"admin\"'";
+                    }
                     html += (field.ngChange) ? Attr(field, 'ngChange') : "";
                     html += "id=\"" + form.name + "_" + fld + "_chbox\" ";
                     html += (idx !== undefined) ? "_" + idx : "";
@@ -752,7 +757,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
 
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
-                    html += "<div class='form-group' ";
+                    html += "<div class='form-group ";
+                    html += (field['class']) ? (field['class']) : "";
+                    html += "'";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
                     html += (field.ngHide) ? this.attr(field, 'ngHide') : "";
                     html += ">\n";
@@ -1246,6 +1253,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if (horizontal) {
                             html += "</div>\n";
                         }
+
+                        html += (field.helpCollapse) ? this.buildHelpCollapse(field.helpCollapse) : '';
                     }
 
                     //radio group
@@ -1641,6 +1650,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 if (btn === 'reset') {
                                     button.label = 'Reset';
                                     button['class'] = 'btn-default';
+                                }
+                                if (btn === 'launch') {
+                                    button.label = 'Launch';
+                                    button['class'] = 'btn-primary';
                                 }
 
                                 // Build button HTML

@@ -65,6 +65,15 @@ export function PermissionsList($scope, $rootScope, $location, $log, $routeParam
         }
     };
 
+    // if the permission includes adhoc (and is not admin), display that
+    $scope.getPermissionText = function () {
+        if (this.permission.permission_type !== "admin" && this.permission.run_ad_hoc_commands) {
+            return this.permission.permission_type + " + ad hoc";
+        } else {
+            return this.permission.permission_type;
+        }
+    };
+
     $scope.editPermission = function (id) {
         $location.path($location.path() + '/' + id);
     };
@@ -155,6 +164,11 @@ export function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $r
             data = {};
             for (fld in form.fields) {
                 data[fld] = $scope[fld];
+            }
+            // job template (or deploy) based permissions do not have the run
+            // ad hoc commands parameter
+            if (data.category === "Deploy") {
+                data.run_ad_hoc_commands = false;
             }
             url = (base === 'teams') ? GetBasePath('teams') + id + '/permissions/' : GetBasePath('users') + id + '/permissions/';
             Rest.setUrl(url);
@@ -304,6 +318,11 @@ export function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $
         Wait('start');
         for (fld in form.fields) {
             data[fld] = $scope[fld];
+        }
+        // job template (or deploy) based permissions do not have the run
+        // ad hoc commands parameter
+        if (data.category === "Deploy") {
+            data.run_ad_hoc_commands = false;
         }
         Rest.setUrl(defaultUrl);
         if($scope.category === "Inventory"){

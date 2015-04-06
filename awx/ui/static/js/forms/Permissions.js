@@ -96,6 +96,7 @@ export default
                     label: 'Permission',
                     labelClass: 'prepend-asterisk',
                     type: 'radio_group',
+                    class: 'squeeze',
                     options: [{
                         label: 'Read',
                         value: 'read',
@@ -121,11 +122,26 @@ export default
                         value: 'check',
                         ngShow: "category == 'Deploy'"
                     }],
+                    // hack: attach helpCollapse here if the permissions
+                    // category is deploy
+                    helpCollapse: [{
+                        hdr: 'Permission',
+                        ngBind: 'permissionTypeHelp',
+                        ngHide: "category == 'Inventory'"
+                    }]
+                },
+                run_ad_hoc_commands: {
+                    label: 'Execute commands',
+                    type: 'checkbox',
+                    // hack: attach helpCollapse here if the permissions
+                    // category is inventory
                     helpCollapse: [{
                         hdr: 'Permission',
                         ngBind: 'permissionTypeHelp'
-                    }]
-                }
+                    }],
+                    ngShow: "category == 'Inventory'",
+                    associated: 'permission_type'
+                },
             },
 
             buttons: {

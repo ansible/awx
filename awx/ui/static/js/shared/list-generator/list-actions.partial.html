@@ -1,9 +1,12 @@
 <span ng-repeat="(name, options) in list.actions">
+    <!-- TODO: Unfortunately, the data-tip-watch attribute is not loaded for
+    some reason -->
     <button
         toolbar-button
         mode="options.mode"
         icon-name="{{name}}"
         aw-tool-tip="{{options.awToolTip}}"
+        data-tip-watch="{{options.dataTipWatch}}"
         data-placement="{{options.dataPlacement}}"
         data-container="{{options.dataContainer}}"
         class="options.class"

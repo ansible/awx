@@ -39,6 +39,7 @@ import Refresh from "tower/helpers/refresh";
 import RelatedSearch from "tower/helpers/related-search";
 import Search from "tower/helpers/search";
 import Teams from "tower/helpers/teams";
+import AdhocHelper from "tower/helpers/Adhoc";
 
 export
     {   AboutAnsible,
@@ -78,5 +79,6 @@ export
         Refresh,
         RelatedSearch,
         Search,
-        Teams
+        Teams,
+        AdhocHelper
     };

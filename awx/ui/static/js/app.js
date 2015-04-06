@@ -40,6 +40,7 @@ import {ScheduleEditController} from 'tower/controllers/Schedules';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from 'tower/controllers/Projects';
 import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from 'tower/controllers/Organizations';
 import {InventoriesList, InventoriesAdd, InventoriesEdit, InventoriesManage} from 'tower/controllers/Inventories';
+import {AdhocForm} from 'tower/controllers/Adhoc';
 import {AdminsList} from 'tower/controllers/Admins';
 import {UsersList, UsersAdd, UsersEdit} from 'tower/controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from 'tower/controllers/Teams';
@@ -88,6 +89,7 @@ var tower = angular.module('Tower', [
     'AdminListDefinition',
     'CustomInventoryListDefinition',
     'AWDirectives',
+    'AdhocFormDefinition',
     'InventoriesListDefinition',
     'InventoryFormDefinition',
     'InventoryHelper',
@@ -168,7 +170,8 @@ var tower = angular.module('Tower', [
     'ConfigureTowerHelper',
     'ConfigureTowerJobsListDefinition',
     'CreateCustomInventoryHelper',
-    'CustomInventoryListDefinition'
+    'CustomInventoryListDefinition',
+    'AdhocHelper'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -197,6 +200,11 @@ var tower = angular.module('Tower', [
 
             when('/jobs/:id/stdout', {
                 templateUrl: urlPrefix + 'partials/job_stdout.html',
+                controller: JobStdoutController
+            }).
+
+            when('/ad_hoc_commands/:id', {
+                templateUrl: urlPrefix + 'partials/job_stdout_adhoc.html',
                 controller: JobStdoutController
             }).
 
@@ -278,6 +286,11 @@ var tower = angular.module('Tower', [
             when('/inventories/:inventory_id/manage', {
                 templateUrl: urlPrefix + 'partials/inventory-manage.html',
                 controller: InventoriesManage
+            }).
+
+            when('/inventories/:inventory_id/adhoc', {
+                templateUrl: urlPrefix + 'partials/adhoc.html',
+                controller: AdhocForm
             }).
 
             when('/organizations', {

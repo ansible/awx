@@ -16,6 +16,7 @@ export default
         index: false,
         hover: true,
         'class': 'table-no-border',
+        multiSelect: true,
 
         fields: {
             name: {
@@ -78,6 +79,17 @@ export default
         },
 
         actions: {
+            launch: {
+                mode: 'all',
+                // TODO: ngShow permissions
+                ngClick: 'populateAdhocForm()',
+                awToolTip: "Run a command on this inventory"
+                // TODO: set up a tip watcher and change text based on when
+                // things are selected/not selected.  This is started and
+                // commented out in the inventory controller within the watchers.
+                // awToolTip: "{{ adhocButtonTipContents }}",
+                // dataTipWatch: "adhocButtonTipContents"
+            },
             create: {
                 mode: 'all',
                 ngClick: "createGroup()",

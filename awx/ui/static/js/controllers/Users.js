@@ -294,6 +294,15 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     $routeParams.id + '. GET status: ' + status });
             });
 
+        // if the permission includes adhoc (and is not admin), display that
+        $scope.getPermissionText = function () {
+            if (this.permission.permission_type !== "admin" && this.permission.run_ad_hoc_commands) {
+                return this.permission.permission_type + " + ad hoc";
+            } else {
+                return this.permission.permission_type;
+            }
+        };
+
         // Save changes to the parent
         $scope.formSave = function () {
             var data = {}, fld;

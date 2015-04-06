@@ -870,6 +870,53 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
         show_failures: false
     }];
 
+    // TODO: only display adhoc button if the user has permission to use it.
+    // TODO: figure out how to get the action-list partial to update so that
+    // the tooltip can be changed based off things being selected or not.
+    $scope.adhocButtonTipContents = "Launch adhoc command for the inventory";
+
+    // watcher for the group list checkbox changes
+    $scope.$on('multiSelectList.selectionChanged', function(e, selection) {
+        if (selection.length > 0) {
+            $scope.groupsSelected = true;
+            // $scope.adhocButtonTipContents = "Launch adhoc command for the "
+            //     + "selected groups and hosts.";
+        } else {
+            $scope.groupsSelected = false;
+            // $scope.adhocButtonTipContents = "Launch adhoc command for the "
+            //     + "inventory.";
+        }
+        $scope.groupsSelectedItems = selection.selectedItems;
+    });
+
+    // watcher for the host list checkbox changes
+    hostScope.$on('multiSelectList.selectionChanged', function(e, selection) {
+        // you need this so that the event doesn't bubble to the watcher above
+        // for the host list
+        e.stopPropagation();
+        if (selection.length > 0) {
+            $scope.hostsSelected = true;
+            // $scope.adhocButtonTipContents = "Launch adhoc command for the "
+            //     + "selected groups and hosts.";
+        } else {
+            $scope.hostsSelected = false;
+            // $scope.adhocButtonTipContents = "Launch adhoc command for the "
+            //     + "inventory.";
+        }
+        $scope.hostsSelectedItems = selection.selectedItems;
+    });
+
+    // populates host patterns based on selected hosts/groups
+    $scope.populateAdhocForm = function() {
+        var host_patterns = "all";
+        if ($scope.hostsSelected || $scope.groupsSelected) {
+            var allSelectedItems = $scope.groupsSelectedItems.concat($scope.hostsSelectedItems)
+            host_patterns = _.pluck(allSelectedItems, "name").join(":");
+        }
+        $rootScope.hostPatterns = host_patterns;
+        $location.path('/inventories/' + $scope.inventory.id + '/adhoc');
+    }
+
     $scope.refreshHostsOnGroupRefresh = false;
     $scope.selected_group_id = null;
 

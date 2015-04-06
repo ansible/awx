@@ -130,6 +130,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'submit':
                 icon = 'fa-rocket';
                 break;
+            case 'launch':
+                icon = 'fa-rocket';
+                break;
             case 'stream':
                 icon = 'fa-clock-o';
                 break;
@@ -652,12 +655,14 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         var hdr = params.hdr,
             content = params.content,
             show = params.show,
+            ngHide = params.ngHide,
             idx = params.idx,
             bind = params.bind,
             html = '';
 
         html += "<div class=\"panel-group collapsible-help\" ";
-        html += (show) ? "ng-show=\"" + show + "\"" : "";
+        html += (show) ? "ng-show=\"" + show + "\" " : "";
+        html += (ngHide) ? "ng-hide=\"" + ngHide  + "\" " : "";
         html += ">\n";
         html += "<div class=\"panel panel-default\">\n";
         html += "<div class=\"panel-heading\" ng-click=\"accordionToggle('#accordion" + idx + "')\">\n";

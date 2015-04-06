@@ -11,7 +11,7 @@
 */
 
 
-export function JobStdoutController ($log, $rootScope, $scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, Socket) {
+export function JobStdoutController ($location, $log, $rootScope, $scope, $compile, $routeParams, ClearScope, GetBasePath, Wait, Rest, ProcessErrors, Socket) {
 
     ClearScope();
 
@@ -170,7 +170,9 @@ export function JobStdoutController ($log, $rootScope, $scope, $compile, $routeP
         }
     });
 
-    Rest.setUrl(GetBasePath('jobs') + job_id + '/');
+    // Note: could be ad_hoc_commands or jobs
+    var jobType = $location.path().replace(/^\//, '').split('/')[0];
+    Rest.setUrl(GetBasePath(jobType) + job_id + '/');
     Rest.get()
         .success(function(data) {
             $scope.job = data;
@@ -270,6 +272,5 @@ export function JobStdoutController ($log, $rootScope, $scope, $compile, $routeP
 
 }
 
-JobStdoutController.$inject = [ '$log', '$rootScope', '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors',
+JobStdoutController.$inject = [ '$location', '$log', '$rootScope', '$scope', '$compile', '$routeParams', 'ClearScope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors',
     'Socket' ];
-
