@@ -3,6 +3,7 @@
 
 # Python
 from datetime import datetime
+from copy import deepcopy
 
 # Django
 
@@ -10,7 +11,7 @@ from datetime import datetime
 from awx.main.models.fact import * # noqa
 from awx.main.tests.base import BaseTest, MongoDBRequired
 
-__all__ = ['FactHostTest', 'FactTest']
+__all__ = ['FactHostTest', 'FactTest', 'FactGetVersionTest']
 
 TEST_FACT_DATA = {
     'hostname': 'hostname1',
@@ -58,6 +59,12 @@ class FactHostTest(BaseTest, MongoDBRequired):
         self.assertIsNotNone(host, "Host added but not found")
         self.assertEqual(TEST_FACT_DATA['hostname'], host.hostname, "Gotten record hostname does not match expected hostname")
 
+    # Ensure an error is raised for .get() that doesn't match a record.
+    def test_get_host_id_no_result(self):
+        host = FactHost(hostname=TEST_FACT_DATA['hostname'])
+        host.save()
+
+        self.assertRaises(FactHost.DoesNotExist, FactHost.objects.get, hostname='doesnotexist')
 
 class FactTest(BaseTest, MongoDBRequired):
     def setUp(self):
@@ -84,4 +91,34 @@ class FactTest(BaseTest, MongoDBRequired):
         self.assertEqual(v.fact.id, f_obj.id)
         self.assertEqual(v.fact.module, TEST_FACT_DATA['add_fact_data']['module'])
 
+class FactGetVersionTest(BaseTest, MongoDBRequired):
+    def setUp(self):
+        super(FactGetVersionTest, self).setUp()
+        TEST_FACT_DATA['add_fact_data']['host'] = FactHost(hostname=TEST_FACT_DATA['hostname']).save()
+
+        self.t1 = datetime.now().replace(second=1, microsecond=0)
+        self.t2 = datetime.now().replace(second=2, microsecond=0)
+        data = deepcopy(TEST_FACT_DATA)
+        data['add_fact_data']['timestamp'] = self.t1
+        (self.f1, self.v1) = Fact.add_fact(**data['add_fact_data'])
+        data = deepcopy(TEST_FACT_DATA)
+        data['add_fact_data']['timestamp'] = self.t2
+        (self.f2, self.v2) = Fact.add_fact(**data['add_fact_data'])
+
+    def test_get_version_exact_timestamp(self):
+        fact = Fact.get_version(hostname=TEST_FACT_DATA['hostname'], timestamp=self.t1, module=TEST_FACT_DATA['add_fact_data']['module'])
+        self.assertIsNotNone(fact, "Set of Facts not found")
+        self.assertEqual(self.f1.id, fact.id)
+        self.assertEqual(self.f1.fact, fact.fact)
+
+    def test_get_version_lte_timestamp(self):
+        t3 = datetime.now().replace(second=3, microsecond=0)
+        fact = Fact.get_version(hostname=TEST_FACT_DATA['hostname'], timestamp=t3, module=TEST_FACT_DATA['add_fact_data']['module'])
+        self.assertEqual(self.f1.id, fact.id)
+        self.assertEqual(self.f1.fact, fact.fact)
+
+    def test_get_version_none(self):
+        t3 = deepcopy(self.t1).replace(second=0)
+        fact = Fact.get_version(hostname=TEST_FACT_DATA['hostname'], timestamp=t3, module=TEST_FACT_DATA['add_fact_data']['module'])
+        self.assertIsNone(fact)
 
