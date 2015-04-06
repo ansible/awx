@@ -332,7 +332,8 @@ export function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $
 
 }
 
-PermissionsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'PermissionsForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath',
-    'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 'PermissionCategoryChange'
-];
+PermissionsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
+    '$log', '$routeParams', 'PermissionsForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt',
+    'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess',
+    'Wait', 'PermissionCategoryChange'];

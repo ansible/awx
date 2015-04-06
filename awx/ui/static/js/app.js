@@ -76,7 +76,7 @@ var tower = angular.module('Tower', [
     'UserFormDefinition',
     'FormGenerator',
     'OrganizationListDefinition',
-    'jobTemplates', 
+    'jobTemplates',
     'UserListDefinition',
     'UserHelper',
     'PromptDialog',

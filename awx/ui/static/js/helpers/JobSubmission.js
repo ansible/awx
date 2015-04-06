@@ -299,7 +299,6 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
 
       html += "<div class=\"alert alert-info\">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>\n";
       // html += "<form name=\"password_form\" novalidate>\n";
-
       scope.passwords.forEach(function(password) {
         // Prompt for password
         field = form.fields[password];

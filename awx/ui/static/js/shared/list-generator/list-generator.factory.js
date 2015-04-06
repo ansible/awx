@@ -229,7 +229,6 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                 selection.deselectedItems.forEach(function(item) {
                                     item.isSelected = false;
                                 });
-
                             }.bind(this));
 
                         this.scope.$on('$destroy', function() {
@@ -396,7 +395,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                                });
             }
 
-            html += "</div><!-- list-acitons -->\n";
+            html += "</div><!-- list-actions -->\n";
 
                             html += "</div><!-- list-actions-column -->\n";
                         } else {

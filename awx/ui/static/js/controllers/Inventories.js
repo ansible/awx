@@ -15,11 +15,11 @@
 
 import 'tower/job-templates/main';
 
-export function InventoriesList($scope, $rootScope, $location, $log, $routeParams, $compile, $filter, Rest, Alert, InventoryList, generateList,
-    LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
+export function InventoriesList($scope, $rootScope, $location, $log,
+    $routeParams, $compile, $filter, Rest, Alert, InventoryList, generateList,
+    LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
+    ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
     EditInventoryProperties, Find, Empty, LogViewer) {
-
-    //ClearScope();
 
     var list = InventoryList,
         defaultUrl = GetBasePath('inventory'),
@@ -51,7 +51,10 @@ export function InventoriesList($scope, $rootScope, $location, $log, $routeParam
             // close any lingering tool tipss
             $(this).hide();
         });
-        elem.attr({ "aw-pop-over": html, "data-popover-title": title, "data-placement": "right" });
+        elem.attr({
+            "aw-pop-over": html,
+            "data-popover-title": title,
+            "data-placement": "right" });
         $compile(elem)($scope);
         elem.on('shown.bs.popover', function() {
             $('.popover').each(function() {
@@ -837,12 +840,16 @@ InventoriesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$lo
 
 
 
-export function InventoriesManage ($log, $scope, $location, $routeParams, $compile, generateList, ClearScope, Empty, Wait, Rest, Alert, LoadBreadCrumbs, GetBasePath, ProcessErrors,
-    Breadcrumbs, InventoryGroups, InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, GroupsEdit, InventoryUpdate,
-    GroupsCancelUpdate, ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete, EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
-    InventoryGroupsHelp, HelpDialog, ViewJob, WatchInventoryWindowResize, GetHostContainerRows, GetGroupContainerRows, GetGroupContainerHeight,
-    GroupsCopy, HostsCopy, Socket)
-{
+export function InventoriesManage ($log, $scope, $rootScope, $location,
+    $routeParams, $compile, generateList, ClearScope, Empty, Wait, Rest, Alert,
+    LoadBreadCrumbs, GetBasePath, ProcessErrors, Breadcrumbs, InventoryGroups,
+    InjectHosts, Find, HostsReload, SearchInit, PaginateInit, GetSyncStatusMsg,
+    GetHostsStatusMsg, GroupsEdit, InventoryUpdate, GroupsCancelUpdate,
+    ViewUpdateStatus, GroupsDelete, Store, HostsEdit, HostsDelete,
+    EditInventoryProperties, ToggleHostEnabled, Stream, ShowJobSummary,
+    InventoryGroupsHelp, HelpDialog, ViewJob, WatchInventoryWindowResize,
+    GetHostContainerRows, GetGroupContainerRows, GetGroupContainerHeight,
+    GroupsCopy, HostsCopy, Socket) {
 
     var PreviousSearchParams,
         url,
@@ -1365,7 +1372,8 @@ export function InventoriesManage ($log, $scope, $location, $routeParams, $compi
             hostScope.show_failures = show_failures;
             $scope.groupSelect(group_id);
             hostScope.hosts = [];
-            $scope.show_failures = show_failures; // turn on failed hosts filter in hosts view
+            $scope.show_failures = show_failures; // turn on failed hosts
+            // filter in hosts view
         } else {
             Wait('stop');
         }
@@ -1374,15 +1382,24 @@ export function InventoriesManage ($log, $scope, $location, $routeParams, $compi
     if ($scope.removeGroupDeleteCompleted) {
         $scope.removeGroupDeleteCompleted();
     }
-    $scope.removeGroupDeleteCompleted = $scope.$on('GroupDeleteCompleted', function() {
-        $scope.refreshGroups();
-    });
+    $scope.removeGroupDeleteCompleted = $scope.$on('GroupDeleteCompleted',
+        function() {
+            $scope.refreshGroups();
+        }
+    );
 }
 
 
-InventoriesManage.$inject = ['$log', '$scope', '$location', '$routeParams', '$compile', 'generateList', 'ClearScope', 'Empty', 'Wait', 'Rest', 'Alert', 'LoadBreadCrumbs',
-    'GetBasePath', 'ProcessErrors', 'Breadcrumbs', 'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg',
-    'GetHostsStatusMsg', 'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
-    'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary', 'InventoryGroupsHelp', 'HelpDialog', 'ViewJob', 'WatchInventoryWindowResize',
-    'GetHostContainerRows', 'GetGroupContainerRows', 'GetGroupContainerHeight', 'GroupsCopy', 'HostsCopy', 'Socket'
-    ];
+InventoriesManage.$inject = ['$log', '$scope', '$rootScope', '$location',
+    '$routeParams', '$compile', 'generateList', 'ClearScope', 'Empty', 'Wait',
+    'Rest', 'Alert', 'LoadBreadCrumbs', 'GetBasePath', 'ProcessErrors',
+    'Breadcrumbs', 'InventoryGroups', 'InjectHosts', 'Find', 'HostsReload',
+    'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg',
+    'GroupsEdit', 'InventoryUpdate', 'GroupsCancelUpdate', 'ViewUpdateStatus',
+    'GroupsDelete', 'Store', 'HostsEdit', 'HostsDelete',
+    'EditInventoryProperties', 'ToggleHostEnabled', 'Stream', 'ShowJobSummary',
+    'InventoryGroupsHelp', 'HelpDialog', 'ViewJob',
+    'WatchInventoryWindowResize', 'GetHostContainerRows',
+    'GetGroupContainerRows', 'GetGroupContainerHeight', 'GroupsCopy',
+    'HostsCopy', 'Socket'
+];

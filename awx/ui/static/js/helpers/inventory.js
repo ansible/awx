@@ -18,7 +18,6 @@ export default
         'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper', 'VariablesHelper',
     ])
 
-
     .factory('GetGroupContainerHeight', [ function() {
         return function() {
 
@@ -100,7 +99,6 @@ export default
 
         };
     }])
-
 
     .factory('WatchInventoryWindowResize', ['ApplyEllipsis', 'SetContainerHeights',
         function (ApplyEllipsis, SetContainerHeights) {
@@ -184,7 +182,6 @@ export default
             };
         }
     ])
-
 
     .factory('EditInventoryProperties', ['InventoryForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList',
         'GetBasePath', 'ParseTypeChange', 'SaveInventory', 'Wait', 'Store', 'SearchInit', 'ParseVariableString', 'CreateDialog', 'TextareaResize',

@@ -134,7 +134,8 @@ export default
                 ngClick: 'updateGroup(group.id)',
                 awToolTip: "{{ group.launch_tooltip }}",
                 dataTipWatch: "group.launch_tooltip",
-                ngShow: "group.status !== 'running' && group.status !== 'pending' && group.status !== 'updating'",
+                ngShow: "group.status !== 'running' && group.status "
+                    + "!== 'pending' && group.status !== 'updating'",
                 ngClass: "group.launch_class",
                 dataPlacement: "top"
             },
@@ -144,7 +145,8 @@ export default
                 ngClick: "cancelUpdate(group.id)",
                 awToolTip: "Cancel sync process",
                 'class': 'red-txt',
-                ngShow: "group.status == 'running' || group.status == 'pending' || group.status == 'updating'",
+                ngShow: "group.status == 'running' || group.status == 'pending' "
+                    + "|| group.status == 'updating'",
                 dataPlacement: "top"
             },
             edit: {
