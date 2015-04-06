@@ -293,6 +293,7 @@ class Migration(SchemaMigration):
         },
         'main.job': {
             'Meta': {'ordering': "('id',)", 'object_name': 'Job', '_ormbases': ['main.UnifiedJob']},
+            'become_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'cloud_credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs_as_cloud_credential+'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
             'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
             'extra_vars': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),

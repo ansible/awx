@@ -13,6 +13,11 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.BooleanField')(default=False),
                       keep_default=False)
 
+        # Adding field 'Job.become_enabled'
+        db.add_column(u'main_job', 'become_enabled',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
+
         # Adding field 'Credential.become_method'
         db.add_column(u'main_credential', 'become_method',
                       self.gf('django.db.models.fields.CharField')(default='', max_length=32, blank=True),
@@ -32,6 +37,9 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Deleting field 'JobTemplate.become_enabled'
         db.delete_column(u'main_jobtemplate', 'become_enabled')
+
+        # Deleting field 'Job.become_enabled'
+        db.delete_column(u'main_job', 'become_enabled')
 
         # Deleting field 'Credential.become_method'
         db.delete_column(u'main_credential', 'become_method')
@@ -297,6 +305,7 @@ class Migration(SchemaMigration):
         },
         'main.job': {
             'Meta': {'ordering': "('id',)", 'object_name': 'Job', '_ormbases': ['main.UnifiedJob']},
+            'become_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'cloud_credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs_as_cloud_credential+'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
             'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
             'extra_vars': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),

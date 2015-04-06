@@ -637,7 +637,7 @@ class RunJob(BaseTask):
                 if become_method and become_method == "su" and "become_password" in kwargs.get("passwords", {}):
                     args.append("--ask-su-pass")
             else:
-                if job.job_template.become_enabled:
+                if job.become_enabled:
                     args.append('--become')
                 if become_method:
                     args.extend(['--become-method', become_method])
