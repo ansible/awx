@@ -227,7 +227,7 @@ class BaseSerializer(serializers.ModelSerializer):
     def get_type_choices(self):
         type_name_map = {
             'job': 'Playbook Run',
-            'ad_hoc_command': 'Ad Hoc Command',
+            'ad_hoc_command': 'Command',
             'project_update': 'SCM Update',
             'inventory_update': 'Inventory Sync',
             'system_job': 'Management Job',
