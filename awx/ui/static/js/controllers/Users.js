@@ -297,7 +297,7 @@ export function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeP
         // if the permission includes adhoc (and is not admin), display that
         $scope.getPermissionText = function () {
             if (this.permission.permission_type !== "admin" && this.permission.run_ad_hoc_commands) {
-                return this.permission.permission_type + " + ad hoc";
+                return this.permission.permission_type + " + run commands";
             } else {
                 return this.permission.permission_type;
             }
