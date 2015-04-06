@@ -60,6 +60,7 @@ export function AdhocForm($scope, $rootScope, $location, $routeParams,
     // pre-populate hostPatterns from the inventory page and
     // delete the value off of rootScope
     $scope.limit = $rootScope.hostPatterns || "all";
+    $scope.providedHostPatterns = $scope.limit;
     delete $rootScope.hostPatterns;
 
     if ($scope.removeChoicesReady) {
@@ -159,6 +160,7 @@ export function AdhocForm($scope, $rootScope, $location, $routeParams,
         for (var fld in master) {
             $scope[fld] = master[fld];
         }
+        $scope.limit = $scope.providedHostPatterns;
         KindChange({ scope: $scope, form: form, reset: false });
         OwnerChange({ scope: $scope });
         LoginMethodChange({ scope: $scope });
