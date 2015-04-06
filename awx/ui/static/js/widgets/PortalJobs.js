@@ -141,7 +141,7 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             $('.portal-container').height(available_height);
             search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
             page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
-            header = 0; //Math.max($('#completed_jobs_table thead').height(), 41);
+            header = 100; //Math.max($('#completed_jobs_table thead').height(), 41);
             height = Math.floor(available_height) - header - page_row - search_row ;
             if (docw < 765 && docw >= 493) {
                 row_height = 27;
@@ -149,17 +149,23 @@ angular.module('PortalJobsWidget', ['RestServices', 'Utilities'])
             else if (docw < 493) {
                 row_height = 47;
             }
+            else if (docw < 768) {
+                row_height = 44;
+            }
             else if (docw < 865) {
                 row_height = 87;
             }
             else if (docw < 925) {
                 row_height = 67;
             }
+            else if (docw < 992) {
+                row_height = 55;
+            }
             else if (docw < 1415) {
                 row_height = 47;
             }
             else {
-                row_height = 35;
+                row_height = 44;
             }
             max_rows = Math.floor(height / row_height);
             if (max_rows < 5){

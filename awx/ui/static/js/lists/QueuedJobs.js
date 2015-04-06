@@ -84,12 +84,12 @@ export default
                 awToolTip: 'Cancel the job',
                 dataPlacement: 'top'
             },
-            job_details: {
-                mode: 'all',
-                ngClick: "viewJobLog(queued_job.id)",
-                awToolTip: 'View job details',
-                dataPlacement: 'top',
-                ngShow: "queued_job.type == 'job'"
-            }
+            // job_details: {
+            //     mode: 'all',
+            //     ngClick: "viewJobLog(queued_job.id)",
+            //     awToolTip: 'View job details',
+            //     dataPlacement: 'top',
+            //     ngShow: "queued_job.type == 'job'"
+            // }
         }
     });

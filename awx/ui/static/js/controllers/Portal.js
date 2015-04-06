@@ -117,7 +117,7 @@ export function PortalController($scope, $compile, $routeParams, $rootScope, $lo
                 row_height = 47;
             }
             else {
-                row_height = 35;
+                row_height = 44;
             }
             max_rows = Math.floor(height / row_height);
             if (max_rows < 5){

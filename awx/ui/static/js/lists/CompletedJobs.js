@@ -100,12 +100,12 @@ export default
                 awToolTip: 'Delete the job',
                 dataPlacement: 'top'
             },
-            job_details: {
-                mode: 'all',
-                ngClick: "viewJobLog(completed_job.id)",
-                awToolTip: 'View job details',
-                dataPlacement: 'top'
-            },
+            // job_details: {
+            //     mode: 'all',
+            //     ngClick: "viewJobLog(completed_job.id)",
+            //     awToolTip: 'View job details',
+            //     dataPlacement: 'top'
+            // },
             stdout: {
                 mode: 'all',
                 href: '/#/jobs/{{ completed_job.id }}/stdout',

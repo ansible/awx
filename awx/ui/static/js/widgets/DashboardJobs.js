@@ -135,23 +135,26 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
             page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
             header = Math.max($('#completed_jobs_table thead').height(), 41);
             height = Math.floor(available_height) - header - page_row - search_row -30 ;
-            if (docw < 765 && docw >= 493) {
-                row_height = 27;
-            }
-            else if (docw < 493) {
-                row_height = 47;
-            }
-            else if (docw < 865) {
+            // if (docw < 765 && docw >= 493) {
+            //     row_height = 27;
+            // }
+            if (docw < 480) {
                 row_height = 87;
             }
-            else if (docw < 925) {
-                row_height = 67;
+            else if (docw < 767) {
+                row_height = 44;
+            }
+            else if (docw < 926) {
+                row_height = 87;
+            }
+            else if (docw < 1200) {
+                row_height = 44;
             }
             else if (docw < 1415) {
-                row_height = 47;
+                row_height = 55;
             }
             else {
-                row_height = 27;
+                row_height = 44;
             }
             max_rows = Math.floor(height / row_height);
             if (max_rows < 5){

@@ -85,12 +85,12 @@ export default
                 awToolTip: 'Cancel the job',
                 dataPlacement: 'top'
             },
-            job_details: {
-                mode: 'all',
-                ngClick: "viewJobLog(running_job.id)",
-                awToolTip: 'View job details',
-                dataPlacement: 'top'
-            },
+            // job_details: {
+            //     mode: 'all',
+            //     ngClick: "viewJobLog(running_job.id)",
+            //     awToolTip: 'View job details',
+            //     dataPlacement: 'top'
+            // },
             stdout: {
                 mode: 'all',
                 href: '/#/jobs/{{ running_job.id }}/stdout',

@@ -217,7 +217,13 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
             header = Math.max($('#completed_jobs_table thead').height(), 24);
             height = Math.floor(available_height / 2) - header - page_row - search_row - 30;
-            row_height = (docw < 1350) ? 47 : 44;
+            // row_height = (docw < 1350) ? 47 : 44;
+            if(docw < 1424){
+                row_height = 55;
+            }
+            else {
+                row_height = 44;
+            }
             max_rows = Math.floor(height / row_height);
             max_rows = (max_rows < 5) ? 5 : max_rows;
         }

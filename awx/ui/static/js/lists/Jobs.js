@@ -102,12 +102,12 @@ export default
                 dataPlacement: 'top',
                 ngShow: "job.status != 'running'"
             },
-            job_details: {
-                mode: 'all',
-                ngClick: "viewJobLog(job.id)",
-                awToolTip: 'View job details',
-                dataPlacement: 'top'
-            },
+            // job_details: {
+            //     mode: 'all',
+            //     ngClick: "viewJobLog(job.id)",
+            //     awToolTip: 'View job details',
+            //     dataPlacement: 'top'
+            // },
             stdout: {
                 mode: 'all',
                 href: '/#/jobs/{{ job.id }}/stdout',

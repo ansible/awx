@@ -40,7 +40,7 @@ export default
                 sourceModel: 'organization',
                 sourceField: 'name',
                 excludeModal: true,
-                columnClass: 'col-md-4 hidden-sm hidden-xs'
+                columnClass: 'col-md-3 hidden-sm hidden-xs'
             }
         },
 
@@ -61,7 +61,6 @@ export default
                 awToolTip: 'Edit credential',
                 dataPlacement: 'top'
             },
-
             "delete": {
                 ngClick: "deleteCustomInv(source_script.id, source_script.name)",
                 icon: 'fa-trash',
