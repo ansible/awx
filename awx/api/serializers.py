@@ -785,6 +785,18 @@ class InventorySerializer(BaseSerializerWithVariables):
         return ret
 
 
+class InventoryDetailSerializer(InventorySerializer):
+
+    class Meta:
+        fields = ('*', 'can_run_ad_hoc_commands')
+
+    can_run_ad_hoc_commands = serializers.SerializerMethodField('get_can_run_ad_hoc_commands')
+
+    def get_can_run_ad_hoc_commands(self, obj):
+        view = self.context.get('view', None)
+        return bool(obj and view and view.request and view.request.user and view.request.user.can_access(Inventory, 'run_ad_hoc_commands', obj))
+
+
 class InventoryScriptSerializer(InventorySerializer):
 
     class Meta:

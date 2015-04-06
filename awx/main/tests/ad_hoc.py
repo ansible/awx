@@ -899,6 +899,7 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         # the ad hoc command(s) run against that inventory.  Posting should
         # start a new ad hoc command and always set the inventory from the URL.
         url = reverse('api:inventory_ad_hoc_commands_list', args=(self.inventory.pk,))
+        inventory_url = reverse('api:inventory_detail', args=(self.inventory.pk,))
         with self.current_user('admin'):
             response = self.get(url, expect=200)
             self.assertEqual(response['count'], 1)
@@ -909,6 +910,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.put(url, {}, expect=405)
             self.patch(url, {}, expect=405)
             self.delete(url, expect=405)
+            response = self.get(inventory_url, expect=200)
+            self.assertTrue(response['can_run_ad_hoc_commands'])
         with self.current_user('normal'):
             response = self.get(url, expect=200)
             self.assertEqual(response['count'], 3)
@@ -917,6 +920,8 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.put(url, {}, expect=405)
             self.patch(url, {}, expect=405)
             self.delete(url, expect=405)
+            response = self.get(inventory_url, expect=200)
+            self.assertTrue(response['can_run_ad_hoc_commands'])
         with self.current_user('other'):
             self.get(url, expect=403)
             self.post(url, {}, expect=403)
@@ -935,6 +940,44 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.put(url, {}, expect=401)
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
+
+        # Create a credential for the other user and explicitly give other
+        # user admin permission on the inventory (still not allowed to run ad
+        # hoc commands; can get the list but can't see any items).
+        other_cred = self.create_test_credential(user=self.other_django_user)
+        user_perm_url = reverse('api:user_permissions_list', args=(self.other_django_user.pk,))
+        user_perm_data = {
+            'name': 'Allow Other to Admin Inventory',
+            'inventory': self.inventory.pk,
+            'permission_type': 'admin',
+        }
+        with self.current_user('admin'):
+            response = self.post(user_perm_url, user_perm_data, expect=201)
+            user_perm_id = response['id']
+        with self.current_user('other'):
+            response = self.get(url, expect=200)
+            self.assertEqual(response['count'], 0)
+            self.run_test_ad_hoc_command(url=url, inventory=None, credential=other_cred.pk, expect=403)
+            response = self.get(inventory_url, expect=200)
+            self.assertFalse(response['can_run_ad_hoc_commands'])
+
+        # Update permission to allow other user to run ad hoc commands.  Can
+        # only see his own ad hoc commands (because of credential permission).
+        user_perm_url = reverse('api:permission_detail', args=(user_perm_id,))
+        user_perm_data.update({
+            'name': 'Allow Other to Admin Inventory and Run Ad Hoc Commands',
+            'run_ad_hoc_commands': True,
+        })
+        with self.current_user('admin'):
+            response = self.patch(user_perm_url, user_perm_data, expect=200)
+        with self.current_user('other'):
+            response = self.get(url, expect=200)
+            self.assertEqual(response['count'], 0)
+            self.run_test_ad_hoc_command(url=url, inventory=None, credential=other_cred.pk, expect=201)
+            response = self.get(url, expect=200)
+            self.assertEqual(response['count'], 1)
+            response = self.get(inventory_url, expect=200)
+            self.assertTrue(response['can_run_ad_hoc_commands'])
 
     def test_host_ad_hoc_commands_list(self):
         with self.current_user('admin'):

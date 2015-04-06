@@ -887,7 +887,7 @@ class InventoryList(ListCreateAPIView):
 class InventoryDetail(RetrieveUpdateDestroyAPIView):
 
     model = Inventory
-    serializer_class = InventorySerializer
+    serializer_class = InventoryDetailSerializer
 
     def destroy(self, request, *args, **kwargs):
         with ignore_inventory_computed_fields():
