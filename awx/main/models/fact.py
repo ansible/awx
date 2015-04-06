@@ -41,8 +41,11 @@ class Fact(DynamicDocument):
         version_obj.save()
         return (fact_obj, version_obj)
 
+    # TODO: if we want to relax the need to include module...
+    # If module not specified then filter query may return more than 1 result.
+    # Thus, the resulting facts must somehow be unioned/concated/ or kept as an array.
     @staticmethod
-    def get_version(hostname, timestamp, module=None):
+    def get_host_version(hostname, timestamp, module):
         try:
             host = FactHost.objects.get(hostname=hostname)
         except FactHost.DoesNotExist:
@@ -50,10 +53,9 @@ class Fact(DynamicDocument):
 
         kv = {
             'host' : host.id,
-            'timestamp__lte': timestamp
+            'timestamp__lte': timestamp,
+            'module': module,
         }
-        if module:
-            kv['module'] = module
 
         try:
             facts = Fact.objects.filter(**kv)
@@ -62,6 +64,20 @@ class Fact(DynamicDocument):
             return facts[0]
         except Fact.DoesNotExist:
             return None
+
+    @staticmethod
+    def get_host_timeline(hostname, module):
+        try:
+            host = FactHost.objects.get(hostname=hostname)
+        except FactHost.DoesNotExist:
+            return None
+
+        kv = {
+            'host': host.id,
+            'module': module,
+        }
+
+        return FactVersion.objects.filter(**kv).values_list('timestamp')
 
 class FactVersion(Document):
     timestamp = DateTimeField(required=True)
@@ -76,3 +92,4 @@ class FactVersion(Document):
             'module'
         ]
     }
+    

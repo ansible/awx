@@ -11,7 +11,7 @@ from copy import deepcopy
 from awx.main.models.fact import * # noqa
 from awx.main.tests.base import BaseTest, MongoDBRequired
 
-__all__ = ['FactHostTest', 'FactTest', 'FactGetVersionTest']
+__all__ = ['FactHostTest', 'FactTest', 'FactGetHostVersionTest', 'FactGetHostTimeline']
 
 TEST_FACT_DATA = {
     'hostname': 'hostname1',
@@ -50,6 +50,21 @@ TEST_FACT_DATA = {
 # Strip off microseconds because mongo has less precision
 TEST_FACT_DATA['add_fact_data']['timestamp'] = TEST_FACT_DATA['add_fact_data']['timestamp'].replace(microsecond=0)
 
+def create_host_document():
+    TEST_FACT_DATA['add_fact_data']['host'] = FactHost(hostname=TEST_FACT_DATA['hostname']).save()
+
+def create_fact_scans(count=1):
+    timestamps = []
+    for i in range(0, count):
+        data = deepcopy(TEST_FACT_DATA)
+        t = datetime.now().replace(year=2015 - i, microsecond=0)
+        data['add_fact_data']['timestamp'] = t
+        (f, v) = Fact.add_fact(**data['add_fact_data'])
+        timestamps.append(t)
+
+    return timestamps
+
+
 class FactHostTest(BaseTest, MongoDBRequired):
     def test_create_host(self):
         host = FactHost(hostname=TEST_FACT_DATA['hostname'])
@@ -69,7 +84,7 @@ class FactHostTest(BaseTest, MongoDBRequired):
 class FactTest(BaseTest, MongoDBRequired):
     def setUp(self):
         super(FactTest, self).setUp()
-        TEST_FACT_DATA['add_fact_data']['host'] = FactHost(hostname=TEST_FACT_DATA['hostname']).save()
+        create_host_document()
 
     def test_add_fact(self):
         (f_obj, v_obj) = Fact.add_fact(**TEST_FACT_DATA['add_fact_data'])
@@ -91,10 +106,10 @@ class FactTest(BaseTest, MongoDBRequired):
         self.assertEqual(v.fact.id, f_obj.id)
         self.assertEqual(v.fact.module, TEST_FACT_DATA['add_fact_data']['module'])
 
-class FactGetVersionTest(BaseTest, MongoDBRequired):
+class FactGetHostVersionTest(BaseTest, MongoDBRequired):
     def setUp(self):
-        super(FactGetVersionTest, self).setUp()
-        TEST_FACT_DATA['add_fact_data']['host'] = FactHost(hostname=TEST_FACT_DATA['hostname']).save()
+        super(FactGetHostVersionTest, self).setUp()
+        create_host_document()
 
         self.t1 = datetime.now().replace(second=1, microsecond=0)
         self.t2 = datetime.now().replace(second=2, microsecond=0)
@@ -105,20 +120,35 @@ class FactGetVersionTest(BaseTest, MongoDBRequired):
         data['add_fact_data']['timestamp'] = self.t2
         (self.f2, self.v2) = Fact.add_fact(**data['add_fact_data'])
 
-    def test_get_version_exact_timestamp(self):
-        fact = Fact.get_version(hostname=TEST_FACT_DATA['hostname'], timestamp=self.t1, module=TEST_FACT_DATA['add_fact_data']['module'])
+    def test_get_host_version_exact_timestamp(self):
+        fact = Fact.get_host_version(hostname=TEST_FACT_DATA['hostname'], timestamp=self.t1, module=TEST_FACT_DATA['add_fact_data']['module'])
         self.assertIsNotNone(fact, "Set of Facts not found")
         self.assertEqual(self.f1.id, fact.id)
         self.assertEqual(self.f1.fact, fact.fact)
 
-    def test_get_version_lte_timestamp(self):
+    def test_get_host_version_lte_timestamp(self):
         t3 = datetime.now().replace(second=3, microsecond=0)
-        fact = Fact.get_version(hostname=TEST_FACT_DATA['hostname'], timestamp=t3, module=TEST_FACT_DATA['add_fact_data']['module'])
+        fact = Fact.get_host_version(hostname=TEST_FACT_DATA['hostname'], timestamp=t3, module=TEST_FACT_DATA['add_fact_data']['module'])
         self.assertEqual(self.f1.id, fact.id)
         self.assertEqual(self.f1.fact, fact.fact)
 
-    def test_get_version_none(self):
+    def test_get_host_version_none(self):
         t3 = deepcopy(self.t1).replace(second=0)
-        fact = Fact.get_version(hostname=TEST_FACT_DATA['hostname'], timestamp=t3, module=TEST_FACT_DATA['add_fact_data']['module'])
+        fact = Fact.get_host_version(hostname=TEST_FACT_DATA['hostname'], timestamp=t3, module=TEST_FACT_DATA['add_fact_data']['module'])
         self.assertIsNone(fact)
+
+class FactGetHostTimeline(BaseTest, MongoDBRequired):
+    def setUp(self):
+        super(FactGetHostTimeline, self).setUp()
+        create_host_document()
+
+        self.scans = 20
+        self.timestamps = create_fact_scans(self.scans)
+
+    def test_get_host_timeline_ok(self):
+        timestamps = Fact.get_host_timeline(hostname=TEST_FACT_DATA['hostname'], module=TEST_FACT_DATA['add_fact_data']['module'])
+        self.assertIsNotNone(timestamps)
+        self.assertEqual(len(timestamps), len(self.timestamps))
+        for i in range(0, self.scans):
+            self.assertEqual(timestamps[i], self.timestamps[i])
 
