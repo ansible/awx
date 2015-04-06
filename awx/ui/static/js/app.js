@@ -22,6 +22,7 @@ import 'tower/forms';
 import 'tower/lists';
 import 'tower/widgets';
 import 'tower/help';
+import 'tower/filters'; 
 import {Home, HomeGroups, HomeHosts} from 'tower/controllers/Home';
 import {SocketsController} from 'tower/controllers/Sockets';
 import {Authenticate} from 'tower/controllers/Authentication';

@@ -9,7 +9,7 @@
 
 
 export default
-    angular.module('ScheduledJobsDefinition', [])
+    angular.module('ScheduledJobsDefinition', ['sanitizeFilter'])
     .value( 'ScheduledJobsList', {
 
         name: 'schedules',
@@ -62,7 +62,7 @@ export default
                 sourceModel: 'unified_job_template',
                 sourceField: 'name',
                 ngClick: "editSchedule(schedule.id)",
-                awToolTip: "{{ schedule.nameTip }}",
+                awToolTip: "{{ schedule.nameTip | sanitize}}",
                 dataPlacement: "top",
                 defaultSearchField: true
             }

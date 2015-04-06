@@ -402,64 +402,11 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
      *  Include the standard TB data-XXX attributes to controll a tooltip's appearance.  We will
      *  default placement to the left and delay to the config setting.
      */
-    .directive('awToolTip', ['$sce', function($sce) {
+    .directive('awToolTip', [ function() {
         return {
             link: function(scope, element, attrs) {
                 var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : ($AnsibleConfig) ? $AnsibleConfig.tooltip_delay : {show: 500, hide: 100},
                     placement;
-                if (attrs.awTipPlacement) {
-                    placement = attrs.awTipPlacement;
-                }
-                else {
-                    placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left';
-                }
-
-                $(element).on('hidden.bs.tooltip', function( ) {
-                    // TB3RC1 is leaving behind tooltip <div> elements. This will remove them
-                    // after a tooltip fades away. If not, they lay overtop of other elements and
-                    // honk up the page.
-                    $('.tooltip').each(function() {
-                        $(this).remove();
-                    });
-                });
-
-                attrs.awToolTip = attrs.awToolTip.replace(/</g, "&lt;");
-                attrs.awToolTip = attrs.awToolTip.replace(/>/g, "&gt;");
-                attrs.awToolTip = $sce.getTrustedHtml(attrs.awToolTip);
-                $(element).tooltip({
-                    placement: placement,
-                    delay: delay,
-                    html: true,
-                    title: attrs.awToolTip,
-                    container: 'body',
-                    trigger: 'hover focus'
-                });
-
-                if (attrs.tipWatch) {
-                    // Add dataTipWatch: 'variable_name'
-                    scope.$watch(attrs.tipWatch, function(newVal, oldVal) {
-                        if (newVal !== oldVal) {
-                            // Where did fixTitle come from?:
-                            //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
-                            $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
-                        }
-                    });
-                }
-            }
-        };
-    }])
-
-    /*
-     * This is a copy of awToolTip currently.
-     * TODO: only display these tool tips if the length of the anchor *as interpolated* to be larger than the table cell
-     */
-    .directive('awToolTipEllipses', [ function() {
-        return {
-            link: function(scope, element, attrs) {
-
-                var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : ($AnsibleConfig) ? $AnsibleConfig.tooltip_delay : {show: 500, hide: 100},
-                    placement;
-
                 if (attrs.awTipPlacement) {
                     placement = attrs.awTipPlacement;
                 }
@@ -480,10 +427,21 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     placement: placement,
                     delay: delay,
                     html: true,
-                    title: attrs.awToolTipEllipses,
+                    title: attrs.awToolTip,
                     container: 'body',
                     trigger: 'hover focus'
                 });
+
+                if (attrs.tipWatch) {
+                    // Add dataTipWatch: 'variable_name'
+                    scope.$watch(attrs.tipWatch, function(newVal, oldVal) {
+                        if (newVal !== oldVal) {
+                            // Where did fixTitle come from?:
+                            //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
+                            $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
+                        }
+                    });
+                }
             }
         };
     }])
