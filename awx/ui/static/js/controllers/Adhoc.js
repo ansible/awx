@@ -11,15 +11,15 @@
  * @name controllers.function:Adhoc
  * @description This controller controls the adhoc form creation, command launching and navigating to standard out after command has been succesfully ran.
 */
-export function AdhocForm($scope, $rootScope, $location, $routeParams,
+export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
     AdhocForm, GenerateForm, Rest, ProcessErrors, ClearScope, GetBasePath,
     GetChoices, KindChange, LookUpInit, CredentialList, Empty, OwnerChange,
     LoginMethodChange, Wait) {
 
     ClearScope();
 
-    var url = GetBasePath('inventory') + $routeParams.inventory_id
-        + '/ad_hoc_commands/',
+    var url = GetBasePath('inventory') + $routeParams.inventory_id +
+        '/ad_hoc_commands/',
         generator = GenerateForm,
         form = AdhocForm,
         master = {},
@@ -33,8 +33,8 @@ export function AdhocForm($scope, $rootScope, $location, $routeParams,
     // display
     Wait('start');
     $scope.id = id;
-    $scope.argsPopOver = "<p>These arguments are used with the"
-        + " specified module.</p>";
+    $scope.argsPopOver = "<p>These arguments are used with the" +
+        " specified module.</p>";
     // fix arguments help popover based on the module selected
     $scope.moduleChange = function () {
         // NOTE: for selenium testing link -
@@ -42,18 +42,18 @@ export function AdhocForm($scope, $rootScope, $location, $routeParams,
         // only when a module is selected
         if ($scope.module_name) {
             // give the docs for the selected module
-            $scope.argsPopOver = "<p>These arguments are used with the"
-                + " specified module. You can find information about the "
-                + $scope.module_name.value
-                + " <a id=\"adhoc_module_arguments_docs_link_for_module_"
-                + $scope.module_name.value
-                + "\""
-                + " href=\"http://docs.ansible.com/" + $scope.module_name.value
-                + "_module.html\" target=\"_blank\">here</a>.</p>";
+            $scope.argsPopOver = "<p>These arguments are used with the" +
+                " specified module. You can find information about the " +
+                $scope.module_name.value +
+                " <a id=\"adhoc_module_arguments_docs_link_for_module_" +
+                $scope.module_name.value +
+                "\"" +
+                " href=\"http://docs.ansible.com/" + $scope.module_name.value +
+                "_module.html\" target=\"_blank\">here</a>.</p>";
         } else {
             // no module selected
-            $scope.argsPopOver = "<p>These arguments are used with the"
-                + " specified module.</p>";
+            $scope.argsPopOver = "<p>These arguments are used with the" +
+                " specified module.</p>";
         }
     };
 
@@ -127,7 +127,7 @@ export function AdhocForm($scope, $rootScope, $location, $routeParams,
         // populate data with the relevant form values
         for (fld in form.fields) {
             if (form.fields[fld].type === 'select') {
-                data[fld] = $scope[fld].value
+                data[fld] = $scope[fld].value;
             } else {
                 data[fld] = $scope[fld];
             }
@@ -144,8 +144,8 @@ export function AdhocForm($scope, $rootScope, $location, $routeParams,
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to launch adhoc command. POST returned status: '
-                      + status });
+                    msg: 'Failed to launch adhoc command. POST returned status: ' +
+                        status });
                 // TODO: still need to implement popping up a password prompt
                 // if the credential requires it.  The way that the current end-
                 // point works is that I find out if I need to ask for a
@@ -167,7 +167,7 @@ export function AdhocForm($scope, $rootScope, $location, $routeParams,
     };
 }
 
-AdhocForm.$inject = ['$scope', '$rootScope', '$location', '$routeParams',
+AdhocCtrl.$inject = ['$scope', '$rootScope', '$location', '$routeParams',
     'AdhocForm', 'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope',
     'GetBasePath', 'GetChoices', 'KindChange', 'LookUpInit', 'CredentialList',
     'Empty', 'OwnerChange', 'LoginMethodChange', 'Wait'];

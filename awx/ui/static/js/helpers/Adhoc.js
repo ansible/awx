@@ -43,7 +43,6 @@ export default
             var id = params.project_id,
                 scope = params.scope.$new(),
                 new_job_id,
-                launch_url,
                 html,
                 url;
 
@@ -63,9 +62,9 @@ export default
                     .error(function (data, status) {
                         ProcessErrors(scope, data, status,
                           null, { hdr: 'Error!',
-                              msg: 'Call to ' + url
-                                + ' failed. DELETE returned status: '
-                                + status });
+                              msg: 'Call to ' + url +
+                                  ' failed. DELETE returned status: ' +
+                                  status });
                     });
             });
 
@@ -124,8 +123,7 @@ export default
             Rest.setUrl(url);
             Rest.get()
                 .success(function (data) {
-                    var new_job_id = data.id,
-                        launch_url = url;
+                    new_job_id = data.id;
 
                     scope.passwords_needed_to_start = data.passwords_needed_to_start;
                     if (!Empty(data.passwords_needed_to_start) &&

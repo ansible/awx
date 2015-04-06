@@ -910,12 +910,12 @@ export function InventoriesManage ($log, $scope, $rootScope, $location,
     $scope.populateAdhocForm = function() {
         var host_patterns = "all";
         if ($scope.hostsSelected || $scope.groupsSelected) {
-            var allSelectedItems = $scope.groupsSelectedItems.concat($scope.hostsSelectedItems)
+            var allSelectedItems = $scope.groupsSelectedItems.concat($scope.hostsSelectedItems);
             host_patterns = _.pluck(allSelectedItems, "name").join(":");
         }
         $rootScope.hostPatterns = host_patterns;
         $location.path('/inventories/' + $scope.inventory.id + '/adhoc');
-    }
+    };
 
     $scope.refreshHostsOnGroupRefresh = false;
     $scope.selected_group_id = null;
