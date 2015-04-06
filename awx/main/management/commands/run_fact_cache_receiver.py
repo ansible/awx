@@ -6,7 +6,7 @@ from datetime import datetime
 
 from django.core.management.base import NoArgsCommand
 
-from awx.main.models import * # noqa
+from awx.fact.models.fact import * # noqa
 from awx.main.socket import Socket
 
 _MODULES = ['packages', 'services', 'files']

@@ -155,6 +155,7 @@ INSTALLED_APPS = (
     'awx.main',
     'awx.api',
     'awx.ui',
+    'awx.fact',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)

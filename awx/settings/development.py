@@ -32,7 +32,7 @@ AWX_PROOT_ENABLED = True
 try:
     import django_jenkins
     INSTALLED_APPS += ('django_jenkins',)
-    PROJECT_APPS = ('awx.main.tests', 'awx.api.tests',)
+    PROJECT_APPS = ('awx.main.tests', 'awx.api.tests', 'awx.fact.tests',)
 except ImportError:
     pass
 

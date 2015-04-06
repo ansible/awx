@@ -13,7 +13,7 @@ from mock import MagicMock
 from awx.main.tests.base import BaseTest, MongoDBRequired
 from awx.main.tests.commands.base import BaseCommandMixin
 from awx.main.management.commands.run_fact_cache_receiver import FactCacheReceiver
-from awx.main.models.fact import * # noqa
+from awx.fact.models.fact import * # noqa
 
 __all__ = ['RunFactCacheReceiverUnitTest', 'RunFactCacheReceiverFunctionalTest']
 

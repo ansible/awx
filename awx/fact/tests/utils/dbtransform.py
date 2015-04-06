@@ -10,7 +10,7 @@ from django.conf import settings
 
 # AWX
 from awx.main.tests.base import BaseTest, MongoDBRequired
-from awx.main.models.fact import * # noqa
+from awx.fact.models.fact import * # noqa
 
 __all__ = ['DBTransformTest']
 

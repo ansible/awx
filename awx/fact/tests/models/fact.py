@@ -8,7 +8,7 @@ from copy import deepcopy
 # Django
 
 # AWX
-from awx.main.models.fact import * # noqa
+from awx.fact.models.fact import * # noqa
 from awx.main.tests.base import BaseTest, MongoDBRequired
 
 __all__ = ['FactHostTest', 'FactTest', 'FactGetHostVersionTest', 'FactGetHostTimeline']
