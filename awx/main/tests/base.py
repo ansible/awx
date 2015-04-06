@@ -338,10 +338,9 @@ class BaseTestMixin(QueueTestMixin):
             'ssh_key_data': '',
             'ssh_key_unlock': '',
             'password': '',
-            'sudo_username': '',
-            'sudo_password': '',
-            'su_username': '',
-            'su_password': '',
+            'become_method': '',
+            'become_username': '',
+            'become_password': '',
             'vault_password': '',
         }
         opts.update(kwargs)

@@ -18,7 +18,7 @@ import time
 import traceback
 import urlparse
 import uuid
-
+from distutils.version import LooseVersion as Version
 import dateutil.parser
 
 # Pexpect
@@ -532,7 +532,7 @@ class RunJob(BaseTask):
         passwords = super(RunJob, self).build_passwords(job, **kwargs)
         creds = job.credential
         if creds:
-            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password', 'su_password', 'vault_password'):
+            for field in ('ssh_key_unlock', 'ssh_password', 'become_password', 'vault_password'):
                 if field == 'ssh_password':
                     value = kwargs.get(field, decrypt_field(creds, 'password'))
                 else:
@@ -605,11 +605,14 @@ class RunJob(BaseTask):
         optionally using ssh-agent for public/private key authentication.
         '''
         creds = job.credential
-        ssh_username, sudo_username, su_username = '', '', ''
+        ssh_username, become_username, become_method = '', '', ''
         if creds:
             ssh_username = kwargs.get('username', creds.username)
-            sudo_username = kwargs.get('sudo_username', creds.sudo_username)
-            su_username = kwargs.get('su_username', creds.su_username)
+            become_method = kwargs.get('become_method', creds.become_method)
+            become_username = kwargs.get('become_username', creds.become_username)
+        else:
+            become_method = None
+            become_username = ""
         # Always specify the normal SSH user as root by default.  Since this
         # task is normally running in the background under a service account,
         # it doesn't make sense to rely on ansible-playbook's default of using
@@ -623,17 +626,27 @@ class RunJob(BaseTask):
         args.extend(['-u', ssh_username])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
-        # We only specify sudo/su user and password if explicitly given by the
-        # credential.  Credential should never specify both sudo and su.
-        if su_username:
-            args.extend(['-R', su_username])
-        if 'su_password' in kwargs.get('passwords', {}):
-            args.append('--ask-su-pass')
-        if sudo_username:
-            args.extend(['-U', sudo_username])
-        if 'sudo_password' in kwargs.get('passwords', {}):
-            args.append('--ask-sudo-pass')
-
+        try:
+            if Version(kwargs['ansible_version']) < Version('1.9'):
+                if become_method and become_method == "sudo" and become_username != "":
+                    args.extend(['-U', become_username])
+                if become_method and become_method == "sudo" and "become_password" in kwargs.get("passwords", {}):
+                    args.append("--ask-sudo-pass")
+                if become_method and become_method == "su" and become_username != "":
+                    args.extend(['-R', become_username])
+                if become_method and become_method == "su" and "become_password" in kwargs.get("passwords", {}):
+                    args.append("--ask-su-pass")
+            else:
+                if job.become_enabled:
+                    args.append('--become')
+                if become_method:
+                    args.extend(['--become-method', become_method])
+                if become_username:
+                    args.extend(['--become-user', become_username])
+                if 'become_password' in kwargs.get('passwords', {}):
+                    args.append('--ask-become-pass')
+        except ValueError:
+            pass
         # Support prompting for a vault password.
         if 'vault_password' in kwargs.get('passwords', {}):
             args.append('--ask-vault-pass')
@@ -677,7 +690,6 @@ class RunJob(BaseTask):
             args.append("scan_facts.yml")
         else:
             args.append(job.playbook)
-
         return args
 
     def build_cwd(self, job, **kwargs):
@@ -697,10 +709,16 @@ class RunJob(BaseTask):
         d = super(RunJob, self).get_password_prompts()
         d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
         d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
-        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'sudo_password'
-        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'sudo_password'
-        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'su_password'
-        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'su_password'
+        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^PBRUN password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^pbrun password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^PFEXEC password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'                
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
@@ -1161,7 +1179,7 @@ class RunAdHocCommand(BaseTask):
         passwords = super(RunAdHocCommand, self).build_passwords(ad_hoc_command, **kwargs)
         creds = ad_hoc_command.credential
         if creds:
-            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password', 'su_password'):
+            for field in ('ssh_key_unlock', 'ssh_password', 'become_password'):
                 if field == 'ssh_password':
                     value = kwargs.get(field, decrypt_field(creds, 'password'))
                 else:
@@ -1206,11 +1224,14 @@ class RunAdHocCommand(BaseTask):
         ssh-agent for public/private key authentication.
         '''
         creds = ad_hoc_command.credential
-        ssh_username, sudo_username, su_username = '', '', ''
+        ssh_username, become_username, become_method = '', '', ''
         if creds:
             ssh_username = kwargs.get('username', creds.username)
-            sudo_username = kwargs.get('sudo_username', creds.sudo_username)
-            su_username = kwargs.get('su_username', creds.su_username)
+            become_method = kwargs.get('become_method', creds.become_method)
+            become_username = kwargs.get('become_username', creds.become_username)
+        else:
+            become_method = None
+            become_username = ""
         # Always specify the normal SSH user as root by default.  Since this
         # task is normally running in the background under a service account,
         # it doesn't make sense to rely on ansible's default of using the
@@ -1226,18 +1247,27 @@ class RunAdHocCommand(BaseTask):
             args.append('--ask-pass')
         # We only specify sudo/su user and password if explicitly given by the
         # credential.  Credential should never specify both sudo and su.
-        if su_username:
-            args.extend(['-R', su_username])
-        if 'su_password' in kwargs.get('passwords', {}):
-            args.append('--ask-su-pass')
-        if sudo_username:
-            args.extend(['-U', sudo_username])
-        if 'sudo_password' in kwargs.get('passwords', {}):
-            args.append('--ask-sudo-pass')
-        if ad_hoc_command.privilege_escalation == 'sudo':
-            args.append('--sudo')
-        elif ad_hoc_command.privilege_escalation == 'su':
-            args.append('--su')
+        try:
+            if Version(kwargs['ansible_version']) < Version('1.9'):
+                if become_method and become_method == "sudo" and become_username != "":
+                    args.extend(['-U', become_username])
+                if become_method and become_method == "sudo" and "become_password" in kwargs.get("passwords", {}):
+                    args.append("--ask-sudo-pass")
+                if become_method and become_method == "su" and become_username != "":
+                    args.extend(['-R', become_username])
+                if become_method and become_method == "su" and "become_password" in kwargs.get("passwords", {}):
+                    args.append("--ask-su-pass")
+            else:
+                if ad_hoc_command.become_enabled:
+                    args.append('--become')
+                if become_method:
+                    args.extend(['--become-method', become_method])
+                if become_username:
+                    args.extend(['--become-user', become_username])
+                if 'become_password' in kwargs.get('passwords', {}):
+                    args.append('--ask-become-pass')
+        except ValueError:
+            pass
 
         if ad_hoc_command.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % ad_hoc_command.forks)
@@ -1264,10 +1294,16 @@ class RunAdHocCommand(BaseTask):
         d = super(RunAdHocCommand, self).get_password_prompts()
         d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
         d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
-        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'sudo_password'
-        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'sudo_password'
-        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'su_password'
-        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'su_password'
+        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^PBRUN password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^pbrun password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^PFEXEC password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'                
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         return d

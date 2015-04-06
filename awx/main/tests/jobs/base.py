@@ -283,8 +283,9 @@ class BaseJobTestMixin(BaseTestMixin):
         self.cred_eve = self.user_eve.credentials.create(
             username='eve',
             password='ASK',
-            sudo_username='root',
-            sudo_password='ASK',
+            become_method='sudo',
+            become_username='root',
+            become_password='ASK',
             created_by=self.user_sue,
         )
         self.cred_frank = self.user_frank.credentials.create(

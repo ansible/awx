@@ -190,7 +190,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
     JOB_TEMPLATE_FIELDS = ('id', 'type', 'url', 'related', 'summary_fields',
                            'created', 'modified', 'name', 'description',
                            'job_type', 'inventory', 'project', 'playbook',
-                           'credential', 'use_su_credential', 'sudo_su_flag',
+                           'become_enabled', 'credential',
                            'cloud_credential', 'force_handlers', 'forks',
                            'limit', 'verbosity', 'extra_vars',
                            'ask_variables_on_launch', 'job_tags', 'skip_tags',
@@ -714,7 +714,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                     self.assertFalse(response['can_start'])
                     response = self.post(url, {}, expect=405)
 
-        # Test with a job that prompts for SSH and sudo passwords.
+        # Test with a job that prompts for SSH and sudo become passwords.
         #job = self.job_sup_run
         job = self.make_job(self.jt_sup_run, self.user_sue, 'new')
         url = reverse('api:job_start', args=(job.pk,))
@@ -722,12 +722,12 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             response = self.get(url)
             self.assertTrue(response['can_start'])
             self.assertEqual(set(response['passwords_needed_to_start']),
-                             set(['ssh_password', 'sudo_password']))
+                             set(['ssh_password', 'become_password']))
             data = dict()
             response = self.post(url, data, expect=400)
             data['ssh_password'] = 'sshpass'
             response = self.post(url, data, expect=400)
-            data2 = dict(sudo_password='sudopass')
+            data2 = dict(become_password='sudopass')
             response = self.post(url, data2, expect=400)
             data.update(data2)
             response = self.post(url, data, expect=202)
@@ -796,12 +796,12 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         with self.current_user(self.user_sue):
             response = self.get(url)
             self.assertEqual(set(response['passwords_needed_to_start']),
-                             set(['ssh_password', 'sudo_password']))
+                             set(['ssh_password', 'become_password']))
             data = dict()
             response = self.post(url, data, expect=400)
             data['ssh_password'] = 'sshpass'
             response = self.post(url, data, expect=400)
-            data2 = dict(sudo_password='sudopass')
+            data2 = dict(become_password='sudopass')
             response = self.post(url, data2, expect=400)
             data.update(data2)
             response = self.post(url, data, expect=202)

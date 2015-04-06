@@ -113,6 +113,10 @@ class JobOptions(BaseModel):
         blank=True,
         default='',
     )
+    become_enabled = models.BooleanField(
+        default=False,
+    )
+
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -184,7 +188,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         return ['name', 'description', 'job_type', 'inventory', 'project',
                 'playbook', 'credential', 'cloud_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
-                'force_handlers', 'skip_tags', 'start_at_task']
+                'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled']
 
     def create_job(self, **kwargs):
         '''
@@ -934,7 +938,6 @@ class JobEvent(CreatedModifiedModel):
                         host_summary.save(update_fields=update_fields)
             job.inventory.update_computed_fields()
             emit_websocket_notification('/socket.io/jobs', 'summary_complete', dict(unified_job_id=job.id))
-
 
 class SystemJobOptions(BaseModel):
     '''
