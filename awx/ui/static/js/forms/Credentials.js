@@ -284,12 +284,6 @@ export default
                     awPopOver: "<p>Specify a username for 'become' operations. " +
                     "This is equivalent to specifying the <code>--become-method=BECOME_METHOD</code> parameter, where <code>BECOME_METHOD</code> could be "+
                     "<code>sudo | su | pbrun | pfexec | runas</code> <br>(defaults to <code>sudo</code>)</p>",
-
-                    // "<p><b>Sudo:</b> Optionally specify a username for sudo operations.  "+
-                    //   "This is equivalent to specifying the <code>ansible-playbook --sudo-user</code> parameter.<br />" +
-                    //   "<b>Su:</b> Optionally specify a username for su operations.  This is equivalent to specifying the <code>ansible-playbook --su-user</code> parameter.<br/>"+
-                    //   "<b>Pbrun:</b> Optionally specify a username for pbrun operations. This is equivalent to specifying the <code>ansible-playbook --become_method=pbrun</code> parameter."+
-                    //   "Note that this option is only available with Tower instances using Ansible v1.9 or later (Current: Ansible v.{{ansible_version}})",
                     dataPlacement: 'right',
                     dataContainer: "body"
                 },

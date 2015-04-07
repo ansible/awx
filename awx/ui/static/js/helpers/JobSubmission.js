@@ -8,7 +8,81 @@
 * @ngdoc function
 * @name helpers.function:JobSubmission
 * @description
+* The JobSubmission.js file handles launching a job via a playbook run. There is a workflow that is involved in gathering all the
+* variables needed to launch a job, including credentials, passwords, extra variables, and survey data. Depending on what information
+* is needed to launch the job, a modal is built that prompts the user for any required information. This modal is built by creating
+* an html string with all the fields necessary to launch the job. This html string then gets compiled and opened in a dialog modal.
+*
+* #Workflow when user hits launch button
+*
+* A 'get' call is made to the API's 'job_templates/:job_template_id/launch' endpoint for that job template. The response from the API will specify
+*
+*```
+*    "credential_needed_to_start": true,
+*    "can_start_without_user_input": false,
+*    "ask_variables_on_launch": false,
+*    "passwords_needed_to_start": [],
+*    "variables_needed_to_start": [],
+*    "survey_enabled": false
+*```
+* #Step 1a - Check if there is a credential included in the job template: PromptForCredential
+*
+* The first step is to check if a credential was specified in the job template, by looking at the value of `credential_needed_to_start` .
+* If this boolean is true, then that means that the user did NOT specify a credential in the job template and we must prompt them to select a credential.
+* This emits a call to `PromptForCredential` which will do a lookup on the credentials endpoint and show a modal window with the list
+* of credentials for the user to choose from.
+*
+* #Step 1b - Check if the credential requires a password: CheckPasswords
+*
+* The second part of this process is to check if the credential the user picks requires a prompt for a password. A call is made (in the `CheckPasswords` factory)
+* to the chosen credential
+* and checks if ``password: ASK`` , ``become_password:ASK`` , or ``vault_password: ASK``. If any of these are ASK, then we begin building the html string for
+* each required password (see step 2). If none of these require a password, then we contine on to prompting for vars (see step 3)
+*
+* #Step 2 - Build password html string: PromptForPasswords
+*
+* We may detect from the inital 'get' call that we may need to prompt the user for passwords. The ``passwords_needed_to_start`` array from the 'get' call
+* will explictly tell us which passwords we must prompt for.  Alternatively, we may have found that in steps 1a and 1b that
+* we have must prompt for passwords. Either way, we arrive in `PromptForPasswords` factory which builds the html string depending on how the particular credential is setup.
+*
+* #Step 3 - extra vars text editor: PromptForVars
+*
+* We may arrive at step three if the credential selected does not require a password, or if the password html string is already done being built.
+* if ``ask_variables_on_launch`` was true in the inital 'get' call, then we build the extra_vars text editor in the `PromptForVars` factory.
+* This factory makes a REST call to the job template and finds if any 'extra_vars' were specified in the job template. It takes any specified
+* extra vars and includes them in the extra_vars text editor that is built in the same factory. This code is added to the html string and passed along
+* to the next step.
+*
+* #Step 4 - Survey Taker: PromptForSurvey
+*
+* The last step in building the job submission modal is building the survey taker. If ``survey_enabled`` is true from the initial 'get' call,
+* we make a REST call to the survey endpoint for the specified job and gather the survey data. The `PromptForSurvey` factory takes the survey
+* data and adds to the html string any various survey question.
+*
+* #Step 5 - build the modal: CreateLaunchDialog
+*
+* At this point, we need to compile our giant html string onto the modal and open the job submission modal. This happens in the `CreateLaunch`
+* factory. In this factory the 'Launch' button for the job is tied to the validity of the form, which handles the validation of these fields.
+*
+* #Step 6 - Launch the job: LaunchJob
+*
+* This is maybe the most crucial step. We have setup everything we need in order to gather information from the user and now we want to be sure
+* we handle it correctly. And there are many scenarios to take into account. The first scenario we check for is is ``survey_enabled=true`` and
+*  ``prompt_for_vars=false``, in which case we want to make sure to include the extra_vars from the job template in the data being
+* sent to the API (it is important to note that anything specified in the extra vars on job submission will override vars specified in the job template.
+* Likewise, any variables specified in the extra vars that are duplicated by the survey vars, will get overridden by the survey vars).
+* If the previous scenario is NOT the case, then we continue to gather the modal's answers regularly: gather the passwords, then the extra_vars, then
+* any survey results. Also note that we must gather any required survey answers, as well as any optional survey answers that happened to be provided
+* by the user. We also include the credential that was chosen if the user was prompted to select a credential.
+* At this point we have all the info we need and we are almost ready to perform a POST to the '/launch' endpoint. We must lastly check
+* if the user was not prompted for anything and therefore we don't want to pass any extra_vars to the POST. Once this is done we
+* make the REST POST call and provide all the data to hte API. The response from the API will be the job ID, which is used to redirect the user
+* to the job detail page for that job run.
+*
+* @Usage
+* This is usage information.
 */
+
 'use strict';
 
 export default
