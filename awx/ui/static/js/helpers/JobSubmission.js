@@ -844,14 +844,8 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
                     if(data.ssh_key_unlock === "ASK"){
                       passwords.push("ssh_key_unlock");
                     }
-                    if(data.sudo_password === "ASK"){
-                      passwords.push("sudo_password");
-                    }
-                    if(data.su_password === "ASK"){
-                      passwords.push("su_password");
-                    }
-                    if(data.pbrun_password === "ASK"){
-                      passwords.push("pbrun_password");
+                    if(data.become_password === "ASK"){
+                      passwords.push("become_password");
                     }
                     if(data.vault_password === "ASK"){
                       passwords.push("vault_password");
