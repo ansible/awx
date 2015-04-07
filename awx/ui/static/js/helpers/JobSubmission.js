@@ -127,11 +127,11 @@ function(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath) {
 }])
 
 .factory('PromptForCredential', ['$location', 'Wait', 'GetBasePath', 'LookUpInit', 'JobTemplateForm', 'CredentialList', 'Rest', 'Prompt', 'ProcessErrors',
-function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Rest, Prompt, ProcessErrors) {
+    'CheckPasswords',
+function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialList, Rest, Prompt, ProcessErrors, CheckPasswords) {
   return function(params) {
 
     var scope = params.scope,
-    callback = params.callback || 'CredentialReady',
     selectionMade;
 
     Wait('stop');
@@ -142,7 +142,12 @@ function($location, Wait, GetBasePath, LookUpInit, JobTemplateForm, CredentialLi
     }
     scope.removeShowLookupDialog = scope.$on('ShowLookupDialog', function() {
       selectionMade = function () {
-        scope.$emit(callback, scope.credential);
+        // scope.$emit(callback, scope.credential);
+        CheckPasswords({
+            scope: scope,
+            credential: scope.credential,
+            callback: 'ContinueCred'
+        });
       };
 
       LookUpInit({
@@ -345,72 +350,8 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
           html += "</div>\n";
         }
       });
-      // html += "</form>\n";
 
-
-      // $('#password-modal').empty().html(buildHtml);
-      // e = angular.element(document.getElementById('password-modal'));
-      // $compile(e)(scope);
       scope.$emit(callback, html, url);
-      // CreateLaunchDialog({scope: scope})
-      // buttons = [{
-      //     label: "Cancel",
-      //     onClick: function() {
-      //         scope.passwordCancel();
-      //     },
-      //     icon: "fa-times",
-      //     "class": "btn btn-default",
-      //     "id": "password-cancel-button"
-      // },{
-      //     label: "Continue",
-      //     onClick: function() {
-      //         scope.passwordAccept();
-      //     },
-      //     icon: "fa-check",
-      //     "class": "btn btn-primary",
-      //     "id": "password-accept-button"
-      // }];
-
-
-      // CreateDialog({
-      //     id: 'password-modal',
-      //     scope: scope,
-      //     buttons: buttons,
-      //     width: 600,
-      //     height: (parent_scope.passwords.length > 1) ? 700 : 500,
-      //     minWidth: 500,
-      //     title: 'parent_scope.passwords Required',
-      //     callback: 'DialogReady'
-      // });
-
-      // if (scope.removeDialogReady) {
-      //     scope.removeDialogReady();
-      // }
-      // scope.removeDialogReady = scope.$on('DialogReady', function() {
-      //     $('#password-modal').dialog('open');
-      //     $('#password-accept-button').attr({ "disabled": "disabled" });
-      // });
-      // scope.keydown = function(e){
-      //     if(e.keyCode===13){
-      //         scope.passwordAccept();
-      //     }
-      // };
-
-      // scope.passwordAccept = function() {
-      //     if (!scope.password_form.$invalid) {
-      //         scope.passwords.forEach(function(password) {
-      //             acceptedPasswords[password] = scope[password];
-      //         });
-      //         $('#password-modal').dialog('close');
-      //         scope.$emit(callback, acceptedPasswords);
-      //     }
-      // };
-
-      // scope.passwordCancel = function() {
-      //     $('#password-modal').dialog('close');
-      //     scope.$emit('CancelJob');
-      //     scope.$destroy();
-      // };
 
       // Password change
       scope.clearPWConfirm = function (fld) {
@@ -647,9 +588,6 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
             }
           }
 
-
-
-
           Rest.setUrl(survey_url);
           Rest.get()
           .success(function (data) {
@@ -671,8 +609,45 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
         };
       }])
 
+      .factory('CheckPasswords', ['$compile', 'Rest', 'GetBasePath', 'TextareaResize', 'CreateLaunchDialog', 'GenerateForm', 'JobVarsPromptForm', 'Wait',
+      'ParseVariableString', 'ToJSON', 'ProcessErrors', '$routeParams', 'Empty',
+      function($compile, Rest, GetBasePath, TextareaResize,CreateLaunchDialog, GenerateForm, JobVarsPromptForm, Wait,
+        ParseVariableString, ToJSON, ProcessErrors, $routeParams, Empty) {
+          return function(params) {
+            var scope = params.scope,
+            callback = params.callback,
+            credential = params.credential;
 
+            var passwords = [];
+            if (!Empty(credential)) {
+              Rest.setUrl(GetBasePath('credentials')+credential);
+              Rest.get()
+              .success(function (data) {
+                if(data.kind === "ssh"){
+                  if(data.password === "ASK" ){
+                    passwords.push("ssh_password");
+                  }
+                  if(data.ssh_key_unlock === "ASK"){
+                    passwords.push("ssh_key_unlock");
+                  }
+                  if(data.become_password === "ASK"){
+                    passwords.push("become_password");
+                  }
+                  if(data.vault_password === "ASK"){
+                    passwords.push("vault_password");
+                  }
+                  scope.$emit(callback, passwords);
+                }
 
+              })
+              .error(function (data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                msg: 'Failed to get job template details. GET returned status: ' + status });
+              });
+            }
+
+        };
+      }])
 
 
       /**
@@ -828,50 +803,23 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
             });
 
 
-            if (scope.removeCredentialReady) {
-              scope.removeCredentialReady();
+            if (scope.removeContinueCred) {
+              scope.removeContinueCred();
             }
-            scope.removeCredentialReady = scope.$on('CredentialReady', function(e, credential) {
-              var passwords = [];
-              if (!Empty(credential)) {
-                Rest.setUrl(GetBasePath('credentials')+credential);
-                Rest.get()
-                .success(function (data) {
-                  if(data.kind === "ssh"){
-                    if(data.password === "ASK" ){
-                      passwords.push("ssh_password");
-                    }
-                    if(data.ssh_key_unlock === "ASK"){
-                      passwords.push("ssh_key_unlock");
-                    }
-                    if(data.become_password === "ASK"){
-                      passwords.push("become_password");
-                    }
-                    if(data.vault_password === "ASK"){
-                      passwords.push("vault_password");
-                    }
-                    if(passwords.length>0){
-                      scope.passwords_needed_to_start = passwords;
-                      scope.$emit('PromptForPasswords', passwords, html, url);
-                    }
-                    else if (scope.ask_variables_on_launch){
-                      scope.$emit('PromptForVars', html, url);
-                    }
-                    else if (!Empty(scope.survey_enabled) &&  scope.survey_enabled===true) {
-                      scope.$emit('PromptForSurvey', html, url);
-                    }
-                    else {
-                      scope.$emit('StartPlaybookRun', url);
-                    }
-                  }
-
-                })
-                .error(function (data, status) {
-                  ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                  msg: 'Failed to get job template details. GET returned status: ' + status });
-                });
-              }
-
+            scope.removeContinueCred = scope.$on('ContinueCred', function(e, passwords) {
+                if(passwords.length>0){
+                  scope.passwords_needed_to_start = passwords;
+                  scope.$emit('PromptForPasswords', passwords, html, url);
+                }
+                else if (scope.ask_variables_on_launch){
+                  scope.$emit('PromptForVars', html, url);
+                }
+                else if (!Empty(scope.survey_enabled) &&  scope.survey_enabled===true) {
+                  scope.$emit('PromptForSurvey', html, url);
+                }
+                else {
+                  scope.$emit('StartPlaybookRun', url);
+                }
             });
 
             // Get the job or job_template record
