@@ -295,6 +295,17 @@ export default
                             // '<div class="error ng-hide" id="job-template-survey-error" ng-show="survey_enabled === true && survey_exists!==true">A survey is enabled but it does not exist. Create a survey or disable the survey. </div>'
                             '<div class="error ng-hide" id="job-template-survey-error" ng-show="invalid_survey">A survey is enabled but it does not exist. Create a survey or uncheck the Enable Survey box to disable the survey. </div>'
                 },
+                become_enabled: {
+                  label: 'Enable Privilege Escalation',
+                  type: 'checkbox',
+                  addRequired: false,
+                  editRequird: false,
+                  column: 2,
+                  awPopOver: "<p>If enabled,  run this playbook as an administrator. This is the equivalent of passing the<code> --become</code> option to the <code> ansible-playbook</code> command. </p>",
+                  dataPlacement: 'right',
+                  dataTitle: 'Become Privilege Escalation',
+                  dataContainer: "body"
+                },
                 allow_callbacks: {
                     label: 'Allow Provisioning Callbacks',
                     type: 'checkbox',

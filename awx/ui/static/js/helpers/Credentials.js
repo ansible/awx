@@ -122,12 +122,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                      scope.ssh_key_data = null;
                      scope.ssh_key_unlock = null;
                      scope.ssh_key_unlock_confirm = null;
-                     scope.sudo_username = null;
-                     scope.sudo_password = null;
-                     scope.sudo_password_confirm = null;
-                     scope.su_username = null;
-                     scope.su_password = null;
-                     scope.su_password_confirm = null;
+                     scope.become_username = null;
+                     scope.become_password = null;
                  }
 
                  // Collapse or open help widget based on whether scm value is selected
@@ -168,25 +164,6 @@ angular.module('CredentialsHelper', ['Utilities'])
 }
 ])
 
-
-.factory('LoginMethodChange', [
-    function () {
-    return function (params) {
-        var scope = params.scope,
-        login_method = scope.login_method;
-        if (login_method !== 'sudo') {
-            scope.sudo_username = null;
-            scope.sudo_password = null;
-        }
-        if (login_method !== 'su') {
-            scope.su_username = null;
-            scope.su_password = null;
-        }
-    };
-}
-])
-
-
 .factory('FormSave', ['$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait',
          function ($location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait) {
              return function (params) {
@@ -215,7 +192,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  }
 
                  data.kind = scope.kind.value;
-
+                 data.become_method = (scope.become_method.value) ? scope.become_method.value : "";
                  switch (data.kind) {
                      case 'ssh':
                          data.password = scope.ssh_password;

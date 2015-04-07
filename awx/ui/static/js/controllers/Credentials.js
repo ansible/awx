@@ -136,7 +136,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeP
 
 export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList,
-    GetBasePath, GetChoices, Empty, KindChange, OwnerChange, LoginMethodChange, FormSave) {
+    GetBasePath, GetChoices, Empty, KindChange, OwnerChange, FormSave) {
 
     ClearScope();
 
@@ -156,6 +156,13 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
         url: defaultUrl,
         field: 'kind',
         variable: 'credential_kind_options'
+    });
+
+    GetChoices({
+        scope: $scope,
+        url: defaultUrl,
+        field: 'become_method',
+        variable: 'become_options'
     });
 
     LookUpInit({
@@ -209,16 +216,6 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
         OwnerChange({ scope: $scope });
     }
 
-    if (!Empty($routeParams.su_username) || !Empty($routeParams.su_password)) {
-        $scope.login_method = 'su';
-        LoginMethodChange({ scope: $scope });
-    } else if (!Empty($routeParams.sudo_username) || !Empty($routeParams.sudo_password)) {
-        $scope.login_method = 'sudo';
-        LoginMethodChange({ scope: $scope });
-    } else {
-        $scope.login_method = '';
-        LoginMethodChange({ scope: $scope });
-    }
 
     // Handle Kind change
     $scope.kindChange = function () {
@@ -237,11 +234,6 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
     // Handle Owner change
     $scope.ownerChange = function () {
         OwnerChange({ scope: $scope });
-    };
-
-    // Handle Login Method change
-    $scope.loginMethodChange = function () {
-        LoginMethodChange({ scope: $scope });
     };
 
     // Reset defaults
@@ -294,13 +286,13 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $r
 
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'generateList', 'SearchInit', 'PaginateInit',
-    'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange', 'LoginMethodChange', 'FormSave'
+    'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange', 'FormSave'
 ];
 
 
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, GenerateForm, Rest, Alert,
     ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
-    KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, LoginMethodChange, FormSave, Stream, Wait) {
+    KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave, Stream, Wait) {
 
     ClearScope();
 
@@ -368,7 +360,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
             reset: false
         });
         OwnerChange({ scope: $scope });
-        LoginMethodChange({ scope: $scope });
         Wait('stop');
     });
 
@@ -408,14 +399,13 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
                 }
                 master.owner = $scope.owner;
 
-                if (!Empty($scope.su_username) || !Empty($scope.su_password)) {
-                    $scope.login_method = 'su';
-                } else if (!Empty($scope.sudo_username) || !Empty($scope.sudo_password)) {
-                    $scope.login_method = 'sudo';
-                } else {
-                    $scope.login_method = '';
+                for (i = 0; i < $scope.become_options.length; i++) {
+                    if ($scope.become_options[i].value === data.become_method) {
+                        $scope.become_method = $scope.become_options[i];
+                        break;
+                    }
                 }
-                master.login_method = $scope.login_method;
+                master.become_method = $scope.become_method;
 
                 for (i = 0; i < $scope.credential_kind_options.length; i++) {
                     if ($scope.credential_kind_options[i].value === data.kind) {
@@ -467,6 +457,12 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
         callback: 'choicesReadyCredential'
     });
 
+    GetChoices({
+        scope: $scope,
+        url: defaultUrl,
+        field: 'become_method',
+        variable: 'become_options'
+    });
     $scope.showActivity = function () {
         Stream({ scope: $scope });
     };
@@ -485,11 +481,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
         OwnerChange({ scope: $scope });
     };
 
-    // Handle Login Method change
-    $scope.loginMethodChange = function () {
-        LoginMethodChange({ scope: $scope });
-    };
-
     // Handle Kind change
     $scope.kindChange = function () {
         KindChange({ scope: $scope, form: form, reset: true });
@@ -504,7 +495,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
         setAskCheckboxes();
         KindChange({ scope: $scope, form: form, reset: false });
         OwnerChange({ scope: $scope });
-        LoginMethodChange({ scope: $scope });
     };
 
     // Related set: Add button
@@ -594,5 +584,5 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log, $
 CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices', 'KindChange', 'UserList', 'TeamList', 'LookUpInit',
-    'Empty', 'OwnerChange', 'LoginMethodChange', 'FormSave', 'Stream', 'Wait'
+    'Empty', 'OwnerChange', 'FormSave', 'Stream', 'Wait'
 ];

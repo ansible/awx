@@ -274,57 +274,31 @@ export default
                     hasShowInputButton: true,
                     askShow: "kind.value == 'ssh'",  // Only allow ask for machine credentials
                 },
-                "login_method": {
-                    label: "Privilege Escalation Credentials",
-                    hintText: "If your playbooks use privilege escalation (\"sudo: true\", \"su: true\", etc), you can specify the username to become, and the password to use here.",
-                    type: 'radio_group',
+                "become_method": {
+                    label: "Privilege Escalation",
+                    // hintText: "If your playbooks use privilege escalation (\"sudo: true\", \"su: true\", etc), you can specify the username to become, and the password to use here.",
+                    type: 'select',
                     ngShow: "kind.value == 'ssh'",
-                    ngChange: "loginMethodChange()",
-                    options: [{
-                        label: 'None', // FIXME: Maybe 'Default' or 'SSH only' instead?
-                        value: '',
-                        selected: true
-                    }, {
-                        label: 'Sudo',
-                        value: 'sudo'
-                    }, {
-                        label: 'Su',
-                        value: 'su'
-                    }],
-                    awPopOver: "<p><b>Sudo:</b> Optionally specify a username for sudo operations.  This is equivalent to specifying the <code>ansible-playbook --sudo-user</code> parameter.<br /><b>Su:</b> Optionally specify a username for su operations.  This is equivalent to specifying the <code>ansible-playbook --su-user</code> parameter.",
+                    dataTitle: 'Privilege Escalation',
+                    ngOptions: 'become.label for become in become_options track by become.value',
+                    awPopOver: "<p>Specify a username for 'become' operations. " +
+                    "This is equivalent to specifying the <code>--become-method=BECOME_METHOD</code> parameter, where <code>BECOME_METHOD</code> could be "+
+                    "<code>sudo | su | pbrun | pfexec | runas</code> <br>(defaults to <code>sudo</code>)</p>",
                     dataPlacement: 'right',
                     dataContainer: "body"
                 },
-                "sudo_username": {
-                    label: 'Sudo Username',
+                "become_username": {
+                    label: 'Privilege Escalation Username',
                     type: 'text',
-                    ngShow: "kind.value == 'ssh' && login_method == 'sudo'",
+                    ngShow: "kind.value == 'ssh' && become_method",
                     addRequired: false,
                     editRequired: false,
                     autocomplete: false
                 },
-                "sudo_password": {
-                    label: 'Sudo Password',
+                "become_password": {
+                    label: 'Privilege Escalation Password',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'ssh' && login_method == 'sudo'",
-                    addRequired: false,
-                    editRequired: false,
-                    ask: true,
-                    hasShowInputButton: true,
-                    autocomplete: false
-                },
-                "su_username": {
-                    label: 'Su Username',
-                    type: 'text',
-                    ngShow: "kind.value == 'ssh' && login_method == 'su'",
-                    addRequired: false,
-                    editRequired: false,
-                    autocomplete: false
-                },
-                "su_password": {
-                    label: 'Su Password',
-                    type: 'sensitive',
-                    ngShow: "kind.value == 'ssh' && login_method == 'su'",
+                    ngShow: "kind.value == 'ssh' && become_method",
                     addRequired: false,
                     editRequired: false,
                     ask: true,
