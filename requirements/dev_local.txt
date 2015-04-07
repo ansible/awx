@@ -55,7 +55,6 @@ mongo-python-driver-2.8.tar.gz
   # Needed by pyrax:
   #httplib2-0.8.tar.gz
   #keyring-3.7.zip
-  #mock-1.0.1.tar.gz
   #python-swiftclient-2.0.3.tar.gz
   #rackspace-novaclient-1.4.tar.gz
   # Remaining dev/prod packages:
@@ -78,6 +77,8 @@ mongo-python-driver-2.8.tar.gz
   #mongoengine-0.9.0.tar.gz
 
 # Dev-only packages:
+# Needed for tests
+mock-1.0.1.tar.gz
 # Needed by django-debug-toolbar:
 sqlparse-0.1.11.tar.gz
 # Needed for Python2.6 support:

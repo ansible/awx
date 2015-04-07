@@ -42,6 +42,8 @@ if len(sys.argv) >= 2 and sys.argv[1] == 'test':
             'TEST_NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'),
         }
     }
+    
+    MONGO_DB = 'system_tracking_test'
 
 # Celery AMQP configuration.
 BROKER_URL = 'redis://localhost/'

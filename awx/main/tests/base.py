@@ -25,6 +25,9 @@ from django.contrib.auth.models import User
 from django.test.client import Client
 from django.test.utils import override_settings
 
+# MongoEngine
+from mongoengine.connection import get_db, ConnectionError
+
 # AWX
 from awx.main.models import * # noqa
 from awx.main.backend import LDAPSettings
@@ -39,6 +42,15 @@ TEST_PLAYBOOK = '''- hosts: mygroup
   - name: woohoo
     command: test 1 = 1
 '''
+
+class MongoDBRequired(django.test.TestCase):
+    def setUp(self):
+        # Drop mongo database
+        try:
+            self.db = get_db()
+            self.db.connection.drop_database(settings.MONGO_DB)
+        except ConnectionError:
+            self.skipTest('MongoDB connection failed')
 
 class QueueTestMixin(object):
     def start_queue(self):
@@ -84,6 +96,7 @@ class BaseTestMixin(QueueTestMixin):
 
     def setUp(self):
         super(BaseTestMixin, self).setUp()
+
         self.object_ctr = 0
         # Save sys.path before tests.
         self._sys_path = [x for x in sys.path]
