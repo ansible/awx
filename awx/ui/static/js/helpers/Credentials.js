@@ -17,7 +17,6 @@ angular.module('CredentialsHelper', ['Utilities'])
 .factory('KindChange', ['Empty',
          function (Empty) {
              return function (params) {
-
                  var scope = params.scope,
                  reset = params.reset,
                  collapse, id;

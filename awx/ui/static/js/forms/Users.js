@@ -211,9 +211,9 @@ export default
                             ngBind: 'permission.summary_fields.project.name'
                         },
                         permission_type: {
-                            label: 'Permission'
+                            label: 'Permission',
+                            ngBind: 'getPermissionText()'
                         }
-
                     },
 
                     fieldActions: {

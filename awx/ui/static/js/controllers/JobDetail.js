@@ -1285,6 +1285,7 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
             status: status
         });
     };
+
     scope.refresh = function(){
         $scope.$emit('LoadJob');
     };

@@ -1145,11 +1145,11 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
                 action: action
             });
         });
-
         if($scope.survey_enabled === true && $scope.survey_exists!==true){
             $scope.$emit("PromptForSurvey");
         }
         else {
+
             PlaybookRun({
                 scope: $scope,
                 id: id

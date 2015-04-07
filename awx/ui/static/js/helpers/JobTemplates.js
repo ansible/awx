@@ -70,6 +70,8 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                           scope.example_template_id = 'N';
                           scope.setCallbackHelp();
 
+                          // this fills the job template form both on copy of the job template
+                          // and on edit
                           scope.fillJobTemplate  = function(){
                               // id = id || $rootScope.copy.id;
                               // Retrieve detail record and prepopulate the form

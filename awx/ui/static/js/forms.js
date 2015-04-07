@@ -1,5 +1,6 @@
 import ActivityDetail from "tower/forms/ActivityDetail";
 import Credentials from "tower/forms/Credentials";
+import Adhoc from "tower/forms/Adhoc";
 import CustomInventory from "tower/forms/CustomInventory";
 import EventsViewer from "tower/forms/EventsViewer";
 import Groups from "tower/forms/Groups";
@@ -30,6 +31,7 @@ import Users from "tower/forms/Users";
 export
     {   ActivityDetail,
         Credentials,
+        Adhoc,
         CustomInventory,
         EventsViewer,
         Groups,

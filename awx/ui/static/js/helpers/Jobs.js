@@ -16,7 +16,7 @@ import listGenerator from 'tower/shared/list-generator/main';
 
 export default
     angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers',
-        'JobSubmissionHelper', 'LogViewerHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name])
+        'JobSubmissionHelper', 'LogViewerHelper', 'SearchHelper', 'PaginationHelpers', 'AdhocHelper', listGenerator.name])
 
     /**
      *  JobsControllerInit({ scope: $scope });
@@ -62,7 +62,7 @@ export default
                     else if (job.type === 'project_update') {
                         typeId = job.project;
                     }
-                    else if (job.type === 'job' || job.type === "system_job") {
+                    else if (job.type === 'job' || job.type === "system_job" || job.type === 'ad_hoc_command') {
                         typeId = job.id;
                     }
                     RelaunchJob({ scope: scope, id: typeId, type: job.type, name: job.name });
@@ -112,8 +112,8 @@ export default
         }
     ])
 
-    .factory('RelaunchJob', ['RelaunchInventory', 'RelaunchPlaybook', 'RelaunchSCM',
-        function(RelaunchInventory, RelaunchPlaybook, RelaunchSCM) {
+    .factory('RelaunchJob', ['RelaunchInventory', 'RelaunchPlaybook', 'RelaunchSCM', 'RelaunchAdhoc',
+        function(RelaunchInventory, RelaunchPlaybook, RelaunchSCM, RelaunchAdhoc) {
             return function(params) {
                 var scope = params.scope,
                     id = params.id,
@@ -121,6 +121,9 @@ export default
                     name = params.name;
                 if (type === 'inventory_update') {
                     RelaunchInventory({ scope: scope, id: id});
+                }
+                else if (type === 'ad_hoc_command') {
+                    RelaunchAdhoc({ scope: scope, id: id, name: name });
                 }
                 else if (type === 'job' || type === 'system_job') {
                     RelaunchPlaybook({ scope: scope, id: id, name: name });
@@ -594,5 +597,13 @@ export default
             var scope = params.scope,
                 id = params.id;
             ProjectUpdate({ scope: scope, project_id: id });
+        };
+    }])
+
+    .factory('RelaunchAdhoc', ['AdhocRun', function(AdhocRun) {
+        return function(params) {
+            var scope = params.scope,
+                id = params.id;
+            AdhocRun({ scope: scope, project_id: id, relaunch: true });
         };
     }]);
