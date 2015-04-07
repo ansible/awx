@@ -1,0 +1,132 @@
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+    <s:Header>
+        <a:Action s:mustUnderstand="1">http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTRC/IssueFinal</a:Action>
+        <a:RelatesTo>urn:uuid:487c064b-b7c6-4654-b4d4-715f9961170e</a:RelatesTo>
+        <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+            <u:Timestamp u:Id="_0">
+                <u:Created>2014-08-05T18:36:14.235Z</u:Created>
+                <u:Expires>2014-08-05T18:41:14.235Z</u:Expires>
+            </u:Timestamp>
+        </o:Security>
+    </s:Header>
+    <s:Body>
+        <trust:RequestSecurityTokenResponseCollection xmlns:trust="http://docs.oasis-open.org/ws-sx/ws-trust/200512">
+            <trust:RequestSecurityTokenResponse>
+                <trust:Lifetime>
+                    <wsu:Created xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">2014-08-05T18:36:14.063Z</wsu:Created>
+                    <wsu:Expires xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">2014-08-05T19:36:14.063Z</wsu:Expires>
+                </trust:Lifetime>
+                <wsp:AppliesTo xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+                    <wsa:EndpointReference xmlns:wsa="http://www.w3.org/2005/08/addressing">
+                        <wsa:Address>https://ltartari2.cern.ch:5000/Shibboleth.sso/ADFS</wsa:Address>
+                    </wsa:EndpointReference>
+                </wsp:AppliesTo>
+                <trust:RequestedSecurityToken>
+                    <saml:Assertion MajorVersion="1" MinorVersion="1" AssertionID="_c9e77bc4-a81b-4da7-88c2-72a6ba376d3f" Issuer="https://cern.ch/login" IssueInstant="2014-08-05T18:36:14.235Z" xmlns:saml="urn:oasis:names:tc:SAML:1.0:assertion">
+                        <saml:Conditions NotBefore="2014-08-05T18:36:14.063Z" NotOnOrAfter="2014-08-05T19:36:14.063Z">
+                            <saml:AudienceRestrictionCondition>
+                                <saml:Audience>https://ltartari2.cern.ch:5000/Shibboleth.sso/ADFS</saml:Audience>
+                            </saml:AudienceRestrictionCondition>
+                        </saml:Conditions>
+                        <saml:AttributeStatement>
+                            <saml:Subject>
+                                <saml:NameIdentifier Format="http://schemas.xmlsoap.org/claims/UPN">marek.denis@cern.ch</saml:NameIdentifier>
+                                <saml:SubjectConfirmation>
+                                    <saml:ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:bearer</saml:ConfirmationMethod>
+                                </saml:SubjectConfirmation>
+                            </saml:Subject>
+                            <saml:Attribute AttributeName="UPN" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>marek.denis@cern.ch</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="EmailAddress" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>marek.denis@cern.ch</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="CommonName" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>madenis</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="role" AttributeNamespace="http://schemas.microsoft.com/ws/2008/06/identity/claims">
+                                <saml:AttributeValue>CERN Users</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="Group" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>Domain Users</saml:AttributeValue>
+                                <saml:AttributeValue>occupants-bldg-31</saml:AttributeValue>
+                                <saml:AttributeValue>CERN-Direct-Employees</saml:AttributeValue>
+                                <saml:AttributeValue>ca-dev-allowed</saml:AttributeValue>
+                                <saml:AttributeValue>cernts-cerntstest-users</saml:AttributeValue>
+                                <saml:AttributeValue>staf-fell-pjas-at-cern</saml:AttributeValue>
+                                <saml:AttributeValue>ELG-CERN</saml:AttributeValue>
+                                <saml:AttributeValue>student-club-new-members</saml:AttributeValue>
+                                <saml:AttributeValue>pawel-dynamic-test-82</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="DisplayName" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>Marek Kamil Denis</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="MobileNumber" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>+5555555</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="Building" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>31S-013</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="Firstname" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>Marek Kamil</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="Lastname" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>Denis</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="IdentityClass" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>CERN Registered</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="Federation" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>CERN</saml:AttributeValue>
+                            </saml:Attribute>
+                            <saml:Attribute AttributeName="AuthLevel" AttributeNamespace="http://schemas.xmlsoap.org/claims">
+                                <saml:AttributeValue>Normal</saml:AttributeValue>
+                            </saml:Attribute>
+                        </saml:AttributeStatement>
+                        <saml:AuthenticationStatement AuthenticationMethod="urn:oasis:names:tc:SAML:1.0:am:password" AuthenticationInstant="2014-08-05T18:36:14.032Z">
+                            <saml:Subject>
+                                <saml:NameIdentifier Format="http://schemas.xmlsoap.org/claims/UPN">marek.denis@cern.ch</saml:NameIdentifier>
+                                <saml:SubjectConfirmation>
+                                    <saml:ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:bearer</saml:ConfirmationMethod>
+                                </saml:SubjectConfirmation>
+                            </saml:Subject>
+                        </saml:AuthenticationStatement>
+                        <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+                            <SignedInfo>
+                                <CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+                                <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+                                <Reference URI="#_c9e77bc4-a81b-4da7-88c2-72a6ba376d3f">
+                                    <Transforms>
+                                        <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+                                        <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+                                    </Transforms>
+                                    <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                                    <DigestValue>EaZ/2d0KAY5un9akV3++Npyk6hBc8JuTYs2S3lSxUeQ=</DigestValue>
+                                </Reference>
+                            </SignedInfo>
+                            <SignatureValue>CxYiYvNsbedhHdmDbb9YQCBy6Ppus3bNJdw2g2HLq0VU2yRhv23mUW05I89Hs4yG4OcCo0uOZ3zaeNFbSNXMW+Mr996tAXtujKjgyrCXNJAToE+gwltvGxwY1EluSbe3IzoSM3Ao87mKhxGOSzlDhuN7dQ9Rv6l/J4gUjbOO5SIX4pdZ6mVF7cHEfe9x+H8Lg15YjnElQUEaPi+NSW5jYTdtIpsB4ORxJvALuSt6+4doDYc9wuwBiWkEdnBHAQBINoKpAV2oy0/C85SBX3IdRhxUznmL5yEUmf8JvPccXecMPqJow0L43mnCdu74xPwU0as3MNfYQ10kLvHXHfIExg==</SignatureValue>
+                            <KeyInfo>
+                                <X509Data>
+                                    <X509Certificate>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</X509Certificate>
+                                </X509Data>
+                            </KeyInfo>
+                        </Signature>
+                    </saml:Assertion>
+                </trust:RequestedSecurityToken>
+                <trust:RequestedAttachedReference>
+                    <o:SecurityTokenReference k:TokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:k="http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd">
+                        <o:KeyIdentifier ValueType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID">_c9e77bc4-a81b-4da7-88c2-72a6ba376d3f</o:KeyIdentifier>
+                    </o:SecurityTokenReference>
+                </trust:RequestedAttachedReference>
+                <trust:RequestedUnattachedReference>
+                    <o:SecurityTokenReference k:TokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:k="http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd">
+                        <o:KeyIdentifier ValueType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID">_c9e77bc4-a81b-4da7-88c2-72a6ba376d3f</o:KeyIdentifier>
+                    </o:SecurityTokenReference>
+                </trust:RequestedUnattachedReference>
+                <trust:TokenType>urn:oasis:names:tc:SAML:1.0:assertion</trust:TokenType>
+                <trust:RequestType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue</trust:RequestType>
+                <trust:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer</trust:KeyType>
+            </trust:RequestSecurityTokenResponse>
+        </trust:RequestSecurityTokenResponseCollection>
+    </s:Body>
+</s:Envelope>

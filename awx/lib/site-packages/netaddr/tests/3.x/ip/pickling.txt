@@ -1,0 +1,214 @@
+=IP Persistence Tests=
+
+Copyright (c) 2008-2015, David P. D. Moss. All rights reserved.
+
+{{{
+
+>>> from netaddr import *
+>>> import pickle
+
+}}}
+
+IPAddress object pickling - IPv4.
+
+{{{
+
+>>> ip = IPAddress(3221225985)
+>>> ip
+IPAddress('192.0.2.1')
+
+>>> buf = pickle.dumps(ip)
+
+>>> ip2 = pickle.loads(buf)
+
+>>> ip2 == ip
+True
+
+>>> id(ip2) != id(ip)
+True
+
+>>> ip2.value == 3221225985
+True
+
+>>> ip2.version
+4
+
+>>> del ip, buf, ip2
+
+}}}
+
+IPAddress object pickling - IPv6.
+
+{{{
+
+>>> ip = IPAddress('::ffff:192.0.2.1')
+
+>>> ip
+IPAddress('::ffff:192.0.2.1')
+
+>>> ip.value == 281473902969345
+True
+
+>>> buf = pickle.dumps(ip)
+
+>>> ip2 = pickle.loads(buf)
+
+>>> ip2 == ip
+True
+
+>>> ip2.value == 281473902969345
+True
+
+>>> ip2.version
+6
+
+>>> del ip, buf, ip2
+
+}}}
+
+IPNetwork pickling - IPv4.
+
+{{{
+
+>>> cidr = IPNetwork('192.0.2.0/24')
+>>> cidr
+IPNetwork('192.0.2.0/24')
+
+>>> buf = pickle.dumps(cidr)
+
+>>> cidr2 = pickle.loads(buf)
+
+>>> cidr2 == cidr
+True
+
+>>> id(cidr2) != id(cidr)
+True
+
+>>> cidr2.value == 3221225984
+True
+
+>>> cidr2.prefixlen
+24
+
+>>> cidr2.version
+4
+
+>>> del cidr, buf, cidr2
+
+}}}
+
+IPNetwork object pickling - IPv6.
+
+{{{
+
+>>> cidr = IPNetwork('::ffff:192.0.2.0/120')
+
+>>> cidr
+IPNetwork('::ffff:192.0.2.0/120')
+
+>>> cidr.value == 281473902969344
+True
+
+>>> cidr.prefixlen
+120
+
+>>> buf = pickle.dumps(cidr)
+
+>>> cidr2 = pickle.loads(buf)
+
+>>> cidr2 == cidr
+True
+
+>>> cidr2.value == 281473902969344
+True
+
+>>> cidr2.prefixlen
+120
+
+>>> cidr2.version
+6
+
+>>> del cidr, buf, cidr2
+
+}}}
+
+}}}
+
+IPRange object pickling - IPv4.
+
+{{{
+
+>>> iprange = IPRange('192.0.2.1', '192.0.2.254')
+>>> iprange
+IPRange('192.0.2.1', '192.0.2.254')
+
+>>> iprange.first == 3221225985
+True
+
+>>> iprange.last == 3221226238
+True
+
+>>> iprange.version
+4
+
+>>> buf = pickle.dumps(iprange)
+
+>>> iprange2 = pickle.loads(buf)
+
+>>> iprange2 == iprange
+True
+
+>>> id(iprange2) != id(iprange)
+True
+
+>>> iprange2.first == 3221225985
+True
+
+>>> iprange2.last == 3221226238
+True
+
+>>> iprange2.version
+4
+
+>>> del iprange, buf, iprange2
+
+}}}
+
+IPRange object pickling - IPv6.
+
+{{{
+
+>>> iprange = IPRange('::ffff:192.0.2.1', '::ffff:192.0.2.254')
+
+>>> iprange
+IPRange('::ffff:192.0.2.1', '::ffff:192.0.2.254')
+
+>>> iprange.first == 281473902969345
+True
+
+>>> iprange.last == 281473902969598
+True
+
+>>> iprange.version
+6
+
+>>> buf = pickle.dumps(iprange)
+
+>>> iprange2 = pickle.loads(buf)
+
+>>> iprange2 == iprange
+True
+
+>>> iprange2.first == 281473902969345
+True
+
+>>> iprange2.last == 281473902969598
+True
+
+>>> iprange2.version
+6
+
+>>> del iprange, buf, iprange2
+
+}}}
+

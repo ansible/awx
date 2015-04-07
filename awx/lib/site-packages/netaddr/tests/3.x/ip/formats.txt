@@ -1,0 +1,27 @@
+=IP formatting options=
+
+Copyright (c) 2008-2015, David P. D. Moss. All rights reserved.
+
+{{{
+
+>>> from netaddr import *
+
+}}}
+
+==IPAddress representations==
+
+{{{
+
+>>> hex(IPAddress(0))
+'0x0'
+
+>>> hex(IPAddress(0xffffffff))
+'0xffffffff'
+
+>>> oct(IPAddress(0))
+'0o0'
+
+>>> oct(IPAddress(0xffffffff))
+'0o37777777777'
+
+}}}

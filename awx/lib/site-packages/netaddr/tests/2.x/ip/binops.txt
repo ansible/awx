@@ -1,0 +1,67 @@
+=Binary and numerical operations on IP addresses=
+
+Copyright (c) 2008-2015, David P. D. Moss. All rights reserved.
+
+{{{
+
+>>> from netaddr import *
+
+}}}
+
+==Addition and Subtraction ==
+
+{{{
+
+>>> IPAddress('192.0.2.0') + 1
+IPAddress('192.0.2.1')
+
+>>> 1 + IPAddress('192.0.2.0')
+IPAddress('192.0.2.1')
+
+>>> IPAddress('192.0.2.1') - 1
+IPAddress('192.0.2.0')
+
+>>> IPAddress('192.0.0.0') + IPAddress('0.0.0.42')
+IPAddress('192.0.0.42')
+
+>>> IPAddress('192.0.0.42') - IPAddress('0.0.0.42')
+IPAddress('192.0.0.0')
+
+>>> 1 - IPAddress('192.0.2.1')
+Traceback (most recent call last):
+...
+IndexError: result outside valid IP address boundary!
+
+>>> ip = IPAddress('10.0.0.1')
+>>> ip += 1
+>>> ip
+IPAddress('10.0.0.2')
+>>> ip -= 1
+>>> ip
+IPAddress('10.0.0.1')
+>>> ip += IPAddress('0.0.0.42')
+>>> ip
+IPAddress('10.0.0.43')
+>>> ip -= IPAddress('0.0.0.43')
+>>> ip
+IPAddress('10.0.0.0')
+
+}}}
+
+==Binary operations==
+
+{{{
+
+>>> IPAddress('192.0.2.15') & IPAddress('255.255.255.0')
+IPAddress('192.0.2.0')
+
+>>> IPAddress('255.255.0.0') | IPAddress('0.0.255.255')
+IPAddress('255.255.255.255')
+
+>>> IPAddress('255.255.0.0') ^ IPAddress('255.0.0.0')
+IPAddress('0.255.0.0')
+
+>>> IPAddress('1.2.3.4').packed
+'\x01\x02\x03\x04'
+
+}}}

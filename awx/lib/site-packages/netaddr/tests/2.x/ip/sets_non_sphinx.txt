@@ -1,0 +1,166 @@
+Since "sets.txt" is used by Sphinx to build the documentation, those test cases for IPSet that should not become part of the documenation go here. The tests for Python3 are not imported by Sphinx, though.
+
+>>> from netaddr import *
+
+--------------------------------
+Adding and removing set elements
+--------------------------------
+
+>>> s1 = IPSet(['10.0.0.0/25'])
+
+This hits a special case in IPSet._compact_single_network()
+>>> s1.add('10.0.0.0/24')
+>>> s1
+IPSet(['10.0.0.0/24'])
+
+Various places must also accept integers.
+>>> integer1 = int(IPAddress('10.0.0.1'))
+>>> integer2 = int(IPAddress('fe80::'))
+>>> integer3 = int(IPAddress('10.0.0.2'))
+>>> s2 = IPSet([integer1, integer2])
+>>> s2
+IPSet(['10.0.0.1/32', 'fe80::/128'])
+>>> s2.add(integer3)
+>>> s2
+IPSet(['10.0.0.1/32', '10.0.0.2/32', 'fe80::/128'])
+>>> s2.remove(integer2)
+>>> s2
+IPSet(['10.0.0.1/32', '10.0.0.2/32'])
+>>> s2.update([integer2])
+>>> s2
+IPSet(['10.0.0.1/32', '10.0.0.2/32', 'fe80::/128'])
+
+------------------------------
+Combined IPv4 and IPv6 support
+------------------------------
+
+In keeping with netaddr's pragmatic approach, you are free to mix and match IPv4 and IPv6 within the same data structure.
+
+>>> s1 = IPSet(['192.0.2.0', '::192.0.2.0', '192.0.2.2', '::192.0.2.2'])
+>>> s2 = IPSet(['192.0.2.2', '::192.0.2.2', '192.0.2.4', '::192.0.2.4'])
+
+IPSets with IPNetworks that need to be merged or split (sometimes multiple times) during various set operations.
+IPNetwork('10.0.0.64/30') is the same as IPRange('10.0.0.64', '10.0.0.67')
+>>> s3 = IPSet(['0.0.0.1', '10.0.0.64/30', '255.255.255.1'])
+>>> s4 = IPSet(['10.0.0.64', '10.0.0.66'])
+>>> s4b = IPSet(['10.0.0.64', '10.0.0.66', '111.111.111.111'])
+>>> s5 = IPSet(['10.0.0.65', '10.0.0.67'])
+
+The documentation show various "s1 <operator> s2" examples. Tests below check that "s2 <operator> s1" also works. Additionally, operations on s3, s4... are performed.
+
+IPSets must be usable in boolean context, even when they are very large.
+>>> s6 = IPSet(['2405:8100::/32'])
+>>> bool(s6)
+True
+>>> bool(IPSet())
+False
+
+^^^^^^^^^^^^^^^^
+set intersection
+^^^^^^^^^^^^^^^^
+>>> s2 & s1
+IPSet(['192.0.2.2/32', '::192.0.2.2/128'])
+
+>>> s3 & s4
+IPSet(['10.0.0.64/32', '10.0.0.66/32'])
+>>> s4 & s3
+IPSet(['10.0.0.64/32', '10.0.0.66/32'])
+
+>>> s3 & s5
+IPSet(['10.0.0.65/32', '10.0.0.67/32'])
+>>> s5 & s3
+IPSet(['10.0.0.65/32', '10.0.0.67/32'])
+
+^^^^^^^^^^^^^^
+set difference
+^^^^^^^^^^^^^^
+
+>>> s3 - s4
+IPSet(['0.0.0.1/32', '10.0.0.65/32', '10.0.0.67/32', '255.255.255.1/32'])
+>>> s4 - s3
+IPSet([])
+>>> s3 - s4b
+IPSet(['0.0.0.1/32', '10.0.0.65/32', '10.0.0.67/32', '255.255.255.1/32'])
+
+>>> s3 - s5
+IPSet(['0.0.0.1/32', '10.0.0.64/32', '10.0.0.66/32', '255.255.255.1/32'])
+>>> s5 - s3
+IPSet([])
+
+
+^^^^^^^^^^^^^^^^^^^^^^^^
+set symmetric difference
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+>>> s2 ^ s1
+IPSet(['192.0.2.0/32', '192.0.2.4/32', '::192.0.2.0/128', '::192.0.2.4/128'])
+
+>>> IPSet([]) ^ IPSet([])
+IPSet([])
+>>> IPSet(['0.0.0.1/32']) ^ IPSet([])
+IPSet(['0.0.0.1/32'])
+>>> IPSet(['0.0.0.1/32']) ^ IPSet(['0.0.0.1/32'])
+IPSet([])
+
+>>> s3 ^ s4
+IPSet(['0.0.0.1/32', '10.0.0.65/32', '10.0.0.67/32', '255.255.255.1/32'])
+>>> s4 ^ s3
+IPSet(['0.0.0.1/32', '10.0.0.65/32', '10.0.0.67/32', '255.255.255.1/32'])
+>>> s3 ^ s4b
+IPSet(['0.0.0.1/32', '10.0.0.65/32', '10.0.0.67/32', '111.111.111.111/32', '255.255.255.1/32'])
+
+>>> s3 ^ s5
+IPSet(['0.0.0.1/32', '10.0.0.64/32', '10.0.0.66/32', '255.255.255.1/32'])
+>>> s5 ^ s3
+IPSet(['0.0.0.1/32', '10.0.0.64/32', '10.0.0.66/32', '255.255.255.1/32'])
+
+--------------------------------
+Convert an IP set to an IP Range
+--------------------------------
+>>> list(IPSet().iter_ipranges())
+[]
+
+>>> list(IPSet([IPAddress('10.0.0.1')]).iter_ipranges())
+[IPRange('10.0.0.1', '10.0.0.1')]
+
+Adjacent, non-mergable CIDRs must be merged by iter_ipranges().
+>>> list(IPSet([IPAddress('10.0.0.1'), IPAddress('10.0.0.2')]).iter_ipranges())
+[IPRange('10.0.0.1', '10.0.0.2')]
+
+IPv4 and IPv6 addresses must not be merged.
+>>> list(IPSet([IPAddress(1, 4), IPAddress(1, 6)]).iter_ipranges())
+[IPRange('0.0.0.1', '0.0.0.1'), IPRange('::1', '::1')]
+
+len() fails when the IPSet is longer than sys.maxint, which is quite likely with IPv6.
+>>> from netaddr.compat import _sys_maxint
+>>> s = IPSet(IPRange(IPAddress("::0"), IPAddress(_sys_maxint, 6)))
+>>> len(s)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  ...
+IndexError: range contains more than ...
+
+>>> s = IPSet(IPRange(IPAddress("::0"), IPAddress(_sys_maxint - 1, 6)))
+>>> len(s) == _sys_maxint
+True
+
+------------------
+Various exceptions
+------------------
+
+>>> s1 = IPSet(['10.0.0.1'])
+
+>>> hash(s1)
+Traceback (most recent call last):
+TypeError: IP sets are unhashable!
+
+>>> s1.update(42)
+Traceback (most recent call last):
+TypeError: an iterable was expected!
+
+In the following cases, the exceptions are caught and translated to booleans.
+>>> s1 == 42
+False
+>>> s1 != 42
+True
+
