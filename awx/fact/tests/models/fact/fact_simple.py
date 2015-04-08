@@ -2,6 +2,7 @@
 # All Rights Reserved
 
 # Python
+from __future__ import absolute_import
 from datetime import datetime
 from copy import deepcopy
 
@@ -10,8 +11,9 @@ from copy import deepcopy
 # AWX
 from awx.fact.models.fact import * # noqa
 from awx.main.tests.base import BaseTest, MongoDBRequired
+from .base import BaseFactTest
 
-__all__ = ['FactHostTest', 'FactTest', 'FactGetHostVersionTest', 'FactGetHostTimeline']
+__all__ = ['FactHostTest', 'FactTest', 'FactGetHostVersionTest', 'FactGetHostTimelineTest']
 
 TEST_FACT_DATA = {
     'hostname': 'hostname1',
@@ -48,10 +50,7 @@ TEST_FACT_DATA = {
     }
 }
 # Strip off microseconds because mongo has less precision
-TEST_FACT_DATA['add_fact_data']['timestamp'] = TEST_FACT_DATA['add_fact_data']['timestamp'].replace(microsecond=0)
-
-def create_host_document():
-    TEST_FACT_DATA['add_fact_data']['host'] = FactHost(hostname=TEST_FACT_DATA['hostname']).save()
+BaseFactTest.normalize_timestamp(TEST_FACT_DATA)
 
 def create_fact_scans(count=1):
     timestamps = []
@@ -65,7 +64,7 @@ def create_fact_scans(count=1):
     return timestamps
 
 
-class FactHostTest(BaseTest, MongoDBRequired):
+class FactHostTest(BaseFactTest):
     def test_create_host(self):
         host = FactHost(hostname=TEST_FACT_DATA['hostname'])
         host.save()
@@ -81,10 +80,10 @@ class FactHostTest(BaseTest, MongoDBRequired):
 
         self.assertRaises(FactHost.DoesNotExist, FactHost.objects.get, hostname='doesnotexist')
 
-class FactTest(BaseTest, MongoDBRequired):
+class FactTest(BaseFactTest):
     def setUp(self):
         super(FactTest, self).setUp()
-        create_host_document()
+        self.create_host_document(TEST_FACT_DATA)
 
     def test_add_fact(self):
         (f_obj, v_obj) = Fact.add_fact(**TEST_FACT_DATA['add_fact_data'])
@@ -106,10 +105,10 @@ class FactTest(BaseTest, MongoDBRequired):
         self.assertEqual(v.fact.id, f_obj.id)
         self.assertEqual(v.fact.module, TEST_FACT_DATA['add_fact_data']['module'])
 
-class FactGetHostVersionTest(BaseTest, MongoDBRequired):
+class FactGetHostVersionTest(BaseFactTest):
     def setUp(self):
         super(FactGetHostVersionTest, self).setUp()
-        create_host_document()
+        self.create_host_document(TEST_FACT_DATA)
 
         self.t1 = datetime.now().replace(second=1, microsecond=0)
         self.t2 = datetime.now().replace(second=2, microsecond=0)
@@ -137,10 +136,10 @@ class FactGetHostVersionTest(BaseTest, MongoDBRequired):
         fact = Fact.get_host_version(hostname=TEST_FACT_DATA['hostname'], timestamp=t3, module=TEST_FACT_DATA['add_fact_data']['module'])
         self.assertIsNone(fact)
 
-class FactGetHostTimeline(BaseTest, MongoDBRequired):
+class FactGetHostTimelineTest(BaseFactTest):
     def setUp(self):
-        super(FactGetHostTimeline, self).setUp()
-        create_host_document()
+        super(FactGetHostTimelineTest, self).setUp()
+        self.create_host_document(TEST_FACT_DATA)
 
         self.scans = 20
         self.timestamps = create_fact_scans(self.scans)
@@ -151,4 +150,3 @@ class FactGetHostTimeline(BaseTest, MongoDBRequired):
         self.assertEqual(len(timestamps), len(self.timestamps))
         for i in range(0, self.scans):
             self.assertEqual(timestamps[i], self.timestamps[i])
-

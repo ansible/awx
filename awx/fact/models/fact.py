@@ -1,3 +1,6 @@
+# Copyright (c) 2015 Ansible, Inc.
+# All Rights Reserved
+
 from mongoengine import Document, DynamicDocument, DateTimeField, ReferenceField, StringField
 
 class FactHost(Document):
@@ -78,6 +81,35 @@ class Fact(DynamicDocument):
         }
 
         return FactVersion.objects.filter(**kv).values_list('timestamp')
+
+    @staticmethod
+    def get_single_facts(hostnames, fact_key, timestamp, module):
+        host_ids = FactHost.objects.filter(hostname__in=hostnames).values_list('id')
+        if not host_ids or len(host_ids) == 0:
+            return None
+
+        kv = {
+            'host__in': host_ids,
+            'timestamp__lte': timestamp,
+            'module': module,
+        }
+        facts = FactVersion.objects.filter(**kv).values_list('fact')
+        if not facts or len(facts) == 0:
+            return None
+        # TODO: Make sure the below doesn't trigger a query to get the fact record
+        # It's unclear as to if mongoengine will query the full fact when the id is referenced.
+        # This is not a logic problem, but a performance problem.
+        fact_ids = [fact.id for fact in facts]
+
+        project = {
+            '$project': {
+                'host': 1,
+                'fact.%s' % fact_key: 1,
+            }
+        }
+        facts = Fact.objects.filter(id__in=fact_ids).aggregate(project)
+        return facts
+
 
 class FactVersion(Document):
     timestamp = DateTimeField(required=True)
