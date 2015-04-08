@@ -148,7 +148,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     )
 
     @property
-    def needs_password(self):
+    def needs_ssh_password(self):
         return self.kind == 'ssh' and self.password == 'ASK'
 
     @property
@@ -176,7 +176,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
     @property
     def passwords_needed(self):
         needed = []
-        for field in ('password', 'become_password', 'ssh_key_unlock', 'vault_password'):
+        for field in ('ssh_password', 'become_password', 'ssh_key_unlock', 'vault_password'):
             if getattr(self, 'needs_%s' % field):
                 needed.append(field)
         return needed
