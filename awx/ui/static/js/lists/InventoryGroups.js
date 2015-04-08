@@ -81,7 +81,7 @@ export default
         actions: {
             launch: {
                 mode: 'all',
-                // TODO: ngShow permissions
+                ngShow: 'inventory.can_run_ad_hoc_commands',
                 ngClick: 'populateAdhocForm()',
                 awToolTip: "Run a command on this inventory"
                 // TODO: set up a tip watcher and change text based on when
