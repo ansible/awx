@@ -12,9 +12,9 @@
  * @description This controller controls the adhoc form creation, command launching and navigating to standard out after command has been succesfully ran.
 */
 export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
-    AdhocForm, GenerateForm, Rest, ProcessErrors, ClearScope, GetBasePath,
-    GetChoices, KindChange, LookUpInit, CredentialList, Empty, OwnerChange,
-    LoginMethodChange, Wait) {
+    CheckPasswords, PromptForPasswords, CreateLaunchDialog, AdhocForm, GenerateForm, Rest, ProcessErrors, ClearScope,
+    GetBasePath, GetChoices, KindChange, LookUpInit, CredentialList, Empty,
+    Wait) {
 
     ClearScope();
 
@@ -76,9 +76,6 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
             input_type: 'radio'
         });
 
-        OwnerChange({ scope: $scope });
-        LoginMethodChange({ scope: $scope });
-
         Wait('stop'); // END: form population
     });
 
@@ -91,24 +88,12 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
         callback: 'choicesReadyAdhoc'
     });
 
-    // Handle Owner change
-    $scope.ownerChange = function () {
-        OwnerChange({ scope: $scope });
-    };
-
-    // Handle Login Method change
-    $scope.loginMethodChange = function () {
-        LoginMethodChange({ scope: $scope });
-    };
-
-    // Handle Kind change
-    $scope.kindChange = function () {
-        KindChange({ scope: $scope, form: form, reset: true });
-    };
-
     // launch the job with the provided form data
     $scope.launchJob = function () {
-        var fld, data={};
+        var fld, data={}, html;
+
+        html = '<form class="ng-valid ng-valid-required" name="job_launch_form"' +
+            'id="job_launch_form" autocomplete="off" nonvalidate>';
 
         // stub the payload with defaults from DRF
         data = {
@@ -135,22 +120,92 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
 
         Wait('start');
 
-        // Launch the adhoc job
-        Rest.setUrl(url);
-        Rest.post(data)
-            .success(function (data) {
-                 Wait('stop');
-                 $location.path("/ad_hoc_commands/" + data.id);
-            })
-            .error(function (data, status) {
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to launch adhoc command. POST returned status: ' +
-                        status });
-                // TODO: still need to implement popping up a password prompt
-                // if the credential requires it.  The way that the current end-
-                // point works is that I find out if I need to ask for a
-                // password from POST, thus I get an error response.
+        if ($scope.removeStartAdhocRun) {
+          $scope.removeStartAdhocRun();
+        }
+        $scope.removeStartAdhocRun = $scope.$on('StartAdhocRun', function() {
+                var password;
+                for (password in $scope.passwords) {
+                    data[$scope.passwords[password]] = $scope[$scope.passwords[password]];
+                }
+                // Launch the adhoc job
+                Rest.setUrl(GetBasePath('inventory') +
+                    $routeParams.inventory_id + '/ad_hoc_commands/');
+                Rest.post(data)
+                    .success(function (data) {
+                         Wait('stop');
+                         $location.path("/ad_hoc_commands/" + data.id);
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                            msg: 'Failed to launch adhoc command. POST returned ' +
+                                'status: ' + status });
+                    });
+        });
+
+        if ($scope.removeCreateLaunchDialog) {
+            $scope.removeCreateLaunchDialog();
+        }
+        $scope.removeCreateLaunchDialog = $scope.$on('CreateLaunchDialog',
+            function(e, html, url) {
+                CreateLaunchDialog({
+                    scope: $scope,
+                    html: html,
+                    url: url,
+                    callback: 'StartAdhocRun'
+                });
             });
+
+        if ($scope.removePromptForPasswords) {
+          $scope.removePromptForPasswords();
+        }
+        $scope.removePromptForPasswords = $scope.$on('PromptForPasswords', function(e, passwords_needed_to_start,html, url) {
+          PromptForPasswords({ scope: $scope,
+            passwords: passwords_needed_to_start,
+            callback: 'CreateLaunchDialog',
+            html: html,
+            url: url
+          });
+        });
+
+        if ($scope.removeContinueCred) {
+          $scope.removeContinueCred();
+        }
+        $scope.removeContinueCred = $scope.$on('ContinueCred', function(e, passwords) {
+            if(passwords.length>0){
+                $scope.passwords_needed_to_start = passwords;
+                // only go through the password prompting steps if there are
+                // passwords to prompt for
+                $scope.$emit('PromptForPasswords', passwords, html, url);
+            } else {
+                // if not, go straight to trying to run the job.
+                $scope.$emit('StartAdhocRun', url);
+            }
+        });
+
+        //  start adhoc launching routine
+        CheckPasswords({
+            scope: $scope,
+            credential: $scope.credential,
+            callback: 'ContinueCred'
+        });
+
+        // // Launch the adhoc job
+        // Rest.setUrl(url);
+        // Rest.post(data)
+        //     .success(function (data) {
+        //          Wait('stop');
+        //          $location.path("/ad_hoc_commands/" + data.id);
+        //     })
+        //     .error(function (data, status) {
+        //         ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+        //             msg: 'Failed to launch adhoc command. POST returned status: ' +
+        //                 status });
+        //         // TODO: still need to implement popping up a password prompt
+        //         // if the credential requires it.  The way that the current end-
+        //         // point works is that I find out if I need to ask for a
+        //         // password from POST, thus I get an error response.
+        //     });
     };
 
     // Remove all data input into the form
@@ -161,12 +216,10 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
         }
         $scope.limit = $scope.providedHostPatterns;
         KindChange({ scope: $scope, form: form, reset: false });
-        OwnerChange({ scope: $scope });
-        LoginMethodChange({ scope: $scope });
     };
 }
 
 AdhocCtrl.$inject = ['$scope', '$rootScope', '$location', '$routeParams',
-    'AdhocForm', 'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope',
-    'GetBasePath', 'GetChoices', 'KindChange', 'LookUpInit', 'CredentialList',
-    'Empty', 'OwnerChange', 'LoginMethodChange', 'Wait'];
+    'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'AdhocForm',
+    'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
+    'GetChoices', 'KindChange', 'LookUpInit', 'CredentialList', 'Empty', 'Wait'];
