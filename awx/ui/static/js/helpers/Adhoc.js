@@ -8,9 +8,32 @@
 /**
  * @ngdoc function
  * @name helpers.function:Adhoc
- * @description routines shared by adhoc related controllers
- * AdhocRun is currently only used for _relaunching_ an adhoc command
- * from the Jobs page.
+ * @description These routines are shared by adhoc command related controllers.
+ * The content here is very similar to the JobSubmission helper, and in fact,
+ * certain services are pulled from that helper.  This leads to an important
+ * point: if you need to create functionality that is shared between the command
+ * and playbook run process, put that code in the JobSubmission helper and make
+ * it into a reusable step (by specifying a callback parameter in the factory).
+ * For a good example of this, please see how the AdhocLaunch factory in this
+ * file utilizes the CheckPasswords factory from the JobSubmission helper.
+ *
+ * #AdhocRelaunch Step 1: preparing the GET to ad_hoc_commands/n/relaunch
+ * The adhoc relaunch process is called from the JobSubmission helper.  It is a
+ * separate process from the initial adhoc run becuase of the way the API
+ * endpoints work.  For AdhocRelaunch, we have access to the original run and
+ * we can pull the related relaunch URL by knowing the original Adhoc runs ID.
+ *
+ * #AdhocRelaunch Step 2: If we got passwords back, add them
+ * The relaunch URL gives us back the passwords we need to prompt for (if any).
+ * We'll go to step 3 if there are passwords, and step 4 if not.
+ *
+ * #AdhocRelaunch Step 3: PromptForPasswords and the CreateLaunchDialog
+ *
+ * #AdhocRelaunch Step 5: StartAdhocRun
+ *
+ * #AdhocRelaunch Step 6: LaunchJob and navigate to the standard out page.
+
+ * **If you are
  * TODO: once the API endpoint is figured out for running an adhoc command
  * from the form is figured out, the rest work should probably be excised from
  * the controller and moved into here.  See the todo statements in the
