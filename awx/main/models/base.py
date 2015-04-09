@@ -29,7 +29,8 @@ __all__ = ['VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
            'PERM_INVENTORY_ADMIN', 'PERM_INVENTORY_READ',
            'PERM_INVENTORY_WRITE', 'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_SCAN',
            'PERM_INVENTORY_CHECK', 'PERM_JOBTEMPLATE_CREATE', 'JOB_TYPE_CHOICES',
-           'PERMISSION_TYPE_CHOICES', 'CLOUD_INVENTORY_SOURCES']
+           'PERMISSION_TYPE_CHOICES', 'CLOUD_INVENTORY_SOURCES',
+           'VERBOSITY_CHOICES']
 
 PERM_INVENTORY_ADMIN  = 'admin'
 PERM_INVENTORY_READ   = 'read'
@@ -56,6 +57,15 @@ PERMISSION_TYPE_CHOICES = [
 ]
 
 CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'custom']
+
+VERBOSITY_CHOICES = [
+    (0, '0 (Normal)'),
+    (1, '1 (Verbose)'),
+    (2, '2 (More Verbose)'),
+    (3, '3 (Debug)'),
+    (4, '4 (Connection Debug)'),
+    (5, '5 (WinRM Debug)'),
+]
 
 
 class VarsDictProperty(object):

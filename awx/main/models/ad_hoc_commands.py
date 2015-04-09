@@ -72,6 +72,7 @@ class AdHocCommand(UnifiedJob):
         default=0,
     )
     verbosity = models.PositiveIntegerField(
+        choices=VERBOSITY_CHOICES,
         blank=True,
         default=0,
     )

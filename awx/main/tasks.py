@@ -658,7 +658,7 @@ class RunJob(BaseTask):
         if job.limit:
             args.extend(['-l', job.limit])
         if job.verbosity:
-            args.append('-%s' % ('v' * min(3, job.verbosity)))
+            args.append('-%s' % ('v' * min(5, job.verbosity)))
         if job.job_tags:
             args.extend(['-t', job.job_tags])
         if job.skip_tags:
@@ -1269,7 +1269,7 @@ class RunAdHocCommand(BaseTask):
         if ad_hoc_command.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % ad_hoc_command.forks)
         if ad_hoc_command.verbosity:
-            args.append('-%s' % ('v' * min(3, ad_hoc_command.verbosity)))
+            args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
         args.extend(['-m', ad_hoc_command.module_name])
         args.extend(['-a', ad_hoc_command.module_args])

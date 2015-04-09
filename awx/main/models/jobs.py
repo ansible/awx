@@ -87,6 +87,7 @@ class JobOptions(BaseModel):
         default='',
     )
     verbosity = models.PositiveIntegerField(
+        choices=VERBOSITY_CHOICES,
         blank=True,
         default=0,
     )
