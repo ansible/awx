@@ -16,14 +16,14 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/nvd3/build/nv.d3.css"  type="text/css">
 
-  <link rel="stylesheet" href="{{ STATIC_URL }}tower.min.css"  type="text/css">
+  <link rel="stylesheet" href="{{ STATIC_URL }}tower.min.css?v={{version}}"  type="text/css">
 
   <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" />
   <script>
       var $basePath = "{{ STATIC_URL }}";
   </script>
 
-  <script src="{{ STATIC_URL }}tower.concat.js"></script>
+  <script src="{{ STATIC_URL }}tower.concat.js?v={{version}}"></script>
 
 </head>
 <body>

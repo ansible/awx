@@ -122,6 +122,7 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 TEMPLATE_CONTEXT_PROCESSORS += (
     'django.core.context_processors.request',
     'awx.ui.context_processors.settings',
+    'awx.ui.context_processors.version',
 )
 
 MIDDLEWARE_CLASSES += (
