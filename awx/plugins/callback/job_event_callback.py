@@ -458,8 +458,6 @@ class AdHocCommandCallbackModule(BaseCallbackModule):
     Callback module for logging ansible ad hoc events via ZMQ or the REST API.
     '''
 
-    # FIXME: Clean up lingering control persist sockets.
-
     def __init__(self):
         self.ad_hoc_command_id = int(os.getenv('AD_HOC_COMMAND_ID', '0'))
         self.rest_api_path = '/api/v1/ad_hoc_commands/%d/events/' % self.ad_hoc_command_id

@@ -1209,12 +1209,9 @@ class RunAdHocCommand(BaseTask):
         elif settings.DEBUG:
             env['JOB_CALLBACK_DEBUG'] = '1'
 
-        # Create a directory for ControlPath sockets that is unique to each
-        # ad hoc command and visible inside the proot environment (when enabled).
-        cp_dir = os.path.join(kwargs['private_data_dir'], 'cp')
-        if not os.path.exists(cp_dir):
-            os.mkdir(cp_dir, 0700)
-        env['ANSIBLE_SSH_CONTROL_PATH'] = os.path.join(cp_dir, 'ansible-ssh-%%h-%%p-%%r')
+        # Specify empty SSH args (should disable ControlPersist entirely for
+        # ad hoc commands).
+        env.setdefault('ANSIBLE_SSH_ARGS', '')
 
         return env
 
