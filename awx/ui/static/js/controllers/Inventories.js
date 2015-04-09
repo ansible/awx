@@ -442,7 +442,7 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $r
                 Rest.put(json_data)
                     .success(function () {
                         Wait('stop');
-                        $location.path('/inventories/' + inventory_id + '/');
+                        $location.path('/inventories/' + inventory_id + '/manage');
                     })
                     .error(function (data, status) {
                         ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
