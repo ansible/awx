@@ -9,12 +9,6 @@
  *
  */
 
-
-
-/* global chkPass:false */
-
-import {chkPass} from './pwdmeter';
-
 export default
 angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'JobsHelper'])
 
@@ -693,31 +687,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 $(elm).spinner(opts);
                 $(elm).on("click", function () {
                     $(elm).select();
-                });
-            }
-        };
-    }])
-
-    //
-    // chkPass
-    //
-    // Enables use of js/shared/pwdmeter.js to check strengh of passwords.
-    // See controllers/Users.js for example.
-    //
-    .directive('chkPass', [ function() {
-        return {
-            require: 'ngModel',
-            link: function(scope, elm, attrs, ctrl) {
-                $(elm).keyup(function() {
-                    var validity = true,
-                        score = chkPass(elm.val());
-                    if (elm.val()) {
-                        validity = (score > $AnsibleConfig.password_strength) ? true : false;
-                    }
-                    ctrl.$setValidity('complexity', validity);
-                    if (!scope.$$phase) {
-                        scope.$digest();
-                    }
                 });
             }
         };

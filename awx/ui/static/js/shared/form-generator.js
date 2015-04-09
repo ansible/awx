@@ -393,12 +393,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         scope[form.name + '_form'][fld].$setPristine();
                         scope[form.name + '_form'][fld].$setValidity('apiError', true);
                     }
-                    if (f.chkPass && scope[form.name + '_form'][fld]) {
-                        scope[form.name + '_form'][fld].$setValidity('complexity', true);
-                        $('#progbar').css({
-                            width: 0
-                        });
-                    }
                     if (f.awPassMatch && scope[form.name + '_form'][fld]) {
                         scope[form.name + '_form'][fld].$setValidity('awpassmatch', true);
                     }
@@ -779,7 +773,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "ng-model=\"" + fld + '" ';
                             html += 'name="' + fld + '" ';
                             html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
-                            html += (field.chkPass) ? "chk-pass " : "";
                             html += buildId(field, fld, this.form);
                             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : "";
                             html += "class=\"form-control";
@@ -848,39 +841,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
 
-                        if (field.chkPass) {
-                            // complexity error
-                            html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.complexity\">Please enter a stronger password (see strength bar below).</div>\n";
-
-                            // progress bar
-                            html += "<div class=\"pw-progress\">\n";
-                            html += "<div class=\"progress progress-striped\">\n";
-                            html += "<div id=\"progbar\" class=\"progress-bar\" role=\"progress\"></div>\n";
-                            html += "</div>\n";
-
-                            // help panel
-                            html += HelpCollapse({
-                                hdr: 'Password Complexity',
-                                content: "<p>A password with reasonable strength is required. As you type the password " +
-                                    "a progress bar will measure the strength. Sufficient strength is reached when the bar turns green.</p>" +
-                                    "<p>Password strength is judged using the following:</p>" +
-                                    "<ul class=\"pwddetails\">" +
-                                    "<li>Minimum 8 characters in length</li>\n" +
-                                    "<li>Contains a sufficient combination of the following items:\n" +
-                                    "<ul>\n" +
-                                    "<li>UPPERCASE letters</li>\n" +
-                                    "<li>Numbers</li>\n" +
-                                    "<li>Symbols _!@#$%^&*()</li>\n" +
-                                    "</ul>\n" +
-                                    "</li>\n" +
-                                    "</ul>\n",
-                                idx: this.accordion_count++,
-                                show: null
-                            });
-                            html += "</div><!-- pw-progress -->\n";
-                        }
-
                         // Add help panel(s)
                         html += (field.helpCollapse) ? this.buildHelpCollapse(field.helpCollapse) : '';
 
@@ -933,7 +893,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += 'name="' + fld + '" ';
 
                             html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
-                            html += (field.chkPass) ? "chk-pass " : "";
                             html += buildId(field, fld, this.form);
 
                             html += (field.controlNGClass) ? "ng-class='" + field.controlNGClass + "' " : "";
@@ -1010,39 +969,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<div class='error api-error' id='" + this.form.name + "-" + fld + "-api-error' ng-bind='" + fld + "_api_error'>\n</div>\n";
 
-                        if (field.chkPass) {
-                            // complexity error
-                            html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.complexity\">Please enter a stronger password (see strength bar below).</div>\n";
-
-                            // progress bar
-                            html += "<div class=\"pw-progress\">\n";
-                            html += "<div class=\"progress progress-striped\">\n";
-                            html += "<div id=\"progbar\" class=\"progress-bar\" role=\"progress\"></div>\n";
-                            html += "</div>\n";
-
-                            // help panel
-                            html += HelpCollapse({
-                                hdr: 'Password Complexity',
-                                content: "<p>A password with reasonable strength is required. As you type the password " +
-                                    "a progress bar will measure the strength. Sufficient strength is reached when the bar turns green.</p>" +
-                                    "<p>Password strength is judged using the following:</p>" +
-                                    "<ul class=\"pwddetails\">" +
-                                    "<li>Minimum 8 characters in length</li>\n" +
-                                    "<li>Contains a sufficient combination of the following items:\n" +
-                                    "<ul>\n" +
-                                    "<li>UPPERCASE letters</li>\n" +
-                                    "<li>Numbers</li>\n" +
-                                    "<li>Symbols _!@#$%^&*()</li>\n" +
-                                    "</ul>\n" +
-                                    "</li>\n" +
-                                    "</ul>\n",
-                                idx: this.accordion_count++,
-                                show: null
-                            });
-                            html += "</div><!-- pw-progress -->\n";
-                        }
-
                         // Add help panel(s)
                         html += (field.helpCollapse) ? this.buildHelpCollapse(field.helpCollapse) : '';
                     }
@@ -1115,7 +1041,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += this.attr(field, 'ngOptions');
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                         html += (field.ngDisabled) ? this.attr(field, 'ngDisabled'): "";
-                        html += (field.ngRequired) ? this.attr(field, 'ngRequired') : ""; 
+                        html += (field.ngRequired) ? this.attr(field, 'ngRequired') : "";
                         html += buildId(field, fld, this.form);
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (options.mode === 'add' && field.addRequired) ? "required " : "";
