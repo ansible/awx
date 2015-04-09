@@ -1,0 +1,23 @@
+{
+  "name": "lrInfiniteScroll",
+  "main": "lrInfiniteScroll.js",
+  "version": "1.0.0",
+  "homepage": "https://github.com/lorenzofox3/lrInfiniteScroll",
+  "authors": [
+    "lorenzofox3 <laurent34azerty@gmail.com>"
+  ],
+  "description": "angular directive to handle element scroll",
+  "keywords": [
+    "angular",
+    "scroll",
+    "inifinite"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
