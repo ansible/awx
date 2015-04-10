@@ -2188,6 +2188,11 @@ class AdHocCommandList(ListCreateAPIView):
     serializer_class = AdHocCommandListSerializer
     new_in_220 = True
 
+    @csrf_exempt
+    @transaction.non_atomic_requests
+    def dispatch(self, *args, **kwargs):
+        return super(AdHocCommandList, self).dispatch(*args, **kwargs)
+
     def create(self, request, *args, **kwargs):
         # Inject inventory ID and limit if parent objects is a host/group.
         if hasattr(self, 'get_parent_object') and not getattr(self, 'parent_key', None):
