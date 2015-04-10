@@ -127,13 +127,16 @@ class LicenseTests(BaseTest):
         with os.fdopen(h, 'w') as f:
             json.dump({'instance_count': 100}, f)
         awx.main.task_engine.TEMPORARY_TASK_FILE = path
+
         def fetch_ami(_self):
             _self.attributes['ami-id'] = 'ami-00000000'
             return True
-        awx.main.task_engine.TemporaryTaskEngine.fetch_ami = fetch_ami
+
         def fetch_instance(_self):
             _self.attributes['instance-id'] = 'i-00000000'
             return True
+
+        awx.main.task_engine.TemporaryTaskEngine.fetch_ami = fetch_ami
         awx.main.task_engine.TemporaryTaskEngine.fetch_instance = fetch_instance
         reader = TaskSerializer()
         license = reader.from_file()
