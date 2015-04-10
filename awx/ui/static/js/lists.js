@@ -1,6 +1,7 @@
 import Admins from "tower/lists/Admins";
 import CloudCredentials from "tower/lists/CloudCredentials";
 import CompletedJobs from "tower/lists/CompletedJobs";
+import AllJobs from "tower/lists/AllJobs";
 import ConfigureTowerJobs from "tower/lists/ConfigureTowerJobs";
 import Credentials from "tower/lists/Credentials";
 import CustomInventory from "tower/lists/CustomInventory";
@@ -33,6 +34,7 @@ export
     {   Admins,
         CloudCredentials,
         CompletedJobs,
+        AllJobs,
         ConfigureTowerJobs,
         Credentials,
         CustomInventory,

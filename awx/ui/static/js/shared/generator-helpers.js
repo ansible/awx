@@ -481,6 +481,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             html += field.text;
         }
         html += "</a>";
+        if (field.alt_text) {
+            html += " " + field.alt_text;
+        }
         return html;
     };
 }])

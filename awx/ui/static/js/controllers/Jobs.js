@@ -14,12 +14,13 @@
 */
 
 
-export function JobsListController ($rootScope, $log, $scope, $compile, $routeParams, ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope,
-    LoadJobsScope, RunningJobsList, CompletedJobsList, QueuedJobsList, ScheduledJobsList, GetChoices, GetBasePath, Wait, Socket) {
+export function JobsListController ($rootScope, $log, $scope, $compile, $routeParams,
+    ClearScope, Breadcrumbs, LoadBreadCrumbs, LoadSchedulesScope,
+    LoadJobsScope, AllJobsList, ScheduledJobsList, GetChoices, GetBasePath, Wait, Socket) {
 
     ClearScope();
 
-    var completed_scope, running_scope, queued_scope, scheduled_scope,
+    var jobs_scope, scheduled_scope,
         choicesCount = 0,
         listCount = 0,
         api_complete = false,
@@ -33,10 +34,10 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             endpoint: "jobs"
         });
         job_socket.init();
-        job_socket.on("status_changed", function(data) {
-            if (api_complete) {
-                processEvent(data);
-            }
+        job_socket.on("status_changed", function() {
+            // if (api_complete) {
+                jobs_scope.refreshJobs();
+            // }
         });
         schedule_socket = Socket({
             scope: $scope,
@@ -50,28 +51,6 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
         });
     }
 
-    function processEvent(event) {
-        switch(event.status) {
-            case 'running':
-                running_scope.search('running_job');
-                queued_scope.search('queued_job');
-                break;
-            case 'new':
-            case 'pending':
-            case 'waiting':
-                queued_scope.search('queued_job');
-                completed_scope.search('completed_job');
-                break;
-            case 'successful':
-            case 'failed':
-            case 'error':
-            case 'canceled':
-                completed_scope.search('completed_job');
-                running_scope.search('running_job');
-                queued_scope.search('queued_job');
-        }
-    }
-
     LoadBreadCrumbs();
 
     if ($scope.removeListLoaded) {
@@ -79,7 +58,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
     }
     $scope.removeListLoaded = $scope.$on('listLoaded', function() {
         listCount++;
-        if (listCount === 4) {
+        if (listCount === 2) {
             api_complete = true;
             openSockets();
         }
@@ -92,71 +71,50 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
     $scope.removeBuildJobsList = $scope.$on('buildJobsList', function() {
         var opt, search_params;
 
-        if (CompletedJobsList.fields.type) {
-            CompletedJobsList.fields.type.searchOptions = $scope.type_choices;
-        }
-        if (RunningJobsList.fields.type) {
-            RunningJobsList.fields.type.searchOptions = $scope.type_choices;
-        }
-        if (QueuedJobsList.fields.type) {
-            QueuedJobsList.fields.type.searchOptions = $scope.type_choices;
+        if (AllJobsList.fields.type) {
+            AllJobsList.fields.type.searchOptions = $scope.type_choices;
         }
         if ($routeParams.status) {
-            search_params[CompletedJobsList.iterator + 'SearchField'] = 'status';
-            search_params[CompletedJobsList.iterator + 'SelectShow'] = true;
-            search_params[CompletedJobsList.iterator + 'SearchSelectOpts'] = CompletedJobsList.fields.status.searchOptions;
-            search_params[CompletedJobsList.iterator + 'SearchFieldLabel'] = CompletedJobsList.fields.status.label.replace(/<br\>/g,' ');
-            search_params[CompletedJobsList.iterator + 'SearchType'] = '';
-            for (opt in CompletedJobsList.fields.status.searchOptions) {
-                if (CompletedJobsList.fields.status.searchOptions[opt].value === $routeParams.status) {
-                    search_params[CompletedJobsList.iterator + 'SearchSelectValue'] = CompletedJobsList.fields.status.searchOptions[opt];
+            search_params[AllJobsList.iterator + 'SearchField'] = 'status';
+            search_params[AllJobsList.iterator + 'SelectShow'] = true;
+            search_params[AllJobsList.iterator + 'SearchSelectOpts'] = AllJobsList.fields.status.searchOptions;
+            search_params[AllJobsList.iterator + 'SearchFieldLabel'] = AllJobsList.fields.status.label.replace(/<br\>/g,' ');
+            search_params[AllJobsList.iterator + 'SearchType'] = '';
+            for (opt in AllJobsList.fields.status.searchOptions) {
+                if (AllJobsList.fields.status.searchOptions[opt].value === $routeParams.status) {
+                    search_params[AllJobsList.iterator + 'SearchSelectValue'] = AllJobsList.fields.status.searchOptions[opt];
                     break;
                 }
             }
         }
-        completed_scope = $scope.$new(true);
-        completed_scope.showJobType = true;
+        jobs_scope = $scope.$new(true);
+        jobs_scope.showJobType = true;
         LoadJobsScope({
             parent_scope: $scope,
-            scope: completed_scope,
-            list: CompletedJobsList,
-            id: 'completed-jobs',
-            url: GetBasePath('unified_jobs') + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled',
-            searchParams: search_params,
-            pageSize: max_rows
-        });
-        running_scope = $scope.$new(true);
-        LoadJobsScope({
-            parent_scope: $scope,
-            scope: running_scope,
-            list: RunningJobsList,
+            scope: jobs_scope,
+            list: AllJobsList,
             id: 'active-jobs',
-            url: GetBasePath('unified_jobs') + '?status=running',
-            pageSize: max_rows
-        });
-        queued_scope = $scope.$new(true);
-        LoadJobsScope({
-            parent_scope: $scope,
-            scope: queued_scope,
-            list: QueuedJobsList,
-            id: 'queued-jobs',
-            url: GetBasePath('unified_jobs') + '?or__status=pending&or__status=waiting&or__status=new',
-            pageSize: max_rows
+            url: GetBasePath('unified_jobs') + '?status__in=pending,running,completed,failed,successful,error,canceled',
+            pageSize: max_rows,
+            spinner: false
         });
         scheduled_scope = $scope.$new(true);
         LoadSchedulesScope({
             parent_scope: $scope,
             scope: scheduled_scope,
             list: ScheduledJobsList,
-            id: 'scheduled-jobs',
+            id: 'scheduled-jobs-tab',
             url: GetBasePath('schedules') + '?next_run__isnull=false',
             pageSize: max_rows
         });
 
         $scope.refreshJobs = function() {
-            queued_scope.search('queued_job');
-            running_scope.search('running_job');
-            completed_scope.search('completed_job');
+            jobs_scope.search('queued_job');
+            jobs_scope.search('running_job');
+            jobs_scope.search('completed_job');
+            // queued_scope.search('queued_job');
+            // running_scope.search('running_job');
+            // completed_scope.search('completed_job');
             scheduled_scope.search('schedule');
         };
 
@@ -211,12 +169,12 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             }
             $log.debug('available_height: ' + available_height);
             $('.jobs-list-container').each(function() {
-                $(this).height(Math.floor(available_height / 2));
+                $(this).height(Math.floor(available_height));
             });
             search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
             page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
-            header = Math.max($('#completed_jobs_table thead').height(), 24);
-            height = Math.floor(available_height / 2) - header - page_row - search_row - 30;
+            header = Math.max($('#active_jobs_table thead').height(), 24);
+            height = Math.floor(available_height ) - header - page_row - search_row - 30;
             // row_height = (docw < 1350) ? 47 : 44;
             if(docw < 1424){
                 row_height = 55;
@@ -240,16 +198,13 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
     // Set container height and return the number of allowed rows
     function resizeContainers() {
         setHeight();
-        completed_scope[CompletedJobsList.iterator + '_page_size'] = max_rows;
-        completed_scope.changePageSize(CompletedJobsList.name, CompletedJobsList.iterator);
-        running_scope[RunningJobsList.iterator + '_page_size'] = max_rows;
-        running_scope.changePageSize(RunningJobsList.name, RunningJobsList.iterator);
-        queued_scope[QueuedJobsList.iterator + '_page_size'] = max_rows;
-        queued_scope.changePageSize(QueuedJobsList.name, QueuedJobsList.iterator);
+        jobs_scope[AllJobsList.iterator + '_page_size'] = max_rows;
+        jobs_scope.changePageSize(AllJobsList.name, AllJobsList.iterator);
         scheduled_scope[ScheduledJobsList.iterator + '_page_size'] = max_rows;
         scheduled_scope.changePageSize(ScheduledJobsList.name, ScheduledJobsList.iterator);
     }
 }
 
-JobsListController.$inject = ['$rootScope', '$log', '$scope', '$compile', '$routeParams', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope', 'RunningJobsList', 'CompletedJobsList',
-    'QueuedJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'Socket'];
+JobsListController.$inject = ['$rootScope', '$log', '$scope', '$compile', '$routeParams',
+'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'LoadSchedulesScope', 'LoadJobsScope',
+'AllJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', 'Socket'];
