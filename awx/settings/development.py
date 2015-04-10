@@ -43,8 +43,9 @@ if 'django_jenkins' in INSTALLED_APPS:
         # The following are not needed when including run_flake8
         # 'django_jenkins.tasks.run_pep8',
         # 'django_jenkins.tasks.run_pyflakes',
-        'django_jenkins.tasks.run_jshint',
-        'django_jenkins.tasks.run_csslint',
+        # The following are handled by various grunt tasks and no longer required
+        # 'django_jenkins.tasks.run_jshint',
+        # 'django_jenkins.tasks.run_csslint',
         )
     PEP8_RCFILE = "setup.cfg"
     PYLINT_RCFILE = ".pylintrc"
