@@ -229,7 +229,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
             errors.append("'name' missing from survey spec")
         if 'description' not in self.survey_spec:
             errors.append("'description' missing from survey spec")
-        for survey_element in self.survey_spec["spec"]:
+        for survey_element in self.survey_spec.get("spec", []):
             if survey_element['variable'] not in data and \
                survey_element['required']:
                 errors.append("'%s' value missing" % survey_element['variable'])

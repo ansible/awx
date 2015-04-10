@@ -1448,14 +1448,14 @@ class JobTemplateLaunch(GenericAPIView):
         data['ask_variables_on_launch'] = obj.ask_variables_on_launch
         data['variables_needed_to_start'] = obj.variables_needed_to_start
         data['credential_needed_to_start'] = obj.credential is None
-        data['survey_enabled'] = obj.survey_enabled
+        data['survey_enabled'] = obj.survey_enabled and 'spec' in obj.survey_spec
         return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
-        if obj.survey_enabled:
+        if obj.survey_enabled and 'spec' in obj.survey_spec:
             if request.DATA == "":
                 request_data = {}
             else:

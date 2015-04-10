@@ -1375,10 +1375,18 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TestCase):
                                  args=(new_jt_id,))
             self.assertEquals(response['url'], detail_url)
         url = reverse('api:job_template_survey_spec', args=(new_jt_id,))
+        launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
         with self.current_user(self.user_sue):
-            response = self.post(url, json.loads(TEST_SIMPLE_REQUIRED_SURVEY), expect=200)
-            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
+            # If no survey spec is available, survey_enabled on launch endpoint
+            # should return, and should be able to launch template without error.
             response = self.get(launch_url)
+            self.assertFalse(response['survey_enabled'])
+            self.post(launch_url, {}, expect=202)
+            # Now post a survey spec and check that the answer is set in the
+            # job's extra vars.
+            self.post(url, json.loads(TEST_SIMPLE_REQUIRED_SURVEY), expect=200)
+            response = self.get(launch_url)
+            self.assertTrue(response['survey_enabled'])
             self.assertTrue('favorite_color' in response['variables_needed_to_start'])
             response = self.post(launch_url, dict(extra_vars=dict(favorite_color="green")), expect=202)
             job = Job.objects.get(pk=response["job"])
@@ -1387,13 +1395,11 @@ class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TestCase):
 
         with self.current_user(self.user_sue):
             response = self.post(url, json.loads(TEST_SIMPLE_NONREQUIRED_SURVEY), expect=200)
-            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
             response = self.get(launch_url)
             self.assertTrue(len(response['variables_needed_to_start']) == 0)
 
         with self.current_user(self.user_sue):
             response = self.post(url, json.loads(TEST_SURVEY_REQUIREMENTS), expect=200)
-            launch_url = reverse('api:job_template_launch', args=(new_jt_id,))
             # Just the required answer should work
             self.post(launch_url, dict(extra_vars=dict(reqd_answer="foo")), expect=202)
             # Short answer but requires a long answer
