@@ -55,7 +55,7 @@ class FactGetSingleFactsTest(BaseFactTest):
         self.fact_data = []
         self.fact_objs = []
         self.hostnames = []
-        for i in range(1, host_count+1):
+        for i in range(1, host_count + 1):
             fact_data = deepcopy(TEST_FACT_DATA)
             fact_data['hostname'] = fact_data['hostname'] % (i)
             fact_data['add_fact_data']['timestamp'] = datetime.now().replace(year=2015 - i)

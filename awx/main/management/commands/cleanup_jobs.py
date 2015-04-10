@@ -66,8 +66,8 @@ class Command(NoArgsCommand):
     def cleanup_ad_hoc_commands(self):
         for ad_hoc_command in AdHocCommand.objects.all():
             ad_hoc_command_display = '"%s" (started %s, %d events)' % \
-                          (unicode(ad_hoc_command), unicode(ad_hoc_command.created),
-                           ad_hoc_command.ad_hoc_command_events.count())
+                (unicode(ad_hoc_command), unicode(ad_hoc_command.created),
+                 ad_hoc_command.ad_hoc_command_events.count())
             if ad_hoc_command.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s ad hoc command %s', action_text, ad_hoc_command.status, ad_hoc_command_display)

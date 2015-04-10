@@ -10,7 +10,6 @@ from copy import deepcopy
 
 # AWX
 from awx.fact.models.fact import * # noqa
-from awx.main.tests.base import BaseTest, MongoDBRequired
 from .base import BaseFactTest
 
 __all__ = ['FactHostTest', 'FactTest', 'FactGetHostVersionTest', 'FactGetHostTimelineTest']
