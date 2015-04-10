@@ -2,9 +2,12 @@
 # All Rights Reserved.
 
 import json
+import os
+import tempfile
 
 from awx.main.models import Host, Inventory, Organization
 from awx.main.tests.base import BaseTest
+import awx.main.task_engine
 from awx.main.task_engine import * # noqa
 
 class LicenseTests(BaseTest):
@@ -16,21 +19,28 @@ class LicenseTests(BaseTest):
         self.setup_users()
         u = self.super_django_user
         org = Organization.objects.create(name='o1', created_by=u)
-        inventory = Inventory.objects.create(name='hi', organization=org, created_by=u)
-        Host.objects.create(name='a1', inventory=inventory, created_by=u)
-        Host.objects.create(name='a2', inventory=inventory, created_by=u)
-        Host.objects.create(name='a3', inventory=inventory, created_by=u)
-        Host.objects.create(name='a4', inventory=inventory, created_by=u)
-        Host.objects.create(name='a5', inventory=inventory, created_by=u)
-        Host.objects.create(name='a6', inventory=inventory, created_by=u)
-        Host.objects.create(name='a7', inventory=inventory, created_by=u)
-        Host.objects.create(name='a8', inventory=inventory, created_by=u)
-        Host.objects.create(name='a9', inventory=inventory, created_by=u)
-        Host.objects.create(name='a10', inventory=inventory, created_by=u)
-        Host.objects.create(name='a11', inventory=inventory, created_by=u)
-        Host.objects.create(name='a12', inventory=inventory, created_by=u)
+        org.admins.add(self.normal_django_user)
+        self.inventory = Inventory.objects.create(name='hi', organization=org, created_by=u)
+        Host.objects.create(name='a1', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a2', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a3', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a4', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a5', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a6', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a7', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a8', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a9', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a10', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a11', inventory=self.inventory, created_by=u)
+        Host.objects.create(name='a12', inventory=self.inventory, created_by=u)
+        self._temp_task_file = awx.main.task_engine.TEMPORARY_TASK_FILE
+        self._temp_task_fetch_ami = awx.main.task_engine.TemporaryTaskEngine.fetch_ami
+        self._temp_task_fetch_instance = awx.main.task_engine.TemporaryTaskEngine.fetch_instance
 
     def tearDown(self):
+        awx.main.task_engine.TEMPORARY_TASK_FILE = self._temp_task_file
+        awx.main.task_engine.TemporaryTaskEngine.fetch_ami = self._temp_task_fetch_ami
+        awx.main.task_engine.TemporaryTaskEngine.fetch_instance = self._temp_task_fetch_instance
         super(LicenseTests, self).tearDown()
         self.stop_redis()
 
@@ -109,3 +119,25 @@ class LicenseTests(BaseTest):
 
         assert vdata['compliant'] is False
         assert vdata['grace_period_remaining'] > 0
+
+    def test_aws_license(self):
+        os.environ['AWX_LICENSE_FILE'] = 'non-existent-license-file.json'
+        h, path = tempfile.mkstemp()
+        self._temp_paths.append(path)
+        with os.fdopen(h, 'w') as f:
+            json.dump({'instance_count': 100}, f)
+        awx.main.task_engine.TEMPORARY_TASK_FILE = path
+        def fetch_ami(_self):
+            _self.attributes['ami-id'] = 'ami-00000000'
+            return True
+        awx.main.task_engine.TemporaryTaskEngine.fetch_ami = fetch_ami
+        def fetch_instance(_self):
+            _self.attributes['instance-id'] = 'i-00000000'
+            return True
+        awx.main.task_engine.TemporaryTaskEngine.fetch_instance = fetch_instance
+        reader = TaskSerializer()
+        license = reader.from_file()
+        self.assertTrue(license['is_aws'])
+        self.assertTrue(license['time_remaining'])
+        self.assertTrue(license['free_instances'] > 0)
+        self.assertTrue(license['grace_period_remaining'] > 0)
