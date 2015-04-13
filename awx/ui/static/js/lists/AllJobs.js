@@ -101,14 +101,14 @@ export default
                 ngClick: 'deleteJob(all_job.id)',
                 awToolTip: 'Cancel the job',
                 dataPlacement: 'top',
-                ngShow: "all_job.status === 'running'"
+                ngShow: "all_job.status === 'running'|| all_job.status == 'waiting' || all_job.status == 'pending'"
             },
             "delete": {
                 mode: 'all',
                 ngClick: 'deleteJob(all_job.id)',
                 awToolTip: 'Delete the job',
                 dataPlacement: 'top',
-                ngShow: "all_job.status !== 'running'"
+                ngShow: "all_job.status !== 'running' && all_job.status !== 'waiting' && all_job.status !== 'pending'"
             },
             stdout: {
                 mode: 'all',

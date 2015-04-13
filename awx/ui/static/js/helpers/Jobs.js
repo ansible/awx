@@ -462,6 +462,9 @@ export default
                 else if (scope.queued_jobs) {
                     jobs = scope.queued_jobs;
                 }
+                else if (scope.all_jobs) {
+                    jobs = scope.all_jobs;
+                }
                 else if (scope.jobs) {
                     jobs = scope.jobs;
                 }
