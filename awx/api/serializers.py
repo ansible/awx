@@ -1472,7 +1472,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             ret['job_template'] = None
 
         if obj.job_template and obj.job_template.survey_enabled:
-            if ret['extra_vars']:
+            if 'extra_vars' in ret:
                 try:
                     extra_vars = json.loads(ret['extra_vars'])
                     for key in obj.job_template.survey_password_variables():
