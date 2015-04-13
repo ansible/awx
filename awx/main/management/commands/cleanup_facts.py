@@ -4,10 +4,8 @@
 # Python
 import re
 from dateutil.relativedelta import relativedelta
-import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from optparse import make_option
-from dateutil.relativedelta import relativedelta
 
 # Django
 from django.core.management.base import BaseCommand, CommandError
@@ -18,8 +16,6 @@ from awx.fact.models.fact import * # noqa
 
 OLDER_THAN = 'older_than'
 GRANULARITY = 'granularity'
-
-logger = logging.getLogger('awx.main.commands.cleanup_facts')
 
 class CleanupFacts(object):
     def __init__(self):
@@ -121,9 +117,9 @@ class Command(BaseCommand):
         older_than = self.string_time_to_timestamp(options[OLDER_THAN])
         granularity = self.string_time_to_timestamp(options[GRANULARITY])
 
-        if older_than == None:
+        if older_than is None:
             raise CommandError('--older_than invalid value "%s"' % options[OLDER_THAN])
-        if granularity == None:
+        if granularity is None:
             raise CommandError('--granularity invalid value "%s"' % options[GRANULARITY])
 
         cleanup_facts.run(older_than, granularity)
