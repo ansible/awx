@@ -679,6 +679,9 @@ class BaseTransactionTest(BaseTestMixin, django.test.TransactionTestCase):
     needs to be accessed by subprocesses).
     '''
 
+@override_settings(CELERY_ALWAYS_EAGER=True,
+                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   ANSIBLE_TRANSPORT='local')
 class BaseLiveServerTest(BaseTestMixin, django.test.LiveServerTestCase):
     '''
     Base class for tests requiring a live test server.
