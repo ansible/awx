@@ -25,21 +25,13 @@ import sys
 
 import six
 
-from novaclient.openstack.common.gettextutils import _
+from novaclient.openstack.common._i18n import _
 
 
 class ClientException(Exception):
     """The base exception class for all exceptions this library raises.
     """
     pass
-
-
-class MissingArgs(ClientException):
-    """Supplied arguments are not sufficient for calling a function."""
-    def __init__(self, missing):
-        self.missing = missing
-        msg = _("Missing arguments: %s") % ", ".join(missing)
-        super(MissingArgs, self).__init__(msg)
 
 
 class ValidationError(ClientException):
@@ -54,11 +46,6 @@ class UnsupportedVersion(ClientException):
 
 class CommandError(ClientException):
     """Error in CLI tool."""
-    pass
-
-
-class ResourceNotFound(ClientException):
-    """Error in getting the resource."""
     pass
 
 
@@ -432,7 +419,7 @@ def from_response(response, method, url):
     """
 
     req_id = response.headers.get("x-openstack-request-id")
-    #NOTE(hdd) true for older versions of nova and cinder
+    # NOTE(hdd) true for older versions of nova and cinder
     if not req_id:
         req_id = response.headers.get("x-compute-request-id")
     kwargs = {
@@ -452,8 +439,8 @@ def from_response(response, method, url):
         except ValueError:
             pass
         else:
-            if isinstance(body, dict):
-                error = list(body.values())[0]
+            if isinstance(body, dict) and isinstance(body.get("error"), dict):
+                error = body["error"]
                 kwargs["message"] = error.get("message")
                 kwargs["details"] = error.get("details")
     elif content_type.startswith("text/"):

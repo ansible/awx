@@ -20,14 +20,17 @@
 OpenStack Client interface. Handles the REST calls and responses.
 """
 
-import errno
+import copy
 import functools
-import glob
 import hashlib
 import logging
-import os
+import re
+import socket
 import time
 
+from keystoneclient import adapter
+from oslo.utils import importutils
+from oslo.utils import netutils
 import requests
 from requests import adapters
 
@@ -39,12 +42,19 @@ except ImportError:
 from six.moves.urllib import parse
 
 from novaclient import exceptions
-from novaclient.openstack.common.gettextutils import _
-from novaclient.openstack.common import network_utils
+from novaclient.i18n import _
 from novaclient import service_catalog
-from novaclient import utils
 
-SENSITIVE_HEADERS = ('X-Auth-Token',)
+
+class TCPKeepAliveAdapter(adapters.HTTPAdapter):
+    """The custom adapter used to set TCP Keep-Alive on all connections."""
+    def init_poolmanager(self, *args, **kwargs):
+        if requests.__version__ >= '2.4.1':
+            kwargs.setdefault('socket_options', [
+                (socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),
+                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1),
+            ])
+        super(TCPKeepAliveAdapter, self).init_poolmanager(*args, **kwargs)
 
 
 class _ClientConnectionPool(object):
@@ -57,140 +67,41 @@ class _ClientConnectionPool(object):
         Store and reuse HTTP adapters per Service URL.
         """
         if url not in self._adapters:
-            self._adapters[url] = adapters.HTTPAdapter()
+            self._adapters[url] = TCPKeepAliveAdapter()
 
         return self._adapters[url]
 
 
-class CompletionCache(object):
-    """The completion cache is how we support tab-completion with novaclient.
+class SessionClient(adapter.LegacyJsonAdapter):
 
-    The `Manager` writes object IDs and Human-IDs to the completion-cache on
-    object-show, object-list, and object-create calls.
-
-    The `nova.bash_completion` script then uses these files to provide the
-    actual tab-completion.
-
-    The cache directory layout is:
-
-        ~/.novaclient/
-            <hash-of-endpoint-and-username>/
-                <resource>-id-cache
-                <resource>-human-id-cache
-    """
-    def __init__(self, username, auth_url, attributes=('id', 'human_id')):
-        self.directory = self._make_directory_name(username, auth_url)
-        self.attributes = attributes
-
-    def _make_directory_name(self, username, auth_url):
-        """Creates a unique directory name based on the auth_url and username
-        of the current user.
-        """
-        uniqifier = hashlib.md5(username.encode('utf-8') +
-                                auth_url.encode('utf-8')).hexdigest()
-        base_dir = utils.env('NOVACLIENT_UUID_CACHE_DIR',
-                             default="~/.novaclient")
-        return os.path.expanduser(os.path.join(base_dir, uniqifier))
-
-    def _prepare_directory(self):
-        try:
-            os.makedirs(self.directory, 0o755)
-        except OSError:
-            # NOTE(kiall): This is typically either permission denied while
-            #              attempting to create the directory, or the
-            #              directory already exists. Either way, don't
-            #              fail.
-            pass
-
-    def clear_class(self, obj_class):
-        self._prepare_directory()
-
-        resource = obj_class.__name__.lower()
-        resource_glob = os.path.join(self.directory, "%s-*-cache" % resource)
-
-        for filename in glob.iglob(resource_glob):
-            try:
-                os.unlink(filename)
-            except OSError as e:
-                if e.errno != errno.ENOENT:
-                    raise
-
-    def _write_attribute(self, resource, attribute, value):
-        self._prepare_directory()
-
-        filename = "%s-%s-cache" % (resource, attribute.replace('_', '-'))
-        path = os.path.join(self.directory, filename)
-
-        with open(path, 'a') as f:
-            f.write("%s\n" % value)
-
-    def write_object(self, obj):
-        resource = obj.__class__.__name__.lower()
-
-        for attribute in self.attributes:
-            value = getattr(obj, attribute, None)
-            if value:
-                self._write_attribute(resource, attribute, value)
-
-
-class SessionClient(object):
-
-    def __init__(self, session, auth, interface, service_type, region_name):
-        self.session = session
-        self.auth = auth
-
-        self.interface = interface
-        self.service_type = service_type
-        self.region_name = region_name
+    def __init__(self, *args, **kwargs):
+        self.times = []
+        super(SessionClient, self).__init__(*args, **kwargs)
 
     def request(self, url, method, **kwargs):
-        kwargs.setdefault('user_agent', 'python-novaclient')
-        kwargs.setdefault('auth', self.auth)
-        kwargs.setdefault('authenticated', False)
+        # NOTE(jamielennox): The standard call raises errors from
+        # keystoneclient, where we need to raise the novaclient errors.
+        raise_exc = kwargs.pop('raise_exc', True)
+        start_time = time.time()
+        resp, body = super(SessionClient, self).request(url,
+                                                        method,
+                                                        raise_exc=False,
+                                                        **kwargs)
 
-        try:
-            kwargs['json'] = kwargs.pop('body')
-        except KeyError:
-            pass
+        end_time = time.time()
+        self.times.append(('%s %s' % (method, url),
+                          start_time, end_time))
 
-        headers = kwargs.setdefault('headers', {})
-        headers.setdefault('Accept', 'application/json')
-
-        endpoint_filter = kwargs.setdefault('endpoint_filter', {})
-        endpoint_filter.setdefault('interface', self.interface)
-        endpoint_filter.setdefault('service_type', self.service_type)
-        endpoint_filter.setdefault('region_name', self.region_name)
-
-        resp = self.session.request(url, method, raise_exc=False, **kwargs)
-
-        body = None
-        if resp.text:
-            try:
-                body = resp.json()
-            except ValueError:
-                pass
-
-        if resp.status_code >= 400:
+        if raise_exc and resp.status_code >= 400:
             raise exceptions.from_response(resp, body, url, method)
 
         return resp, body
 
-    def _cs_request(self, url, method, **kwargs):
-        # this function is mostly redundant but makes compatibility easier
-        kwargs.setdefault('authenticated', True)
-        return self.request(url, method, **kwargs)
+    def get_timings(self):
+        return self.times
 
-    def get(self, url, **kwargs):
-        return self._cs_request(url, 'GET', **kwargs)
-
-    def post(self, url, **kwargs):
-        return self._cs_request(url, 'POST', **kwargs)
-
-    def put(self, url, **kwargs):
-        return self._cs_request(url, 'PUT', **kwargs)
-
-    def delete(self, url, **kwargs):
-        return self._cs_request(url, 'DELETE', **kwargs)
+    def reset_timings(self):
+        self.times = []
 
 
 def _original_only(f):
@@ -234,7 +145,7 @@ class HTTPClient(object):
         self.tenant_id = tenant_id
 
         self._connection_pool = (_ClientConnectionPool()
-                                if connection_pool else None)
+                                 if connection_pool else None)
 
         # This will be called by #_get_password if self.password is None.
         # EG if a password can only be obtained by prompting the user, but a
@@ -301,6 +212,11 @@ class HTTPClient(object):
                 # otherwise we will get all the requests logging messages
                 rql.setLevel(logging.WARNING)
 
+        # NOTE(melwitt): Service catalog is only set if bypass_url isn't
+        #                used. Otherwise, we can cache using services_url.
+        self.service_catalog = None
+        self.services_url = {}
+
     def use_token_cache(self, use_it):
         self.os_cache = use_it
 
@@ -318,21 +234,47 @@ class HTTPClient(object):
     def reset_timings(self):
         self.times = []
 
-    def safe_header(self, name, value):
-        if name in SENSITIVE_HEADERS:
-            # because in python3 byte string handling is ... ug
-            v = value.encode('utf-8')
-            h = hashlib.sha1(v)
-            d = h.hexdigest()
-            return name, "{SHA1}%s" % d
-        else:
-            return name, value
+    def _redact(self, target, path, text=None):
+        """Replace the value of a key in `target`.
+
+        The key can be at the top level by specifying a list with a single
+        key as the path. Nested dictionaries are also supported by passing a
+        list of keys to be navigated to find the one that should be replaced.
+        In this case the last one is the one that will be replaced.
+
+        :param dict target: the dictionary that may have a key to be redacted;
+                            modified in place
+        :param list path: a list representing the nested structure in `target`
+                          that should be redacted; modified in place
+        :param string text: optional text to use as a replacement for the
+                            redacted key. if text is not specified, the
+                            default text will be sha1 hash of the value being
+                            redacted
+        """
+
+        key = path.pop()
+
+        # move to the most nested dict
+        for p in path:
+            try:
+                target = target[p]
+            except KeyError:
+                return
+
+        if key in target:
+            if text:
+                target[key] = text
+            else:
+                # because in python3 byte string handling is ... ug
+                value = target[key].encode('utf-8')
+                sha1sum = hashlib.sha1(value)
+                target[key] = "{SHA1}%s" % sha1sum.hexdigest()
 
     def http_log_req(self, method, url, kwargs):
         if not self.http_log_debug:
             return
 
-        string_parts = ['curl -i']
+        string_parts = ['curl -g -i']
 
         if not kwargs.get('verify', True):
             string_parts.append(' --insecure')
@@ -340,24 +282,38 @@ class HTTPClient(object):
         string_parts.append(" '%s'" % url)
         string_parts.append(' -X %s' % method)
 
+        headers = copy.deepcopy(kwargs['headers'])
+        self._redact(headers, ['X-Auth-Token'])
         # because dict ordering changes from 2 to 3
-        keys = sorted(kwargs['headers'].keys())
+        keys = sorted(headers.keys())
         for name in keys:
-            value = kwargs['headers'][name]
-            header = ' -H "%s: %s"' % self.safe_header(name, value)
+            value = headers[name]
+            header = ' -H "%s: %s"' % (name, value)
             string_parts.append(header)
 
         if 'data' in kwargs:
-            string_parts.append(" -d '%s'" % (kwargs['data']))
+            data = json.loads(kwargs['data'])
+            self._redact(data, ['auth', 'passwordCredentials', 'password'])
+            string_parts.append(" -d '%s'" % json.dumps(data))
         self._logger.debug("REQ: %s" % "".join(string_parts))
 
     def http_log_resp(self, resp):
         if not self.http_log_debug:
             return
+
+        if resp.text and resp.status_code != 400:
+            try:
+                body = json.loads(resp.text)
+                self._redact(body, ['access', 'token', 'id'])
+            except ValueError:
+                body = None
+        else:
+            body = None
+
         self._logger.debug("RESP: [%(status)s] %(headers)s\nRESP BODY: "
                            "%(text)s\n", {'status': resp.status_code,
                                           'headers': resp.headers,
-                                          'text': resp.text})
+                                          'text': json.dumps(body)})
 
     def open_session(self):
         if not self._connection_pool:
@@ -379,10 +335,10 @@ class HTTPClient(object):
                     self._session.close()
                 self._current_url = service_url
                 self._logger.debug(
-                        "New session created for: (%s)" % service_url)
+                    "New session created for: (%s)" % service_url)
                 self._session = requests.Session()
                 self._session.mount(service_url,
-                        self._connection_pool.get(service_url))
+                                    self._connection_pool.get(service_url))
             return self._session
         elif self._session:
             return self._session
@@ -422,7 +378,7 @@ class HTTPClient(object):
             # or 'actively refused' in the body, so that's what we'll do.
             if resp.status_code == 400:
                 if ('Connection refused' in resp.text or
-                    'actively refused' in resp.text):
+                        'actively refused' in resp.text):
                     raise exceptions.ConnectionRefused(resp.text)
             try:
                 body = json.loads(resp.text)
@@ -446,6 +402,20 @@ class HTTPClient(object):
     def _cs_request(self, url, method, **kwargs):
         if not self.management_url:
             self.authenticate()
+        if url is None:
+            # To get API version information, it is necessary to GET
+            # a nova endpoint directly without "v2/<tenant-id>".
+            magic_tuple = parse.urlsplit(self.management_url)
+            scheme, netloc, path, query, frag = magic_tuple
+            path = re.sub(r'v[1-9]/[a-z0-9]+$', '', path)
+            url = parse.urlunsplit((scheme, netloc, path, None, None))
+        else:
+            if self.service_catalog:
+                url = self.get_service_url(self.service_type) + url
+            else:
+                # NOTE(melwitt): The service catalog is not available
+                #                when bypass_url is used.
+                url = self.management_url + url
 
         # Perform the request once. If we get a 401 back then it
         # might be because the auth token expired, so try to
@@ -455,8 +425,7 @@ class HTTPClient(object):
             if self.projectid:
                 kwargs['headers']['X-Auth-Project-Id'] = self.projectid
 
-            resp, body = self._time_request(self.management_url + url, method,
-                                            **kwargs)
+            resp, body = self._time_request(url, method, **kwargs)
             return resp, body
         except exceptions.Unauthorized as e:
             try:
@@ -467,8 +436,7 @@ class HTTPClient(object):
                 self.keyring_saved = False
                 self.authenticate()
                 kwargs['headers']['X-Auth-Token'] = self.auth_token
-                resp, body = self._time_request(self.management_url + url,
-                                                method, **kwargs)
+                resp, body = self._time_request(url, method, **kwargs)
                 return resp, body
             except exceptions.Unauthorized:
                 raise e
@@ -490,6 +458,19 @@ class HTTPClient(object):
     def delete(self, url, **kwargs):
         return self._cs_request(url, 'DELETE', **kwargs)
 
+    def get_service_url(self, service_type):
+        if service_type not in self.services_url:
+            url = self.service_catalog.url_for(
+                attr='region',
+                filter_value=self.region_name,
+                endpoint_type=self.endpoint_type,
+                service_type=service_type,
+                service_name=self.service_name,
+                volume_service_name=self.volume_service_name,)
+            url = url.rstrip('/')
+            self.services_url[service_type] = url
+        return self.services_url[service_type]
+
     def _extract_service_catalog(self, url, resp, body, extract_token=True):
         """See what the auth service told us and process the response.
         We may get redirected to another site, fail or actually get
@@ -506,14 +487,7 @@ class HTTPClient(object):
                     self.auth_token = self.service_catalog.get_token()
                     self.tenant_id = self.service_catalog.get_tenant_id()
 
-                management_url = self.service_catalog.url_for(
-                    attr='region',
-                    filter_value=self.region_name,
-                    endpoint_type=self.endpoint_type,
-                    service_type=self.service_type,
-                    service_name=self.service_name,
-                    volume_service_name=self.volume_service_name,)
-                self.management_url = management_url.rstrip('/')
+                self.management_url = self.get_service_url(self.service_type)
                 return None
             except exceptions.AmbiguousEndpoints:
                 print(_("Found more than one valid endpoint. Use a more "
@@ -553,7 +527,11 @@ class HTTPClient(object):
                                              extract_token=False)
 
     def authenticate(self):
-        magic_tuple = network_utils.urlsplit(self.auth_url)
+        if not self.auth_url:
+            msg = _("Authentication requires 'auth_url', which should be "
+                    "specified in '%s'") % self.__class__.__name__
+            raise exceptions.AuthorizationFailure(msg)
+        magic_tuple = netutils.urlsplit(self.auth_url)
         scheme, netloc, path, query, frag = magic_tuple
         port = magic_tuple.port
         if port is None:
@@ -698,13 +676,17 @@ def _construct_http_client(username=None, password=None, project_id=None,
                            auth_system='keystone', auth_plugin=None,
                            auth_token=None, cacert=None, tenant_id=None,
                            user_id=None, connection_pool=False, session=None,
-                           auth=None):
+                           auth=None, user_agent='python-novaclient',
+                           interface=None, **kwargs):
     if session:
         return SessionClient(session=session,
                              auth=auth,
-                             interface=endpoint_type,
+                             interface=interface or endpoint_type,
                              service_type=service_type,
-                             region_name=region_name)
+                             region_name=region_name,
+                             service_name=service_name,
+                             user_agent=user_agent,
+                             **kwargs)
     else:
         # FIXME(jamielennox): username and password are now optional. Need
         # to test that they were provided in this mode.
@@ -736,9 +718,9 @@ def _construct_http_client(username=None, password=None, project_id=None,
 
 def get_client_class(version):
     version_map = {
-        '1.1': 'novaclient.v1_1.client.Client',
-        '2': 'novaclient.v1_1.client.Client',
-        '3': 'novaclient.v3.client.Client',
+        '1.1': 'novaclient.v2.client.Client',
+        '2': 'novaclient.v2.client.Client',
+        '3': 'novaclient.v2.client.Client',
     }
     try:
         client_path = version_map[str(version)]
@@ -748,7 +730,7 @@ def get_client_class(version):
                                'keys': ', '.join(version_map.keys())}
         raise exceptions.UnsupportedVersion(msg)
 
-    return utils.import_class(client_path)
+    return importutils.import_class(client_path)
 
 
 def Client(version, *args, **kwargs):

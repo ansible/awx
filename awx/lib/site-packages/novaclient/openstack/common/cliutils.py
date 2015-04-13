@@ -24,14 +24,21 @@ import os
 import sys
 import textwrap
 
+from oslo.utils import encodeutils
+from oslo.utils import strutils
 import prettytable
 import six
 from six import moves
 
-from novaclient.openstack.common.apiclient import exceptions
-from novaclient.openstack.common.gettextutils import _
-from novaclient.openstack.common import strutils
-from novaclient.openstack.common import uuidutils
+from novaclient.openstack.common._i18n import _
+
+
+class MissingArgs(Exception):
+    """Supplied arguments are not sufficient for calling a function."""
+    def __init__(self, missing):
+        self.missing = missing
+        msg = _("Missing arguments: %s") % ", ".join(missing)
+        super(MissingArgs, self).__init__(msg)
 
 
 def validate_args(fn, *args, **kwargs):
@@ -56,7 +63,7 @@ def validate_args(fn, *args, **kwargs):
     required_args = argspec.args[:len(argspec.args) - num_defaults]
 
     def isbound(method):
-        return getattr(method, 'im_self', None) is not None
+        return getattr(method, '__self__', None) is not None
 
     if isbound(fn):
         required_args.pop(0)
@@ -64,7 +71,7 @@ def validate_args(fn, *args, **kwargs):
     missing = [arg for arg in required_args if arg not in kwargs]
     missing = missing[len(args):]
     if missing:
-        raise exceptions.MissingArgs(missing)
+        raise MissingArgs(missing)
 
 
 def arg(*args, **kwargs):
@@ -132,7 +139,7 @@ def isunauthenticated(func):
 
 
 def print_list(objs, fields, formatters=None, sortby_index=0,
-               mixed_case_fields=None):
+               mixed_case_fields=None, field_labels=None):
     """Print a list or objects as a table, one row per object.
 
     :param objs: iterable of :class:`Resource`
@@ -141,14 +148,22 @@ def print_list(objs, fields, formatters=None, sortby_index=0,
     :param sortby_index: index of the field for sorting table rows
     :param mixed_case_fields: fields corresponding to object attributes that
         have mixed case names (e.g., 'serverId')
+    :param field_labels: Labels to use in the heading of the table, default to
+        fields.
     """
     formatters = formatters or {}
     mixed_case_fields = mixed_case_fields or []
+    field_labels = field_labels or fields
+    if len(field_labels) != len(fields):
+        raise ValueError(_("Field labels list %(labels)s has different number "
+                           "of elements than fields list %(fields)s"),
+                         {'labels': field_labels, 'fields': fields})
+
     if sortby_index is None:
         kwargs = {}
     else:
-        kwargs = {'sortby': fields[sortby_index]}
-    pt = prettytable.PrettyTable(fields, caching=False)
+        kwargs = {'sortby': field_labels[sortby_index]}
+    pt = prettytable.PrettyTable(field_labels)
     pt.align = 'l'
 
     for o in objs:
@@ -165,7 +180,7 @@ def print_list(objs, fields, formatters=None, sortby_index=0,
                 row.append(data)
         pt.add_row(row)
 
-    print(strutils.safe_encode(pt.get_string(**kwargs)))
+    print(encodeutils.safe_encode(pt.get_string(**kwargs)))
 
 
 def print_dict(dct, dict_property="Property", wrap=0):
@@ -175,7 +190,7 @@ def print_dict(dct, dict_property="Property", wrap=0):
     :param dict_property: name of the first column
     :param wrap: wrapping for the second column
     """
-    pt = prettytable.PrettyTable([dict_property, 'Value'], caching=False)
+    pt = prettytable.PrettyTable([dict_property, 'Value'])
     pt.align = 'l'
     for k, v in six.iteritems(dct):
         # convert dict to str to check length
@@ -193,7 +208,7 @@ def print_dict(dct, dict_property="Property", wrap=0):
                 col1 = ''
         else:
             pt.add_row([k, v])
-    print(strutils.safe_encode(pt.get_string()))
+    print(encodeutils.safe_encode(pt.get_string()))
 
 
 def get_password(max_password_prompts=3):
@@ -217,76 +232,16 @@ def get_password(max_password_prompts=3):
     return pw
 
 
-def find_resource(manager, name_or_id, **find_args):
-    """Look for resource in a given manager.
-
-    Used as a helper for the _find_* methods.
-    Example:
-
-        def _find_hypervisor(cs, hypervisor):
-            #Get a hypervisor by name or ID.
-            return cliutils.find_resource(cs.hypervisors, hypervisor)
-    """
-    # first try to get entity as integer id
-    try:
-        return manager.get(int(name_or_id))
-    except (TypeError, ValueError, exceptions.NotFound):
-        pass
-
-    # now try to get entity as uuid
-    try:
-        tmp_id = strutils.safe_encode(name_or_id)
-
-        if uuidutils.is_uuid_like(tmp_id):
-            return manager.get(tmp_id)
-    except (TypeError, ValueError, exceptions.NotFound):
-        pass
-
-    # for str id which is not uuid
-    if getattr(manager, 'is_alphanum_id_allowed', False):
-        try:
-            return manager.get(name_or_id)
-        except exceptions.NotFound:
-            pass
-
-    try:
-        try:
-            return manager.find(human_id=name_or_id, **find_args)
-        except exceptions.NotFound:
-            pass
-
-        # finally try to find entity by name
-        try:
-            resource = getattr(manager, 'resource_class', None)
-            name_attr = resource.NAME_ATTR if resource else 'name'
-            kwargs = {name_attr: name_or_id}
-            kwargs.update(find_args)
-            return manager.find(**kwargs)
-        except exceptions.NotFound:
-            msg = _("No %(name)s with a name or "
-                    "ID of '%(name_or_id)s' exists.") % \
-                {
-                    "name": manager.resource_class.__name__.lower(),
-                    "name_or_id": name_or_id
-                }
-            raise exceptions.CommandError(msg)
-    except exceptions.NoUniqueMatch:
-        msg = _("Multiple %(name)s matches found for "
-                "'%(name_or_id)s', use an ID to be more specific.") % \
-            {
-                "name": manager.resource_class.__name__.lower(),
-                "name_or_id": name_or_id
-            }
-        raise exceptions.CommandError(msg)
-
-
 def service_type(stype):
     """Adds 'service_type' attribute to decorated function.
 
     Usage:
-        @service_type('volume')
-        def mymethod(f):
-            ...
+
+    .. code-block:: python
+
+       @service_type('volume')
+       def mymethod(f):
+       ...
     """
     def inner(f):
         f.service_type = stype

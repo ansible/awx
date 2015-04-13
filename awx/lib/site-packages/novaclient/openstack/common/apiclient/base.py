@@ -26,12 +26,12 @@ Base utilities to build API operation managers and objects on top of.
 import abc
 import copy
 
+from oslo.utils import strutils
 import six
 from six.moves.urllib import parse
 
+from novaclient.openstack.common._i18n import _
 from novaclient.openstack.common.apiclient import exceptions
-from novaclient.openstack.common.gettextutils import _
-from novaclient.openstack.common import strutils
 
 
 def getid(obj):
@@ -99,12 +99,13 @@ class BaseManager(HookableMixin):
         super(BaseManager, self).__init__()
         self.client = client
 
-    def _list(self, url, response_key, obj_class=None, json=None):
+    def _list(self, url, response_key=None, obj_class=None, json=None):
         """List the collection.
 
         :param url: a partial URL, e.g., '/servers'
         :param response_key: the key to be looked up in response dictionary,
-            e.g., 'servers'
+            e.g., 'servers'. If response_key is None - all response body
+            will be used.
         :param obj_class: class for constructing the returned objects
             (self.resource_class will be used by default)
         :param json: data that will be encoded as JSON and passed in POST
@@ -118,7 +119,7 @@ class BaseManager(HookableMixin):
         if obj_class is None:
             obj_class = self.resource_class
 
-        data = body[response_key]
+        data = body[response_key] if response_key is not None else body
         # NOTE(ja): keystone returns values as list as {'values': [ ... ]}
         #           unlike other services which just return the list...
         try:
@@ -128,15 +129,17 @@ class BaseManager(HookableMixin):
 
         return [obj_class(self, res, loaded=True) for res in data if res]
 
-    def _get(self, url, response_key):
+    def _get(self, url, response_key=None):
         """Get an object from collection.
 
         :param url: a partial URL, e.g., '/servers'
         :param response_key: the key to be looked up in response dictionary,
-            e.g., 'server'
+            e.g., 'server'. If response_key is None - all response body
+            will be used.
         """
         body = self.client.get(url).json()
-        return self.resource_class(self, body[response_key], loaded=True)
+        data = body[response_key] if response_key is not None else body
+        return self.resource_class(self, data, loaded=True)
 
     def _head(self, url):
         """Retrieve request headers for an object.
@@ -146,21 +149,23 @@ class BaseManager(HookableMixin):
         resp = self.client.head(url)
         return resp.status_code == 204
 
-    def _post(self, url, json, response_key, return_raw=False):
+    def _post(self, url, json, response_key=None, return_raw=False):
         """Create an object.
 
         :param url: a partial URL, e.g., '/servers'
         :param json: data that will be encoded as JSON and passed in POST
             request (GET will be sent by default)
         :param response_key: the key to be looked up in response dictionary,
-            e.g., 'servers'
+            e.g., 'server'. If response_key is None - all response body
+            will be used.
         :param return_raw: flag to force returning raw JSON instead of
             Python object of self.resource_class
         """
         body = self.client.post(url, json=json).json()
+        data = body[response_key] if response_key is not None else body
         if return_raw:
-            return body[response_key]
-        return self.resource_class(self, body[response_key])
+            return data
+        return self.resource_class(self, data)
 
     def _put(self, url, json=None, response_key=None):
         """Update an object with PUT method.
@@ -169,7 +174,8 @@ class BaseManager(HookableMixin):
         :param json: data that will be encoded as JSON and passed in POST
             request (GET will be sent by default)
         :param response_key: the key to be looked up in response dictionary,
-            e.g., 'servers'
+            e.g., 'servers'. If response_key is None - all response body
+            will be used.
         """
         resp = self.client.put(url, json=json)
         # PUT requests may not return a body
@@ -187,7 +193,8 @@ class BaseManager(HookableMixin):
         :param json: data that will be encoded as JSON and passed in POST
             request (GET will be sent by default)
         :param response_key: the key to be looked up in response dictionary,
-            e.g., 'servers'
+            e.g., 'servers'. If response_key is None - all response body
+            will be used.
         """
         body = self.client.patch(url, json=json).json()
         if response_key is not None:
@@ -465,7 +472,7 @@ class Resource(object):
 
     def __getattr__(self, k):
         if k not in self.__dict__:
-            #NOTE(bcwaldon): disallow lazy-loading if already loaded once
+            # NOTE(bcwaldon): disallow lazy-loading if already loaded once
             if not self.is_loaded():
                 self.get()
                 return self.__getattr__(k)

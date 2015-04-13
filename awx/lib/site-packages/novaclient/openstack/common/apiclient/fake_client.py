@@ -33,7 +33,9 @@ from six.moves.urllib import parse
 from novaclient.openstack.common.apiclient import client
 
 
-def assert_has_keys(dct, required=[], optional=[]):
+def assert_has_keys(dct, required=None, optional=None):
+    required = required or []
+    optional = optional or []
     for k in required:
         try:
             assert k in dct
@@ -79,7 +81,7 @@ class FakeHTTPClient(client.HTTPClient):
     def __init__(self, *args, **kwargs):
         self.callstack = []
         self.fixtures = kwargs.pop("fixtures", None) or {}
-        if not args and not "auth_plugin" in kwargs:
+        if not args and "auth_plugin" not in kwargs:
             args = (None, )
         super(FakeHTTPClient, self).__init__(*args, **kwargs)
 
