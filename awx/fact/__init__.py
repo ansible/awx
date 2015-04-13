@@ -10,11 +10,13 @@ from mongoengine import connect
 from mongoengine.connection import get_db, ConnectionError
 from .utils.dbtransform import register_key_transform
 
-logger = logging.getLogger('fact.__init__')
+#logger = logging.getLogger('fact.__init__')
 
 # Connect to Mongo
 try:
     connect(settings.MONGO_DB)
     register_key_transform(get_db())
 except ConnectionError:
-    logger.warn('Failed to establish connect to MongDB "%s"' % (settings.MONGO_DB))
+    pass
+    # TODO: Would be nice to log this
+    #logger.warn('Failed to establish connect to MongDB "%s"' % (settings.MONGO_DB))
