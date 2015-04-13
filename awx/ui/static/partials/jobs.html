@@ -12,55 +12,32 @@
                 </div>
             </div>
         </div>
+        
+        <div >
+            <ul id="jobs_tabs" class="nav nav-tabs">
+                <li class="active"><a id="active_jobs_link" ng-click="toggleTab($event, 'active_jobs_link', 'jobs_tabs')" href="#active-jobs-tab" data-toggle="tab">Jobs</a></li>
+                <li><a id="scheduled_jobs_link" ng-click="toggleTab($event, 'scheduled_jobs_link', 'job_status_tabs')" href="#scheduled-jobs-tab" data-toggle= "tab">Schedule</a></li>
+            </ul>
+            <div  id="jobs-tab-content" class= "tab-content">
+                <div class="tab-pane active" id= "active-jobs-tab">
+                    <div class= "row search-row">
+                        <div class="col-lg-6 col-md-6 " id="active-jobs-search-container">
+                        </div>
+                    </div>
+                    <div class= "job-list" id="active-jobs-container">
+                        <div id="active-jobs" class= "job-list-target">
+                        </div>
+                    </div>
+                </div>
+                <div class= "tab-pane" id="scheduled-jobs-tab">
+                    <div class= "row search-row">
+                        <div class="col-lg-6 col-md-6 " id="scheduled-jobs-tab-search-container">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div class="row">
-            <div class="col-lg-6 left-side">
-                <div class="jobs-list-container completed">
-                    <div class="row search-row">
-                        <div class="col-md-6"><div class="title">Completed</div></div>
-                        <div class="col-md-6" id="completed-jobs-search-container"></div>
-                    </div>
-                    <div class="job-list" id="completed-jobs-container">
-                        <div id="completed-jobs" class="job-list-target"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 right-side">
-                <div class="jobs-list-container">
-                    <div class="row search-row">
-                        <div class="col-md-6"><div class="title">Active</div></div>
-                        <div class="col-md-6" id="active-jobs-search-container"></div>
-                    </div>
-                    <div class="job-list" id="active-jobs-container">
-                        <div id="active-jobs" class="job-list-target"></div>
-                    </div>
-                </div>
-            </div>
-        </div><!-- row -->
-        <div class="row bottom-row">
-            <div class="col-lg-6 left-side">
-                <div class="jobs-list-container">
-                    <div class="row search-row">
-                        <div class="col-md-6"><div class="title">Queued</div></div>
-                        <div class="col-md-6" id="queued-jobs-search-container"></div>
-                    </div>
-                    <div class="job-list" id="queued-jobs-container">
-                        <div id="queued-jobs" class="job-list-target"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 right-side">
-                <div class="jobs-list-container">
-                    <div class="row search-row">
-                        <div class="col-md-6"><div class="title">Scheduled</div></div>
-                        <div class="col-md-6" id="scheduled-jobs-search-container"></div>
-                    </div>
-                    <div class="job-list" id="scheduled-jobs-container">
-                        <div id="scheduled-jobs" class="job-list-target"></div>
-                    </div>
-                </div>
-            </div>
-        </div><!-- row -->
 
         <div id="schedule-dialog-target"></div>
         <div ng-include="'/static/partials/logviewer.html'"></div>

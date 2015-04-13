@@ -1,6 +1,7 @@
 import Admins from "tower/lists/Admins";
 import CloudCredentials from "tower/lists/CloudCredentials";
 import CompletedJobs from "tower/lists/CompletedJobs";
+import AllJobs from "tower/lists/AllJobs";
 import ConfigureTowerJobs from "tower/lists/ConfigureTowerJobs";
 import Credentials from "tower/lists/Credentials";
 import CustomInventory from "tower/lists/CustomInventory";
@@ -20,8 +21,6 @@ import Permissions from "tower/lists/Permissions";
 import PortalJobTemplates from "tower/lists/PortalJobTemplates";
 import PortalJobs from "tower/lists/PortalJobs";
 import Projects from "tower/lists/Projects";
-import QueuedJobs from "tower/lists/QueuedJobs";
-import RunningJobs from "tower/lists/RunningJobs";
 import ScanJobsList from "tower/lists/ScanJobs";
 import ScheduledJobs from "tower/lists/ScheduledJobs";
 import Schedules from "tower/lists/Schedules";
@@ -33,6 +32,7 @@ export
     {   Admins,
         CloudCredentials,
         CompletedJobs,
+        AllJobs,
         ConfigureTowerJobs,
         Credentials,
         CustomInventory,
@@ -52,8 +52,6 @@ export
         PortalJobTemplates,
         PortalJobs,
         Projects,
-        QueuedJobs,
-        RunningJobs,
         ScanJobsList,
         ScheduledJobs,
         Schedules,

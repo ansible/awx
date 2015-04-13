@@ -28,8 +28,8 @@ export default
         function($location, Find, DeleteJob, RelaunchJob, LogViewer, $window) {
             return function(params) {
                 var scope = params.scope,
-                    iterator = (params.iterator) ? params.iterator : scope.iterator,
-                    base = $location.path().replace(/^\//, '').split('/')[0];
+                    iterator = (params.iterator) ? params.iterator : scope.iterator;
+                    //base = $location.path().replace(/^\//, '').split('/')[0];
 
                 scope.deleteJob = function(id) {
                     DeleteJob({ scope: scope, id: id });
@@ -55,6 +55,9 @@ export default
                     else if (scope.jobs) {
                         list = scope.jobs;
                     }
+                    else if(scope.all_jobs){
+                        list = scope.all_jobs;
+                    }
                     job = Find({ list: list, key: 'id', val: id });
                     if (job.type === 'inventory_update') {
                         typeId = job.inventory_source;
@@ -69,9 +72,9 @@ export default
                 };
 
                 scope.refreshJobs = function() {
-                    if (base !== 'jobs') {
+                    // if (base !== 'jobs') {
                         scope.search(iterator);
-                    }
+                    // }
 
                 };
 
@@ -88,6 +91,9 @@ export default
                     }
                     else if (scope.jobs) {
                         list = scope.jobs;
+                    }
+                    else if(scope.all_jobs){
+                        list = scope.all_jobs;
                     }
                     else if(scope.portal_jobs){
                         list=scope.portal_jobs;
@@ -455,6 +461,9 @@ export default
                 }
                 else if (scope.queued_jobs) {
                     jobs = scope.queued_jobs;
+                }
+                else if (scope.all_jobs) {
+                    jobs = scope.all_jobs;
                 }
                 else if (scope.jobs) {
                     jobs = scope.jobs;
