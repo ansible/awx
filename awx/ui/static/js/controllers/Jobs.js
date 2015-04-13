@@ -156,39 +156,27 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             available_height,
             search_row, page_row, height, header, row_height;
         $log.debug('docw: ' + docw);
-        if (docw > 1200) {
-            // customize the container height and # of rows based on available viewport height
-            available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - 80;
-            if (docw < 1350) {
-                available_height = (available_height < 800) ? 800 : available_height;
-            } else {
-                available_height = (available_height < 550) ? 550 : available_height;
-            }
-            $log.debug('available_height: ' + available_height);
-            $('.jobs-list-container').each(function() {
-                $(this).height(Math.floor(available_height));
-            });
-            search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
-            page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
-            header = Math.max($('#active_jobs_table thead').height(), 24);
-            height = Math.floor(available_height ) - header - page_row - search_row - 30;
-            // row_height = (docw < 1350) ? 47 : 44;
-            if(docw < 1424){
-                row_height = 55;
-            }
-            else {
-                row_height = 44;
-            }
-            max_rows = Math.floor(height / row_height);
-            max_rows = (max_rows < 5) ? 5 : max_rows;
+
+        // customize the container height and # of rows based on available viewport height
+        available_height = $(window).height() - $('#main-menu-container .navbar').outerHeight() - 80;
+        if (docw < 1350) {
+            available_height = (available_height < 800) ? 800 : available_height;
+        } else {
+            available_height = (available_height < 550) ? 550 : available_height;
         }
-        else {
-            // when width < 1240px || height < 800px put things back to their default state
-            $('.jobs-list-container').each(function() {
-                $(this).css({ 'height': 'auto' });
-            });
-            max_rows = 5;
-        }
+        $log.debug('available_height: ' + available_height);
+        $('.jobs-list-container').each(function() {
+            $(this).height(Math.floor(available_height));
+        });
+        search_row = Math.max($('.search-row:eq(0)').outerHeight(), 50);
+        page_row = Math.max($('.page-row:eq(0)').outerHeight(), 33);
+        header = Math.max($('#active_jobs_table thead').height(), 24);
+        height = Math.floor(available_height ) - header - page_row - search_row - 30;
+        row_height = 44;
+
+        max_rows = Math.floor(height / row_height);
+        max_rows = (max_rows < 5) ? 5 : max_rows;
+
         $log.debug('max_rows: ' + max_rows);
     }
 

@@ -21,8 +21,6 @@ import Permissions from "tower/lists/Permissions";
 import PortalJobTemplates from "tower/lists/PortalJobTemplates";
 import PortalJobs from "tower/lists/PortalJobs";
 import Projects from "tower/lists/Projects";
-import QueuedJobs from "tower/lists/QueuedJobs";
-import RunningJobs from "tower/lists/RunningJobs";
 import ScanJobsList from "tower/lists/ScanJobs";
 import ScheduledJobs from "tower/lists/ScheduledJobs";
 import Schedules from "tower/lists/Schedules";
@@ -54,8 +52,6 @@ export
         PortalJobTemplates,
         PortalJobs,
         Projects,
-        QueuedJobs,
-        RunningJobs,
         ScanJobsList,
         ScheduledJobs,
         Schedules,
