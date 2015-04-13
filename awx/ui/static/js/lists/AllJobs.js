@@ -96,11 +96,19 @@ export default
                 dataPlacement: 'top',
                 ngHide: "all_job.type == 'system_job' "
             },
+            cancel: {
+                mode: 'all',
+                ngClick: 'deleteJob(all_job.id)',
+                awToolTip: 'Cancel the job',
+                dataPlacement: 'top',
+                ngShow: "all_job.status === 'running'"
+            },
             "delete": {
                 mode: 'all',
                 ngClick: 'deleteJob(all_job.id)',
                 awToolTip: 'Delete the job',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: "all_job.status !== 'running'"
             },
             stdout: {
                 mode: 'all',

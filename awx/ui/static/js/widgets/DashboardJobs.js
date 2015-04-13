@@ -76,7 +76,7 @@ angular.module('DashboardJobsWidget', ['RestServices', 'Utilities'])
                 scope: jobs_scope,
                 list: JobsList,
                 id: 'active-jobs',
-                url: GetBasePath('unified_jobs') + '?status__in=running,completed,failed,successful,error,canceled',
+                url: GetBasePath('unified_jobs') + '?status__in=pending,running,completed,failed,successful,error,canceled',
                 pageSize: max_rows,
                 spinner: false
             });

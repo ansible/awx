@@ -112,9 +112,6 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             jobs_scope.search('queued_job');
             jobs_scope.search('running_job');
             jobs_scope.search('completed_job');
-            // queued_scope.search('queued_job');
-            // running_scope.search('running_job');
-            // completed_scope.search('completed_job');
             scheduled_scope.search('schedule');
         };
 

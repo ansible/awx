@@ -562,8 +562,8 @@ export default
          *
          */
         .factory('LoadSchedulesScope', ['$compile', '$location', '$routeParams','SearchInit', 'PaginateInit', 'generateList', 'SchedulesControllerInit',
-            'SchedulesListInit', 'SearchWidget',
-            function($compile, $location, $routeParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit, SearchWidget) {
+            'SchedulesListInit',
+            function($compile, $location, $routeParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit) {
             return function(params) {
                 var parent_scope = params.parent_scope,
                     scope = params.scope,
@@ -571,37 +571,17 @@ export default
                     id = params.id,
                     url = params.url,
                     pageSize = params.pageSize || 5,
-                    spinner = (params.spinner === undefined) ? true : params.spinner,
-                    base = $location.path().replace(/^\//, '').split('/')[0],
-                    e, html;
+                    spinner = (params.spinner === undefined) ? true : params.spinner;
 
-                if (base === 'jobs') {
-                    // on jobs page the search widget appears on the right
-                    html = SearchWidget({
-                        iterator: list.iterator,
-                        template: params.list,
-                        includeSize: false
-                    });
-                    e = angular.element(document.getElementById(id + '-search-container')).append(html);
-                    $compile(e)(scope);
-                    GenerateList.inject(list, {
-                        mode: 'edit',
-                        id: id,
-                        breadCrumbs: false,
-                        scope: scope,
-                        showSearch: false
-                    });
-                }
-                else {
-                    GenerateList.inject(list, {
-                        mode: 'edit',
-                        id: id,
-                        breadCrumbs: false,
-                        scope: scope,
-                        searchSize: 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
-                        showSearch: true
-                    });
-                }
+
+                GenerateList.inject(list, {
+                    mode: 'edit',
+                    id: id,
+                    breadCrumbs: false,
+                    scope: scope,
+                    searchSize: 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
+                    showSearch: true
+                });
 
                 SearchInit({
                     scope: scope,
