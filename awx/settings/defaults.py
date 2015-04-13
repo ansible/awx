@@ -522,6 +522,15 @@ AZURE_HOST_FILTER = r'^.+$'
 AZURE_EXCLUDE_EMPTY_GROUPS = True
 AZURE_INSTANCE_ID_VAR = None
 
+# ---------------------
+# ----- OpenStack -----
+# ---------------------
+OPENSTACK_ENABLED_VAR = 'status'
+OPENSTACK_ENABLED_VALUE = 'ACTIVE'
+OPENSTACK_GROUP_FILTER = r'^.+$'
+OPENSTACK_HOST_FILTER = r'^.+$'
+OPENSTACK_EXCLUDE_EMPTY_GROUPS = True
+OPENSTACK_INSTANCE_ID_VAR = None
 
 # ---------------------
 # -- Activity Stream --

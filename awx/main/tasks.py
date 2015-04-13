@@ -20,6 +20,7 @@ import urlparse
 import uuid
 from distutils.version import LooseVersion as Version
 import dateutil.parser
+import yaml
 
 # Pexpect
 import pexpect
@@ -931,6 +932,15 @@ class RunInventoryUpdate(BaseTask):
             credential = inventory_update.credential
             return decrypt_field(credential, 'ssh_key_data')
 
+        if inventory_update.source == 'openstack':
+            credential = inventory_update.credential
+            openstack_auth = dict(auth_url=credential.host,
+                                  username=credential.username,
+                                  password=decrypt_field(credential, "password"),
+                                  project_name=credential.project)
+            openstack_data = {"clouds": {"devstack": {"auth": openstack_auth}}}
+            return yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True)
+
         cp = ConfigParser.ConfigParser()
         # Build custom ec2.ini for ec2 inventory script to use.
         if inventory_update.source == 'ec2':
@@ -1051,6 +1061,8 @@ class RunInventoryUpdate(BaseTask):
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')
             env['GCE_PEM_FILE_PATH'] = kwargs['private_data_file']
+        elif inventory_update.source == 'openstack':
+            env['OPENSTACK_CONFIG_FILE'] = kwargs.get('private_data_file', '')
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
