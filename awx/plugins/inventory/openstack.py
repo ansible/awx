@@ -50,11 +50,11 @@ import shade
 
 class OpenStackInventory(object):
 
-    def __init__(self, private=False, refresh=False):
+    def __init__(self, refresh=False):
+        config_files = [ os.environ.get('OPENSTACK_CONFIG_FILE', None) 
+            or '/etc/ansible/openstack.yml' ]
         self.openstack_config = os_client_config.config.OpenStackConfig(
-            os_client_config.config.CONFIG_FILES.append(
-                '/etc/ansible/openstack.yml'),
-            private)
+            config_files)
         self.clouds = shade.openstack_clouds(self.openstack_config)
         self.refresh = refresh
 
@@ -92,10 +92,8 @@ class OpenStackInventory(object):
         hostvars = collections.defaultdict(dict)
 
         for cloud in self.clouds:
-
             # Cycle on servers
             for server in cloud.list_servers():
-
                 meta = cloud.get_server_meta(server)
 
                 if 'interface_ip' not in meta['server_vars']:
@@ -131,9 +129,6 @@ class OpenStackInventory(object):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='OpenStack Inventory Module')
-    parser.add_argument('--private',
-                        action='store_true',
-                        help='Use private address for ansible host')
     parser.add_argument('--refresh', action='store_true',
                         help='Refresh cached information')
     group = parser.add_mutually_exclusive_group(required=True)
@@ -146,7 +141,7 @@ def parse_args():
 def main():
     args = parse_args()
     try:
-        inventory = OpenStackInventory(args.private, args.refresh)
+        inventory = OpenStackInventory(args.refresh)
         if args.list:
             inventory.list_instances()
         elif args.host:
