@@ -1217,7 +1217,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
         if bool(('license' in self.result_stdout or 'licensed' in self.result_stdout) and
-                'exceeded' in self.result_stdout and not self.license_error):
+                'exceeded' in self.result_stdout and not self.license_error) or \
+            bool('License has expired' in self.result_stdout or 'License count exceeded'):
             self.license_error = True
             if 'license_error' not in update_fields:
                 update_fields.append('license_error')
