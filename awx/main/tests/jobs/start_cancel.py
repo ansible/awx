@@ -10,7 +10,6 @@ from django.conf import settings
 from django.test.utils import override_settings
 
 # AWX
-import django
 from awx.main.models import * # noqa
 from awx.main.tests.base import BaseLiveServerTest
 from .base import BaseJobTestMixin
