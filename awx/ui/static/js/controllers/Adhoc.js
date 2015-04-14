@@ -23,7 +23,8 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
         generator = GenerateForm,
         form = AdhocForm,
         master = {},
-        id = $routeParams.inventory_id;
+        id = $routeParams.inventory_id,
+        choicesReadyCount = 0;
 
     // inject the adhoc command form
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
@@ -63,10 +64,10 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
     $scope.providedHostPatterns = $scope.limit;
     delete $rootScope.hostPatterns;
 
-    if ($scope.removeChoicesReady) {
-        $scope.removeChoicesReady();
+    if ($scope.removeLookUpInitialize) {
+        $scope.removeLookUpInitialize();
     }
-    $scope.removeChoicesReady = $scope.$on('choicesReadyAdhoc', function () {
+    $scope.removeLookUpInitialize = $scope.$on('lookUpInitialize', function () {
         LookUpInit({
             scope: $scope,
             form: form,
@@ -79,12 +80,32 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
         Wait('stop'); // END: form population
     });
 
+    if ($scope.removeChoicesReady) {
+        $scope.removeChoicesReady();
+    }
+    $scope.removeChoicesReady = $scope.$on('choicesReadyAdhoc', function () {
+        choicesReadyCount++;
+
+        if (choicesReadyCount === 2) {
+            $scope.$emit('lookUpInitialize');
+        }
+    });
+
     // setup Machine Credential lookup
     GetChoices({
         scope: $scope,
         url: url,
         field: 'module_name',
         variable: 'adhoc_module_options',
+        callback: 'choicesReadyAdhoc'
+    });
+
+    // setup verbosity options lookup
+    GetChoices({
+        scope: $scope,
+        url: url,
+        field: 'verbosity',
+        variable: 'adhoc_verbosity_options',
         callback: 'choicesReadyAdhoc'
     });
 
