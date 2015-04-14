@@ -35,7 +35,7 @@ export default
                 awTipPlacement: "top",
                 dataTitle: "{{ all_job.status_popover_title }}",
                 icon: 'icon-job-{{ all_job.status }}',
-                alt_text: "{{all_job.status | capitalize}}",
+                alt_text: "{{all_job.status_label}}",
                 iconOnly: true,
                 ngClick:"viewJobLog(all_job.id)",
                 searchable: true,

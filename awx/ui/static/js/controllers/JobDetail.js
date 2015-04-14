@@ -13,7 +13,7 @@
 
 export function JobDetailController ($location, $rootScope, $scope, $compile, $routeParams, $log, ClearScope, Breadcrumbs, LoadBreadCrumbs, GetBasePath, Wait, Rest,
     ProcessErrors, SelectPlay, SelectTask, Socket, GetElapsed, DrawGraph, LoadHostSummary, ReloadHostSummaryList, JobIsFinished, SetTaskStyles, DigestEvent,
-    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString) {
+    UpdateDOM, EventViewer, DeleteJob, PlaybookRun, HostEventsViewer, LoadPlays, LoadTasks, LoadHosts, HostsEdit, ParseVariableString, GetChoices) {
 
     ClearScope();
 
@@ -85,6 +85,14 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
         { value: 'run', label: 'Run' },
         { value: 'check', label: 'Check' }
     ];
+
+    GetChoices({
+        scope: scope,
+        url: GetBasePath('unified_jobs'),
+        field: 'status',
+        variable: 'status_choices',
+        // callback: 'choicesReady'
+    });
 
     scope.eventsHelpText = "<p><i class=\"fa fa-circle successful-hosts-color\"></i> Successful</p>\n" +
         "<p><i class=\"fa fa-circle changed-hosts-color\"></i> Changed</p>\n" +
@@ -680,6 +688,13 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
                 else {
                     scope.job_status.elapsed = '00:00:00';
                 }
+                scope.status_choices.every(function(status) {
+                       if (status.value === scope.job.status) {
+                           scope.job_status.status_label = status.label;
+                           return false;
+                       }
+                       return true;
+                   });
                 //scope.setSearchAll('host');
                 scope.$emit('LoadPlays', data.related.job_events);
                 scope.$emit('GetCreatedByNames', data.related.created_by);
@@ -1305,5 +1320,5 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
 JobDetailController.$inject = [ '$location', '$rootScope', '$scope', '$compile', '$routeParams', '$log', 'ClearScope', 'Breadcrumbs', 'LoadBreadCrumbs', 'GetBasePath',
     'Wait', 'Rest', 'ProcessErrors', 'SelectPlay', 'SelectTask', 'Socket', 'GetElapsed', 'DrawGraph', 'LoadHostSummary', 'ReloadHostSummaryList',
     'JobIsFinished', 'SetTaskStyles', 'DigestEvent', 'UpdateDOM', 'EventViewer', 'DeleteJob', 'PlaybookRun', 'HostEventsViewer', 'LoadPlays', 'LoadTasks',
-    'LoadHosts', 'HostsEdit', 'ParseVariableString'
+    'LoadHosts', 'HostsEdit', 'ParseVariableString', 'GetChoices'
 ];
