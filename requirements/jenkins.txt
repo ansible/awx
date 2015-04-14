@@ -4,6 +4,7 @@
 ansible
 redis
 pyzmq
+netifaces
 python-memcached
 python-ldap
 pycrypto
