@@ -33,3 +33,19 @@ class HostManager(hosts.HostManager):
         """Perform an action on a host."""
         url = '/os-hosts/{0}/{1}'.format(host, action)
         return self._get(url, response_key='host')
+
+    def list(self, zone=None, service=None):
+        """List cloud hosts."""
+
+        filters = []
+        if zone:
+            filters.append('zone=%s' % zone)
+        if service:
+            filters.append('service=%s' % service)
+
+        if filters:
+            url = '/os-hosts?%s' % '&'.join(filters)
+        else:
+            url = '/os-hosts'
+
+        return self._list(url, "hosts")

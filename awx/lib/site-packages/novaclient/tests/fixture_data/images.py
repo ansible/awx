@@ -10,8 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import httpretty
-
 from novaclient.openstack.common import jsonutils
 from novaclient.tests import fakes
 from novaclient.tests.fixture_data import base
@@ -31,9 +29,11 @@ class V1(base.Fixture):
             ]
         }
 
-        httpretty.register_uri(httpretty.GET, self.url(),
-                               body=jsonutils.dumps(get_images),
-                               content_type='application/json')
+        headers = {'Content-Type': 'application/json'}
+
+        self.requests.register_uri('GET', self.url(),
+                                   json=get_images,
+                                   headers=headers)
 
         image_1 = {
             'id': 1,
@@ -58,60 +58,53 @@ class V1(base.Fixture):
             "links": {},
         }
 
-        get_images_detail = {'images': [image_1, image_2]}
+        self.requests.register_uri('GET', self.url('detail'),
+                                   json={'images': [image_1, image_2]},
+                                   headers=headers)
 
-        httpretty.register_uri(httpretty.GET, self.url('detail'),
-                               body=jsonutils.dumps(get_images_detail),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url(1),
+                                   json={'image': image_1},
+                                   headers=headers)
 
-        get_images_1 = {'image': image_1}
+        self.requests.register_uri('GET', self.url(2),
+                                   json={'image': image_2},
+                                   headers=headers)
 
-        httpretty.register_uri(httpretty.GET, self.url(1),
-                               body=jsonutils.dumps(get_images_1),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url(456),
+                                   json={'image': image_2},
+                                   headers=headers)
 
-        get_images_2 = {'image': image_2}
-
-        httpretty.register_uri(httpretty.GET, self.url(2),
-                               body=jsonutils.dumps(get_images_2),
-                               content_type='application/json')
-
-        httpretty.register_uri(httpretty.GET, self.url(456),
-                               body=jsonutils.dumps(get_images_2),
-                               content_type='application/json')
-
-        def post_images(request, url, headers):
-            body = jsonutils.loads(request.body.decode('utf-8'))
+        def post_images(request, context):
+            body = jsonutils.loads(request.body)
             assert list(body) == ['image']
             fakes.assert_has_keys(body['image'], required=['serverId', 'name'])
-            return 202, headers, jsonutils.dumps(images_1)
+            return images_1
 
-        httpretty.register_uri(httpretty.POST, self.url(),
-                               body=post_images,
-                               content_type='application/json')
+        self.requests.register_uri('POST', self.url(),
+                                   json=post_images,
+                                   headers=headers,
+                                   status_code=202)
 
-        def post_images_1_metadata(request, url, headers):
-            body = jsonutils.loads(request.body.decode('utf-8'))
+        def post_images_1_metadata(request, context):
+            body = jsonutils.loads(request.body)
             assert list(body) == ['metadata']
             fakes.assert_has_keys(body['metadata'], required=['test_key'])
-            data = jsonutils.dumps({'metadata': image_1['metadata']})
-            return 200, headers, data
+            return {'metadata': image_1['metadata']}
 
-        httpretty.register_uri(httpretty.POST, self.url(1, 'metadata'),
-                               body=post_images_1_metadata,
-                               content_type='application/json')
+        self.requests.register_uri('POST', self.url(1, 'metadata'),
+                                   json=post_images_1_metadata,
+                                   headers=headers)
 
         for u in (1, 2, '1/metadata/test_key'):
-            httpretty.register_uri(httpretty.DELETE, self.url(u),
-                                   status=204)
+            self.requests.register_uri('DELETE', self.url(u), status_code=204)
 
-        httpretty.register_uri(httpretty.HEAD, self.url(1), status=200,
-                               x_image_meta_id=1,
-                               x_image_meta_name='CentOS 5.2',
-                               x_image_meta_updated='2010-10-10T12:00:00Z',
-                               x_image_meta_created='2010-10-10T12:00:00Z',
-                               x_image_meta_status='ACTIVE',
-                               x_image_meta_property_test_key='test_value')
+        image_headers = {'x-image-meta-id': '1',
+                         'x-image-meta-name': 'CentOS 5.2',
+                         'x-image-meta-updated': '2010-10-10T12:00:00Z',
+                         'x-image-meta-created': '2010-10-10T12:00:00Z',
+                         'x-image-meta-status': 'ACTIVE',
+                         'x-image-meta-property-test-key': 'test_value'}
+        self.requests.register_uri('HEAD', self.url(1), headers=image_headers)
 
 
 class V3(V1):

@@ -10,9 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-import httpretty
-
 from novaclient.openstack.common import jsonutils
 from novaclient.tests import fakes
 from novaclient.tests.fixture_data import base
@@ -26,25 +23,27 @@ class V1(base.Fixture):
         super(V1, self).setUp()
         keypair = {'fingerprint': 'FAKE_KEYPAIR', 'name': 'test'}
 
-        httpretty.register_uri(httpretty.GET, self.url(),
-                               body=jsonutils.dumps({'keypairs': [keypair]}),
-                               content_type='application/json')
+        headers = {'Content-Type': 'application/json'}
 
-        httpretty.register_uri(httpretty.GET, self.url('test'),
-                               body=jsonutils.dumps({'keypair': keypair}),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url(),
+                                   json={'keypairs': [keypair]},
+                                   headers=headers)
 
-        httpretty.register_uri(httpretty.DELETE, self.url('test'), status=202)
+        self.requests.register_uri('GET', self.url('test'),
+                                   json={'keypair': keypair},
+                                   headers=headers)
 
-        def post_os_keypairs(request, url, headers):
-            body = jsonutils.loads(request.body.decode('utf-8'))
+        self.requests.register_uri('DELETE', self.url('test'), status_code=202)
+
+        def post_os_keypairs(request, context):
+            body = jsonutils.loads(request.body)
             assert list(body) == ['keypair']
             fakes.assert_has_keys(body['keypair'], required=['name'])
-            return 202, headers, jsonutils.dumps({'keypair': keypair})
+            return {'keypair': keypair}
 
-        httpretty.register_uri(httpretty.POST, self.url(),
-                               body=post_os_keypairs,
-                               content_type='application/json')
+        self.requests.register_uri('POST', self.url(),
+                                   json=post_os_keypairs,
+                                   headers=headers)
 
 
 class V3(V1):

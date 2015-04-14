@@ -1,0 +1,171 @@
+=IPRange Tests=
+
+Copyright (c) 2008-2015, David P. D. Moss. All rights reserved.
+
+{{{
+
+>>> from netaddr import *
+
+}}}
+
+Constructor tests.
+
+{{{
+
+>>> iprange = IPRange('192.0.2.1', '192.0.2.254')
+
+>>> iprange
+IPRange('192.0.2.1', '192.0.2.254')
+
+>>> '%s' % iprange
+'192.0.2.1-192.0.2.254'
+
+>>> IPRange('::ffff:192.0.2.1', '::ffff:192.0.2.254')
+IPRange('::ffff:192.0.2.1', '::ffff:192.0.2.254')
+
+>>> IPRange('192.0.2.1', '192.0.2.1')
+IPRange('192.0.2.1', '192.0.2.1')
+
+>>> IPRange('208.049.164.000', '208.050.066.255', flags=ZEROFILL)
+IPRange('208.49.164.0', '208.50.66.255')
+
+}}}
+
+Bad constructor tests.
+
+{{{
+
+>>> IPRange('192.0.2.2', '192.0.2.1')
+Traceback (most recent call last):
+...
+AddrFormatError: lower bound IP greater than upper bound!
+
+>>> IPRange('::', '0.0.0.1')
+Traceback (most recent call last):
+...
+AddrFormatError: base address '0.0.0.1' is not IPv6
+
+>>> IPRange('0.0.0.0', '::1')
+Traceback (most recent call last):
+...
+AddrFormatError: base address '::1' is not IPv4
+
+}}}
+
+Indexing and slicing tests.
+
+{{{
+
+>>> iprange = IPRange('192.0.2.1', '192.0.2.254')
+
+>>> len(iprange)
+254
+
+>>> iprange.first == 3221225985
+True
+
+>>> iprange.last == 3221226238
+True
+
+>>> iprange[0]
+IPAddress('192.0.2.1')
+
+>>> iprange[-1]
+IPAddress('192.0.2.254')
+
+>>> iprange[512]
+Traceback (most recent call last):
+...
+IndexError: index out range for address range size!
+
+>>> list(iprange[0:3])
+[IPAddress('192.0.2.1'), IPAddress('192.0.2.2'), IPAddress('192.0.2.3')]
+
+>>> list(iprange[0:10:2])
+[IPAddress('192.0.2.1'), IPAddress('192.0.2.3'), IPAddress('192.0.2.5'), IPAddress('192.0.2.7'), IPAddress('192.0.2.9')]
+
+>>> list(iprange[0:1024:512])
+[IPAddress('192.0.2.1')]
+
+>>> IPRange('::ffff:192.0.2.1', '::ffff:192.0.2.254')[0:10:2]
+Traceback (most recent call last):
+...
+TypeError: IPv6 slices are not supported!
+
+}}}
+
+Membership tests.
+
+{{{
+
+>>> IPRange('192.0.2.5', '192.0.2.10') in IPRange('192.0.2.1', '192.0.2.254')
+True
+
+>>> IPRange('fe80::1', 'fe80::fffe') in IPRange('fe80::', 'fe80::ffff:ffff:ffff:ffff')
+True
+
+>>> IPRange('192.0.2.5', '192.0.2.10') in IPRange('::', '::255.255.255.255')
+False
+
+}}}
+
+Sorting tests.
+
+{{{
+
+>>> ipranges = (IPRange('192.0.2.40', '192.0.2.50'), IPRange('192.0.2.20', '192.0.2.30'), IPRange('192.0.2.1', '192.0.2.254'),)
+
+>>> sorted(ipranges)
+[IPRange('192.0.2.1', '192.0.2.254'), IPRange('192.0.2.20', '192.0.2.30'), IPRange('192.0.2.40', '192.0.2.50')]
+
+>>> ipranges = list(ipranges)
+
+>>> ipranges.append(IPRange('192.0.2.45', '192.0.2.49'))
+
+>>> sorted(ipranges)
+[IPRange('192.0.2.1', '192.0.2.254'), IPRange('192.0.2.20', '192.0.2.30'), IPRange('192.0.2.40', '192.0.2.50'), IPRange('192.0.2.45', '192.0.2.49')]
+
+}}}
+
+CIDR interoperability tests.
+
+{{{
+
+>>> IPRange('192.0.2.5', '192.0.2.10').cidrs()
+[IPNetwork('192.0.2.5/32'), IPNetwork('192.0.2.6/31'), IPNetwork('192.0.2.8/31'), IPNetwork('192.0.2.10/32')]
+
+>>> IPRange('fe80::', 'fe80::ffff:ffff:ffff:ffff').cidrs()
+[IPNetwork('fe80::/64')]
+
+}}}
+
+Various additional tests.
+
+{{{
+
+>>> iprange.info
+{'IPv4': [{'date': '1993-05',
+ 'designation': 'Administered by ARIN',
+ 'prefix': '192/8',
+ 'status': 'Legacy',
+ 'whois': 'whois.arin.net'}]}
+
+>>> iprange.is_private()
+True
+
+>>> iprange.version
+4
+
+len() fails when the IPRange is longer than sys.maxint, which is quite likely with IPv6.
+>>> from netaddr.compat import _sys_maxint
+>>> r = IPRange(IPAddress("::0"), IPAddress(_sys_maxint, 6))
+>>> len(r)
+Traceback (most recent call last):
+  ...
+IndexError: range contains more than ...
+
+>>> r = IPRange(IPAddress("::0"), IPAddress(_sys_maxint - 1, 6))
+>>> len(r) == _sys_maxint
+True
+
+}}}

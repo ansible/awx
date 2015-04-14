@@ -40,7 +40,7 @@ class DiscoverTest(utils.TestCase):
         def test():
             shell = novaclient.shell.OpenStackComputeShell()
             for name, module in shell._discover_via_entry_points():
-                self.assertEqual(name, 'foo')
+                self.assertEqual('foo', name)
                 self.assertTrue(inspect.ismodule(module))
 
         test()
@@ -68,7 +68,7 @@ class DiscoverTest(utils.TestCase):
         def test():
             shell = novaclient.shell.OpenStackComputeShell()
             extensions = shell._discover_extensions('1.1')
-            self.assertEqual(len(extensions), 3)
+            self.assertEqual(3, len(extensions))
             names = sorted(['foo', 'bar', 'baz'])
             sorted_extensions = sorted(extensions, key=lambda ext: ext.name)
             for i in range(len(names)):

@@ -1,0 +1,75 @@
+=IEEE EUI-64 Identifier Tests=
+
+Copyright (c) 2008-2015, David P. D. Moss. All rights reserved.
+
+{{{
+
+>>> from netaddr import *
+
+}}}
+
+Basic operations.
+
+{{{
+
+>>> mac = EUI('00-1B-77-49-54-FD')
+>>> mac
+EUI('00-1B-77-49-54-FD')
+
+>>> eui = mac.eui64()
+>>> eui
+EUI('00-1B-77-FF-FE-49-54-FD')
+
+>>> eui.eui64()
+EUI('00-1B-77-FF-FE-49-54-FD')
+
+>>> int(eui) == 7731765737772285
+True
+
+>>> eui.packed
+b'\x00\x1bw\xff\xfeIT\xfd'
+
+>>> eui.bin  
+'0b11011011101111111111111111110010010010101010011111101'
+
+>>> eui.bits()
+'00000000-00011011-01110111-11111111-11111110-01001001-01010100-11111101'
+
+}}}
+
+IPv6 interoperability
+
+{{{
+
+>>> mac = EUI('00-1B-77-49-54-FD')
+
+>>> eui = mac.eui64()
+
+>>> mac
+EUI('00-1B-77-49-54-FD')
+
+>>> eui
+EUI('00-1B-77-FF-FE-49-54-FD')
+
+>>> mac.modified_eui64()
+EUI('02-1B-77-FF-FE-49-54-FD')
+
+>>> mac.ipv6_link_local()
+IPAddress('fe80::21b:77ff:fe49:54fd')
+
+>>> eui.ipv6_link_local()
+IPAddress('fe80::21b:77ff:fe49:54fd')
+
+>>> mac.ipv6(0x12340000000000000000000000000000)
+IPAddress('1234::21b:77ff:fe49:54fd')
+
+>>> eui.ipv6(0x12340000000000000000000000000000)
+IPAddress('1234::21b:77ff:fe49:54fd')
+
+>>> addr_colonned = EUI('00:1B:77:49:54:FD:BB:34')
+>>> addr_colonned
+EUI('00-1B-77-49-54-FD-BB-34')
+
+>>> addr_no_delimeter = EUI('001B774954FDBB34')
+>>> addr_no_delimeter
+EUI('00-1B-77-49-54-FD-BB-34')

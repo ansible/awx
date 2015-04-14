@@ -140,26 +140,26 @@ class PrintResultTestCase(test_utils.TestCase):
     def test_print_dict(self):
         dict = {'key': 'value'}
         utils.print_dict(dict)
-        self.assertEqual(sys.stdout.getvalue(),
-                         '+----------+-------+\n'
+        self.assertEqual('+----------+-------+\n'
                          '| Property | Value |\n'
                          '+----------+-------+\n'
                          '| key      | value |\n'
-                         '+----------+-------+\n')
+                         '+----------+-------+\n',
+                         sys.stdout.getvalue())
 
     @mock.patch('sys.stdout', six.StringIO())
     def test_print_dict_wrap(self):
         dict = {'key1': 'not wrapped',
                 'key2': 'this will be wrapped'}
         utils.print_dict(dict, wrap=16)
-        self.assertEqual(sys.stdout.getvalue(),
-                         '+----------+--------------+\n'
+        self.assertEqual('+----------+--------------+\n'
                          '| Property | Value        |\n'
                          '+----------+--------------+\n'
                          '| key1     | not wrapped  |\n'
                          '| key2     | this will be |\n'
                          '|          | wrapped      |\n'
-                         '+----------+--------------+\n')
+                         '+----------+--------------+\n',
+                         sys.stdout.getvalue())
 
     @mock.patch('sys.stdout', six.StringIO())
     def test_print_list_sort_by_str(self):
@@ -169,14 +169,14 @@ class PrintResultTestCase(test_utils.TestCase):
 
         utils.print_list(objs, ["Name", "Value"], sortby_index=0)
 
-        self.assertEqual(sys.stdout.getvalue(),
-                         '+------+-------+\n'
+        self.assertEqual('+------+-------+\n'
                          '| Name | Value |\n'
                          '+------+-------+\n'
                          '| k1   | 1     |\n'
                          '| k2   | 3     |\n'
                          '| k3   | 2     |\n'
-                         '+------+-------+\n')
+                         '+------+-------+\n',
+                         sys.stdout.getvalue())
 
     @mock.patch('sys.stdout', six.StringIO())
     def test_print_list_sort_by_integer(self):
@@ -186,14 +186,14 @@ class PrintResultTestCase(test_utils.TestCase):
 
         utils.print_list(objs, ["Name", "Value"], sortby_index=1)
 
-        self.assertEqual(sys.stdout.getvalue(),
-                         '+------+-------+\n'
+        self.assertEqual('+------+-------+\n'
                          '| Name | Value |\n'
                          '+------+-------+\n'
                          '| k1   | 1     |\n'
                          '| k3   | 2     |\n'
                          '| k2   | 3     |\n'
-                         '+------+-------+\n')
+                         '+------+-------+\n',
+                         sys.stdout.getvalue())
 
     # without sorting
     @mock.patch('sys.stdout', six.StringIO())
@@ -204,47 +204,47 @@ class PrintResultTestCase(test_utils.TestCase):
 
         utils.print_list(objs, ["Name", "Value"], sortby_index=None)
 
-        self.assertEqual(sys.stdout.getvalue(),
-                         '+------+-------+\n'
+        self.assertEqual('+------+-------+\n'
                          '| Name | Value |\n'
                          '+------+-------+\n'
                          '| k1   | 1     |\n'
                          '| k3   | 3     |\n'
                          '| k2   | 2     |\n'
-                         '+------+-------+\n')
+                         '+------+-------+\n',
+                         sys.stdout.getvalue())
 
     @mock.patch('sys.stdout', six.StringIO())
     def test_print_dict_dictionary(self):
         dict = {'k': {'foo': 'bar'}}
         utils.print_dict(dict)
-        self.assertEqual(sys.stdout.getvalue(),
-                         '+----------+----------------+\n'
+        self.assertEqual('+----------+----------------+\n'
                          '| Property | Value          |\n'
                          '+----------+----------------+\n'
                          '| k        | {"foo": "bar"} |\n'
-                         '+----------+----------------+\n')
+                         '+----------+----------------+\n',
+                         sys.stdout.getvalue())
 
     @mock.patch('sys.stdout', six.StringIO())
     def test_print_dict_list_dictionary(self):
         dict = {'k': [{'foo': 'bar'}]}
         utils.print_dict(dict)
-        self.assertEqual(sys.stdout.getvalue(),
-                         '+----------+------------------+\n'
+        self.assertEqual('+----------+------------------+\n'
                          '| Property | Value            |\n'
                          '+----------+------------------+\n'
                          '| k        | [{"foo": "bar"}] |\n'
-                         '+----------+------------------+\n')
+                         '+----------+------------------+\n',
+                         sys.stdout.getvalue())
 
     @mock.patch('sys.stdout', six.StringIO())
     def test_print_dict_list(self):
         dict = {'k': ['foo', 'bar']}
         utils.print_dict(dict)
-        self.assertEqual(sys.stdout.getvalue(),
-                         '+----------+----------------+\n'
+        self.assertEqual('+----------+----------------+\n'
                          '| Property | Value          |\n'
                          '+----------+----------------+\n'
                          '| k        | ["foo", "bar"] |\n'
-                         '+----------+----------------+\n')
+                         '+----------+----------------+\n',
+                         sys.stdout.getvalue())
 
 
 class FlattenTestCase(test_utils.TestCase):
@@ -270,22 +270,22 @@ class FlattenTestCase(test_utils.TestCase):
     def test_pretty_choice_list(self):
         l = []
         r = utils.pretty_choice_list(l)
-        self.assertEqual(r, "")
+        self.assertEqual("", r)
 
         l = ["v1", "v2", "v3"]
         r = utils.pretty_choice_list(l)
-        self.assertEqual(r, "'v1', 'v2', 'v3'")
+        self.assertEqual("'v1', 'v2', 'v3'", r)
 
     def test_pretty_choice_dict(self):
         d = {}
         r = utils.pretty_choice_dict(d)
-        self.assertEqual(r, "")
+        self.assertEqual("", r)
 
         d = {"k1": "v1",
              "k2": "v2",
              "k3": "v3"}
         r = utils.pretty_choice_dict(d)
-        self.assertEqual(r, "'k1=v1', 'k2=v2', 'k3=v3'")
+        self.assertEqual("'k1=v1', 'k2=v2', 'k3=v3'", r)
 
 
 class ValidationsTestCase(test_utils.TestCase):

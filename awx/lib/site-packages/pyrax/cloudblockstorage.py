@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright (c)2012 Rackspace US, Inc.
@@ -246,7 +245,7 @@ class CloudBlockStorageManager(BaseManager):
     """
     def _create_body(self, name, size=None, volume_type=None, description=None,
              metadata=None, snapshot_id=None, clone_id=None,
-             availability_zone=None):
+             availability_zone=None, image=None):
         """
         Used to create the dict required to create a new volume
         """
@@ -260,6 +259,8 @@ class CloudBlockStorageManager(BaseManager):
             description = ""
         if metadata is None:
             metadata = {}
+        if image is not None:
+            image = utils.get_id(image)
         body = {"volume": {
                 "size": size,
                 "snapshot_id": snapshot_id,
@@ -269,6 +270,7 @@ class CloudBlockStorageManager(BaseManager):
                 "volume_type": volume_type,
                 "metadata": metadata,
                 "availability_zone": availability_zone,
+                "imageRef": image,
                 }}
         return body
 

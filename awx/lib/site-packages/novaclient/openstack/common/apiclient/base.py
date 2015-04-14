@@ -32,6 +32,7 @@ from six.moves.urllib import parse
 from novaclient.openstack.common.apiclient import exceptions
 from novaclient.openstack.common.gettextutils import _
 from novaclient.openstack.common import strutils
+from novaclient.openstack.common import uuidutils
 
 
 def getid(obj):
@@ -436,6 +437,21 @@ class Resource(object):
         self._info = info
         self._add_details(info)
         self._loaded = loaded
+        self._init_completion_cache()
+
+    def _init_completion_cache(self):
+        cache_write = getattr(self.manager, 'write_to_completion_cache', None)
+        if not cache_write:
+            return
+
+        # NOTE(sirp): ensure `id` is already present because if it isn't we'll
+        # enter an infinite loop of __getattr__ -> get -> __init__ ->
+        # __getattr__ -> ...
+        if 'id' in self.__dict__ and uuidutils.is_uuid_like(self.id):
+            cache_write('uuid', self.id)
+
+        if self.human_id:
+            cache_write('human_id', self.human_id)
 
     def __repr__(self):
         reprkeys = sorted(k
@@ -465,7 +481,7 @@ class Resource(object):
 
     def __getattr__(self, k):
         if k not in self.__dict__:
-            #NOTE(bcwaldon): disallow lazy-loading if already loaded once
+            # NOTE(bcwaldon): disallow lazy-loading if already loaded once
             if not self.is_loaded():
                 self.get()
                 return self.__getattr__(k)

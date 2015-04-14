@@ -12,10 +12,9 @@
 #    under the License.
 
 from novaclient import extension
-from novaclient.v1_1.contrib import list_extensions
-
 from novaclient.tests import utils
 from novaclient.tests.v1_1 import fakes
+from novaclient.v1_1.contrib import list_extensions
 
 
 extensions = [

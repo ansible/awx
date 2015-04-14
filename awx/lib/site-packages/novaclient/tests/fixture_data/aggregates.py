@@ -10,9 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import httpretty
-
-from novaclient.openstack.common import jsonutils
 from novaclient.tests.fixture_data import base
 
 
@@ -32,21 +29,24 @@ class Fixture(base.Fixture):
              'availability_zone': 'nova1'},
         ]}
 
-        httpretty.register_uri(httpretty.GET, self.url(),
-                               body=jsonutils.dumps(get_os_aggregates),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url(),
+                                   json=get_os_aggregates,
+                                   headers=self.json_headers)
 
-        r = jsonutils.dumps({'aggregate': get_os_aggregates['aggregates'][0]})
+        get_aggregates_1 = {'aggregate': get_os_aggregates['aggregates'][0]}
 
-        httpretty.register_uri(httpretty.POST, self.url(), body=r,
-                               content_type='application/json')
+        self.requests.register_uri('POST', self.url(),
+                                   json=get_aggregates_1,
+                                   headers=self.json_headers)
 
         for agg_id in (1, 2):
-            for method in (httpretty.GET, httpretty.PUT):
-                httpretty.register_uri(method, self.url(agg_id), body=r,
-                                       content_type='application/json')
+            for method in ('GET', 'PUT'):
+                self.requests.register_uri(method, self.url(agg_id),
+                                           json=get_aggregates_1,
+                                           headers=self.json_headers)
 
-            httpretty.register_uri(httpretty.POST, self.url(agg_id, 'action'),
-                                   body=r, content_type='application/json')
+            self.requests.register_uri('POST', self.url(agg_id, 'action'),
+                                       json=get_aggregates_1,
+                                       headers=self.json_headers)
 
-        httpretty.register_uri(httpretty.DELETE, self.url(1), status=202)
+        self.requests.register_uri('DELETE', self.url(1), status_code=202)

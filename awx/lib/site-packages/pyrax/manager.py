@@ -58,7 +58,7 @@ class BaseManager(object):
         self.uri_base = uri_base
 
 
-    def list(self, limit=None, marker=None, return_raw=False):
+    def list(self, limit=None, marker=None, return_raw=False, other_keys=None):
         """
         Returns a list of resource objects. Pagination is supported through the
         optional 'marker' and 'limit' parameters.
@@ -67,6 +67,15 @@ class BaseManager(object):
         BaseManager subclasses will have to parse the raw response to get the
         desired information. For those cases, pass 'return_raw=True', and the
         response and response_body will be returned unprocessed.
+
+        Another use case is when additional information is returned in the
+        response body. To have that returned, use the 'other_keys' parameter.
+        This can be either a single string or a list of strings that correspond
+        to keys in the response body. If specified, a 2-tuple is returned, with
+        the first element being the list of resources, and the second a dict
+        whose keys are the 'other_keys' items, and whose values are the
+        corresponding values in the response body, or None if no such key is
+        present.
         """
         uri = "/%s" % self.uri_base
         pagination_items = []
@@ -77,7 +86,7 @@ class BaseManager(object):
         pagination = "&".join(pagination_items)
         if pagination:
             uri = "%s?%s" % (uri, pagination)
-        return self._list(uri, return_raw=return_raw)
+        return self._list(uri, return_raw=return_raw, other_keys=other_keys)
 
 
     def head(self, item):
@@ -131,7 +140,8 @@ class BaseManager(object):
         return self._delete(uri)
 
 
-    def _list(self, uri, obj_class=None, body=None, return_raw=False):
+    def _list(self, uri, obj_class=None, body=None, return_raw=False,
+            other_keys=None):
         """
         Handles the communication with the API when getting
         a full listing of the resources managed by this class.
@@ -146,19 +156,28 @@ class BaseManager(object):
             obj_class = self.resource_class
 
         data = self._data_from_response(resp_body)
-        return [obj_class(self, res, loaded=False)
-                for res in data if res]
+        ret = [obj_class(self, res, loaded=False) for res in data if res]
+        if other_keys:
+            keys = utils.coerce_to_list(other_keys)
+            other = [self._data_from_response(resp_body, key) for key in keys]
+            return (ret, other)
+        else:
+            return ret
 
 
-    def _data_from_response(self, resp_body):
+    def _data_from_response(self, resp_body, key=None):
         """
         This works for most API responses, but some don't structure their
         listing responses the same way, so overriding this method allows
         subclasses to handle extraction for those outliers.
         """
-        data = resp_body.get(self.plural_response_key, resp_body)
-        # NOTE(ja): keystone returns values as list as {"values": [ ... ]}
-        #           unlike other services which just return the list...
+        if key:
+            data = resp_body.get(key)
+        else:
+            data = resp_body.get(self.plural_response_key, resp_body)
+        # NOTE(ja): some services, such as keystone returns values as list as
+        # {"values": [ ... ]} unlike other services which just return the
+        # list.
         if isinstance(data, dict):
             try:
                 data = data["values"]

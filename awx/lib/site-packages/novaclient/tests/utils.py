@@ -14,8 +14,8 @@
 import os
 
 import fixtures
-import httpretty
 import requests
+from requests_mock.contrib import fixture as requests_mock_fixture
 import six
 import testscenarios
 import testtools
@@ -52,24 +52,26 @@ class FixturedTestCase(testscenarios.TestWithScenarios, TestCase):
     def setUp(self):
         super(FixturedTestCase, self).setUp()
 
-        httpretty.reset()
+        self.requests = self.useFixture(requests_mock_fixture.Fixture())
         self.data_fixture = None
         self.client_fixture = None
         self.cs = None
 
         if self.client_fixture_class:
-            self.client_fixture = self.useFixture(self.client_fixture_class())
+            fix = self.client_fixture_class(self.requests)
+            self.client_fixture = self.useFixture(fix)
             self.cs = self.client_fixture.client
 
         if self.data_fixture_class:
-            self.data_fixture = self.useFixture(self.data_fixture_class())
+            fix = self.data_fixture_class(self.requests)
+            self.data_fixture = self.useFixture(fix)
 
     def assert_called(self, method, path, body=None):
-        self.assertEqual(httpretty.last_request().method, method)
-        self.assertEqual(httpretty.last_request().path, path)
+        self.assertEqual(self.requests.last_request.method, method)
+        self.assertEqual(self.requests.last_request.path_url, path)
 
         if body:
-            req_data = httpretty.last_request().body
+            req_data = self.requests.last_request.body
             if isinstance(req_data, six.binary_type):
                 req_data = req_data.decode('utf-8')
             if not isinstance(body, six.string_types):

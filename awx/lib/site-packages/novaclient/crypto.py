@@ -22,7 +22,7 @@ class DecryptionFailure(Exception):
 
 
 def decrypt_password(private_key, password):
-    """Base64 decodes password and unecrypts it with private key.
+    """Base64 decodes password and unencrypts it with private key.
 
     Requires openssl binary available in the path.
     """

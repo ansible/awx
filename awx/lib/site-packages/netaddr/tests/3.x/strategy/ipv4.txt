@@ -1,0 +1,130 @@
+=IP version 4 Strategy Module=
+
+Copyright (c) 2008-2015, David P. D. Moss. All rights reserved.
+
+Uses TEST-NET references throughout, as described in RFC 3330.
+
+{{{
+
+>>> from netaddr.strategy.ipv4 import *
+
+}}}
+
+==Basic Smoke Tests==
+
+{{{
+
+>>> b = '11000000.00000000.00000010.00000001'
+>>> i = 3221225985
+>>> t = (192, 0, 2, 1)
+>>> s = '192.0.2.1'
+>>> p = b'\xc0\x00\x02\x01'
+>>> bin_val = '0b11000000000000000000001000000001'
+
+>>> bits_to_int(b) == 3221225985
+True
+
+>>> int_to_bits(i)
+'11000000.00000000.00000010.00000001'
+
+>>> int_to_str(i)
+'192.0.2.1'
+
+>>> int_to_words(i) == (192, 0, 2, 1)
+True
+
+>>> int_to_packed(i)
+b'\xc0\x00\x02\x01'
+
+>>> int_to_bin(i)
+'0b11000000000000000000001000000001'
+
+>>> int_to_bin(i)
+'0b11000000000000000000001000000001'
+
+>>> bin_to_int(bin_val) == 3221225985
+True
+
+>>> words_to_int(t) == 3221225985
+True
+
+>>> words_to_int(list(t)) == 3221225985
+True
+
+>>> packed_to_int(p) == 3221225985
+True
+
+>>> valid_bin(bin_val)
+True
+
+}}}
+
+== inet_aton() Behavioural Tests ==
+
+inet_aton() is a very old system call and is very permissive with regard to what is assume is a valid IPv4 address. Unfortunately, it is also the most widely used by system software used in software today, so netaddr supports this behaviour by default.
+
+{{{
+
+>>> str_to_int('127') == 127
+True
+
+>>> str_to_int('0x7f') == 127
+True
+
+>>> str_to_int('0177') == 127
+True
+
+>>> str_to_int('127.1') == 2130706433
+True
+
+>>> str_to_int('0x7f.1') == 2130706433
+True
+
+>>> str_to_int('0177.1') == 2130706433
+True
+
+>>> str_to_int('127.0.0.1') == 2130706433
+True
+
+}}}
+
+== inet_pton() Behavioural Tests ==
+
+inet_pton() is a newer system call that supports both IPv4 and IPv6. It is a lot more strict about what it deems to be a valid IPv4 address and doesn't support many of the features found in inet_aton() such as support for non- decimal octets, partial numbers of octets, etc.
+
+{{{
+
+>>> str_to_int('127', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: '127' is not a valid IPv4 address string!
+
+>>> str_to_int('0x7f', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: '0x7f' is not a valid IPv4 address string!
+
+>>> str_to_int('0177', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: '0177' is not a valid IPv4 address string!
+
+>>> str_to_int('127.1', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: '127.1' is not a valid IPv4 address string!
+
+>>> str_to_int('0x7f.1', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: '0x7f.1' is not a valid IPv4 address string!
+
+>>> str_to_int('0177.1', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: '0177.1' is not a valid IPv4 address string!
+
+>>> str_to_int('127.0.0.1', flags=INET_PTON) == 2130706433
+True
+
+}}}

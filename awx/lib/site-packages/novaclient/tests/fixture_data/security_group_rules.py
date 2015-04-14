@@ -10,8 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import httpretty
-
 from novaclient.openstack.common import jsonutils
 from novaclient.tests import fakes
 from novaclient.tests.fixture_data import base
@@ -34,24 +32,26 @@ class Fixture(base.Fixture):
             'cidr': '10.0.0.0/8'
         }
 
-        get_rules = {'security_group_rules': [rule]}
-        httpretty.register_uri(httpretty.GET, self.url(),
-                               body=jsonutils.dumps(get_rules),
-                               content_type='application/json')
+        headers = {'Content-Type': 'application/json'}
+
+        self.requests.register_uri('GET', self.url(),
+                                   json={'security_group_rules': [rule]},
+                                   headers=headers)
 
         for u in (1, 11, 12):
-            httpretty.register_uri(httpretty.DELETE, self.url(u), status=202)
+            self.requests.register_uri('DELETE', self.url(u), status_code=202)
 
-        def post_rules(request, url, headers):
-            body = jsonutils.loads(request.body.decode('utf-8'))
+        def post_rules(request, context):
+            body = jsonutils.loads(request.body)
             assert list(body) == ['security_group_rule']
             fakes.assert_has_keys(body['security_group_rule'],
                                   required=['parent_group_id'],
                                   optional=['group_id', 'ip_protocol',
                                             'from_port', 'to_port', 'cidr'])
 
-            return 202, headers, jsonutils.dumps({'security_group_rule': rule})
+            return {'security_group_rule': rule}
 
-        httpretty.register_uri(httpretty.POST, self.url(),
-                               body=post_rules,
-                               content_type='application/json')
+        self.requests.register_uri('POST', self.url(),
+                                   json=post_rules,
+                                   headers=headers,
+                                   status_code=202)

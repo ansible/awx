@@ -79,7 +79,7 @@ class FakeHTTPClient(client.HTTPClient):
     def __init__(self, *args, **kwargs):
         self.callstack = []
         self.fixtures = kwargs.pop("fixtures", None) or {}
-        if not args and not "auth_plugin" in kwargs:
+        if not args and "auth_plugin" not in kwargs:
             args = (None, )
         super(FakeHTTPClient, self).__init__(*args, **kwargs)
 

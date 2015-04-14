@@ -1,0 +1,170 @@
+=IP Range Boundary Tests=
+
+Copyright (c) 2008-2015, David P. D. Moss. All rights reserved.
+
+{{{
+
+>>> from netaddr import *
+>>> import pprint
+
+}}}
+
+`iter_iprange()` iterator boundary tests.
+
+{{{
+
+>>> pprint.pprint(list(iter_iprange('192.0.2.0', '192.0.2.7')))
+[IPAddress('192.0.2.0'),
+ IPAddress('192.0.2.1'),
+ IPAddress('192.0.2.2'),
+ IPAddress('192.0.2.3'),
+ IPAddress('192.0.2.4'),
+ IPAddress('192.0.2.5'),
+ IPAddress('192.0.2.6'),
+ IPAddress('192.0.2.7')]
+
+>>> pprint.pprint(list(iter_iprange('::ffff:192.0.2.0', '::ffff:192.0.2.7')))
+[IPAddress('::ffff:192.0.2.0'),
+ IPAddress('::ffff:192.0.2.1'),
+ IPAddress('::ffff:192.0.2.2'),
+ IPAddress('::ffff:192.0.2.3'),
+ IPAddress('::ffff:192.0.2.4'),
+ IPAddress('::ffff:192.0.2.5'),
+ IPAddress('::ffff:192.0.2.6'),
+ IPAddress('::ffff:192.0.2.7')]
+
+
+}}}
+
+`IPNetwork()` iterator boundary tests.
+
+{{{
+
+>>> pprint.pprint(list(IPNetwork('192.0.2.0/29')[0:-1]))
+[IPAddress('192.0.2.0'),
+ IPAddress('192.0.2.1'),
+ IPAddress('192.0.2.2'),
+ IPAddress('192.0.2.3'),
+ IPAddress('192.0.2.4'),
+ IPAddress('192.0.2.5'),
+ IPAddress('192.0.2.6')]
+
+>>> pprint.pprint(list(IPNetwork('192.0.2.0/29')[::-1]))
+[IPAddress('192.0.2.7'),
+ IPAddress('192.0.2.6'),
+ IPAddress('192.0.2.5'),
+ IPAddress('192.0.2.4'),
+ IPAddress('192.0.2.3'),
+ IPAddress('192.0.2.2'),
+ IPAddress('192.0.2.1'),
+ IPAddress('192.0.2.0')]
+ 
+For IPv4, network (first) and broadcast (last) address must be skipped.
+>>> pprint.pprint(list(IPNetwork('192.0.2.0/29').iter_hosts()))
+[IPAddress('192.0.2.1'),
+ IPAddress('192.0.2.2'),
+ IPAddress('192.0.2.3'),
+ IPAddress('192.0.2.4'),
+ IPAddress('192.0.2.5'),
+ IPAddress('192.0.2.6')]
+
+For IPv6, Subnet-Router anycast address (first) must be skipped.
+>>> pprint.pprint(list(IPNetwork('::ffff:192.0.2.0/125').iter_hosts()))
+[IPAddress('::ffff:192.0.2.1'),
+ IPAddress('::ffff:192.0.2.2'),
+ IPAddress('::ffff:192.0.2.3'),
+ IPAddress('::ffff:192.0.2.4'),
+ IPAddress('::ffff:192.0.2.5'),
+ IPAddress('::ffff:192.0.2.6'),
+ IPAddress('::ffff:192.0.2.7')]
+
+Very small IPNetworks do contain some IP addresses
+>>> list(IPNetwork("192.168.0.0/31"))
+[IPAddress('192.168.0.0'), IPAddress('192.168.0.1')]
+>>> list(IPNetwork("1234::/128"))
+[IPAddress('1234::')]
+
+But they have no IPs that can be assigned to hosts.
+>>> list(IPNetwork("1234::/128").iter_hosts())
+[]
+>>> list(IPNetwork("192.168.0.0/31").iter_hosts())
+[]
+
+}}}
+
+`IPRange()` iterator boundary tests.
+
+{{{
+
+>>> pprint.pprint(list(IPRange('192.0.2.0', '192.0.2.7')))
+[IPAddress('192.0.2.0'),
+ IPAddress('192.0.2.1'),
+ IPAddress('192.0.2.2'),
+ IPAddress('192.0.2.3'),
+ IPAddress('192.0.2.4'),
+ IPAddress('192.0.2.5'),
+ IPAddress('192.0.2.6'),
+ IPAddress('192.0.2.7')]
+
+>>> pprint.pprint(list(IPRange('::ffff:192.0.2.0', '::ffff:192.0.2.7')))
+[IPAddress('::ffff:192.0.2.0'),
+ IPAddress('::ffff:192.0.2.1'),
+ IPAddress('::ffff:192.0.2.2'),
+ IPAddress('::ffff:192.0.2.3'),
+ IPAddress('::ffff:192.0.2.4'),
+ IPAddress('::ffff:192.0.2.5'),
+ IPAddress('::ffff:192.0.2.6'),
+ IPAddress('::ffff:192.0.2.7')]
+
+}}}
+
+Boolean contexts.
+
+{{{
+
+>>> bool(IPAddress('0.0.0.0'))
+False
+
+>>> bool(IPAddress('0.0.0.1'))
+True
+
+>>> bool(IPAddress('255.255.255.255'))
+True
+
+>>> bool(IPNetwork('0.0.0.0/0'))
+True
+
+>>> bool(IPNetwork('::/0'))
+True
+
+>>> bool(IPRange('0.0.0.0', '255.255.255.255'))
+True
+
+>>> bool(IPRange('0.0.0.0', '0.0.0.0'))
+True
+
+>>> bool(IPGlob('*.*.*.*'))
+True
+
+>>> bool(IPGlob('0.0.0.0'))
+True
+
+}}}
+
+`IPAddress()` negative increment tests.
+
+{{{
+
+>>> ip = IPAddress('0.0.0.0')
+>>> ip += -1
+Traceback (most recent call last):
+...
+IndexError: result outside valid IP address boundary!
+
+>>> ip = IPAddress('255.255.255.255')
+>>> ip -= -1
+Traceback (most recent call last):
+...
+IndexError: result outside valid IP address boundary!
+
+}}}

@@ -55,5 +55,5 @@ class FloatingIPsTest(utils.FixturedTestCase):
     def test_create_floating_ip_with_pool(self):
         fl = self.cs.floating_ips.create('nova')
         self.assert_called('POST', '/os-floating-ips')
-        self.assertEqual(fl.pool, 'nova')
+        self.assertEqual('nova', fl.pool)
         self.assertIsInstance(fl, floating_ips.FloatingIP)

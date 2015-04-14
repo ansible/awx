@@ -1,0 +1,234 @@
+=IP Constructor Stress Tests=
+
+Copyright (c) 2008-2015, David P. D. Moss. All rights reserved.
+
+{{{
+
+>>> from netaddr import *
+
+}}}
+
+IPAddress constructor - integer values.
+
+{{{
+
+>>> IPAddress(1)
+IPAddress('0.0.0.1')
+
+>>> IPAddress(1, 4)
+IPAddress('0.0.0.1')
+
+>>> IPAddress(1, 6)
+IPAddress('::1')
+
+>>> IPAddress(10)
+IPAddress('0.0.0.10')
+
+>>> IPAddress(0x1ffffffff)
+IPAddress('::1:ffff:ffff')
+
+>>> IPAddress(0xffffffff, 6)
+IPAddress('::255.255.255.255')
+
+>>> IPAddress(0x1ffffffff)
+IPAddress('::1:ffff:ffff')
+
+>>> IPAddress(2 ** 128 - 1)
+IPAddress('ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff')
+
+}}}
+
+IPAddress constructor - IPv4 inet_aton behaviour (default).
+
+{{{
+
+#	Hexadecimal octets.
+>>> IPAddress('0x7f.0x1')
+IPAddress('127.0.0.1')
+
+>>> IPAddress('0x7f.0x0.0x0.0x1')
+IPAddress('127.0.0.1')
+
+#	Octal octets.
+>>> IPAddress('0177.01')
+IPAddress('127.0.0.1')
+
+#	Mixed octets.
+>>> IPAddress('0x7f.0.01')
+IPAddress('127.0.0.1')
+
+#	Partial addresses - pretty weird ...
+>>> IPAddress('127')
+IPAddress('0.0.0.127')
+
+>>> IPAddress('127')
+IPAddress('0.0.0.127')
+
+>>> IPAddress('127.1')
+IPAddress('127.0.0.1')
+
+>>> IPAddress('127.0.1')
+IPAddress('127.0.0.1')
+
+}}}
+
+IPAddress constructor - IPv4 inet_pton behaviour (stricter parser).
+
+{{{
+
+#	Octal octets.
+>>> IPAddress('0177.01', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: failed to detect a valid IP address from '0177.01'
+
+#	Mixed octets.
+>>> IPAddress('0x7f.0.01', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: failed to detect a valid IP address from '0x7f.0.01'
+
+#   Partial octets.
+>>> IPAddress('10', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: failed to detect a valid IP address from '10'
+
+>>> IPAddress('10.1', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: failed to detect a valid IP address from '10.1'
+
+>>> IPAddress('10.0.1', flags=INET_PTON)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: failed to detect a valid IP address from '10.0.1'
+
+>>> IPAddress('10.0.0.1', flags=INET_PTON)
+IPAddress('10.0.0.1')
+
+}}}
+
+IPAddress constructor - zero filled octets.
+
+{{{
+
+#   This takes a lot of people by surprise ...
+>>> IPAddress('010.000.000.001')
+IPAddress('8.0.0.1')
+
+#   So, we need this!
+>>> IPAddress('010.000.000.001', flags=ZEROFILL)
+IPAddress('10.0.0.1')
+
+#   Zero-fill with inet_aton behaviour - partial octets are OK but zero-filled
+#   octets are interpreted as decimal ...
+>>> IPAddress('010.000.001', flags=ZEROFILL)
+IPAddress('10.0.0.1')
+
+#   Zero-fill with inet_pton behaviour - 4 octets only!
+>>> IPAddress('010.000.001', flags=INET_PTON|ZEROFILL)
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: failed to detect a valid IP address from '010.000.001'
+
+#   Zero-fill with inet_pton behaviour - 4 octets only!
+>>> IPAddress('010.000.000.001', flags=INET_PTON|ZEROFILL)
+IPAddress('10.0.0.1')
+
+#   To save some typing there are short versions of these flags.
+>>> IPAddress('010.000.000.001', flags=P|Z)
+IPAddress('10.0.0.1')
+
+}}}
+
+IP network construction.
+
+{{{
+
+>>> IPNetwork('192.0.2.0/24')
+IPNetwork('192.0.2.0/24')
+
+>>> IPNetwork('192.0.2.0/255.255.255.0')
+IPNetwork('192.0.2.0/24')
+
+>>> IPNetwork('192.0.2.0/0.0.0.255')
+IPNetwork('192.0.2.0/24')
+
+>>> IPNetwork(IPNetwork('192.0.2.0/24'))
+IPNetwork('192.0.2.0/24')
+
+>>> IPNetwork(IPNetwork('::192.0.2.0/120'))
+IPNetwork('::192.0.2.0/120')
+
+>>> IPNetwork(IPNetwork('192.0.2.0/24'))
+IPNetwork('192.0.2.0/24')
+
+>>> IPNetwork('::192.0.2.0/120')
+IPNetwork('::192.0.2.0/120')
+
+>>> IPNetwork('::192.0.2.0/120', 6)
+IPNetwork('::192.0.2.0/120')
+
+}}}
+
+Optional implicit IP network prefix selection rules.
+
+{{{
+
+>>> IPNetwork('192.0.2.0', implicit_prefix=True)
+IPNetwork('192.0.2.0/24')
+
+>>> IPNetwork('231.192.0.15', implicit_prefix=True)
+IPNetwork('231.192.0.15/4')
+
+>>> IPNetwork('10', implicit_prefix=True)
+IPNetwork('10.0.0.0/8')
+
+}}}
+
+Optional flags for tweaking IPNetwork constructor behaviour.
+
+{{{
+
+>>> IPNetwork('172.24.200')
+IPNetwork('172.24.200.0/32')
+
+>>> IPNetwork('172.24.200', implicit_prefix=True)
+IPNetwork('172.24.200.0/16')
+
+#	Truncate the host bits so we get a pure network.
+>>> IPNetwork('172.24.200', implicit_prefix=True, flags=NOHOST)
+IPNetwork('172.24.0.0/16')
+
+
+}}}
+
+Negative testing
+
+{{{
+
+>>> IPNetwork('foo')
+Traceback (most recent call last):
+...
+netaddr.core.AddrFormatError: invalid IPNetwork foo
+
+}}}
+
+Netmasks
+
+{{{
+
+>>> IPAddress('1.1.1.1').netmask_bits()
+32
+
+>>> IPAddress('255.255.255.254').netmask_bits()
+31
+
+>>> IPAddress('255.255.255.0').netmask_bits()
+24
+
+>>> IPAddress('::').netmask_bits()
+128
+
+}}}

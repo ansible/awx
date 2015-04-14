@@ -58,7 +58,7 @@ class AvailabilityZoneTest(utils.FixturedTestCase):
         z0 = self.shell._treeizeAvailabilityZone(zones[0])
         z1 = self.shell._treeizeAvailabilityZone(zones[1])
 
-        self.assertEqual((len(z0), len(z1)), (1, 1))
+        self.assertEqual((1, 1), (len(z0), len(z1)))
 
         self._assertZone(z0[0], l0[0], l0[1])
         self._assertZone(z1[0], l1[0], l1[1])
@@ -89,7 +89,7 @@ class AvailabilityZoneTest(utils.FixturedTestCase):
         z1 = self.shell._treeizeAvailabilityZone(zones[1])
         z2 = self.shell._treeizeAvailabilityZone(zones[2])
 
-        self.assertEqual((len(z0), len(z1), len(z2)), (3, 5, 1))
+        self.assertEqual((3, 5, 1), (len(z0), len(z1), len(z2)))
 
         self._assertZone(z0[0], l0[0], l0[1])
         self._assertZone(z0[1], l1[0], l1[1])

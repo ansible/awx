@@ -1,0 +1,104 @@
+=Python 2.x and 3.x compatibility tests=
+
+Copyright (c) 2008-2015, David P. D. Moss. All rights reserved.
+
+{{{
+
+>>> from netaddr.compat import _sys_maxint, _is_str, _is_int, _callable
+
+>>> from netaddr.compat import _func_doc, _dict_keys, _dict_items
+
+>>> from netaddr.compat import _iter_dict_keys, _bytes_join, _zip, _range
+
+>>> from netaddr.compat import _iter_range, _func_name, _func_doc
+
+#   string and integer detection tests.
+>>> _is_int(_sys_maxint)
+True
+
+>>> _is_str(_sys_maxint)
+False
+
+>>> _is_str('')
+True
+
+>>> _is_str(''.encode())
+True
+
+#   byte string join tests.
+>>> str_8bit = _bytes_join(['a'.encode(), 'b'.encode(), 'c'.encode()])
+
+>>> str_8bit == 'abc'.encode()
+True
+
+>>> "b'abc'" == '%r' % str_8bit
+True
+
+#   dict operation tests.
+>>> d = { 'a' : 0, 'b' : 1, 'c' : 2 }
+
+>>> sorted(_dict_keys(d)) == ['a', 'b', 'c']
+True
+
+>>> sorted(_dict_items(d)) == [('a', 0), ('b', 1), ('c', 2)]
+True
+
+#   zip() BIF tests.
+>>> l2 = _zip([0], [1])
+
+>>> hasattr(_zip(l2), 'pop')
+True
+
+>>> l2 == [(0, 1)]
+True
+
+#   range/xrange() tests.
+>>> l1 = _range(3)
+
+>>> isinstance(l1, list)
+True
+
+>>> hasattr(l1, 'pop')
+True
+
+>>> l1 == [0, 1, 2]
+True
+
+>>> it = _iter_range(3)
+
+>>> isinstance(it, list)
+False
+
+>>> hasattr(it, '__iter__')
+True
+
+>>> it == [0, 1, 2]
+False
+
+>>> list(it) == [0, 1, 2]
+True
+
+#   callable() and function meta-data tests.
+>>> i = 1
+>>> def f1():
+...     """docstring"""
+...     pass
+
+>>> f2 = lambda x: x
+
+>>> _callable(i)
+False
+
+>>> _callable(f1)
+True
+
+>>> _callable(f2)
+True
+
+>>> _func_name(f1) == 'f1'
+True
+
+>>> _func_doc(f1) == 'docstring'
+True
+
+}}}

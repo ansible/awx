@@ -57,11 +57,6 @@ class CommandError(ClientException):
     pass
 
 
-class ResourceNotFound(ClientException):
-    """Error in getting the resource."""
-    pass
-
-
 class AuthorizationFailure(ClientException):
     """Cannot authorize API client."""
     pass
@@ -432,7 +427,7 @@ def from_response(response, method, url):
     """
 
     req_id = response.headers.get("x-openstack-request-id")
-    #NOTE(hdd) true for older versions of nova and cinder
+    # NOTE(hdd) true for older versions of nova and cinder
     if not req_id:
         req_id = response.headers.get("x-compute-request-id")
     kwargs = {

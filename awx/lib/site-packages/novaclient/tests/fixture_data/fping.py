@@ -10,9 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import httpretty
-
-from novaclient.openstack.common import jsonutils
 from novaclient.tests.fixture_data import base
 
 
@@ -30,9 +27,9 @@ class Fixture(base.Fixture):
                 "alive": True,
             }
         }
-        httpretty.register_uri(httpretty.GET, self.url(1),
-                               body=jsonutils.dumps(get_os_fping_1),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url(1),
+                                   json=get_os_fping_1,
+                                   headers=self.json_headers)
 
         get_os_fping = {
             'servers': [
@@ -44,6 +41,6 @@ class Fixture(base.Fixture):
                 },
             ]
         }
-        httpretty.register_uri(httpretty.GET, self.url(),
-                               body=jsonutils.dumps(get_os_fping),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url(),
+                                   json=get_os_fping,
+                                   headers=self.json_headers)

@@ -740,6 +740,7 @@ class InventorySourceOptions(BaseModel):
         ('gce',    _('Google Compute Engine')),
         ('azure',  _('Microsoft Azure')),
         ('vmware', _('VMware vCenter')),
+        ('openstack', _('Openstack')),
         ('custom', _('Custom Script')),
     ]
 
@@ -961,6 +962,11 @@ class InventorySourceOptions(BaseModel):
         """Return a complete list of regions in VMware, as a list of two-tuples
         (but note that VMware doesn't actually have regions!).
         """
+        return [('all', 'All')]
+
+    @classmethod
+    def get_openstack_region_choices(self):
+        """I don't think openstack has regions"""
         return [('all', 'All')]
 
     def clean_credential(self):

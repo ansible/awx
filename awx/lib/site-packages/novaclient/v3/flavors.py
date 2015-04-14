@@ -97,7 +97,7 @@ class FlavorManager(flavors.FlavorManager):
                 "id": id,
                 "swap": swap,
                 "ephemeral": ephemeral,
-                "rxtx_factor": rxtx_factor,
+                "os-flavor-rxtx:rxtx_factor": rxtx_factor,
                 "flavor-access:is_public": is_public,
             }
         }

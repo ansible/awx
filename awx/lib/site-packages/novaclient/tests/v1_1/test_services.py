@@ -35,8 +35,8 @@ class ServicesTest(utils.TestCase):
         self.cs.assert_called('GET', '/os-services')
         for s in svs:
             self.assertIsInstance(s, self._get_service_type())
-            self.assertEqual(s.binary, 'nova-compute')
-            self.assertEqual(s.host, 'host1')
+            self.assertEqual('nova-compute', s.binary)
+            self.assertEqual('host1', s.host)
             self.assertTrue(str(s).startswith('<Service: '))
 
     def test_list_services_with_hostname(self):
@@ -44,16 +44,16 @@ class ServicesTest(utils.TestCase):
         self.cs.assert_called('GET', '/os-services?host=host2')
         for s in svs:
             self.assertIsInstance(s, self._get_service_type())
-            self.assertEqual(s.binary, 'nova-compute')
-            self.assertEqual(s.host, 'host2')
+            self.assertEqual('nova-compute', s.binary)
+            self.assertEqual('host2', s.host)
 
     def test_list_services_with_binary(self):
         svs = self.cs.services.list(binary='nova-cert')
         self.cs.assert_called('GET', '/os-services?binary=nova-cert')
         for s in svs:
             self.assertIsInstance(s, self._get_service_type())
-            self.assertEqual(s.binary, 'nova-cert')
-            self.assertEqual(s.host, 'host1')
+            self.assertEqual('nova-cert', s.binary)
+            self.assertEqual('host1', s.host)
 
     def test_list_services_with_host_binary(self):
         svs = self.cs.services.list(host='host2', binary='nova-cert')
@@ -61,8 +61,8 @@ class ServicesTest(utils.TestCase):
                               '/os-services?host=host2&binary=nova-cert')
         for s in svs:
             self.assertIsInstance(s, self._get_service_type())
-            self.assertEqual(s.binary, 'nova-cert')
-            self.assertEqual(s.host, 'host2')
+            self.assertEqual('nova-cert', s.binary)
+            self.assertEqual('host2', s.host)
 
     def _update_body(self, host, binary, disabled_reason=None):
         body = {"host": host,
@@ -76,7 +76,7 @@ class ServicesTest(utils.TestCase):
         values = self._update_body("host1", "nova-cert")
         self.cs.assert_called('PUT', '/os-services/enable', values)
         self.assertIsInstance(service, self._get_service_type())
-        self.assertEqual(service.status, 'enabled')
+        self.assertEqual('enabled', service.status)
 
     def test_services_delete(self):
         self.cs.services.delete('1')
@@ -87,7 +87,7 @@ class ServicesTest(utils.TestCase):
         values = self._update_body("host1", "nova-cert")
         self.cs.assert_called('PUT', '/os-services/disable', values)
         self.assertIsInstance(service, self._get_service_type())
-        self.assertEqual(service.status, 'disabled')
+        self.assertEqual('disabled', service.status)
 
     def test_services_disable_log_reason(self):
         service = self.cs.services.disable_log_reason(
@@ -96,4 +96,4 @@ class ServicesTest(utils.TestCase):
                                    "disable bad host")
         self.cs.assert_called('PUT', '/os-services/disable-log-reason', values)
         self.assertIsInstance(service, self._get_service_type())
-        self.assertEqual(service.status, 'disabled')
+        self.assertEqual('disabled', service.status)

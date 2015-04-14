@@ -12,11 +12,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from novaclient import extension
-from novaclient.v1_1.contrib import instance_action
 
+from novaclient import extension
 from novaclient.tests import utils
 from novaclient.tests.v1_1.contrib import fakes
+from novaclient.v1_1.contrib import instance_action
 
 
 extensions = [

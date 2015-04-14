@@ -15,10 +15,9 @@
 
 
 from novaclient import extension
-from novaclient.v1_1.contrib import baremetal
-
 from novaclient.tests import utils
 from novaclient.tests.v1_1.contrib import fakes
+from novaclient.v1_1.contrib import baremetal
 
 
 extensions = [

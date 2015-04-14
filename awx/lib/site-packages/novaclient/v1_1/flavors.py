@@ -16,12 +16,12 @@
 Flavor interface.
 """
 
+from oslo.utils import strutils
 from six.moves.urllib import parse
 
 from novaclient import base
 from novaclient import exceptions
 from novaclient.openstack.common.gettextutils import _
-from novaclient.openstack.common import strutils
 from novaclient import utils
 
 

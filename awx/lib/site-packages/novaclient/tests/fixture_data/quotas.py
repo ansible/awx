@@ -10,9 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import httpretty
-
-from novaclient.openstack.common import jsonutils
 from novaclient.tests.fixture_data import base
 
 
@@ -25,32 +22,32 @@ class V1(base.Fixture):
 
         uuid = '97f4c221-bff4-4578-b030-0df4ef119353'
         uuid2 = '97f4c221bff44578b0300df4ef119353'
-        test_json = jsonutils.dumps({'quota_set': self.test_quota('test')})
+        test_json = {'quota_set': self.test_quota('test')}
+        self.headers = {'Content-Type': 'application/json'}
 
         for u in ('test', 'tenant-id', 'tenant-id/defaults',
                   '%s/defaults' % uuid2):
-            httpretty.register_uri(httpretty.GET, self.url(u),
-                                   body=test_json,
-                                   content_type='application/json')
+            self.requests.register_uri('GET', self.url(u),
+                                       json=test_json,
+                                       headers=self.headers)
 
-        quota_json = jsonutils.dumps({'quota_set': self.test_quota(uuid)})
-        httpretty.register_uri(httpretty.PUT, self.url(uuid),
-                               body=quota_json,
-                               content_type='application/json')
-        httpretty.register_uri(httpretty.GET, self.url(uuid),
-                               body=quota_json,
-                               content_type='application/json')
+        self.requests.register_uri('PUT', self.url(uuid),
+                                   json={'quota_set': self.test_quota(uuid)},
+                                   headers=self.headers)
 
-        quota_json2 = jsonutils.dumps({'quota_set': self.test_quota(uuid2)})
-        httpretty.register_uri(httpretty.PUT, self.url(uuid2),
-                               body=quota_json2,
-                               content_type='application/json')
-        httpretty.register_uri(httpretty.GET, self.url(uuid2),
-                               body=quota_json2,
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url(uuid),
+                                   json={'quota_set': self.test_quota(uuid)},
+                                   headers=self.headers)
+
+        self.requests.register_uri('PUT', self.url(uuid2),
+                                   json={'quota_set': self.test_quota(uuid2)},
+                                   headers=self.headers)
+        self.requests.register_uri('GET', self.url(uuid2),
+                                   json={'quota_set': self.test_quota(uuid2)},
+                                   headers=self.headers)
 
         for u in ('test', uuid2):
-            httpretty.register_uri(httpretty.DELETE, self.url(u), status=202)
+            self.requests.register_uri('DELETE', self.url(u), status_code=202)
 
     def test_quota(self, tenant_id='test'):
         return {
@@ -82,6 +79,6 @@ class V3(V1):
             }
         }
 
-        httpretty.register_uri(httpretty.GET, self.url('test', 'detail'),
-                               body=jsonutils.dumps(get_detail),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url('test', 'detail'),
+                                   json=get_detail,
+                                   headers=self.headers)

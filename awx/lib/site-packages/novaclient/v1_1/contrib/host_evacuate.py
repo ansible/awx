@@ -26,8 +26,8 @@ def _server_evacuate(cs, server, args):
     success = True
     error_message = ""
     try:
-        cs.servers.evacuate(server['uuid'], args.target_host,
-                            args.on_shared_storage)
+        cs.servers.evacuate(server=server['uuid'], host=args.target_host,
+                            on_shared_storage=args.on_shared_storage)
     except Exception as e:
         success = False
         error_message = _("Error while evacuating instance: %s") % e
@@ -41,7 +41,9 @@ def _server_evacuate(cs, server, args):
 @utils.arg('--target_host',
            metavar='<target_host>',
            default=None,
-           help=_('Name of target host.'))
+           help=_('Name of target host. '
+                  'If no host is specified the scheduler'
+                  ' will select a target.'))
 @utils.arg('--on-shared-storage',
            dest='on_shared_storage',
            action="store_true",
@@ -49,7 +51,7 @@ def _server_evacuate(cs, server, args):
            help=_('Specifies whether all instances files are on shared '
                   ' storage'))
 def do_host_evacuate(cs, args):
-    """Evacuate all instances from failed host to specified one."""
+    """Evacuate all instances from failed host."""
     hypervisors = cs.hypervisors.search(args.host, servers=True)
     response = []
     for hyper in hypervisors:

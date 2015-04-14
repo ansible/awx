@@ -67,36 +67,36 @@ class FlavorsTest(utils.TestCase):
         f = self.cs.flavors.get(1)
         self.cs.assert_called('GET', '/flavors/1')
         self.assertIsInstance(f, self.flavor_type)
-        self.assertEqual(f.ram, 256)
-        self.assertEqual(f.disk, 10)
-        self.assertEqual(f.ephemeral, 10)
-        self.assertEqual(f.is_public, True)
+        self.assertEqual(256, f.ram)
+        self.assertEqual(10, f.disk)
+        self.assertEqual(10, f.ephemeral)
+        self.assertEqual(True, f.is_public)
 
     def test_get_flavor_details_alphanum_id(self):
         f = self.cs.flavors.get('aa1')
         self.cs.assert_called('GET', '/flavors/aa1')
         self.assertIsInstance(f, self.flavor_type)
-        self.assertEqual(f.ram, 128)
-        self.assertEqual(f.disk, 0)
-        self.assertEqual(f.ephemeral, 0)
-        self.assertEqual(f.is_public, True)
+        self.assertEqual(128, f.ram)
+        self.assertEqual(0, f.disk)
+        self.assertEqual(0, f.ephemeral)
+        self.assertEqual(True, f.is_public)
 
     def test_get_flavor_details_diablo(self):
         f = self.cs.flavors.get(3)
         self.cs.assert_called('GET', '/flavors/3')
         self.assertIsInstance(f, self.flavor_type)
-        self.assertEqual(f.ram, 256)
-        self.assertEqual(f.disk, 10)
-        self.assertEqual(f.ephemeral, 'N/A')
-        self.assertEqual(f.is_public, 'N/A')
+        self.assertEqual(256, f.ram)
+        self.assertEqual(10, f.disk)
+        self.assertEqual('N/A', f.ephemeral)
+        self.assertEqual('N/A', f.is_public)
 
     def test_find(self):
         f = self.cs.flavors.find(ram=256)
         self.cs.assert_called('GET', '/flavors/detail')
-        self.assertEqual(f.name, '256 MB Server')
+        self.assertEqual('256 MB Server', f.name)
 
         f = self.cs.flavors.find(disk=0)
-        self.assertEqual(f.name, '128 MB Server')
+        self.assertEqual('128 MB Server', f.name)
 
         self.assertRaises(exceptions.NotFound, self.cs.flavors.find,
                           disk=12345)

@@ -10,8 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import httpretty
-
 from novaclient.openstack.common import jsonutils
 from novaclient.tests.fixture_data import base
 
@@ -34,29 +32,30 @@ class Fixture(base.Fixture):
             ]
         }
 
-        httpretty.register_uri(httpretty.GET, self.url(),
-                               body=jsonutils.dumps(get_os_networks),
-                               content_type='application/json')
+        headers = {'Content-Type': 'application/json'}
 
-        def post_os_networks(request, url, headers):
-            body = jsonutils.loads(request.body.decode('utf-8'))
-            data = jsonutils.dumps({'network': body})
-            return 202, headers, data
+        self.requests.register_uri('GET', self.url(),
+                                   json=get_os_networks,
+                                   headers=headers)
 
-        httpretty.register_uri(httpretty.POST, self.url(),
-                               body=post_os_networks,
-                               content_type='application/json')
+        def post_os_networks(request, context):
+            body = jsonutils.loads(request.body)
+            return {'network': body}
+
+        self.requests.register_uri("POST", self.url(),
+                               json=post_os_networks,
+                               headers=headers)
 
         get_os_networks_1 = {'network': {"label": "1", "cidr": "10.0.0.0/24"}}
 
-        httpretty.register_uri(httpretty.GET, self.url(1),
-                               body=jsonutils.dumps(get_os_networks_1),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url(1),
+                                   json=get_os_networks_1,
+                                   headers=headers)
 
-        httpretty.register_uri(httpretty.DELETE,
-                               self.url('networkdelete'),
-                               stauts=202)
+        self.requests.register_uri('DELETE',
+                                   self.url('networkdelete'),
+                                   status_code=202)
 
         for u in ('add', 'networkdisassociate/action', 'networktest/action',
                   '1/action', '2/action'):
-            httpretty.register_uri(httpretty.POST, self.url(u), stauts=202)
+            self.requests.register_uri('POST', self.url(u), status_code=202)

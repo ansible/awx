@@ -25,13 +25,13 @@ class FloatingIPDNSDomainTest(utils.FixturedTestCase):
 
     def test_dns_domains(self):
         domainlist = self.cs.dns_domains.domains()
-        self.assertEqual(len(domainlist), 2)
+        self.assertEqual(2, len(domainlist))
 
         for entry in domainlist:
             self.assertIsInstance(entry,
                                   floating_ip_dns.FloatingIPDNSDomain)
 
-        self.assertEqual(domainlist[1].domain, 'example.com')
+        self.assertEqual('example.com', domainlist[1].domain)
 
     def test_create_private_domain(self):
         self.cs.dns_domains.create_private(self.testdomain, 'test_avzone')
@@ -61,13 +61,13 @@ class FloatingIPDNSEntryTest(utils.FixturedTestCase):
     def test_get_dns_entries_by_ip(self):
         entries = self.cs.dns_entries.get_for_ip(self.testdomain,
                                                  ip=self.testip)
-        self.assertEqual(len(entries), 2)
+        self.assertEqual(2, len(entries))
 
         for entry in entries:
             self.assertIsInstance(entry,
                                   floating_ip_dns.FloatingIPDNSEntry)
 
-        self.assertEqual(entries[1].dns_entry['name'], 'host2')
+        self.assertEqual('host2', entries[1].dns_entry['name'])
         self.assertEqual(entries[1].dns_entry['ip'], self.testip)
 
     def test_get_dns_entry_by_name(self):
