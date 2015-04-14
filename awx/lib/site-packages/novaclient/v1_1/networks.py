@@ -26,7 +26,7 @@ class Network(base.Resource):
     """
     A network.
     """
-    HUMAN_ID = False
+    HUMAN_ID = True
     NAME_ATTR = "label"
 
     def __repr__(self):
@@ -89,8 +89,14 @@ class NetworkManager(base.ManagerWithFind):
         :param vlan: int
         :param vlan_start: int
         :param vpn_start: int
+        :param mtu: int
+        :param enable_dhcp: int
+        :param dhcp_server: str
+        :param share_address: int
+        :param allowed_start: str
+        :param allowed_end: str
 
-        :rtype: list of :class:`Network`
+        :rtype: object of :class:`Network`
         """
         body = {"network": kwargs}
         return self._create('/os-networks', body, 'network')

@@ -58,7 +58,7 @@ class BaseResource(object):
         for bash completion.
         """
         if self.NAME_ATTR in self.__dict__ and self.HUMAN_ID:
-            return utils.slugify(getattr(self, self.NAME_ATTR))
+            return utils.to_slug(getattr(self, self.NAME_ATTR))
         return None
 
 

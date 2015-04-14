@@ -10,9 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import httpretty
-
-from novaclient.openstack.common import jsonutils
 from novaclient.tests.fixture_data import base
 
 
@@ -24,17 +21,17 @@ class Fixture(base.Fixture):
         super(Fixture, self).setUp()
 
         get_os_cloudpipe = {'cloudpipes': [{'project_id': 1}]}
-        httpretty.register_uri(httpretty.GET, self.url(),
-                               body=jsonutils.dumps(get_os_cloudpipe),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url(),
+                               json=get_os_cloudpipe,
+                               headers=self.json_headers)
 
         instance_id = '9d5824aa-20e6-4b9f-b967-76a699fc51fd'
         post_os_cloudpipe = {'instance_id': instance_id}
-        httpretty.register_uri(httpretty.POST, self.url(),
-                               body=jsonutils.dumps(post_os_cloudpipe),
-                               content_type='application/json',
-                               status=202)
+        self.requests.register_uri('POST', self.url(),
+                               json=post_os_cloudpipe,
+                               headers=self.json_headers,
+                               status_code=202)
 
-        httpretty.register_uri(httpretty.PUT, self.url('configure-project'),
-                               content_type='application/json',
-                               status=202)
+        self.requests.register_uri('PUT', self.url('configure-project'),
+                                   headers=self.json_headers,
+                                   status_code=202)

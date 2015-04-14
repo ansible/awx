@@ -10,9 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-import httpretty
-
 from novaclient.openstack.common import jsonutils
 from novaclient.tests.fixture_data import base
 
@@ -54,22 +51,23 @@ class Fixture(base.Fixture):
             }
         ]
 
-        get_server_groups = {'server_groups': server_groups}
-        httpretty.register_uri(httpretty.GET, self.url(),
-                               body=jsonutils.dumps(get_server_groups),
-                               content_type='application/json')
+        headers = {'Content-Type': 'application/json'}
+
+        self.requests.register_uri('GET', self.url(),
+                                   json={'server_groups': server_groups},
+                                   headers=headers)
 
         server = server_groups[0]
-        server_json = jsonutils.dumps({'server_group': server})
+        server_j = jsonutils.dumps({'server_group': server})
 
         def _register(method, *args):
-            httpretty.register_uri(method, self.url(*args), body=server_json)
+            self.requests.register_uri(method, self.url(*args), text=server_j)
 
-        _register(httpretty.POST)
-        _register(httpretty.POST, server['id'])
-        _register(httpretty.GET, server['id'])
-        _register(httpretty.PUT, server['id'])
-        _register(httpretty.POST, server['id'], '/action')
+        _register('POST')
+        _register('POST', server['id'])
+        _register('GET', server['id'])
+        _register('PUT', server['id'])
+        _register('POST', server['id'], '/action')
 
-        httpretty.register_uri(httpretty.DELETE, self.url(server['id']),
-                               status=202)
+        self.requests.register_uri('DELETE', self.url(server['id']),
+                                   status_code=202)

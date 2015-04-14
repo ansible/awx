@@ -13,19 +13,23 @@
 
 import json
 import re
+import sys
 import textwrap
 import uuid
 
-from oslo.serialization import jsonutils
 from oslo.utils import encodeutils
 import pkg_resources
 import prettytable
 import six
 
 from novaclient import exceptions
-from novaclient.i18n import _
 from novaclient.openstack.common import cliutils
+from novaclient.openstack.common.gettextutils import _
+from novaclient.openstack.common import jsonutils
 
+
+arg = cliutils.arg
+env = cliutils.env
 
 VALID_KEY_REGEX = re.compile(r"[\w\.\- :]+$", re.UNICODE)
 
@@ -67,10 +71,34 @@ def get_resource_manager_extra_kwargs(f, args, allow_conflicts=False):
     return extra_kwargs
 
 
+def service_type(stype):
+    """
+    Adds 'service_type' attribute to decorated function.
+    Usage:
+        @service_type('volume')
+        def mymethod(f):
+            ...
+    """
+    def inner(f):
+        f.service_type = stype
+        return f
+    return inner
+
+
+def get_service_type(f):
+    """
+    Retrieves service type from function
+    """
+    return getattr(f, 'service_type', None)
+
+
+def pretty_choice_list(l):
+    return ', '.join("'%s'" % i for i in l)
+
+
 def pretty_choice_dict(d):
     """Returns a formatted dict as 'key=value'."""
-    return cliutils.pretty_choice_list(
-        ['%s=%s' % (k, d[k]) for k in sorted(d.keys())])
+    return pretty_choice_list(['%s=%s' % (k, d[k]) for k in sorted(d.keys())])
 
 
 def print_list(objs, fields, formatters={}, sortby_index=None):
@@ -209,21 +237,21 @@ def find_resource(manager, name_or_id, **find_args):
 
     try:
         try:
+            return manager.find(human_id=name_or_id, **find_args)
+        except exceptions.NotFound:
+            pass
+
+        # finally try to find entity by name
+        try:
             resource = getattr(manager, 'resource_class', None)
             name_attr = resource.NAME_ATTR if resource else 'name'
             kwargs = {name_attr: name_or_id}
             kwargs.update(find_args)
             return manager.find(**kwargs)
         except exceptions.NotFound:
-            pass
-
-        # finally try to find entity by human_id
-        try:
-            return manager.find(human_id=name_or_id, **find_args)
-        except exceptions.NotFound:
-            msg = (_("No %(class)s with a name or ID of '%(name)s' exists.") %
-                   {'class': manager.resource_class.__name__.lower(),
-                    'name': name_or_id})
+            msg = _("No %(class)s with a name or ID of '%(name)s' exists.") % \
+                  {'class': manager.resource_class.__name__.lower(),
+                   'name': name_or_id}
             raise exceptions.CommandError(msg)
     except exceptions.NoUniqueMatch:
         msg = (_("Multiple %(class)s matches found for '%(name)s', use an ID "
@@ -285,6 +313,24 @@ def _make_field_formatter(attr, filters=None):
     return name, formatter
 
 
+class HookableMixin(object):
+    """Mixin so classes can register and run hooks."""
+    _hooks_map = {}
+
+    @classmethod
+    def add_hook(cls, hook_type, hook_func):
+        if hook_type not in cls._hooks_map:
+            cls._hooks_map[hook_type] = []
+
+        cls._hooks_map[hook_type].append(hook_func)
+
+    @classmethod
+    def run_hooks(cls, hook_type, *args, **kwargs):
+        hook_funcs = cls._hooks_map.get(hook_type) or []
+        for hook_func in hook_funcs:
+            hook_func(*args, **kwargs)
+
+
 def safe_issubclass(*args):
     """Like issubclass, but will just return False if not a class."""
 
@@ -297,20 +343,11 @@ def safe_issubclass(*args):
     return False
 
 
-def do_action_on_many(action, resources, success_msg, error_msg):
-    """Helper to run an action on many resources."""
-    failure_flag = False
-
-    for resource in resources:
-        try:
-            action(resource)
-            print(success_msg % resource)
-        except Exception as e:
-            failure_flag = True
-            print(e)
-
-    if failure_flag:
-        raise exceptions.CommandError(error_msg)
+def import_class(import_str):
+    """Returns a class from a string including module and class."""
+    mod_str, _sep, class_str = import_str.rpartition('.')
+    __import__(mod_str)
+    return getattr(sys.modules[mod_str], class_str)
 
 
 def _load_entry_point(ep_name, name=None):

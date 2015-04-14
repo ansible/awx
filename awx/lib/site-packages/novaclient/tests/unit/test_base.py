@@ -36,7 +36,7 @@ class BaseTest(utils.TestCase):
 
     def test_resource_lazy_getattr(self):
         f = flavors.Flavor(cs.flavors, {'id': 1})
-        self.assertEqual('256 mb server', f.name)
+        self.assertEqual('256 MB Server', f.name)
         cs.assert_called('GET', '/flavors/1')
 
         # Missing stuff still fails after a second get

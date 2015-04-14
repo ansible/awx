@@ -38,7 +38,7 @@ class FlavorsTest(test_flavors.FlavorsTest):
                 "ephemeral": ephemeral,
                 "id": id,
                 "swap": swap,
-                "rxtx_factor": rxtx_factor,
+                "os-flavor-rxtx:rxtx_factor": rxtx_factor,
                 "flavor-access:is_public": is_public,
             }
         }

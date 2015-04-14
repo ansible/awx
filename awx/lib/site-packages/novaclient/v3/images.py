@@ -17,10 +17,11 @@
 Image interface.
 """
 
+from oslo.utils import encodeutils
+from oslo.utils import strutils
 from six.moves.urllib import parse
 
 from novaclient import base
-from novaclient.openstack.common import strutils
 
 
 class Image(base.Resource):
@@ -51,7 +52,7 @@ class ImageManager(base.ManagerWithFind):
 
     def _image_meta_from_headers(self, headers):
         meta = {'properties': {}}
-        safe_decode = strutils.safe_decode
+        safe_decode = encodeutils.safe_decode
         for key, value in headers.items():
             value = safe_decode(value, incoming='utf-8')
             if key.startswith('x-image-meta-property-'):

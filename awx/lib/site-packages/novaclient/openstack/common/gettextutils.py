@@ -32,22 +32,111 @@ import os
 from babel import localedata
 import six
 
-_localedir = os.environ.get('novaclient'.upper() + '_LOCALEDIR')
-_t = gettext.translation('novaclient', localedir=_localedir, fallback=True)
-
-# We use separate translation catalogs for each log level, so set up a
-# mapping between the log level name and the translator. The domain
-# for the log level is project_name + "-log-" + log_level so messages
-# for each level end up in their own catalog.
-_t_log_levels = dict(
-    (level, gettext.translation('novaclient' + '-log-' + level,
-                                localedir=_localedir,
-                                fallback=True))
-    for level in ['info', 'warning', 'error', 'critical']
-)
-
 _AVAILABLE_LANGUAGES = {}
+
+# FIXME(dhellmann): Remove this when moving to oslo.i18n.
 USE_LAZY = False
+
+
+class TranslatorFactory(object):
+    """Create translator functions
+    """
+
+    def __init__(self, domain, lazy=False, localedir=None):
+        """Establish a set of translation functions for the domain.
+
+        :param domain: Name of translation domain,
+                       specifying a message catalog.
+        :type domain: str
+        :param lazy: Delays translation until a message is emitted.
+                     Defaults to False.
+        :type lazy: Boolean
+        :param localedir: Directory with translation catalogs.
+        :type localedir: str
+        """
+        self.domain = domain
+        self.lazy = lazy
+        if localedir is None:
+            localedir = os.environ.get(domain.upper() + '_LOCALEDIR')
+        self.localedir = localedir
+
+    def _make_translation_func(self, domain=None):
+        """Return a new translation function ready for use.
+
+        Takes into account whether or not lazy translation is being
+        done.
+
+        The domain can be specified to override the default from the
+        factory, but the localedir from the factory is always used
+        because we assume the log-level translation catalogs are
+        installed in the same directory as the main application
+        catalog.
+
+        """
+        if domain is None:
+            domain = self.domain
+        if self.lazy:
+            return functools.partial(Message, domain=domain)
+        t = gettext.translation(
+            domain,
+            localedir=self.localedir,
+            fallback=True,
+        )
+        if six.PY3:
+            return t.gettext
+        return t.ugettext
+
+    @property
+    def primary(self):
+        "The default translation function."
+        return self._make_translation_func()
+
+    def _make_log_translation_func(self, level):
+        return self._make_translation_func(self.domain + '-log-' + level)
+
+    @property
+    def log_info(self):
+        "Translate info-level log messages."
+        return self._make_log_translation_func('info')
+
+    @property
+    def log_warning(self):
+        "Translate warning-level log messages."
+        return self._make_log_translation_func('warning')
+
+    @property
+    def log_error(self):
+        "Translate error-level log messages."
+        return self._make_log_translation_func('error')
+
+    @property
+    def log_critical(self):
+        "Translate critical-level log messages."
+        return self._make_log_translation_func('critical')
+
+
+# NOTE(dhellmann): When this module moves out of the incubator into
+# oslo.i18n, these global variables can be moved to an integration
+# module within each application.
+
+# Create the global translation functions.
+_translators = TranslatorFactory('novaclient')
+
+# The primary translation function using the well-known name "_"
+_ = _translators.primary
+
+# Translators for log levels.
+#
+# The abbreviated names are meant to reflect the usual use of a short
+# name like '_'. The "L" is for "log" and the other letter comes from
+# the level.
+_LI = _translators.log_info
+_LW = _translators.log_warning
+_LE = _translators.log_error
+_LC = _translators.log_critical
+
+# NOTE(dhellmann): End of globals that will move to the application's
+# integration module.
 
 
 def enable_lazy():
@@ -58,39 +147,16 @@ def enable_lazy():
     your project is importing _ directly instead of using the
     gettextutils.install() way of importing the _ function.
     """
-    global USE_LAZY
+    # FIXME(dhellmann): This function will be removed in oslo.i18n,
+    # because the TranslatorFactory makes it superfluous.
+    global _, _LI, _LW, _LE, _LC, USE_LAZY
+    tf = TranslatorFactory('novaclient', lazy=True)
+    _ = tf.primary
+    _LI = tf.log_info
+    _LW = tf.log_warning
+    _LE = tf.log_error
+    _LC = tf.log_critical
     USE_LAZY = True
-
-
-def _(msg):
-    if USE_LAZY:
-        return Message(msg, domain='novaclient')
-    else:
-        if six.PY3:
-            return _t.gettext(msg)
-        return _t.ugettext(msg)
-
-
-def _log_translation(msg, level):
-    """Build a single translation of a log message
-    """
-    if USE_LAZY:
-        return Message(msg, domain='novaclient' + '-log-' + level)
-    else:
-        translator = _t_log_levels[level]
-        if six.PY3:
-            return translator.gettext(msg)
-        return translator.ugettext(msg)
-
-# Translators for log levels.
-#
-# The abbreviated names are meant to reflect the usual use of a short
-# name like '_'. The "L" is for "log" and the other letter comes from
-# the level.
-_LI = functools.partial(_log_translation, level='info')
-_LW = functools.partial(_log_translation, level='warning')
-_LE = functools.partial(_log_translation, level='error')
-_LC = functools.partial(_log_translation, level='critical')
 
 
 def install(domain, lazy=False):
@@ -112,26 +178,9 @@ def install(domain, lazy=False):
                  any available locale.
     """
     if lazy:
-        # NOTE(mrodden): Lazy gettext functionality.
-        #
-        # The following introduces a deferred way to do translations on
-        # messages in OpenStack. We override the standard _() function
-        # and % (format string) operation to build Message objects that can
-        # later be translated when we have more information.
-        def _lazy_gettext(msg):
-            """Create and return a Message object.
-
-            Lazy gettext function for a given domain, it is a factory method
-            for a project/module to get a lazy gettext function for its own
-            translation domain (i.e. nova, glance, cinder, etc.)
-
-            Message encapsulates a string so that we can translate
-            it later when needed.
-            """
-            return Message(msg, domain=domain)
-
         from six import moves
-        moves.builtins.__dict__['_'] = _lazy_gettext
+        tf = TranslatorFactory(domain, lazy=True)
+        moves.builtins.__dict__['_'] = tf.primary
     else:
         localedir = '%s_LOCALEDIR' % domain.upper()
         if six.PY3:
@@ -274,13 +323,14 @@ class Message(six.text_type):
     def __radd__(self, other):
         return self.__add__(other)
 
-    def __str__(self):
-        # NOTE(luisg): Logging in python 2.6 tries to str() log records,
-        # and it expects specifically a UnicodeError in order to proceed.
-        msg = _('Message objects do not support str() because they may '
-                'contain non-ascii characters. '
-                'Please use unicode() or translate() instead.')
-        raise UnicodeError(msg)
+    if six.PY2:
+        def __str__(self):
+            # NOTE(luisg): Logging in python 2.6 tries to str() log records,
+            # and it expects specifically a UnicodeError in order to proceed.
+            msg = _('Message objects do not support str() because they may '
+                    'contain non-ascii characters. '
+                    'Please use unicode() or translate() instead.')
+            raise UnicodeError(msg)
 
 
 def get_available_languages(domain):
@@ -323,8 +373,8 @@ def get_available_languages(domain):
                'zh_Hant_HK': 'zh_HK',
                'zh_Hant': 'zh_TW',
                'fil': 'tl_PH'}
-    for (locale, alias) in six.iteritems(aliases):
-        if locale in language_list and alias not in language_list:
+    for (locale_, alias) in six.iteritems(aliases):
+        if locale_ in language_list and alias not in language_list:
             language_list.append(alias)
 
     _AVAILABLE_LANGUAGES[domain] = language_list

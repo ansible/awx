@@ -10,9 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-import httpretty
-
 from novaclient.openstack.common import jsonutils
 from novaclient.tests import fakes
 from novaclient.tests.fixture_data import base
@@ -64,36 +61,39 @@ class Fixture(base.Fixture):
         }
 
         get_groups = {'security_groups': [security_group_1, security_group_2]}
-        httpretty.register_uri(httpretty.GET, self.url(),
-                               body=jsonutils.dumps(get_groups),
-                               content_type='application/json')
+        headers = {'Content-Type': 'application/json'}
+
+        self.requests.register_uri('GET', self.url(),
+                                   json=get_groups,
+                                   headers=headers)
 
         get_group_1 = {'security_group': security_group_1}
-        httpretty.register_uri(httpretty.GET, self.url(1),
-                               body=jsonutils.dumps(get_group_1),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url(1),
+                                   json=get_group_1,
+                                   headers=headers)
 
-        httpretty.register_uri(httpretty.DELETE, self.url(1), status=202)
+        self.requests.register_uri('DELETE', self.url(1), status_code=202)
 
-        def post_os_security_groups(request, url, headers):
-            body = jsonutils.loads(request.body.decode('utf-8'))
+        def post_os_security_groups(request, context):
+            body = jsonutils.loads(request.body)
             assert list(body) == ['security_group']
             fakes.assert_has_keys(body['security_group'],
                                   required=['name', 'description'])
-            r = jsonutils.dumps({'security_group': security_group_1})
-            return 202, headers, r
+            return {'security_group': security_group_1}
 
-        httpretty.register_uri(httpretty.POST, self.url(),
-                               body=post_os_security_groups,
-                               content_type='application/json')
+        self.requests.register_uri('POST', self.url(),
+                                   json=post_os_security_groups,
+                                   headers=headers,
+                                   status_code=202)
 
-        def put_os_security_groups_1(request, url, headers):
-            body = jsonutils.loads(request.body.decode('utf-8'))
+        def put_os_security_groups_1(request, context):
+            body = jsonutils.loads(request.body)
             assert list(body) == ['security_group']
             fakes.assert_has_keys(body['security_group'],
                                   required=['name', 'description'])
-            return 205, headers, request.body
+            return body
 
-        httpretty.register_uri(httpretty.PUT, self.url(1),
-                               body=put_os_security_groups_1,
-                               content_type='application/json')
+        self.requests.register_uri('PUT', self.url(1),
+                                   json=put_os_security_groups_1,
+                                   headers=headers,
+                                   status_code=205)

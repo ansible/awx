@@ -33,11 +33,11 @@ try:
 except ImportError:
     import json
 
-from oslo.utils import importutils
 import requests
 
-from novaclient.openstack.common._i18n import _
 from novaclient.openstack.common.apiclient import exceptions
+from novaclient.openstack.common.gettextutils import _
+from novaclient.openstack.common import importutils
 
 
 _logger = logging.getLogger(__name__)
@@ -104,7 +104,7 @@ class HTTPClient(object):
             return
 
         string_parts = [
-            "curl -g -i",
+            "curl -i",
             "-X '%s'" % method,
             "'%s'" % url,
         ]
@@ -156,7 +156,7 @@ class HTTPClient(object):
              requests.Session.request (such as `headers`) or `json`
              that will be encoded as JSON and used as `data` argument
         """
-        kwargs.setdefault("headers", {})
+        kwargs.setdefault("headers", kwargs.get("headers", {}))
         kwargs["headers"]["User-Agent"] = self.user_agent
         if self.original_ip:
             kwargs["headers"]["Forwarded"] = "for=%s;by=%s" % (
@@ -247,10 +247,6 @@ class HTTPClient(object):
                 raise
             self.cached_token = None
             client.cached_endpoint = None
-            if self.auth_plugin.opts.get('token'):
-                self.auth_plugin.opts['token'] = None
-            if self.auth_plugin.opts.get('endpoint'):
-                self.auth_plugin.opts['endpoint'] = None
             self.authenticate()
             try:
                 token, endpoint = self.auth_plugin.token_and_endpoint(
@@ -361,7 +357,8 @@ class BaseClient(object):
                     "Must be one of: %(version_map)s") % {
                         'api_name': api_name,
                         'version': version,
-                        'version_map': ', '.join(version_map.keys())}
+                        'version_map': ', '.join(version_map.keys())
+                    }
             raise exceptions.UnsupportedVersion(msg)
 
         return importutils.import_class(client_path)

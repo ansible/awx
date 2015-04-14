@@ -10,9 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import httpretty
-
-from novaclient.openstack.common import jsonutils
 from novaclient.tests.fixture_data import base
 
 
@@ -41,9 +38,10 @@ class V1(base.Fixture):
                 }
             ]
         }
-        httpretty.register_uri(httpretty.GET, self.url(),
-                               body=jsonutils.dumps(get_os_availability_zone),
-                               content_type='application/json')
+
+        self.requests.register_uri('GET', self.url(),
+                                   json=get_os_availability_zone,
+                                   headers=self.json_headers)
 
         get_os_zone_detail = {
             self.zone_info_key: [
@@ -88,9 +86,9 @@ class V1(base.Fixture):
             ]
         }
 
-        httpretty.register_uri(httpretty.GET, self.url('detail'),
-                               body=jsonutils.dumps(get_os_zone_detail),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url('detail'),
+                                   json=get_os_zone_detail,
+                                   headers=self.json_headers)
 
 
 class V3(V1):

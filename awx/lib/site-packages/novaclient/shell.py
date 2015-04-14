@@ -28,12 +28,7 @@ import logging
 import os
 import pkgutil
 import sys
-import time
 
-from keystoneclient.auth.identity.generic import password
-from keystoneclient.auth.identity.generic import token
-from keystoneclient.auth.identity import v3 as identity
-from keystoneclient import session as ksession
 from oslo.utils import encodeutils
 from oslo.utils import strutils
 import pkg_resources
@@ -52,12 +47,13 @@ import novaclient.auth_plugin
 from novaclient import client
 from novaclient import exceptions as exc
 import novaclient.extension
-from novaclient.i18n import _
 from novaclient.openstack.common import cliutils
+from novaclient.openstack.common.gettextutils import _
 from novaclient import utils
-from novaclient.v2 import shell as shell_v2
+from novaclient.v1_1 import shell as shell_v1_1
+from novaclient.v3 import shell as shell_v3
 
-DEFAULT_OS_COMPUTE_API_VERSION = "2"
+DEFAULT_OS_COMPUTE_API_VERSION = "1.1"
 DEFAULT_NOVA_ENDPOINT_TYPE = 'publicURL'
 # NOTE(cyeoh): Having the service type dependent on the API version
 # is pretty ugly, but we have to do this because traditionally the
@@ -139,7 +135,7 @@ class SecretsHelper(object):
         if not HAS_KEYRING or not self.args.os_cache:
             return
         if (auth_token == self.auth_token and
-                management_url == self.management_url):
+            management_url == self.management_url):
             # Nothing changed....
             return
         if not all([management_url, auth_token, tenant_id]):
@@ -159,7 +155,7 @@ class SecretsHelper(object):
             self._password = self.args.os_password
         else:
             verify_pass = strutils.bool_from_string(
-                cliutils.env("OS_VERIFY_PASSWORD", default=False), True)
+                utils.env("OS_VERIFY_PASSWORD", default=False), True)
             self._password = self._prompt_password(verify_pass)
         if not self._password:
             raise exc.CommandError(
@@ -228,47 +224,13 @@ class NovaClientArgumentParser(argparse.ArgumentParser):
         choose_from = ' (choose from'
         progparts = self.prog.partition(' ')
         self.exit(2, _("error: %(errmsg)s\nTry '%(mainp)s help %(subp)s'"
-                       " for more information.\n") %
-                  {'errmsg': message.split(choose_from)[0],
-                   'mainp': progparts[0],
-                   'subp': progparts[2]})
-
-    def _get_option_tuples(self, option_string):
-        """returns (action, option, value) candidates for an option prefix
-
-        Returns [first candidate] if all candidates refers to current and
-        deprecated forms of the same options: "nova boot ... --key KEY"
-        parsing succeed because --key could only match --key-name,
-        --key_name which are current/deprecated forms of the same option.
-        """
-        option_tuples = (super(NovaClientArgumentParser, self)
-                         ._get_option_tuples(option_string))
-        if len(option_tuples) > 1:
-            normalizeds = [option.replace('_', '-')
-                           for action, option, value in option_tuples]
-            if len(set(normalizeds)) == 1:
-                return option_tuples[:1]
-        return option_tuples
+                     " for more information.\n") %
+                     {'errmsg': message.split(choose_from)[0],
+                      'mainp': progparts[0],
+                      'subp': progparts[2]})
 
 
 class OpenStackComputeShell(object):
-    times = []
-
-    def _append_global_identity_args(self, parser):
-        # Register the CLI arguments that have moved to the session object.
-        ksession.Session.register_cli_options(parser)
-
-        parser.set_defaults(insecure=cliutils.env('NOVACLIENT_INSECURE',
-                            default=False))
-
-        identity.Password.register_argparse_arguments(parser)
-
-        parser.set_defaults(os_username=cliutils.env('OS_USERNAME',
-                                                     'NOVA_USERNAME'))
-        parser.set_defaults(os_password=cliutils.env('OS_PASSWORD',
-                                                     'NOVA_PASSWORD'))
-        parser.set_defaults(os_auth_url=cliutils.env('OS_AUTH_URL',
-                                                     'NOVA_URL'))
 
     def get_base_parser(self):
         parser = NovaClientArgumentParser(
@@ -281,8 +243,7 @@ class OpenStackComputeShell(object):
         )
 
         # Global arguments
-        parser.add_argument(
-            '-h', '--help',
+        parser.add_argument('-h', '--help',
             action='store_true',
             help=argparse.SUPPRESS,
         )
@@ -291,118 +252,111 @@ class OpenStackComputeShell(object):
                             action='version',
                             version=novaclient.__version__)
 
-        parser.add_argument(
-            '--debug',
+        parser.add_argument('--debug',
             default=False,
             action='store_true',
             help=_("Print debugging output"))
 
-        parser.add_argument(
-            '--os-cache',
+        parser.add_argument('--os-cache',
             default=strutils.bool_from_string(
-                cliutils.env('OS_CACHE', default=False), True),
+                utils.env('OS_CACHE', default=False), True),
             action='store_true',
             help=_("Use the auth token cache. Defaults to False if "
                    "env[OS_CACHE] is not set."))
 
-        parser.add_argument(
-            '--timings',
+        parser.add_argument('--timings',
             default=False,
             action='store_true',
             help=_("Print call timing info"))
 
-        parser.add_argument(
-            '--os-auth-token',
-            default=cliutils.env('OS_AUTH_TOKEN'),
-            help='Defaults to env[OS_AUTH_TOKEN]')
+        parser.add_argument('--timeout',
+            default=600,
+            metavar='<seconds>',
+            type=positive_non_zero_float,
+            help=_("Set HTTP call timeout (in seconds)"))
 
-        parser.add_argument(
-            '--os_username',
+        parser.add_argument('--os-auth-token',
+                default=utils.env('OS_AUTH_TOKEN'),
+                help='Defaults to env[OS_AUTH_TOKEN]')
+
+        parser.add_argument('--os-username',
+            metavar='<auth-user-name>',
+            default=utils.env('OS_USERNAME', 'NOVA_USERNAME'),
+            help=_('Defaults to env[OS_USERNAME].'))
+        parser.add_argument('--os_username',
             help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--os_password',
+        parser.add_argument('--os-user-id',
+            metavar='<auth-user-id>',
+            default=utils.env('OS_USER_ID'),
+            help=_('Defaults to env[OS_USER_ID].'))
+
+        parser.add_argument('--os-password',
+            metavar='<auth-password>',
+            default=utils.env('OS_PASSWORD', 'NOVA_PASSWORD'),
+            help=_('Defaults to env[OS_PASSWORD].'))
+        parser.add_argument('--os_password',
             help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--os-tenant-name',
+        parser.add_argument('--os-tenant-name',
             metavar='<auth-tenant-name>',
-            default=cliutils.env('OS_TENANT_NAME', 'NOVA_PROJECT_ID'),
+            default=utils.env('OS_TENANT_NAME', 'NOVA_PROJECT_ID'),
             help=_('Defaults to env[OS_TENANT_NAME].'))
-        parser.add_argument(
-            '--os_tenant_name',
+        parser.add_argument('--os_tenant_name',
             help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--os-tenant-id',
+        parser.add_argument('--os-tenant-id',
             metavar='<auth-tenant-id>',
-            default=cliutils.env('OS_TENANT_ID'),
+            default=utils.env('OS_TENANT_ID'),
             help=_('Defaults to env[OS_TENANT_ID].'))
 
-        parser.add_argument(
-            '--os_auth_url',
+        parser.add_argument('--os-auth-url',
+            metavar='<auth-url>',
+            default=utils.env('OS_AUTH_URL', 'NOVA_URL'),
+            help=_('Defaults to env[OS_AUTH_URL].'))
+        parser.add_argument('--os_auth_url',
             help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--os-region-name',
+        parser.add_argument('--os-region-name',
             metavar='<region-name>',
-            default=cliutils.env('OS_REGION_NAME', 'NOVA_REGION_NAME'),
+            default=utils.env('OS_REGION_NAME', 'NOVA_REGION_NAME'),
             help=_('Defaults to env[OS_REGION_NAME].'))
-        parser.add_argument(
-            '--os_region_name',
+        parser.add_argument('--os_region_name',
             help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--os-auth-system',
+        parser.add_argument('--os-auth-system',
             metavar='<auth-system>',
-            default=cliutils.env('OS_AUTH_SYSTEM'),
+            default=utils.env('OS_AUTH_SYSTEM'),
             help='Defaults to env[OS_AUTH_SYSTEM].')
-        parser.add_argument(
-            '--os_auth_system',
+        parser.add_argument('--os_auth_system',
             help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--service-type',
+        parser.add_argument('--service-type',
             metavar='<service-type>',
             help=_('Defaults to compute for most actions'))
-        parser.add_argument(
-            '--service_type',
+        parser.add_argument('--service_type',
             help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--service-name',
+        parser.add_argument('--service-name',
             metavar='<service-name>',
-            default=cliutils.env('NOVA_SERVICE_NAME'),
+            default=utils.env('NOVA_SERVICE_NAME'),
             help=_('Defaults to env[NOVA_SERVICE_NAME]'))
-        parser.add_argument(
-            '--service_name',
+        parser.add_argument('--service_name',
             help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--volume-service-name',
+        parser.add_argument('--volume-service-name',
             metavar='<volume-service-name>',
-            default=cliutils.env('NOVA_VOLUME_SERVICE_NAME'),
+            default=utils.env('NOVA_VOLUME_SERVICE_NAME'),
             help=_('Defaults to env[NOVA_VOLUME_SERVICE_NAME]'))
-        parser.add_argument(
-            '--volume_service_name',
+        parser.add_argument('--volume_service_name',
             help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--os-endpoint-type',
+        parser.add_argument('--endpoint-type',
             metavar='<endpoint-type>',
-            dest='endpoint_type',
-            default=cliutils.env(
-                'NOVA_ENDPOINT_TYPE',
-                default=cliutils.env(
-                    'OS_ENDPOINT_TYPE',
-                    default=DEFAULT_NOVA_ENDPOINT_TYPE)),
-            help=_('Defaults to env[NOVA_ENDPOINT_TYPE], '
-                   'env[OS_ENDPOINT_TYPE] or ') +
-                 DEFAULT_NOVA_ENDPOINT_TYPE + '.')
-
-        parser.add_argument(
-            '--endpoint-type',
-            help=argparse.SUPPRESS)
+            default=utils.env('NOVA_ENDPOINT_TYPE',
+                        default=DEFAULT_NOVA_ENDPOINT_TYPE),
+            help=_('Defaults to env[NOVA_ENDPOINT_TYPE] or ')
+                    + DEFAULT_NOVA_ENDPOINT_TYPE + '.')
         # NOTE(dtroyer): We can't add --endpoint_type here due to argparse
         #                thinking usage-list --end is ambiguous; but it
         #                works fine with only --endpoint-type present
@@ -410,31 +364,41 @@ class OpenStackComputeShell(object):
         # parser.add_argument('--endpoint_type',
         #     help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--os-compute-api-version',
+        parser.add_argument('--os-compute-api-version',
             metavar='<compute-api-ver>',
-            default=cliutils.env('OS_COMPUTE_API_VERSION',
-                                 default=DEFAULT_OS_COMPUTE_API_VERSION),
+            default=utils.env('OS_COMPUTE_API_VERSION',
+                default=DEFAULT_OS_COMPUTE_API_VERSION),
             help=_('Accepts 1.1 or 3, '
-                   'defaults to env[OS_COMPUTE_API_VERSION].'))
-        parser.add_argument(
-            '--os_compute_api_version',
+                 'defaults to env[OS_COMPUTE_API_VERSION].'))
+        parser.add_argument('--os_compute_api_version',
             help=argparse.SUPPRESS)
 
-        parser.add_argument(
-            '--bypass-url',
+        parser.add_argument('--os-cacert',
+            metavar='<ca-certificate>',
+            default=utils.env('OS_CACERT', default=None),
+            help='Specify a CA bundle file to use in '
+                 'verifying a TLS (https) server certificate. '
+                 'Defaults to env[OS_CACERT]')
+
+        parser.add_argument('--insecure',
+            default=utils.env('NOVACLIENT_INSECURE', default=False),
+            action='store_true',
+            help=_("Explicitly allow novaclient to perform \"insecure\" "
+                 "SSL (https) requests. The server's certificate will "
+                 "not be verified against any certificate authorities. "
+                 "This option should be used with caution."))
+
+        parser.add_argument('--bypass-url',
             metavar='<bypass-url>',
             dest='bypass_url',
-            default=cliutils.env('NOVACLIENT_BYPASS_URL'),
+            default=utils.env('NOVACLIENT_BYPASS_URL'),
             help="Use this API endpoint instead of the Service Catalog. "
                  "Defaults to env[NOVACLIENT_BYPASS_URL]")
         parser.add_argument('--bypass_url',
-                            help=argparse.SUPPRESS)
+            help=argparse.SUPPRESS)
 
         # The auth-system-plugins might require some extra options
         novaclient.auth_plugin.load_auth_system_opts(parser)
-
-        self._append_global_identity_args(parser)
 
         return parser
 
@@ -446,12 +410,12 @@ class OpenStackComputeShell(object):
 
         try:
             actions_module = {
-                '1.1': shell_v2,
-                '2': shell_v2,
-                '3': shell_v2,
+                '1.1': shell_v1_1,
+                '2': shell_v1_1,
+                '3': shell_v3,
             }[version]
         except KeyError:
-            actions_module = shell_v2
+            actions_module = shell_v1_1
 
         self._find_actions(subparsers, actions_module)
         self._find_actions(subparsers, self)
@@ -491,10 +455,6 @@ class OpenStackComputeShell(object):
     def _discover_via_contrib_path(self, version):
         module_path = os.path.dirname(os.path.abspath(__file__))
         version_str = "v%s" % version.replace('.', '_')
-        # NOTE(akurilin): v1.1, v2 and v3 have one implementation, so
-        # we should discover contrib modules in one place.
-        if version_str in ["v1_1", "v3"]:
-            version_str = "v2"
         ext_path = os.path.join(module_path, version_str, 'contrib')
         ext_glob = os.path.join(ext_path, "*.py")
 
@@ -515,8 +475,7 @@ class OpenStackComputeShell(object):
             yield name, module
 
     def _add_bash_completion_subparser(self, subparsers):
-        subparser = subparsers.add_parser(
-            'bash_completion',
+        subparser = subparsers.add_parser('bash_completion',
             add_help=False,
             formatter_class=OpenStackHelpFormatter
         )
@@ -532,14 +491,13 @@ class OpenStackComputeShell(object):
             action_help = desc.strip()
             arguments = getattr(callback, 'arguments', [])
 
-            subparser = subparsers.add_parser(
-                command,
+            subparser = subparsers.add_parser(command,
                 help=action_help,
                 description=desc,
                 add_help=False,
-                formatter_class=OpenStackHelpFormatter)
-            subparser.add_argument(
-                '-h', '--help',
+                formatter_class=OpenStackHelpFormatter
+            )
+            subparser.add_argument('-h', '--help',
                 action='help',
                 help=argparse.SUPPRESS,
             )
@@ -558,20 +516,6 @@ class OpenStackComputeShell(object):
         logging.basicConfig(level=logging.DEBUG,
                             format=streamformat)
 
-    def _get_keystone_auth(self, session, auth_url, **kwargs):
-        auth_token = kwargs.pop('auth_token', None)
-        if auth_token:
-            return token.Token(auth_url, auth_token, **kwargs)
-        else:
-            return password.Password(
-                auth_url,
-                username=kwargs.pop('username'),
-                user_id=kwargs.pop('user_id'),
-                password=kwargs.pop('password'),
-                user_domain_id=kwargs.pop('user_domain_id'),
-                user_domain_name=kwargs.pop('user_domain_name'),
-                **kwargs)
-
     def main(self, argv):
         # Parse args once to find version and debug settings
         parser = self.get_base_parser()
@@ -583,7 +527,7 @@ class OpenStackComputeShell(object):
 
         # build available subcommands based on version
         self.extensions = self._discover_extensions(
-            options.os_compute_api_version)
+                options.os_compute_api_version)
         self._run_extension_hooks('__pre_parse_args__')
 
         # NOTE(dtroyer): Hackery to handle --endpoint_type due to argparse
@@ -595,7 +539,7 @@ class OpenStackComputeShell(object):
             argv[spot] = '--endpoint-type'
 
         subcommand_parser = self.get_subcommand_parser(
-            options.os_compute_api_version)
+                options.os_compute_api_version)
         self.parser = subcommand_parser
 
         if options.help or not argv:
@@ -631,9 +575,6 @@ class OpenStackComputeShell(object):
         cacert = args.os_cacert
         timeout = args.timeout
 
-        keystone_session = None
-        keystone_auth = None
-
         # We may have either, both or none of these.
         # If we have both, we don't need USERNAME, PASSWORD etc.
         # Fill in the blanks from the SecretsHelper if possible.
@@ -651,11 +592,6 @@ class OpenStackComputeShell(object):
         if not endpoint_type:
             endpoint_type = DEFAULT_NOVA_ENDPOINT_TYPE
 
-        # This allow users to use endpoint_type as (internal, public or admin)
-        # just like other openstack clients (glance, cinder etc)
-        if endpoint_type in ['internal', 'public', 'admin']:
-            endpoint_type += 'URL'
-
         if not service_type:
             os_compute_api_version = (options.os_compute_api_version or
                                       DEFAULT_OS_COMPUTE_API_VERSION)
@@ -665,19 +601,12 @@ class OpenStackComputeShell(object):
             except KeyError:
                 service_type = DEFAULT_NOVA_SERVICE_TYPE_MAP[
                     DEFAULT_OS_COMPUTE_API_VERSION]
-            service_type = cliutils.get_service_type(args.func) or service_type
+            service_type = utils.get_service_type(args.func) or service_type
 
         # If we have an auth token but no management_url, we must auth anyway.
         # Expired tokens are handled by client.py:_cs_request
         must_auth = not (cliutils.isunauthenticated(args.func)
                          or (auth_token and management_url))
-
-        # Do not use Keystone session for cases with no session support. The
-        # presence of auth_plugin means os_auth_system is present and is not
-        # keystone.
-        use_session = True
-        if auth_plugin or bypass_url or os_cache or volume_service_name:
-            use_session = False
 
         # FIXME(usrleon): Here should be restrict for project id same as
         # for os_username or os_password but for compatibility it is not.
@@ -687,86 +616,54 @@ class OpenStackComputeShell(object):
 
             if not auth_plugin or not auth_plugin.opts:
                 if not os_username and not os_user_id:
-                    raise exc.CommandError(
-                        _("You must provide a username "
-                          "or user id via --os-username, --os-user-id, "
-                          "env[OS_USERNAME] or env[OS_USER_ID]"))
+                    raise exc.CommandError(_("You must provide a username "
+                            "or user id via --os-username, --os-user-id, "
+                            "env[OS_USERNAME] or env[OS_USER_ID]"))
 
-            if not any([args.os_tenant_name, args.os_tenant_id,
-                        args.os_project_id, args.os_project_name]):
-                raise exc.CommandError(_("You must provide a project name or"
-                                         " project id via --os-project-name,"
-                                         " --os-project-id, env[OS_PROJECT_ID]"
-                                         " or env[OS_PROJECT_NAME]. You may"
-                                         " use os-project and os-tenant"
-                                         " interchangeably."))
+            if not os_tenant_name and not os_tenant_id:
+                raise exc.CommandError(_("You must provide a tenant name "
+                        "or tenant id via --os-tenant-name, "
+                        "--os-tenant-id, env[OS_TENANT_NAME] "
+                        "or env[OS_TENANT_ID]"))
 
             if not os_auth_url:
                 if os_auth_system and os_auth_system != 'keystone':
                     os_auth_url = auth_plugin.get_auth_url()
 
             if not os_auth_url:
-                    raise exc.CommandError(
-                        _("You must provide an auth url "
-                          "via either --os-auth-url or env[OS_AUTH_URL] "
-                          "or specify an auth_system which defines a "
-                          "default url with --os-auth-system "
-                          "or env[OS_AUTH_SYSTEM]"))
-
-            project_id = args.os_project_id or args.os_tenant_id
-            project_name = args.os_project_name or args.os_tenant_name
-            if use_session:
-                # Not using Nova auth plugin, so use keystone
-                start_time = time.time()
-                keystone_session = ksession.Session.load_from_cli_options(args)
-                keystone_auth = self._get_keystone_auth(
-                    keystone_session,
-                    args.os_auth_url,
-                    username=args.os_username,
-                    user_id=args.os_user_id,
-                    user_domain_id=args.os_user_domain_id,
-                    user_domain_name=args.os_user_domain_name,
-                    password=args.os_password,
-                    auth_token=args.os_auth_token,
-                    project_id=project_id,
-                    project_name=project_name,
-                    project_domain_id=args.os_project_domain_id,
-                    project_domain_name=args.os_project_domain_name)
-                end_time = time.time()
-                self.times.append(
-                    ('%s %s' % ('auth_url', args.os_auth_url),
-                     start_time, end_time))
+                    raise exc.CommandError(_("You must provide an auth url "
+                            "via either --os-auth-url or env[OS_AUTH_URL] "
+                            "or specify an auth_system which defines a "
+                            "default url with --os-auth-system "
+                            "or env[OS_AUTH_SYSTEM]"))
 
         if (options.os_compute_api_version and
                 options.os_compute_api_version != '1.0'):
-            if not any([args.os_tenant_id, args.os_tenant_name,
-                        args.os_project_id, args.os_project_name]):
-                raise exc.CommandError(_("You must provide a project name or"
-                                         " project id via --os-project-name,"
-                                         " --os-project-id, env[OS_PROJECT_ID]"
-                                         " or env[OS_PROJECT_NAME]. You may"
-                                         " use os-project and os-tenant"
-                                         " interchangeably."))
+            if not os_tenant_name and not os_tenant_id:
+                raise exc.CommandError(_("You must provide a tenant name "
+                        "or tenant id via --os-tenant-name, "
+                        "--os-tenant-id, env[OS_TENANT_NAME] "
+                        "or env[OS_TENANT_ID]"))
 
             if not os_auth_url:
-                raise exc.CommandError(
-                    _("You must provide an auth url "
-                      "via either --os-auth-url or env[OS_AUTH_URL]"))
+                raise exc.CommandError(_("You must provide an auth url "
+                        "via either --os-auth-url or env[OS_AUTH_URL]"))
 
-        self.cs = client.Client(
-            options.os_compute_api_version,
-            os_username, os_password, os_tenant_name,
-            tenant_id=os_tenant_id, user_id=os_user_id,
-            auth_url=os_auth_url, insecure=insecure,
-            region_name=os_region_name, endpoint_type=endpoint_type,
-            extensions=self.extensions, service_type=service_type,
-            service_name=service_name, auth_system=os_auth_system,
-            auth_plugin=auth_plugin, auth_token=auth_token,
-            volume_service_name=volume_service_name,
-            timings=args.timings, bypass_url=bypass_url,
-            os_cache=os_cache, http_log_debug=options.debug,
-            cacert=cacert, timeout=timeout,
-            session=keystone_session, auth=keystone_auth)
+        completion_cache = client.CompletionCache(os_username, os_auth_url)
+
+        self.cs = client.Client(options.os_compute_api_version,
+                os_username, os_password, os_tenant_name,
+                tenant_id=os_tenant_id, user_id=os_user_id,
+                auth_url=os_auth_url, insecure=insecure,
+                region_name=os_region_name, endpoint_type=endpoint_type,
+                extensions=self.extensions, service_type=service_type,
+                service_name=service_name, auth_system=os_auth_system,
+                auth_plugin=auth_plugin, auth_token=auth_token,
+                volume_service_name=volume_service_name,
+                timings=args.timings, bypass_url=bypass_url,
+                os_cache=os_cache, http_log_debug=options.debug,
+                cacert=cacert, timeout=timeout,
+                completion_cache=completion_cache)
 
         # Now check for the password/token of which pieces of the
         # identifying keyring key can come from the underlying client
@@ -799,11 +696,7 @@ class OpenStackComputeShell(object):
             # This does a couple of bits which are useful even if we've
             # got the token + service URL already. It exits fast in that case.
             if not cliutils.isunauthenticated(args.func):
-                if not use_session:
-                    # Only call authenticate() if Nova auth plugin is used.
-                    # If keystone is used, authentication is handled as part
-                    # of session.
-                    self.cs.authenticate()
+                self.cs.authenticate()
         except exc.Unauthorized:
             raise exc.CommandError(_("Invalid OpenStack Nova credentials."))
         except exc.AuthorizationFailure:
@@ -832,13 +725,12 @@ class OpenStackComputeShell(object):
                 volume_service_name=volume_service_name,
                 timings=args.timings, bypass_url=bypass_url,
                 os_cache=os_cache, http_log_debug=options.debug,
-                session=keystone_session, auth=keystone_auth,
                 cacert=cacert, timeout=timeout)
 
         args.func(self.cs, args)
 
         if args.timings:
-            self._dump_timings(self.times + self.cs.get_timings())
+            self._dump_timings(self.cs.get_timings())
 
     def _dump_timings(self, timings):
         class Tyme(object):
@@ -873,11 +765,8 @@ class OpenStackComputeShell(object):
         commands.remove('bash_completion')
         print(' '.join(commands | options))
 
-    @cliutils.arg(
-        'command',
-        metavar='<subcommand>',
-        nargs='?',
-        help='Display help for <subcommand>')
+    @utils.arg('command', metavar='<subcommand>', nargs='?',
+                    help='Display help for <subcommand>')
     def do_help(self, args):
         """
         Display help about this program or one of its subcommands.
@@ -897,7 +786,7 @@ class OpenStackHelpFormatter(argparse.HelpFormatter):
     def __init__(self, prog, indent_increment=2, max_help_position=32,
                  width=None):
         super(OpenStackHelpFormatter, self).__init__(prog, indent_increment,
-                                                     max_help_position, width)
+              max_help_position, width)
 
     def start_section(self, heading):
         # Title-case the headings
@@ -917,9 +806,9 @@ def main():
         print("ERROR (%(name)s): %(msg)s" % details,
               file=sys.stderr)
         sys.exit(1)
-    except KeyboardInterrupt:
-        print("... terminating nova client", file=sys.stderr)
-        sys.exit(130)
+    except KeyboardInterrupt as e:
+        print("Shutting down novaclient", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

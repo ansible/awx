@@ -59,7 +59,13 @@ class NetworksTest(utils.FixturedTestCase):
             'project_id': '1',
             'vlan': 5,
             'vlan_start': 1,
-            'vpn_start': 1
+            'vpn_start': 1,
+            'mtu': 1500,
+            'enable_dhcp': 'T',
+            'dhcp_server': '1920.2.2',
+            'share_address': 'T',
+            'allowed_start': '192.0.2.10',
+            'allowed_end': '192.0.2.20',
         }
 
         f = self.cs.networks.create(**params)

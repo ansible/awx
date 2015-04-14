@@ -14,11 +14,10 @@
 #    under the License.
 
 from novaclient import base
-from novaclient.openstack.common.apiclient import base as common_base
 from novaclient import utils
 
 
-class Extension(common_base.HookableMixin):
+class Extension(utils.HookableMixin):
     """Extension descriptor."""
 
     SUPPORTED_HOOKS = ('__pre_parse_args__', '__post_parse_args__')

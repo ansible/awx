@@ -10,9 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import httpretty
-
-from novaclient.openstack.common import jsonutils
 from novaclient.tests.fixture_data import base
 
 
@@ -43,9 +40,9 @@ class Fixture(base.Fixture):
                 'data': 'foo'
             }
         }
-        httpretty.register_uri(httpretty.GET, self.url('root'),
-                               body=jsonutils.dumps(get_os_certificate),
-                               content_type='application/json')
+        self.requests.register_uri('GET', self.url('root'),
+                                   json=get_os_certificate,
+                                   headers=self.json_headers)
 
         post_os_certificates = {
             'certificate': {
@@ -53,6 +50,6 @@ class Fixture(base.Fixture):
                 'data': 'bar'
              }
         }
-        httpretty.register_uri(httpretty.POST, self.url(),
-                               body=jsonutils.dumps(post_os_certificates),
-                               content_type='application/json')
+        self.requests.register_uri('POST', self.url(),
+                                   json=post_os_certificates,
+                                   headers=self.json_headers)

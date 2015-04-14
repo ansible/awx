@@ -37,7 +37,7 @@ class KeypairsTest(utils.FixturedTestCase):
         kp = self.cs.keypairs.get('test')
         self.assert_called('GET', '/%s/test' % self.keypair_prefix)
         self.assertIsInstance(kp, keypairs.Keypair)
-        self.assertEqual(kp.name, 'test')
+        self.assertEqual('test', kp.name)
 
     def test_list_keypairs(self):
         kps = self.cs.keypairs.list()

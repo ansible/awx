@@ -78,3 +78,7 @@ class HostsTest(utils.FixturedTestCase):
         host.shutdown()
         self.assert_called(
             'GET', '/os-hosts/sample_host/shutdown')
+
+    def test_hosts_repr(self):
+        hs = self.cs.hosts.get('host')
+        self.assertEqual('<Host: dummy>', repr(hs[0]))

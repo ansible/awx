@@ -44,14 +44,14 @@ class ImagesTest(utils.FixturedTestCase):
         i = self.cs.images.get(1)
         self.assert_called('HEAD', '/v1/images/1')
         self.assertIsInstance(i, images.Image)
-        self.assertEqual(i.id, '1')
-        self.assertEqual(i.name, 'CentOS 5.2')
+        self.assertEqual('1', i.id)
+        self.assertEqual('CentOS 5.2', i.name)
 
     def test_find(self):
         i = self.cs.images.find(name="CentOS 5.2")
-        self.assertEqual(i.id, '1')
+        self.assertEqual('1', i.id)
         self.assert_called('HEAD', '/v1/images/1')
 
         iml = self.cs.images.findall(status='SAVING')
-        self.assertEqual(len(iml), 1)
-        self.assertEqual(iml[0].name, 'My Server Backup')
+        self.assertEqual(1, len(iml))
+        self.assertEqual('My Server Backup', iml[0].name)

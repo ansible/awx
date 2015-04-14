@@ -19,9 +19,11 @@ COMPUTE_URL = 'http://compute.host'
 class Fixture(fixtures.Fixture):
 
     base_url = None
+    json_headers = {'Content-Type': 'application/json'}
 
-    def __init__(self, compute_url=COMPUTE_URL):
+    def __init__(self, requests, compute_url=COMPUTE_URL):
         super(Fixture, self).__init__()
+        self.requests = requests
         self.compute_url = compute_url
 
     def url(self, *args, **kwargs):

@@ -48,6 +48,7 @@ def request(method, uri, *args, **kwargs):
     """
     req_method = req_methods[method.upper()]
     raise_exception = kwargs.pop("raise_exception", True)
+    raw_content = kwargs.pop("raw_content", False)
     kwargs["headers"] = kwargs.get("headers", {})
     http_log_req(method, uri, args, kwargs)
     data = None
@@ -62,11 +63,14 @@ def request(method, uri, *args, **kwargs):
         resp = req_method(uri, data=data, **kwargs)
     else:
         resp = req_method(uri, **kwargs)
-    try:
-        body = resp.json()
-    except ValueError:
-        # No JSON in response
+    if raw_content:
         body = resp.content
+    else:
+        try:
+            body = resp.json()
+        except ValueError:
+            # No JSON in response
+            body = resp.content
     http_log_resp(resp, body)
     if resp.status_code >= 400 and raise_exception:
         raise exc.from_response(resp, body)

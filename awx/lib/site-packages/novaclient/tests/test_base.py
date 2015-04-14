@@ -25,18 +25,18 @@ class BaseTest(utils.TestCase):
 
     def test_resource_repr(self):
         r = base.Resource(None, dict(foo="bar", baz="spam"))
-        self.assertEqual(repr(r), "<Resource baz=spam, foo=bar>")
+        self.assertEqual("<Resource baz=spam, foo=bar>", repr(r))
 
     def test_getid(self):
-        self.assertEqual(base.getid(4), 4)
+        self.assertEqual(4, base.getid(4))
 
         class TmpObject(object):
             id = 4
-        self.assertEqual(base.getid(TmpObject), 4)
+        self.assertEqual(4, base.getid(TmpObject))
 
     def test_resource_lazy_getattr(self):
         f = flavors.Flavor(cs.flavors, {'id': 1})
-        self.assertEqual(f.name, '256 MB Server')
+        self.assertEqual('256 MB Server', f.name)
         cs.assert_called('GET', '/flavors/1')
 
         # Missing stuff still fails after a second get

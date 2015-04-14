@@ -26,15 +26,15 @@ class FpingTest(utils.FixturedTestCase):
 
     def test_fping_repr(self):
         r = self.cs.fping.get(1)
-        self.assertEqual(repr(r), "<Fping: 1>")
+        self.assertEqual("<Fping: 1>", repr(r))
 
     def test_list_fpings(self):
         fl = self.cs.fping.list()
         self.assert_called('GET', '/os-fping')
         for f in fl:
             self.assertIsInstance(f, fping.Fping)
-            self.assertEqual(f.project_id, "fake-project")
-            self.assertEqual(f.alive, True)
+            self.assertEqual("fake-project", f.project_id)
+            self.assertEqual(True, f.alive)
 
     def test_list_fpings_all_tenants(self):
         fl = self.cs.fping.list(all_tenants=True)
@@ -58,5 +58,5 @@ class FpingTest(utils.FixturedTestCase):
         f = self.cs.fping.get(1)
         self.assert_called('GET', '/os-fping/1')
         self.assertIsInstance(f, fping.Fping)
-        self.assertEqual(f.project_id, "fake-project")
-        self.assertEqual(f.alive, True)
+        self.assertEqual("fake-project", f.project_id)
+        self.assertEqual(True, f.alive)

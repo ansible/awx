@@ -21,7 +21,7 @@ from novaclient import base
 
 class Host(base.Resource):
     def __repr__(self):
-        return "<Host: %s>" % self.host_name
+        return "<Host: %s>" % self.host
 
     def _add_details(self, info):
         dico = 'resource' in info and info['resource'] or info

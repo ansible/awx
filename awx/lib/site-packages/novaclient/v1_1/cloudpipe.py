@@ -19,7 +19,7 @@ from novaclient import base
 
 
 class Cloudpipe(base.Resource):
-    """A cloudpipe instance is a VPN attached to a proejct's VLAN."""
+    """A cloudpipe instance is a VPN attached to a project's VLAN."""
 
     def __repr__(self):
         return "<Cloudpipe: %s>" % self.project_id

@@ -28,10 +28,10 @@ class FixedIpsTest(utils.FixturedTestCase):
     def test_get_fixed_ip(self):
         info = self.cs.fixed_ips.get(fixed_ip='192.168.1.1')
         self.assert_called('GET', '/os-fixed-ips/192.168.1.1')
-        self.assertEqual(info.cidr, '192.168.1.0/24')
-        self.assertEqual(info.address, '192.168.1.1')
-        self.assertEqual(info.hostname, 'foo')
-        self.assertEqual(info.host, 'bar')
+        self.assertEqual('192.168.1.0/24', info.cidr)
+        self.assertEqual('192.168.1.1', info.address)
+        self.assertEqual('foo', info.hostname)
+        self.assertEqual('bar', info.host)
 
     def test_reserve_fixed_ip(self):
         body = {"reserve": None}
