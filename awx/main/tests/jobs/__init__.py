@@ -1,6 +1,9 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
-from awx.main.tests.jobs.jobs_monolithic import * # noqa
-from survey_password import * # noqa
-from base import * # noqa
+from __future__ import absolute_import
+
+from .jobs_monolithic import * # noqa
+from .survey_password import * # noqa
+from .start_cancel import * # noqa
+from .base import * # noqa
