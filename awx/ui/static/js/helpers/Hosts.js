@@ -607,8 +607,14 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                               });
                           }
                           else {
+                              if (selected_group_id) {
+                                  // adding hosts to a group
+                                  url = GetBasePath('groups') + selected_group_id + '/';
+                              } else {
+                                  // adding hosts to the top-level (inventory)
+                                  url = GetBasePath('inventory') + inventory_id + '/';
+                              }
                               // Add mode
-                              url = GetBasePath('groups') + selected_group_id + '/';
                               Rest.setUrl(url);
                               Rest.get()
                               .success( function(data) {

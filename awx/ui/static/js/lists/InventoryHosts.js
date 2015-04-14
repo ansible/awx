@@ -90,7 +90,6 @@ export default
             create: {
                 mode: 'all',
                 ngClick: "createHost()",
-                ngHide: '!selected_group_id', //disable when 'All Hosts' selected
                 awToolTip: "Create a new host"
             },
             refresh: {
