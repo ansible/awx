@@ -10,7 +10,7 @@ from mongoengine import connect
 from mongoengine.connection import get_db, ConnectionError
 from .utils.dbtransform import register_key_transform
 
-logger = logging.getLogger('fact.__init__')
+logger = logging.getLogger('awx.fact')
 
 # Connect to Mongo
 try:
