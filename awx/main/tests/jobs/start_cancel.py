@@ -7,7 +7,6 @@ from __future__ import absolute_import
 # Django
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from django.test.utils import override_settings
 
 # AWX
 from awx.main.models import * # noqa
