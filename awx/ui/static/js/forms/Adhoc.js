@@ -67,6 +67,7 @@ export default
                     sourceModel: 'credential',
                     sourceField: 'name',
                     ngClick: 'lookUpCredential()',
+                    class: 'squeeze',
                     awPopOver: '<p>Select the credential you want to use when ' +
                         'accessing the remote hosts to run the command. ' +
                         'Choose the credential containing ' +
@@ -79,6 +80,30 @@ export default
                         variable: 'credRequired',
                         init: 'false'
                     }
+                },
+                become_enabled: {
+                    label: 'Enable Become for Credential',
+                    type: 'checkbox',
+                    editRequired: false
+                    // awPopOver: '<p>If checked, user will be become the user ' +
+                    //     'specified by the credential.</p>',
+                    // dataPlacement: 'right',
+                    // dataTitle: 'Enable Become for Credential',
+                    // dataContainer: 'body'
+                },
+                verbosity: {
+                    label: 'Verbosity',
+                    excludeModal: true,
+                    type: 'select',
+                    ngOptions: 'verbosity.label for verbosity in ' +
+                        'adhoc_verbosity_options ' +
+                        'track by verbosity.value',
+                    editRequired: true,
+                    awPopOver:'<p>These are the verbosity levels for standard ' +
+                        'out of the command run that are supported.',
+                    dataTitle: 'Module',
+                    dataPlacement: 'right',
+                    dataContainer: 'body'
                 }
             },
 
