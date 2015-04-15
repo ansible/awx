@@ -1,0 +1,100 @@
+/** @define MenuItem */
+
+@import (reference) "shared/utilities/icons.less";
+
+.MenuItem {
+  display: flex;
+  flex: none;
+  padding: 2.8rem 0;
+  min-height: 5.8rem;
+  min-width: 9.2rem;
+
+  &--fixed {
+      flex: none;
+      min-width: 0;
+      margin-right: 0 !important;
+  }
+
+  &--logo {
+      width: 202px;
+  }
+
+  &--active {
+    flex-direction: column !important;
+    justify-content: center !important;
+    background-color: rgba(255,255,255,0.35);
+    .MenuItem-hover-icon {
+        display: flex;
+        opacity: 1 !important;
+        height: 22px !important;
+    }
+  }
+
+  &--hoverable {
+    transition: background-color 0.3s;
+    flex-direction: column;
+    justify-content: center;
+    .MenuItem-hover-icon {
+        display: flex;
+        opacity: 0;
+        height: 0;
+        width: auto;
+        transition: opacity 0.3s ease-out, height 0.2s ease-out;
+    }
+    &:hover {
+        background-color: rgba(255,255,255,0.35);
+        .MenuItem-hover-icon {
+            display: flex;
+            opacity: 1;
+            height: 22px;
+        }
+    }
+  }
+  &--context {
+    // Push this and all following elements to the right
+    margin-left: auto;
+    flex-direction: column;
+    justify-content: center;
+
+    .MenuItem {
+      // Make sure items in this container are aligned to
+      // the right-hand side (on rtl platforms)
+      align-self: flex-end;
+    }
+  }
+
+  &--right {
+    margin-left: auto;
+  }
+
+  &--setup {
+    &:before {
+      .icon(@fa-var-cogs);
+      padding-right: 0.25rem;
+    }
+  }
+
+  &--popup {
+    // Make pseudo button
+    background: transparent;
+    border: 0;
+    padding: 8px 0;
+
+    outline: none;
+
+    &:after {
+        .icon(@fa-var-angle-down);
+    }
+  }
+
+  &-logo {
+    height: 34px;
+    width: auto;
+  }
+
+  &-icon {
+      height: 13px;
+      width: auto;
+  }
+
+}

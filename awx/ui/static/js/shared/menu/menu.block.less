@@ -1,0 +1,51 @@
+/** @define Menu */
+
+.Menu {
+  display: flex;
+  align-items: center;
+  background-color: white;
+
+  &--main {
+      background-color: white;
+      padding: 0 1rem;
+      margin: 0;
+      .MenuItem {
+          color: black;
+          margin-right: 2rem;
+          padding: 0 1rem;
+          align-items: center;
+          &:last-child {
+            margin-right: 0;
+          }
+      }
+  }
+
+  &--popup {
+    display: block;
+    position: absolute;
+    top: 60px;
+    right: 19px;
+    width: 160px;
+
+    .MenuItem {
+      padding: 0.5rem;
+      border: solid 1px #7A7A7A;
+      border-bottom: none;
+      text-align: center;
+      margin-right: 0;
+      &:last-child {
+        border-bottom: solid 1px #7A7A7A;
+      }
+    }
+  }
+
+  &--fixed-top {
+    width: 100%;
+    z-index: 1040;
+    position: fixed;
+    right: 0;
+    left: 0;
+    top: 0;
+  }
+
+}

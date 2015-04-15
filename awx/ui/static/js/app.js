@@ -937,7 +937,7 @@ var tower = angular.module('Tower', [
         LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, ConfigureTower, CreateCustomInventory) {
 
 
-            var e, html, sock;
+            var html, e, sock;
 
             function activateTab() {
                 // Make the correct tab active
