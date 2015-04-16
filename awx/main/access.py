@@ -278,7 +278,7 @@ class InventoryAccess(BaseAccess):
 
     model = Inventory
 
-    def get_queryset(self, allowed=None):
+    def get_queryset(self, allowed=None, ad_hoc=None):
         allowed = allowed or PERMISSION_TYPES_ALLOWING_INVENTORY_READ
         qs = Inventory.objects.filter(active=True).distinct()
         qs = qs.select_related('created_by', 'modified_by', 'organization')
@@ -286,21 +286,27 @@ class InventoryAccess(BaseAccess):
             return qs
         qs = qs.filter(organization__active=True)
         admin_of = qs.filter(organization__admins__in=[self.user]).distinct()
-        has_user_perms = qs.filter(
+        has_user_kw = dict(
             permissions__user__in=[self.user],
             permissions__permission_type__in=allowed,
             permissions__active=True,
-        ).distinct()
-        has_team_perms = qs.filter(
+        )
+        if ad_hoc is not None:
+            has_user_kw['permissions__run_ad_hoc_commands'] = ad_hoc
+        has_user_perms = qs.filter(**has_user_kw).distinct()
+        has_team_kw = dict(
             permissions__team__users__in=[self.user],
             permissions__team__active=True,
             permissions__permission_type__in=allowed,
             permissions__active=True,
-        ).distinct()
+        )
+        if ad_hoc is not None:
+            has_team_kw['permissions__run_ad_hoc_commands'] = ad_hoc
+        has_team_perms = qs.filter(**has_team_kw).distinct()
         return admin_of | has_user_perms | has_team_perms
 
-    def has_permission_types(self, obj, allowed):
-        return bool(obj and self.get_queryset(allowed).filter(pk=obj.pk).exists())
+    def has_permission_types(self, obj, allowed, ad_hoc=None):
+        return bool(obj and self.get_queryset(allowed, ad_hoc).filter(pk=obj.pk).exists())
 
     def can_read(self, obj):
         return self.has_permission_types(obj, PERMISSION_TYPES_ALLOWING_INVENTORY_READ)
@@ -347,16 +353,7 @@ class InventoryAccess(BaseAccess):
         return self.can_admin(obj, None)
 
     def can_run_ad_hoc_commands(self, obj):
-        qs = self.get_queryset(PERMISSION_TYPES_ALLOWING_INVENTORY_READ)
-        if not obj or not qs.filter(pk=obj.pk).exists():
-            return False
-        if self.user.is_superuser:
-            return True
-        if self.user in obj.organization.admins.all():
-            return True
-        if qs.filter(pk=obj.pk, permissions__permission_type__in=PERMISSION_TYPES_ALLOWING_INVENTORY_READ, permissions__run_ad_hoc_commands=True).exists():
-            return True
-        return False
+        return self.has_permission_types(obj, PERMISSION_TYPES_ALLOWING_INVENTORY_READ, True)
 
 class HostAccess(BaseAccess):
     '''

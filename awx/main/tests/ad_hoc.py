@@ -952,6 +952,19 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
 
+        # Create another unrelated inventory permission with run_ad_hoc_commands
+        # set; this tests an edge case in the RBAC query where we'll return
+        # can_run_ad_hoc_commands = True when we shouldn't.
+        nobody_perm_url = reverse('api:user_permissions_list', args=(self.nobody_django_user.pk,))
+        nobody_perm_data = {
+            'name': 'Allow Nobody to Read Inventory',
+            'inventory': self.inventory.pk,
+            'permission_type': 'read',
+            'run_ad_hoc_commands': True,
+        }
+        with self.current_user('admin'):
+            response = self.post(nobody_perm_url, nobody_perm_data, expect=201)
+
         # Create a credential for the other user and explicitly give other
         # user admin permission on the inventory (still not allowed to run ad
         # hoc commands; can get the list but can't see any items).
@@ -968,9 +981,9 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         with self.current_user('other'):
             response = self.get(url, expect=200)
             self.assertEqual(response['count'], 0)
-            self.run_test_ad_hoc_command(url=url, inventory=None, credential=other_cred.pk, expect=403)
             response = self.get(inventory_url, expect=200)
             self.assertFalse(response['can_run_ad_hoc_commands'])
+            self.run_test_ad_hoc_command(url=url, inventory=None, credential=other_cred.pk, expect=403)
 
         # Update permission to allow other user to run ad hoc commands.  Can
         # only see his own ad hoc commands (because of credential permission).
