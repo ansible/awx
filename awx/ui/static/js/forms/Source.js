@@ -164,7 +164,9 @@ export default
                 },
                 inventory_variables: {
                     label: 'Source Variables', //"{{vars_label}}" ,
-                    ngShow: "source && (source.value == 'vmware')",
+
+                    ngShow: "source && (source.value == 'vmware' || " +
+                                        "source.value == 'openstack')",
                     type: 'textarea',
                     addRequired: false,
                     editRequird: false,
