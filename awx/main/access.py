@@ -144,7 +144,7 @@ class BaseAccess(object):
     def can_unattach(self, obj, sub_obj, relationship):
         return self.can_change(obj, None)
 
-    def check_license(self):
+    def check_license(self, add_host=False):
         reader = TaskSerializer()
         validation_info = reader.from_file()
         if 'test' in sys.argv or 'jenkins' in sys.argv:
@@ -156,9 +156,16 @@ class BaseAccess(object):
             raise PermissionDenied("license is missing")
         if validation_info.get("grace_period_remaining") <= 0:
             raise PermissionDenied("license has expired")
-        if validation_info.get('free_instances', 0) < 0:
-            #raise PermissionDenied("Host Count exceeds available instances")
-            raise PermissionDenied("license range of %s instances has been exceeded" % validation_info.get('available_instances', 0))
+
+        free_instances = validation_info.get('free_instances', 0)
+        available_instances = validation_info.get('available_instances', 0)
+        if add_host and free_instances == 0:
+            raise PermissionDenied("license count of %s instances has been reached" % available_instances)
+        elif add_host and free_instances < 0:
+            raise PermissionDenied("license count of %s instances has been exceeded" % available_instances)
+        elif not add_host and free_instances < 0:
+            raise PermissionDenied("host count exceeds available instances")
+
 
 class UserAccess(BaseAccess):
     '''
@@ -382,7 +389,7 @@ class HostAccess(BaseAccess):
             return False
 
         # Check to see if we have enough licenses
-        self.check_license()
+        self.check_license(add_host=True)
         return True
 
     def can_change(self, obj, data):
