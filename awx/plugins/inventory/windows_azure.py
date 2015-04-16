@@ -220,10 +220,15 @@ class AzureInventory(object):
     def add_deployment(self, cloud_service, deployment):
         """Adds a deployment to the inventory and index"""
         for role in deployment.role_instance_list.role_instances:
-            for ie in role.instance_endpoints.instance_endpoints:
-                if ie.name == 'SSH':
-                    self.add_instance(role.instance_name, deployment, ie.public_port, cloud_service)
-                    break
+            try:
+                # Only consider ready vm instances (not StoppedDeallocated, not RoleStateUnknown, not StoppedVM)
+                if role.instance_status == 'ReadyRole':
+                    for ie in role.instance_endpoints.instance_endpoints:
+                        if ie.name == 'SSH':
+                            self.add_instance(role.instance_name, deployment, ie.public_port, cloud_service)
+                            break
+            except AttributeError:
+                return
 
     def add_instance(self, hostname, deployment, ssh_port, cloud_service):
         """Adds an instance to the inventory and index"""
