@@ -30,7 +30,7 @@ if not hasattr(unittest, 'skipIf'):
     import unittest2 as unittest
 
 __all__ = ['DumpDataTest', 'CleanupDeletedTest', 'CleanupJobsTest',
-           'InventoryImportTest']
+           'CleanupActivityStreamTest', 'InventoryImportTest']
 
 TEST_PLAYBOOK = '''- hosts: test-group
   gather_facts: False
@@ -442,6 +442,72 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         ad_hoc_commands_after = AdHocCommand.objects.all().count()
         self.assertNotEqual(ad_hoc_commands_before, ad_hoc_commands_after)
         self.assertFalse(ad_hoc_commands_after)
+
+
+class CleanupActivityStreamTest(BaseCommandMixin, BaseTest):
+    '''
+    Test cases for cleanup_activitystream management command.
+    '''
+
+    def setUp(self):
+        self.start_redis()
+        super(CleanupActivityStreamTest, self).setUp()
+        self.create_test_inventories()
+
+    def tearDown(self):
+        super(CleanupActivityStreamTest, self).tearDown()
+        self.stop_redis()
+
+    def test_cleanup(self):
+        # Should already have entries due to test case setup. With no
+        # parameters, "days" defaults to 30, which won't cleanup anything.
+        count_before = ActivityStream.objects.count()
+        self.assertTrue(count_before)
+        result, stdout, stderr = self.run_command('cleanup_activitystream')
+        self.assertEqual(result, None)
+        count_after = ActivityStream.objects.count()
+        self.assertEqual(count_before, count_after)
+
+        # With days=1, nothing should be changed.
+        result, stdout, stderr = self.run_command('cleanup_activitystream', days=1)
+        self.assertEqual(result, None)
+        count_after = ActivityStream.objects.count()
+        self.assertEqual(count_before, count_after)
+
+        # With days=0 and dry_run=True, nothing should be changed.
+        result, stdout, stderr = self.run_command('cleanup_activitystream', days=0, dry_run=True)
+        self.assertEqual(result, None)
+        count_after = ActivityStream.objects.count()
+        self.assertEqual(count_before, count_after)
+
+        # With days=0, everything should be cleaned up.
+        result, stdout, stderr = self.run_command('cleanup_activitystream', days=0)
+        self.assertEqual(result, None)
+        count_after = ActivityStream.objects.count()
+        self.assertNotEqual(count_before, count_after)
+        self.assertFalse(count_after)
+
+        # Modify hosts to create 1000 activity stream entries.
+        t = time.time()
+        for x in xrange(0, 1000 / Host.objects.count()):
+            for host in Host.objects.all():
+                host.name = u'%s-update-%d' % (host.name, x)
+                host.save()
+        create_elapsed = time.time() - t
+
+        # Time how long it takes to cleanup activity stream, should be no more
+        # than 1/4 the time taken to create the entries.
+        count_before = ActivityStream.objects.count()
+        self.assertTrue(count_before)
+        t = time.time()
+        result, stdout, stderr = self.run_command('cleanup_activitystream', days=0)
+        cleanup_elapsed = time.time() - t
+        self.assertEqual(result, None)
+        count_after = ActivityStream.objects.count()
+        self.assertNotEqual(count_before, count_after)
+        self.assertFalse(count_after)
+        self.assertTrue(cleanup_elapsed < (create_elapsed / 4),
+                        'create took %0.3fs, cleanup took %0.3fs, expected < %0.3fs' % (create_elapsed, cleanup_elapsed, create_elapsed / 4))
 
 
 class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):

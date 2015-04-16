@@ -39,7 +39,8 @@ class Command(NoArgsCommand):
 
     def cleanup_activitystream(self):
         n_deleted_items = 0
-        for asobj in ActivityStream.objects.all():
+        pks_to_delete = set()
+        for asobj in ActivityStream.objects.iterator():
             asobj_disp = '"%s" id: %s' % (unicode(asobj), asobj.id)
             if asobj.timestamp >= self.cutoff:
                 if self.dry_run:
@@ -47,9 +48,16 @@ class Command(NoArgsCommand):
             else:
                 if self.dry_run:
                     self.logger.info("would delete %s" % asobj_disp)
-                if not self.dry_run:
-                    asobj.delete()
-                    n_deleted_items += 1
+                else:
+                    pks_to_delete.add(asobj.pk)
+            # Cleanup objects in batches instead of deleting each one individually.
+            if len(pks_to_delete) >= 500:
+                ActivityStream.objects.filter(pk__in=pks_to_delete).delete()
+                n_deleted_items += len(pks_to_delete)
+                pks_to_delete.clear()
+        if len(pks_to_delete):
+            ActivityStream.objects.filter(pk__in=pks_to_delete).delete()
+            n_deleted_items += len(pks_to_delete)
         print("Removed %s items" % str(n_deleted_items))
 
     def handle_noargs(self, **options):
