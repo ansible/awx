@@ -1,5 +1,5 @@
 /*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+ *  Copyright (c) 2015 AnsibleWorks, Inc.
  *
  *  Credentials.js
  *
@@ -44,6 +44,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
+                 scope.passwordLabel = 'Password';
 
                  $('.popover').each(function() {
                      // remove lingering popover <div>. Seems to be a bug in TB3 RC1
@@ -68,6 +69,11 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
+                 scope.projectLabel = '';
+                 scope.project_required = false;
+                 scope.passwordLabel = 'Password (API Key)';
+                 scope.projectPopOver = "<p>The project value</p>";
+                 scope.hostPopOver = "<p>The host value</p>";
 
                  if (!Empty(scope.kind)) {
                      // Apply kind specific settings
@@ -77,36 +83,57 @@ angular.module('CredentialsHelper', ['Utilities'])
                          break;
                          case 'rax':
                              scope.rackspace_required = true;
-                         scope.username_required = true;
+                             scope.username_required = true;
                          break;
                          case 'ssh':
                              scope.usernameLabel = 'Username'; //formally 'SSH Username'
                          break;
                          case 'scm':
                              scope.sshKeyDataLabel = 'SCM Private Key';
+                             scope.passwordLabel = 'Password';
                          break;
                          case 'gce':
                              scope.usernameLabel = 'Service Account Email Address';
-                         scope.sshKeyDataLabel = 'RSA Private Key';
-                         scope.email_required = true;
-                         scope.key_required = true;
-                         scope.project_required = true;
-                         scope.key_description =  'Paste the contents of the PEM file associated with the service account email.';
-                         scope.key_hint= "drag and drop a private key file on the field below";
+                             scope.sshKeyDataLabel = 'RSA Private Key';
+                             scope.email_required = true;
+                             scope.key_required = true;
+                             scope.project_required = true;
+                             scope.key_description =  'Paste the contents of the PEM file associated with the service account email.';
+                             scope.key_hint= "drag and drop a private key file on the field below";
+                             scope.projectLabel = "Project";
+                             scope.project_required = false;
+                             scope.projectPopOver = "<p>The Project ID is the " +
+                             "GCE assigned identification. It is constructed as " +
+                             "two words followed by a three digit number.  Such " +
+                             "as: </p><p>adjective-noun-000</p>";
                          break;
                          case 'azure':
                              scope.usernameLabel = "Subscription ID";
-                         scope.sshKeyDataLabel = 'Management Certificate';
-                         scope.subscription_required = true;
-                         scope.key_required = true;
-                         scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.";
-                         scope.key_hint= "drag and drop a management certificate file on the field below";
+                             scope.sshKeyDataLabel = 'Management Certificate';
+                             scope.subscription_required = true;
+                             scope.key_required = true;
+                             scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.";
+                             scope.key_hint= "drag and drop a management certificate file on the field below";
                          break;
                          case 'vmware':
                              scope.username_required = true;
-                         scope.host_required = true;
-                         scope.password_required = true;
-                         scope.hostLabel = "vCenter Host";
+                             scope.host_required = true;
+                             scope.password_required = true;
+                             scope.hostLabel = "vCenter Host";
+                             scope.passwordLabel = 'Password';
+                         break;
+                         case 'openstack':
+                             scope.hostLabel = "Host (Authentication URL)";
+                             scope.projectLabel = "Project (Tenet Name/ID)";
+                             scope.password_required = true;
+                             scope.project_required = true;
+                             scope.host_required = true;
+                             scope.username_required = true;
+                             scope.projectPopOver = "<p>This is the tenant name " +
+                                 "or tenant id. This value is usually the same " +
+                                 " as the username.</p>";
+                             scope.hostPopOver = "<p>The host to authenticate with." +
+                                 "<br />For example, https://openstack.business.com/v2.0/";
                          break;
                      }
                  }

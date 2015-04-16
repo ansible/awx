@@ -1,5 +1,5 @@
 /*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+ *  Copyright (c) 2015 AnsibleWorks, Inc.
  *
  *  Credentials.js
  *  Form definition for Credential model
@@ -156,7 +156,12 @@ export default
                 "host": {
                     labelBind: 'hostLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'vmware'",
+                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack'",
+                    awPopOverWatch: "projectPopOver",
+                    awPopOver: "set in helpers/credentials",
+                    dataTitle: 'Host',
+                    dataPlacement: 'right',
+                    dataContainer: "body",
                     autocomplete: false,
                     awRequiredWhen: {
                         variable: 'host_required',
@@ -219,9 +224,9 @@ export default
                     clear: false,
                 },
                 "password": {
-                    label: 'Password',
+                    labelBind: 'passwordLabel',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'scm' || kind.value == 'vmware'",
+                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack'",
                     addRequired: false,
                     editRequired: false,
                     ask: false,
@@ -306,20 +311,20 @@ export default
                     autocomplete: false
                 },
                 "project": {
-                    label: "Project",
+                    labelBind: 'projectLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'gce'",
-                    awRequiredWhen: {
-                        variable: 'project_required',
-                        init: false
-                    },
-                    awPopOver: "<p>The Project ID is the GCE assigned identification. It is constructed as two words followed by a three digit number.  Such as: </p><p>adjective-noun-000</p>",
+                    ngShow: "kind.value == 'gce' || kind.value == 'openstack'",
+                    awPopOverWatch: "projectPopOver",
+                    awPopOver: "set in helpers/credentials",
                     dataTitle: 'Project ID',
                     dataPlacement: 'right',
                     dataContainer: "body",
                     addRequired: false,
                     editRequired: false,
-                    autocomplete: false
+                    awRequiredWhen: {
+                        variable: 'project_required',
+                        init: false
+                    }
                 },
                 "vault_password": {
                     label: "Vault Password",
