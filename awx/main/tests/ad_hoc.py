@@ -567,8 +567,10 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
         self.assertEqual(url, response['url'])
         with self.current_user('admin'):
             response = self.get(url, expect=200)
+            self.assertEqual(response['credential'], self.credential.pk)
             self.assertEqual(response['related']['credential'],
                              reverse('api:credential_detail', args=(self.credential.pk,)))
+            self.assertEqual(response['inventory'], self.inventory.pk)
             self.assertEqual(response['related']['inventory'],
                              reverse('api:inventory_detail', args=(self.inventory.pk,)))
             self.assertTrue(response['related']['stdout'])
@@ -599,6 +601,15 @@ class AdHocCommandApiTest(BaseAdHocCommandTest):
             self.put(url, {}, expect=401)
             self.patch(url, {}, expect=401)
             self.delete(url, expect=401)
+
+        # Verify that the credential and inventory are null when they have
+        # been deleted.
+        self.credential.mark_inactive()
+        self.inventory.mark_inactive()
+        with self.current_user('admin'):
+            response = self.get(url, expect=200)
+            self.assertEqual(response['credential'], None)
+            self.assertEqual(response['inventory'], None)
 
     def test_ad_hoc_command_cancel(self):
         # Override setting so that ad hoc command isn't actually started.

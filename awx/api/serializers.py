@@ -1543,6 +1543,10 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
             if parent_model in (Host, Group):
                 ret.pop('inventory', None)
                 ret.pop('limit', None)
+        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+            ret['inventory'] = None
+        if 'credential' in ret and (not obj.credential or not obj.credential.active):
+            ret['credential'] = None
         return ret
 
 
