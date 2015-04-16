@@ -1,0 +1,9 @@
+<ul class="ansible-breadcrumb" id="breadcrumb-list">
+    <li ng-repeat="crumb in breadcrumbs" ng-class="{active: crumb.isCurrent}">
+        <a href="{{'#' + crumb.path }}">
+            {{crumb.title}}
+        </a>
+    </li>
+</ul>
+<!-- empty trasncluded div required to make child directives link up -->
+<div ng-transclude></div>

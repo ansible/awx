@@ -34,6 +34,7 @@ import dataServices from 'tower/services/_data-services';
 import dashboardGraphs from 'tower/directives/_dashboard-graphs';
 
 import routeExtensions from 'tower/shared/route-extensions/main';
+import breadcrumbs from 'tower/shared/breadcrumbs/main';
 
 // modules
 import browserData from 'tower/browser-data/main';
@@ -78,6 +79,7 @@ var tower = angular.module('Tower', [
     dashboardGraphs.name,
     routeExtensions.name,
     browserData.name,
+    breadcrumbs.name,
     'AuthService',
     'Utilities',
     'LicenseHelper',

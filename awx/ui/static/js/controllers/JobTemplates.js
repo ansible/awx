@@ -264,7 +264,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
 
     CallbackHelpInit({ scope: $scope });
     $scope.can_edit = true;
-    generator.inject(form, { mode: 'add', related: false, scope: $scope });
+    generator.inject(form, { mode: 'add', related: false, scope: $scope, breadcrumbs: true });
 
     callback = function() {
         // Make sure the form controller knows there was a change
@@ -674,7 +674,7 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     CallbackHelpInit({ scope: $scope });
 
     SchedulesList.well = false;
-    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope, breadcrumbs: true });
     $scope.mode = 'edit';
     $scope.parseType = 'yaml';
     $scope.showJobType = false;

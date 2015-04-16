@@ -1,3 +1,17 @@
+<breadcrumbs>
+    <breadcrumb path="/teams" title="Teams"></breadcrumb>
+    <breadcrumb
+        path="/teams/add"
+        title="Create Team"
+        ng-if="mode == 'add'">
+    </breadcrumb>
+    <breadcrumb
+      path="/teams/{{team_id}}"
+      title="{{team_name}}"
+      ng-if="team_id">
+    </breadcrumb>
+</breadcrumbs>
+
 <div class="tab-pane" id="teams">
   <div ng-cloak id="htmlTemplate"></div>
 </div>

@@ -404,7 +404,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $rout
         defaultUrl = GetBasePath('projects'),
         master = {};
 
-    generator.inject(form, { mode: 'add', related: false, scope: $scope });
+    generator.inject(form, { mode: 'add', related: false, scope: $scope, breadcrumbs: true });
     generator.reset();
     LoadBreadCrumbs();
 
@@ -557,7 +557,8 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log, $rou
     generator.inject(form, {
         mode: 'edit',
         related: true,
-        scope: $scope
+        scope: $scope,
+        breadcrumbs: true
     });
     generator.reset();
 

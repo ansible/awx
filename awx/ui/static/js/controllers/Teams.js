@@ -191,6 +191,8 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
         id = $routeParams.team_id,
         relatedSets = {};
 
+    $scope.team_id = id;
+
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
 
@@ -234,7 +236,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
     })
         .success(function (data) {
             var fld, related, set;
-            LoadBreadCrumbs({ path: '/teams/' + id, title: data.name });
+            $scope.team_name = data.name;
             for (fld in form.fields) {
                 if (data[fld]) {
                     $scope[fld] = data[fld];
@@ -296,6 +298,7 @@ export function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeP
             .success(function () {
                 Wait('stop');
                 var base = $location.path().replace(/^\//, '').split('/')[0];
+                $scope.team_name = $scope.name;
                 if (base === 'teams') {
                     ReturnToCaller();
                 }

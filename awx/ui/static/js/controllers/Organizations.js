@@ -166,6 +166,8 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
         id = $routeParams.organization_id,
         relatedSets = {};
 
+    $scope.organization_id = id;
+
     generator.inject(form, { mode: 'edit', related: true, scope: $scope});
     generator.reset();
 
@@ -186,7 +188,7 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
     Rest.get()
         .success(function (data) {
             var fld, related, set;
-            LoadBreadCrumbs({ path: '/organizations/' + id, title: data.name });
+            $scope.organization_name = data.name;
             for (fld in form.fields) {
                 if (data[fld]) {
                     $scope[fld] = data[fld];
@@ -225,6 +227,7 @@ export function OrganizationsEdit($scope, $rootScope, $compile, $location, $log,
         Rest.put(params)
             .success(function () {
                 Wait('stop');
+                $scope.organization_name = $scope.name;
                 master = params;
                 $rootScope.flashMessage = "Your changes were successfully saved!";
             })
