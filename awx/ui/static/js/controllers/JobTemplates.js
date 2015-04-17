@@ -440,7 +440,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
                         break;
                     }
                     if (msg) {
-                        Alert('Waning', msg, 'alert-info');
+                        Alert('Warning', msg, 'alert-info');
                     }
                 })
                 .error(function (data, status) {
@@ -770,7 +770,7 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
                     }
                     Wait('stop');
                     if (msg) {
-                        Alert('Waning', msg, 'alert-info');
+                        Alert('Warning', msg, 'alert-info');
                     }
                 })
                 .error(function (data, status) {
