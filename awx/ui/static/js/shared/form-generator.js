@@ -1034,7 +1034,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "class=\"form-control";
                         html += (field['class']) ? " " + field['class'] : "";
                         html += "\" ";
-                        html += this.attr(field, 'ngOptions');
+                        html += (field.ngOptions) ? this.attr(field, 'ngOptions') : "" ;
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                         html += (field.ngDisabled) ? this.attr(field, 'ngDisabled'): "";
                         html += (field.ngRequired) ? this.attr(field, 'ngRequired') : "";
@@ -1042,6 +1042,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (options.mode === 'add' && field.addRequired) ? "required " : "";
                         html += (field.multiSelect) ? "multiple " : "";
+                        html += (field.awMultiselect) ? "aw-multiselect=\"" + field.awMultiselect + "\" " : "";
                         html += (field.readonly) ? "disabled " : "";
                         html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
                             field.awRequiredWhen.variable + "\" " : "";

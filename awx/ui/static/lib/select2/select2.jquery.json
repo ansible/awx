@@ -11,26 +11,22 @@
         "tag",
         "tagging"
     ],
-    "version": "3.5.1",
+    "version": "4.0.0-rc.2",
     "author": {
-        "name": "Igor Vaynberg",
-        "url": "https://github.com/ivaynberg"
+        "name": "Kevin Brown",
+        "url": "https://github.com/kevin-brown"
     },
     "licenses": [
         {
-            "type": "Apache",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0"
-        },
-        {
-            "type": "GPL v2",
-            "url": "http://www.gnu.org/licenses/gpl-2.0.html"
+            "type": "MIT",
+            "url": "http://opensource.org/licenses/MIT"
         }
     ],
-    "bugs": "https://github.com/ivaynberg/select2/issues",
-    "homepage": "http://ivaynberg.github.com/select2",
-    "docs": "http://ivaynberg.github.com/select2/",
-    "download": "https://github.com/ivaynberg/select2/tags",
+    "bugs": "https://github.com/select2/select2/issues",
+    "homepage": "https://select2.github.io",
+    "docs": "https://select2.github.io",
+    "download": "https://github.com/select2/select2/releases",
     "dependencies": {
-        "jquery": ">=1.7.1"
+        "jquery": ">=1.7.2"
     }
 }

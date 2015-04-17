@@ -231,18 +231,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
          }
 ])
 
-/**
- *
- * TODO: Document
- *
- */
-.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange', 'CustomInventoryList' ,
-         function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange, CustomInventoryList) {
+
+
+
+.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange', 'CustomInventoryList', 'CreateSelect2',
+         function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange, CustomInventoryList, CreateSelect2) {
              return function (params) {
 
                  var scope = params.scope,
                  form = params.form,
                  kind, url, callback, invUrl;
+
 
                  if (!Empty(scope.source)) {
                      if (scope.source.value === 'file') {
@@ -255,37 +254,36 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                      }
                      if (scope.source.value === 'rax') {
                          scope.source_region_choices = scope.rax_regions;
-                         //$('#s2id_group_source_regions').select2('data', []);
-                         $('#s2id_source_source_regions').select2('data', [{
-                             id: 'all',
-                             text: 'All'
-                         }]);
                          $('#source_form').addClass('squeeze');
-                     } else if (scope.source.value === 'ec2') {
+                         CreateSelect2({
+                             element: '#source_source_regions'
+                         });
+                     }
+                     else if (scope.source.value === 'ec2') {
                          scope.source_region_choices = scope.ec2_regions;
-                         $('#s2id_source_source_regions').select2('data', [{
-                             id: 'all',
-                             text: 'All'
-                         }]);
                          scope.group_by_choices = scope.ec2_group_by;
-                         $('#s2id_group_by').select2('data', []);
                          $('#source_form').addClass('squeeze');
-                     } else if (scope.source.value === 'gce') {
+                         CreateSelect2({
+                             element: '#source_source_regions'
+                         });
+                         CreateSelect2({
+                             element: '#source_group_by'
+                         });
+
+                     }
+                     else if (scope.source.value === 'gce') {
                          scope.source_region_choices = scope.gce_regions;
-                         //$('#s2id_group_source_regions').select2('data', []);
-                         $('#s2id_source_source_regions').select2('data', [{
-                             id: 'all',
-                             text: 'All'
-                         }]);
                          $('#source_form').addClass('squeeze');
+                         CreateSelect2({
+                             element: '#source_source_regions'
+                         });
+
                      } else if (scope.source.value === 'azure') {
                          scope.source_region_choices = scope.azure_regions;
-                         //$('#s2id_group_source_regions').select2('data', []);
-                         $('#s2id_source_source_regions').select2('data', [{
-                             id: 'all',
-                             text: 'All'
-                         }]);
                          $('#source_form').addClass('squeeze');
+                         CreateSelect2({
+                             element: '#source_source_regions'
+                         });
                      }
                      if(scope.source.value==="custom"){
                          // need to filter the possible custom scripts by the organization defined for the current inventory
@@ -700,11 +698,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
 .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
          'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find', 'WatchInventoryWindowResize',
-         'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize',
+         'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize', 'CreateSelect2',
          function ($rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
                    GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
                    GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, GroupsScheduleListInit,
-                   SourceForm, SetSchedulesInnerDialogSize) {
+                   SourceForm, SetSchedulesInnerDialogSize, CreateSelect2) {
                        return function (params) {
 
                            var parent_scope = params.scope,
@@ -1048,7 +1046,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                                    }
                                                }
                                                master.source_regions = opts;
-                                               $('#s2id_source_source_regions').select2('data', opts);
+                                               CreateSelect2({
+                                                   element: "#source_source_regions",
+                                                   opts: opts
+                                               });
+
                                            }
                                        } else {
                                            // If empty, default to all
@@ -1056,7 +1058,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                                id: 'all',
                                                text: 'All'
                                            }];
-                                           $('#s2id_source_source_regions').select2('data', master.source_regions);
+                                        //    $('#source_source_regions').select2('data', master.source_regions);
                                        }
                                        if (data.group_by && data.source === 'ec2') {
                                            set = sources_scope.ec2_group_by;
@@ -1073,7 +1075,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                                }
                                            }
                                            master.group_by = opts;
-                                           $('#s2id_source_group_by').select2('data', opts);
+                                           CreateSelect2({
+                                               element: "#source_group_by",
+                                               opts: opts
+                                           });
                                        }
                                        sources_scope.group_update_url = data.related.update;
                                        modal_scope.$emit('groupVariablesLoaded');  // JT-- "groupVariablesLoaded" is where the schedule info is loaded, so I make a call after the sources_scope.source has been loaded
@@ -1249,7 +1254,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                };
 
                                // Create a string out of selected list of regions
-                               regions = $('#s2id_source_source_regions').select2("data");
+                               regions = $('#source_source_regions').select2("data");
                                r = [];
                                for (i = 0; i < regions.length; i++) {
                                    r.push(regions[i].id);
@@ -1259,7 +1264,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                if (sources_scope.source && (sources_scope.source.value === 'ec2')) {
                                    data.instance_filters = sources_scope.instance_filters;
                                    // Create a string out of selected list of regions
-                                   group_by = $('#s2id_source_group_by').select2("data");
+                                   group_by = $('#source_group_by').select2("data");
                                    r = [];
                                    for (i = 0; i < group_by.length; i++) {
                                        r.push(group_by[i].id);

@@ -728,43 +728,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
-
-    /*
-       awMultiSelect
-       Relies on select2.js to create a multi-select with tags.
-    */
-    .directive('awMultiselect', [ function() {
-        return {
-            require: '^form',  //inject the form into the ctrl parameter
-            link: function(scope, elm, attrs, ctrl) {
-                $(elm).select2({
-                    multiple: true,
-                    data: function() {
-                        // dynamically load the possible values
-                        if (scope[attrs.awMultiselect]) {
-                            var set = scope[attrs.awMultiselect],
-                                opts = [], i;
-                            for (i=0; i < set.length; i++) {
-                                opts.push({ id: set[i].value, text: set[i].label });
-                            }
-                            return {results: opts };
-                        }
-                        return {results: { id: '', text: ''} };
-                    }
-                });
-
-                // Make sure the form buttons enable when the value changes
-                $(elm).on('change', function() {
-                    ctrl.$setDirty();
-                    if (!scope.$$phase) {
-                        scope.$digest();
-                    }
-                });
-            }
-        };
-    }])
-
-
     /*
      *  Make an element draggable. Used on inventory groups tree.
      *

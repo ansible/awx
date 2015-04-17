@@ -661,6 +661,57 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
+ * @name shared.function:Utilities#CreateSelect2
+ * @methodOf shared.function:Utilities
+ * @description Make a regular select drop down a select2 dropdown
+ */
+.factory('CreateSelect2', [
+    function () {
+        return function (params) {
+
+            var element = params.element,
+            options = params.opts;
+
+            $.fn.select2.amd.require([
+              "select2/utils",
+              "select2/dropdown",
+              "select2/dropdown/attachContainer",
+              "select2/dropdown/search",
+            ], function (Utils, DropdownAdapter, AttachContainer, DropdownSearch) {
+
+                var CustomAdapter = Utils.Decorate(
+                  Utils.Decorate(
+                      DropdownAdapter,
+                      DropdownSearch
+                  ),
+                  AttachContainer
+                 );
+
+                $(element).select2({
+                    dropdownAdapter: CustomAdapter,
+                    multiple: 'true',
+                    theme: "bootstrap",
+                    width: '100%'
+                });
+                if(options){
+                    for (var d = 0; d < $(element + " option").length; d++) {
+                        var item = $(element + " option")[d];
+                        for ( var f = 0; f < options.length; f++){
+                            if(item.value === options[f].id){
+                                // Append it to the select
+                                item.setAttribute('selected', 'selected');
+                            }
+                        }
+                    }
+
+                    $(element).trigger('change');
+                }
+
+            });
+        };
+ }])
+/**
+ * @ngdoc method
  * @name shared.function:Utilities#GetChoices
  * @methodOf shared.function:Utilities
  * @description Make an Options call to the API and retrieve dropdown options

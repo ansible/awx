@@ -53,11 +53,12 @@ export default
                 },
                 source_regions: {
                     label: 'Regions',
-                    type: 'text',
+                    type: 'select',
+                    ngOptions: 'source.label for source in source_region_choices track by source.value',
+                    multiSelect: true,
                     ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure')",
                     addRequired: false,
                     editRequired: false,
-                    awMultiselect: 'source_region_choices',
                     dataTitle: 'Source Regions',
                     dataPlacement: 'right',
                     awPopOver: "<p>Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, " +
@@ -87,11 +88,12 @@ export default
                 },
                 group_by: {
                     label: 'Only Group By',
-                    type: 'text',
+                    type: 'select',
                     ngShow: "source && source.value == 'ec2'",
+                    ngOptions: 'source.label for source in group_by_choices track by source.value',
                     addRequired: false,
                     editRequired: false,
-                    awMultiselect: 'group_by_choices',
+                    multiSelect: true,
                     dataTitle: 'Only Group By',
                     dataPlacement: 'right',
                     awPopOver: "<p>Select which groups to create automatically. " +
