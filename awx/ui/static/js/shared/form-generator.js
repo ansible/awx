@@ -671,10 +671,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += Attr(field, 'type');
                     html += "ng-model=\"" + fld + '" ';
                     html += "name=\"" + fld + '" ';
-                    if (form.name === "permission") {
-                        html += "ng-disabled='permission_type === \"admin\"'";
-                        html += "ng-checked='permission_type === \"admin\"'";
-                    }
                     html += (field.ngChange) ? Attr(field, 'ngChange') : "";
                     html += "id=\"" + form.name + "_" + fld + "_chbox\" ";
                     html += (idx !== undefined) ? "_" + idx : "";
