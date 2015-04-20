@@ -118,7 +118,7 @@ class AzureInventory(object):
         the Windows Azure API provides.
         """
         if hostname not in self.host_metadata:
-            return "No host found: %s" % hostname
+            return "No host found: %s" % json.dumps(self.host_metadata)
         if jsonify:
             return json.dumps(self.host_metadata[hostname])
         return self.host_metadata[hostname]
@@ -227,12 +227,12 @@ class AzureInventory(object):
                     if ie.name == 'SSH':
                         port = ie.public_port
                         break
-                self.add_instance(role.instance_name, deployment, port, cloud_service)
             except AttributeError as e:
-                print json.dumps({ 'msg': 'Attribute error %s' % e })
-                return
+                pass
+            finally:
+                self.add_instance(role.instance_name, deployment, port, cloud_service, role.instance_status)
 
-    def add_instance(self, hostname, deployment, ssh_port, cloud_service):
+    def add_instance(self, hostname, deployment, ssh_port, cloud_service, status):
         """Adds an instance to the inventory and index"""
 
         dest = urlparse(deployment.url).hostname
@@ -241,7 +241,8 @@ class AzureInventory(object):
         self.index[hostname] = deployment.name
 
         self.host_metadata[hostname] = dict(ansible_ssh_host=dest,
-                                            ansible_ssh_port=int(ssh_port))
+                                            ansible_ssh_port=int(ssh_port),
+                                            instance_status=status)
 
         # List of all azure deployments
         self.push(self.inventory, "azure", hostname)
