@@ -60,9 +60,12 @@ tools/vagrant/local.yml
 
 # Setup
 setup.log
+backup.log
+restore.log
 setup/tower_setup_conf.yml
 setup/setup.log
 setup/inventory
+tower-backup-*
 
 # Other
 .tower_cycle
