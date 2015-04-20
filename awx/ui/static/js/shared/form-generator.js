@@ -787,7 +787,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 field.awRequiredWhen.variable + "\" " : "";
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
                             html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
-                            html += (field.awMultiselect) ? "aw-multiselect=\"" + field.awMultiselect + "\" " : "";
                             html += ">\n";
                         }
 
@@ -911,7 +910,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 field.awRequiredWhen.variable + "' " : "";
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
                             html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled='" + field.associated + "_ask' " : "";
-                            html += (field.awMultiselect) ? "aw-multiselect='" + field.awMultiselect + "' " : "";
                             html += ">\n";
                         }
 
@@ -1042,7 +1040,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (options.mode === 'add' && field.addRequired) ? "required " : "";
                         html += (field.multiSelect) ? "multiple " : "";
-                        html += (field.awMultiselect) ? "aw-multiselect=\"" + field.awMultiselect + "\" " : "";
                         html += (field.readonly) ? "disabled " : "";
                         html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
                             field.awRequiredWhen.variable + "\" " : "";

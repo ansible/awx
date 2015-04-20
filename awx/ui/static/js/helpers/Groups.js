@@ -1058,7 +1058,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                                id: 'all',
                                                text: 'All'
                                            }];
-                                        //    $('#source_source_regions').select2('data', master.source_regions);
                                        }
                                        if (data.group_by && data.source === 'ec2') {
                                            set = sources_scope.ec2_group_by;

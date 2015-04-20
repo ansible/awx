@@ -664,6 +664,24 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  * @name shared.function:Utilities#CreateSelect2
  * @methodOf shared.function:Utilities
  * @description Make a regular select drop down a select2 dropdown
+ *  To make a ``<select>`` field a select2 select 2, create the field in the
+ *  form definition with the multiSelect flag set to true. In the controller
+ *  of the page in question, call the CreateSelect2 factory with the element
+ *  id (be sure to include the appropriate jquery identifier in the parameter)
+ *  or any options that should be pre-selected in the select2 field.
+ *  The array of options should be formatted as
+ * ```
+ * [
+ *  {
+ *     id: 'id' ,
+ *     text: 'text'
+ *  },
+ *  {
+ *     id: 'id' ,
+ *     text: 'text'
+ *  }
+ * ]
+ * ```
  */
 .factory('CreateSelect2', [
     function () {

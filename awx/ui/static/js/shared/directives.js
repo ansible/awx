@@ -620,33 +620,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
-    .directive('awMultiSelect', [ function() {
-        return {
-            require: 'ngModel',
-            link: function(scope, elm) {
-                $(elm).multiselect  ({
-                    buttonClass: 'btn-default, btn-mini',
-                    buttonWidth: 'auto',
-                    buttonContainer: '<div class="btn-group" />',
-                    maxHeight: false,
-                    buttonText: function(options) {
-                        if (options.length === 0) {
-                            return 'None selected <b class="caret"></b>';
-                        }
-                        if (options.length > 3) {
-                            return options.length + ' selected  <b class="caret"></b>';
-                        }
-                        var selected = '';
-                        options.each(function() {
-                            selected += $(this).text() + ', ';
-                        });
-                        return selected.substr(0, selected.length -2) + ' <b class="caret"></b>';
-                    }
-                });
-            }
-        };
-    }])
-
     //
     // Enable jqueryui spinner widget on a numeric input field
     //
