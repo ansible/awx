@@ -170,7 +170,7 @@ export function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $r
                 $("#permission_run_ad_hoc_commands_chbox").attr("disabled", false);
             }
         }
-    }
+    };
 
     // Save
     $scope.formSave = function () {
@@ -257,7 +257,7 @@ export function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $
                 $("#permission_run_ad_hoc_commands_chbox").attr("disabled", false);
             }
         }
-    }
+    };
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
