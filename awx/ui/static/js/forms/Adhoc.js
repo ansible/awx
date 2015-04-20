@@ -98,6 +98,7 @@ export default
                     ngOptions: 'verbosity.label for verbosity in ' +
                         'adhoc_verbosity_options ' +
                         'track by verbosity.value',
+                    "default": 1,
                     editRequired: true,
                     awPopOver:'<p>These are the verbosity levels for standard ' +
                         'out of the command run that are supported.',

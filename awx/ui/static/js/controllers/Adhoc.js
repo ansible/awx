@@ -87,6 +87,8 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
         choicesReadyCount++;
 
         if (choicesReadyCount === 2) {
+            // this sets the default option as specified by the controller.
+            $scope.verbosity = $scope.adhoc_verbosity_options[$scope.verbosity_field.default];
             $scope.$emit('lookUpInitialize');
         }
     });
