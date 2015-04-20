@@ -157,7 +157,7 @@ export default
                     labelBind: 'hostLabel',
                     type: 'text',
                     ngShow: "kind.value == 'vmware' || kind.value == 'openstack'",
-                    awPopOverWatch: "projectPopOver",
+                    awPopOverWatch: "hostPopOver",
                     awPopOver: "set in helpers/credentials",
                     dataTitle: 'Host',
                     dataPlacement: 'right',
