@@ -221,13 +221,15 @@ class AzureInventory(object):
         """Adds a deployment to the inventory and index"""
         for role in deployment.role_instance_list.role_instances:
             try:
-                # Only consider ready vm instances (not StoppedDeallocated, not RoleStateUnknown, not StoppedVM)
-                if role.instance_status == 'ReadyRole':
-                    for ie in role.instance_endpoints.instance_endpoints:
-                        if ie.name == 'SSH':
-                            self.add_instance(role.instance_name, deployment, ie.public_port, cloud_service)
-                            break
-            except AttributeError:
+                # Default port 22 unless port found with name 'SSH'
+                port = '22'
+                for ie in role.instance_endpoints.instance_endpoints:
+                    if ie.name == 'SSH':
+                        port = ie.public_port
+                        break
+                self.add_instance(role.instance_name, deployment, port, cloud_service)
+            except AttributeError as e:
+                print json.dumps({ 'msg': 'Attribute error %s' % e })
                 return
 
     def add_instance(self, hostname, deployment, ssh_port, cloud_service):
