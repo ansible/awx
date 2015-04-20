@@ -938,7 +938,7 @@ class RunInventoryUpdate(BaseTask):
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
-            openstack_data = {"clouds": {"devstack": {"auth": openstack_auth}}}
+            openstack_data = {"clouds": {"devstack": {"private": "true", "auth": openstack_auth}}}
             return yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True)
 
         cp = ConfigParser.ConfigParser()

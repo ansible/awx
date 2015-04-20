@@ -1898,3 +1898,19 @@ class InventoryUpdatesTest(BaseTransactionTest):
         other_inv_src_opts = {'source': 'custom', 'source_script': script_data['id']}
         with self.current_user(self.super_django_user):
             self.put(other_inv_src, other_inv_src_opts, expect=400)
+
+    def test_update_from_openstack(self):
+        api_url = getattr(settings, 'TEST_OPENSTACK_HOST', '')
+        api_user = getattr(settings, 'TEST_OPENSTACK_USER', '')
+        api_password = getattr(settings, 'TEST_OPENSTACK_PASSWORD', '')
+        api_project = getattr(settings, 'TEST_OPENSTACK_PROJECT', '')
+        if not all([api_url, api_user, api_password, api_project]):
+            self.skipTest("No test openstack credentials defined")
+        self.create_test_license_file()
+        credential = Credential.objects.create(kind='openstack',
+                                               host=api_url,
+                                               username=api_user,
+                                               password=api_password,
+                                               project=api_project)
+        inventory_source = self.update_inventory_source(self.group, source='openstack', credential=credential)
+        self.check_inventory_source(inventory_source)

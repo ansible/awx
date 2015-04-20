@@ -56,7 +56,7 @@ class OpenStackInventory(object):
         self.openstack_config = os_client_config.config.OpenStackConfig(
             config_files)
         self.clouds = shade.openstack_clouds(self.openstack_config)
-        self.refresh = refresh
+        self.refresh = True
 
         self.cache_max_age = self.openstack_config.get_cache_max_age()
         cache_path = self.openstack_config.get_cache_path()
@@ -101,9 +101,9 @@ class OpenStackInventory(object):
                     continue
 
                 server_vars = meta['server_vars']
-                hostvars[server.name][
-                    'ansible_ssh_host'] = server_vars['interface_ip']
+                hostvars[server.name]['ansible_ssh_host'] = server_vars['interface_ip']
                 hostvars[server.name]['openstack'] = server_vars
+                hostvars[server.name]['hostId'] = server_vars['hostId']
 
                 for group in meta['groups']:
                     groups[group].append(server.name)
