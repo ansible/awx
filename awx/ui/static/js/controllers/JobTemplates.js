@@ -249,7 +249,7 @@ JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$route
 export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath,
     InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty, ToJSON,
-    CallbackHelpInit, SurveyControllerInit, Prompt) {
+    CallbackHelpInit, SurveyControllerInit, Prompt, GetChoices) {
 
     ClearScope();
 
@@ -273,18 +273,6 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     $scope.mode = "add";
     $scope.parseType = 'yaml';
     ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
-
-    $scope.job_type_options = [
-        { value: 'run', label: 'Run' },
-        { value: 'check', label: 'Check' },
-        { value: 'scan' , label: 'Scan'}
-    ];
-
-    $scope.verbosity_options = [
-        { value: 0, label: 'Default' },
-        { value: 1, label: 'Verbose' },
-        { value: 3, label: 'Debug' }
-    ];
 
     $scope.playbook_options = [];
     $scope.allow_callbacks = 'false';
@@ -315,34 +303,70 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     CloudCredentialList.name = 'cloudcredentials';
     CloudCredentialList.iterator = 'cloudcredential';
 
-    LookUpInit({
-        url: GetBasePath('credentials') + '?cloud=true',
-        scope: $scope,
-        form: form,
-        current_item: null,
-        list: CloudCredentialList,
-        field: 'cloud_credential',
-        hdr: 'Select Cloud Credential',
-        input_type: 'radio'
-    });
-
-    LookUpInit({
-        url: GetBasePath('credentials') + '?kind=ssh',
-        scope: $scope,
-        form: form,
-        current_item: null,
-        list: CredentialList,
-        field: 'credential',
-        hdr: 'Select Machine Credential',
-        input_type: "radio"
-    });
-
     SurveyControllerInit({
         scope: $scope,
         parent_scope: $scope
     });
 
+    if ($scope.removeLookUpInitialize) {
+        $scope.removeLookUpInitialize();
+    }
+    $scope.removeLookUpInitialize = $scope.$on('lookUpInitialize', function () {
+        LookUpInit({
+            url: GetBasePath('credentials') + '?cloud=true',
+            scope: $scope,
+            form: form,
+            current_item: null,
+            list: CloudCredentialList,
+            field: 'cloud_credential',
+            hdr: 'Select Cloud Credential',
+            input_type: 'radio'
+        });
 
+        LookUpInit({
+            url: GetBasePath('credentials') + '?kind=ssh',
+            scope: $scope,
+            form: form,
+            current_item: null,
+            list: CredentialList,
+            field: 'credential',
+            hdr: 'Select Machine Credential',
+            input_type: "radio"
+        });
+    });
+
+    var selectCount = 0;
+
+    if ($scope.removeChoicesReady) {
+        $scope.removeChoicesReady();
+    }
+    $scope.removeChoicesReady = $scope.$on('choicesReadyVerbosity', function () {
+        selectCount++;
+        if (selectCount === 2) {
+            // this sets the default options for the selects as specified by the controller.
+            $scope.verbosity = $scope.verbosity_options[$scope.verbosity_field.default];
+            $scope.job_type = $scope.job_type_options[$scope.job_type_field.default];
+            $scope.$emit('lookUpInitialize');
+        }
+    });
+
+    // setup verbosity options select
+    GetChoices({
+        scope: $scope,
+        url: defaultUrl,
+        field: 'verbosity',
+        variable: 'verbosity_options',
+        callback: 'choicesReadyVerbosity'
+    });
+
+    // setup job type options select
+    GetChoices({
+        scope: $scope,
+        url: defaultUrl,
+        field: 'job_type',
+        variable: 'job_type_options',
+        callback: 'choicesReadyVerbosity'
+    });
 
     // Update playbook select whenever project value changes
     selectPlaybook = function (oldValue, newValue) {
@@ -621,7 +645,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
 JobTemplatesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
-    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit', 'SurveyControllerInit', 'Prompt'
+    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON', 'CallbackHelpInit', 'SurveyControllerInit', 'Prompt', 'GetChoices'
 ];
 
 
@@ -652,19 +676,6 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     $scope.mode = 'edit';
     $scope.parseType = 'yaml';
     $scope.showJobType = false;
-
-    // Our job type options
-    $scope.job_type_options = [
-        { value: 'run', label: 'Run' },
-        { value: 'check', label: 'Check' },
-        { value: 'scan', label: 'Scan'}
-    ];
-
-    $scope.verbosity_options = [
-        { value: 0, label: 'Default' },
-        { value: 1, label: 'Verbose' },
-        { value: 3, label: 'Debug' }
-    ];
 
     SurveyControllerInit({
         scope: $scope,
@@ -963,7 +974,7 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     }
     $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
         choicesCount++;
-        if (choicesCount === 2) {
+        if (choicesCount === 4) {
             $scope.$emit('LoadJobs');
         }
     });
@@ -981,6 +992,24 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
         url: GetBasePath('unified_jobs'),
         field: 'type',
         variable: 'type_choices',
+        callback: 'choicesReady'
+    });
+
+    // setup verbosity options lookup
+    GetChoices({
+        scope: $scope,
+        url: defaultUrl,
+        field: 'verbosity',
+        variable: 'verbosity_options',
+        callback: 'choicesReady'
+    });
+
+    // setup job type options lookup
+    GetChoices({
+        scope: $scope,
+        url: defaultUrl,
+        field: 'job_type',
+        variable: 'job_type_options',
         callback: 'choicesReady'
     });
 
