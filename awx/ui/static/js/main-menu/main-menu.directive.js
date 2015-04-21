@@ -12,6 +12,7 @@ function link(scope, element, attrs) {
     scope.$watch(function(scope) {
         return scope.$eval(scope.style);
     }, function(value) {
+        console.log('changed', scope.$eval(scope.style));
         scope.menuStylePartialUrl = getMenuStylePartialUrl(value);
     });
 }
