@@ -199,7 +199,7 @@ export default
                     label: 'Verbosity',
                     type: 'select',
                     ngOptions: 'v.label for v in verbosity_options track by v.value',
-                    "default": 0,
+                    "default": 1,
                     addRequired: true,
                     editRequired: true,
                     column: 1,
