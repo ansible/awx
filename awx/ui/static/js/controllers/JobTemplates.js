@@ -272,7 +272,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     };
     $scope.mode = "add";
     $scope.parseType = 'yaml';
-    ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback })
+    ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
 
     $scope.playbook_options = [];
     $scope.allow_callbacks = 'false';
