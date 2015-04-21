@@ -29,7 +29,7 @@ valid_sockets = []
 class TowerBaseNamespace(BaseNamespace):
 
     def get_allowed_methods(self):
-        return []
+        return ['recv_disconnect']
     
     def get_initial_acl(self):
         global valid_sockets
@@ -99,7 +99,8 @@ class AdHocCommandEventNamespace(TowerBaseNamespace):
 class ScheduleNamespace(TowerBaseNamespace):
 
     def get_allowed_methods(self):
-        return ["schedule_changed"]
+        parent_allowed = super(ScheduleNamespace, self).get_allowed_methods()
+        return parent_allowed + ["schedule_changed"]
 
     def recv_connect(self):
         logger.info("Received client connect for schedule namespace from %s" % str(self.environ['REMOTE_ADDR']))
