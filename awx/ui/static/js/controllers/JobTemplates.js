@@ -272,13 +272,7 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
     };
     $scope.mode = "add";
     $scope.parseType = 'yaml';
-    ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
-
-    $scope.job_type_options = [
-        { value: 'run', label: 'Run' },
-        { value: 'check', label: 'Check' },
-        { value: 'scan' , label: 'Scan'}
-    ];
+    ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback })
 
     $scope.playbook_options = [];
     $scope.allow_callbacks = 'false';
@@ -341,21 +335,36 @@ export function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $
         });
     });
 
+    var selectCount = 0;
+
     if ($scope.removeChoicesReady) {
         $scope.removeChoicesReady();
     }
     $scope.removeChoicesReady = $scope.$on('choicesReadyVerbosity', function () {
-        // this sets the default option as specified by the controller.
-        $scope.verbosity = $scope.verbosity_options[$scope.verbosity_field.default];
-        $scope.$emit('lookUpInitialize');
+        selectCount++;
+        if (selectCount === 2) {
+            // this sets the default options for the selects as specified by the controller.
+            $scope.verbosity = $scope.verbosity_options[$scope.verbosity_field.default];
+            $scope.job_type = $scope.job_type_options[$scope.job_type_field.default];
+            $scope.$emit('lookUpInitialize');
+        }
     });
 
-    // setup verbosity options lookup
+    // setup verbosity options select
     GetChoices({
         scope: $scope,
         url: defaultUrl,
         field: 'verbosity',
         variable: 'verbosity_options',
+        callback: 'choicesReadyVerbosity'
+    });
+
+    // setup job type options select
+    GetChoices({
+        scope: $scope,
+        url: defaultUrl,
+        field: 'job_type',
+        variable: 'job_type_options',
         callback: 'choicesReadyVerbosity'
     });
 
@@ -668,13 +677,6 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     $scope.parseType = 'yaml';
     $scope.showJobType = false;
 
-    // Our job type options
-    $scope.job_type_options = [
-        { value: 'run', label: 'Run' },
-        { value: 'check', label: 'Check' },
-        { value: 'scan', label: 'Scan'}
-    ];
-
     SurveyControllerInit({
         scope: $scope,
         parent_scope: $scope,
@@ -972,7 +974,7 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
     }
     $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
         choicesCount++;
-        if (choicesCount === 3) {
+        if (choicesCount === 4) {
             $scope.$emit('LoadJobs');
         }
     });
@@ -999,6 +1001,15 @@ export function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, 
         url: defaultUrl,
         field: 'verbosity',
         variable: 'verbosity_options',
+        callback: 'choicesReady'
+    });
+
+    // setup job type options lookup
+    GetChoices({
+        scope: $scope,
+        url: defaultUrl,
+        field: 'job_type',
+        variable: 'job_type_options',
         callback: 'choicesReady'
     });
 
