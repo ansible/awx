@@ -31,6 +31,7 @@ export default
                     'class': "btn-primary btn-xs activity-btn",
                     ngClick: "showActivity()",
                     awToolTip: "View Activity Stream",
+                    awFeature: 'activity_streams',
                     dataPlacement: "top",
                     icon: "icon-comments-alt",
                     mode: 'edit',
@@ -114,7 +115,8 @@ export default
                 ldap_user: {
                     label: 'Created by LDAP',
                     type: 'checkbox',
-                    readonly: true
+                    readonly: true,
+                    awFeature: 'ldap'
                 }
             },
 

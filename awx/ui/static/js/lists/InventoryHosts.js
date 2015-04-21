@@ -101,7 +101,8 @@ export default
             stream: {
                 ngClick: "showHostActivity()",
                 awToolTip: "View Activity Stream",
-                mode: 'all'
+                mode: 'all',
+                awFeature: 'activity_streams'
             }
         }
 

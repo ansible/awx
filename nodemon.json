@@ -6,7 +6,8 @@
     "awx/ui/static/docs/**/*"
   ],
   "watch": [
-    "awx/ui/static"
+    "awx/ui/static",
+    "awx/ui/tests"
   ],
   "ext": "js json less html"
 }

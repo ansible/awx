@@ -40,12 +40,14 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addOrganization()',
-                awToolTip: 'Create a new organization'
+                awToolTip: 'Create a new organization',
+                awFeature: 'multiple_organizations'
             },
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                mode: 'edit'
+                mode: 'edit',
+                awFeature: 'activity_streams'
             }
         },
 

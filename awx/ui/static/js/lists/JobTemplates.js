@@ -54,6 +54,7 @@ export default
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 icon: "icon-comments-alt",
+                awFeature: 'activity_streams',
                 mode: 'edit',
                 ngHide: 'portalMode===true'
             }

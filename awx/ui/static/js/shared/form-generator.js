@@ -752,6 +752,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "'";
                     html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
                     html += (field.ngHide) ? this.attr(field, 'ngHide') : "";
+                    html += (field.awFeature) ? "aw-feature=\"" + field.awFeature + "\" " : ""; 
                     html += ">\n";
 
                     //text fields

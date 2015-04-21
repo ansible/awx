@@ -33,7 +33,6 @@ import {PortalController} from 'tower/controllers/Portal';
 import dataServices from 'tower/services/_data-services';
 import dashboardGraphs from 'tower/directives/_dashboard-graphs';
 
-
 import {JobDetailController} from 'tower/controllers/JobDetail';
 import {JobStdoutController} from 'tower/controllers/JobStdout';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from 'tower/controllers/JobTemplates';
@@ -58,6 +57,7 @@ import 'tower/shared/Timer';
 import 'tower/shared/Socket';
 
 import 'tower/job-templates/main';
+import 'tower/shared/features/main';
 
 /*#if DEBUG#*/
 import {__deferLoadIfEnabled} from 'tower/debug';
@@ -171,7 +171,8 @@ var tower = angular.module('Tower', [
     'ConfigureTowerJobsListDefinition',
     'CreateCustomInventoryHelper',
     'CustomInventoryListDefinition',
-    'AdhocHelper'
+    'AdhocHelper',
+    'features'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -184,277 +185,552 @@ var tower = angular.module('Tower', [
 
             when('/jobs', {
                 templateUrl: urlPrefix + 'partials/jobs.html',
-                controller: JobsListController
+                controller: JobsListController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/portal', {
                 templateUrl: urlPrefix + 'partials/portal.html',
-                controller: PortalController
+                controller: PortalController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/jobs/:id', {
                 templateUrl: urlPrefix + 'partials/job_detail.html',
-                controller: JobDetailController
+                controller: JobDetailController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/jobs/:id/stdout', {
                 templateUrl: urlPrefix + 'partials/job_stdout.html',
-                controller: JobStdoutController
+                controller: JobStdoutController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/ad_hoc_commands/:id', {
                 templateUrl: urlPrefix + 'partials/job_stdout_adhoc.html',
-                controller: JobStdoutController
+                controller: JobStdoutController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/job_templates', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesList
+                controller: JobTemplatesList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/job_templates/add', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesAdd
+                controller: JobTemplatesAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/job_templates/:template_id', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesEdit
+                controller: JobTemplatesEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/job_templates/:id/schedules', {
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
-                controller: ScheduleEditController
+                controller: ScheduleEditController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/projects', {
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: ProjectsList
+                controller: ProjectsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/projects/add', {
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: ProjectsAdd
+                controller: ProjectsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/projects/:id', {
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: ProjectsEdit
+                controller: ProjectsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/projects/:id/schedules', {
                 templateUrl: urlPrefix + 'partials/schedule_detail.html',
-                controller: ScheduleEditController
+                controller: ScheduleEditController,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/projects/:project_id/organizations', {
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: OrganizationsList
+                controller: OrganizationsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/projects/:project_id/organizations/add', {
                 templateUrl: urlPrefix + 'partials/projects.html',
-                controller: OrganizationsAdd
+                controller: OrganizationsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/inventories', {
                 templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesList
+                controller: InventoriesList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/inventories/add', {
                 templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesAdd
+                controller: InventoriesAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/inventories/:inventory_id', {
                 templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesEdit
+                controller: InventoriesEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/inventories/:inventory_id/job_templates/add', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesAdd
+                controller: JobTemplatesAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/inventories/:inventory_id/job_templates/:template_id', {
                 templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesEdit
+                controller: JobTemplatesEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/inventories/:inventory_id/manage', {
                 templateUrl: urlPrefix + 'partials/inventory-manage.html',
-                controller: InventoriesManage
+                controller: InventoriesManage,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/inventories/:inventory_id/adhoc', {
                 templateUrl: urlPrefix + 'partials/adhoc.html',
-                controller: AdhocCtrl
+                controller: AdhocCtrl,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/organizations', {
                 templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: OrganizationsList
+                controller: OrganizationsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/organizations/add', {
                 templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: OrganizationsAdd
+                controller: OrganizationsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/organizations/:organization_id', {
                 templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: OrganizationsEdit
+                controller: OrganizationsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/organizations/:organization_id/admins', {
                 templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: AdminsList
+                controller: AdminsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/organizations/:organization_id/users', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersList
+                controller: UsersList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/organizations/:organization_id/users/add', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersAdd
+                controller: UsersAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/organizations/:organization_id/users/:user_id', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersEdit
+                controller: UsersEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: TeamsList
+                controller: TeamsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/add', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: TeamsAdd
+                controller: TeamsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: TeamsEdit
+                controller: TeamsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/permissions/add', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: PermissionsAdd
+                controller: PermissionsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/permissions', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: PermissionsList
+                controller: PermissionsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/permissions/:permission_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: PermissionsEdit
+                controller: PermissionsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/users', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: UsersList
+                controller: UsersList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/users/:user_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: UsersEdit
+                controller: UsersEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/projects', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsList
+                controller: ProjectsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/projects/add', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsAdd
+                controller: ProjectsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/projects/:project_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsEdit
+                controller: ProjectsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/credentials', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsList
+                controller: CredentialsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/credentials/add', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsAdd
+                controller: CredentialsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:team_id/credentials/:credential_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsEdit
+                controller: CredentialsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/credentials', {
                 templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: CredentialsList
+                controller: CredentialsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/credentials/add', {
                 templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: CredentialsAdd
+                controller: CredentialsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/credentials/:credential_id', {
                 templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: CredentialsEdit
+                controller: CredentialsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/users', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersList
+                controller: UsersList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/users/add', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersAdd
+                controller: UsersAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/users/:user_id', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersEdit
+                controller: UsersEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/users/:user_id/credentials', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: CredentialsList
+                controller: CredentialsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/users/:user_id/permissions/add', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: PermissionsAdd
+                controller: PermissionsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/users/:user_id/permissions', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: PermissionsList
+                controller: PermissionsList,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/users/:user_id/permissions/:permission_id', {
                 templateUrl: urlPrefix + 'partials/users.html',
-                controller: PermissionsEdit
+                controller: PermissionsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/users/:user_id/credentials/add', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsAdd
+                controller: CredentialsAdd,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/teams/:user_id/credentials/:credential_id', {
                 templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsEdit
+                controller: CredentialsEdit,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/login', {
@@ -464,17 +740,23 @@ var tower = angular.module('Tower', [
 
             when('/logout', {
                 templateUrl: urlPrefix + 'partials/blank.html',
-                controller: Authenticate
+                controller: Authenticate,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/home', {
                 templateUrl: urlPrefix + 'partials/home.html',
                 controller: Home,
                 resolve: {
-                    graphData: ['$q', 'jobStatusGraphData', 'hostCountGraphData', function($q, jobStatusGraphData, hostCountGraphData) {
+                    graphData: ['$q', 'jobStatusGraphData', 'hostCountGraphData', 'FeaturesService', function($q, jobStatusGraphData, hostCountGraphData, FeaturesService) {
                         return $q.all({
                             jobStatus: jobStatusGraphData.get("month", "all"),
-                            hostCounts: hostCountGraphData.get()
+                            hostCounts: hostCountGraphData.get(),
+                            features: FeaturesService.get()
                         });
                     }]
                 }
@@ -482,12 +764,22 @@ var tower = angular.module('Tower', [
 
             when('/home/groups', {
                 templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeGroups
+                controller: HomeGroups,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/home/hosts', {
                 templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeHosts
+                controller: HomeHosts,
+                resolve: {
+                    features: ['FeaturesService', function(FeaturesService) {
+                        return FeaturesService.get();
+                    }]
+                }
             }).
 
             when('/sockets', {
@@ -684,7 +976,6 @@ var tower = angular.module('Tower', [
                     if($location.$$url !== '/login'){
                         $rootScope.$emit('OpenSocket');
                     }
-
                 }
 
                 activateTab();

@@ -95,6 +95,7 @@ angular.module('AuthService', ['ngCookies', Utilities.name])
             },
 
             getLicense: function () {
+                //check in here first to see if license is already obtained, if we do have it, then rootScope.license
                 return $http({
                     method: 'GET',
                     url: GetBasePath('config'),
@@ -109,6 +110,7 @@ angular.module('AuthService', ['ngCookies', Utilities.name])
                 license.version = data.version;
                 license.tested = false;
                 Store('license', license);
+                $rootScope.features = Store('license').features;
             },
 
             licenseTested: function () {
