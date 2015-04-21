@@ -386,7 +386,7 @@ def emit_websocket_notification(endpoint, event, payload):
             payload['event'] = event
             payload['endpoint'] = endpoint
             websocket.publish(payload)
-    except Exception as ex:
+    except Exception:
         pass
 
 _inventory_updates = threading.local()
