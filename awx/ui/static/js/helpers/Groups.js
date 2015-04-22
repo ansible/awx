@@ -1253,12 +1253,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                };
 
                                // Create a string out of selected list of regions
-                               regions = $('#source_source_regions').select2("data");
-                               r = [];
-                               for (i = 0; i < regions.length; i++) {
-                                   r.push(regions[i].id);
+                               if(sources_scope.source_regions){
+                                   regions = $('#source_source_regions').select2("data");
+                                   r = [];
+                                   for (i = 0; i < regions.length; i++) {
+                                       r.push(regions[i].id);
+                                   }
+                                   data.source_regions = r.join();
                                }
-                               data.source_regions = r.join();
 
                                if (sources_scope.source && (sources_scope.source.value === 'ec2')) {
                                    data.instance_filters = sources_scope.instance_filters;
@@ -1380,7 +1382,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                            group_created = true;
                                            group_id = data.id;
                                            sources_scope.source_url = data.related.inventory_source;
-                                           if (properties_scope.variables) {
+                                           if (properties_scope.variables && properties_scope.variables !== "---") {
                                                modal_scope.$emit('updateVariables', json_data, data.related.variable_data);
                                            }
                                            else {
