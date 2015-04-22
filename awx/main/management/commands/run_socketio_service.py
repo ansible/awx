@@ -132,7 +132,11 @@ def notification_handler(server):
             }
             for session_id, socket in list(server.sockets.iteritems()):
                 if session_id in valid_sockets:
-                    socket.send_packet(packet)
+                    try:
+                        socket.send_packet(packet)
+                    except Exception, e:
+                        logger.error("Error sending client packet to %s: %s" % (str(session_id), str(packet)))
+                        logger.error("Error was: " + str(e))
 
 class Command(NoArgsCommand):
     '''
