@@ -242,7 +242,8 @@ class AzureInventory(object):
 
         self.host_metadata[hostname] = dict(ansible_ssh_host=dest,
                                             ansible_ssh_port=int(ssh_port),
-                                            instance_status=status)
+                                            instance_status=status,
+                                            private_id=deployment.private_id)
 
         # List of all azure deployments
         self.push(self.inventory, "azure", hostname)
