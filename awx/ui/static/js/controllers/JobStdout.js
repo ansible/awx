@@ -31,6 +31,8 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
         st,
         direction;
 
+    $scope.isClosed = true;
+
 
     function openSockets() {
         status_socket = Socket({
@@ -152,12 +154,39 @@ export function JobStdoutController ($location, $log, $rootScope, $scope, $compi
         }
     });
 
+    $scope.toggleClosedStatus = function() {
+        if (!$scope.isClosed) {
+            $('.StandardOutDetails-detailRow--closable').slideUp(200);
+            $scope.isClosed = true;
+        }
+        else {
+            $('.StandardOutDetails-detailRow--closable').slideDown(200);
+            $scope.isClosed = false;
+        }
+    };
+
     // Note: could be ad_hoc_commands or jobs
     var jobType = $location.path().replace(/^\//, '').split('/')[0];
     Rest.setUrl(GetBasePath(jobType) + job_id + '/');
     Rest.get()
         .success(function(data) {
             $scope.job = data;
+            $scope.job_template_name = data.name;
+            $scope.project_name = (data.summary_fields.project) ? data.summary_fields.project.name : '';
+            $scope.inventory_name = (data.summary_fields.inventory) ? data.summary_fields.inventory.name : '';
+            $scope.job_template_url = '/#/job_templates/' + data.unified_job_template;
+            $scope.inventory_url = ($scope.inventory_name && data.inventory) ? '/#/inventories/' + data.inventory : '';
+            $scope.project_url = ($scope.project_name && data.project) ? '/#/projects/' + data.project : '';
+            $scope.credential_name = (data.summary_fields.credential) ? data.summary_fields.credential.name : '';
+            $scope.credential_url = (data.credential) ? '/#/credentials/' + data.credential : '';
+            $scope.cloud_credential_url = (data.cloud_credential) ? '/#/credentials/' + data.cloud_credential : '';
+            $scope.playbook = data.playbook;
+            $scope.credential = data.credential;
+            $scope.cloud_credential = data.cloud_credential;
+            $scope.forks = data.forks;
+            $scope.limit = data.limit;
+            $scope.verbosity = data.verbosity;
+            $scope.job_tags = data.job_tags;
             stdout_url = data.related.stdout;
             if (data.status === 'successful' || data.status === 'failed' || data.status === 'error' || data.status === 'canceled') {
                 live_event_processing = false;

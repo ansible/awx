@@ -106,8 +106,14 @@ export default
                         else {
                             $location.url('/jobs/' + job.id);
                         }
-                    }
-                    else {
+                    } else if (job.type === 'ad_hoc_command') {
+                        if(scope.$parent.portalMode===true){
+                            $window.open('/#/ad_hoc_commands/' + job.id, '_blank');
+                        }
+                        else {
+                            $location.url('/ad_hoc_commands/' + job.id);
+                        }
+                    } else {
                         LogViewer({
                             scope: scope,
                             url: job.url

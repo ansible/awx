@@ -876,11 +876,11 @@ export function JobDetailController ($location, $rootScope, $scope, $compile, $r
 
     scope.toggleLessStatus = function() {
         if (!scope.lessStatus) {
-            $('#job-status-form .toggle-show').hide(400);
+            $('#job-status-form .toggle-show').slideUp(200);
             scope.lessStatus = true;
         }
         else {
-            $('#job-status-form .toggle-show').show(400);
+            $('#job-status-form .toggle-show').slideDown(200);
             scope.lessStatus = false;
         }
     };
