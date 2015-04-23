@@ -103,7 +103,7 @@ class OpenStackInventory(object):
                 server_vars = meta['server_vars']
                 hostvars[server.name]['ansible_ssh_host'] = server_vars['interface_ip']
                 hostvars[server.name]['openstack'] = server_vars
-                hostvars[server.name]['hostId'] = server_vars['hostId']
+                hostvars[server.name]['id'] = server_vars['id']
 
                 for group in meta['groups']:
                     groups[group].append(server.name)
