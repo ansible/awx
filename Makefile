@@ -199,10 +199,12 @@ server_noattach:
 	tmux rename-window 'Tower'
 	tmux select-window -t tower:0
 	tmux split-window -v 'exec make celeryd'
-	tmux split-window -h 'exec make socketservice'
-	tmux select-pane -U
-	tmux split-window -v 'exec make receiver'
 	tmux split-window -h 'exec make taskmanager'
+	tmux new-window 'exec make receiver'
+	tmux select-window -t tower:1
+	tmux rename-window 'Extra Services'
+	tmux split-window -v 'exec make socketservice'
+	tmux split-window -h 'exec make factcacher'
 
 server: server_noattach
 	tmux -2 attach-session -t tower
@@ -228,6 +230,9 @@ taskmanager:
 
 socketservice:
 	$(PYTHON) manage.py run_socketio_service
+
+factcacher:
+	$(PYTHON) manage.py run_fact_cache_receiver
 
 pep8:
 	pep8 -r awx/
