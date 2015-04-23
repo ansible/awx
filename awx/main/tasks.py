@@ -934,7 +934,7 @@ class RunInventoryUpdate(BaseTask):
         # If this is Microsoft Azure or GCE, return the RSA key
         if inventory_update.source in ('azure', 'gce'):
             credential = inventory_update.credential
-            return dict(scm_credential=decrypt_field(credential, 'ssh_key_data'))
+            return dict(cloud_credential=decrypt_field(credential, 'ssh_key_data'))
 
         if inventory_update.source == 'openstack':
             credential = inventory_update.credential
@@ -944,7 +944,7 @@ class RunInventoryUpdate(BaseTask):
                                   project_name=credential.project)
             private_state = str(inventory_update.source_vars_dict.get("private", "true"))
             openstack_data = {"clouds": {"devstack": {"private": private_state, "auth": openstack_auth}}}
-            return yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True)
+            return dict(cloud_credential=yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True))
 
         cp = ConfigParser.ConfigParser()
         # Build custom ec2.ini for ec2 inventory script to use.
@@ -998,7 +998,7 @@ class RunInventoryUpdate(BaseTask):
         if cp.sections():
             f = cStringIO.StringIO()
             cp.write(f)
-            return dict(scm_credential=f.getvalue())
+            return dict(cloud_credential=f.getvalue())
 
     def build_passwords(self, inventory_update, **kwargs):
         """Build a dictionary of authentication/credential information for
@@ -1043,32 +1043,32 @@ class RunInventoryUpdate(BaseTask):
         # `awx/plugins/inventory` directory; those files should be kept in
         # sync with those in Ansible core at all times.
         passwords = kwargs.get('passwords', {})
-        scm_credential = kwargs.get('private_data_files', {}).get('scm_credential', '')
+        cloud_credential = kwargs.get('private_data_files', {}).get('cloud_credential', '')
         if inventory_update.source == 'ec2':
             if passwords.get('source_username', '') and passwords.get('source_password', ''):
                 env['AWS_ACCESS_KEY_ID'] = passwords['source_username']
                 env['AWS_SECRET_ACCESS_KEY'] = passwords['source_password']
-            env['EC2_INI_PATH'] = scm_credential
+            env['EC2_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'rax':
-            env['RAX_CREDS_FILE'] = scm_credential
+            env['RAX_CREDS_FILE'] = cloud_credential
             env['RAX_REGION'] = inventory_update.source_regions or 'all'
             # Set this environment variable so the vendored package won't
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
         elif inventory_update.source == 'vmware':
-            env['VMWARE_INI'] = scm_credential
+            env['VMWARE_INI'] = cloud_credential
             env['VMWARE_HOST'] = passwords.get('source_host', '')
             env['VMWARE_USER'] = passwords.get('source_username', '')
             env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
         elif inventory_update.source == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
-            env['AZURE_CERT_PATH'] = scm_credential
+            env['AZURE_CERT_PATH'] = cloud_credential
         elif inventory_update.source == 'gce':
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')
-            env['GCE_PEM_FILE_PATH'] = scm_credential
+            env['GCE_PEM_FILE_PATH'] = cloud_credential
         elif inventory_update.source == 'openstack':
-            env['OPENSTACK_CONFIG_FILE'] = scm_credential
+            env['OPENSTACK_CONFIG_FILE'] = cloud_credential
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
