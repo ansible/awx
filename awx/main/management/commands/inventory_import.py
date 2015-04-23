@@ -357,8 +357,9 @@ class ExecutableJsonLoader(BaseLoader):
             stdout, stderr = proc.communicate()
             if proc.returncode != 0:
                 raise RuntimeError('%r failed (rc=%d) with output: %s' % (cmd, proc.returncode, stderr))
-            data = json.loads(stdout)
-            if not isinstance(data, dict):
+            try:
+                data = json.loads(stdout)
+            except ValueError:
                 raise TypeError('Returned JSON must be a dictionary, got %s instead' % str(type(data)))
         except:
             logger.error('Failed to load JSON from: %s', stdout)

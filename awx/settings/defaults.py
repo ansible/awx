@@ -513,15 +513,15 @@ AZURE_REGIONS_BLACKLIST = []
 
 # Inventory variable name/value for determining whether a host is active
 # in Microsoft Azure.
-AZURE_ENABLED_VAR = 'status'
-AZURE_ENABLED_VALUE = 'created'
+AZURE_ENABLED_VAR = 'instance_status'
+AZURE_ENABLED_VALUE = 'ReadyRole'
 
 # Filter for allowed group and host names when importing inventory from
 # Microsoft Azure.
 AZURE_GROUP_FILTER = r'^.+$'
 AZURE_HOST_FILTER = r'^.+$'
 AZURE_EXCLUDE_EMPTY_GROUPS = True
-AZURE_INSTANCE_ID_VAR = None
+AZURE_INSTANCE_ID_VAR = 'private_id'
 
 # ---------------------
 # ----- OpenStack -----
