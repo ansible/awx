@@ -1434,42 +1434,21 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
         return super(JobTemplateDetail, self).destroy(request, *args, **kwargs)
 
 
-class JobTemplateLaunch(GenericAPIView):
+class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
     model = JobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = JobLaunchSerializer
     is_job_start = True
-
-    def get(self, request, *args, **kwargs):
-        obj = self.get_object()
-        data = {}
-        data['can_start_without_user_input'] = obj.can_start_without_user_input()
-        data['passwords_needed_to_start'] = obj.passwords_needed_to_start
-        data['ask_variables_on_launch'] = obj.ask_variables_on_launch
-        data['variables_needed_to_start'] = obj.variables_needed_to_start
-        data['credential_needed_to_start'] = obj.credential is None
-        data['survey_enabled'] = obj.survey_enabled and 'spec' in obj.survey_spec
-        return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
-        if obj.survey_enabled and 'spec' in obj.survey_spec:
-            if request.DATA == "":
-                request_data = {}
-            else:
-                request_data = request.DATA
-            validation_errors = obj.survey_variable_validation(request_data.get('extra_vars', {}))
-            if validation_errors:
-                return Response(dict(variables_needed_to_start=validation_errors),
-                                status=status.HTTP_400_BAD_REQUEST)
-        if obj.credential is None and ('credential' not in request.DATA and 'credential_id' not in request.DATA):
-            return Response(dict(errors="Credential not provided"), status=status.HTTP_400_BAD_REQUEST)
-        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
-            return Response(dict(errors="Job Template Project is missing or undefined"), status=status.HTTP_400_BAD_REQUEST)
-        if obj.inventory is None or not obj.inventory.active:
-            return Response(dict(errors="Job Template Inventory is missing or undefined"), status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class(data=request.DATA, context={'obj': obj})
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         new_job = obj.create_unified_job(**request.DATA)
         result = new_job.signal_start(**request.DATA)
         if not result:
