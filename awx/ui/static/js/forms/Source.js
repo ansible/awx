@@ -117,9 +117,10 @@ export default
                     ngShow: "source && source.value === 'custom'",
                     sourceModel: 'source_script',
                     sourceField: 'name',
-                    ngClick: 'lookUpSource_script()' , //'lookUpCustom_inventory()',
-                    addRequired: true,
-                    editRequired: true
+                    ngClick: 'lookUpSource_script()' , 
+                    addRequired: false,
+                    editRequired: false,
+                    ngRequired: "source && source.value === 'custom'",
                 },
                 extra_vars: {
                     label: 'Environment Variables', //"{{vars_label}}" ,
