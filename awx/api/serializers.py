@@ -1696,7 +1696,7 @@ class JobLaunchSerializer(BaseSerializer):
     can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
     variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
     credential_id = serializers.IntegerField(write_only=True, required=False)
-    errors = serializers.IntegerField(read_only=True)   # only 'visible' when returning errors
+    #errors = serializers.CharField(read_only=True)   # only 'visible' when returning errors
     credential = serializers.IntegerField(write_only=True, required=False) 
     credential_id = serializers.IntegerField(write_only=True, required=False)
     extra_vars = serializers.CharField(write_only=True, required=False)
@@ -1707,10 +1707,15 @@ class JobLaunchSerializer(BaseSerializer):
                   'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
                   'credential_id', 'credential')
 
+    def cred_valid(self, obj):
+        if obj.credential is not None:
+            return obj.credential.active
+        return False
+
     def to_native(self, obj):
         res = super(JobLaunchSerializer, self).to_native(obj)
         if obj:
-            res['credential_needed_to_start'] = obj.credential is None
+            res['credential_needed_to_start'] = not self.cred_valid(obj)
             res['survey_enabled'] = obj.survey_enabled and 'spec' in obj.survey_spec
         return res
 
@@ -1729,16 +1734,13 @@ class JobLaunchSerializer(BaseSerializer):
                 raise serializers.ValidationError({
                     'variables_needed_to_start': validation_errors
                 })
-        return attrs
 
-    def validate_errors(self, attrs):
-        obj = self.context.get('obj')
-        if obj.credential is None and 'credential' not in attrs and 'credential_id' not in attrs:
-            raise serializers.ValidationError("Credential not provided")
+        if not self.cred_valid(obj) and ('credential' not in attrs and 'credential_id' not in attrs):
+            raise serializers.ValidationError({'errors': ["Credential not provided"]})
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
-            raise serializers.ValidationError("Job Template Project is missing or undefined")
+            raise serializers.ValidationError({'errors': ["Job Template Project is missing or undefined"]})
         if obj.inventory is None or not obj.inventory.active:
-            return serializers.ValidationError("Job Template Inventory is missing or undefined")
+            return serializers.ValidationError({'errors': ["Job Template Inventory is missing or undefined"]})
         return attrs
 
 class ScheduleSerializer(BaseSerializer):
