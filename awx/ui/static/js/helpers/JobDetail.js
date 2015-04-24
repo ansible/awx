@@ -1146,7 +1146,7 @@ export default
                 graph_data.push({
                     label: 'OK',
                     value: (scope.host_summary.ok === scope.host_summary.total) ? 1 : scope.host_summary.ok,
-                    color: '#00aa00'
+                    color: '#60D66F'
                 });
             }
             if (scope.host_summary.changed) {
@@ -1167,7 +1167,7 @@ export default
                 graph_data.push({
                     label: 'Failed',
                     value: (scope.host_summary.failed === scope.host_summary.total) ? 1 : scope.host_summary.failed,
-                    color: '#aa0000'
+                    color: '#ff5850'
                 });
             }
 

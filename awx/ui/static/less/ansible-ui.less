@@ -12,14 +12,11 @@
 @blue:         #1778c3;   /* logo blue */
 @blue-link:    #1778c3;
 @blue-dark:    #2a6496;   /* link hover */
-@green:        #00aa00;   // Ansible OK
 @grey:         #A9A9A9;
 @grey-txt:     #707070;
 @info:         #d9edf7;   /* alert info background color */
 @info-border:  #bce8f1;   /* alert info border color */
 @info-color:   #3a87ad;
-@red:          #aa0000;   // Ansible Failed
-@red-hover:    #AE3F3A;
 @unreachable:  #FF0000;
 @changed:      #FF9900;   // Ansible Changed
 @skipped:      #00aaaa;   // Ansible Skipped
@@ -30,6 +27,10 @@
 
 @tip-background: #0088CC;
 @tip-color: #fff;
+@green: #60D66F;
+@red: #ff5850;
+@red-hover: #FA8C87;
+
 
 @font-face {
     font-family: 'Open Sans';
@@ -365,6 +366,7 @@ textarea.allowresize {
 .prepend-asterisk:before {
   content: "\002A\00A0";
   color: @red;
+  margin-right: -5px;
 }
 
 .subtitle {
