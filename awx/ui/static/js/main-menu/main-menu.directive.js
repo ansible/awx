@@ -20,7 +20,7 @@ function link(scope, element, attrs) {
 export default function() {
     return {
         restrict: 'E',
-        template: '<nav class="Menu Menu--main Menu--fixed-top" ng-include="menuStylePartialUrl"></nav>',
+        templateUrl: '/static/js/main-menu/main-menu.partial.html',
         scope: {
             style: '&menuStyle'
         },

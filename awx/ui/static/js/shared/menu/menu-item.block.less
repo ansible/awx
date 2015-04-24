@@ -10,13 +10,25 @@
   min-width: 9.2rem;
 
   &--fixed {
+    @media screen and (max-width: 570px) {
+      flex: 1 0 100% !important;
+      justify-content: center;
+    }
       flex: none;
       min-width: 0;
       margin-right: 0 !important;
   }
 
+  &-helpTitle {
+    @media screen and (min-width: 571px) {
+      display: none;
+    }
+  }
+
   &--logo {
-      width: 202px;
+    @media screen and (max-width: 570px) {
+      justify-content: center;
+    }
   }
 
   &--active {
@@ -31,15 +43,20 @@
   }
 
   &--hoverable {
-    transition: background-color 0.3s;
     flex-direction: column;
     justify-content: center;
+    transition: background-color 0.3s;
     .MenuItem-hover-icon {
-        display: flex;
-        opacity: 0;
-        height: 0;
-        width: auto;
-        transition: opacity 0.3s ease-out, height 0.2s ease-out;
+      height: 22px;
+    }
+    @media screen and (min-width: 571px) {
+      .MenuItem-hover-icon {
+          display: flex;
+          opacity: 0;
+          height: 0;
+          width: auto;
+          transition: opacity 0.3s ease-out, height 0.2s ease-out;
+      }
     }
     &:hover {
         background-color: rgba(255,255,255,0.35);
@@ -64,7 +81,11 @@
   }
 
   &--right {
+    // Push this and all following elements to the right
     margin-left: auto;
+    @media screen and (max-width: 570px) {
+      margin-left: 0;
+    }
   }
 
   &--setup {
@@ -90,11 +111,17 @@
   &-logo {
     height: 34px;
     width: auto;
+    @media screen and (max-width: 570px) {
+        height: 25px;
+    }
   }
 
   &-icon {
       height: 13px;
       width: auto;
+      @media screen and (max-width: 570px) {
+        margin-right: 1.4rem;
+      }
   }
 
 }

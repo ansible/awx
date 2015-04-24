@@ -1,0 +1,33 @@
+/** @define MenuToggle */
+
+.MenuToggle {
+
+    &-icon {
+        // Override settings (on svg tag) from nv.d3.css that really
+        // shouldn't be there, but are, so meh.
+        display: inherit;
+        width: inherit;
+        height: inherit;
+        // border: solid thin white;
+    }
+
+    &-bar {
+        fill: #000;
+        transition: transform 0.25s cubic-bezier(.96,-0.6,.27,1.68), opacity 0.25s;
+        transform: rotate(0deg);
+        transform-origin: center center;
+    }
+
+
+    &--open {
+        .MenuToggle-crossBar1 {
+            transform: rotate(45deg);
+        }
+        .MenuToggle-topBar, .MenuToggle-bottomBar {
+            opacity: 0;
+        }
+        .MenuToggle-crossBar2 {
+            transform: rotate(-45deg);
+        }
+    }
+}

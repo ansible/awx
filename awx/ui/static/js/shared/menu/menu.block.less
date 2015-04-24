@@ -18,6 +18,30 @@
             margin-right: 0;
           }
       }
+
+      @media screen and (max-width: 570px) {
+        position: relative;
+        transition: height 1s;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        height: 56px;
+        overflow: hidden;
+
+        &.Menu--open {
+          height: 348px !important;
+        border-bottom: solid thin black;
+        }
+
+        .MenuItem {
+          flex: 1 0 50%;
+          padding: 0;
+          margin-right: 0;
+
+          &--logo {
+            flex: 2 0 100%;
+          }
+        }
+      }
   }
 
   &--popup {
@@ -39,13 +63,21 @@
     }
   }
 
+  &-toggle {
+    @media screen and (min-width: 571px) {
+      display: none;
+    }
+  }
+
   &--fixed-top {
-    width: 100%;
-    z-index: 1040;
-    position: fixed;
-    right: 0;
-    left: 0;
-    top: 0;
+    // @media screen and (min-width: 571px) {
+      width: 100%;
+      z-index: 1040;
+      position: fixed;
+      right: 0;
+      left: 0;
+      top: 0;
+    // }
   }
 
 }
