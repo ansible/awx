@@ -58,6 +58,10 @@ pep8.txt
 tools/vagrant/local.yml
 .vagrant*
 
+# Virtualbox
+ansible-tower-*-ova
+ansible-tower-*.box
+
 # Setup
 setup.log
 setup/tower_setup_conf.yml

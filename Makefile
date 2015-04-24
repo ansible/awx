@@ -21,7 +21,7 @@ else
 endif
 
 # Allow AMI license customization
-AWS_INSTANCE_COUNT ?= 100
+AWS_INSTANCE_COUNT ?= 0
 
 # TAR build parameters
 ifneq ($(OFFICIAL),yes)
@@ -70,7 +70,8 @@ MOCK_CFG ?=
 	develop refresh adduser syncdb migrate dbchange dbshell runserver celeryd \
 	receiver test test_coverage coverage_html ui_analysis_report test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm \
-	deb deb-src debian reprepro setup_tarball sync_ui
+	deb deb-src debian reprepro setup_tarball sync_ui \
+	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6
 
 # Remove setup build files
 clean-tar:
@@ -95,8 +96,17 @@ clean-ui:
 	rm -rf awx/ui/dist
 	rm -rf awx/ui/static/docs
 
+# Remove packer artifacts
+clean-packer:
+	rm -rf packer_cache
+	rm -rf packaging/packer/packer_cache
+	rm -rf packaging/packer/output-virtualbox-iso/
+	rm -f packaging/packer/ansible-tower-*.box
+	rm -rf packaging/packer/ansible-tower*-ova
+	rm -f Vagrantfile
+
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar
+clean: clean-rpm clean-deb clean-grunt clean-ui clean-tar clean-packer
 	rm -rf dist/*
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -427,8 +437,23 @@ reprepro: deb
 	    reprepro --keepunreferencedfiles --export=force -b reprepro --ignore=brokenold includedeb $${DIST} $${DEB} ; \
 	done; \
 
-ami:
-	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" -var "official=$(OFFICIAL)" $(NAME).json)
+amazon-ebs:
+	cd packaging/packer && $(PACKER) build -only $@ $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
+
+virtualbox-ovf: packaging/packer/ansible-tower-$(VERSION)-virtualbox.box
+
+packaging/packer/ansible-tower-$(VERSION)-virtualbox.box: packaging/packer/output-virtualbox-iso/centos-7.ovf
+	cd packaging/packer && $(PACKER) build -only virtualbox-ovf $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
+
+packaging/packer/output-virtualbox-iso/centos-6.ovf:
+	cd packaging/packer && $(PACKER) build packer-centos-6.json
+
+virtualbox-centos-6: packaging/packer/output-virtualbox-iso/centos-6.ovf
+
+packaging/packer/output-virtualbox-iso/centos-7.ovf:
+	cd packaging/packer && $(PACKER) build packer-centos-7.json
+
+virtualbox-centos-7: packaging/packer/output-virtualbox-iso/centos-7.ovf
 
 install:
 	$(PYTHON) setup.py install egg_info -b ""
