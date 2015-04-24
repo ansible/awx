@@ -1445,14 +1445,16 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        # Note: is_valid() may modify request.DATA
-        # It will remove any key/value pair who's key is not credential, credential_id, or extra_vars
-        serializer = self.serializer_class(data=request.DATA, context={'obj': obj, 'data': request.DATA})
+        serializer = self.serializer_class(data=request.DATA, context={'obj': obj})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        new_job = obj.create_unified_job(**request.DATA)
-        result = new_job.signal_start(**request.DATA)
+        kv = {
+            'credential': serializer.object.credential,
+            'extra_vars': serializer.object.extra_vars
+        }
+        new_job = obj.create_unified_job(**kv)
+        result = new_job.signal_start(**kv)
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
             new_job.delete()

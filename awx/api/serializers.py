@@ -1695,7 +1695,6 @@ class JobLaunchSerializer(BaseSerializer):
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
     can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
     variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
-    credential_id = serializers.IntegerField(write_only=True, required=False)
     credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
     survey_enabled = serializers.SerializerMethodField('get_survey_enabled')
 
@@ -1703,7 +1702,7 @@ class JobLaunchSerializer(BaseSerializer):
         model = JobTemplate
         fields = ('can_start_without_user_input', 'passwords_needed_to_start', 'extra_vars',
                   'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
-                  'credential_id', 'credential', 'credential_needed_to_start',)
+                  'credential', 'credential_needed_to_start',)
         read_only_fields = ('ask_variables_on_launch',)
         write_only_fields = ('credential','extra_vars',)
 
@@ -1746,8 +1745,7 @@ class JobLaunchSerializer(BaseSerializer):
 
     def validate(self, attrs):
         obj = self.context.get('obj')
-        data = self.context.get('data')
-        sanitary_fields = ('credential', 'credential_id', 'extra_vars')
+
         if not self.cred_valid(obj) and (attrs.get('credential', None) is None and attrs.get('credential_id', None) is None):
             raise serializers.ValidationError(dict(errors=["Credential not provided"]))
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
@@ -1755,10 +1753,6 @@ class JobLaunchSerializer(BaseSerializer):
         if obj.inventory is None or not obj.inventory.active:
             raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
 
-        data.clear()
-        for field in sanitary_fields:
-            if field in attrs:
-                data[field] = attrs[field]
         return attrs
 
 class ScheduleSerializer(BaseSerializer):
