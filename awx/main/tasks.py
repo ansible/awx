@@ -1352,10 +1352,15 @@ class RunSystemJob(BaseTask):
         args = ['awx-manage', system_job.job_type]
         try:
             json_vars = json.loads(system_job.extra_vars)
-            if 'days' in json_vars:
-                args.extend(['--days', str(json_vars['days'])])
+            if 'days' in json_vars and system_job.job_type != 'cleanup_facts':
+                args.extend(['--days', str(json_vars.get('days', 60))])
             if system_job.job_type == 'cleanup_jobs':
                 args.extend(['--jobs', '--project-updates', '--inventory-updates', '--management-jobs'])
+            if system_job.job_type == 'cleanup_facts':
+                if 'older_than' in json_vars:
+                    args.extend(['--older_than', str(json_vars['older_than'])])
+                if 'granularity' in json_vars:
+                    args.extend(['--granularity', str(json_vars['granularity'])])
             #     Keeping this around in case we want to break this out
             #     if 'jobs' in json_vars and json_vars['jobs']:
             #         args.extend(['--jobs'])
