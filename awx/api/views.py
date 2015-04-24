@@ -1445,7 +1445,9 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        serializer = self.serializer_class(data=request.DATA, context={'obj': obj})
+        # Note: is_valid() may modify request.DATA
+        # It will remove any key/value pair who's key is not credential, credential_id, or extra_vars
+        serializer = self.serializer_class(data=request.DATA, context={'obj': obj, 'data': request.DATA})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

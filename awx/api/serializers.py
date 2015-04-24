@@ -1696,50 +1696,69 @@ class JobLaunchSerializer(BaseSerializer):
     can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
     variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
     credential_id = serializers.IntegerField(write_only=True, required=False)
-    credential = serializers.IntegerField(write_only=True, required=False) 
-    credential_id = serializers.IntegerField(write_only=True, required=False)
-    extra_vars = serializers.CharField(write_only=True, required=False)
+    credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
+    survey_enabled = serializers.SerializerMethodField('get_survey_enabled')
 
     class Meta:
         model = JobTemplate
         fields = ('can_start_without_user_input', 'passwords_needed_to_start', 'extra_vars',
                   'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
-                  'credential_id', 'credential')
+                  'credential_id', 'credential', 'credential_needed_to_start',)
+        read_only_fields = ('ask_variables_on_launch',)
+        write_only_fields = ('credential','extra_vars',)
 
     def cred_valid(self, obj):
         if obj.credential is not None:
             return obj.credential.active
         return False
 
-    def to_native(self, obj):
-        res = super(JobLaunchSerializer, self).to_native(obj)
+    def get_credential_needed_to_start(self, obj):
         if obj:
-            res['credential_needed_to_start'] = not self.cred_valid(obj)
-            res['survey_enabled'] = obj.survey_enabled and 'spec' in obj.survey_spec
-        return res
+            return not self.cred_valid(obj)
+        return True
+
+    def get_survey_enabled(self, obj):
+        if obj:
+            return obj.survey_enabled and 'spec' in obj.survey_spec
+        return False
+
+    def validate_extra_vars(self, attrs, source):
+        extra_vars = attrs.get(source, {})
+        if not extra_vars:
+            return attrs
+
+        try:
+            extra_vars = literal_eval(extra_vars)
+            attrs['extra_vars'] = extra_vars
+        except Exception:
+            if not isinstance(extra_vars, dict):
+                raise serializers.ValidationError("Invalid format. JSON expected.")
+        return attrs
+
+    def validate_variables_needed_to_start(self, attrs, source):
+        obj = self.context.get('obj')
+
+        if self.get_survey_enabled(obj):
+            validation_errors = obj.survey_variable_validation(attrs.get('extra_vars', {}))
+            if validation_errors:
+                raise serializers.ValidationError(validation_errors)
+        return attrs
 
     def validate(self, attrs):
         obj = self.context.get('obj')
-        if obj.survey_enabled and 'spec' in obj.survey_spec:
-            try:
-                extra_vars = literal_eval(attrs.get('extra_vars', {}))
-            except Exception:
-                if not isinstance(extra_vars, dict):
-                    raise serializers.ValidationError({
-                        'extra_vars': "Invalid format. JSON expected."
-                    })
-            validation_errors = obj.survey_variable_validation(extra_vars)
-            if validation_errors:
-                raise serializers.ValidationError({
-                    'variables_needed_to_start': validation_errors
-                })
-
-        if not self.cred_valid(obj) and ('credential' not in attrs and 'credential_id' not in attrs):
-            raise serializers.ValidationError({'errors': ["Credential not provided"]})
+        data = self.context.get('data')
+        sanitary_fields = ('credential', 'credential_id', 'extra_vars')
+        if not self.cred_valid(obj) and (attrs.get('credential', None) is None and attrs.get('credential_id', None) is None):
+            raise serializers.ValidationError(dict(errors=["Credential not provided"]))
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
-            raise serializers.ValidationError({'errors': ["Job Template Project is missing or undefined"]})
+            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
         if obj.inventory is None or not obj.inventory.active:
-            return serializers.ValidationError({'errors': ["Job Template Inventory is missing or undefined"]})
+            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
+
+        data.clear()
+        for field in sanitary_fields:
+            if field in attrs:
+                data[field] = attrs[field]
         return attrs
 
 class ScheduleSerializer(BaseSerializer):
