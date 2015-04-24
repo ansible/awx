@@ -1696,7 +1696,6 @@ class JobLaunchSerializer(BaseSerializer):
     can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
     variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
     credential_id = serializers.IntegerField(write_only=True, required=False)
-    #errors = serializers.CharField(read_only=True)   # only 'visible' when returning errors
     credential = serializers.IntegerField(write_only=True, required=False) 
     credential_id = serializers.IntegerField(write_only=True, required=False)
     extra_vars = serializers.CharField(write_only=True, required=False)
