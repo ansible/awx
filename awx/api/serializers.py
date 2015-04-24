@@ -1519,7 +1519,7 @@ class JobRelaunchSerializer(JobSerializer):
 
     def validate(self, attrs):
         obj = self.context.get('obj')
-        if not obj.credential or obj.credential.active == False:
+        if not obj.credential or obj.credential.active is False:
             raise serializers.ValidationError(dict(credential=["Credential not found or deleted."]))
         return attrs
 
