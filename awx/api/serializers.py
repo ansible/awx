@@ -1493,16 +1493,35 @@ class JobCancelSerializer(JobSerializer):
 
 
 class JobRelaunchSerializer(JobSerializer):
+    passwords_needed_to_start = serializers.SerializerMethodField('get_passwords_needed_to_start')
 
     class Meta:
-        fields = ()
+        fields = ('passwords_needed_to_start',)
 
-    def to_native(self, obj):
+    def get_passwords_needed_to_start(self, obj):
         if obj:
-            return dict([(p, u'') for p in obj.passwords_needed_to_start])
-        else:
-            return {}
+            return obj.passwords_needed_to_start
+        return ''
 
+    def validate_passwords_needed_to_start(self, attrs, source):
+        obj = self.context.get('obj')
+        data = self.context.get('data')
+
+        # Check for passwords needed 
+        needed = self.get_passwords_needed_to_start(obj)
+        provided = dict([(field, data.get(field, '')) for field in needed])
+        if not all(provided.values()):
+            raise serializers.ValidationError(needed)
+
+        data.clear()
+        data.update(provided)
+        return attrs
+
+    def validate(self, attrs):
+        obj = self.context.get('obj')
+        if not obj.credential or obj.credential.active == False:
+            raise serializers.ValidationError(dict(credential=["Credential not found or deleted."]))
+        return attrs
 
 class AdHocCommandSerializer(UnifiedJobSerializer):
 
