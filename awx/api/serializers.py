@@ -1706,20 +1706,21 @@ class JobLaunchSerializer(BaseSerializer):
         read_only_fields = ('ask_variables_on_launch',)
         write_only_fields = ('credential','extra_vars',)
 
-    def cred_valid(self, obj):
-        if obj.credential is not None:
-            return obj.credential.active
-        return False
-
     def get_credential_needed_to_start(self, obj):
-        if obj:
-            return not self.cred_valid(obj)
-        return True
+        return not (obj and obj.credential and obj.credential.active)
 
     def get_survey_enabled(self, obj):
         if obj:
             return obj.survey_enabled and 'spec' in obj.survey_spec
         return False
+
+    def validate_credential(self, attrs, source):
+        obj = self.context.get('obj')
+        credential = attrs.get(source, None) or (obj and obj.credential)
+        if not credential or not credential.active:
+            raise serializers.ValidationError('Credential not provided')
+        attrs[source] = credential
+        return attrs
 
     def validate_extra_vars(self, attrs, source):
         extra_vars = attrs.get(source, {})
@@ -1746,8 +1747,6 @@ class JobLaunchSerializer(BaseSerializer):
     def validate(self, attrs):
         obj = self.context.get('obj')
 
-        if not self.cred_valid(obj) and (attrs.get('credential', None) is None and attrs.get('credential_id', None) is None):
-            raise serializers.ValidationError(dict(errors=["Credential not provided"]))
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
             raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
         if obj.inventory is None or not obj.inventory.active:
