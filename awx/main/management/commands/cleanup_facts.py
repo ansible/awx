@@ -4,12 +4,12 @@
 # Python
 import re
 from dateutil.relativedelta import relativedelta
-from datetime import datetime
 from optparse import make_option
 
 # Django
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils.timezone import now
 
 # AWX
 from awx.fact.models.fact import * # noqa
@@ -72,7 +72,7 @@ class CleanupFacts(object):
     older_than and granularity are of type relativedelta
     '''
     def run(self, older_than, granularity):
-        t = datetime.now()
+        t = now()
         deleted_count = self.cleanup(t - older_than, granularity)
         print("Deleted %d facts." % deleted_count)
 
