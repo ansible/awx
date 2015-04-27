@@ -176,7 +176,7 @@ export default
                     'class': "input-small",
                     column: 1,
                     awPopOver: '<p>The number of parallel or simultaneous processes to use while executing the playbook. 0 signifies ' +
-                        'the default value from the <a href=\"http://docs.ansible.com/intro_configuration.html#the-ansible-configuration-file\" ' +
+                        'the default value from the <a id="ansible_forks_docs" href=\"http://docs.ansible.com/intro_configuration.html#the-ansible-configuration-file\" ' +
                         ' target=\"_blank\">ansible configuration file</a>.</p>',
                     dataTitle: 'Forks',
                     dataPlacement: 'right',

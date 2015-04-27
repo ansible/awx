@@ -710,9 +710,8 @@ function($compile, Rest, GetBasePath, TextareaResize,CreateDialog, GenerateForm,
                   if(data.vault_password === "ASK"){
                     passwords.push("vault_password");
                   }
-                  scope.$emit(callback, passwords);
                 }
-
+                scope.$emit(callback, passwords);
               })
               .error(function (data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',
