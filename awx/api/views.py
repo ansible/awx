@@ -1450,7 +1450,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         kv = {
-            'credential': serializer.object.credential,
+            'credential': serializer.object.credential.pk,
             'extra_vars': serializer.object.extra_vars
         }
         new_job = obj.create_unified_job(**kv)
