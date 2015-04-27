@@ -1709,7 +1709,7 @@ class JobLaunchSerializer(BaseSerializer):
     def to_native(self, obj):
         res = super(JobLaunchSerializer, self).to_native(obj)
         view = self.context.get('view', None)
-        if hasattr(view, '_raw_data_form_marker'):
+        if obj and hasattr(view, '_raw_data_form_marker'):
             if obj.passwords_needed_to_start:
                 password_keys = dict([(p, u'') for p in obj.passwords_needed_to_start])
                 res.update(dict(extra_vars=password_keys))
