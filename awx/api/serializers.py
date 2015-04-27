@@ -1716,6 +1716,17 @@ class JobLaunchSerializer(BaseSerializer):
         read_only_fields = ('ask_variables_on_launch',)
         write_only_fields = ('credential','extra_vars',)
 
+    def to_native(self, obj):
+        res = super(JobLaunchSerializer, self).to_native(obj)
+        view = self.context.get('view', None)
+        if obj and hasattr(view, '_raw_data_form_marker'):
+            if obj.passwords_needed_to_start:
+                password_keys = dict([(p, u'') for p in obj.passwords_needed_to_start])
+                res.update(password_keys)
+            if self.get_credential_needed_to_start(obj) is True:
+                res.update(dict(credential=''))
+        return res
+
     def get_credential_needed_to_start(self, obj):
         return not (obj and obj.credential and obj.credential.active)
 
@@ -1730,6 +1741,20 @@ class JobLaunchSerializer(BaseSerializer):
         if not credential or not credential.active:
             raise serializers.ValidationError('Credential not provided')
         attrs[source] = credential
+        return attrs
+
+    def validate_passwords_needed_to_start(self, attrs, source):
+        obj = self.context.get('obj')
+        passwords = self.context.get('passwords')
+        data = self.context.get('data')
+
+        # fill passwords dict with request data passwords
+        if obj.passwords_needed_to_start:
+            try:
+                for p in obj.passwords_needed_to_start:
+                    passwords[p] = data.get(p)
+            except KeyError:
+                raise serializers.ValidationError(obj.passwords_needed_to_start)
         return attrs
 
     def validate_extra_vars(self, attrs, source):
