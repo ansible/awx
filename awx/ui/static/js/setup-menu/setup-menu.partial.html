@@ -1,56 +1,57 @@
-<section id="htmlTemplate" class="Container" page-name="SetupMenu">
+<section id="htmlTemplate" class="Container">
   <nav class="SetupMenu Container-main">
-      <a href="#/credentials" class="SetupItem SetupMenu-block">
-        <i class="SetupItem-icon"><img src="/static/img/Credentials.svg"></i>
-        <h4 class="SetupItem-title">Credentials</h4>
-        <p class="SetupItem-description">
-          Add passwords, SSH keys, etc. for Tower to use when launching jobs against machines, or syncing inventories or projects.
-        </p>
+      <a href="#/credentials" class="SetupItem Media">
+        <i class="SetupItem-icon Media-figure"><img src="/static/img/Credentials.svg"></i>
+        <div class="Media-body">
+          <h4 class="SetupItem-title">Credentials</h4>
+          <p class="SetupItem-description">Add passwords, SSH keys, etc. for Tower to use when launching jobs against machines, or syncing inventories or projects.</p>
+        </div>
       </a>
-      <a href="#/users" class="SetupItem SetupMenu-block">
-        <i class="SetupItem-icon"><img src="/static/img/Users.svg"></i>
-        <h4 class="SetupItem-title">Users</h4>
-        <p class="SetupItem-description">
-          Allow others to sign into Tower and own content they create.
-        </p>
+      <a href="#/users" class="SetupItem Media">
+        <i class="SetupItem-icon Media-figure"><img src="/static/img/Users.svg"></i>
+        <div class="Media-body">
+          <h4 class="SetupItem-title">Users</h4>
+          <p class="SetupItem-description">
+            Allow others to sign into Tower and own content they create.
+          </p>
+        </div>
       </a>
-      <a href="#/teams" class="SetupItem SetupMenu-block">
-        <i class="SetupItem-icon"><img src="/static/img/Teams.svg"></i>
-        <h4 class="SetupItem-title">Teams</h4>
-        <p class="SetupItem-description">
-          Divide up your organization to associate content and control permissions for groups.
-        </p>
+      <a href="#/teams" class="SetupItem Media">
+        <i class="SetupItem-icon Media-figure"><img src="/static/img/Teams.svg"></i>
+        <div class="Media-block">
+          <h4 class="SetupItem-title">Teams</h4>
+          <p class="SetupItem-description">
+            Divide up your organization to associate content and control permissions for groups.
+          </p>
+        </div>
       </a>
-      <a href="#/organizations" class="SetupItem SetupMenu-block">
-        <i class="SetupItem-icon"><img src="/static/img/Organizations.svg"></i>
-        <h4 class="SetupItem-title">Organizations</h4>
-        <p class="SetupItem-description">
-          Group all of your content to manage permissions across departments in your company
-        </p>
-
-      </a>
-      <button class="SetupMenu-block SetupItem SetupItem--button Button--pseudo" ng-click="showManagementJobsModal()" ng-if="user_is_superuser">
-        <i class="SetupItem-icon"><img src="/static/img/ManagementJobs.svg"></i>
-        <h4 class="SetupItem-title">Management Jobs</h4>
-        <p class="SetupItem-description">
-          Schedule jobs to periodically cleanup job history
-        </p>
-      </button>
-      <button class="SetupMenu-block SetupItem SetupItem--button Button--pseudo" ng-click="showInventoryScriptsModal()" ng-if="user_is_superuser">
-        <i class="SetupItem-icon"><img src="/static/img/InventoryScripts.svg"></i>
-        <h4 class="SetupItem-title">Inventory Scripts</h4>
-        <p class="SetupItem-description">
-          Create and edit scripts to dynamically load hosts from any sources
-        </p>
-      </button>
   </nav>
   <aside class="Container-aside">
-      <nav class="DetailNav Menu Menu--vertical">
-        <button href="#/license" ng-click="showLicenseModal()" class="Button--pseudo">
-          <h4 class="DetailNav-title">View your License</h4>
+      <nav class="SetupMenu Menu Menu--vertical">
+        <a href="#/organizations" class="SetupItem SetupItem--aside">
+            <h4 class="SetupItem-title SetupItem-title--aside">Organizations</h4>
+            <p class="SetupItem-description SetupItem-description--aside">
+              Group all of your content to manage permissions across departments in your company
+            </p>
+          </div>
+        </a>
+        <button class="SetupItem SetupItem--button SetupItem--aside" ng-click="showManagementJobsModal()" ng-if="user_is_superuser">
+          <h4 class="SetupItem-title SetupItem-title--aside">Management Jobs</h4>
+          <p class="SetupItem-description SetupItem-description--aside">
+            Schedule jobs to periodically cleanup job history
+          </p>
         </button>
-        <button ng-click="showAboutModal()" class="DetailNav--extra Button--pseudo">
-          <h4 class="DetailNav-title">About Tower</h4>
+        <button class="SetupItem SetupItem--button SetupItem--aside" ng-click="showInventoryScriptsModal()" ng-if="user_is_superuser">
+          <h4 class="SetupItem-title SetupItem-title--aside">Inventory Scripts</h4>
+          <p class="SetupItem-description SetupItem-description--aside">
+            Create and edit scripts to dynamically load hosts from any sources
+          </p>
+        </button>
+        <button href="#/license" ng-click="showLicenseModal()" class="SetupItem SetupItem--button SetupItem--aside">
+          <h4 class="SetupItem-title SetupItem-title--aside">View your License</h4>
+        </button>
+        <button ng-click="showAboutModal()" class="SetupItem SetupItem--button SetupItem--aside">
+          <h4 class="SetupItem-title SetupItem-title--aside">About Tower</h4>
         </button>
       </nav>
   </aside>
