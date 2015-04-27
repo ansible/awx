@@ -1445,12 +1445,15 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
+        if 'credential' not in request.DATA and 'credential_id' in request.DATA:
+            request.DATA['credential'] = request.DATA['credential_id']
+
         serializer = self.serializer_class(data=request.DATA, context={'obj': obj})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         kv = {
-            'credential': serializer.object.credential,
+            'credential': serializer.object.credential.pk,
             'extra_vars': serializer.object.extra_vars
         }
         new_job = obj.create_unified_job(**kv)
