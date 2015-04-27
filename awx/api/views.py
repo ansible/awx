@@ -1833,7 +1833,7 @@ class JobCancel(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
-class JobRelaunch(GenericAPIView):
+class JobRelaunch(RetrieveAPIView, GenericAPIView):
 
     model = Job
     serializer_class = JobRelaunchSerializer
@@ -1844,23 +1844,16 @@ class JobRelaunch(GenericAPIView):
     def dispatch(self, *args, **kwargs):
         return super(JobRelaunch, self).dispatch(*args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        obj = self.get_object()
-        data = {}
-        data['passwords_needed_to_start'] = obj.passwords_needed_to_start
-        return Response(data)
-
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        # Check for passwords needed before copying job.
-        needed = obj.passwords_needed_to_start
-        provided = dict([(field, request.DATA.get(field, '')) for field in needed])
-        if not all(provided.values()):
-            data = dict(passwords_needed_to_start=needed)
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        # Note: is_valid() may modify request.DATA
+        # It will remove any key/value pair who's key is not in the 'passwords_needed_to_start' list
+        serializer = self.serializer_class(data=request.DATA, context={'obj': obj, 'data': request.DATA})
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         new_job = obj.copy()
         result = new_job.signal_start(**request.DATA)
