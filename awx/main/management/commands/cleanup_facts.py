@@ -30,19 +30,31 @@ class CleanupFacts(object):
     #   pivot -= granularity
     # group by host 
     def cleanup(self, older_than_abs, granularity):
+        flag_delete_all = False
         fact_oldest = FactVersion.objects.all().order_by('timestamp').first()
         if not fact_oldest:
             return 0
+
+        # Special case, granularity=0x where x is d, w, or y
+        # The intent is to delete all facts < older_than_abs
+        if granularity == relativedelta():
+            flag_delete_all = True
 
         total = 0
         date_pivot = older_than_abs
         while date_pivot > fact_oldest.timestamp:
             date_pivot_next = date_pivot - granularity
             kv = {
-                'timestamp__lte': date_pivot,
-                'timestamp__gt': date_pivot_next,
+                'timestamp__lte': date_pivot
             }
+            if not flag_delete_all:
+                kv['timestamp__gt'] = date_pivot_next
+
             version_objs = FactVersion.objects.filter(**kv).order_by('-timestamp')
+
+            if flag_delete_all:
+                total = version_objs.delete()
+                break
 
             # Transform array -> {host_id} = [<fact_version>, <fact_version>, ...]
             # TODO: If this set gets large then we can use mongo to transform the data set for us.
@@ -66,6 +78,7 @@ class CleanupFacts(object):
                 total += count
 
             date_pivot = date_pivot_next
+
         return total
 
     '''
