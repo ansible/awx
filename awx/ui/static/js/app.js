@@ -180,7 +180,6 @@ var tower = angular.module('Tower', [
     .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')
     .config(['$routeProvider',
         function ($routeProvider) {
-
             $routeProvider.
 
             when('/jobs', {
@@ -644,6 +643,7 @@ var tower = angular.module('Tower', [
                     if (!/^\/(login|logout)/.test($location.path())) {
                         // capture most recent URL, excluding login/logout
                         $rootScope.lastPath = $location.path();
+                        $rootScope.enteredPath = $location.path();
                         $cookieStore.put('lastPath', $location.path());
                     }
 
