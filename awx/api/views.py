@@ -812,7 +812,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
 
     def update_filter(self, request, *args, **kwargs):
         ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins '''
-        obj = User.objects.get(pk=kwargs['pk'])
+        obj = self.get_object()
         can_change = request.user.can_access(User, 'change', obj, request.DATA)
         can_admin = request.user.can_access(User, 'admin', obj, request.DATA)
         if can_change and not can_admin:
@@ -828,7 +828,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
                 raise PermissionDenied('Cannot change %s' % ', '.join(changed.keys()))
 
     def destroy(self, request, *args, **kwargs):
-        obj = User.objects.get(pk=kwargs['pk'])
+        obj = self.get_object()
         can_delete = request.user.can_access(User, 'delete', obj)
         if not can_delete:
             raise PermissionDenied('Cannot delete user')
