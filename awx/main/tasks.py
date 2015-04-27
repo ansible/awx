@@ -768,7 +768,9 @@ class RunProjectUpdate(BaseTask):
         '''
         private_data = {}
         if project_update.credential:
-            private_data['scm_credential'] = decrypt_field(project_update.credential, 'ssh_key_data')
+            credential = project_update.credential
+            if credential.ssh_key_data not in (None, ''):
+                private_data['scm_credential'] = decrypt_field(project_update.credential, 'ssh_key_data')
         return private_data
 
     def build_passwords(self, project_update, **kwargs):
