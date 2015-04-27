@@ -1455,8 +1455,9 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
         kv = {
             'credential': serializer.object.credential.pk,
-            'extra_vars': serializer.object.extra_vars
         }
+        if 'extra_vars' in request.DATA:
+            kv['extra_vars'] = request.DATA['extra_vars']
         kv.update(passwords)
 
         new_job = obj.create_unified_job(**kv)

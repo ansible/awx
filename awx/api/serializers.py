@@ -6,7 +6,6 @@ import json
 import re
 import logging
 from dateutil import rrule
-from ast import literal_eval
 
 # PyYAML
 import yaml
@@ -1759,15 +1758,14 @@ class JobLaunchSerializer(BaseSerializer):
 
     def validate_extra_vars(self, attrs, source):
         extra_vars = attrs.get(source, {})
-        if not extra_vars:
-            return attrs
 
         try:
-            extra_vars = literal_eval(extra_vars)
-            attrs['extra_vars'] = extra_vars
-        except Exception:
-            if not isinstance(extra_vars, dict):
-                raise serializers.ValidationError("Invalid format. JSON expected.")
+            extra_vars = json.loads(extra_vars)
+        except (ValueError, TypeError):
+            try:
+                extra_vars = yaml.safe_load(extra_vars)
+            except (yaml.YAMLError, TypeError):
+                raise serializers.ValidationError('Must be valid JSON or YAML')
         return attrs
 
     def validate_variables_needed_to_start(self, attrs, source):
