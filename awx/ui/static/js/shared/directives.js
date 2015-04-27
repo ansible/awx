@@ -620,33 +620,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         };
     }])
 
-    .directive('awMultiSelect', [ function() {
-        return {
-            require: 'ngModel',
-            link: function(scope, elm) {
-                $(elm).multiselect  ({
-                    buttonClass: 'btn-default, btn-mini',
-                    buttonWidth: 'auto',
-                    buttonContainer: '<div class="btn-group" />',
-                    maxHeight: false,
-                    buttonText: function(options) {
-                        if (options.length === 0) {
-                            return 'None selected <b class="caret"></b>';
-                        }
-                        if (options.length > 3) {
-                            return options.length + ' selected  <b class="caret"></b>';
-                        }
-                        var selected = '';
-                        options.each(function() {
-                            selected += $(this).text() + ', ';
-                        });
-                        return selected.substr(0, selected.length -2) + ' <b class="caret"></b>';
-                    }
-                });
-            }
-        };
-    }])
-
     //
     // Enable jqueryui spinner widget on a numeric input field
     //
@@ -727,43 +700,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             }
         };
     }])
-
-
-    /*
-       awMultiSelect
-       Relies on select2.js to create a multi-select with tags.
-    */
-    .directive('awMultiselect', [ function() {
-        return {
-            require: '^form',  //inject the form into the ctrl parameter
-            link: function(scope, elm, attrs, ctrl) {
-                $(elm).select2({
-                    multiple: true,
-                    data: function() {
-                        // dynamically load the possible values
-                        if (scope[attrs.awMultiselect]) {
-                            var set = scope[attrs.awMultiselect],
-                                opts = [], i;
-                            for (i=0; i < set.length; i++) {
-                                opts.push({ id: set[i].value, text: set[i].label });
-                            }
-                            return {results: opts };
-                        }
-                        return {results: { id: '', text: ''} };
-                    }
-                });
-
-                // Make sure the form buttons enable when the value changes
-                $(elm).on('change', function() {
-                    ctrl.$setDirty();
-                    if (!scope.$$phase) {
-                        scope.$digest();
-                    }
-                });
-            }
-        };
-    }])
-
 
     /*
      *  Make an element draggable. Used on inventory groups tree.

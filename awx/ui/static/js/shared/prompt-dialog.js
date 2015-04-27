@@ -34,7 +34,7 @@ angular.module('PromptDialog', ['Utilities'])
 
                 var dialog = angular.element(document.getElementById('prompt-modal')),
                     scope = dialog.scope(), cls, local_backdrop;
-
+                
                 scope.promptHeader = params.hdr;
                 scope.promptBody = $sce.trustAsHtml(params.body);
                 scope.promptAction = params.action;

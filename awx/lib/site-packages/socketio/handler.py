@@ -205,6 +205,7 @@ class SocketIOHandler(WSGIHandler):
                 del self.websocket.environ
             del self.websocket
         if self.environ:
+            self.environ.pop('wsgi.websocket', None)
             del self.environ
 
     def handle_bad_request(self):

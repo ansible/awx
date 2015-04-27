@@ -482,19 +482,37 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         # Invalid auth can't trigger the launch endpoint
         self.check_invalid_auth(launch_url, {}, methods=('post',))
 
+        # Implicit, attached credentials
         with self.current_user(self.user_sue):
             response = self.post(launch_url, {}, expect=202)
             j = Job.objects.get(pk=response['job'])
             self.assertTrue(j.status == 'new')
 
+        # Explicit, override credentials
         with self.current_user(self.user_sue):
             response = self.post(launch_url, {'credential': self.cred_doug.pk}, expect=202)
             j = Job.objects.get(pk=response['job'])
             self.assertTrue(j.status == 'new')
+            self.assertEqual(j.credential.pk, self.cred_doug.pk)
 
-        # Can't launch a job template without a credential defined
+        # Explicit, override credentials
+        with self.current_user(self.user_sue):
+            response = self.post(launch_url, {'credential_id': self.cred_doug.pk}, expect=202)
+            j = Job.objects.get(pk=response['job'])
+            self.assertTrue(j.status == 'new')
+            self.assertEqual(j.credential.pk, self.cred_doug.pk)
+
+        # Can't launch a job template without a credential defined (or if we
+        # pass an invalid/inactive credential value).
         with self.current_user(self.user_sue):
             response = self.post(no_launch_url, {}, expect=400)
+            response = self.post(no_launch_url, {'credential': 0}, expect=400)
+            response = self.post(no_launch_url, {'credential_id': 0}, expect=400)
+            response = self.post(no_launch_url, {'credential': 'one'}, expect=400)
+            response = self.post(no_launch_url, {'credential_id': 'one'}, expect=400)
+            self.cred_doug.mark_inactive()
+            response = self.post(no_launch_url, {'credential': self.cred_doug.pk}, expect=400)
+            response = self.post(no_launch_url, {'credential_id': self.cred_doug.pk}, expect=400)
 
         # Job Templates without projects can not be launched
         with self.current_user(self.user_sue):
@@ -503,9 +521,9 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             jt = JobTemplate.objects.get(pk=response['id'])
             jt.project = None
             jt.save()
-            launch_url = reverse('api:job_template_launch',
-                                 args=(response['id'],))
-            self.post(launch_url, {}, expect=400)
+            launch_url2 = reverse('api:job_template_launch',
+                                  args=(response['id'],))
+            self.post(launch_url2, {}, expect=400)
 
         # Job Templates without inventory can not be launched
         with self.current_user(self.user_sue):
@@ -514,9 +532,15 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             jt = JobTemplate.objects.get(pk=response['id'])
             jt.inventory = None
             jt.save()
-            launch_url = reverse('api:job_template_launch',
-                                 args=(response['id'],))
-            self.post(launch_url, {}, expect=400)
+            launch_url3 = reverse('api:job_template_launch',
+                                  args=(response['id'],))
+            self.post(launch_url3, {}, expect=400)
+
+        # Job Templates with deleted credentials cannot be launched.
+        self.cred_sue.mark_inactive()
+        with self.current_user(self.user_sue):
+            response = self.post(launch_url, {}, expect=400)
+
 
 class JobTest(BaseJobTestMixin, django.test.TestCase):
 

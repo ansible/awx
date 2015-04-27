@@ -661,6 +661,75 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
+ * @name shared.function:Utilities#CreateSelect2
+ * @methodOf shared.function:Utilities
+ * @description Make a regular select drop down a select2 dropdown
+ *  To make a ``<select>`` field a select2 select 2, create the field in the
+ *  form definition with the multiSelect flag set to true. In the controller
+ *  of the page in question, call the CreateSelect2 factory with the element
+ *  id (be sure to include the appropriate jquery identifier in the parameter)
+ *  or any options that should be pre-selected in the select2 field.
+ *  The array of options should be formatted as
+ * ```
+ * [
+ *  {
+ *     id: 'id' ,
+ *     text: 'text'
+ *  },
+ *  {
+ *     id: 'id' ,
+ *     text: 'text'
+ *  }
+ * ]
+ * ```
+ */
+.factory('CreateSelect2', [
+    function () {
+        return function (params) {
+
+            var element = params.element,
+            options = params.opts;
+
+            $.fn.select2.amd.require([
+              "select2/utils",
+              "select2/dropdown",
+              "select2/dropdown/attachContainer",
+              "select2/dropdown/search",
+            ], function (Utils, DropdownAdapter, AttachContainer, DropdownSearch) {
+
+                var CustomAdapter = Utils.Decorate(
+                  Utils.Decorate(
+                      DropdownAdapter,
+                      DropdownSearch
+                  ),
+                  AttachContainer
+                 );
+
+                $(element).select2({
+                    dropdownAdapter: CustomAdapter,
+                    multiple: 'true',
+                    theme: "bootstrap",
+                    width: '100%'
+                });
+                if(options){
+                    for (var d = 0; d < $(element + " option").length; d++) {
+                        var item = $(element + " option")[d];
+                        for ( var f = 0; f < options.length; f++){
+                            if(item.value === options[f].id){
+                                // Append it to the select
+                                item.setAttribute('selected', 'selected');
+                            }
+                        }
+                    }
+
+                    $(element).trigger('change');
+                }
+
+            });
+        };
+ }])
+/**
+ * @ngdoc method
  * @name shared.function:Utilities#GetChoices
  * @methodOf shared.function:Utilities
  * @description Make an Options call to the API and retrieve dropdown options

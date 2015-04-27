@@ -97,6 +97,7 @@ export default
                     labelClass: 'prepend-asterisk',
                     type: 'radio_group',
                     class: 'squeeze',
+                    ngChange: 'changeAdhocCommandCheckbox()',
                     options: [{
                         label: 'Read',
                         value: 'read',

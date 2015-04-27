@@ -117,13 +117,13 @@ angular.module('JobStatusGraphWidget', ['RestServices', 'Utilities'])
 
                     var timeFormat, graphData = [
                         {
-                            "color": "#00aa00",
+                            "color": "#60D66F",
                             "key": "Successful",
                             "values": data.jobs.successful
                         },
                         {
                             "key" : "Failed" ,
-                            "color" : "#aa0000",
+                            "color" : "#ff5850",
                             "values": data.jobs.failed
                         }
                     ];

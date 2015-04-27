@@ -365,7 +365,7 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
             data[parent_key] = self.kwargs['pk']
 
         # attempt to deserialize the object
-        serializer = self.serializer_class(data=data)
+        serializer = self.get_serializer(data=data)
         if not serializer.is_valid():
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
@@ -377,7 +377,7 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
         # save the object through the serializer, reload and returned the saved
         # object deserialized
         obj = serializer.save()
-        serializer = self.serializer_class(obj)
+        serializer = self.get_serializer(instance=obj)
     
         headers = {'Location': obj.get_absolute_url()}
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

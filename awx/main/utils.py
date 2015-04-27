@@ -24,6 +24,7 @@ from django.utils.encoding import smart_str
 # PyCrypto
 from Crypto.Cipher import AES
 
+logger = logging.getLogger('awx.main.utils')
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version', 'update_scm_url',
@@ -380,10 +381,13 @@ def get_system_task_capacity():
 def emit_websocket_notification(endpoint, event, payload):
     from awx.main.socket import Socket
 
-    with Socket('websocket', 'w') as websocket:
-        payload['event'] = event
-        payload['endpoint'] = endpoint
-        websocket.publish(payload)
+    try:
+        with Socket('websocket', 'w', nowait=True, logger=logger) as websocket:
+            payload['event'] = event
+            payload['endpoint'] = endpoint
+            websocket.publish(payload)
+    except Exception:
+        pass
 
 _inventory_updates = threading.local()
 

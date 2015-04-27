@@ -379,6 +379,23 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique):
         # If update_fields has been specified, add our field names to it,
         # if hit hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
+        # If updating a credential, make sure that we only allow user OR team
+        # to be set, and clear out the other field based on which one has
+        # changed.
+        if self.pk:
+            cred_before = Credential.objects.get(pk=self.pk)
+            if self.user and self.team:
+                # If the user changed, remove the previously assigned team.
+                if cred_before.user != self.user:
+                    self.team = None
+                    if 'team' not in update_fields:
+                        update_fields.append('team')
+                # If the team changed, remove the previously assigned user.
+                elif cred_before.team != self.team:
+                    self.user = None
+                    if 'user' not in update_fields:
+                        update_fields.append('user')
+        # Set cloud flag based on credential kind.
         cloud = self.kind in CLOUD_PROVIDERS + ('aws',)
         if self.cloud != cloud:
             self.cloud = cloud

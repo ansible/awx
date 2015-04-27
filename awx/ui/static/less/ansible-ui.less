@@ -12,14 +12,11 @@
 @blue:         #1778c3;   /* logo blue */
 @blue-link:    #1778c3;
 @blue-dark:    #2a6496;   /* link hover */
-@green:        #00aa00;   // Ansible OK
 @grey:         #A9A9A9;
 @grey-txt:     #707070;
 @info:         #d9edf7;   /* alert info background color */
 @info-border:  #bce8f1;   /* alert info border color */
 @info-color:   #3a87ad;
-@red:          #aa0000;   // Ansible Failed
-@red-hover:    #AE3F3A;
 @unreachable:  #FF0000;
 @changed:      #FF9900;   // Ansible Changed
 @skipped:      #00aaaa;   // Ansible Skipped
@@ -30,6 +27,10 @@
 
 @tip-background: #0088CC;
 @tip-color: #fff;
+@green: #60D66F;
+@red: #ff5850;
+@red-hover: #FA8C87;
+
 
 @font-face {
     font-family: 'Open Sans';
@@ -184,6 +185,18 @@ a:focus {
   .dropdown .caret {
     border-top-color: @blue;
   }
+}
+
+// removing all the pesky outlines on buttons/links/etc.
+a:focus,
+a:active,
+button:focus,
+button:active,
+i:focus,
+i:active,
+.btn:focus,
+.btn:active:focus {
+    outline: 0;
 }
 
 .jqstooltip{
@@ -365,6 +378,11 @@ textarea.allowresize {
 .prepend-asterisk:before {
   content: "\002A\00A0";
   color: @red;
+  margin-right: -5px;
+}
+
+.prepend-asterisk--login:before {
+    margin-right: -2px;
 }
 
 .subtitle {
@@ -656,10 +674,10 @@ dd {
 
 /* Outline required fields in Red when there is an error */
   .form-control.ng-dirty.ng-invalid, .form-control.ng-dirty.ng-invalid:focus {
-      border-color: rgba(204, 0, 0, 0.8);
+      border-color: rgba(255, 88, 80, 0.8);
       outline: 0;
-      -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(204, 0, 0, 0.6);
-              box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(204, 0, 0, 0.6);
+      -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(255, 88, 80, 0.6);
+              box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(255, 88, 80, 0.6);
   }
 
 /* For some reason TB 3 RC1 does not provide an input-mini */
@@ -1486,8 +1504,6 @@ input[type="checkbox"].checkbox-no-label {
      border-bottom: 1px solid #ddd;
      border-right: 1px solid #ddd;
   }
-
-  #groups_table .actions .cancel { padding-right: 2px; }
 
   .node-toggle, .node-no-toggle {
     /* also used on job evetns */

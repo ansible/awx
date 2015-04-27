@@ -671,10 +671,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += Attr(field, 'type');
                     html += "ng-model=\"" + fld + '" ';
                     html += "name=\"" + fld + '" ';
-                    if (form.name === "permission") {
-                        html += "ng-disabled='permission_type === \"admin\"'";
-                        html += "ng-checked='permission_type === \"admin\"'";
-                    }
                     html += (field.ngChange) ? Attr(field, 'ngChange') : "";
                     html += "id=\"" + form.name + "_" + fld + "_chbox\" ";
                     html += (idx !== undefined) ? "_" + idx : "";
@@ -791,7 +787,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 field.awRequiredWhen.variable + "\" " : "";
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
                             html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
-                            html += (field.awMultiselect) ? "aw-multiselect=\"" + field.awMultiselect + "\" " : "";
                             html += ">\n";
                         }
 
@@ -915,7 +910,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 field.awRequiredWhen.variable + "' " : "";
                             html += (field.awValidUrl) ? "aw-valid-url " : "";
                             html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled='" + field.associated + "_ask' " : "";
-                            html += (field.awMultiselect) ? "aw-multiselect='" + field.awMultiselect + "' " : "";
                             html += ">\n";
                         }
 
@@ -1038,7 +1032,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "class=\"form-control";
                         html += (field['class']) ? " " + field['class'] : "";
                         html += "\" ";
-                        html += this.attr(field, 'ngOptions');
+                        html += (field.ngOptions) ? this.attr(field, 'ngOptions') : "" ;
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                         html += (field.ngDisabled) ? this.attr(field, 'ngDisabled'): "";
                         html += (field.ngRequired) ? this.attr(field, 'ngRequired') : "";

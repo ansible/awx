@@ -48,11 +48,11 @@ function HostStatusGraph($compile, $window) {
                 if(data.hosts.total+data.hosts.failed>0){
                     data = [
                         {   "label": "Successful",
-                            "color": "#00aa00",
+                            "color": "#60D66F",
                             "value" : data.hosts.total
                         } ,
                         {   "label": "Failed",
-                            "color" : "#aa0000",
+                            "color" : "#ff5850",
                             "value" : data.hosts.failed
                         }
                     ];
@@ -68,7 +68,7 @@ function HostStatusGraph($compile, $window) {
                             return '<b>'+x+'</b>'+ '<p>' +  Math.floor(y.replace(',','')) + ' Hosts ' +  '</p>';
                         })
                         .labelType("percent")
-                        .color(['#00aa00', '#aa0000']);
+                        .color(['#60D66F', '#ff5850']);
 
                     d3.select(element.find('svg')[0])
                         .datum(data)

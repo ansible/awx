@@ -28,6 +28,12 @@ class CleanupFactsCommandFunctionalTest(BaseCommandMixin, BaseTest, MongoDBRequi
         result, stdout, stderr = self.run_command('cleanup_facts', granularity='1w',older_than='5d')
         self.assertEqual(stdout, 'Deleted 0 facts.\n')
 
+    def test_invoke_all_deleted(self):
+        self.create_hosts_and_facts(datetime(year=2015, day=2, month=1, microsecond=0), 10, 20)
+
+        result, stdout, stderr = self.run_command('cleanup_facts', granularity='0d', older_than='0d')
+        self.assertEqual(stdout, 'Deleted 200 facts.\n')
+
     def test_invoke_params_required(self):
         result, stdout, stderr = self.run_command('cleanup_facts')
         self.assertIsInstance(result, CommandError)
