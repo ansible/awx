@@ -1498,6 +1498,14 @@ class JobRelaunchSerializer(JobSerializer):
     class Meta:
         fields = ('passwords_needed_to_start',)
 
+    def to_native(self, obj):
+        res = super(JobRelaunchSerializer, self).to_native(obj)
+        view = self.context.get('view', None)
+        if hasattr(view, '_raw_data_form_marker'):
+            password_keys = dict([(p, u'') for p in self.get_passwords_needed_to_start(obj)])
+            res.update(password_keys)
+        return res
+
     def get_passwords_needed_to_start(self, obj):
         if obj:
             return obj.passwords_needed_to_start
@@ -1512,9 +1520,6 @@ class JobRelaunchSerializer(JobSerializer):
         provided = dict([(field, data.get(field, '')) for field in needed])
         if not all(provided.values()):
             raise serializers.ValidationError(needed)
-
-        data.clear()
-        data.update(provided)
         return attrs
 
     def validate(self, attrs):
