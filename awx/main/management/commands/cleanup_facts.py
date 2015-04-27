@@ -4,12 +4,12 @@
 # Python
 import re
 from dateutil.relativedelta import relativedelta
-from datetime import datetime
 from optparse import make_option
 
 # Django
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils.timezone import now
 
 # AWX
 from awx.fact.models.fact import * # noqa
@@ -30,19 +30,31 @@ class CleanupFacts(object):
     #   pivot -= granularity
     # group by host 
     def cleanup(self, older_than_abs, granularity):
+        flag_delete_all = False
         fact_oldest = FactVersion.objects.all().order_by('timestamp').first()
         if not fact_oldest:
             return 0
+
+        # Special case, granularity=0x where x is d, w, or y
+        # The intent is to delete all facts < older_than_abs
+        if granularity == relativedelta():
+            flag_delete_all = True
 
         total = 0
         date_pivot = older_than_abs
         while date_pivot > fact_oldest.timestamp:
             date_pivot_next = date_pivot - granularity
             kv = {
-                'timestamp__lte': date_pivot,
-                'timestamp__gt': date_pivot_next,
+                'timestamp__lte': date_pivot
             }
+            if not flag_delete_all:
+                kv['timestamp__gt'] = date_pivot_next
+
             version_objs = FactVersion.objects.filter(**kv).order_by('-timestamp')
+
+            if flag_delete_all:
+                total = version_objs.delete()
+                break
 
             # Transform array -> {host_id} = [<fact_version>, <fact_version>, ...]
             # TODO: If this set gets large then we can use mongo to transform the data set for us.
@@ -66,13 +78,14 @@ class CleanupFacts(object):
                 total += count
 
             date_pivot = date_pivot_next
+
         return total
 
     '''
     older_than and granularity are of type relativedelta
     '''
     def run(self, older_than, granularity):
-        t = datetime.now()
+        t = now()
         deleted_count = self.cleanup(t - older_than, granularity)
         print("Deleted %d facts." % deleted_count)
 

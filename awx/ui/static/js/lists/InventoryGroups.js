@@ -47,6 +47,9 @@ export default
                 },{
                     name: "Microsoft Azure",
                     value: "azure"
+                },{
+                    name: "Openstack",
+                    value: "openstack"
                 }],
                 sourceModel: 'inventory_source',
                 sourceField: 'source',
@@ -55,7 +58,7 @@ export default
             has_external_source: {
                 label: 'Has external source?',
                 searchType: 'in',
-                searchValue: 'ec2,rax,vmware,azure,gce',
+                searchValue: 'ec2,rax,vmware,azure,gce,openstack',
                 searchOnly: true,
                 sourceModel: 'inventory_source',
                 sourceField: 'source'

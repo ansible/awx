@@ -1295,6 +1295,16 @@ class CredentialSerializer(BaseSerializer):
         for field in Credential.PASSWORD_FIELDS:
             if unicode(attrs.get(field, '')).startswith('$encrypted$'):
                 attrs.pop(field, None)
+
+        # If creating a credential from a view that automatically sets the
+        # parent_key (user or team), set the other value to None.
+        view = self.context.get('view', None)
+        parent_key = getattr(view, 'parent_key', None)
+        if parent_key == 'user':
+            attrs['team'] = None
+        if parent_key == 'team':
+            attrs['user'] = None
+
         instance = super(CredentialSerializer, self).restore_object(attrs, instance)
         return instance
 
