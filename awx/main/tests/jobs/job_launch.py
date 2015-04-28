@@ -185,3 +185,9 @@ class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TestCase):
             response = self.post(self.launch_url, {'ssh_password': 'whatever'}, expect=202)
             j = Job.objects.get(pk=response['job'])
             self.assertEqual(j.status, 'new')
+
+    def test_explicit_cred_with_ask_password_empty_string_fail(self):
+        with self.current_user(self.user_sue):
+            response = self.post(self.launch_url, {'ssh_password': ''}, expect=400)
+            j = Job.objects.get(pk=response['job'])
+            self.assertEqual(j.status, 'new')
