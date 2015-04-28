@@ -1801,6 +1801,9 @@ class JobLaunchSerializer(BaseSerializer):
             except (yaml.YAMLError, TypeError, AttributeError):
                 raise serializers.ValidationError(dict(extra_vars=['Must be valid JSON or YAML']))
 
+        if not isinstance(extra_vars, dict):
+            extra_vars = {}
+
         if self.get_survey_enabled(obj):
             validation_errors = obj.survey_variable_validation(extra_vars)
             if validation_errors:
