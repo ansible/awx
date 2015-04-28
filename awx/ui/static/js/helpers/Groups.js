@@ -1042,8 +1042,19 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                        sources_scope.sourceChange(); //set defaults that rely on source value
 
                                        if (data.source_regions) {
-                                           if (data.source === 'ec2' || data.source === 'rax') {
-                                               set = (data.source === 'ec2') ? sources_scope.ec2_regions : sources_scope.rax_regions;
+                                           if (data.source === 'ec2' ||
+                                               data.source === 'rax' ||
+                                               data.source === 'gce' ||
+                                               data.source === 'azure') {
+                                               if (data.source === 'ec2') {
+                                                   set = sources_scope.ec2_regions;
+                                               } else if (data.source === 'rax') {
+                                                   set = sources_scope.rax_regions;
+                                               } else if (data.source === 'gce') {
+                                                   set = sources_scope.gce_regions;
+                                               } else if (data.source === 'azure') {
+                                                   set = sources_scope.azure_regions;
+                                               }
                                                opts = [];
                                                list = data.source_regions.split(',');
                                                for (i = 0; i < list.length; i++) {
