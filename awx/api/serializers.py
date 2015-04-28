@@ -1582,6 +1582,9 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
             ret['inventory'] = None
         if 'credential' in ret and (not obj.credential or not obj.credential.active):
             ret['credential'] = None
+        # For the UI, only module_name is returned for name, instead of the
+        # longer module name + module_args format.
+        ret['name'] = obj.module_name
         return ret
 
 
