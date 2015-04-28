@@ -7,11 +7,9 @@ from __future__ import absolute_import
 # Django
 import django
 from django.core.urlresolvers import reverse
-from django.conf import settings
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tests.base import BaseLiveServerTest
 from .base import BaseJobTestMixin
 
 __all__ = ['JobTemplateLaunchTest', 'JobTemplateLaunchPasswordsTest']
@@ -111,14 +109,14 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TestCase):
         # pass an invalid/inactive credential value).
         with self.current_user(self.user_sue):
             self.cred_sue.mark_inactive()
-            response = self.post(self.launch_url, {}, expect=400)
-            response = self.post(self.launch_url, {'credential': 0}, expect=400)
-            response = self.post(self.launch_url, {'credential_id': 0}, expect=400)
-            response = self.post(self.launch_url, {'credential': 'one'}, expect=400)
-            response = self.post(self.launch_url, {'credential_id': 'one'}, expect=400)
+            self.post(self.launch_url, {}, expect=400)
+            self.post(self.launch_url, {'credential': 0}, expect=400)
+            self.post(self.launch_url, {'credential_id': 0}, expect=400)
+            self.post(self.launch_url, {'credential': 'one'}, expect=400)
+            self.post(self.launch_url, {'credential_id': 'one'}, expect=400)
             self.cred_doug.mark_inactive()
-            response = self.post(self.launch_url, {'credential': self.cred_doug.pk}, expect=400)
-            response = self.post(self.launch_url, {'credential_id': self.cred_doug.pk}, expect=400)
+            self.post(self.launch_url, {'credential': self.cred_doug.pk}, expect=400)
+            self.post(self.launch_url, {'credential_id': self.cred_doug.pk}, expect=400)
 
     def test_no_project_fail(self):
         # Job Templates without projects can not be launched
@@ -148,7 +146,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TestCase):
         # Job Templates with deleted credentials cannot be launched.
         self.cred_sue.mark_inactive()
         with self.current_user(self.user_sue):
-            response = self.post(self.launch_url, {}, expect=400)
+            self.post(self.launch_url, {}, expect=400)
 
 class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TestCase):
     def setUp(self):
