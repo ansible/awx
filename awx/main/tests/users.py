@@ -322,6 +322,13 @@ class UsersTest(BaseTest):
         orig = User.objects.get(pk=self.super_django_user.pk)
         self.assertTrue(orig.username != 'change')
 
+    def test_user_delete_non_existant_user(self):
+        user_pk = self.normal_django_user.pk
+        fake_pk = user_pk + 1000
+        self.assertFalse(User.objects.filter(pk=fake_pk).exists(), "We made up a fake pk and it happened to exist")
+        url = reverse('api:user_detail', args=(fake_pk,))
+        self.delete(url, expect=404, auth=self.get_super_credentials())
+
     def test_password_not_shown_in_get_operations_for_list_or_detail(self):
         url = reverse('api:user_detail', args=(self.super_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_super_credentials())
