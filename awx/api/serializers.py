@@ -6,6 +6,7 @@ import json
 import re
 import logging
 from dateutil import rrule
+from ast import literal_eval
 
 # PyYAML
 import yaml
@@ -1780,29 +1781,27 @@ class JobLaunchSerializer(BaseSerializer):
                 raise serializers.ValidationError(obj.passwords_needed_to_start)
         return attrs
 
-    def validate_extra_vars(self, attrs, source):
-        extra_vars = attrs.get(source, {})
+    def validate(self, attrs):
+        obj = self.context.get('obj')
+        extra_vars = attrs.get('extra_vars', {})
+        try:
+            extra_vars = literal_eval(extra_vars)
+            extra_vars = json.dumps(extra_vars)
+        except Exception:
+            pass
 
         try:
             extra_vars = json.loads(extra_vars)
         except (ValueError, TypeError):
             try:
                 extra_vars = yaml.safe_load(extra_vars)
-            except (yaml.YAMLError, TypeError):
-                raise serializers.ValidationError('Must be valid JSON or YAML')
-        return attrs
-
-    def validate_variables_needed_to_start(self, attrs, source):
-        obj = self.context.get('obj')
+            except (yaml.YAMLError, TypeError, AttributeError):
+                raise serializers.ValidationError(dict(extra_vars=['Must be valid JSON or YAML']))
 
         if self.get_survey_enabled(obj):
-            validation_errors = obj.survey_variable_validation(attrs.get('extra_vars', {}))
+            validation_errors = obj.survey_variable_validation(extra_vars)
             if validation_errors:
-                raise serializers.ValidationError(validation_errors)
-        return attrs
-
-    def validate(self, attrs):
-        obj = self.context.get('obj')
+                raise serializers.ValidationError(dict(variables_needed_to_start=validation_errors))
 
         if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
             raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
