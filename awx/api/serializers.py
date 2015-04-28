@@ -1777,7 +1777,7 @@ class JobLaunchSerializer(BaseSerializer):
 
         credential = attrs.get('credential', None) or obj.credential
         # fill passwords dict with request data passwords
-        if credential.passwords_needed:
+        if credential and credential.passwords_needed:
             try:
                 for p in credential.passwords_needed:
                     passwords[p] = data[p]
