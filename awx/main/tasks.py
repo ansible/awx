@@ -230,10 +230,10 @@ class BaseTask(Task):
         '''
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
-    def build_private_data(self, instance, **kwargs):
+    def build_private_data(self, job, **kwargs):
         '''
-        Return any private data that needs to be written to a temporary file
-        for this task.
+        Return SSH private key data (only if stored in DB as ssh_key_data).
+        Return structure is a dict of the form:
         '''
 
     def build_private_data_dir(self, instance, **kwargs):
@@ -244,20 +244,23 @@ class BaseTask(Task):
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         return path
 
-    def build_private_data_file(self, instance, **kwargs):
+    def build_private_data_files(self, instance, **kwargs):
         '''
-        Create a temporary file containing the private data.
+        Create a temporary files containing the private data.
+        Returns a dictionary with keys from build_private_data
+        (i.e. 'credential', 'cloud_credential') and values the file path.
         '''
         private_data = self.build_private_data(instance, **kwargs)
+        private_data_files = {}
         if private_data is not None:
-            handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
-            f = os.fdopen(handle, 'w')
-            f.write(private_data)
-            f.close()
-            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-            return path
-        else:
-            return ''
+            for name, data in private_data.iteritems():
+                handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
+                f = os.fdopen(handle, 'w')
+                f.write(data)
+                f.close()
+                os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+                private_data_files[name] = path
+        return private_data_files
 
     def build_passwords(self, instance, **kwargs):
         '''
@@ -434,7 +437,8 @@ class BaseTask(Task):
             # Fetch ansible version once here to support version-dependent features.
             kwargs['ansible_version'] = get_ansible_version()
             kwargs['private_data_dir'] = self.build_private_data_dir(instance, **kwargs)
-            kwargs['private_data_file'] = self.build_private_data_file(instance, **kwargs)
+            # May have to serialize the value
+            kwargs['private_data_files'] = self.build_private_data_files(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
             args = self.build_args(instance, **kwargs)
             safe_args = self.build_safe_args(instance, **kwargs)
@@ -505,25 +509,22 @@ class RunJob(BaseTask):
 
     def build_private_data(self, job, **kwargs):
         '''
-        Return SSH private key data needed for this job (only if stored in DB
-        as ssh_key_data).
+        Returns a dict of the form
+        dict['credential'] = <credential_decrypted_ssh_key_data>
+        dict['cloud_credential'] = <cloud_credential_decrypted_ssh_key_data>
         '''
+        job_credentials = ['credential', 'cloud_credential']
+        private_data = {}
         # If we were sent SSH credentials, decrypt them and send them
         # back (they will be written to a temporary file).
-        credential = getattr(job, 'credential', None)
-        if credential:
-            return decrypt_field(credential, 'ssh_key_data') or None
 
-        # We might also have been sent a cloud credential. If so, send it.
-        #
-        # This sets up an either/or situation with credential and cloud
-        # credential when it comes to SSH data. This should be fine, as if
-        # you're running against cloud instances, you'll be using the cloud
-        # credentials to do so. I assert that no situation currently exists
-        # where we need both.
-        cloud_credential = getattr(job, 'cloud_credential', None)
-        if cloud_credential:
-            return decrypt_field(cloud_credential, 'ssh_key_data') or None
+        for cred_name in job_credentials:
+            credential = getattr(job, cred_name, None)
+            if credential:
+                if credential.ssh_key_data not in (None, ''):
+                    private_data[cred_name] = decrypt_field(credential, 'ssh_key_data') or ''
+
+        return private_data
 
     def build_passwords(self, job, **kwargs):
         '''
@@ -583,10 +584,10 @@ class RunJob(BaseTask):
         elif cloud_cred and cloud_cred.kind == 'gce':
             env['GCE_EMAIL'] = cloud_cred.username
             env['GCE_PROJECT'] = cloud_cred.project
-            env['GCE_PEM_FILE_PATH'] = kwargs['private_data_file']
+            env['GCE_PEM_FILE_PATH'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
         elif cloud_cred and cloud_cred.kind == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.username
-            env['AZURE_CERT_PATH'] = kwargs['private_data_file']
+            env['AZURE_CERT_PATH'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
         elif cloud_cred and cloud_cred.kind == 'vmware':
             env['VMWARE_USER'] = cloud_cred.username
             env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
@@ -729,7 +730,7 @@ class RunJob(BaseTask):
         '''
         If using an SSH key, return the path for use by ssh-agent.
         '''
-        return kwargs.get('private_data_file', '')
+        return kwargs.get('private_data_files', {}).get('credential', '')
 
     def should_use_proot(self, instance, **kwargs):
         '''
@@ -760,12 +761,17 @@ class RunProjectUpdate(BaseTask):
     name = 'awx.main.tasks.run_project_update'
     model = ProjectUpdate
 
+
     def build_private_data(self, project_update, **kwargs):
         '''
         Return SSH private key data needed for this project update.
         '''
+        private_data = {}
         if project_update.credential:
-            return decrypt_field(project_update.credential, 'ssh_key_data') or None
+            credential = project_update.credential
+            if credential.ssh_key_data not in (None, ''):
+                private_data['scm_credential'] = decrypt_field(project_update.credential, 'ssh_key_data')
+        return private_data
 
     def build_passwords(self, project_update, **kwargs):
         '''
@@ -916,7 +922,7 @@ class RunProjectUpdate(BaseTask):
         '''
         If using an SSH key, return the path for use by ssh-agent.
         '''
-        return kwargs.get('private_data_file', '')
+        return kwargs.get('private_data_files', {}).get('scm_credential', '')
 
 class RunInventoryUpdate(BaseTask):
 
@@ -930,7 +936,7 @@ class RunInventoryUpdate(BaseTask):
         # If this is Microsoft Azure or GCE, return the RSA key
         if inventory_update.source in ('azure', 'gce'):
             credential = inventory_update.credential
-            return decrypt_field(credential, 'ssh_key_data')
+            return dict(cloud_credential=decrypt_field(credential, 'ssh_key_data'))
 
         if inventory_update.source == 'openstack':
             credential = inventory_update.credential
@@ -938,8 +944,9 @@ class RunInventoryUpdate(BaseTask):
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
-            openstack_data = {"clouds": {"devstack": {"auth": openstack_auth}}}
-            return yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True)
+            private_state = str(inventory_update.source_vars_dict.get("private", "true"))
+            openstack_data = {"clouds": {"devstack": {"private": private_state, "auth": openstack_auth}}}
+            return dict(cloud_credential=yaml.safe_dump(openstack_data, default_flow_style=False, allow_unicode=True))
 
         cp = ConfigParser.ConfigParser()
         # Build custom ec2.ini for ec2 inventory script to use.
@@ -993,7 +1000,7 @@ class RunInventoryUpdate(BaseTask):
         if cp.sections():
             f = cStringIO.StringIO()
             cp.write(f)
-            return f.getvalue()
+            return dict(cloud_credential=f.getvalue())
 
     def build_passwords(self, inventory_update, **kwargs):
         """Build a dictionary of authentication/credential information for
@@ -1038,31 +1045,32 @@ class RunInventoryUpdate(BaseTask):
         # `awx/plugins/inventory` directory; those files should be kept in
         # sync with those in Ansible core at all times.
         passwords = kwargs.get('passwords', {})
+        cloud_credential = kwargs.get('private_data_files', {}).get('cloud_credential', '')
         if inventory_update.source == 'ec2':
             if passwords.get('source_username', '') and passwords.get('source_password', ''):
                 env['AWS_ACCESS_KEY_ID'] = passwords['source_username']
                 env['AWS_SECRET_ACCESS_KEY'] = passwords['source_password']
-            env['EC2_INI_PATH'] = kwargs.get('private_data_file', '')
+            env['EC2_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'rax':
-            env['RAX_CREDS_FILE'] = kwargs.get('private_data_file', '')
+            env['RAX_CREDS_FILE'] = cloud_credential
             env['RAX_REGION'] = inventory_update.source_regions or 'all'
             # Set this environment variable so the vendored package won't
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
         elif inventory_update.source == 'vmware':
-            env['VMWARE_INI'] = kwargs.get('private_data_file', '')
+            env['VMWARE_INI'] = cloud_credential
             env['VMWARE_HOST'] = passwords.get('source_host', '')
             env['VMWARE_USER'] = passwords.get('source_username', '')
             env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
         elif inventory_update.source == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
-            env['AZURE_CERT_PATH'] = kwargs['private_data_file']
+            env['AZURE_CERT_PATH'] = cloud_credential
         elif inventory_update.source == 'gce':
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')
-            env['GCE_PEM_FILE_PATH'] = kwargs['private_data_file']
+            env['GCE_PEM_FILE_PATH'] = cloud_credential
         elif inventory_update.source == 'openstack':
-            env['OPENSTACK_CONFIG_FILE'] = kwargs.get('private_data_file', '')
+            env['OPENSTACK_CONFIG_FILE'] = cloud_credential
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
@@ -1163,7 +1171,6 @@ class RunInventoryUpdate(BaseTask):
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
 
-
 class RunAdHocCommand(BaseTask):
     '''
     Celery task to run an ad hoc command using ansible.
@@ -1180,8 +1187,10 @@ class RunAdHocCommand(BaseTask):
         # If we were sent SSH credentials, decrypt them and send them
         # back (they will be written to a temporary file).
         creds = ad_hoc_command.credential
-        if creds:
-            return decrypt_field(creds, 'ssh_key_data') or None
+        private_data = {}
+        if creds and creds.ssh_key_data not in (None, ''):
+            private_data['ad_hoc_credential'] = decrypt_field(creds, 'ssh_key_data') or ''
+        return private_data
 
     def build_passwords(self, ad_hoc_command, **kwargs):
         '''
@@ -1321,7 +1330,7 @@ class RunAdHocCommand(BaseTask):
         '''
         If using an SSH key, return the path for use by ssh-agent.
         '''
-        return kwargs.get('private_data_file', '')
+        return kwargs.get('private_data_files', {}).get('ad_hoc_credential', '')
 
     def should_use_proot(self, instance, **kwargs):
         '''
@@ -1345,10 +1354,15 @@ class RunSystemJob(BaseTask):
         args = ['awx-manage', system_job.job_type]
         try:
             json_vars = json.loads(system_job.extra_vars)
-            if 'days' in json_vars:
-                args.extend(['--days', str(json_vars['days'])])
+            if 'days' in json_vars and system_job.job_type != 'cleanup_facts':
+                args.extend(['--days', str(json_vars.get('days', 60))])
             if system_job.job_type == 'cleanup_jobs':
                 args.extend(['--jobs', '--project-updates', '--inventory-updates', '--management-jobs'])
+            if system_job.job_type == 'cleanup_facts':
+                if 'older_than' in json_vars:
+                    args.extend(['--older_than', str(json_vars['older_than'])])
+                if 'granularity' in json_vars:
+                    args.extend(['--granularity', str(json_vars['granularity'])])
             #     Keeping this around in case we want to break this out
             #     if 'jobs' in json_vars and json_vars['jobs']:
             #         args.extend(['--jobs'])

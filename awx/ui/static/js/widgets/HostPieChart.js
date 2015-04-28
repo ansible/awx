@@ -63,12 +63,12 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                     data = [
                         {
                             "label": "Successful",
-                            "color": "#00aa00",
+                            "color": "#60D66F",
                             "value" : dashboard.hosts.total
                         } ,
                         {
                             "label": "Failed",
-                            "color" : "#aa0000",
+                            "color" : "#ff5850",
                             "value" : dashboard.hosts.failed
                         }
                     ];
@@ -85,7 +85,7 @@ angular.module('HostPieChartWidget', ['RestServices', 'Utilities'])
                           .tooltipContent(function(x, y) {
                                 return '<b>'+x+'</b>'+ '<p>' +  Math.floor(y.replace(',','')) + ' Hosts ' +  '</p>';
                             })
-                          .color(['#00aa00', '#aa0000']);
+                          .color(['#60D66F', '#ff5850']);
 
                         host_pie_chart.pie.pieLabelsOutside(true).labelType("percent");
 

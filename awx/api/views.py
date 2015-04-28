@@ -812,7 +812,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
 
     def update_filter(self, request, *args, **kwargs):
         ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins '''
-        obj = User.objects.get(pk=kwargs['pk'])
+        obj = self.get_object()
         can_change = request.user.can_access(User, 'change', obj, request.DATA)
         can_admin = request.user.can_access(User, 'admin', obj, request.DATA)
         if can_change and not can_admin:
@@ -828,7 +828,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
                 raise PermissionDenied('Cannot change %s' % ', '.join(changed.keys()))
 
     def destroy(self, request, *args, **kwargs):
-        obj = User.objects.get(pk=kwargs['pk'])
+        obj = self.get_object()
         can_delete = request.user.can_access(User, 'delete', obj)
         if not can_delete:
             raise PermissionDenied('Cannot delete user')
@@ -1434,44 +1434,34 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
         return super(JobTemplateDetail, self).destroy(request, *args, **kwargs)
 
 
-class JobTemplateLaunch(GenericAPIView):
+class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
     model = JobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = JobLaunchSerializer
     is_job_start = True
-
-    def get(self, request, *args, **kwargs):
-        obj = self.get_object()
-        data = {}
-        data['can_start_without_user_input'] = obj.can_start_without_user_input()
-        data['passwords_needed_to_start'] = obj.passwords_needed_to_start
-        data['ask_variables_on_launch'] = obj.ask_variables_on_launch
-        data['variables_needed_to_start'] = obj.variables_needed_to_start
-        data['credential_needed_to_start'] = obj.credential is None
-        data['survey_enabled'] = obj.survey_enabled and 'spec' in obj.survey_spec
-        return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
-        if obj.survey_enabled and 'spec' in obj.survey_spec:
-            if request.DATA == "":
-                request_data = {}
-            else:
-                request_data = request.DATA
-            validation_errors = obj.survey_variable_validation(request_data.get('extra_vars', {}))
-            if validation_errors:
-                return Response(dict(variables_needed_to_start=validation_errors),
-                                status=status.HTTP_400_BAD_REQUEST)
-        if obj.credential is None and ('credential' not in request.DATA and 'credential_id' not in request.DATA):
-            return Response(dict(errors="Credential not provided"), status=status.HTTP_400_BAD_REQUEST)
-        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
-            return Response(dict(errors="Job Template Project is missing or undefined"), status=status.HTTP_400_BAD_REQUEST)
-        if obj.inventory is None or not obj.inventory.active:
-            return Response(dict(errors="Job Template Inventory is missing or undefined"), status=status.HTTP_400_BAD_REQUEST)
-        new_job = obj.create_unified_job(**request.DATA)
-        result = new_job.signal_start(**request.DATA)
+
+        if 'credential' not in request.DATA and 'credential_id' in request.DATA:
+            request.DATA['credential'] = request.DATA['credential_id']
+
+        passwords = {}
+        serializer = self.serializer_class(data=request.DATA, context={'obj': obj, 'data': request.DATA, 'passwords': passwords})
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        kv = {
+            'credential': serializer.object.credential.pk,
+        }
+        if 'extra_vars' in request.DATA:
+            kv['extra_vars'] = request.DATA['extra_vars']
+        kv.update(passwords)
+
+        new_job = obj.create_unified_job(**kv)
+        result = new_job.signal_start(**kv)
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
             new_job.delete()
@@ -1843,7 +1833,7 @@ class JobCancel(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
-class JobRelaunch(GenericAPIView):
+class JobRelaunch(RetrieveAPIView, GenericAPIView):
 
     model = Job
     serializer_class = JobRelaunchSerializer
@@ -1854,23 +1844,16 @@ class JobRelaunch(GenericAPIView):
     def dispatch(self, *args, **kwargs):
         return super(JobRelaunch, self).dispatch(*args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        obj = self.get_object()
-        data = {}
-        data['passwords_needed_to_start'] = obj.passwords_needed_to_start
-        return Response(data)
-
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        # Check for passwords needed before copying job.
-        needed = obj.passwords_needed_to_start
-        provided = dict([(field, request.DATA.get(field, '')) for field in needed])
-        if not all(provided.values()):
-            data = dict(passwords_needed_to_start=needed)
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        # Note: is_valid() may modify request.DATA
+        # It will remove any key/value pair who's key is not in the 'passwords_needed_to_start' list
+        serializer = self.serializer_class(data=request.DATA, context={'obj': obj, 'data': request.DATA})
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         new_job = obj.copy()
         result = new_job.signal_start(**request.DATA)

@@ -19,7 +19,7 @@
 export default
 angular.module('LoadConfigHelper', ['Utilities'])
 
-.factory('LoadConfig', ['$log', '$rootScope', '$http', 'ProcessErrors', 'Store', function($log, $rootScope, $http, ProcessErrors, Store) {
+.factory('LoadConfig', ['$log', '$rootScope', '$http', '$location', 'ProcessErrors', 'Store', function($log, $rootScope, $http, $location, ProcessErrors, Store) {
     return function() {
 
         if ($rootScope.removeLoadConfig) {
@@ -42,6 +42,7 @@ angular.module('LoadConfigHelper', ['Utilities'])
                 });
         });
 
+        $rootScope.enteredPath = $location.path();
         // Load js/local_config.js
         $http({ method:'GET', url: $basePath + 'js/local_config.js' })
             .success(function(data) {

@@ -36,6 +36,7 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
     $scope.id = id;
     $scope.argsPopOver = "<p>These arguments are used with the" +
         " specified module.</p>";
+
     // fix arguments help popover based on the module selected
     $scope.moduleChange = function () {
         // NOTE: for selenium testing link -
@@ -64,20 +65,13 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
     $scope.providedHostPatterns = $scope.limit;
     delete $rootScope.hostPatterns;
 
-    if ($scope.removeLookUpInitialize) {
-        $scope.removeLookUpInitialize();
-    }
-    $scope.removeLookUpInitialize = $scope.$on('lookUpInitialize', function () {
-        LookUpInit({
-            scope: $scope,
-            form: form,
-            current_item: (!Empty($scope.credential_id)) ? $scope.credential_id : null,
-            list: CredentialList,
-            field: 'credential',
-            input_type: 'radio'
-        });
-
-        Wait('stop'); // END: form population
+    LookUpInit({
+        scope: $scope,
+        form: form,
+        current_item: (!Empty($scope.credential_id)) ? $scope.credential_id : null,
+        list: CredentialList,
+        field: 'credential',
+        input_type: 'radio'
     });
 
     if ($scope.removeChoicesReady) {
@@ -87,7 +81,10 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
         choicesReadyCount++;
 
         if (choicesReadyCount === 2) {
-            $scope.$emit('lookUpInitialize');
+            // this sets the default options for the selects as specified by the controller.
+            $scope.verbosity = $scope.adhoc_verbosity_options[$scope.verbosity_field.default];
+            $("#forks-number").spinner("value", $scope.forks_field.default);
+            Wait('stop'); // END: form population
         }
     });
 
@@ -210,23 +207,6 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
             credential: $scope.credential,
             callback: 'ContinueCred'
         });
-
-        // // Launch the adhoc job
-        // Rest.setUrl(url);
-        // Rest.post(data)
-        //     .success(function (data) {
-        //          Wait('stop');
-        //          $location.path("/ad_hoc_commands/" + data.id);
-        //     })
-        //     .error(function (data, status) {
-        //         ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-        //             msg: 'Failed to launch adhoc command. POST returned status: ' +
-        //                 status });
-        //         // TODO: still need to implement popping up a password prompt
-        //         // if the credential requires it.  The way that the current end-
-        //         // point works is that I find out if I need to ask for a
-        //         // password from POST, thus I get an error response.
-        //     });
     };
 
     // Remove all data input into the form
@@ -237,6 +217,8 @@ export function AdhocCtrl($scope, $rootScope, $location, $routeParams,
         }
         $scope.limit = $scope.providedHostPatterns;
         KindChange({ scope: $scope, form: form, reset: false });
+        $scope.verbosity = $scope.adhoc_verbosity_options[$scope.verbosity_field.default];
+        $("#forks-number").spinner("value", $scope.forks_field.default);
     };
 }
 

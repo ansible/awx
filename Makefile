@@ -199,10 +199,12 @@ server_noattach:
 	tmux rename-window 'Tower'
 	tmux select-window -t tower:0
 	tmux split-window -v 'exec make celeryd'
-	tmux split-window -h 'exec make socketservice'
-	tmux select-pane -U
-	tmux split-window -v 'exec make receiver'
 	tmux split-window -h 'exec make taskmanager'
+	tmux new-window 'exec make receiver'
+	tmux select-window -t tower:1
+	tmux rename-window 'Extra Services'
+	tmux split-window -v 'exec make socketservice'
+	tmux split-window -h 'exec make factcacher'
 
 server: server_noattach
 	tmux -2 attach-session -t tower
@@ -228,6 +230,9 @@ taskmanager:
 
 socketservice:
 	$(PYTHON) manage.py run_socketio_service
+
+factcacher:
+	$(PYTHON) manage.py run_fact_cache_receiver
 
 pep8:
 	pep8 -r awx/
@@ -255,7 +260,7 @@ ui_analysis_report: reports/ui_code node_modules Gruntfile.js
 
 reports/ui_code: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 	rm -rf reports/ui_code
-	$(BROCCOLI) build reports/ui_code -- --no-concat --no-tests --no-styles
+	$(BROCCOLI) build reports/ui_code -- --no-concat --no-tests --no-styles --no-sourcemaps
 
 # Run UI unit tests
 test_ui: node_modules minjs_ci Gruntfile.js
@@ -294,7 +299,7 @@ devjs: node_modules clean-ui Brocfile.js bower.json Gruntfile.js
 
 # Build minified JS/CSS.
 minjs: node_modules clean-ui Brocfile.js
-	$(BROCCOLI) build awx/ui/dist -- --silent --no-debug --no-tests --compress --no-docs
+	$(BROCCOLI) build awx/ui/dist -- --silent --no-debug --no-tests --compress --no-docs --no-sourcemaps
 
 minjs_ci: node_modules clean-ui Brocfile.js
 	$(BROCCOLI) build awx/ui/dist -- --no-debug --compress --no-docs

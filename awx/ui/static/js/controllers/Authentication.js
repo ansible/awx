@@ -105,6 +105,16 @@ export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, 
     if ($location.path() === '/logout') {
         //if logout request, clear AuthToken and user session data
         Authorization.logout();
+    } else if ($location.path() === '/login') {
+        if ($rootScope.enteredPath) {
+            $rootScope.lastPath = $rootScope.enteredPath;
+        } else if (!$rootScope.lastPath) {
+            // your last path was home
+            $cookieStore.remove('lastPath');
+            $rootScope.lastPath = '/home';
+        }
+    } else {
+        $rootScope.enteredPath = $location.path();
     }
 
     e = angular.element(document.getElementById('login-modal-content'));
@@ -116,7 +126,7 @@ export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, 
         "<div class=\"login-alert\" ng-show=\"sessionExpired\">Your session timed out due to inactivity. Please sign in.</div>\n" +
         "<form id=\"login-form\" name=\"loginForm\" class=\"form-horizontal\" autocomplete=\"off\" novalidate >\n" +
         "<div class=\"form-group\">\n" +
-        "<label class=\"control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk\">Username</label>\n" +
+        "<label class=\"control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk prepend-asterisk--login\">Username</label>\n" +
         "<div class=\"col-md-8 col-sm-8 col-xs-9\">\n" +
         "<input type=\"text\" name=\"login_username\" class=\"form-control\" ng-model=\"login_username\"" +
         "id=\"login-username\" autocomplete=\"off\" required>\n" +
@@ -125,7 +135,7 @@ export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, 
         "</div>\n" +
         "</div>\n" +
         "<div class=\"form-group\">\n" +
-        "<label class=\"control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk\">Password</label>\n" +
+        "<label class=\"control-label col-md-offset-1 col-md-2 col-sm-offset-1 col-sm-2 col-xs-3 prepend-asterisk prepend-asterisk--login\">Password</label>\n" +
         "<div class=\"col-md-8 col-sm-8 col-xs-9\">\n" +
         "<input type=\"password\" name=\"login_password\" id=\"login-password\" class=\"form-control\"" +
         "ng-model=\"login_password\" required autocomplete=\"off\">\n" +

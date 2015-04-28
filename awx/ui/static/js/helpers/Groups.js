@@ -1,5 +1,5 @@
 /*********************************************
- *  Copyright (c) 2014 AnsibleWorks, Inc.
+ *  Copyright (c) 2015 AnsibleWorks, Inc.
  *
  *  GroupsHelper
  *
@@ -231,105 +231,113 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
          }
 ])
 
+
 /**
  *
  * TODO: Document
  *
  */
-.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange', 'CustomInventoryList' ,
-         function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange, CustomInventoryList) {
-             return function (params) {
+.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange', 'CustomInventoryList', 'CreateSelect2',
+        function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange, CustomInventoryList, CreateSelect2) {
+            return function (params) {
 
-                 var scope = params.scope,
-                 form = params.form,
-                 kind, url, callback, invUrl;
+                var scope = params.scope,
+                form = params.form,
+                kind, url, callback, invUrl;
 
-                 if (!Empty(scope.source)) {
-                     if (scope.source.value === 'file') {
-                         scope.sourcePathRequired = true;
-                     } else {
-                         scope.sourcePathRequired = false;
-                         // reset fields
-                         scope.source_path = '';
-                         scope[form.name + '_form'].source_path.$setValidity('required', true);
-                     }
-                     if (scope.source.value === 'rax') {
-                         scope.source_region_choices = scope.rax_regions;
-                         //$('#s2id_group_source_regions').select2('data', []);
-                         $('#s2id_source_source_regions').select2('data', [{
-                             id: 'all',
-                             text: 'All'
-                         }]);
-                         $('#source_form').addClass('squeeze');
-                     } else if (scope.source.value === 'ec2') {
-                         scope.source_region_choices = scope.ec2_regions;
-                         $('#s2id_source_source_regions').select2('data', [{
-                             id: 'all',
-                             text: 'All'
-                         }]);
+                if (!Empty(scope.source)) {
+                    if (scope.source.value === 'file') {
+                        scope.sourcePathRequired = true;
+                    } else {
+                        scope.sourcePathRequired = false;
+                        // reset fields
+                        scope.source_path = '';
+                        scope[form.name + '_form'].source_path.$setValidity('required', true);
+                    }
+                    if (scope.source.value === 'rax') {
+                        scope.source_region_choices = scope.rax_regions;
+                        $('#source_form').addClass('squeeze');
+                         CreateSelect2({
+                             element: '#source_source_regions'
+                         });
+                    } else if (scope.source.value === 'ec2') {
+                        scope.source_region_choices = scope.ec2_regions;
                          scope.group_by_choices = scope.ec2_group_by;
-                         $('#s2id_group_by').select2('data', []);
                          $('#source_form').addClass('squeeze');
-                     } else if (scope.source.value === 'gce') {
-                         scope.source_region_choices = scope.gce_regions;
-                         //$('#s2id_group_source_regions').select2('data', []);
-                         $('#s2id_source_source_regions').select2('data', [{
-                             id: 'all',
-                             text: 'All'
-                         }]);
-                         $('#source_form').addClass('squeeze');
-                     } else if (scope.source.value === 'azure') {
-                         scope.source_region_choices = scope.azure_regions;
-                         //$('#s2id_group_source_regions').select2('data', []);
-                         $('#s2id_source_source_regions').select2('data', [{
-                             id: 'all',
-                             text: 'All'
-                         }]);
-                         $('#source_form').addClass('squeeze');
-                     }
-                     if(scope.source.value==="custom"){
-                         // need to filter the possible custom scripts by the organization defined for the current inventory
-                         invUrl = GetBasePath('inventory_scripts') + '?organization='+scope.$parent.inventory.organization;
-                         LookUpInit({
-                             url: invUrl,
-                             scope: scope,
-                             form: form,
-                             hdr: "Select Custom Inventory",
-                             list: CustomInventoryList,
-                             field: 'source_script',
-                             input_type: 'radio'
+                         CreateSelect2({
+                             element: '#source_source_regions'
                          });
-                         scope.extra_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
-                         ParseTypeChange({ scope: scope, variable: 'extra_vars', parse_variable: form.fields.extra_vars.parseTypeName,
-                                         field_id: 'source_extra_vars', onReady: callback });
-                     }
-                     if(scope.source.value==="vmware"){
-                         scope.inventory_variables = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
-                         ParseTypeChange({ scope: scope, variable: 'inventory_variables', parse_variable: form.fields.inventory_variables.parseTypeName,
-                                         field_id: 'source_inventory_variables', onReady: callback });
-                     }
-                     if (scope.source.value === 'rax' || scope.source.value === 'ec2'|| scope.source.value==='gce' || scope.source.value === 'azure' || scope.source.value === 'vmware') {
-                         kind = (scope.source.value === 'rax') ? 'rax' : (scope.source.value==='gce') ? 'gce' : (scope.source.value==='azure') ? 'azure' : (scope.source.value === 'vmware') ? 'vmware' : 'aws' ;
-                         url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;
-                         LookUpInit({
-                             url: url,
-                             scope: scope,
-                             form: form,
-                             list: CredentialList,
-                             field: 'credential',
-                             input_type: "radio"
+                         CreateSelect2({
+                             element: '#source_group_by'
                          });
-                         if ($('#group_tabs .active a').text() === 'Source' && (scope.source.value === 'ec2' )) {
-                             callback = function(){ Wait('stop'); };
-                             Wait('start');
-                             scope.source_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
-                             ParseTypeChange({ scope: scope, variable: 'source_vars', parse_variable: form.fields.source_vars.parseTypeName,
-                                             field_id: 'source_source_vars', onReady: callback });
-                         }
-                     }
-                 }
-             };
-         }
+                    } else if (scope.source.value === 'gce') {
+                        scope.source_region_choices = scope.gce_regions;
+                         $('#source_form').addClass('squeeze');
+                         CreateSelect2({
+                             element: '#source_source_regions'
+                         });
+                    } else if (scope.source.value === 'azure') {
+                        scope.source_region_choices = scope.azure_regions;
+                         $('#source_form').addClass('squeeze');
+                         CreateSelect2({
+                             element: '#source_source_regions'
+                         });
+                    }
+                    if(scope.source.value==="custom"){
+                        // need to filter the possible custom scripts by the organization defined for the current inventory
+                        invUrl = GetBasePath('inventory_scripts') + '?organization='+scope.$parent.inventory.organization;
+                        LookUpInit({
+                            url: invUrl,
+                            scope: scope,
+                            form: form,
+                            hdr: "Select Custom Inventory",
+                            list: CustomInventoryList,
+                            field: 'source_script',
+                            input_type: 'radio'
+                        });
+                        scope.extra_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
+                        ParseTypeChange({ scope: scope, variable: 'extra_vars', parse_variable: form.fields.extra_vars.parseTypeName,
+                                        field_id: 'source_extra_vars', onReady: callback });
+                    }
+                    if(scope.source.value==="vmware" ||
+                        scope.source.value==="openstack"){
+                        scope.inventory_variables = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
+                        ParseTypeChange({ scope: scope, variable: 'inventory_variables', parse_variable: form.fields.inventory_variables.parseTypeName,
+                                        field_id: 'source_inventory_variables', onReady: callback });
+                    }
+                    if (scope.source.value === 'rax' ||
+                        scope.source.value === 'ec2' ||
+                        scope.source.value==='gce' ||
+                        scope.source.value === 'azure' ||
+                        scope.source.value === 'vmware' ||
+                        scope.source.value === 'openstack') {
+                        if (scope.source.value === 'ec2') {
+                            kind = 'aws';
+                        } else {
+                            kind = scope.source.value;
+                        }
+                        url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;
+                        LookUpInit({
+                            url: url,
+                            scope: scope,
+                            form: form,
+                            list: CredentialList,
+                            field: 'credential',
+                            input_type: "radio"
+                        });
+                        if ($('#group_tabs .active a').text() === 'Source' &&
+                            (scope.source.value === 'ec2' )) {
+                            callback = function(){ Wait('stop'); };
+                            Wait('start');
+                            scope.source_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
+                            ParseTypeChange({ scope: scope, variable: 'source_vars',
+                                parse_variable: form.fields.source_vars.parseTypeName,
+                                field_id: 'source_source_vars', onReady: callback });
+                        }
+                    }
+                }
+            };
+        }
 ])
 
 /**
@@ -700,11 +708,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
 .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
          'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find', 'WatchInventoryWindowResize',
-         'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize',
+         'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SourceForm', 'SetSchedulesInnerDialogSize', 'CreateSelect2',
          function ($rootScope, $location, $log, $routeParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
                    GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
                    GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, GroupsScheduleListInit,
-                   SourceForm, SetSchedulesInnerDialogSize) {
+                   SourceForm, SetSchedulesInnerDialogSize, CreateSelect2) {
                        return function (params) {
 
                            var parent_scope = params.scope,
@@ -905,7 +913,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                        Wait('start');
                                        ParseTypeChange({ scope: sources_scope, variable: 'source_vars', parse_variable: SourceForm.fields.source_vars.parseTypeName,
                                                        field_id: 'source_source_vars', onReady: waitStop });
-                                   } else if (sources_scope.source && (sources_scope.source.value === 'vmware')) {
+                                   } else if (sources_scope.source && (sources_scope.source.value === 'vmware' ||
+                                                                       sources_scope.source.value === 'openstack')) {
                                        Wait('start');
                                        ParseTypeChange({ scope: sources_scope, variable: 'inventory_variables', parse_variable: SourceForm.fields.inventory_variables.parseTypeName,
                                                        field_id: 'source_inventory_variables', onReady: waitStop });
@@ -1033,8 +1042,19 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                        sources_scope.sourceChange(); //set defaults that rely on source value
 
                                        if (data.source_regions) {
-                                           if (data.source === 'ec2' || data.source === 'rax') {
-                                               set = (data.source === 'ec2') ? sources_scope.ec2_regions : sources_scope.rax_regions;
+                                           if (data.source === 'ec2' ||
+                                               data.source === 'rax' ||
+                                               data.source === 'gce' ||
+                                               data.source === 'azure') {
+                                               if (data.source === 'ec2') {
+                                                   set = sources_scope.ec2_regions;
+                                               } else if (data.source === 'rax') {
+                                                   set = sources_scope.rax_regions;
+                                               } else if (data.source === 'gce') {
+                                                   set = sources_scope.gce_regions;
+                                               } else if (data.source === 'azure') {
+                                                   set = sources_scope.azure_regions;
+                                               }
                                                opts = [];
                                                list = data.source_regions.split(',');
                                                for (i = 0; i < list.length; i++) {
@@ -1048,7 +1068,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                                    }
                                                }
                                                master.source_regions = opts;
-                                               $('#s2id_source_source_regions').select2('data', opts);
+                                               CreateSelect2({
+                                                   element: "#source_source_regions",
+                                                   opts: opts
+                                               });
+
                                            }
                                        } else {
                                            // If empty, default to all
@@ -1056,7 +1080,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                                id: 'all',
                                                text: 'All'
                                            }];
-                                           $('#s2id_source_source_regions').select2('data', master.source_regions);
                                        }
                                        if (data.group_by && data.source === 'ec2') {
                                            set = sources_scope.ec2_group_by;
@@ -1073,7 +1096,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                                }
                                            }
                                            master.group_by = opts;
-                                           $('#s2id_source_group_by').select2('data', opts);
+                                           CreateSelect2({
+                                               element: "#source_group_by",
+                                               opts: opts
+                                           });
                                        }
                                        sources_scope.group_update_url = data.related.update;
                                        modal_scope.$emit('groupVariablesLoaded');  // JT-- "groupVariablesLoaded" is where the schedule info is loaded, so I make a call after the sources_scope.source has been loaded
@@ -1249,17 +1275,19 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                };
 
                                // Create a string out of selected list of regions
-                               regions = $('#s2id_source_source_regions').select2("data");
-                               r = [];
-                               for (i = 0; i < regions.length; i++) {
-                                   r.push(regions[i].id);
+                               if(sources_scope.source_regions){
+                                   regions = $('#source_source_regions').select2("data");
+                                   r = [];
+                                   for (i = 0; i < regions.length; i++) {
+                                       r.push(regions[i].id);
+                                   }
+                                   data.source_regions = r.join();
                                }
-                               data.source_regions = r.join();
 
                                if (sources_scope.source && (sources_scope.source.value === 'ec2')) {
                                    data.instance_filters = sources_scope.instance_filters;
                                    // Create a string out of selected list of regions
-                                   group_by = $('#s2id_source_group_by').select2("data");
+                                   group_by = $('#source_group_by').select2("data");
                                    r = [];
                                    for (i = 0; i < group_by.length; i++) {
                                        r.push(group_by[i].id);
@@ -1276,7 +1304,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                    data.source_vars = ToJSON(sources_scope.envParseType, sources_scope.extra_vars, true);
                                }
 
-                               if (sources_scope.source && (sources_scope.source.value === 'vmware')) {
+                               if (sources_scope.source && (sources_scope.source.value === 'vmware' ||
+                                                            sources_scope.source.value === 'openstack')) {
                                    data.source_vars = ToJSON(sources_scope.envParseType, sources_scope.inventory_variables, true);
                                }
 
@@ -1376,7 +1405,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                            group_created = true;
                                            group_id = data.id;
                                            sources_scope.source_url = data.related.inventory_source;
-                                           if (properties_scope.variables) {
+                                           if (properties_scope.variables && properties_scope.variables !== "---") {
                                                modal_scope.$emit('updateVariables', json_data, data.related.variable_data);
                                            }
                                            else {

@@ -23,8 +23,8 @@ export default [  function() {
                 barWidth: 7,
                 barSpacing: 2,
                 zeroBarColor: 'grey',
-                posBarColor: '#00aa00',
-                negBarColor: '#aa0000',
+                posBarColor: '#60D66F',
+                negBarColor: '#ff5850',
                 tooltipFormatter: scope.formatter,
                 tooltipFormat: '{{value:jobs}}',
                 tooltipValueLookups: {

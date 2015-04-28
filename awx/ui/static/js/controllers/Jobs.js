@@ -104,6 +104,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $routePa
             scope: scheduled_scope,
             list: ScheduledJobsList,
             id: 'scheduled-jobs-tab',
+            searchSize: 'col-lg-4 col-md-4 col-sm-4 col-xs-12',
             url: GetBasePath('schedules') + '?next_run__isnull=false',
             pageSize: max_rows
         });

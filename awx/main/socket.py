@@ -14,7 +14,7 @@ class Socket(object):
     Intended to allow alteration of backend details in a single, consistent
     way throughout the Tower application.
     """
-    def __init__(self, bucket, rw, debug=0, logger=None):
+    def __init__(self, bucket, rw, debug=0, logger=None, nowait=False):
         """Instantiate a Socket object, which uses ZeroMQ to actually perform
         passing a message back and forth.
 
@@ -42,6 +42,7 @@ class Socket(object):
 
         self._debug = debug
         self._logger = logger
+        self._nowait = nowait
 
     def __enter__(self):
         self.connect()
@@ -92,7 +93,10 @@ class Socket(object):
         # Okay, create the connection.
         if self._context is None:
             self._context = zmq.Context()
-            self._socket = self._context.socket(self._rw) 
+            self._socket = self._context.socket(self._rw)
+            if self._nowait:
+                self._socket.setsockopt(zmq.RCVTIMEO, 2000)
+                self._socket.setsockopt(zmq.LINGER, 1000)
             if self._rw == zmq.REQ:
                 self._socket.connect(port)
             else:
@@ -134,8 +138,8 @@ class Socket(object):
                 break
             except Exception as ex:
                 if self._logger:
-                    self._logger.info('Publish Exception: %r; retry=%d',
-                                      ex, retry, exc_info=True)
+                    self._logger.error('Publish Exception: %r; retry=%d',
+                                       ex, retry, exc_info=True)
                 if retry >= 3:
                     raise
 

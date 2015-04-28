@@ -118,7 +118,7 @@ class AzureInventory(object):
         the Windows Azure API provides.
         """
         if hostname not in self.host_metadata:
-            return "No host found: %s" % hostname
+            return "No host found: %s" % json.dumps(self.host_metadata)
         if jsonify:
             return json.dumps(self.host_metadata[hostname])
         return self.host_metadata[hostname]
@@ -220,12 +220,19 @@ class AzureInventory(object):
     def add_deployment(self, cloud_service, deployment):
         """Adds a deployment to the inventory and index"""
         for role in deployment.role_instance_list.role_instances:
-            for ie in role.instance_endpoints.instance_endpoints:
-                if ie.name == 'SSH':
-                    self.add_instance(role.instance_name, deployment, ie.public_port, cloud_service)
-                    break
+            try:
+                # Default port 22 unless port found with name 'SSH'
+                port = '22'
+                for ie in role.instance_endpoints.instance_endpoints:
+                    if ie.name == 'SSH':
+                        port = ie.public_port
+                        break
+            except AttributeError as e:
+                pass
+            finally:
+                self.add_instance(role.instance_name, deployment, port, cloud_service, role.instance_status)
 
-    def add_instance(self, hostname, deployment, ssh_port, cloud_service):
+    def add_instance(self, hostname, deployment, ssh_port, cloud_service, status):
         """Adds an instance to the inventory and index"""
 
         dest = urlparse(deployment.url).hostname
@@ -234,7 +241,9 @@ class AzureInventory(object):
         self.index[hostname] = deployment.name
 
         self.host_metadata[hostname] = dict(ansible_ssh_host=dest,
-                                            ansible_ssh_port=int(ssh_port))
+                                            ansible_ssh_port=int(ssh_port),
+                                            instance_status=status,
+                                            private_id=deployment.private_id)
 
         # List of all azure deployments
         self.push(self.inventory, "azure", hostname)

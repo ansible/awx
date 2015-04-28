@@ -486,8 +486,11 @@ class ProjectsTest(BaseTransactionTest):
         # can add credentials to a user (if user or org admin or super user)
         self.post(other_creds, data=new_credentials, expect=401)
         self.post(other_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
+        new_credentials['team'] = team.pk
         result = self.post(other_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
         cred_user = result['id']
+        self.assertEqual(result['team'], None)
+        del new_credentials['team']
         new_credentials['name'] = 'credential2'
         self.post(other_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
         new_credentials['name'] = 'credential3'
@@ -497,9 +500,12 @@ class ProjectsTest(BaseTransactionTest):
 
         # can add credentials to a team
         new_credentials['name'] = 'credential'
+        new_credentials['user'] = other.pk
         self.post(team_creds, data=new_credentials, expect=401)
         self.post(team_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
-        self.post(team_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
+        result = self.post(team_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
+        self.assertEqual(result['user'], None)
+        del new_credentials['user']
         new_credentials['name'] = 'credential2'
         result = self.post(team_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
         new_credentials['name'] = 'credential3'
@@ -610,6 +616,25 @@ class ProjectsTest(BaseTransactionTest):
         self.put(edit_creds2, data=d_cred_team, expect=200, auth=self.get_super_credentials())
         cred_put_t = self.put(edit_creds2, data=d_cred_team, expect=200, auth=self.get_normal_credentials())
         self.put(edit_creds2, data=d_cred_team, expect=403, auth=self.get_other_credentials())
+
+        # Reassign credential between team and user.
+        with self.current_user(self.super_django_user):
+            self.post(team_creds, data=dict(id=cred_user.pk), expect=204)
+            response = self.get(edit_creds1)
+            self.assertEqual(response['team'], team.pk)
+            self.assertEqual(response['user'], None)
+            self.post(other_creds, data=dict(id=cred_user.pk), expect=204)
+            response = self.get(edit_creds1)
+            self.assertEqual(response['team'], None)
+            self.assertEqual(response['user'], other.pk)
+            self.post(other_creds, data=dict(id=cred_team.pk), expect=204)
+            response = self.get(edit_creds2)
+            self.assertEqual(response['team'], None)
+            self.assertEqual(response['user'], other.pk)
+            self.post(team_creds, data=dict(id=cred_team.pk), expect=204)
+            response = self.get(edit_creds2)
+            self.assertEqual(response['team'], team.pk)
+            self.assertEqual(response['user'], None)
 
         cred_put_t['disassociate'] = 1
         team_url = reverse('api:team_credentials_list', args=(cred_put_t['team'],))

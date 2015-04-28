@@ -136,6 +136,7 @@ export function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $r
     master.category = 'Inventory';
     master.inventoryrequired = true;
     master.projectrequired = false;
+    $scope.run_ad_hoc_commands = false;
 
     LookUpInit({
         scope: $scope,
@@ -154,6 +155,22 @@ export function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $r
         field: 'project',
         input_type: 'radio'
     });
+
+    $scope.changeAdhocCommandCheckbox = function () {
+        if ($scope.category === 'Deploy') {
+            $scope.run_ad_hoc_command = false;
+        } else {
+            if ($scope.permission_type === 'admin') {
+                $scope.run_ad_hoc_commands = true;
+                $("#permission_run_ad_hoc_commands_chbox").attr("disabled", true);
+            } else  {
+                if (!$scope.run_ad_hoc_commands) {
+                    $scope.run_ad_hoc_commands = false;
+                }
+                $("#permission_run_ad_hoc_commands_chbox").attr("disabled", false);
+            }
+        }
+    };
 
     // Save
     $scope.formSave = function () {
@@ -226,11 +243,24 @@ export function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $
         defaultUrl = GetBasePath('base') + 'permissions/' + id + '/',
         master = {};
 
+    $scope.changeAdhocCommandCheckbox = function () {
+        if ($scope.category === 'Deploy') {
+            $scope.run_ad_hoc_command = false;
+        } else {
+            if ($scope.permission_type === 'admin') {
+                $scope.run_ad_hoc_commands = true;
+                $("#permission_run_ad_hoc_commands_chbox").attr("disabled", true);
+            } else  {
+                if (!$scope.run_ad_hoc_commands) {
+                    $scope.run_ad_hoc_commands = false;
+                }
+                $("#permission_run_ad_hoc_commands_chbox").attr("disabled", false);
+            }
+        }
+    };
+
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
-
-
-
 
     $scope.selectCategory = function (resetIn) {
         var reset = (resetIn === false) ? false : true;
@@ -284,6 +314,8 @@ export function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $
                     field: 'project',
                     input_type: 'radio'
                 });
+
+                $scope.changeAdhocCommandCheckbox();
 
                 if (!$scope.PermissionAddAllowed) {
                     // If not a privileged user, disable access

@@ -1,20 +1,59 @@
 {
-  "name" : "Select2",
+  "name": "Select2",
   "description": "Select2 is a jQuery based replacement for select boxes. It supports searching, remote data sets, and infinite scrolling of results.",
-  "homepage": "http://ivaynberg.github.io/select2",
-  "author": "Igor Vaynberg",
-  "repository": {"type": "git", "url": "git://github.com/ivaynberg/select2.git"},
-  "main": "select2.js",
-  "version": "3.5.1",
+  "homepage": "https://select2.github.io",
+  "author": {
+    "name": "Kevin Brown",
+    "url": "https://github.com/kevin-brown"
+  },
+  "contributors": [
+    {
+      "name": "Igor Vaynberg",
+      "url": "https://github.com/ivaynberg"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/select2/select2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/select2/select2/issues"
+  },
+  "keywords": [
+    "select",
+    "autocomplete",
+    "typeahead",
+    "dropdown",
+    "multiselect",
+    "tag",
+    "tagging"
+  ],
+  "license": "MIT",
+  "main": "dist/js/select2.js",
+  "version": "4.0.0-rc.2",
   "jspm": {
-    "main": "select2",
-    "files": ["select2.js", "select2.png", "select2.css", "select2-spinner.gif"],
-    "shim": {
-        "select2": {
-            "imports": ["jquery", "./select2.css!"],
-            "exports": "$"
-        }
-    },
-    "buildConfig": { "uglify": true }
+    "main": "js/select2",
+    "directories": {
+      "lib": "dist"
+    }
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-concat": "^0.4.0",
+    "grunt-contrib-connect": "^0.9.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-nodeunit": "~0.3.3",
+    "grunt-contrib-qunit": "~0.4.0",
+    "grunt-contrib-requirejs": "^0.4.4",
+    "grunt-contrib-symlink": "^0.3.0",
+    "grunt-contrib-uglify": "~0.4.0",
+    "grunt-contrib-watch": "~0.6.0",
+    "grunt-gh-pages": "^0.9.1",
+    "grunt-jekyll": "^0.4.2",
+    "grunt-sass": "~0.12.0",
+    "grunt-saucelabs": "^8.5.0",
+    "node-sass": "~0.8.6"
   }
 }
