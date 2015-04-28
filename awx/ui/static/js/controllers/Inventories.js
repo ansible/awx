@@ -438,8 +438,9 @@ export function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $r
             }
             $scope.removeUpdateInventoryVariables = $scope.$on('UpdateInventoryVariables', function(e, data) {
                 var inventory_id = data.id;
+                var vars_to_send = {"variables": json_data};
                 Rest.setUrl(data.related.variable_data);
-                Rest.put(json_data)
+                Rest.put(vars_to_send)
                     .success(function () {
                         Wait('stop');
                         $location.path('/inventories/' + inventory_id + '/manage');
