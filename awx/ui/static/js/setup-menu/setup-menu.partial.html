@@ -28,29 +28,43 @@
   </nav>
   <aside class="Container-aside">
       <nav class="SetupMenu Menu Menu--vertical">
-        <a href="#/organizations" class="SetupItem SetupItem--aside">
+        <a href="#/organizations" class="SetupItem SetupItem--aside HoverIcon Media">
+          <i class="SetupItem-icon SetupItem-icon--aside Media-figure">
+            <img class="Icon HoverIcon-icon HoverIcon-icon--opacity" src="/static/img/Organizations.svg">
+          </i>
+          <div class="Media-block">
             <h4 class="SetupItem-title SetupItem-title--aside">Organizations</h4>
             <p class="SetupItem-description SetupItem-description--aside">
-              Group all of your content to manage permissions across departments in your company
+            Group all of your content to manage permissions across departments in your company
             </p>
           </div>
         </a>
-        <button class="SetupItem SetupItem--button SetupItem--aside" ng-click="showManagementJobsModal()" ng-if="user_is_superuser">
-          <h4 class="SetupItem-title SetupItem-title--aside">Management Jobs</h4>
-          <p class="SetupItem-description SetupItem-description--aside">
-            Schedule jobs to periodically cleanup job history
-          </p>
+        <button class="SetupItem SetupItem--button SetupItem--aside HoverIcon Media" ng-click="showManagementJobsModal()" ng-if="user_is_superuser">
+          <i class="SetupItem-icon SetupItem-icon--aside Media-figure">
+            <img class="Icon HoverIcon-icon HoverIcon-icon--opacity" src="/static/img/ManagementJobs.svg">
+          </i>
+          <div class="Media-block">
+            <h4 class="SetupItem-title SetupItem-title--aside">Management Jobs</h4>
+            <p class="SetupItem-description SetupItem-description--aside">
+              Schedule jobs to periodically cleanup job history
+            </p>
+          </div>
         </button>
-        <button class="SetupItem SetupItem--button SetupItem--aside" ng-click="showInventoryScriptsModal()" ng-if="user_is_superuser">
-          <h4 class="SetupItem-title SetupItem-title--aside">Inventory Scripts</h4>
-          <p class="SetupItem-description SetupItem-description--aside">
-            Create and edit scripts to dynamically load hosts from any sources
-          </p>
+        <button class="SetupItem SetupItem--button SetupItem--aside HoverIcon Media" ng-click="showInventoryScriptsModal()" ng-if="user_is_superuser">
+          <i class="SetupItem-icon SetupItem-icon--aside Media-figure">
+            <img class="Icon HoverIcon-icon HoverIcon-icon--opacity" src="/static/img/InventoryScripts.svg">
+          </i>
+          <div class="Media-block">
+            <h4 class="SetupItem-title SetupItem-title--aside">Inventory Scripts</h4>
+            <p class="SetupItem-description SetupItem-description--aside">
+              Create and edit scripts to dynamically load hosts from any sources
+            </p>
+            </div>
         </button>
-        <button href="#/license" ng-click="showLicenseModal()" class="SetupItem SetupItem--button SetupItem--aside">
+        <button href="#/license" ng-click="showLicenseModal()" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">
           <h4 class="SetupItem-title SetupItem-title--aside">View your License</h4>
         </button>
-        <button ng-click="showAboutModal()" class="SetupItem SetupItem--button SetupItem--aside">
+        <button ng-click="showAboutModal()" class="SetupItem SetupItem--button SetupItem--aside SetupItem--noIcon">
           <h4 class="SetupItem-title SetupItem-title--aside">About Tower</h4>
         </button>
       </nav>

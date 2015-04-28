@@ -1,0 +1,35 @@
+/** @define HoverIcon */
+
+.HoverIcon {
+  @media screen and (max-width: 571px) {
+    &--onlyLarge {
+        .HoverIcon-icon--opacity {
+          opacity: 1;
+        }
+        .HoverIcon-icon--height {
+          height: 22px;
+        }
+    }
+  }
+  &-icon {
+    width: auto;
+    &--opacity {
+      transition: opacity 0.3s ease-out;
+      opacity: 0;
+    }
+    &--height {
+      transition: height 0.2s ease-out;
+      height: 0;
+    }
+  }
+  &:hover {
+    .HoverIcon-icon {
+      &--opacity {
+        opacity: 1;
+      }
+      &--height {
+        height: 22px;
+      }
+    }
+  }
+}

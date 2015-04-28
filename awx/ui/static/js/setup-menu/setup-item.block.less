@@ -4,28 +4,46 @@
 
 .SetupItem {
 
-  &--aside {
-    padding-bottom: @vertical-basis / 2;
-  }
+    @icon-small-size: 2.4rem;
+    @icon-large-size: 3.4rem;
+
+    &--aside {
+      padding-bottom: @vertical-basis / 2;
+    }
+
     @vertical-basis: 1.4rem;
 
-    padding: 0;
-    padding-bottom: @vertical-basis;
+    padding: (@vertical-basis / 2) 0;
 
-    color: black !important;
+    color: black;
     flex: 1 0 100%;
-    transition: background-color 0.25s ease-in-out;
-    background-color: white !important;
+    transition: background-color 0.15s ease-in-out;
+    background-color: white;
+
     &:hover, &:focus, &:active {
         color: black;
     }
 
-    .SetupItem-icon {
-        max-width: 2.8rem;
-        align-self: center;
-        img {
-            width: 2.3rem;
-        }
+    &--hoverable {
+      &:hover {
+        background-color: lighten(@ansible-red, 28%);
+      }
+    }
+
+    &-icon {
+      &--aside {
+        width: @icon-small-size;
+      }
+
+      width: @icon-large-size;
+      align-self: center;
+      img {
+          width: 100%;
+      }
+    }
+
+    &--noIcon {
+      margin-left: @icon-small-size + 1.4rem; // 1.4rem comes from Media-figure margin
     }
 
     &--button {
