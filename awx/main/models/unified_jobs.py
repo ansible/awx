@@ -764,9 +764,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         # Get any passwords or other data that are prerequisites to running
         # the job.
         needed = self.get_passwords_needed_to_start()
-        for field in needed:
-            if field not in kwargs:
-                return False
+        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        if not all(opts.values()):
+            return False
         if 'extra_vars' in kwargs:
             self.handle_extra_data(kwargs['extra_vars'])
 
