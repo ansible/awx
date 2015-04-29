@@ -27,16 +27,16 @@
 */
 
 export default
-angular.module('PromptDialog', ['Utilities'])
-    .factory('Prompt', ['$sce',
-        function ($sce) {
+angular.module('PromptDialog', ['Utilities', 'sanitizeFilter'])
+    .factory('Prompt', ['$sce', '$filter',
+        function ($sce, $filter) {
             return function (params) {
 
                 var dialog = angular.element(document.getElementById('prompt-modal')),
                     scope = dialog.scope(), cls, local_backdrop;
-                
+
                 scope.promptHeader = params.hdr;
-                scope.promptBody = $sce.trustAsHtml(params.body);
+                scope.promptBody = $filter('sanitize')(params.body);
                 scope.promptAction = params.action;
 
                 local_backdrop = (params.backdrop === undefined) ? "static" : params.backdrop;
