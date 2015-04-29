@@ -264,6 +264,21 @@ class BaseJobTestMixin(BaseTestMixin):
             password=TEST_SSH_KEY_DATA,
             created_by=self.user_sue,
         )
+        self.cred_sue_ask = self.user_sue.credentials.create(
+            username='sue',
+            password='ASK',
+            created_by=self.user_sue,
+        )
+        self.cred_sue_ask_many = self.user_sue.credentials.create(
+            username='sue',
+            password='ASK',
+            become_method='sudo',
+            become_username='root',
+            become_password='ASK',
+            ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
+            ssh_key_unlock='ASK',
+            created_by=self.user_sue,
+        )
         self.cred_bob = self.user_bob.credentials.create(
             username='bob',
             password='ASK',
