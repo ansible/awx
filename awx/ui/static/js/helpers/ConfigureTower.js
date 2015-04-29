@@ -427,28 +427,6 @@ export default
                     action: action,
                     backdrop: false
                 });
-                    //         }
-                    //     } else {
-                    //         //a schedule doesn't exist
-                    //         $("#prompt_action_btn").text('OK');
-                    //         $('#prompt_cancel_btn').hide();
-                    //         var action2 = function(){
-                    //             $('#prompt-modal').modal('hide');
-                    //             $("#prompt_action_btn").text('Yes');
-                    //             $('#prompt_cancel_btn').show();
-                    //         };
-                    //         Prompt({
-                    //                 hdr: "Delete",
-                    //                 body: "<div class=\"alert alert-info\">No schedule exists for that job. </div>",
-                    //                 action: action2,
-                    //                 backdrop: false
-                    //             });
-                    //     }
-                    // })
-                    // .error(function(data, status) {
-                    //     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                    //         msg: 'Failed updating job ' + scope.job_template_id + ' with variables. PUT returned: ' + status });
-                    // });
             };
 
             scope.cancelScheduleForm = function() {

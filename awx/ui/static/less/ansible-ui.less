@@ -30,6 +30,7 @@
 @green: #60D66F;
 @red: #ff5850;
 @red-hover: #FA8C87;
+@red-focus: #FF1105;
 
 
 @font-face {
@@ -1550,6 +1551,19 @@ input[type="checkbox"].checkbox-no-label {
           color: @blue-dark;
       }
   }
+
+
+ .btn-danger {
+     background-color: @red;
+     border-color: @red-focus;
+ }
+
+ .btn-danger:hover,
+ .btn-danger:focus,
+ .btn-danger:active {
+     border-color: @red-focus;
+     background-color: @red-focus;
+ }
 
 // ad hoc permission checkbox
 .squeeze.form-group {
