@@ -23,7 +23,7 @@ class Command(NoArgsCommand):
 
     option_list = NoArgsCommand.option_list + (
         make_option('--days', dest='days', type='int', default=90, metavar='N',
-                    help='Remove jobs/updates executed more than N days ago'),
+                    help='Remove jobs/updates executed more than N days ago. Defaults to 90.'),
         make_option('--dry-run', dest='dry_run', action='store_true',
                     default=False, help='Dry run mode (show items that would '
                     'be removed)'),
