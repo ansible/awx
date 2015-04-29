@@ -114,7 +114,7 @@ class AdHocCommand(UnifiedJob):
     @property
     def passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
-        if self.credential:
+        if self.credential and self.credential.active:
             return self.credential.passwords_needed
         else:
             return []

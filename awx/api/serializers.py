@@ -1775,13 +1775,14 @@ class JobLaunchSerializer(BaseSerializer):
         passwords = self.context.get('passwords')
         data = self.context.get('data')
 
+        credential = attrs.get('credential', None) or obj.credential
         # fill passwords dict with request data passwords
-        if obj.passwords_needed_to_start:
+        if credential and credential.passwords_needed:
             try:
-                for p in obj.passwords_needed_to_start:
-                    passwords[p] = data.get(p)
+                for p in credential.passwords_needed:
+                    passwords[p] = data[p]
             except KeyError:
-                raise serializers.ValidationError(obj.passwords_needed_to_start)
+                raise serializers.ValidationError(credential.passwords_needed)
         return attrs
 
     def validate(self, attrs):
