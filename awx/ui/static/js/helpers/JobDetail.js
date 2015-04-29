@@ -1170,7 +1170,12 @@ export default
                     color: '#ff5850'
                 });
             }
-
+            scope.graph_data = graph_data;
+            var total_count = 0, gd_obj;
+            for (gd_obj in graph_data) {
+                total_count += graph_data[gd_obj].value;
+            }
+            scope.total_count_for_graph = total_count;
             // Adjust the size
             width = $('#job-summary-container .job_well').width();
             height = $('#job-summary-container .job_well').height() - $('#summary-well-top-section').height() - $('#graph-section .header').outerHeight() - 15;
@@ -1187,7 +1192,7 @@ export default
                     }
                     svg = d3.select("#graph-section").append("svg").attr("width", svg_width).attr("height", svg_height);
                     svg.append("g").attr("id","completedHostsDonut");
-                    Donut3D.draw("completedHostsDonut", graph_data, Math.floor(svg_width / 2), Math.floor(svg_height / 2), Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
+                    Donut3D.draw("completedHostsDonut", graph_data, Math.floor(svg_width / 2), Math.floor(svg_height / 2) - 35, Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
                     $('#graph-section .header .legend').show();
                 }
             }
