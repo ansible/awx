@@ -1,11 +1,13 @@
 import route from './setup.route';
+import icon from 'tower/shared/icon/main';
 
 export default
     angular.module('setupMenu',
                    [    'AboutAnsibleHelpModal',
                         'LicenseHelper',
                         'ConfigureTowerHelper',
-                        'CreateCustomInventoryHelper'
+                        'CreateCustomInventoryHelper',
+                        icon.name
                    ])
         .config(['$routeProvider', function($routeProvider) {
             var url = route.route;

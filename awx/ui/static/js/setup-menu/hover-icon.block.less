@@ -1,5 +1,7 @@
 /** @define HoverIcon */
 
+@import 'shared/branding/colors.less';
+
 .HoverIcon {
   @media screen and (max-width: 571px) {
     &--onlyLarge {
@@ -13,6 +15,11 @@
   }
   &-icon {
     width: auto;
+    &--color {
+      g, path {
+          transition: fill 0.15s ease-out;
+      }
+    }
     &--opacity {
       transition: opacity 0.3s ease-out;
       opacity: 0;
@@ -29,6 +36,11 @@
       }
       &--height {
         height: 22px;
+      }
+      &--color {
+        path, g {
+            fill: @ansible-red;
+        }
       }
     }
   }
