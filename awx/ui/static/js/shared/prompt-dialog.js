@@ -36,7 +36,7 @@ angular.module('PromptDialog', ['Utilities', 'sanitizeFilter'])
                     scope = dialog.scope(), cls, local_backdrop;
 
                 scope.promptHeader = params.hdr;
-                scope.promptBody = $filter('sanitize')(params.body);
+                scope.promptBody = params.body;
                 scope.promptAction = params.action;
 
                 local_backdrop = (params.backdrop === undefined) ? "static" : params.backdrop;

@@ -16,7 +16,7 @@
 import 'tower/job-templates/main';
 
 export function InventoriesList($scope, $rootScope, $location, $log,
-    $routeParams, $compile, $filter, Rest, Alert, InventoryList, generateList,
+    $routeParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList, generateList,
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, Wait, Stream,
     EditInventoryProperties, Find, Empty, LogViewer) {
@@ -346,7 +346,7 @@ export function InventoriesList($scope, $rootScope, $location, $log,
 
         Prompt({
             hdr: 'Delete',
-            body: '<div class=\"alert alert-info\">Delete inventory ' + name + '?</div>',
+            body: '<div class=\"alert alert-info\">Delete inventory ' + $filter('sanitize')(name) + '?</div>',
             action: action
         });
     };
@@ -370,7 +370,7 @@ export function InventoriesList($scope, $rootScope, $location, $log,
     };
 }
 
-InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', '$compile', '$filter', 'Rest', 'Alert', 'InventoryList', 'generateList',
+InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList', 'generateList',
     'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties', 'Find', 'Empty', 'LogViewer'
 ];
