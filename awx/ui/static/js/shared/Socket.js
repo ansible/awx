@@ -118,7 +118,7 @@ angular.module('SocketIO', ['AuthService', 'Utilities'])
                         self.socket.on('diconnect', function() {
                             $log.debug('Socket disconnected');
                             self.scope.$apply(function() {
-                                self.socketStatus = 'error';
+                                self.scope.socketStatus = 'error';
                                 self.scope.socketTip = getSocketTip(self.scope.socketStatus);
                             });
                         });
