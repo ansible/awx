@@ -1518,6 +1518,78 @@ class JobCancelSerializer(JobSerializer):
         fields = ('can_cancel',)
 
 
+class JobLaunchSerializer(JobSerializer):
+    can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
+    variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
+    credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
+    survey_enabled = serializers.SerializerMethodField('get_survey_enabled')
+
+    class Meta:
+        fields = ('can_start_without_user_input', 'passwords_needed_to_start', 'extra_vars',
+                  'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
+                  'credential', 'credential_needed_to_start',)
+        write_only_fields = ('credential','extra_vars',)
+
+    def to_native(self, obj):
+        res = super(JobLaunchSerializer, self).to_native(obj)
+        view = self.context.get('view', None)
+        if obj and hasattr(view, '_raw_data_form_marker'):
+            if obj.passwords_needed_to_start:
+                password_keys = dict([(p, u'') for p in obj.passwords_needed_to_start])
+                res.update(password_keys)
+            if self.get_credential_needed_to_start(obj) is True:
+                res.update(dict(credential=''))
+        return res
+
+    def get_credential_needed_to_start(self, obj):
+        return not (obj and obj.credential and obj.credential.active)
+
+    def get_survey_enabled(self, obj):
+        if obj:
+            return obj.survey_enabled and 'spec' in obj.survey_spec
+        return False
+
+    def validate_credential(self, attrs, source):
+        obj = self.context.get('obj')
+        credential = attrs.get(source, None) or (obj and obj.credential)
+        if not credential or not credential.active:
+            raise serializers.ValidationError('Credential not provided')
+        attrs[source] = credential
+        return attrs
+
+    def validate(self, attrs):
+        obj = self.context.get('obj')
+        extra_vars = attrs.get('extra_vars', {})
+        try:
+            extra_vars = literal_eval(extra_vars)
+            extra_vars = json.dumps(extra_vars)
+        except Exception:
+            pass
+
+        try:
+            extra_vars = json.loads(extra_vars)
+        except (ValueError, TypeError):
+            try:
+                extra_vars = yaml.safe_load(extra_vars)
+            except (yaml.YAMLError, TypeError, AttributeError):
+                raise serializers.ValidationError(dict(extra_vars=['Must be valid JSON or YAML']))
+
+        if not isinstance(extra_vars, dict):
+            extra_vars = {}
+
+        if self.get_survey_enabled(obj):
+            validation_errors = obj.survey_variable_validation(extra_vars)
+            if validation_errors:
+                raise serializers.ValidationError(dict(variables_needed_to_start=validation_errors))
+
+        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
+            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
+        if obj.inventory is None or not obj.inventory.active:
+            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
+
+        return attrs
+
+
 class JobRelaunchSerializer(JobSerializer):
 
     class Meta:
@@ -1731,78 +1803,6 @@ class AdHocCommandEventSerializer(BaseSerializer):
         if obj.host:
             res['host'] = reverse('api:host_detail', args=(obj.host.pk,))
         return res
-
-class JobLaunchSerializer(JobSerializer):
-    can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
-    variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
-    credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
-    survey_enabled = serializers.SerializerMethodField('get_survey_enabled')
-
-    class Meta:
-        model = JobTemplate
-        fields = ('can_start_without_user_input', 'passwords_needed_to_start', 'extra_vars',
-                  'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
-                  'credential', 'credential_needed_to_start',)
-        write_only_fields = ('credential','extra_vars',)
-
-    def to_native(self, obj):
-        res = super(JobLaunchSerializer, self).to_native(obj)
-        view = self.context.get('view', None)
-        if obj and hasattr(view, '_raw_data_form_marker'):
-            if obj.passwords_needed_to_start:
-                password_keys = dict([(p, u'') for p in obj.passwords_needed_to_start])
-                res.update(password_keys)
-            if self.get_credential_needed_to_start(obj) is True:
-                res.update(dict(credential=''))
-        return res
-
-    def get_credential_needed_to_start(self, obj):
-        return not (obj and obj.credential and obj.credential.active)
-
-    def get_survey_enabled(self, obj):
-        if obj:
-            return obj.survey_enabled and 'spec' in obj.survey_spec
-        return False
-
-    def validate_credential(self, attrs, source):
-        obj = self.context.get('obj')
-        credential = attrs.get(source, None) or (obj and obj.credential)
-        if not credential or not credential.active:
-            raise serializers.ValidationError('Credential not provided')
-        attrs[source] = credential
-        return attrs
-
-    def validate(self, attrs):
-        obj = self.context.get('obj')
-        extra_vars = attrs.get('extra_vars', {})
-        try:
-            extra_vars = literal_eval(extra_vars)
-            extra_vars = json.dumps(extra_vars)
-        except Exception:
-            pass
-
-        try:
-            extra_vars = json.loads(extra_vars)
-        except (ValueError, TypeError):
-            try:
-                extra_vars = yaml.safe_load(extra_vars)
-            except (yaml.YAMLError, TypeError, AttributeError):
-                raise serializers.ValidationError(dict(extra_vars=['Must be valid JSON or YAML']))
-
-        if not isinstance(extra_vars, dict):
-            extra_vars = {}
-
-        if self.get_survey_enabled(obj):
-            validation_errors = obj.survey_variable_validation(extra_vars)
-            if validation_errors:
-                raise serializers.ValidationError(dict(variables_needed_to_start=validation_errors))
-
-        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
-            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
-        if obj.inventory is None or not obj.inventory.active:
-            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
-
-        return attrs
 
 class ScheduleSerializer(BaseSerializer):
 
