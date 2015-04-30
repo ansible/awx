@@ -15,7 +15,7 @@
 
 
 export default
-angular.module('Utilities', ['RestServices', 'Utilities'])
+angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 
 /**
  * @ngdoc method
@@ -99,9 +99,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
  * alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
  * clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
  */
-.factory('Alert', ['$rootScope', function ($rootScope) {
+.factory('Alert', ['$rootScope', '$filter', function ($rootScope, $filter) {
     return function (hdr, msg, cls, action, secondAlert, disableButtons, backdrop) {
         var scope = $rootScope.$new(), alertClass, local_backdrop;
+        msg = $filter('sanitize')(msg);
         if (secondAlert) {
 
             $('#alertHeader2').html(hdr);

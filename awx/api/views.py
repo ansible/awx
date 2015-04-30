@@ -619,7 +619,7 @@ class ProjectDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = ProjectSerializer
 
     def destroy(self, request, *args, **kwargs):
-        obj = Project.objects.get(pk=kwargs['pk'])
+        obj = self.get_object()
         can_delete = request.user.can_access(Project, 'delete', obj)
         if not can_delete:
             raise PermissionDenied("Cannot delete project")
@@ -1323,7 +1323,7 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
     new_in_14 = True
 
     def destroy(self, request, *args, **kwargs):
-        obj = InventorySource.objects.get(pk=kwargs['pk'])
+        obj = self.get_object()
         can_delete = request.user.can_access(InventorySource, 'delete', obj)
         if not can_delete:
             raise PermissionDenied("Cannot delete inventory source")
@@ -1425,7 +1425,7 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = JobTemplateSerializer
 
     def destroy(self, request, *args, **kwargs):
-        obj = JobTemplate.objects.get(pk=kwargs['pk'])
+        obj = self.get_object()
         can_delete = request.user.can_access(JobTemplate, 'delete', obj)
         if not can_delete:
             raise PermissionDenied("Cannot delete job template")
