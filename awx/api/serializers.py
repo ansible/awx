@@ -1321,13 +1321,12 @@ class CredentialSerializer(BaseSerializer):
 
 
 class JobOptionsSerializer(BaseSerializer):
-    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
 
     class Meta:
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
                   'credential', 'cloud_credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
-                  'skip_tags', 'start_at_task', 'passwords_needed_to_start',)
+                  'skip_tags', 'start_at_task',)
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
@@ -1373,21 +1372,6 @@ class JobOptionsSerializer(BaseSerializer):
             raise serializers.ValidationError('Must select playbook for project')
         return attrs
 
-    def validate_passwords_needed_to_start(self, attrs, source):
-        obj = self.context.get('obj')
-        passwords = self.context.get('passwords')
-        data = self.context.get('data')
-
-        credential = attrs.get('credential', None) or obj.credential
-        # fill passwords dict with request data passwords
-        if credential and credential.passwords_needed:
-            try:
-                for p in credential.passwords_needed:
-                    passwords[p] = data[p]
-            except KeyError:
-                raise serializers.ValidationError(credential.passwords_needed)
-        return attrs
-
 
 class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
@@ -1395,7 +1379,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
     class Meta:
         model = JobTemplate
-        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'survey_enabled', 'become_enabled')
+        fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'survey_enabled', 'become_enabled',)
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -1509,6 +1493,42 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                     pass
         return ret
 
+'''
+This Serializer requires that model be set to something with a 'passwords_needed_to_start'
+variable.
+Inheriting classes should add 'passwords_needed_to_start' to their list of fields
+to take advantage of the validate functionality.
+'''
+class PasswordsNeededToStartMixin(BaseSerializer):
+
+    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
+
+    def validate_passwords_needed_to_start(self, attrs, source):
+        obj = self.context.get('obj')
+        passwords = {}
+
+        credential = attrs.get('credential', None) or obj.credential
+        # fill passwords dict with request data passwords
+        if credential and credential.passwords_needed:
+            try:
+                for p in credential.passwords_needed:
+                    passwords[p] = self.init_data[p]
+            except KeyError:
+                raise serializers.ValidationError(credential.passwords_needed)
+
+        # Use the context dict to allow the view to access the passwords
+        self.context['passwords'] = passwords
+        return attrs
+
+
+class JobTemplateSerializerWithPasswordsNeededToStart(JobTemplateSerializer, PasswordsNeededToStartMixin):
+    pass
+
+
+class JobSerializerWithPasswordsNeededToStart(JobSerializer, PasswordsNeededToStartMixin):
+    pass
+
+
 class JobCancelSerializer(JobSerializer):
 
     can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
@@ -1517,7 +1537,8 @@ class JobCancelSerializer(JobSerializer):
         fields = ('can_cancel',)
 
 
-class JobLaunchSerializer(JobTemplateSerializer, JobOptionsSerializer):
+class JobLaunchSerializer(JobTemplateSerializerWithPasswordsNeededToStart):
+
     can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
     variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
     credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
@@ -1589,7 +1610,7 @@ class JobLaunchSerializer(JobTemplateSerializer, JobOptionsSerializer):
         return attrs
 
 
-class JobRelaunchSerializer(JobSerializer):
+class JobRelaunchSerializer(JobSerializerWithPasswordsNeededToStart):
 
     class Meta:
         fields = ('passwords_needed_to_start',)
@@ -1598,7 +1619,7 @@ class JobRelaunchSerializer(JobSerializer):
         res = super(JobRelaunchSerializer, self).to_native(obj)
         view = self.context.get('view', None)
         if hasattr(view, '_raw_data_form_marker'):
-            password_keys = dict([(p, u'') for p in self.get_passwords_needed_to_start(obj)])
+            password_keys = dict([(p, u'') for p in obj.passwords_needed_to_start])
             res.update(password_keys)
         return res
 
