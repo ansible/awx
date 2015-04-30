@@ -28,8 +28,8 @@
 
 export default
 angular.module('PromptDialog', ['Utilities', 'sanitizeFilter'])
-    .factory('Prompt', ['$sce', '$filter',
-        function ($sce, $filter) {
+    .factory('Prompt', [
+        function () {
             return function (params) {
 
                 var dialog = angular.element(document.getElementById('prompt-modal')),
