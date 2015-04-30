@@ -1321,12 +1321,13 @@ class CredentialSerializer(BaseSerializer):
 
 
 class JobOptionsSerializer(BaseSerializer):
+    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
 
     class Meta:
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
                   'credential', 'cloud_credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
-                  'skip_tags', 'start_at_task')
+                  'skip_tags', 'start_at_task', 'passwords_needed_to_start',)
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
@@ -1370,6 +1371,21 @@ class JobOptionsSerializer(BaseSerializer):
             raise serializers.ValidationError('Playbook not found for project')
         if project and not playbook:
             raise serializers.ValidationError('Must select playbook for project')
+        return attrs
+
+    def validate_passwords_needed_to_start(self, attrs, source):
+        obj = self.context.get('obj')
+        passwords = self.context.get('passwords')
+        data = self.context.get('data')
+
+        credential = attrs.get('credential', None) or obj.credential
+        # fill passwords dict with request data passwords
+        if credential and credential.passwords_needed:
+            try:
+                for p in credential.passwords_needed:
+                    passwords[p] = data[p]
+            except KeyError:
+                raise serializers.ValidationError(credential.passwords_needed)
         return attrs
 
 
@@ -1418,12 +1434,11 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
-    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
     ask_variables_on_launch = serializers.Field(source='ask_variables_on_launch')
 
     class Meta:
         model = Job
-        fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch')
+        fields = ('*', 'job_template', 'ask_variables_on_launch')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -1494,22 +1509,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                     pass
         return ret
 
-    def validate_passwords_needed_to_start(self, attrs, source):
-        obj = self.context.get('obj')
-        passwords = self.context.get('passwords')
-        data = self.context.get('data')
-
-        credential = attrs.get('credential', None) or obj.credential
-        # fill passwords dict with request data passwords
-        if credential and credential.passwords_needed:
-            try:
-                for p in credential.passwords_needed:
-                    passwords[p] = data[p]
-            except KeyError:
-                raise serializers.ValidationError(credential.passwords_needed)
-        return attrs
-
-
 class JobCancelSerializer(JobSerializer):
 
     can_cancel = serializers.BooleanField(source='can_cancel', read_only=True)
@@ -1518,7 +1517,7 @@ class JobCancelSerializer(JobSerializer):
         fields = ('can_cancel',)
 
 
-class JobLaunchSerializer(JobSerializer):
+class JobLaunchSerializer(JobTemplateSerializer, JobOptionsSerializer):
     can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
     variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
     credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
