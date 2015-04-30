@@ -1537,6 +1537,12 @@ class JobRelaunchSerializer(JobSerializer):
         obj = self.context.get('obj')
         if not obj.credential or obj.credential.active is False:
             raise serializers.ValidationError(dict(credential=["Credential not found or deleted."]))
+
+        if obj.job_type != PERM_INVENTORY_SCAN and (obj.project is None or not obj.project.active):
+            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined"]))
+        if obj.inventory is None or not obj.inventory.active:
+            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined"]))
+
         return attrs
 
 class AdHocCommandSerializer(UnifiedJobSerializer):
