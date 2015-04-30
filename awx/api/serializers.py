@@ -1494,6 +1494,21 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                     pass
         return ret
 
+    def validate_passwords_needed_to_start(self, attrs, source):
+        obj = self.context.get('obj')
+        passwords = self.context.get('passwords')
+        data = self.context.get('data')
+
+        credential = attrs.get('credential', None) or obj.credential
+        # fill passwords dict with request data passwords
+        if credential and credential.passwords_needed:
+            try:
+                for p in credential.passwords_needed:
+                    passwords[p] = data[p]
+            except KeyError:
+                raise serializers.ValidationError(credential.passwords_needed)
+        return attrs
+
 
 class JobCancelSerializer(JobSerializer):
 
@@ -1504,7 +1519,6 @@ class JobCancelSerializer(JobSerializer):
 
 
 class JobRelaunchSerializer(JobSerializer):
-    passwords_needed_to_start = serializers.SerializerMethodField('get_passwords_needed_to_start')
 
     class Meta:
         fields = ('passwords_needed_to_start',)
@@ -1516,22 +1530,6 @@ class JobRelaunchSerializer(JobSerializer):
             password_keys = dict([(p, u'') for p in self.get_passwords_needed_to_start(obj)])
             res.update(password_keys)
         return res
-
-    def get_passwords_needed_to_start(self, obj):
-        if obj:
-            return obj.passwords_needed_to_start
-        return ''
-
-    def validate_passwords_needed_to_start(self, attrs, source):
-        obj = self.context.get('obj')
-        data = self.context.get('data')
-
-        # Check for passwords needed 
-        needed = self.get_passwords_needed_to_start(obj)
-        provided = dict([(field, data.get(field, '')) for field in needed])
-        if not all(provided.values()):
-            raise serializers.ValidationError(needed)
-        return attrs
 
     def validate(self, attrs):
         obj = self.context.get('obj')
@@ -1734,8 +1732,7 @@ class AdHocCommandEventSerializer(BaseSerializer):
             res['host'] = reverse('api:host_detail', args=(obj.host.pk,))
         return res
 
-class JobLaunchSerializer(BaseSerializer):
-    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
+class JobLaunchSerializer(JobSerializer):
     can_start_without_user_input = serializers.Field(source='can_start_without_user_input')
     variables_needed_to_start = serializers.Field(source='variables_needed_to_start')
     credential_needed_to_start = serializers.SerializerMethodField('get_credential_needed_to_start')
@@ -1746,7 +1743,6 @@ class JobLaunchSerializer(BaseSerializer):
         fields = ('can_start_without_user_input', 'passwords_needed_to_start', 'extra_vars',
                   'ask_variables_on_launch', 'survey_enabled', 'variables_needed_to_start',
                   'credential', 'credential_needed_to_start',)
-        read_only_fields = ('ask_variables_on_launch',)
         write_only_fields = ('credential','extra_vars',)
 
     def to_native(self, obj):
@@ -1774,21 +1770,6 @@ class JobLaunchSerializer(BaseSerializer):
         if not credential or not credential.active:
             raise serializers.ValidationError('Credential not provided')
         attrs[source] = credential
-        return attrs
-
-    def validate_passwords_needed_to_start(self, attrs, source):
-        obj = self.context.get('obj')
-        passwords = self.context.get('passwords')
-        data = self.context.get('data')
-
-        credential = attrs.get('credential', None) or obj.credential
-        # fill passwords dict with request data passwords
-        if credential and credential.passwords_needed:
-            try:
-                for p in credential.passwords_needed:
-                    passwords[p] = data[p]
-            except KeyError:
-                raise serializers.ValidationError(credential.passwords_needed)
         return attrs
 
     def validate(self, attrs):
