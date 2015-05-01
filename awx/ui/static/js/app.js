@@ -35,6 +35,9 @@ import dashboardGraphs from 'tower/directives/_dashboard-graphs';
 
 import routeExtensions from 'tower/shared/route-extensions/main';
 
+// modules
+import browserData from 'tower/browser-data/main';
+
 import {JobDetailController} from 'tower/controllers/JobDetail';
 import {JobStdoutController} from 'tower/controllers/JobStdout';
 import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from 'tower/controllers/JobTemplates';
@@ -74,6 +77,7 @@ var tower = angular.module('Tower', [
     dataServices.name,
     dashboardGraphs.name,
     routeExtensions.name,
+    browserData.name,
     'AuthService',
     'Utilities',
     'LicenseHelper',
@@ -878,27 +882,6 @@ var tower = angular.module('Tower', [
 
             var e, html, sock;
 
-            function detectBrowser() {
-                var ua = window.navigator.userAgent,
-                    browser;
-                if (ua.search("MSIE") >= 0) {
-                    browser = "MSIE";
-                }
-                else if (navigator.userAgent.search("Chrome") >= 0 && navigator.userAgent.search("OPR") < 0) {
-                    browser = "CHROME";
-                }
-                else if (navigator.userAgent.search("Firefox") >= 0) {
-                    browser = "FF";
-                }
-                else if (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0 && navigator.userAgent.search("OPR") < 0) {
-                    browser = "SAFARI";
-                }
-                else if (navigator.userAgent.search("OPR") >= 0) {
-                    browser = "OPERA";
-                }
-                return browser;
-            }
-
             function activateTab() {
                 // Make the correct tab active
                 var base = $location.path().replace(/^\//, '').split('/')[0];
@@ -940,8 +923,6 @@ var tower = angular.module('Tower', [
                 $rootScope.breadcrumbs = [];
                 $rootScope.crumbCache = [];
                 $rootScope.sessionTimer = Timer.init();
-
-                $rootScope.browser = detectBrowser();
 
                 if ($rootScope.removeOpenSocket) {
                     $rootScope.removeOpenSocket();
