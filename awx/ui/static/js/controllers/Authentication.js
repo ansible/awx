@@ -105,16 +105,6 @@ export function Authenticate($log, $cookieStore, $compile, $window, $rootScope, 
     if ($location.path() === '/logout') {
         //if logout request, clear AuthToken and user session data
         Authorization.logout();
-    } else if ($location.path() === '/login') {
-        if ($rootScope.enteredPath) {
-            $rootScope.lastPath = $rootScope.enteredPath;
-        } else if (!$rootScope.lastPath) {
-            // your last path was home
-            $cookieStore.remove('lastPath');
-            $rootScope.lastPath = '/home';
-        }
-    } else {
-        $rootScope.enteredPath = $location.path();
     }
 
     e = angular.element(document.getElementById('login-modal-content'));

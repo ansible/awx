@@ -70,7 +70,7 @@ angular.module('AuthService', ['ngCookies', Utilities.name])
                     $cookieStore.put( 'lastPath', '/portal');
                     $rootScope.lastPath = '/portal';
                 }
-                else if ($cookieStore.get('lastPath') !== '/home' || $cookieStore.get('lastPath') !== '/'){
+                else if ($cookieStore.get('lastPath') !== '/home' || $cookieStore.get('lastPath') !== '/' || $cookieStore.get('lastPath') !== '/login' || $cookieStore.get('lastPath') !== '/logout'){
                     // do nothing
                     $rootScope.lastPath = $cookieStore.get('lastPath');
                 }
